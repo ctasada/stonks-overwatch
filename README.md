@@ -27,3 +27,8 @@ Run the server
 ```shell
 python manage.py runserver
 ```
+
+
+## Documentation
+
+* [DeGiro Connector](https://github.com/Chavithra/degiro-connector)
