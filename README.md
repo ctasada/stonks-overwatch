@@ -8,6 +8,11 @@ source venv/bin/activate
 pip install Django
 ```
 
+For Windows
+```shell
+.\venv\Scripts\activate.bat
+```
+
 Run the server
 ```shell
 python manage.py runserver
