@@ -1,4 +1,4 @@
-# Stockts Portfolio
+# Stocks Portfolio
 
 ## Start Developing
 
