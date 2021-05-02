@@ -2,38 +2,15 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.views import View
 
-import json
-import logging
+from degiro.utils.degiro import DeGiro
 
-from trading.api import API as TradingAPI
-from trading.pb.trading_pb2 import Credentials
+import json
 
 class Account(View):
     def __init__(self):
-        # SETUP LOGGING LEVEL
-        logging.basicConfig(level=logging.DEBUG)
+        deGiro = DeGiro()
 
-        # SETUP CONFIG DICT
-        with open('config/config.json') as config_file:
-            config_dict = json.load(config_file)
-
-        # SETUP CREDENTIALS
-        username = config_dict['username']
-        password = config_dict['password']
-        int_account = config_dict['int_account']
-        one_time_password = config_dict['one_time_password']
-        credentials = Credentials(
-            int_account=int_account,
-            username=username,
-            password=password,
-            one_time_password=one_time_password,
-        )
-
-        # SETUP TRADING API
-        self.trading_api = TradingAPI(credentials=credentials)
-
-        # CONNECT
-        self.trading_api.connect()
+        self.trading_api = deGiro.getClient()
 
     def get(self, request):
 
