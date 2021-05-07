@@ -4,7 +4,11 @@ import logging
 from trading.api import API as TradingAPI
 from trading.pb.trading_pb2 import Credentials
 
-class DeGiro():
+from degiro.utils.single_instance_metaclass import SingleInstanceMetaClass
+
+class DeGiro(metaclass=SingleInstanceMetaClass):
+    trading_api = None
+
     def __init__(self):
         # SETUP LOGGING LEVEL
         logging.basicConfig(level=logging.DEBUG)
@@ -35,10 +39,10 @@ class DeGiro():
     def getClient(self) -> TradingAPI:
         return self.trading_api
 
-    def _get_account_info(self):
+    def get_account_info(self):
         return self.trading_api.get_account_info()
 
-    def _get_client_details(self):
+    def get_client_details(self):
         # FETCH CONFIG TABLE
         client_details_table = self.trading_api.get_client_details()
 
@@ -53,7 +57,7 @@ class DeGiro():
 
         return client_details_table
     
-    def _get_config(self):
+    def get_config(self):
         config_table = self.trading_api.get_config()
 
         return config_table
