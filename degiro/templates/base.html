@@ -1,4 +1,5 @@
 {% load static %}
+{% load custom_tags %}
 <!DOCTYPE html>
 <html>
 
@@ -34,7 +35,7 @@
                 <li class="{% if request.path == url %}active{% endif %}">
                     <a href="{{ url }}">
                         <i class="fas fa-user"></i>
-                        User Account
+                        {% username %} - {% clientrole %}
                     </a>
                 </li>
             </ul> 
