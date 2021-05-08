@@ -61,7 +61,7 @@ products_info = trading_api.get_products_info(
 )
 
 # DEBUG Values
-print(json.dumps(update_dict, indent = 4))
+#print(json.dumps(update_dict, indent = 4))
 # print(json.dumps(products_info, indent = 4))
 
 myPortfolio = []
