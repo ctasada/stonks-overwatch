@@ -4,7 +4,6 @@ import logging
 import quotecast.helpers.pb_handler as pb_handler
 import pandas as pd
 
-from IPython.display import display
 from trading.api import API as TradingAPI
 from trading.pb.trading_pb2 import Credentials, ProductsInfo, Update
 
@@ -62,7 +61,7 @@ products_info = trading_api.get_products_info(
 )
 
 # DEBUG Values
-# print(json.dumps(update_dict, indent = 4))
+print(json.dumps(update_dict, indent = 4))
 # print(json.dumps(products_info, indent = 4))
 
 myPortfolio = []
@@ -83,6 +82,6 @@ for portfolio in update_dict['portfolio']['values']:
             )
         )
 
-print(myPortfolio)
+# print(myPortfolio)
 
 trading_api.logout()
