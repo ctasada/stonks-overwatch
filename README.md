@@ -43,3 +43,10 @@ python manage.py runserver
 * [Bootstrap Sidebar](https://bootstrapious.com/p/bootstrap-sidebar)
 
 **Should we replace Django by Flask?**
+
+## TODOs
+- [ ] DeGiro Client: Replace the Singleton by a proper session instance
+- [ ] DeGiro Client: Stop using Totp and request 2FA for each connection
+- [ ] Portfolio: Show filter to see Open/Close/All stocks
+- [ ] Improve side-bar behaviour
+- [ ] Replace dicts by properly designed models
