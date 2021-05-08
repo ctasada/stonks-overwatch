@@ -1,5 +1,39 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Portfolio</h2>
+<div class="row g-5">
+    <div class="col-md-7 col-lg-8">
+        <h4 class="mb-3">Portfolio</h4>
+        <table class="table">
+            {% block table.thead %}
+            <thead>
+                <tr>
+                  <th scope="col">Name</th>
+                  <th scope="col">Symbol</th>
+                  <th scope="col">Size</th>
+                  <th scope="col">Price</th>
+                  <th scope="col">Currency</th>
+                  <th scope="col">Value</th>
+                </tr>
+            </thead>
+            {% endblock table.thead %}
+            {% block table.tbody %}
+            <tbody>
+                {% for stock in portfolio %}
+                    {% if stock.isOpen %}
+                        <tr>
+                            <td>{{ stock.name }}</td>
+                            <td>{{ stock.symbol }}</td>
+                            <td>{{ stock.size }}</td>
+                            <td>{{ stock.price }}</td>
+                            <td>{{ stock.currency }}</td>
+                            <td>{{ stock.value }}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+            {% endblock table.tbody %}
+        </table>
+    </div>
+</div>
 {% endblock %}

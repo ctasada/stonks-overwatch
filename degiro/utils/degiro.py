@@ -6,6 +6,7 @@ from trading.pb.trading_pb2 import Credentials
 
 from degiro.utils.single_instance_metaclass import SingleInstanceMetaClass
 
+# TODO: A singleton is nice, but doesn't allow for multiple users
 class DeGiro(metaclass=SingleInstanceMetaClass):
     trading_api = None
 
