@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="row g-5">
-    <div class="col-md-7 col-lg-8">
+    <div class="col">
         <h4 class="mb-3">Portfolio</h4>
         <table class="table">
             {% block table.thead %}
@@ -10,9 +10,10 @@
                 <tr>
                   <th scope="col">Name</th>
                   <th scope="col">Symbol</th>
-                  <th scope="col">Size</th>
+                  <th scope="col">Sector</th>
+                  <th scope="col">Industry</th>
+                  <th scope="col">Shares</th>
                   <th scope="col">Price</th>
-                  <th scope="col">Currency</th>
                   <th scope="col">Value</th>
                 </tr>
             </thead>
@@ -24,9 +25,10 @@
                         <tr>
                             <td>{{ stock.name }}</td>
                             <td>{{ stock.symbol }}</td>
-                            <td>{{ stock.size }}</td>
+                            <td>{{ stock.sector }}</td>
+                            <td>{{ stock.industry }}</td>
+                            <td>{{ stock.shares }}</td>
                             <td>{{ stock.price }}</td>
-                            <td>{{ stock.currency }}</td>
                             <td>{{ stock.value }}</td>
                         </tr>
                     {% endif %}

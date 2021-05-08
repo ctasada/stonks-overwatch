@@ -13,10 +13,10 @@ class User(View):
         self.deGiro = DeGiro()
 
     def get(self, request):
-        accountInfo = self.deGiro.get_account_info()
+        # accountInfo = self.deGiro.get_account_info()
         clientDetails = self.deGiro.get_client_details()
-        # info = self.deGiro._get_config()
-        # print(clientDetails)
+        #info = self.deGiro.get_config()
+        #print(clientDetails)
 
         context = {
             "username": clientDetails['data']['username'],
