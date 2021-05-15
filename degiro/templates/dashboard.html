@@ -1,5 +1,65 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Dashboard</h2>
+<h4 class="mb-3">Dashboard</h4>
+<div id="container" style="width: 50%;">
+  <canvas id="sectors-chart"></canvas>
+</div>
+
+  <!-- ChartJS -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.2.0"></script>
+  <!-- Import D3 Scale Chromatic via CDN -->
+  <script src="https://d3js.org/d3-color.v1.min.js"></script>
+  <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+  <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+  <script type='text/javascript' src="/static/chromaticColors.js"></script>
+
+  <script>
+    // chromatic color data
+    const dataLenght = {{ labels|length }};
+
+    // sets d3 interpolate color range
+    // See https://github.com/d3/d3-scale-chromatic
+    const colorScale = d3.interpolateWarm;
+    const colorRangeInfo = {
+      colorStart: 0,
+      colorEnd: 1,
+      useEndAsStart: false,
+    };
+    const randomColor = interpolateColors(dataLenght, colorScale, colorRangeInfo);
+
+    const data = {
+      {% autoescape off %}
+      labels: {{ labels }},
+      {% endautoescape %}
+      datasets: [
+        {
+          label: 'Sector Position Sizes',
+          data: {{ values }},
+          backgroundColor: randomColor,
+          borderColor: randomColor,
+          borderWidth: 1,
+        }
+      ]
+    };
+
+    const config = {
+      type: 'pie',
+      data: data,
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom',
+          },
+          title: {
+            display: true,
+            text: 'Sector Position Sizes'
+          }
+        }
+      },
+    };
+
+    let chart = new Chart(document.getElementById("sectors-chart").getContext("2d"), config);
+  </script>
 {% endblock %}
