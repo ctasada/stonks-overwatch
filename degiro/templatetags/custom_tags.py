@@ -12,3 +12,7 @@ def clientrole():
 def username():
     clientDetails = DeGiro().get_client_details()
     return clientDetails['data']['username']
+
+@register.filter
+def index(sequence, position):
+    return sequence[position]

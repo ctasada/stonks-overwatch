@@ -43,9 +43,7 @@ class PortfolioModel:
         # print(json.dumps(products_info, indent = 4))
 
         # Get user's base currency
-        accountInfo = self.deGiro.get_account_info()
-        baseCurrency = accountInfo['data']['baseCurrency']
-        baseCurrencySymbol = CurrencySymbols.get_symbol(baseCurrency)
+        baseCurrencySymbol = self.get_base_currency_symbol()
 
         # print(accountInfo['data']['currencyPairs']['EURUSD']['price'])
         # print(update_dict['portfolio']['values'])
@@ -82,6 +80,14 @@ class PortfolioModel:
                 )
 
         return sorted(myPortfolio, key=lambda k: k['symbol'])
+
+    # Get user's base currency
+    def get_base_currency_symbol(self):
+        accountInfo = self.deGiro.get_account_info()
+        baseCurrency = accountInfo['data']['baseCurrency']
+        baseCurrencySymbol = CurrencySymbols.get_symbol(baseCurrency)
+
+        return baseCurrencySymbol
 
     def __get_company_profile(self, product_isin):
         company_profile = self.deGiro.getClient().get_company_profile(
