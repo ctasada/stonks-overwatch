@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load custom_tags %}
 
 {% block content %}
 <h4 class="mb-3">Dashboard</h4>
@@ -20,7 +21,7 @@
 
     // sets d3 interpolate color range
     // See https://github.com/d3/d3-scale-chromatic
-    const colorScale = d3.interpolateWarm;
+    const colorScale = d3.interpolateCool;
     const colorRangeInfo = {
       colorStart: 0,
       colorEnd: 1,
@@ -28,23 +29,43 @@
     };
     const randomColor = interpolateColors(dataLenght, colorScale, colorRangeInfo);
 
+    let currencySymbol = "{{ currencySymbol }}";
+    let valuesDict = [
+      [
+      {% for sector in sectors.labels %}
+        {
+          "label" : "{{ sector }}",
+          "value" : {{ sectors.values|index:forloop.counter0 }},
+        },
+      {% endfor %}
+      ], [
+      {% for stock in stocks.labels %}
+        {
+          "label" : "{{ stock }}",
+          "value" : {{ stocks.values|index:forloop.counter0 }},
+        },
+      {% endfor %}
+      ],
+    ];
+
     const data = {
-      {% autoescape off %}
-      labels: {{ labels }},
-      {% endautoescape %}
+      labels: {{ labels|safe }},
       datasets: [
         {
-          label: 'Sector Position Sizes',
-          data: {{ values }},
+          data: {{ sectors.values }},
           backgroundColor: randomColor,
-          borderColor: randomColor,
+          borderWidth: 1,
+        },
+        {
+          data: {{ stocks.values }},
+          backgroundColor: randomColor,
           borderWidth: 1,
         }
       ]
     };
 
     const config = {
-      type: 'pie',
+      type: 'doughnut',
       data: data,
       options: {
         responsive: true,
@@ -52,9 +73,19 @@
           legend: {
             position: 'bottom',
           },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return valuesDict[context.datasetIndex][context.dataIndex].label + ': ' + currencySymbol + valuesDict[context.datasetIndex][context.dataIndex].value;
+              }
+            }
+          },
           title: {
             display: true,
-            text: 'Sector Position Sizes'
+            text: 'Sector Position Sizes',
+            font: {
+              size: 20
+            }
           }
         }
       },

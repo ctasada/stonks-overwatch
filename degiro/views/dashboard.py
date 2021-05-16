@@ -11,24 +11,38 @@ class Dashboard(View):
 
     def get(self, request):
         portfolio = self.portfolio.get_portfolio()
+        portfolio = sorted(portfolio, key=lambda k: k['sector'])
         # print (json.dumps(portfolio, indent=2))
 
         sectors = {}
 
+        stockLabels = []
+        stockValues = []
+
         for stock in portfolio:
             if stock['isOpen']:
                 sectorName = stock['sector']
-                sectors[sectorName] = stock.get("value", 0) + stock['value']
+                sectors[sectorName] = sectors.get(sectorName, 0) + stock['value']
+                stockLabels.append(stock['symbol'])
+                stockValues.append(stock['value'])
 
-        labels = []
-        values = []
+        sectorLabels = []
+        sectorValues = []
         for key in sectors:
-            labels.append(key)
-            values.append(sectors[key])
+            sectorLabels.append(key)
+            sectorValues.append(sectors[key])
 
         context = {
-            "labels": labels,
-            "values": values,
+            "labels": sectorLabels + stockLabels,
+            "sectors": {
+                "labels": sectorLabels,
+                "values": sectorValues,
+            },
+            "stocks": {
+                "labels": stockLabels,
+                "values": stockValues,
+            },
+            "currencySymbol": self.portfolio.get_base_currency_symbol(),
         }
-
+        
         return render(request, 'dashboard.html', context)
