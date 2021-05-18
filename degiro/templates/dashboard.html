@@ -14,7 +14,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js"></script>
 
   <script>
-    const dataLenght = {{ labels|length }};
+    const dataLenght = {{ sectors.labels|length }} + {{ stocks.labels|length }};
 
     var sectorTypes = {{ sectors.labels|safe }};
     var stocksPerSector = {{ stocksPerSector|safe }};
@@ -52,7 +52,7 @@
     ];
 
     const data = {
-      labels: {{ labels|safe }},
+      labels: {{ sectors.labels|safe }}.concat({{ stocks.labels|safe }}),
       datasets: [
         {
           data: {{ sectors.values }},

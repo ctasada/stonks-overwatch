@@ -38,7 +38,6 @@ class Dashboard(View):
             sectorValues.append(sectors[key])
 
         context = {
-            "labels": sectorLabels + stockLabels,
             "sectors": {
                 "labels": sectorLabels,
                 "values": sectorValues,
@@ -50,5 +49,5 @@ class Dashboard(View):
             "currencySymbol": self.portfolio.get_base_currency_symbol(),
             "stocksPerSector": stocksPerSector,
         }
-        print (json.dumps(context, indent=2))
+        # FIXME: Simplify this response
         return render(request, 'dashboard.html', context)
