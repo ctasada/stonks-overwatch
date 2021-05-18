@@ -41,6 +41,7 @@ python manage.py runserver
 
 ## HowTos
 * [Bootstrap Sidebar](https://bootstrapious.com/p/bootstrap-sidebar)
+* [Mastering Multi-hued Color Scales with Chroma.js](https://www.vis4.net/blog/2013/09/mastering-multi-hued-color-scales/)
 
 **Should we replace Django by Flask?**
 

@@ -54,8 +54,8 @@ class PortfolioModel:
                 info = products_info['data'][portfolio['id']]
                 company_profile = self.__get_company_profile(info['isin'])
                 
-                sector = ''
-                industry = ''
+                sector = 'Unknown'
+                industry = 'Unknown'
                 if company_profile.get('data'):
                     sector = company_profile['data']['sector']
                     industry = company_profile['data']['industry']
