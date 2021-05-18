@@ -18,6 +18,7 @@ class Dashboard(View):
 
         stockLabels = []
         stockValues = []
+        stocksPerSector = {}
 
         for stock in portfolio:
             if stock['isOpen']:
@@ -25,6 +26,10 @@ class Dashboard(View):
                 sectors[sectorName] = sectors.get(sectorName, 0) + stock['value']
                 stockLabels.append(stock['symbol'])
                 stockValues.append(stock['value'])
+
+                stocks = stocksPerSector.get(sectorName, [])
+                stocks.append(stock['symbol'])
+                stocksPerSector[sectorName] = stocks
 
         sectorLabels = []
         sectorValues = []
@@ -43,6 +48,7 @@ class Dashboard(View):
                 "values": stockValues,
             },
             "currencySymbol": self.portfolio.get_base_currency_symbol(),
+            "stocksPerSector": stocksPerSector,
         }
-        
+        print (json.dumps(context, indent=2))
         return render(request, 'dashboard.html', context)

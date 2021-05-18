@@ -9,25 +9,28 @@
 
   <!-- ChartJS -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.2.0"></script>
-  <!-- Import D3 Scale Chromatic via CDN -->
-  <script src="https://d3js.org/d3-color.v1.min.js"></script>
-  <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
-  <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
-  <script type='text/javascript' src="/static/chromaticColors.js"></script>
+  
+  <!-- Import ChromaJS via CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js"></script>
 
   <script>
-    // chromatic color data
     const dataLenght = {{ labels|length }};
 
-    // sets d3 interpolate color range
-    // See https://github.com/d3/d3-scale-chromatic
-    const colorScale = d3.interpolateCool;
-    const colorRangeInfo = {
-      colorStart: 0,
-      colorEnd: 1,
-      useEndAsStart: false,
-    };
-    const randomColor = interpolateColors(dataLenght, colorScale, colorRangeInfo);
+    var sectorTypes = {{ sectors.labels|safe }};
+    var stocksPerSector = {{ stocksPerSector|safe }};
+    
+    // chromatic color data
+    var sectorColors = chroma.scale('Set3').colors(sectorTypes.length);
+    var stockColors = [];
+
+    var i = 0;
+    for (const [key, value] of Object.entries(stocksPerSector)) {
+      chromaColor = chroma(sectorColors[i]);
+      for (var j = 0; j < value.length; j++) {
+        stockColors.push(chromaColor.darken(j + 1).hex());
+      }
+      i++;
+    }
 
     let currencySymbol = "{{ currencySymbol }}";
     let valuesDict = [
@@ -53,12 +56,12 @@
       datasets: [
         {
           data: {{ sectors.values }},
-          backgroundColor: randomColor,
-          borderWidth: 1,
+          backgroundColor: sectorColors,
+          borderWidth: 2,
         },
         {
           data: {{ stocks.values }},
-          backgroundColor: randomColor,
+          backgroundColor: stockColors,
           borderWidth: 1,
         }
       ]
