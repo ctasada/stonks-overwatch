@@ -2,14 +2,17 @@
 
 ## Start Developing
 
+### With Docker
+```shell
+docker-compose build
+docker-compose up
+```
+
+### Without Docker
 ```shell
 python3 -m venv venv
 source venv/bin/activate
-```
-
-For Windows
-```shell
-python3 -m venv venv
+# For Windows
 .\venv\Scripts\activate.bat
 ```
 
@@ -18,14 +21,14 @@ Install Dependencies
 pip install -r requirements.txt
 ```
 
-Update Dependencies
-```shell
-pip freeze > requirements.txt
-```
-
 Run the server
 ```shell
-python manage.py runserver
+python app/manage.py runserver
+```
+
+## Update Dependencies
+```shell
+pip freeze > requirements.txt
 ```
 
 ## Documentation
