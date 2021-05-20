@@ -14,7 +14,7 @@ from trading.pb.trading_pb2 import (
 logging.basicConfig(level=logging.DEBUG)
 
 # SETUP CONFIG DICT
-with open('../config/config.json') as config_file:
+with open('./config/config.json') as config_file:
     config_dict = json.load(config_file)
 
 # SETUP CREDENTIALS

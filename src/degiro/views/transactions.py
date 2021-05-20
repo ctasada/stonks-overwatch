@@ -3,14 +3,21 @@ from django.http import JsonResponse
 from django.views import View
 from django.shortcuts import render
 
-from degiro.utils.degiro import DeGiro
+from degiro.models.transactions import TransactionsModel
 
 import json
 
 class Transactions(View):
     def __init__(self):
-        self.deGiro = DeGiro()
+        self.transactions = TransactionsModel()
 
     def get(self, request):
+        transactions = self.transactions.get_transactions()
 
-        return render(request, 'transactions.html', {})
+        # print (json.dumps(transactions, indent=2))
+
+        context = {
+            "transactions": transactions,
+        }
+
+        return render(request, 'transactions.html', context)
