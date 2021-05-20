@@ -23,7 +23,7 @@ pip install -r requirements.txt
 
 Run the server
 ```shell
-python app/manage.py runserver
+python src/manage.py runserver
 ```
 
 ## Update Dependencies

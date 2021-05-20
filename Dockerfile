@@ -11,6 +11,6 @@ RUN pip install -r requirements.txt
 
 WORKDIR /app
 
-COPY ./app /app
+COPY ./src /app
 # FIXME: Secrets must be provided in a more secure way
 COPY ./config /app/config
