@@ -8,10 +8,9 @@
             {% block table.thead %}
             <thead>
                 <tr>
-                  <th scope="col">Symbol</th>
-                  <th scope="col">Name</th>
+                  <th scope="col">Stock</th>
                   <th scope="col">Date</th>
-                  <th scope="col">Buy/Sell</th>
+                  <th scope="col">Action</th>
                   <th scope="col">Price</th>
                   <th scope="col">Quantity</th>
                 </tr>
@@ -21,10 +20,9 @@
             <tbody>
                 {% for transaction in transactions %}
                     <tr>
-                        <td>{{ transaction.symbol }}</td>
-                        <td>{{ transaction.name }}</td>
+                        <td>{{ transaction.symbol }}<br><small class="fw-lighter">{{ transaction.name }}</small></td>
                         <td>{{ transaction.date }}</td>
-                        <td>{{ transaction.buysell }}</td>
+                        <td>{{ transaction.buysell }}<br><small class="fw-lighter">{{ transaction.transactionType }}</small></td>
                         <td>{{ transaction.price }}</td>
                         <td>{{ transaction.quantity }}</td>
                     </tr>

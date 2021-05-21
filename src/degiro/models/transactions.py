@@ -7,6 +7,8 @@ from trading.pb.trading_pb2 import (
     TransactionsHistory,
 )
 import quotecast.helpers.pb_handler as pb_handler
+from datetime import date
+from datetime import datetime
 import json
 
 class TransactionsModel:
@@ -15,7 +17,7 @@ class TransactionsModel:
 
     def get_transactions(self):
         # SETUP REQUEST
-        today = datetime.date.today()
+        today = date.today()
         from_date = TransactionsHistory.Request.Date(
             year=2020,
             month=1,
@@ -54,21 +56,36 @@ class TransactionsModel:
             request=request,
             raw=True,
         )
-        print (json.dumps(products_info, indent=2))
 
         # DISPLAY PRODUCTS_INFO
         myTransactions = []
         for transaction in transactions_history.values:
             info = products_info['data'][str(int(transaction['productId']))]
+            time = datetime.strptime(transaction['date'], '%Y-%m-%dT%H:%M:%S%z')
             myTransactions.append(
                 dict(
                     name=info['name'],
                     symbol = info['symbol'],
-                    date = transaction['date'],
-                    buysell = transaction['buysell'],
+                    date = time.strftime('%Y-%m-%d %H:%M:%S'),
+                    buysell = self.convertBuySell(transaction['buysell']),
+                    transactionType = self.convertTransactionTypeId(transaction['transactionTypeId']),
                     price = transaction['price'],
                     quantity = transaction['quantity'],
                 )
             )
 
         return sorted(myTransactions, key=lambda k: k['date'])
+
+    def convertBuySell(self, buysell: str):
+        if (buysell == "B"):
+            return "Buy"
+        elif (buysell == "S"):
+            return "Sell"
+        
+        return "Unknown"
+
+    def convertTransactionTypeId(self, transactionTypeId: int):
+        return {
+            0: "",
+            101: "Stock Split",
+        }.get(transactionTypeId, "Unkown Transaction")
