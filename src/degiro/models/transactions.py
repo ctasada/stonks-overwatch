@@ -59,8 +59,6 @@ class TransactionsModel:
             raw=True,
         )
 
-        print (json.dumps(products_info, indent=2))
-
         # Get user's base currency
         baseCurrencySymbol = get_base_currency_symbol()
 
