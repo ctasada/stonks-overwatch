@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row g-5">
+    <div class="col">
+        <h4 class="mb-3">Account Overview</h4>
+        <table class="table table-hover table-sm">
+            {% block table.thead %}
+            <thead>
+                <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Currency</th>
+                    <th scope="col">Change</th>
+                    <th scope="col">Value Date</th>
+                </tr>
+            </thead>
+            {% endblock table.thead %}
+            {% block table.tbody %}
+            <tbody>
+                {% for statement in accountOverview %}
+                    <tr>
+                        <td>{{ statement.date }}</td>
+                        <td>{{ statement.type }}</td>
+                        <td>{{ statement.description }}</td>
+                        <td>{{ statement.currency }}</td>
+                        <td>{{ statement.change }}</td>
+                        <td>{{ statement.valueDate }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            {% endblock table.tbody %}
+        </table>
+    </div>
+</div>
+{% endblock %}

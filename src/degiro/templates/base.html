@@ -65,6 +65,13 @@
                         Transactions
                     </a>
                 </li>
+                {% url 'account_overview' as url %}
+                <li class="{% if request.path == url %}active{% endif %}">
+                    <a href="{{ url }}">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        Account Statement
+                    </a>
+                </li>
             </ul> 
         </nav>
 
