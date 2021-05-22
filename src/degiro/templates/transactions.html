@@ -13,6 +13,9 @@
                   <th scope="col">Action</th>
                   <th scope="col">Price</th>
                   <th scope="col">Quantity</th>
+                  <th scope="col">Local Value</th>
+                  <th scope="col">Value</th>
+                  <th scope="col">Fees</th>
                 </tr>
             </thead>
             {% endblock table.thead %}
@@ -25,6 +28,9 @@
                         <td>{{ transaction.buysell }}<br><small class="fw-lighter">{{ transaction.transactionType }}</small></td>
                         <td>{{ transaction.price }}</td>
                         <td>{{ transaction.quantity }}</td>
+                        <td>{{ transaction.total }}</td>
+                        <td>{{ transaction.totalInBaseCurrency }}</td>
+                        <td>{{ transaction.fees }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
