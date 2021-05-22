@@ -2,6 +2,7 @@ from django.views import View
 from django.shortcuts import render
 
 from degiro.models.portfolio import PortfolioModel
+from degiro.utils.localization import get_base_currency_symbol
 
 import json
 
@@ -46,8 +47,9 @@ class Dashboard(View):
                 "labels": stockLabels,
                 "values": stockValues,
             },
-            "currencySymbol": self.portfolio.get_base_currency_symbol(),
+            "currencySymbol": get_base_currency_symbol(),
             "stocksPerSector": stocksPerSector,
         }
+        
         # FIXME: Simplify this response
         return render(request, 'dashboard.html', context)

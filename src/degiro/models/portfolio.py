@@ -1,8 +1,8 @@
 from degiro.utils.degiro import DeGiro
+from degiro.utils.localization import format_money_value, get_base_currency_symbol
 
 import quotecast.helpers.pb_handler as pb_handler
 from trading.pb.trading_pb2 import ProductsInfo, Update
-from currency_symbols import CurrencySymbols
 
 import json
 
@@ -43,7 +43,7 @@ class PortfolioModel:
         # print(json.dumps(products_info, indent = 4))
 
         # Get user's base currency
-        baseCurrencySymbol = self.get_base_currency_symbol()
+        baseCurrencySymbol = get_base_currency_symbol()
 
         # print(accountInfo['data']['currencyPairs']['EURUSD']['price'])
         # print(update_dict['portfolio']['values'])
@@ -60,8 +60,8 @@ class PortfolioModel:
                     sector = company_profile['data']['sector']
                     industry = company_profile['data']['industry']
 
-                price = self.__format_money_value(portfolio['price'], CurrencySymbols.get_symbol(info['currency']))
-                value = self.__format_money_value(portfolio['value'], baseCurrencySymbol)
+                price = format_money_value(value = portfolio['price'], currency = info['currency'])
+                value = format_money_value(value = portfolio['value'], currencySymbol = baseCurrencySymbol)
 
                 myPortfolio.append(
                     dict(
@@ -81,14 +81,6 @@ class PortfolioModel:
 
         return sorted(myPortfolio, key=lambda k: k['symbol'])
 
-    # Get user's base currency
-    def get_base_currency_symbol(self):
-        accountInfo = self.deGiro.get_account_info()
-        baseCurrency = accountInfo['data']['baseCurrency']
-        baseCurrencySymbol = CurrencySymbols.get_symbol(baseCurrency)
-
-        return baseCurrencySymbol
-
     def __get_company_profile(self, product_isin):
         company_profile = self.deGiro.getClient().get_company_profile(
             product_isin=product_isin,
@@ -96,6 +88,3 @@ class PortfolioModel:
         )
 
         return company_profile
-
-    def __format_money_value(self, value, currencySymbol):
-        return currencySymbol + "{:,.2f}".format(value)
