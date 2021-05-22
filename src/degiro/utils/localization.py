@@ -1,5 +1,6 @@
 from degiro.utils.degiro import DeGiro
 from currency_symbols import CurrencySymbols
+import datetime
 
 # Get user's base currency
 def get_base_currency_symbol():
@@ -15,3 +16,7 @@ def format_money_value(value: float, currency: str = None, currencySymbol : str 
         currencySymbol = CurrencySymbols.get_symbol(currency)
     
     return currencySymbol + " {:,.2f}".format(value)
+
+def format_date_time(value: str):
+    time = datetime.datetime.strptime(value, '%Y-%m-%dT%H:%M:%S%z')
+    return time.strftime('%Y-%m-%d %H:%M:%S')

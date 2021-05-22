@@ -1,7 +1,6 @@
 from degiro.utils.degiro import DeGiro
-from degiro.utils.localization import format_money_value, get_base_currency_symbol
+from degiro.utils.localization import format_money_value, get_base_currency_symbol, format_date_time
 
-import datetime
 from trading.api import API as TradingAPI
 from trading.pb.trading_pb2 import (
     Credentials,
@@ -10,7 +9,6 @@ from trading.pb.trading_pb2 import (
 )
 import quotecast.helpers.pb_handler as pb_handler
 from datetime import date
-from datetime import datetime
 import json
 
 class TransactionsModel:
@@ -66,7 +64,6 @@ class TransactionsModel:
         myTransactions = []
         for transaction in transactions_history.values:
             info = products_info['data'][str(int(transaction['productId']))]
-            time = datetime.strptime(transaction['date'], '%Y-%m-%dT%H:%M:%S%z')
 
             fees = transaction['totalPlusFeeInBaseCurrency'] - transaction['totalInBaseCurrency']
 
@@ -74,7 +71,7 @@ class TransactionsModel:
                 dict(
                     name=info['name'],
                     symbol = info['symbol'],
-                    date = time.strftime('%Y-%m-%d %H:%M:%S'),
+                    date = format_date_time(transaction['date']),
                     buysell = self.convertBuySell(transaction['buysell']),
                     transactionType = self.convertTransactionTypeId(transaction['transactionTypeId']),
                     price = transaction['price'],
