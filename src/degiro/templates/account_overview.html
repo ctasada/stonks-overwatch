@@ -10,8 +10,8 @@
                 <tr>
                     <th scope="col">Date</th>
                     <th scope="col">Type</th>
+                    <th scope="col">Stock</th>
                     <th scope="col">Description</th>
-                    <th scope="col">Currency</th>
                     <th scope="col">Change</th>
                     <th scope="col">Value Date</th>
                 </tr>
@@ -23,9 +23,9 @@
                     <tr>
                         <td>{{ statement.date }}</td>
                         <td>{{ statement.type }}</td>
+                        <td>{{ statement.stockSymbol }}<br><small class="fw-lighter">{{ statement.stockName }}</small></td>
                         <td>{{ statement.description }}</td>
-                        <td>{{ statement.currency }}</td>
-                        <td>{{ statement.change }}</td>
+                        <td>{{ statement.formatedChange }}</td>
                         <td>{{ statement.valueDate }}</td>
                     </tr>
                 {% endfor %}

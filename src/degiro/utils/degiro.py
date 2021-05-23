@@ -2,7 +2,7 @@ import json
 import logging
 
 from trading.api import API as TradingAPI
-from trading.pb.trading_pb2 import Credentials
+from trading.pb.trading_pb2 import Credentials, ProductsInfo
 
 from degiro.utils.single_instance_metaclass import SingleInstanceMetaClass
 
@@ -68,3 +68,19 @@ class DeGiro(metaclass=SingleInstanceMetaClass):
         config_table = DeGiro.get_client().get_config()
 
         return config_table
+
+    @staticmethod
+    def get_products_info(products_ids):
+        products_ids = list(set(products_ids))
+
+        # SETUP REQUEST
+        request = ProductsInfo.Request()
+        request.products.extend(products_ids)
+
+        # FETCH DATA
+        products_info = DeGiro.get_client().get_products_info(
+            request=request,
+            raw=True,
+        )
+
+        return products_info['data']

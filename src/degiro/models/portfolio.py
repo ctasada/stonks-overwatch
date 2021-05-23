@@ -2,7 +2,7 @@ from degiro.utils.degiro import DeGiro
 from degiro.utils.localization import LocalizationUtility
 
 import quotecast.helpers.pb_handler as pb_handler
-from trading.pb.trading_pb2 import ProductsInfo, Update
+from trading.pb.trading_pb2 import Update
 
 import json
 
@@ -26,15 +26,7 @@ class PortfolioModel:
             if portfolio['id'].isnumeric():
                 products_ids.append(int(portfolio['id']))
 
-        # SETUP REQUEST
-        request = ProductsInfo.Request()
-        request.products.extend(list(set(products_ids)))
-
-        # FETCH DATA
-        products_info = DeGiro.get_client().get_products_info(
-            request=request,
-            raw=True,
-        )
+        products_info = DeGiro.get_products_info(products_ids)
 
         # DEBUG Values
         # print(json.dumps(update_dict, indent = 4))
@@ -49,7 +41,7 @@ class PortfolioModel:
 
         for portfolio in update_dict['portfolio']['values']:
             if portfolio['id'].isnumeric():
-                info = products_info['data'][portfolio['id']]
+                info = products_info[portfolio['id']]
                 company_profile = self.__get_company_profile(info['isin'])
                 
                 sector = 'Unknown'
