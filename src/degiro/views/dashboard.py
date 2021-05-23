@@ -2,7 +2,7 @@ from django.views import View
 from django.shortcuts import render
 
 from degiro.models.portfolio import PortfolioModel
-from degiro.utils.localization import get_base_currency_symbol
+from degiro.utils.localization import LocalizationUtility
 
 import json
 
@@ -47,7 +47,7 @@ class Dashboard(View):
                 "labels": stockLabels,
                 "values": stockValues,
             },
-            "currencySymbol": get_base_currency_symbol(),
+            "currencySymbol": LocalizationUtility.get_base_currency_symbol(),
             "stocksPerSector": stocksPerSector,
         }
         

@@ -1,5 +1,5 @@
 from degiro.utils.degiro import DeGiro
-from degiro.utils.localization import format_money_value, get_base_currency_symbol
+from degiro.utils.localization import LocalizationUtility
 
 import quotecast.helpers.pb_handler as pb_handler
 from trading.pb.trading_pb2 import ProductsInfo, Update
@@ -43,7 +43,7 @@ class PortfolioModel:
         # print(json.dumps(products_info, indent = 4))
 
         # Get user's base currency
-        baseCurrencySymbol = get_base_currency_symbol()
+        baseCurrencySymbol = LocalizationUtility.get_base_currency_symbol()
 
         # print(accountInfo['data']['currencyPairs']['EURUSD']['price'])
         # print(update_dict['portfolio']['values'])
@@ -60,8 +60,8 @@ class PortfolioModel:
                     sector = company_profile['data']['sector']
                     industry = company_profile['data']['industry']
 
-                price = format_money_value(value = portfolio['price'], currency = info['currency'])
-                value = format_money_value(value = portfolio['value'], currencySymbol = baseCurrencySymbol)
+                price = LocalizationUtility.format_money_value(value = portfolio['price'], currency = info['currency'])
+                value = LocalizationUtility.format_money_value(value = portfolio['value'], currencySymbol = baseCurrencySymbol)
 
                 myPortfolio.append(
                     dict(

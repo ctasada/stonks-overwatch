@@ -1,6 +1,6 @@
 from typing import overload
 from degiro.utils.degiro import DeGiro
-from degiro.utils.localization import format_money_value, get_base_currency_symbol, format_date_time
+from degiro.utils.localization import LocalizationUtility
 
 from trading.api import API as TradingAPI
 from trading.pb.trading_pb2 import (
@@ -44,8 +44,8 @@ class AccountOverviewModel:
         for cash_movement in account_overview.get('data').get('cashMovements'):
             overview.append(
                 dict(
-                    date = format_date_time(cash_movement['date']),
-                    valueDate = format_date_time(cash_movement['valueDate']),
+                    date = LocalizationUtility.format_date_time(cash_movement['date']),
+                    valueDate = LocalizationUtility.format_date_time(cash_movement['valueDate']),
                     description = cash_movement['description'],
                     type = cash_movement['type'],
                     currency = cash_movement['currency'],
