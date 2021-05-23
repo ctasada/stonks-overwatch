@@ -1,5 +1,5 @@
 from degiro.utils.degiro import DeGiro
-from degiro.utils.localization import format_money_value, get_base_currency_symbol, format_date_time
+from degiro.utils.localization import LocalizationUtility
 
 from trading.api import API as TradingAPI
 from trading.pb.trading_pb2 import (
@@ -58,7 +58,7 @@ class TransactionsModel:
         )
 
         # Get user's base currency
-        baseCurrencySymbol = get_base_currency_symbol()
+        baseCurrencySymbol = LocalizationUtility.get_base_currency_symbol()
 
         # DISPLAY PRODUCTS_INFO
         myTransactions = []
@@ -71,14 +71,14 @@ class TransactionsModel:
                 dict(
                     name=info['name'],
                     symbol = info['symbol'],
-                    date = format_date_time(transaction['date']),
+                    date = LocalizationUtility.format_date_time(transaction['date']),
                     buysell = self.convertBuySell(transaction['buysell']),
                     transactionType = self.convertTransactionTypeId(transaction['transactionTypeId']),
                     price = transaction['price'],
                     quantity = transaction['quantity'],
-                    total = format_money_value(value = transaction['total'], currency = info['currency']),
-                    totalInBaseCurrency = format_money_value(value = transaction['totalInBaseCurrency'], currencySymbol = baseCurrencySymbol),
-                    fees = format_money_value(value = fees, currencySymbol = baseCurrencySymbol)
+                    total = LocalizationUtility.format_money_value(value = transaction['total'], currency = info['currency']),
+                    totalInBaseCurrency = LocalizationUtility.format_money_value(value = transaction['totalInBaseCurrency'], currencySymbol = baseCurrencySymbol),
+                    fees = LocalizationUtility.format_money_value(value = fees, currencySymbol = baseCurrencySymbol)
                 )
             )
 
