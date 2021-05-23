@@ -6,8 +6,7 @@ class LocalizationUtility(object):
     # Get user's base currency
     @staticmethod
     def get_base_currency_symbol():
-        deGiro = DeGiro()
-        accountInfo = deGiro.get_account_info()
+        accountInfo = DeGiro.get_account_info()
         baseCurrency = accountInfo['data']['baseCurrency']
         baseCurrencySymbol = CurrencySymbols.get_symbol(baseCurrency)
 

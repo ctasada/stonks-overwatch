@@ -37,15 +37,20 @@ class DeGiro(metaclass=SingleInstanceMetaClass):
         # CONNECT
         self.trading_api.connect()
     
-    def getClient(self) -> TradingAPI:
-        return self.trading_api
+    @staticmethod
+    def get_client() -> TradingAPI:
+        degiro = DeGiro()
 
-    def get_account_info(self):
-        return self.trading_api.get_account_info()
+        return degiro.trading_api
 
-    def get_client_details(self):
+    @staticmethod
+    def get_account_info():
+        return DeGiro.get_client().get_account_info()
+
+    @staticmethod
+    def get_client_details():
         # FETCH CONFIG TABLE
-        client_details_table = self.trading_api.get_client_details()
+        client_details_table = DeGiro.get_client().get_client_details()
 
         # EXTRACT DATA
         int_account = client_details_table['data']['intAccount']
@@ -58,7 +63,8 @@ class DeGiro(metaclass=SingleInstanceMetaClass):
 
         return client_details_table
     
-    def get_config(self):
-        config_table = self.trading_api.get_config()
+    @staticmethod
+    def get_config():
+        config_table = DeGiro.get_client().get_config()
 
         return config_table
