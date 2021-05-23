@@ -7,8 +7,6 @@ from trading.pb.trading_pb2 import ProductsInfo, Update
 import json
 
 class PortfolioModel:
-    def __init__(self):
-        self.deGiro = DeGiro()
 
     def get_portfolio(self):
         # SETUP REQUEST
@@ -17,7 +15,7 @@ class PortfolioModel:
             Update.Request(option=Update.Option.PORTFOLIO, last_updated=0),
         ])
 
-        update = self.deGiro.getClient().get_update(request_list=request_list, raw=False)
+        update = DeGiro.get_client().get_update(request_list=request_list, raw=False)
         update_dict = pb_handler.message_to_dict(message=update)
 
         products_ids = []
@@ -33,7 +31,7 @@ class PortfolioModel:
         request.products.extend(list(set(products_ids)))
 
         # FETCH DATA
-        products_info = self.deGiro.getClient().get_products_info(
+        products_info = DeGiro.get_client().get_products_info(
             request=request,
             raw=True,
         )
@@ -82,7 +80,7 @@ class PortfolioModel:
         return sorted(myPortfolio, key=lambda k: k['symbol'])
 
     def __get_company_profile(self, product_isin):
-        company_profile = self.deGiro.getClient().get_company_profile(
+        company_profile = DeGiro.get_client().get_company_profile(
             product_isin=product_isin,
             raw=True,
         )

@@ -5,12 +5,12 @@ register = template.Library()
 
 @register.simple_tag
 def clientrole():
-    clientDetails = DeGiro().get_client_details()
+    clientDetails = DeGiro.get_client_details()
     return clientDetails['data']['clientRole'].capitalize()
 
 @register.simple_tag
 def username():
-    clientDetails = DeGiro().get_client_details()
+    clientDetails = DeGiro.get_client_details()
     return clientDetails['data']['username']
 
 @register.filter

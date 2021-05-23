@@ -11,8 +11,6 @@ from datetime import date
 import json
 
 class AccountOverviewModel:
-    def __init__(self):
-        self.deGiro = DeGiro()
 
     def get_account_overview(self):
         # SETUP REQUEST
@@ -33,7 +31,7 @@ class AccountOverviewModel:
         )
 
         # FETCH DATA
-        account_overview = self.deGiro.getClient().get_account_overview(
+        account_overview = DeGiro.get_client().get_account_overview(
             request=request,
             raw=True,
         )

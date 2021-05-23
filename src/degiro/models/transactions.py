@@ -34,7 +34,7 @@ class TransactionsModel:
         )
 
         # FETCH TRANSACTIONS DATA
-        transactions_history = self.deGiro.getClient().get_transactions_history(
+        transactions_history = DeGiro.get_client().get_transactions_history(
             request=request,
             raw=False,
         )
@@ -52,7 +52,7 @@ class TransactionsModel:
         request.products.extend(products_ids)
 
         # FETCH DATA
-        products_info = self.deGiro.getClient().get_products_info(
+        products_info = DeGiro.get_client().get_products_info(
             request=request,
             raw=True,
         )
