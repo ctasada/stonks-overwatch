@@ -1,13 +1,7 @@
 from degiro.utils.degiro import DeGiro
 from degiro.utils.localization import LocalizationUtility
 
-from trading.api import API as TradingAPI
-from trading.pb.trading_pb2 import (
-    Credentials,
-    ProductsInfo,
-    TransactionsHistory,
-)
-import quotecast.helpers.pb_handler as pb_handler
+from trading.pb.trading_pb2 import TransactionsHistory
 from datetime import date
 import json
 
@@ -45,17 +39,7 @@ class TransactionsModel:
         for transaction in transactions_history.values:
             products_ids.append(int(transaction['productId']))
 
-        products_ids = list(set(products_ids))
-
-        # SETUP REQUEST
-        request = ProductsInfo.Request()
-        request.products.extend(products_ids)
-
-        # FETCH DATA
-        products_info = DeGiro.get_client().get_products_info(
-            request=request,
-            raw=True,
-        )
+        products_info = DeGiro.get_products_info(products_ids)
 
         # Get user's base currency
         baseCurrencySymbol = LocalizationUtility.get_base_currency_symbol()
@@ -63,7 +47,7 @@ class TransactionsModel:
         # DISPLAY PRODUCTS_INFO
         myTransactions = []
         for transaction in transactions_history.values:
-            info = products_info['data'][str(int(transaction['productId']))]
+            info = products_info[str(int(transaction['productId']))]
 
             fees = transaction['totalPlusFeeInBaseCurrency'] - transaction['totalInBaseCurrency']
 

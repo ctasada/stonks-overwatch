@@ -36,18 +36,40 @@ class AccountOverviewModel:
             raw=True,
         )
 
+        products_ids = []
+        for cash_movement in account_overview.get('data').get('cashMovements'):
+            if 'productId' in cash_movement:
+                products_ids.append(int(cash_movement['productId']))
+
+        products_info = DeGiro.get_products_info(products_ids)
+        
         # print(json.dumps(account_overview, indent = 4))
 
         overview = []
         for cash_movement in account_overview.get('data').get('cashMovements'):
+            
+            stockName = ''
+            stockSymbol = ''
+            if 'productId' in cash_movement:
+                info = products_info[str(int(cash_movement['productId']))]
+                stockName = info['name']
+                stockSymbol = info['symbol']
+
+            formatedChange = ''
+            if 'change' in cash_movement:
+                formatedChange = LocalizationUtility.format_money_value(value = cash_movement['change'], currency = cash_movement['currency'])
+            
             overview.append(
                 dict(
                     date = LocalizationUtility.format_date_time(cash_movement['date']),
                     valueDate = LocalizationUtility.format_date_time(cash_movement['valueDate']),
+                    stockName = stockName,
+                    stockSymbol = stockSymbol,
                     description = cash_movement['description'],
-                    type = cash_movement['type'],
+                    type = cash_movement['type'].replace("_", " ").title(),
                     currency = cash_movement['currency'],
                     change = cash_movement.get('change', ''),
+                    formatedChange = formatedChange,
                 )
             )
         
