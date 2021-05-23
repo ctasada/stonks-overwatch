@@ -11,7 +11,7 @@ class User(View):
         self.user = UserModel()
 
     def get(self, request):
-        clientDetails = self.user.getDetails()
+        clientDetails = self.user.get_details()
 
         context = {
             "username": clientDetails['username'],
@@ -19,6 +19,8 @@ class User(View):
             "fullName": clientDetails['displayName'],
             "dateOfBirth": clientDetails['firstContact']['dateOfBirth'],
             "nationality": pycountry.languages.get(alpha_2=clientDetails['firstContact']['nationality']).name,
+            "email": clientDetails['email'],
+            "language": pycountry.languages.get(alpha_2=clientDetails['language']).name,
         }
 
         return render(request, 'user.html', context)

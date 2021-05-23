@@ -14,7 +14,12 @@ class AccountOverview(View):
     def get(self, request):
         overview = self.accountOverview.get_account_overview()
 
-        # print (json.dumps(transactions, indent=2))
+        # print (json.dumps(overview, indent=2))
+
+        # filteredOverview = []
+        # for transaction in overview:
+        #     if (transaction['type'] in ['CASH_TRANSACTION'] and transaction['stockSymbol'] is "") or ('Dividend' in transaction['description']):
+        #         filteredOverview.append(transaction)
 
         context = {
             "accountOverview": overview,

@@ -22,7 +22,7 @@
                 {% for statement in accountOverview %}
                     <tr>
                         <td>{{ statement.date }}</td>
-                        <td>{{ statement.type }}</td>
+                        <td>{{ statement.typeStr }}</td>
                         <td>{{ statement.stockSymbol }}<br><small class="fw-lighter">{{ statement.stockName }}</small></td>
                         <td>{{ statement.description }}</td>
                         <td>{{ statement.formatedChange }}</td>
