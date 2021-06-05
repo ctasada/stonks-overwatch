@@ -4,7 +4,7 @@ import logging
 import quotecast.helpers.pb_handler as pb_handler
 import pandas as pd
 
-from IPython.display import display
+# from IPython.display import display
 from trading.api import API as TradingAPI
 from trading.pb.trading_pb2 import Credentials, Update
 
@@ -12,7 +12,7 @@ from trading.pb.trading_pb2 import Credentials, Update
 logging.basicConfig(level=logging.DEBUG)
 
 # SETUP CONFIG DICT
-with open('../config/config.json') as config_file:
+with open('./config/config.json') as config_file:
     config = json.load(config_file)
 
 # SETUP CREDENTIALS
@@ -37,7 +37,7 @@ trading_api.connect()
 # SETUP REQUEST
 request_list = Update.RequestList()
 request_list.values.extend([
-    Update.Request(option=Update.Option.ORDERS, last_updated=0),
+    # Update.Request(option=Update.Option.ORDERS, last_updated=0),
     Update.Request(option=Update.Option.PORTFOLIO, last_updated=0),
     Update.Request(option=Update.Option.TOTALPORTFOLIO, last_updated=0),
 ])
@@ -87,3 +87,12 @@ print(json.dumps(update_dict, indent = 4))
 #     "cashFundCompensationCurrency": "EUR",
 #     "totalNonProductFees": -10.878364599
 # }
+
+# for value in update_dict['portfolio']['values']:
+
+result = dict (
+    totalCash = update_dict['total_portfolio']['values']['totalCash'],
+    totalDepositWithdrawal = update_dict['total_portfolio']['values']['totalDepositWithdrawal'],
+)
+
+print(json.dumps(result, indent = 4))
