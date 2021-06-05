@@ -36,6 +36,10 @@ pip freeze > requirements.txt
 * [DeGiro Connector](https://github.com/Chavithra/degiro-connector)
 * [Bootstrap](https://getbootstrap.com)
 
+## Dependencies
+
+* https://www.npmjs.com/package/chroma-js
+
 ## Ideas
 
 * [Django Jazzmin](https://github.com/farridav/django-jazzmin)
