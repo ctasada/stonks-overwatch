@@ -52,7 +52,7 @@
     ];
 
     const data = {
-      labels: {{ sectors.labels|safe }}.concat({{ stocks.labels|safe }}),
+      labels: {{ sectors.labels|safe }},
       datasets: [
         {
           data: {{ sectors.values }},

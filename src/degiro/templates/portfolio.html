@@ -12,6 +12,8 @@
                   <th scope="col">Sector</th>
                   <th scope="col">Shares</th>
                   <th scope="col">Price</th>
+                  <th scope="col">Cost Per Share</th>
+                  <th scope="col">Unrealized Gain</th>
                   <th scope="col">Value</th>
                 </tr>
             </thead>
@@ -25,6 +27,8 @@
                             <td>{{ stock.sector }}<br><small class="fw-lighter">{{ stock.industry }}</small></td>
                             <td>{{ stock.shares }}</td>
                             <td>{{ stock.formattedPrice }}</td>
+                            <td>{{ stock.formattedBreakEvenPrice }}</td>
+                            <td>{{ stock.formattedUnrealizedGain }}</td>
                             <td>{{ stock.formattedValue }}</td>
                         </tr>
                     {% endif %}

@@ -4,8 +4,8 @@
 
 ### With Docker
 ```shell
-docker-compose build
-docker-compose up
+docker compose build
+docker compose up
 ```
 
 ### Without Docker
@@ -48,9 +48,16 @@ pip freeze > requirements.txt
 
 **Should we replace Django by Flask?**
 
+## Other interesting projects
+* https://github.com/leo-pfeiffer/portfolio_dashboard
+
 ## TODOs
 - [ ] DeGiro Client: Replace the Singleton by a proper session instance
 - [ ] DeGiro Client: Stop using Totp and request 2FA for each connection
 - [ ] Portfolio: Show filter to see Open/Close/All stocks
 - [ ] Improve side-bar behaviour
 - [ ] Replace dicts by properly designed models
+- [ ] Provide support for both Unrealized and Realized Gain/Loss
+        Onger. W/V € - Gain/Loss Unrealized - unrealizedPl
+        Totale W/V € - Gain/Loss Total (Realized + unrealized) - totalPl
+

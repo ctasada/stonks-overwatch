@@ -1,14 +1,16 @@
 import json
 import logging
 
-from trading.api import API as TradingAPI
-from trading.pb.trading_pb2 import Credentials, ProductsInfo
+from degiro_connector.trading.api import API as TradingAPI
+from degiro_connector.trading.pb.trading_pb2 import Credentials, ProductsInfo
 
 from degiro.utils.single_instance_metaclass import SingleInstanceMetaClass
 
 # TODO: A singleton is nice, but doesn't allow for multiple users
 class DeGiro(metaclass=SingleInstanceMetaClass):
     trading_api = None
+    clientId = None
+    sessionId = None
 
     def __init__(self):
         # SETUP LOGGING LEVEL
@@ -40,6 +42,11 @@ class DeGiro(metaclass=SingleInstanceMetaClass):
     @staticmethod
     def get_client() -> TradingAPI:
         degiro = DeGiro()
+
+        config_table = degiro.trading_api.get_config()
+
+        degiro.clientId = config_table['clientId']
+        degiro.sessionId = config_table['sessionId']
 
         return degiro.trading_api
 
