@@ -2,8 +2,8 @@ from typing import overload
 from degiro.utils.degiro import DeGiro
 from degiro.utils.localization import LocalizationUtility
 
-from trading.api import API as TradingAPI
-from trading.pb.trading_pb2 import (
+from degiro_connector.trading.api import API as TradingAPI
+from degiro_connector.trading.pb.trading_pb2 import (
     Credentials,
     AccountOverview,
 )

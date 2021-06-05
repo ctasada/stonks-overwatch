@@ -1,8 +1,8 @@
 from degiro.utils.degiro import DeGiro
 from degiro.utils.localization import LocalizationUtility
 
-import quotecast.helpers.pb_handler as pb_handler
-from trading.pb.trading_pb2 import Update
+import degiro_connector.quotecast.helpers.pb_handler as pb_handler
+from degiro_connector.trading.pb.trading_pb2 import Update
 
 import json
 
@@ -30,13 +30,10 @@ class PortfolioModel:
 
         # DEBUG Values
         # print(json.dumps(update_dict, indent = 4))
-        # print(json.dumps(products_info, indent = 4))
 
         # Get user's base currency
         baseCurrencySymbol = LocalizationUtility.get_base_currency_symbol()
 
-        # print(accountInfo['data']['currencyPairs']['EURUSD']['price'])
-        # print(update_dict['portfolio']['values'])
         myPortfolio = []
 
         for portfolio in update_dict['portfolio']['values']:
@@ -52,6 +49,10 @@ class PortfolioModel:
 
                 price = LocalizationUtility.format_money_value(value = portfolio['price'], currency = info['currency'])
                 value = LocalizationUtility.format_money_value(value = portfolio['value'], currencySymbol = baseCurrencySymbol)
+                breakEvenPrice = LocalizationUtility.format_money_value(value = portfolio['breakEvenPrice'], currency = info['currency'])
+
+                unrealizedGain = (portfolio['price'] - portfolio['breakEvenPrice']) * portfolio['size']
+                formattedUnrealizedGain = LocalizationUtility.format_money_value(value = unrealizedGain, currency = info['currency'])
 
                 myPortfolio.append(
                     dict(
@@ -61,15 +62,28 @@ class PortfolioModel:
                         industry = industry,
                         shares = portfolio['size'],
                         price = portfolio['price'],
+                        breakEvenPrice = portfolio['breakEvenPrice'],
                         formattedPrice = price,
-                        breakEvenPrice = portfolio['breakEvenPrice'], # GAK: Average Purchase Price                
+                        formattedBreakEvenPrice = breakEvenPrice, # GAK: Average Purchase Price
                         value = portfolio['value'],
                         formattedValue = value,
                         isOpen = (portfolio['size'] != 0.0 and portfolio['value'] != 0.0),
+                        unrealizedGain = unrealizedGain,
+                        formattedUnrealizedGain = formattedUnrealizedGain,
                     )
                 )
 
         return sorted(myPortfolio, key=lambda k: k['symbol'])
+
+    def get_portfolio_total(self):
+        portfolio = self.get_portfolio()
+
+        portfolioTotalValue = 0.0
+
+        for equity in portfolio:
+            portfolioTotalValue += equity['value']
+
+        return portfolioTotalValue
 
     def __get_company_profile(self, product_isin):
         company_profile = DeGiro.get_client().get_company_profile(
