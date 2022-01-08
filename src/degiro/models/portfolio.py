@@ -1,8 +1,8 @@
 from degiro.utils.degiro import DeGiro
 from degiro.utils.localization import LocalizationUtility
 
-import degiro_connector.quotecast.helpers.pb_handler as pb_handler
-from degiro_connector.trading.pb.trading_pb2 import Update
+import degiro_connector.core.helpers.pb_handler as pb_handler
+from degiro_connector.trading.models.trading_pb2 import Update
 
 import json
 

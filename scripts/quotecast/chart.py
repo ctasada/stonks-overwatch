@@ -3,7 +3,7 @@ import json
 import logging
 
 from degiro_connector.quotecast.api import API as QuotecastAPI
-from degiro_connector.quotecast.pb.quotecast_pb2 import Chart
+from degiro_connector.quotecast.models.quotecast_pb2 import Chart
 
 # SETUP LOGGING
 logging.basicConfig(level=logging.INFO)
@@ -21,13 +21,13 @@ quotecast_api = QuotecastAPI(user_token=user_token)
 # SUBSCRIBE TO METRICS
 request = Chart.Request()
 request.requestid = '1'
-request.resolution = Chart.Resolution.PT1M
+request.resolution = Chart.Interval.PT1M
 request.culture = 'fr-FR'
 request.series.append('issueid:360148977')
 request.series.append('price:issueid:360148977')
 request.series.append('ohlc:issueid:360148977')
 request.series.append('volume:issueid:360148977')
-request.period = Chart.Period.P1D
+request.period = Chart.Interval.P1D
 request.tz = 'Europe/Paris'
 
 # FETCH DATA
