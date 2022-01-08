@@ -1,7 +1,7 @@
 from degiro.utils.degiro import DeGiro
 from degiro.utils.localization import LocalizationUtility
 
-from degiro_connector.trading.pb.trading_pb2 import TransactionsHistory
+from degiro_connector.trading.models.trading_pb2 import TransactionsHistory
 from datetime import date
 import json
 

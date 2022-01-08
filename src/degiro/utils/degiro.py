@@ -2,7 +2,7 @@ import json
 import logging
 
 from degiro_connector.trading.api import API as TradingAPI
-from degiro_connector.trading.pb.trading_pb2 import Credentials, ProductsInfo
+from degiro_connector.trading.models.trading_pb2 import Credentials, ProductsInfo
 
 from degiro.utils.single_instance_metaclass import SingleInstanceMetaClass
 

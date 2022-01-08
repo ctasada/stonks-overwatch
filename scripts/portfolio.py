@@ -1,11 +1,11 @@
 # IMPORTATIONS
 import json
 import logging
-import degiro_connector.quotecast.helpers.pb_handler as pb_handler
+import degiro_connector.core.helpers.pb_handler as pb_handler
 import pandas as pd
 
 from degiro_connector.trading.api import API as TradingAPI
-from degiro_connector.trading.pb.trading_pb2 import Credentials, ProductsInfo, Update
+from degiro_connector.trading.models.trading_pb2 import Credentials, ProductsInfo, Update
 
 # SETUP LOGGING LEVEL
 logging.basicConfig(level=logging.DEBUG)

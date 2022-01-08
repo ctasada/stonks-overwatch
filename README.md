@@ -28,6 +28,7 @@ python src/manage.py runserver
 
 ## Update Dependencies
 ```shell
+pip list --outdated
 pip freeze > requirements.txt
 ```
 
