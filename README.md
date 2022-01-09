@@ -46,6 +46,7 @@ pip freeze > requirements.txt
 * [Django Jazzmin](https://github.com/farridav/django-jazzmin)
 * [Django Bootstrap Tutorial](https://github.com/thalesbruno/django_bootstrap)
 * [Django Bootstrap-4](https://github.com/zostera/django-bootstrap4)
+* [Django Soft-UI Dashboard](https://appseed.us/product/django-soft-ui-dashboard)
 
 ## HowTos
 * [Bootstrap Sidebar](https://bootstrapious.com/p/bootstrap-sidebar)

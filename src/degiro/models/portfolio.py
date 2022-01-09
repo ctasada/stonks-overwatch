@@ -76,14 +76,33 @@ class PortfolioModel:
         return sorted(myPortfolio, key=lambda k: k['symbol'])
 
     def get_portfolio_total(self):
+        # Calculate current value
         portfolio = self.get_portfolio()
 
         portfolioTotalValue = 0.0
 
         for equity in portfolio:
             portfolioTotalValue += equity['value']
+        
+        # SETUP REQUEST
+        request_list = Update.RequestList()
+        request_list.values.extend([
+            Update.Request(option=Update.Option.TOTALPORTFOLIO, last_updated=0),
+        ])
 
-        return portfolioTotalValue
+        update = DeGiro.get_client().get_update(request_list=request_list)
+        update_dict = pb_handler.message_to_dict(message=update)
+
+        baseCurrencySymbol = LocalizationUtility.get_base_currency_symbol()
+        # print(json.dumps(update_dict, indent = 4))
+
+        total_portfolio = {
+            "totalDepositWithdrawal": LocalizationUtility.format_money_value(value = update_dict['total_portfolio']['values']['totalDepositWithdrawal'], currencySymbol = baseCurrencySymbol),
+            "totalCash": LocalizationUtility.format_money_value(value = update_dict['total_portfolio']['values']['totalCash'], currencySymbol = baseCurrencySymbol),
+            "currentValue": LocalizationUtility.format_money_value(value = portfolioTotalValue, currencySymbol = baseCurrencySymbol)
+        }
+
+        return total_portfolio
 
     def __get_company_profile(self, product_isin):
         company_profile = DeGiro.get_client().get_company_profile(

@@ -1,5 +1,8 @@
 from django import template
 from degiro.utils.degiro import DeGiro
+from degiro.models.portfolio import PortfolioModel
+
+import json
 
 register = template.Library()
 
@@ -16,3 +19,12 @@ def username():
 @register.filter
 def index(sequence, position):
     return sequence[position]
+
+@register.inclusion_tag('total_overview.html')
+def show_total_portfolio():
+    portfolio = PortfolioModel()
+    total_portfolio = portfolio.get_portfolio_total()
+    
+    # print(json.dumps(total_portfolio, indent = 4))
+    
+    return { 'total_portfolio': total_portfolio }
