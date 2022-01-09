@@ -1,0 +1,8 @@
+{
+    "username": "USERNAME",
+    "password": "PASSWORD",
+    "int_account": "See https://github.com/Chavithra/degiro-connector#34-how-to-find-your--int_account-",
+    "totp_secret_key": "See https://github.com/Chavithra/degiro-connector#35-how-to-use-2fa-",
+    "one_time_password": "See https://github.com/Chavithra/degiro-connector#35-how-to-use-2fa-",
+    "user_token": "See https://github.com/Chavithra/degiro-connector#23-how-to-find-your--user_token-"
+}
