@@ -35,17 +35,17 @@
     let currencySymbol = "{{ currencySymbol }}";
     let valuesDict = [
       [
-      {% for sector in sectors.labels %}
-        {
-          "label" : "{{ sector }}",
-          "value" : {{ sectors.values|index:forloop.counter0 }},
-        },
-      {% endfor %}
-      ], [
       {% for stock in stocks.labels %}
         {
           "label" : "{{ stock }}",
           "value" : {{ stocks.values|index:forloop.counter0 }},
+        },
+      {% endfor %}
+      ], [
+      {% for sector in sectors.labels %}
+        {
+          "label" : "{{ sector }}",
+          "value" : {{ sectors.values|index:forloop.counter0 }},
         },
       {% endfor %}
       ],
@@ -55,14 +55,14 @@
       labels: {{ sectors.labels|safe }},
       datasets: [
         {
-          data: {{ sectors.values }},
-          backgroundColor: sectorColors,
-          borderWidth: 2,
-        },
-        {
           data: {{ stocks.values }},
           backgroundColor: stockColors,
           borderWidth: 1,
+        },
+        {
+          data: {{ sectors.values }},
+          backgroundColor: sectorColors,
+          borderWidth: 2,
         }
       ]
     };
