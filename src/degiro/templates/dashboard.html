@@ -79,7 +79,9 @@
           tooltip: {
             callbacks: {
               label: function(context) {
-                return valuesDict[context.datasetIndex][context.dataIndex].label + ': ' + currencySymbol + valuesDict[context.datasetIndex][context.dataIndex].value;
+                var stockValue = valuesDict[context.datasetIndex][context.dataIndex].value;
+                stockValue = Intl.NumberFormat().format(stockValue);
+                return valuesDict[context.datasetIndex][context.dataIndex].label + ': ' + currencySymbol + ' ' + stockValue;
               }
             }
           },
