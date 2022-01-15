@@ -28,7 +28,12 @@
                             <td>{{ stock.shares }}</td>
                             <td>{{ stock.formattedPrice }}</td>
                             <td>{{ stock.formattedBreakEvenPrice }}</td>
-                            <td>{{ stock.formattedUnrealizedGain }}</td>
+                            {% if stock.unrealizedGain > 0 %}
+                                <td class="text-success" >
+                            {% else %}
+                                <td class="text-danger" >
+                            {% endif %} 
+                            {{ stock.formattedUnrealizedGain }}</td>
                             <td>{{ stock.formattedValue }}</td>
                         </tr>
                     {% endif %}
