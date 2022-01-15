@@ -59,11 +59,15 @@ class AccountOverviewModel:
             if 'change' in cash_movement:
                 formatedChange = LocalizationUtility.format_money_value(value = cash_movement['change'], currency = cash_movement['currency'])
             
+            unsettledCash = 0
+            formatedUnsettledCash = ''
             formatedTotalBalance = ''
             totalBalance = 0
             if 'balance' in cash_movement:
                 totalBalance = cash_movement.get('balance').get('total')
                 formatedTotalBalance = LocalizationUtility.format_money_value(value = totalBalance, currency = cash_movement['currency'])
+                unsettledCash = cash_movement.get('balance').get('unsettledCash')
+                formatedUnsettledCash = LocalizationUtility.format_money_value(value = unsettledCash, currency = cash_movement['currency'])
             
             overview.append(
                 dict(
@@ -79,6 +83,9 @@ class AccountOverviewModel:
                     formatedChange = formatedChange,
                     totalBalance = totalBalance,
                     formatedTotalBalance = formatedTotalBalance,
+                    # Seems that this value is the proper one for Dividends. Checking ...
+                    unsettledCash = unsettledCash,
+                    formatedUnsettledCash = formatedUnsettledCash,
                 )
             )
         

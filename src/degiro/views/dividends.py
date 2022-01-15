@@ -19,20 +19,20 @@ class Dividends(View):
         for transaction in dividendsOverview:
             # Group dividends by month. We may only need the dividend name and amount
             month = self.format_date_to_month(transaction['date'])
-            print(transaction)
+
             entry = dividends.setdefault(month, dict())
             entry.setdefault("dividends", []).append({
                 'day': self.get_date_day(transaction['date']),
                 'stockName': transaction['stockName'],
                 'stockSymbol': transaction['stockSymbol'],
-                'value': transaction['formatedTotalBalance']
+                'unsettleCash': transaction['formatedUnsettledCash']
             })
             # Number of Payouts in the month
             payouts = entry.setdefault("payouts", 0)
             entry["payouts"] = payouts + 1
             # Total payout in the month
             total = entry.setdefault("total", 0)
-            entry["total"] = total + transaction['totalBalance']
+            entry["total"] = total + transaction['unsettledCash']
 
         context = {
             'dividends': dividends
