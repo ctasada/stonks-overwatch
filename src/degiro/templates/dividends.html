@@ -4,22 +4,22 @@
 {% block content %}
 <h4 class="mb-3">Dividends</h4>
 <div class="container-fluid">
-    <div class="row">
+    <div class="row"" style="background-color:#dbf5ff">
         {% for key, value in dividends.items %}
             <div class="col-sm border">
-                <div class="row-sm mt-1">
+                <div class="row-sm mt-1 fs-5">
                     {{ key }}
                 </div>
                 <div class="row m-2">
                     <div class="col-sm-10 text-left">
                         {{ value.payouts }} payouts
                     </div>
-                    <div class="col-sm text-right border rounded-pill">
+                    <div class="col-sm text-right border rounded-pill" style="background-color: #7386D5; color: white">
                         {{ value.total|floatformat:2 }}
                     </div>
                 </div>
                 {% for dividend in value.dividends %}
-                <div class="row m-2 border rounded-pill">
+                <div class="row m-2 border rounded-pill" style="background-color: #A6B9FF">
                     <div class="col-sm-1 text-left">
                         {{ dividend.day }}
                     </div>
