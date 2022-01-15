@@ -66,7 +66,7 @@ class TransactionsModel:
                 )
             )
 
-        return sorted(myTransactions, key=lambda k: k['date'])
+        return sorted(myTransactions, key=lambda k: k['date'], reverse=True)
 
     def convertBuySell(self, buysell: str):
         if (buysell == "B"):
