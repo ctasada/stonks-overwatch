@@ -24,6 +24,7 @@ pip install -r requirements.txt
 Run the server
 ```shell
 python src/manage.py runserver
+open http://127.0.0.1:8000/degiro
 ```
 
 ## Update Dependencies

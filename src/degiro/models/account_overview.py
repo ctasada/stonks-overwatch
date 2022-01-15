@@ -59,6 +59,12 @@ class AccountOverviewModel:
             if 'change' in cash_movement:
                 formatedChange = LocalizationUtility.format_money_value(value = cash_movement['change'], currency = cash_movement['currency'])
             
+            formatedTotalBalance = ''
+            totalBalance = 0
+            if 'balance' in cash_movement:
+                totalBalance = cash_movement.get('balance').get('total')
+                formatedTotalBalance = LocalizationUtility.format_money_value(value = totalBalance, currency = cash_movement['currency'])
+            
             overview.append(
                 dict(
                     date = LocalizationUtility.format_date_time(cash_movement['date']),
@@ -71,7 +77,20 @@ class AccountOverviewModel:
                     currency = cash_movement['currency'],
                     change = cash_movement.get('change', ''),
                     formatedChange = formatedChange,
+                    totalBalance = totalBalance,
+                    formatedTotalBalance = formatedTotalBalance,
                 )
             )
         
         return overview
+
+    def get_dividends(self):
+        overview = self.get_account_overview()
+
+        dividends = []
+        for transaction in overview:
+            # We don't include 'Dividendbelasting' because the 'value' seems to already include the taxes
+            if (transaction['description'] in ['Dividend']):
+                dividends.append(transaction)
+
+        return dividends

@@ -60,11 +60,7 @@ account_overview = trading_api.get_account_overview(
 print(json.dumps(account_overview, indent = 4))
 
 # DISPLAY CASH MOVEMENTS
-# for cash_movement in account_overview.values['cashMovements']:
-    # print('date:', cash_movement['date'])
-    # print('valueDate:', cash_movement['valueDate'])
-    # print('productId:', dict(cash_movement).get('productId', 'unknown'))
-    # print('currency:', dict(cash_movement).get('currency', 'unknown'))
-    # print('change:', dict(cash_movement).get('change', 'unknown'))
-    # print(cash_movement)
-    # break
+# for cash_movement in account_overview.get('data').get('cashMovements'):
+#     if cash_movement['description'] in ['Dividend', 'Dividendbelasting']:
+#         for key, value in cash_movement.items():
+#             print(key, ' : ', value)
