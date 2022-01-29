@@ -97,7 +97,7 @@ class AccountOverviewModel:
         dividends = []
         for transaction in overview:
             # We don't include 'Dividendbelasting' because the 'value' seems to already include the taxes
-            if (transaction['description'] in ['Dividend']):
+            if (transaction['description'] in ['Dividend', 'Vermogenswinst']):
                 dividends.append(transaction)
 
         return dividends
