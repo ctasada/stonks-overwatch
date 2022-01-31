@@ -20,19 +20,35 @@ class Dividends(View):
             # Group dividends by month. We may only need the dividend name and amount
             month = self.format_date_to_month(transaction['date'])
 
-            entry = dividends.setdefault(month, dict())
-            entry.setdefault("dividends", []).append({
+            day = self.get_date_day(transaction['date'])
+            stock = transaction['stockSymbol']
+
+            monthEntry = dividends.setdefault(month, dict())
+            days = monthEntry.setdefault("days", dict())
+            dayEntry = days.setdefault(day, dict())
+            stockEntry = dayEntry.setdefault(stock, dict())
+
+            stockEntry['stockName'] = transaction['stockName']
+            stockEntry['change'] = stockEntry.setdefault('change', 0) + transaction['change']
+            stockEntry['currency'] = transaction['currency']
+            stockEntry['formatedChange'] = LocalizationUtility.format_money_value(value = stockEntry['change'], currency = transaction['currency'])
+
+            monthEntry.setdefault("dividends", []).append({
                 'day': self.get_date_day(transaction['date']),
                 'stockName': transaction['stockName'],
                 'stockSymbol': transaction['stockSymbol'],
-                'unsettleCash': transaction['formatedUnsettledCash']
+                'formatedChange': transaction['formatedChange']
             })
+
             # Number of Payouts in the month
-            payouts = entry.setdefault("payouts", 0)
-            entry["payouts"] = payouts + 1
+            payouts = monthEntry.setdefault("payouts", 0)
+            monthEntry["payouts"] = payouts + 1
             # Total payout in the month
-            total = entry.setdefault("total", 0)
-            entry["total"] = total + transaction['unsettledCash']
+            total = monthEntry.setdefault("total", 0)
+            monthEntry["total"] = total + transaction['change']
+            monthEntry["formatedTotal"] = LocalizationUtility.format_money_value(value = monthEntry['total'], currency = transaction['currency'])
+
+        print(dividends)
 
         context = {
             'dividends': dividends
