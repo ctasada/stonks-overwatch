@@ -11,25 +11,29 @@
                     {{ key }}
                 </div>
                 <div class="row m-2">
-                    <div class="col-sm-10 text-left">
+                    <div class="col text-left">
                         {{ value.payouts }} payouts
                     </div>
-                    <div class="col-sm-2 text-right border rounded-pill" style="background-color: #7386D5; color: white">
-                        {{ value.total|floatformat:2 }}
+                    <div class="col-md-auto text-right border rounded-pill" style="background-color: #7386D5; color: white">
+                        {{ value.formatedTotal }}
                     </div>
                 </div>
-                {% for dividend in value.dividends %}
-                <div class="row m-2 border rounded-pill" style="background-color: #A6B9FF">
-                    <div class="col-sm-1 text-left">
-                        {{ dividend.day }}
-                    </div>
-                    <div class="col-sm-8 text-truncate">
-                        {{ dividend.stockName }}
-                    </div>
-                    <div class="col-sm-3 text-right">
-                        {{ dividend.unsettleCash }}
-                    </div>
-                </div>
+                {% for day, dividends in value.days.items %}
+                    {% for key, dividend in dividends.items %}
+                        {% if dividend.change != 0 %}
+                            <div class="row m-2 border rounded-pill" style="background-color: #A6B9FF">
+                                <div class="col-sm-1 text-left">
+                                    {{ day }}
+                                </div>
+                                <div class="col-sm-8 text-truncate">
+                                    {{ dividend.stockName }}
+                                </div>
+                                <div class="col-sm-3 text-right">
+                                    {{ dividend.formatedChange }}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
                 {% endfor %}
             </div>
 
