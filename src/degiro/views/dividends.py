@@ -47,7 +47,8 @@ class Dividends(View):
 
             # Number of Payouts in the month
             payouts = monthEntry.setdefault("payouts", 0)
-            monthEntry["payouts"] = payouts + 1
+            if (transaction['change'] > 0):
+                monthEntry["payouts"] = payouts + 1
             # Total payout in the month
             total = monthEntry.setdefault("total", 0)
             monthEntry["total"] = total + transaction['change']
