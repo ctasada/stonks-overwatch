@@ -14,7 +14,7 @@ class DeGiro(metaclass=SingleInstanceMetaClass):
 
     def __init__(self):
         # SETUP LOGGING LEVEL
-        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.INFO)
 
         # SETUP CONFIG DICT
         with open('config/config.json') as config_file:
