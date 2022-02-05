@@ -30,6 +30,7 @@ open http://127.0.0.1:8000/degiro
 ## Update Dependencies
 ```shell
 pip list --outdated
+pip install <dependency> -U
 pip freeze > requirements.txt
 ```
 
