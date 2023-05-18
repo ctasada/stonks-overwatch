@@ -58,8 +58,10 @@ pip freeze > requirements.txt
 
 ## Other interesting projects
 * https://github.com/leo-pfeiffer/portfolio_dashboard
+* https://github.com/lucalaringe/degiro_portfolio_analytics
 
 ## TODOs
+- Upgrade to Django 4.2 (LTS)
 - [ ] DeGiro Client: Replace the Singleton by a proper session instance
 - [ ] DeGiro Client: Stop using Totp and request 2FA for each connection
 - [ ] Portfolio: Show filter to see Open/Close/All stocks
