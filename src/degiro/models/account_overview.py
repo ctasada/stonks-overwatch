@@ -3,10 +3,9 @@ from degiro.utils.degiro import DeGiro
 from degiro.utils.localization import LocalizationUtility
 
 from degiro_connector.trading.api import API as TradingAPI
-from degiro_connector.trading.models.trading_pb2 import (
-    Credentials,
-    AccountOverview,
-)
+from degiro_connector.trading.models.credentials import Credentials
+from degiro_connector.trading.models.account import OverviewRequest
+
 from datetime import date
 import json
 
@@ -15,29 +14,29 @@ class AccountOverviewModel:
     def get_account_overview(self):
         # SETUP REQUEST
         today = date.today()
-        from_date = AccountOverview.Request.Date(
+        from_date = date(
             year=2020,
             month=1,
             day=1,
         )
-        to_date = AccountOverview.Request.Date(
+        to_date = date(
             year=today.year,
             month=today.month,
             day=today.day,
         )
-        request = AccountOverview.Request(
+        request = OverviewRequest(
             from_date=from_date,
             to_date=to_date,
         )
 
         # FETCH DATA
         account_overview = DeGiro.get_client().get_account_overview(
-            request=request,
+            overview_request=request,
             raw=True,
         )
 
         products_ids = []
-        for cash_movement in account_overview.get('data').get('cashMovements'):
+        for cash_movement in account_overview.get('data'):
             if 'productId' in cash_movement:
                 products_ids.append(int(cash_movement['productId']))
 
@@ -46,7 +45,7 @@ class AccountOverviewModel:
         # print(json.dumps(account_overview, indent = 4))
 
         overview = []
-        for cash_movement in account_overview.get('data').get('cashMovements'):
+        for cash_movement in account_overview.get('data'):
             
             stockName = ''
             stockSymbol = ''
@@ -72,14 +71,14 @@ class AccountOverviewModel:
             overview.append(
                 dict(
                     date = LocalizationUtility.format_date_time(cash_movement['date']),
-                    valueDate = LocalizationUtility.format_date_time(cash_movement['valueDate']),
+                    # valueDate = LocalizationUtility.format_date_time(cash_movement['valueDate']),
                     stockName = stockName,
                     stockSymbol = stockSymbol,
-                    description = cash_movement['description'],
-                    type = cash_movement['type'],
-                    typeStr = cash_movement['type'].replace("_", " ").title(),
-                    currency = cash_movement['currency'],
-                    change = cash_movement.get('change', ''),
+                    # description = cash_movement['description'],
+                    # type = cash_movement['type'],
+                    # typeStr = cash_movement['type'].replace("_", " ").title(),
+                    # currency = cash_movement['currency'],
+                    # change = cash_movement.get('change', ''),
                     formatedChange = formatedChange,
                     totalBalance = totalBalance,
                     formatedTotalBalance = formatedTotalBalance,
@@ -95,9 +94,10 @@ class AccountOverviewModel:
         overview = self.get_account_overview()
 
         dividends = []
-        for transaction in overview:
-            # We don't include 'Dividendbelasting' because the 'value' seems to already include the taxes
-            if (transaction['description'] in ['Dividend', 'Dividendbelasting', 'Vermogenswinst']):
-                dividends.append(transaction)
+        # FIXME
+        # for transaction in overview:
+        #     # We don't include 'Dividendbelasting' because the 'value' seems to already include the taxes
+        #     if (transaction['description'] in ['Dividend', 'Dividendbelasting', 'Vermogenswinst']):
+        #         dividends.append(transaction)
 
         return dividends

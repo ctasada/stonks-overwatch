@@ -3,11 +3,11 @@ import datetime
 import json
 import logging
 
+from datetime import date
+
 from degiro_connector.trading.api import API as TradingAPI
-from degiro_connector.trading.models.trading_pb2 import (
-    AccountOverview,
-    Credentials,
-)
+from degiro_connector.trading.models.credentials import Credentials
+from degiro_connector.trading.models.account import OverviewRequest
 
 # SETUP LOGGING LEVEL
 logging.basicConfig(level=logging.DEBUG)
@@ -36,24 +36,24 @@ trading_api.connect()
 
 # SETUP REQUEST
 today = datetime.date.today()
-from_date = AccountOverview.Request.Date(
+from_date = date(
     year=2020,
     month=1,
     day=1,
 )
-to_date = AccountOverview.Request.Date(
+to_date = date(
     year=today.year,
     month=today.month,
     day=today.day,
 )
-request = AccountOverview.Request(
+request = OverviewRequest(
     from_date=from_date,
     to_date=to_date,
 )
 
 # FETCH DATA
 account_overview = trading_api.get_account_overview(
-    request=request,
+    overview_request=request,
     raw=True,
 )
 

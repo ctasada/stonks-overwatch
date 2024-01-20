@@ -3,12 +3,10 @@ import datetime
 import json
 import logging
 
-import degiro_connector.core.helpers.pb_handler as pb_handler
 from degiro_connector.trading.api import API as TradingAPI
-from degiro_connector.trading.models.trading_pb2 import (
-    Update,
-    Credentials,
-)
+from degiro_connector.trading.models.credentials import Credentials
+from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
+
 
 # SETUP LOGGING LEVEL
 logging.basicConfig(level=logging.DEBUG)
@@ -36,16 +34,15 @@ trading_api = TradingAPI(credentials=credentials)
 trading_api.connect()
 
 # SETUP REQUEST
-request_list = Update.RequestList()
-request_list.values.extend([
-    Update.Request(option=Update.Option.TOTALPORTFOLIO, last_updated=0),
-])
-
-update = trading_api.get_update(request_list=request_list)
-update_dict = pb_handler.message_to_dict(message=update)
+update = trading_api.get_update(
+    request_list=[
+        UpdateRequest(option=UpdateOption.TOTAL_PORTFOLIO, last_updated=0),
+    ],
+    raw=True,
+)
 # total_portfolio_df = pd.DataFrame(update_dict['total_portfolio']['values'])
 
-print(json.dumps(update_dict, indent = 4))
+print(json.dumps(update, indent = 4))
 
 # DISPLAY CASH MOVEMENTS
 # for cash_movement in account_overview.values['cashMovements']:

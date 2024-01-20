@@ -1,9 +1,10 @@
 from degiro.utils.degiro import DeGiro
 from degiro.utils.localization import LocalizationUtility
 
-from degiro_connector.trading.models.trading_pb2 import TransactionsHistory
+from degiro_connector.trading.models.transaction import HistoryRequest
 from datetime import date
 import json
+import logging
 
 class TransactionsModel:
     def __init__(self):
@@ -12,31 +13,30 @@ class TransactionsModel:
     def get_transactions(self):
         # SETUP REQUEST
         today = date.today()
-        from_date = TransactionsHistory.Request.Date(
+        from_date = date(
             year=2020,
             month=1,
             day=1,
         )
-        to_date = TransactionsHistory.Request.Date(
+        to_date = date(
             year=today.year,
             month=today.month,
             day=today.day,
         )
-        request = TransactionsHistory.Request(
-            from_date=from_date,
-            to_date=to_date,
-        )
-
+        logging.basicConfig(level=logging.DEBUG)
         # FETCH TRANSACTIONS DATA
         transactions_history = DeGiro.get_client().get_transactions_history(
-            request=request,
-            raw=False,
+            transaction_request=HistoryRequest(
+                from_date=from_date,
+                to_date=to_date,
+            ),
+            raw=True,
         )
 
         products_ids = []
 
         # ITERATION OVER THE TRANSACTIONS TO OBTAIN THE PRODUCTS
-        for transaction in transactions_history.values:
+        for transaction in transactions_history['data']:
             products_ids.append(int(transaction['productId']))
 
         products_info = DeGiro.get_products_info(products_ids)
@@ -46,7 +46,7 @@ class TransactionsModel:
 
         # DISPLAY PRODUCTS_INFO
         myTransactions = []
-        for transaction in transactions_history.values:
+        for transaction in transactions_history['data']:
             info = products_info[str(int(transaction['productId']))]
 
             fees = transaction['totalPlusFeeInBaseCurrency'] - transaction['totalInBaseCurrency']
