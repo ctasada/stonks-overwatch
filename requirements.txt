@@ -10,9 +10,9 @@ currency-symbols==2.0.3
 decorator==5.1.1
 degiro-connector==3.0.16
 distlib==0.3.8
-Django==3.2.19
+Django==5.0.1
 filelock==3.13.1
-grpcio==1.54.2
+grpcio==1.60.0
 idna==3.6
 ipython-genutils==0.2.0
 isodate==0.6.1
