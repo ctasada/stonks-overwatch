@@ -1,6 +1,6 @@
 # IMPORTATIONS
+import common
 import json
-import logging
 import pandas as pd
 
 # from IPython.display import display
@@ -8,31 +8,7 @@ from degiro_connector.trading.api import API as TradingAPI
 from degiro_connector.trading.models.credentials import Credentials
 from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
 
-# SETUP LOGGING LEVEL
-logging.basicConfig(level=logging.DEBUG)
-
-# SETUP CONFIG DICT
-with open('./config/config.json') as config_file:
-    config = json.load(config_file)
-
-# SETUP CREDENTIALS
-int_account = config['int_account']
-username = config['username']
-password = config['password']
-totp_secret_key = config['totp_secret_key']
-
-credentials = Credentials(
-    int_account=int_account,
-    username=username,
-    password=password,
-    totp_secret_key=totp_secret_key,
-)
-
-# SETUP TRADING API
-trading_api = TradingAPI(credentials=credentials)
-
-# CONNECT
-trading_api.connect()
+trading_api = common.connectToDegiro()
 
 # SETUP REQUEST
 update = trading_api.get_update(request_list=[
@@ -93,3 +69,5 @@ result = dict (
 )
 
 print(json.dumps(result, indent = 4))
+
+trading_api.logout()
