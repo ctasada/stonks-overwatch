@@ -3,16 +3,14 @@ import json
 import logging
 
 from degiro_connector.trading.api import API as TradingAPI
-from degiro_connector.trading.models.trading_pb2 import (
-    Credentials,
-    ProductsInfo,
-)
+from degiro_connector.trading.models.credentials import Credentials
+from degiro_connector.trading.models.product import ProductInfo
 
 # SETUP LOGGING LEVEL
 logging.basicConfig(level=logging.DEBUG)
 
 # SETUP CONFIG DICT
-with open('../config/config.json') as config_file:
+with open('./config/config.json') as config_file:
     config_dict = json.load(config_file)
 
 # SETUP CREDENTIALS
@@ -33,13 +31,9 @@ trading_api = TradingAPI(credentials=credentials)
 # CONNECT
 trading_api.connect()
 
-# SETUP REQUEST
-request = ProductsInfo.Request()
-request.products.extend([11789747])
-
 # FETCH DATA
 products_info = trading_api.get_products_info(
-    request=request,
+    product_list=[11789747],
     raw=True,
 )
 

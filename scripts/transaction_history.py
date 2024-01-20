@@ -3,11 +3,11 @@ import datetime
 import json
 import logging
 
+from datetime import date
 from degiro_connector.trading.api import API as TradingAPI
-from degiro_connector.trading.models.trading_pb2 import (
-    Credentials,
-    TransactionsHistory,
-)
+from degiro_connector.trading.models.credentials import Credentials
+from degiro_connector.trading.models.transaction import HistoryRequest
+
 
 # SETUP LOGGING LEVEL
 logging.basicConfig(level=logging.DEBUG)
@@ -36,24 +36,23 @@ trading_api.connect()
 
 # SETUP REQUEST
 today = datetime.date.today()
-from_date = TransactionsHistory.Request.Date(
+from_date = date(
     year=2020,
     month=1,
     day=1,
 )
-to_date = TransactionsHistory.Request.Date(
+to_date = date(
     year=today.year,
     month=today.month,
     day=today.day,
 )
-request = TransactionsHistory.Request(
-    from_date=from_date,
-    to_date=to_date,
-)
 
 # FETCH DATA
 transactions_history = trading_api.get_transactions_history(
-    request=request,
+    transaction_request=HistoryRequest(
+        from_date=from_date,
+        to_date=to_date,
+    ),
     raw=True,
 )
 

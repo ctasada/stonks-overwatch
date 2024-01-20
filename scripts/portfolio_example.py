@@ -1,12 +1,12 @@
 # IMPORTATIONS
 import json
 import logging
-import degiro_connector.core.helpers.pb_handler as pb_handler
 import pandas as pd
 
 # from IPython.display import display
 from degiro_connector.trading.api import API as TradingAPI
-from degiro_connector.trading.models.trading_pb2 import Credentials, Update
+from degiro_connector.trading.models.credentials import Credentials
+from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
 
 # SETUP LOGGING LEVEL
 logging.basicConfig(level=logging.DEBUG)
@@ -35,17 +35,14 @@ trading_api = TradingAPI(credentials=credentials)
 trading_api.connect()
 
 # SETUP REQUEST
-request_list = Update.RequestList()
-request_list.values.extend([
+update = trading_api.get_update(request_list=[
     # Update.Request(option=Update.Option.ORDERS, last_updated=0),
-    Update.Request(option=Update.Option.PORTFOLIO, last_updated=0),
-    Update.Request(option=Update.Option.TOTALPORTFOLIO, last_updated=0),
-])
+    UpdateRequest(option=UpdateOption.PORTFOLIO, last_updated=0),
+    UpdateRequest(option=UpdateOption.TOTAL_PORTFOLIO, last_updated=0),
+], raw=False)
 
-update = trading_api.get_update(request_list=request_list, raw=False)
-update_dict = pb_handler.message_to_dict(message=update)
-
-print(json.dumps(update_dict, indent = 4))
+# print(update)
+# print(json.dumps(update, indent = 4))
 
 # update_dict['portfolio']['values] => 
 # {
@@ -91,8 +88,8 @@ print(json.dumps(update_dict, indent = 4))
 # for value in update_dict['portfolio']['values']:
 
 result = dict (
-    totalCash = update_dict['total_portfolio']['values']['totalCash'],
-    totalDepositWithdrawal = update_dict['total_portfolio']['values']['totalDepositWithdrawal'],
+    totalCash = update['totalPortfolio']['value']['totalCash'],
+    totalDepositWithdrawal = update['totalPortfolio']['value']['totalDepositWithdrawal'],
 )
 
 print(json.dumps(result, indent = 4))

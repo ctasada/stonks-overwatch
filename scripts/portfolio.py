@@ -1,17 +1,18 @@
 # IMPORTATIONS
 import json
 import logging
-import degiro_connector.core.helpers.pb_handler as pb_handler
 import pandas as pd
 
 from degiro_connector.trading.api import API as TradingAPI
-from degiro_connector.trading.models.trading_pb2 import Credentials, ProductsInfo, Update
+from degiro_connector.trading.models.credentials import Credentials
+from degiro_connector.trading.models.product import ProductInfo
+from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
 
 # SETUP LOGGING LEVEL
 logging.basicConfig(level=logging.DEBUG)
 
 # SETUP CONFIG DICT
-with open('../config/config.json') as config_file:
+with open('./config/config.json') as config_file:
     config = json.load(config_file)
 
 # SETUP CREDENTIALS
@@ -34,50 +35,42 @@ trading_api = TradingAPI(credentials=credentials)
 trading_api.connect()
 
 # SETUP REQUEST
-request_list = Update.RequestList()
-request_list.values.extend([
-    Update.Request(option=Update.Option.PORTFOLIO, last_updated=0),
-])
-
-update = trading_api.get_update(request_list=request_list, raw=False)
-update_dict = pb_handler.message_to_dict(message=update)
+update = trading_api.get_update(request_list=[
+    UpdateRequest(option=UpdateOption.PORTFOLIO, last_updated=0),
+], raw=True)
 
 products_ids = []
 
 # ITERATION OVER THE TRANSACTIONS TO OBTAIN THE PRODUCTS
-for portfolio in update_dict['portfolio']['values']:
+for portfolio in update['portfolio']['value']:
     # Seems that 'FLATEX_EUR' and 'FLATEX_USD' are returned
     if portfolio['id'].isnumeric():
         products_ids.append(int(portfolio['id']))
 
-# SETUP REQUEST
-request = ProductsInfo.Request()
-request.products.extend(list(set(products_ids)))
-
 # FETCH DATA
 products_info = trading_api.get_products_info(
-    request=request,
+    product_list=list(set(products_ids)),
     raw=True,
 )
 
 # DEBUG Values
 #print(json.dumps(update_dict, indent = 4))
-# print(json.dumps(products_info, indent = 4))
+print(json.dumps(products_info, indent = 4))
 
 myPortfolio = []
 
-for portfolio in update_dict['portfolio']['values']:
+for portfolio in update['portfolio']['value']:
     if portfolio['id'].isnumeric():
         info = products_info['data'][portfolio['id']]
         myPortfolio.append(
             dict(
                 name=info['name'],
                 symbol = info['symbol'],
-                size = portfolio['size'],
-                price = portfolio['price'],
+                # size = portfolio['size'],
+                # price = portfolio['closePrice'],
                 currency = info['currency'],
-                breakEvenPrice = portfolio['breakEvenPrice'], # GAK: Average Purchase Price                
-                value = portfolio['value'],
+                # breakEvenPrice = portfolio['breakEvenPrice'], # GAK: Average Purchase Price                
+                # value = portfolio['value'],
                 isin = info['isin'],
             )
         )

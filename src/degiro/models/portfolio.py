@@ -1,8 +1,7 @@
 from degiro.utils.degiro import DeGiro
 from degiro.utils.localization import LocalizationUtility
 
-import degiro_connector.core.helpers.pb_handler as pb_handler
-from degiro_connector.trading.models.trading_pb2 import Update
+from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
 
 import json
 
@@ -10,18 +9,14 @@ class PortfolioModel:
 
     def get_portfolio(self):
         # SETUP REQUEST
-        request_list = Update.RequestList()
-        request_list.values.extend([
-            Update.Request(option=Update.Option.PORTFOLIO, last_updated=0),
-        ])
-
-        update = DeGiro.get_client().get_update(request_list=request_list, raw=False)
-        update_dict = pb_handler.message_to_dict(message=update)
+        update = DeGiro.get_client().get_update(request_list=[
+            UpdateRequest(option=UpdateOption.PORTFOLIO, last_updated=0),
+        ], raw=True)
 
         products_ids = []
 
         # ITERATION OVER THE TRANSACTIONS TO OBTAIN THE PRODUCTS
-        for portfolio in update_dict['portfolio']['values']:
+        for portfolio in update['portfolio']['value']:
             # Seems that 'FLATEX_EUR' and 'FLATEX_USD' are returned
             if portfolio['id'].isnumeric():
                 products_ids.append(int(portfolio['id']))
@@ -36,7 +31,13 @@ class PortfolioModel:
 
         myPortfolio = []
 
-        for portfolio in update_dict['portfolio']['values']:
+        for tmp in update['portfolio']['value']:
+            # Portfolio has a weird structure, lets convert it here
+            portfolio = {}
+            for value in tmp['value']:
+                if value.get("value") is not None:
+                    portfolio[value['name']] = value['value']
+            # Finish conversion
             if portfolio['id'].isnumeric():
                 info = products_info[portfolio['id']]
                 company_profile = self.__get_company_profile(info['isin'])
@@ -85,20 +86,26 @@ class PortfolioModel:
             portfolioTotalValue += equity['value']
         
         # SETUP REQUEST
-        request_list = Update.RequestList()
-        request_list.values.extend([
-            Update.Request(option=Update.Option.TOTALPORTFOLIO, last_updated=0),
-        ])
-
-        update = DeGiro.get_client().get_update(request_list=request_list)
-        update_dict = pb_handler.message_to_dict(message=update)
+        update = DeGiro.get_client().get_update(
+            request_list=[
+                UpdateRequest(option=UpdateOption.TOTAL_PORTFOLIO, last_updated=0),
+            ],
+            raw=True,
+        )
 
         baseCurrencySymbol = LocalizationUtility.get_base_currency_symbol()
         # print(json.dumps(update_dict, indent = 4))
 
+        # Portfolio has a weird structure, lets convert it here
+        tmp_total_portfolio = {}
+        for value in update['totalPortfolio']['value']:
+            if value.get("value") is not None:
+                tmp_total_portfolio[value['name']] = value['value']
+        # Finish conversion
+
         total_portfolio = {
-            "totalDepositWithdrawal": LocalizationUtility.format_money_value(value = update_dict['total_portfolio']['values']['totalDepositWithdrawal'], currencySymbol = baseCurrencySymbol),
-            "totalCash": LocalizationUtility.format_money_value(value = update_dict['total_portfolio']['values']['totalCash'], currencySymbol = baseCurrencySymbol),
+            "totalDepositWithdrawal": LocalizationUtility.format_money_value(value = tmp_total_portfolio['totalDepositWithdrawal'], currencySymbol = baseCurrencySymbol),
+            "totalCash": LocalizationUtility.format_money_value(value = tmp_total_portfolio['totalCash'], currencySymbol = baseCurrencySymbol),
             "currentValue": LocalizationUtility.format_money_value(value = portfolioTotalValue, currencySymbol = baseCurrencySymbol)
         }
 
