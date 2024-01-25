@@ -9,29 +9,16 @@ docker compose up
 ```
 
 ### Without Docker
-```shell
-python3 -m venv venv
-source venv/bin/activate
-# For Windows
-.\venv\Scripts\activate.bat
-```
 
 Install Dependencies
 ```shell
-pip install -r requirements.txt
+poetry install
 ```
 
 Run the server
 ```shell
-python src/manage.py runserver
+poetry run src/manage.py runserver
 open http://127.0.0.1:8000/degiro
-```
-
-## Update Dependencies
-```shell
-pip list --outdated
-pip install <dependency> -U
-pip freeze > requirements.txt
 ```
 
 ## Documentation
