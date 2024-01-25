@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "stocks-portfolio"
+version = "0.1.0"
+description = "DeGiro Stocks Portfolio"
+authors = ["carlos.tasada <carlos.tasada@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+degiro-connector = "^3.0.16"
+django = "^5.0.1"
+pycountry = "^23.12.11"
+currency-symbols = "^2.0.3"
+pandas = "^2.2.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
