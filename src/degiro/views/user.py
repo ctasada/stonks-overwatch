@@ -21,6 +21,7 @@ class User(View):
             "nationality": pycountry.languages.get(alpha_2=clientDetails['firstContact']['nationality']).name,
             "email": clientDetails['email'],
             "language": pycountry.languages.get(alpha_2=clientDetails['language']).name,
+            "displayLanguage": pycountry.languages.get(alpha_2=clientDetails['displayLanguage']).name,
         }
 
         return render(request, 'user.html', context)

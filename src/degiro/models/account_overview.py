@@ -36,7 +36,7 @@ class AccountOverviewModel:
         )
 
         products_ids = []
-        for cash_movement in account_overview.get('data'):
+        for cash_movement in account_overview.get('data').get('cashMovements'):
             if 'productId' in cash_movement:
                 products_ids.append(int(cash_movement['productId']))
 
@@ -45,7 +45,7 @@ class AccountOverviewModel:
         # print(json.dumps(account_overview, indent = 4))
 
         overview = []
-        for cash_movement in account_overview.get('data'):
+        for cash_movement in account_overview.get('data').get('cashMovements'):
             
             stockName = ''
             stockSymbol = ''
@@ -71,14 +71,14 @@ class AccountOverviewModel:
             overview.append(
                 dict(
                     date = LocalizationUtility.format_date_time(cash_movement['date']),
-                    # valueDate = LocalizationUtility.format_date_time(cash_movement['valueDate']),
+                    valueDate = LocalizationUtility.format_date_time(cash_movement['valueDate']),
                     stockName = stockName,
                     stockSymbol = stockSymbol,
-                    # description = cash_movement['description'],
-                    # type = cash_movement['type'],
-                    # typeStr = cash_movement['type'].replace("_", " ").title(),
-                    # currency = cash_movement['currency'],
-                    # change = cash_movement.get('change', ''),
+                    description = cash_movement['description'],
+                    type = cash_movement['type'],
+                    typeStr = cash_movement['type'].replace("_", " ").title(),
+                    currency = cash_movement['currency'],
+                    change = cash_movement.get('change', ''),
                     formatedChange = formatedChange,
                     totalBalance = totalBalance,
                     formatedTotalBalance = formatedTotalBalance,
@@ -94,10 +94,9 @@ class AccountOverviewModel:
         overview = self.get_account_overview()
 
         dividends = []
-        # FIXME
-        # for transaction in overview:
-        #     # We don't include 'Dividendbelasting' because the 'value' seems to already include the taxes
-        #     if (transaction['description'] in ['Dividend', 'Dividendbelasting', 'Vermogenswinst']):
-        #         dividends.append(transaction)
+        for transaction in overview:
+            # We don't include 'Dividendbelasting' because the 'value' seems to already include the taxes
+            if (transaction['description'] in ['Dividend', 'Dividendbelasting', 'Vermogenswinst']):
+                dividends.append(transaction)
 
         return dividends
