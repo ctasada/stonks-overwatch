@@ -13,6 +13,7 @@ django = "^5.0.1"
 pycountry = "^23.12.11"
 currency-symbols = "^2.0.3"
 pandas = "^2.2.0"
+requests-cache = "^1.1.1"
 
 [build-system]
 requires = ["poetry-core"]
