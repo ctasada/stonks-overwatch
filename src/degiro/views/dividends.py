@@ -2,12 +2,14 @@ from django.views import View
 from django.shortcuts import render
 import datetime
 import pandas as pd
+import logging
 
 from degiro.models.account_overview import AccountOverviewModel
 from degiro.utils.localization import LocalizationUtility
 
 import json
 
+logger = logging.getLogger(__name__)
 class Dividends(View):
 
     DATETIME_PATTERN = '%Y-%m-%d %H:%M:%S'
@@ -20,15 +22,21 @@ class Dividends(View):
         dividendsOverview = self.accountOverview.get_dividends()
 
         dividends = self.get_dividends_calendar(dividendsOverview)
+        dividendsGrowth = {}
 
         for transaction in dividendsOverview:
             # Group dividends by month. We may only need the dividend name and amount
-            month = self.format_date_to_month(transaction['date'])
+            monthYear = self.format_date_to_month_year(transaction['date'])
+            monthNumber = int(self.format_date_to_month_number(transaction['date']))
+            year = int(self.format_date_to_year(transaction['date']))
+
+            if year not in dividendsGrowth:
+                dividendsGrowth[year] = [0] * 12
 
             day = self.get_date_day(transaction['date'])
             stock = transaction['stockSymbol']
 
-            monthEntry = dividends.setdefault(month, dict())
+            monthEntry = dividends.setdefault(monthYear, dict())
             days = monthEntry.setdefault("days", dict())
             dayEntry = days.setdefault(day, dict())
             stockEntry = dayEntry.setdefault(stock, dict())
@@ -54,8 +62,14 @@ class Dividends(View):
             monthEntry["total"] = total + transaction['change']
             monthEntry["formatedTotal"] = LocalizationUtility.format_money_value(value = monthEntry['total'], currency = transaction['currency'])
 
+            dividendsGrowth[year][monthNumber - 1] = round(monthEntry["total"], 2)
+
+        # We want the Dividends Growth chronologically sorted
+        dividendsGrowth = dict(sorted(dividendsGrowth.items(), key=lambda item: item[0]))
+
         context = {
-            'dividends': dividends
+            'dividendsCalendar': dividends,
+            'dividendsGrowth': dividendsGrowth
         }
         
         return render(request, 'dividends.html', context)
@@ -77,10 +91,18 @@ class Dividends(View):
 ))
         return dividends
 
-    def format_date_to_month(self, value: str):
+    def format_date_to_month_year(self, value: str):
         time = datetime.datetime.strptime(value, self.DATETIME_PATTERN)
         return time.strftime('%B %Y')
 
     def get_date_day(self, value: str):
         time = datetime.datetime.strptime(value, self.DATETIME_PATTERN)
         return time.strftime('%d')
+    
+    def format_date_to_month_number(self, value: str):
+        time = datetime.datetime.strptime(value, self.DATETIME_PATTERN)
+        return time.strftime('%m')
+
+    def format_date_to_year(self, value: str):
+        time = datetime.datetime.strptime(value, self.DATETIME_PATTERN)
+        return time.strftime('%Y')

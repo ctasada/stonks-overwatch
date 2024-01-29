@@ -2,10 +2,20 @@
 {% load custom_tags %}
 
 {% block content %}
+<!-- ChartJS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-autocolors"></script>
+  
 <h4 class="mb-3">Dividends</h4>
 <div class="container-fluid">
-    <div class="row"" style="background-color:#dbf5ff">
-        {% for key, value in dividends.items %}
+    <div class="row">
+        <div id="container" style="width: 100%;">
+            <canvas id="dividends-growth"></canvas>
+        </div>
+    </div>
+    <div class="row"><h5 class="mb-4">Calendar</h4></div>
+    <div class="row" style="background-color:#dbf5ff">
+        {% for key, value in dividendsCalendar.items %}
             <div class="col-sm-4 border">
                 <div class="row-sm mt-1 fs-5">
                     {{ key }}
@@ -44,4 +54,47 @@
         {% endfor %}
     </div>
 </div>
+
+<script>
+    // Customize colors with https://www.npmjs.com/package/@seahsky/chartjs-plugin-autocolors#customize
+    const autocolors = window['chartjs-plugin-autocolors'];
+
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const data = {
+        labels: months,
+        datasets: [
+            {% for key, value in dividendsGrowth.items %}
+            {
+                label: "{{ key }}",
+                data: {{ value }},
+                borderWidth: 1
+            },
+            {% endfor %}
+        ]
+    };
+    const config = {
+        type: 'bar',
+        data: data,
+        plugins: [
+            autocolors
+        ],
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: false,
+                }
+            }
+        },
+    };
+    let chart = new Chart(document.getElementById("dividends-growth").getContext("2d"), config);
+</script>
 {% endblock %}
