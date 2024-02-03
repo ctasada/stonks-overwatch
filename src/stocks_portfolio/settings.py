@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'degiro.apps.DegiroConfig',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
