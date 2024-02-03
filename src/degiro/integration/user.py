@@ -1,7 +1,7 @@
 from degiro.utils.degiro import DeGiro
 import json
 
-class UserModel:
+class UserData:
     clientDetails = None
 
     def get_details(self):

@@ -5,7 +5,7 @@ from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
 
 import json
 
-class PortfolioModel:
+class PortfolioData:
 
     def get_portfolio(self):
         # SETUP REQUEST

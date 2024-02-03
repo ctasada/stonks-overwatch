@@ -6,7 +6,7 @@ from datetime import date
 import json
 import logging
 
-class TransactionsModel:
+class TransactionsData:
     def __init__(self):
         self.deGiro = DeGiro()
 
