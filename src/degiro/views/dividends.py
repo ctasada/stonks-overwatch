@@ -4,7 +4,7 @@ import datetime
 import pandas as pd
 import logging
 
-from degiro.models.account_overview import AccountOverviewModel
+from degiro.integration.account_overview import AccountOverviewData
 from degiro.utils.localization import LocalizationUtility
 
 import json
@@ -15,7 +15,7 @@ class Dividends(View):
     DATETIME_PATTERN = '%Y-%m-%d %H:%M:%S'
 
     def __init__(self):
-        self.accountOverview = AccountOverviewModel()
+        self.accountOverview = AccountOverviewData()
 
     def get(self, request):
         # We don't need to sort the dict, since it's already coming sorted in DESC date order

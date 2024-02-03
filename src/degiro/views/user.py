@@ -2,13 +2,13 @@ from django.views import View
 from django.shortcuts import render
 import pycountry
 
-from degiro.models.user import UserModel
+from degiro.integration.user import UserData
 
 import json
 
 class User(View):
     def __init__(self):
-        self.user = UserModel()
+        self.user = UserData()
 
     def get(self, request):
         clientDetails = self.user.get_details()

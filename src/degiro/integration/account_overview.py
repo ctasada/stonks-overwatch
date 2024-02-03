@@ -2,14 +2,12 @@ from typing import overload
 from degiro.utils.degiro import DeGiro
 from degiro.utils.localization import LocalizationUtility
 
-from degiro_connector.trading.api import API as TradingAPI
-from degiro_connector.trading.models.credentials import Credentials
 from degiro_connector.trading.models.account import OverviewRequest
 
 from datetime import date
 import json
 
-class AccountOverviewModel:
+class AccountOverviewData:
 
     def get_account_overview(self):
         # SETUP REQUEST
