@@ -16,10 +16,9 @@ class Migration(migrations.Migration):
             fields=[
                 ('date', models.DateTimeField()),
                 ('valueDate', models.DateTimeField()),
-                ('id', models.IntegerField(primary_key=True, serialize=False)),
                 ('description', models.CharField(max_length=200)),
                 ('currency', models.CharField(max_length=3)),
-                ('balance', models.DecimalField(decimal_places=2, max_digits=10)),
+                ('change', models.DecimalField(decimal_places=2, max_digits=10)),
                 ('type', models.CharField(max_length=200)),
             ],
         ),
