@@ -1,29 +1,34 @@
 # IMPORTATIONS
 import json
 import csv
+import pandas as pd
 
-from datetime import date, datetime
+from datetime import date, datetime, time, timedelta
+from django.forms import model_to_dict
 
 from degiro.utils.degiro import DeGiro
 from degiro.models import CashMovements
 
 from degiro_connector.trading.models.account import OverviewRequest
 
+## Obtains the latest update from the DB and increases to next day or defaults to January 2020
+def get_import_from_date():
+    try:
+        entry = CashMovements.objects.all().order_by('-date').first()
+        if entry is not None:
+            oldest_day = model_to_dict( entry )['date']
+            oldest_day += timedelta(days=1)
+            return datetime.combine(oldest_day, time.min)
+    except:
+        print("Something went wrong, defaulting to oldest date")
+
+    return date(year=2020, month=1, day=1)
+
 ## Import Account data from DeGiro ##
-def get_cash_movements(file_path):
+def get_cash_movements(from_date, json_file_path):
     trading_api = DeGiro.get_client()
 
-    # SETUP REQUEST
-    from_date = date(
-        year=2020,
-        month=1,
-        day=1,
-    )
-
-    request = OverviewRequest(
-        from_date=from_date,
-        to_date=date.today(),
-    )
+    request = OverviewRequest(from_date=from_date, to_date=date.today())
 
     # FETCH DATA
     account_overview = trading_api.get_account_overview(
@@ -32,64 +37,72 @@ def get_cash_movements(file_path):
     )
 
     ## Save the JSON to a file
-    data_file = open(file_path, 'w')
+    data_file = open(json_file_path, 'w')
     data_file.write(json.dumps(account_overview, indent = 4))
     data_file.close()
 
 ## ---------------------- ##
 
-## Convert Data to CSV ##
-def convert_json_to_csv(json_file_path, csv_file_path):
+def transform_json(json_file_path, output_file_path):
     with open(json_file_path) as json_file:
         data = json.load(json_file)
 
-    cashMovements = data['data']['cashMovements']
+    # Use pd.json_normalize to convert the JSON to a DataFrame
+    df = pd.json_normalize(data['data']['cashMovements'], sep='_')
+    # Fix id values format after Pandas
+    for col in ['productId', 'id']:
+        df[col] = df[col].apply(lambda x: None if pd.isnull(x) else str(x).replace('.0', ''))
 
-    # now we will open a file for writing
-    data_file = open(csv_file_path, 'w')
-    
-    # create the csv writer object
-    csv_writer = csv.writer(data_file)
+    # Set the index explicitly
+    df.set_index('date', inplace=True)
 
-    # The JSON is not consistent, some entries contain different fields
-    header = ['date', 'valueDate', 'description', 'currency', 'change', 'type']
-    # Writing headers of CSV file
-    csv_writer.writerow(header)
+    # Sort the DataFrame by the 'date' column
+    df = df.sort_values(by='date')
 
-    for entry in cashMovements:
-        row = []
-        # Some values we don't want to import, so lets skip them
-        # - CASH_FUND_TRANSACTION ?????
-        # - PAYMENT is allways followed by a CASH_TRANSACTION
-        # - FLATEX_CASH_SWEEP is detailing the sweep to the account, so this value is kind of duplicated
-        if (entry['type'] in ['CASH_FUND_TRANSACTION', 'FLATEX_CASH_SWEEP', 'PAYMENT']):
-            print(entry)
-            continue
+    transformed_json = json.loads(df.reset_index().to_json(orient='records'))
 
-        # Writing data of CSV file
-        for field in header:
-            row.append(entry.get(field))
-        
-        csv_writer.writerow(row)
-
+    # ## Save the JSON to a file
+    data_file = open(output_file_path, 'w')
+    data_file.write(json.dumps(transformed_json, indent = 4))
     data_file.close()
 
+
+## Convert Data to CSV ##
+def convert_json_to_csv(json_file_path, csv_file_path):
+    # Converting JSON data to a pandas DataFrame
+    df = pd.read_json(json_file_path)
+    df.to_csv(csv_file_path, index=False)
+
 def import_cash_movements(file_path):
+    conv = lambda i : i or None
     with open(file_path, 'r') as file:
         reader = csv.DictReader(file)
         for row in reader:
-            CashMovements.objects.create(
-                date=datetime.strptime(row['date'], '%Y-%m-%dT%H:%M:%S%z').date(),
-                valueDate=datetime.strptime(row['valueDate'], '%Y-%m-%dT%H:%M:%S%z').date(),
-                description=row['description'],
-                currency=row['currency'],
-                type=row['type'],
-                change=row['change']
-            )
+            try :
+                CashMovements.objects.create(
+                    date=datetime.strptime(row['date'], '%Y-%m-%dT%H:%M:%S%z'),
+                    valueDate=datetime.strptime(row['valueDate'], '%Y-%m-%dT%H:%M:%S%z'),
+                    description=row['description'],
+                    productId=row.get('productId'),
+                    currency=row['currency'],
+                    type=row['type'],
+                    change=conv(row.get('change', None)),
+                    balance_unsettledCash=row.get('balance_unsettledCash', None),
+                    balance_flatexCash=row.get('balance_flatexCash', None),
+                    balance_cashFund=row.get('balance_cashFund', None),
+                    balance_total=row.get('balance_total', None),
+                    exchangeRate=conv(row.get('exchangeRate', None)),
+                    orderId=row.get('orderId', None)
+                )
+            except Exception as error:
+                print(f"Cannot import row: {row}")
+                print("Exception: ", error)
 
 def run():
-    # get_cash_movements('account.json')
-    convert_json_to_csv('account.json', 'account.csv')
+    from_date = get_import_from_date()
+    get_cash_movements(from_date, 'account.json')
+    transform_json('account.json', 'account_transform.json')
+    convert_json_to_csv('account_transform.json', 'account.csv')
     import_cash_movements('account.csv')
 
 if __name__ == '__main__':
