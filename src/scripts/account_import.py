@@ -79,11 +79,16 @@ def import_cash_movements(file_path):
         reader = csv.DictReader(file)
         for row in reader:
             try :
+                # When Pandas creates the CSV finds out that it's a number and tries to be "smart"
+                productId = None
+                if (row.get('productId')):
+                    productId = row.get('productId').split('.')[0]
+
                 CashMovements.objects.create(
                     date=datetime.strptime(row['date'], '%Y-%m-%dT%H:%M:%S%z'),
                     valueDate=datetime.strptime(row['valueDate'], '%Y-%m-%dT%H:%M:%S%z'),
                     description=row['description'],
-                    productId=row.get('productId'),
+                    productId=productId,
                     currency=row['currency'],
                     type=row['type'],
                     change=conv(row.get('change', None)),
