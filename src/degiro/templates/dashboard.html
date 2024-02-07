@@ -2,55 +2,102 @@
 {% load custom_tags %}
 
 {% block content %}
-<h4 class="mb-3">Dashboard</h4>
-<div id="container" style="width: 50%;">
-  <canvas id="sectors-chart"></canvas>
-</div>
+  <h4 class="mb-3">Dashboard</h4>
+  <div id="container">
+    <div class="row">
+      <canvas id="growth-chart"></canvas>
+    </div>
+    <div class="row">
+      <canvas id="sectors-chart"></canvas>
+    </div>
+  </div>
 
   <!-- ChartJS -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1"></script>
   <script src="https://cdn.jsdelivr.net/npm/@seahsky/chartjs-plugin-autocolors"></script>
 
   <script>
     // Customize colors with https://www.npmjs.com/package/@seahsky/chartjs-plugin-autocolors#customize
     const autocolors = window['@seahsky/chartjs-plugin-autocolors'];
 
-    let currencySymbol = "{{ currencySymbol }}";
+    let currencySymbol = "{{ sectors.currencySymbol }}";
     let valuesDict = [
       [
-      {% for stock in stocks.labels %}
+      {% for stock in sectors.stocks.labels %}
         {
           "label" : "{{ stock }}",
-          "value" : {{ stocks.values|index:forloop.counter0 }},
+          "value" : {{ sectors.stocks.values|index:forloop.counter0 }},
         },
       {% endfor %}
       ], [
-      {% for sector in sectors.labels %}
+      {% for sector in sectors.sectors.labels %}
         {
           "label" : "{{ sector }}",
-          "value" : {{ sectors.values|index:forloop.counter0 }},
+          "value" : {{ sectors.sectors.values|index:forloop.counter0 }},
         },
       {% endfor %}
       ],
     ];
 
-    const data = {
-      labels: {{ sectors.labels|safe }},
+    const dataGrowth = {
+      datasets: [{
+            label: 'Cash Contributions',
+            data: {{ growth.cash_contributions|safe }},
+            stepped: true,
+        }],
+    };
+
+    const configGrowth = {
+      type: 'line',
+      data: dataGrowth,
+      options: {
+        responsive: true,
+        scales: {
+            x: {
+                type: 'time',
+                max: new Date(),
+                time: {
+                    unit: 'month',
+                    round: 'day',
+                }
+            },
+            y: {
+						  beginAtZero: true,
+					  }
+        },
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          title: {
+            display: true,
+            text: 'Portfolio Growth'
+          }
+        }
+      },
+    };
+
+    let growthChart = new Chart(document.getElementById("growth-chart").getContext("2d"), configGrowth);
+
+    const dataSectors = {
+      labels: {{ sectors.sectors.labels|safe }},
       datasets: [
         {
-          data: {{ stocks.values }},
+          data: {{ sectors.stocks.values }},
           borderWidth: 1,
         },
         {
-          data: {{ sectors.values }},
+          data: {{ sectors.sectors.values }},
           borderWidth: 2,
         }
       ]
     };
 
-    const config = {
+    const configSectors = {
       type: 'doughnut',
-      data: data,
+      data: dataSectors,
       plugins: [
         autocolors
       ],
@@ -84,6 +131,6 @@
       },
     };
 
-    let chart = new Chart(document.getElementById("sectors-chart").getContext("2d"), config);
+    let doughnutSectorsChart = new Chart(document.getElementById("sectors-chart").getContext("2d"), configSectors);
   </script>
 {% endblock %}

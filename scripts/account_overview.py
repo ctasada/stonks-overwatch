@@ -1,8 +1,10 @@
 # IMPORTATIONS
 import common
 import json
+import numpy as np
+import pandas as pd
 
-from datetime import date
+from datetime import date, datetime
 
 from degiro_connector.trading.api import API as TradingAPI
 from degiro_connector.trading.models.credentials import Credentials
@@ -30,10 +32,49 @@ account_overview = trading_api.get_account_overview(
 
 print(json.dumps(account_overview, indent = 4))
 
+cash_contributions = []
+
 # DISPLAY CASH MOVEMENTS
-# for cash_movement in account_overview.get('data').get('cashMovements'):
-#     if cash_movement['description'] in ['Dividend', 'Dividendbelasting']:
-#         for key, value in cash_movement.items():
-#             print(key, ' : ', value)
+# FIXME: Money from Dividends is not yet included.
+# print(json.dumps(account_overview.get('data').get('cashMovements'), indent = 4))
+for cash_movement in account_overview.get('data').get('cashMovements'):
+    if cash_movement['type'] in ['CASH_TRANSACTION']:
+        if 'productId' not in cash_movement:
+            if cash_movement['currency'] == 'EUR':
+                cash_contributions.append(
+                    dict(
+                        date = pd.to_datetime(cash_movement['date']).to_period('D'),
+                        cash = cash_movement['change'],
+                    )
+                )
+    if cash_movement['type'] in ['FLATEX_CASH_SWEEP']:
+        if 'productId' in cash_movement:
+            cash_contributions.append(
+                dict(
+                    date = pd.to_datetime(cash_movement['date']).to_period('D'),
+                    cash = cash_movement['change'],
+                )
+            )
+
+# print(json.dumps(cash_contributions, indent = 4))
 
 trading_api.logout()
+
+df = pd.DataFrame(columns=['date', 'cash'])
+
+# create a DataFrame
+df = pd.concat([df, pd.DataFrame(cash_contributions)], ignore_index=True)
+
+# Set the index explicitly
+df.set_index('date', inplace=True)
+
+# Sort the DataFrame by the 'date' column
+df = df.sort_values(by='date')
+
+# Convert the index to datetime.date and group by day
+result = df.groupby(df.index)['cash'].sum().reset_index()
+
+# Calculate cumulative sum for the 'cash' column
+df['cumulative_cash'] = df['cash'].cumsum()
+
+print(df)
