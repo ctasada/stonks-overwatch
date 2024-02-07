@@ -1,6 +1,6 @@
 from degiro.utils.degiro import DeGiro
 from currency_symbols import CurrencySymbols
-import datetime
+from datetime import datetime
 
 class LocalizationUtility(object):
     # Get user's base currency
@@ -21,5 +21,10 @@ class LocalizationUtility(object):
 
     @staticmethod
     def format_date_time(value: str):
-        time = datetime.datetime.strptime(value, '%Y-%m-%dT%H:%M:%S%z')
+        time = datetime.strptime(value, '%Y-%m-%dT%H:%M:%S%z')
         return time.strftime('%Y-%m-%d %H:%M:%S')
+    
+    @staticmethod
+    def convert_datetime_to_date(value: str):
+        time = datetime.strptime(value, '%Y-%m-%dT%H:%M:%S%z')
+        return time.strftime('%Y-%m-%d')

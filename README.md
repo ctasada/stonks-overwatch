@@ -69,6 +69,8 @@ poetry run src/manage.py runscript account_import
         Totale W/V € - Gain/Loss Total (Realized + unrealized) - totalPl
 - [ ] Would be interesting to add filters to the Account Overview page and aggregate
 - [ ] Add graph with Portfolio Cumulative P&L / Cumulative Net Contributions / Portfolio NAV (https://www.investopedia.com/terms/n/nav.asp)
+- [ ] Check migration from ChartJS to https://plotly.com/javascript/
+- [ ] BUG: Calculated Cash Balance is 26 cents larger (see src/scripts/account_report.py)
 
 ## Data Structure
 

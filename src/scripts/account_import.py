@@ -12,7 +12,7 @@ from degiro.models import CashMovements
 from degiro_connector.trading.models.account import OverviewRequest
 
 ## Obtains the latest update from the DB and increases to next day or defaults to January 2020
-def get_import_from_date():
+def get_import_from_date() -> date:
     try:
         entry = CashMovements.objects.all().order_by('-date').first()
         if entry is not None:
@@ -25,7 +25,7 @@ def get_import_from_date():
     return date(year=2020, month=1, day=1)
 
 ## Import Account data from DeGiro ##
-def get_cash_movements(from_date, json_file_path):
+def get_cash_movements(from_date, json_file_path) -> None:
     trading_api = DeGiro.get_client()
 
     request = OverviewRequest(from_date=from_date, to_date=date.today())
@@ -43,7 +43,7 @@ def get_cash_movements(from_date, json_file_path):
 
 ## ---------------------- ##
 
-def transform_json(json_file_path, output_file_path):
+def transform_json(json_file_path, output_file_path) -> None:
     with open(json_file_path) as json_file:
         data = json.load(json_file)
 
@@ -68,12 +68,12 @@ def transform_json(json_file_path, output_file_path):
 
 
 ## Convert Data to CSV ##
-def convert_json_to_csv(json_file_path, csv_file_path):
+def convert_json_to_csv(json_file_path, csv_file_path) -> None:
     # Converting JSON data to a pandas DataFrame
     df = pd.read_json(json_file_path)
     df.to_csv(csv_file_path, index=False)
 
-def import_cash_movements(file_path):
+def import_cash_movements(file_path) -> None:
     conv = lambda i : i or None
     with open(file_path, 'r') as file:
         reader = csv.DictReader(file)

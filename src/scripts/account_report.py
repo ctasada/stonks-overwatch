@@ -1,3 +1,4 @@
+import json
 import pandas as pd
 from datetime import date, datetime, time, timedelta
 
@@ -14,7 +15,7 @@ def dictfetchall(cursor):
     columns = [col[0] for col in cursor.description]
     return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
-def calculate_cash_account():
+def calculate_cash_account() -> None:
     # FIXME: the total value seems to be 24 cents larger :/
     with connection.cursor() as cursor:
         cursor.execute(
@@ -30,7 +31,7 @@ def calculate_cash_account():
     
     print (f"Calculated Cash Account = {total[0]}")
 
-def calculate_cash_contributions():
+def calculate_cash_contributions() -> None:
     # FIXME: DeGiro doesn't a consistent description or type. Missing the new value for 'Refund'
     with connection.cursor() as cursor:
         cursor.execute(
@@ -50,9 +51,20 @@ def calculate_cash_contributions():
     print(df)
     print (f"Calculated Cash Contributions = {total}")
 
+    # Remove hours and keep only the day
+    df['date'] = pd.to_datetime(df['date']).dt.date
+    # Group by day, adding the values
+    df.set_index('date', inplace=True)
+    df = df.sort_values(by='date')
+    df = df.groupby(df.index)['change'].sum().reset_index()
+    # Do the cummulative sum
+    df['contributed'] = df['change'].cumsum()
+    print(df)
+
 def run():
     calculate_cash_account()
     calculate_cash_contributions()
+    # TODO: Calculate Expenses
     # TODO: Calculate Dividends
 
 if __name__ == '__main__':
