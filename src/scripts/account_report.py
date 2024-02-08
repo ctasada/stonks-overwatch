@@ -1,19 +1,8 @@
-import json
 import pandas as pd
-from datetime import date, datetime, time, timedelta
 
-from django.db.models import Sum
 from django.db import connection
 from django.forms import model_to_dict
-from degiro.models import CashMovements
-
-def dictfetchall(cursor):
-    """
-    Return all rows from a cursor as a dict.
-    Assume the column names are unique.
-    """
-    columns = [col[0] for col in cursor.description]
-    return [dict(zip(columns, row)) for row in cursor.fetchall()]
+from degiro.utils.db_utils import dictfetchall
 
 def calculate_cash_account() -> None:
     # FIXME: the total value seems to be 24 cents larger :/
