@@ -1,6 +1,5 @@
-# IMPORTATIONS
 import json
-import csv
+import os
 import pandas as pd
 
 from datetime import date, datetime, time, timedelta
@@ -11,10 +10,16 @@ from degiro.models import CashMovements
 
 from degiro_connector.trading.models.account import OverviewRequest
 
+import_folder = './import'
+
+def init():
+    if not os.path.exists(import_folder):
+        os.makedirs(import_folder)
+
 ## Obtains the latest update from the DB and increases to next day or defaults to January 2020
 def get_import_from_date() -> date:
     try:
-        entry = CashMovements.objects.all().order_by('-date').first()
+        entry = CashMovements.objects.all().order_by('date').first()
         if entry is not None:
             oldest_day = model_to_dict( entry )['date']
             oldest_day += timedelta(days=1)
@@ -66,49 +71,37 @@ def transform_json(json_file_path, output_file_path) -> None:
     data_file.write(json.dumps(transformed_json, indent = 4))
     data_file.close()
 
-
-## Convert Data to CSV ##
-def convert_json_to_csv(json_file_path, csv_file_path) -> None:
-    # Converting JSON data to a pandas DataFrame
-    df = pd.read_json(json_file_path)
-    df.to_csv(csv_file_path, index=False)
-
 def import_cash_movements(file_path) -> None:
-    conv = lambda i : i or None
-    with open(file_path, 'r') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            try :
-                # When Pandas creates the CSV finds out that it's a number and tries to be "smart"
-                productId = None
-                if (row.get('productId')):
-                    productId = row.get('productId').split('.')[0]
+    with open(file_path) as json_file:
+        data = json.load(json_file)
 
-                CashMovements.objects.create(
-                    date=datetime.strptime(row['date'], '%Y-%m-%dT%H:%M:%S%z'),
-                    valueDate=datetime.strptime(row['valueDate'], '%Y-%m-%dT%H:%M:%S%z'),
-                    description=row['description'],
-                    productId=productId,
-                    currency=row['currency'],
-                    type=row['type'],
-                    change=conv(row.get('change', None)),
-                    balance_unsettledCash=row.get('balance_unsettledCash', None),
-                    balance_flatexCash=row.get('balance_flatexCash', None),
-                    balance_cashFund=row.get('balance_cashFund', None),
-                    balance_total=row.get('balance_total', None),
-                    exchangeRate=conv(row.get('exchangeRate', None)),
-                    orderId=row.get('orderId', None)
-                )
-            except Exception as error:
-                print(f"Cannot import row: {row}")
-                print("Exception: ", error)
+    conv = lambda i : i or None
+    for row in data:
+        try :
+            CashMovements.objects.create(
+                date=datetime.strptime(row['date'], '%Y-%m-%dT%H:%M:%S%z'),
+                valueDate=datetime.strptime(row['valueDate'], '%Y-%m-%dT%H:%M:%S%z'),
+                description=row['description'],
+                productId=row.get('productId'),
+                currency=row['currency'],
+                type=row['type'],
+                change=conv(row.get('change', None)),
+                balance_unsettledCash=row.get('balance_unsettledCash', None),
+                balance_flatexCash=row.get('balance_flatexCash', None),
+                balance_cashFund=row.get('balance_cashFund', None),
+                balance_total=row.get('balance_total', None),
+                exchangeRate=conv(row.get('exchangeRate', None)),
+                orderId=row.get('orderId', None)
+            )
+        except Exception as error:
+            print(f"Cannot import row: {row}")
+            print("Exception: ", error)
 
 def run():
     from_date = get_import_from_date()
-    get_cash_movements(from_date, 'account.json')
-    transform_json('account.json', 'account_transform.json')
-    convert_json_to_csv('account_transform.json', 'account.csv')
-    import_cash_movements('account.csv')
+    get_cash_movements(from_date, f"{import_folder}/account.json")
+    transform_json(f"{import_folder}/account.json", f"{import_folder}/account_transform.json")
+    import_cash_movements(f"{import_folder}/account_transform.json")
 
 if __name__ == '__main__':
     run()
