@@ -71,6 +71,7 @@ poetry run src/manage.py runscript account_import
 - [ ] Add graph with Portfolio Cumulative P&L / Cumulative Net Contributions / Portfolio NAV (https://www.investopedia.com/terms/n/nav.asp)
 - [ ] Check migration from ChartJS to https://plotly.com/javascript/
 - [ ] BUG: Calculated Cash Balance is 26 cents larger (see src/scripts/account_report.py)
+- [ ] Track https://github.com/chartjs/Chart.js/issues/11005
 
 ## Data Structure
 
