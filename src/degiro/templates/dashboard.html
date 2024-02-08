@@ -4,12 +4,16 @@
 {% block content %}
   <h4 class="mb-3">Dashboard</h4>
   <div id="container">
-    <div class="row">
-      <canvas id="growth-chart"></canvas>
+    <div class="row" style="position: relative; height:40vh; width:100vw">
+      <canvas id="growth-chart" height="400"></canvas>
     </div>
     <div class="row">
-      <canvas id="sectors-chart"></canvas>
-    </div>
+      <div class="col-sm"></div>
+      <div class="col-sm" style="position: relative; height:40vh; width:80vw">
+        <canvas id="sectors-chart"></canvas>
+      </div>
+      <div class="col-sm"></div>
+    </div>  
   </div>
 
   <!-- ChartJS -->
