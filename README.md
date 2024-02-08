@@ -30,6 +30,7 @@ Create Database
 ```shell
 poetry run src/manage.py migrate
 poetry run src/manage.py runscript account_import
+poetry run src/manage.py runscript transactions_import
 ```
 
 ## Documentation

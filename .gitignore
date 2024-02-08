@@ -130,3 +130,6 @@ dmypy.json
 config/config.json
 poetry.lock
 http_cache.sqlite
+
+# Ignore folder with imported files
+/import/
