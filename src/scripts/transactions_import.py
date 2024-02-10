@@ -1,7 +1,5 @@
 import json
-import csv
 import os
-import pandas as pd
 
 from datetime import date, datetime, time, timedelta
 from django.forms import model_to_dict
@@ -85,7 +83,7 @@ def import_transactions(file_path) -> None:
 def run():
     init()
     from_date = get_import_from_date()
-    # get_transactions(from_date, f"{import_folder}/transactions.json")
+    get_transactions(from_date, f"{import_folder}/transactions.json")
     import_transactions(f"{import_folder}/transactions.json")
 
 if __name__ == '__main__':
