@@ -29,8 +29,7 @@ poetry run src/manage.py makemigrations degiro
 Create Database
 ```shell
 poetry run src/manage.py migrate
-poetry run src/manage.py runscript account_import
-poetry run src/manage.py runscript transactions_import
+poetry run src/manage.py runscript init_db
 ```
 
 ## Documentation
@@ -73,12 +72,3 @@ poetry run src/manage.py runscript transactions_import
 - [ ] Check migration from ChartJS to https://plotly.com/javascript/
 - [ ] BUG: Calculated Cash Balance is 26 cents larger (see src/scripts/account_report.py)
 - [ ] Track https://github.com/chartjs/Chart.js/issues/11005
-
-## Data Structure
-
-### Account (Overview / Report)
-The list of cash movements. Fields are:
-
-Datum,Tijd,Valutadatum,Product,ISIN,Omschrijving,FX,Mutatie,,Saldo,,Order Id
-Date,Time,Value Date,Product,ISIN,Description,FX,Movement (currency),Movement,Balance (currency),Balance,Order Id
-

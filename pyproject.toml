@@ -9,12 +9,13 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.11"
 degiro-connector = "^3.0.17"
-django = "^5.0.1"
+django = "^5.0.2"
 pycountry = "^23.12.11"
 currency-symbols = "^2.0.3"
 pandas = "^2.2.0"
 requests-cache = "^1.1.1"
 django-extensions = "^3.2.3"
+python-dateutil = "^2.8.2"
 
 [build-system]
 requires = ["poetry-core"]
