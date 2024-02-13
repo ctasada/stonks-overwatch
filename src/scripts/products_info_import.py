@@ -1,9 +1,12 @@
 import json
+import polars as pl
 
 from degiro.utils.degiro import DeGiro
 from degiro.models import ProductInfo
 
 from scripts.transactions_report import get_productIds
+from degiro_connector.quotecast.tools.chart_fetcher import ChartFetcher
+from degiro_connector.quotecast.models.chart import ChartRequest, Interval
 
 import_folder = './import'
 
@@ -62,17 +65,47 @@ def import_products_info(file_path) -> None:
             print(f"Cannot import row: {row}")
             print("Exception: ", error)
 
+def _get_quotation(issueid, period):
+    # Retrieve user_token
+    trading_api = DeGiro.get_client()
+    client_details_table = trading_api.get_client_details()
+    # int_account = client_details_table['data']['intAccount']
+    user_token = client_details_table['data']['id']
+
+    chart_fetcher = ChartFetcher(user_token=user_token)
+    chart_request = ChartRequest(
+        culture="nl-NL",
+        period=period,
+        requestid="1",
+        resolution=Interval.P1D,
+        series=[
+            f"issueid:{issueid}",
+            f"price:issueid:{issueid}",
+        ],
+        tz="Europe/Amsterdam",
+    )
+    chart = chart_fetcher.get_chart(
+        chart_request=chart_request,
+        raw=False,
+    )
+
+    for series in chart.series:
+        if (series.type == 'time'):
+            print(pl.DataFrame(data=series.data, orient="row"))
+
+
 def import_products_quotation(file_path) -> None:
     with open(file_path) as json_file:
         data = json.load(json_file)
 
     for key in data['data']:
         row = data['data'][key]
-        if row.get('vwdIdSecondary'):
-            print(f"{int(row['id'])} - {row['symbol']} - {row.get('vwdIdSecondary')}")
+        issueId = row.get('vwdIdSecondary', row.get('vwdId'))
+        if issueId:
+            quotation = _get_quotation(issueId, Interval.P1M)
         else:
             # FIXME: Some stocks DO NOT return the value for getting the Quotes
-            print(f"{int(row['id'])} - {row['symbol']}")
+            print(f"{int(row['id'])} - {row['symbol']} - {issueId}")
 
 def run():
     # product_ids = get_productIds()
