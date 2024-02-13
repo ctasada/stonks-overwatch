@@ -1,5 +1,14 @@
+"""Imports DeGiro Account information.
+
+This script is intended to be run as a Django script.
+
+Usage:
+    poetry run src/manage.py runscript account_import
+"""
+
+from scripts.commons import IMPORT_FOLDER, TIME_DATE_FORMAT, init, save_to_json
+
 import json
-import os
 import pandas as pd
 
 from datetime import date, datetime, time, timedelta
@@ -10,14 +19,12 @@ from degiro.models import CashMovements
 
 from degiro_connector.trading.models.account import OverviewRequest
 
-import_folder = './import'
-
-def init():
-    if not os.path.exists(import_folder):
-        os.makedirs(import_folder)
-
-## Obtains the latest update from the DB and increases to next day or defaults to January 2020
 def get_import_from_date() -> date:
+    """
+    Returns the latest update from the DB and increases to next day or defaults to January 2020
+    ### Returns:
+        date: the latest update from the DB and increases to next day or defaults to January 2020
+    """
     try:
         entry = CashMovements.objects.all().order_by('date').first()
         if entry is not None:
@@ -29,8 +36,17 @@ def get_import_from_date() -> date:
 
     return date(year=2020, month=1, day=1)
 
-## Import Account data from DeGiro ##
-def get_cash_movements(from_date, json_file_path) -> None:
+def get_cash_movements(from_date: date, json_file_path: str) -> None:
+    """
+    Import Account data from DeGiro. Uses the `get_account_overview` method.
+    ### Parameters
+        * from_date : date
+            - Starting date to import the data
+        * json_file_path : str
+            - Path to the Json file to store the account information
+    ### Returns:
+        None
+    """
     trading_api = DeGiro.get_client()
 
     request = OverviewRequest(from_date=from_date, to_date=date.today())
@@ -42,13 +58,19 @@ def get_cash_movements(from_date, json_file_path) -> None:
     )
 
     ## Save the JSON to a file
-    data_file = open(json_file_path, 'w')
-    data_file.write(json.dumps(account_overview, indent = 4))
-    data_file.close()
+    save_to_json(account_overview, json_file_path)
 
-## ---------------------- ##
-
-def transform_json(json_file_path, output_file_path) -> None:
+def transform_json(json_file_path: str, output_file_path: str) -> None:
+    """
+    Flattens the data from deGiro `get_account_overview` method for easier manipulation when inserting it into the DB.
+    ### Parameters
+        * json_file_path : str
+            - Path to the Json file that stores the account information
+        * output_file_path : str
+            - Path to the Json file to store the flatten data
+    ### Returns:
+        None
+    """
     with open(json_file_path) as json_file:
         data = json.load(json_file)
 
@@ -67,11 +89,17 @@ def transform_json(json_file_path, output_file_path) -> None:
     transformed_json = json.loads(df.reset_index().to_json(orient='records'))
 
     # ## Save the JSON to a file
-    data_file = open(output_file_path, 'w')
-    data_file.write(json.dumps(transformed_json, indent = 4))
-    data_file.close()
+    save_to_json(transformed_json, output_file_path)
 
-def import_cash_movements(file_path) -> None:
+def import_cash_movements(file_path: str) -> None:
+    """
+    Stores the cash movements into the DB.
+    ### Parameters
+        * file_path : str
+            - Path to the Json file that stores the flatten account information data
+    ### Returns:
+        None
+    """
     with open(file_path) as json_file:
         data = json.load(json_file)
 
@@ -79,8 +107,8 @@ def import_cash_movements(file_path) -> None:
     for row in data:
         try :
             CashMovements.objects.create(
-                date=datetime.strptime(row['date'], '%Y-%m-%dT%H:%M:%S%z'),
-                valueDate=datetime.strptime(row['valueDate'], '%Y-%m-%dT%H:%M:%S%z'),
+                date=datetime.strptime(row['date'], TIME_DATE_FORMAT),
+                valueDate=datetime.strptime(row['valueDate'], TIME_DATE_FORMAT),
                 description=row['description'],
                 productId=row.get('productId'),
                 currency=row['currency'],
@@ -98,10 +126,11 @@ def import_cash_movements(file_path) -> None:
             print("Exception: ", error)
 
 def run():
+    init()
     from_date = get_import_from_date()
-    get_cash_movements(from_date, f"{import_folder}/account.json")
-    transform_json(f"{import_folder}/account.json", f"{import_folder}/account_transform.json")
-    import_cash_movements(f"{import_folder}/account_transform.json")
+    get_cash_movements(from_date, f"{IMPORT_FOLDER}/account.json")
+    transform_json(f"{IMPORT_FOLDER}/account.json", f"{IMPORT_FOLDER}/account_transform.json")
+    import_cash_movements(f"{IMPORT_FOLDER}/account_transform.json")
 
 if __name__ == '__main__':
     run()

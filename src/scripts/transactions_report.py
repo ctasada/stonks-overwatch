@@ -11,8 +11,15 @@ from degiro_connector.quotecast.tools.chart_fetcher import ChartFetcher
 from degiro_connector.quotecast.models.chart import ChartRequest, Interval
 
 from degiro.utils.degiro import DeGiro
+from scripts.commons import DATE_FORMAT
 
-def get_productIds() -> array:
+def get_productIds() -> list:
+    """
+    Gets the list of product ids from the DB.
+
+    ### Returns
+        list: list of product ids
+    """
     with connection.cursor() as cursor:
         cursor.execute(
             """
@@ -26,7 +33,15 @@ def get_productIds() -> array:
     print (productIds)
     return productIds
 
-def get_productInfo(productId) -> dict:
+def get_productInfo(productId: int) -> dict:
+    """
+    Gets product information from the given product id. The information is retrieved from the DB.
+    ### Parameters
+        * productId: int
+            - The product id to query
+    ### Returns
+        list: list of product ids
+    """
     with connection.cursor() as cursor:
         cursor.execute(
             """
@@ -40,7 +55,7 @@ def get_productInfo(productId) -> dict:
 
 def calculate_interval(date_from) -> Interval:
     # Convert String to date object
-    d1 = datetime.strptime(date_from, "%Y-%m-%d")
+    d1 = datetime.strptime(date_from, DATE_FORMAT)
     today = datetime.today()
     # difference between dates in timedelta
     delta = (today - d1).days
@@ -156,7 +171,7 @@ def get_value_growth() -> None:
         product = product_growth.get(key, {})
         carry_total = product.get('carry_total', 0)
 
-        stock_date = entry['date'].strftime('%Y-%m-%d')
+        stock_date = entry['date'].strftime(DATE_FORMAT)
         carry_total += entry['quantity']
         
         product['carry_total'] = carry_total
@@ -190,7 +205,7 @@ def get_value_growth() -> None:
         product_growth[key]['quotation'] = {}
         product_history_dates = list(product_growth[key]['history'].keys())
         start_date = product_history_dates[0]
-        final_date = datetime.today().strftime('%Y-%m-%d')
+        final_date = datetime.today().strftime(DATE_FORMAT)
         tmp_last = product_history_dates[-1]
         if product_growth[key]['history'][tmp_last] == 0:
             final_date = tmp_last
@@ -219,8 +234,8 @@ def get_value_growth() -> None:
             # Keep only the dates that are in the quotation range
             from_date = product_growth[key]['quotation']['from_date']
             to_date = product_growth[key]['quotation']['to_date']
-            if date >= datetime.strptime(from_date, '%Y-%m-%d').date() and date <= datetime.strptime(to_date, '%Y-%m-%d').date():
-                quotes_dict[date.strftime('%Y-%m-%d')] = quotes[count]
+            if date >= datetime.strptime(from_date, DATE_FORMAT).date() and date <= datetime.strptime(to_date, DATE_FORMAT).date():
+                quotes_dict[date.strftime(DATE_FORMAT)] = quotes[count]
         
         product_growth[key]['quotation']['quotes'] = quotes_dict
 
@@ -238,9 +253,9 @@ def _calculate_position_growth(entry: dict) -> dict:
     
     product_history_dates = list(entry['history'].keys())
     
-    start_date = datetime.strptime(product_history_dates[0], '%Y-%m-%d').date()
+    start_date = datetime.strptime(product_history_dates[0], DATE_FORMAT).date()
     if product_history_dates[-1] == 0:
-        final_date = datetime.strptime(product_history_dates[-1], '%Y-%m-%d').date()
+        final_date = datetime.strptime(product_history_dates[-1], DATE_FORMAT).date()
     else:
         final_date = datetime.today().date()
 
@@ -250,7 +265,7 @@ def _calculate_position_growth(entry: dict) -> dict:
     dates = []
     while start_date <= final_date:
         # add current date to list by converting  it to iso format
-        dates.append(start_date.strftime('%Y-%m-%d'))
+        dates.append(start_date.strftime(DATE_FORMAT))
         # increment start date by timedelta
         start_date += delta
 
@@ -272,7 +287,7 @@ def _calculate_growth(json_file_path) -> None:
 
     # FIXME: Maybe Pandas/Polar provides a better way
     # FIXME: We need to convert USD/EUR, here we ignore the currency
-    # FIXME: The result is off by more than 4K, maybe due to FX
+    # FIXME: Result seems that needs to be divided by TODAY's USD/EUR exchange rate.
     aggregate = dict()
     for key in data:
         entry = data[key]
