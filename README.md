@@ -72,3 +72,4 @@ poetry run src/manage.py runscript init_db
 - [ ] Check migration from ChartJS to https://plotly.com/javascript/
 - [ ] BUG: Calculated Cash Balance is 26 cents larger (see src/scripts/account_report.py)
 - [ ] Track https://github.com/chartjs/Chart.js/issues/11005
+- [ ] Review Portfolio growth. Indicates negative growth, which never really happened.

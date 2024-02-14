@@ -50,6 +50,11 @@
             label: 'Cash Contributions',
             data: {{ growth.cash_contributions|safe }},
             stepped: true,
+        },
+        {
+            label: 'Portfolio Growth',
+            data: {{ growth.portfolio_growth|safe }},
+            stepped: false,
         }],
     };
 
