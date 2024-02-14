@@ -72,3 +72,7 @@ class ProductInfo(models.Model):
     qualitySwitchableSecondary = models.BooleanField(default=None, blank=True, null=True)
     qualitySwitchFreeSecondary = models.BooleanField(default=None, blank=True, null=True)
     vwdModuleIdSecondary = models.PositiveIntegerField(default=None, blank=True, null=True)
+
+class ProductQuotation(models.Model):
+    id = models.PositiveIntegerField(primary_key=True)
+    quotations = models.JSONField()
