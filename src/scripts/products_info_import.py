@@ -16,10 +16,29 @@ from django.db import connection
 from scripts.commons import DATE_FORMAT, IMPORT_FOLDER, init, save_to_json
 
 from degiro.utils.degiro import DeGiro
-from degiro.models import ProductInfo
+from degiro.models import ProductInfo, ProductQuotation
 from degiro.utils.db_utils import dictfetchall
 from degiro_connector.quotecast.tools.chart_fetcher import ChartFetcher
 from degiro_connector.quotecast.models.chart import ChartRequest, Interval
+
+def get_productIds() -> list:
+    """
+    Gets the list of product ids from the DB.
+
+    ### Returns
+        list: list of product ids
+    """
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT productId FROM degiro_transactions GROUP BY productId
+            """
+            )
+        results = dictfetchall(cursor)
+    
+    productIds = [entry['productId'] for entry in results]
+    
+    return productIds
 
 def get_products_info(product_ids:list, json_file_path:str) -> None:
     """
@@ -322,20 +341,19 @@ def import_products_quotation() -> None:
             if date >= datetime.strptime(from_date, DATE_FORMAT).date() and date <= datetime.strptime(to_date, DATE_FORMAT).date():
                 quotes_dict[date.strftime(DATE_FORMAT)] = quotes[count]
         
-        product_growth[key]['quotation']['quotes'] = quotes_dict
-
-    # FIXME: Insert the Quotations in the DB
-
-    save_to_json(product_growth, f"{IMPORT_FOLDER}/transform.json")
+        ProductQuotation.objects.update_or_create(
+            id = int(key),
+            quotations = quotes_dict
+        )
 
 def run():
     """
     Imports Product Information from DeGiro.
     """
-    # init()
-    # product_ids = get_productIds()
-    # get_products_info(product_ids, f"{IMPORT_FOLDER}/products_info.json")
-    # import_products_info(f"{IMPORT_FOLDER}/products_info.json")
+    init()
+    product_ids = get_productIds()
+    get_products_info(product_ids, f"{IMPORT_FOLDER}/products_info.json")
+    import_products_info(f"{IMPORT_FOLDER}/products_info.json")
     import_products_quotation()
 
 if __name__ == '__main__':
