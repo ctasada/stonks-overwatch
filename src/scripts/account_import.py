@@ -126,6 +126,9 @@ def import_cash_movements(file_path: str) -> None:
             print("Exception: ", error)
 
 def run():
+    """
+    Imports DeGiro Account information.
+    """
     init()
     from_date = get_import_from_date()
     get_cash_movements(from_date, f"{IMPORT_FOLDER}/account.json")
