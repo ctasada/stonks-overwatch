@@ -3,6 +3,9 @@ from currency_symbols import CurrencySymbols
 from datetime import datetime
 
 class LocalizationUtility(object):
+    TIME_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S%z'
+    DATE_FORMAT = '%Y-%m-%d'
+
     # Get user's base currency
     @staticmethod
     def get_base_currency_symbol():
@@ -21,10 +24,10 @@ class LocalizationUtility(object):
 
     @staticmethod
     def format_date_time(value: str):
-        time = datetime.strptime(value, '%Y-%m-%dT%H:%M:%S%z')
+        time = datetime.strptime(value, LocalizationUtility.TIME_DATE_FORMAT)
         return time.strftime('%Y-%m-%d %H:%M:%S')
     
     @staticmethod
     def convert_datetime_to_date(value: str):
-        time = datetime.strptime(value, '%Y-%m-%dT%H:%M:%S%z')
-        return time.strftime('%Y-%m-%d')
+        time = datetime.strptime(value, LocalizationUtility.TIME_DATE_FORMAT)
+        return time.strftime(LocalizationUtility.DATE_FORMAT)
