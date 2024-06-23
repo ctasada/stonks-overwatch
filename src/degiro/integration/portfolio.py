@@ -92,9 +92,9 @@ class PortfolioData:
             ],
             raw=True,
         )
+        # print(json.dumps(update, indent = 4))
 
         baseCurrencySymbol = LocalizationUtility.get_base_currency_symbol()
-        # print(json.dumps(update_dict, indent = 4))
 
         # Portfolio has a weird structure, lets convert it here
         tmp_total_portfolio = {}
