@@ -76,29 +76,31 @@ def import_transactions(file_path) -> None:
     conv = lambda i : i or None
     for row in data['data']:
         try :
-            Transactions.objects.create(
+            Transactions.objects.update_or_create(
                 id=row['id'],
-                productId=row['productId'],
-                date=datetime.strptime(row['date'], TIME_DATE_FORMAT),
-                buysell=row['buysell'],
-                price=row['price'],
-                quantity=row['quantity'],
-                total=row['total'],
-                orderTypeId=row.get('orderTypeId', None),
-                counterParty=row.get('counterParty', None),
-                transfered=row['transfered'],
-                fxRate=row['fxRate'],
-                nettFxRate=row['nettFxRate'],
-                grossFxRate=row['grossFxRate'],
-                autoFxFeeInBaseCurrency=row['autoFxFeeInBaseCurrency'],
-                totalInBaseCurrency=row['totalInBaseCurrency'],
-                feeInBaseCurrency=row.get('feeInBaseCurrency', None),
-                totalFeesInBaseCurrency=row['totalFeesInBaseCurrency'],
-                totalPlusFeeInBaseCurrency=row['totalPlusFeeInBaseCurrency'],
-                totalPlusAllFeesInBaseCurrency=row['totalPlusAllFeesInBaseCurrency'],
-                transactionTypeId=row['transactionTypeId'],
-                tradingVenue=row.get('tradingVenue', None),
-                executingEntityId=row.get('executingEntityId', None),
+                defaults={
+                    'productId': row['productId'],
+                    'date': datetime.strptime(row['date'], TIME_DATE_FORMAT),
+                    'buysell': row['buysell'],
+                    'price': row['price'],
+                    'quantity': row['quantity'],
+                    'total': row['total'],
+                    'orderTypeId': row.get('orderTypeId', None),
+                    'counterParty': row.get('counterParty', None),
+                    'transfered': row['transfered'],
+                    'fxRate': row['fxRate'],
+                    'nettFxRate': row['nettFxRate'],
+                    'grossFxRate': row['grossFxRate'],
+                    'autoFxFeeInBaseCurrency': row['autoFxFeeInBaseCurrency'],
+                    'totalInBaseCurrency': row['totalInBaseCurrency'],
+                    'feeInBaseCurrency': row.get('feeInBaseCurrency', None),
+                    'totalFeesInBaseCurrency': row['totalFeesInBaseCurrency'],
+                    'totalPlusFeeInBaseCurrency': row['totalPlusFeeInBaseCurrency'],
+                    'totalPlusAllFeesInBaseCurrency': row['totalPlusAllFeesInBaseCurrency'],
+                    'transactionTypeId': row['transactionTypeId'],
+                    'tradingVenue': row.get('tradingVenue', None),
+                    'executingEntityId': row.get('executingEntityId', None),
+                }
             )
         except Exception as error:
             print(f"Cannot import row: {row}")

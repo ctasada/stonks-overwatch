@@ -59,12 +59,12 @@ poetry run src/manage.py runscript init_db
 * https://github.com/lucalaringe/degiro_portfolio_analytics
 
 ## BUGS
-- Dashboard: Portfolio Growth stops in February
 - Dashboard: JNJ & JPM are associated with the wrong sector
 - Start: Potentially old cache is causing problems
+- Start: Is updating the portfolio properly ?
+- Migration: Is duplicating cash contributions?
 
 ## TODOs
-- [ ] Upgrade to FontAwesome 6.x
 - [ ] Make it easier to keep the JS dependencies up-to-date
 - [ ] DeGiro Client: Replace the Singleton by a proper session instance
 - [ ] DeGiro Client: Stop using Totp and request 2FA for each connection

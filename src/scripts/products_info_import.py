@@ -343,7 +343,7 @@ def import_products_quotation() -> None:
         
         ProductQuotation.objects.update_or_create(
             id = int(key),
-            quotations = quotes_dict
+            defaults={'quotations': quotes_dict}
         )
 
 def run():
