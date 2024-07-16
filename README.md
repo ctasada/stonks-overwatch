@@ -57,6 +57,7 @@ poetry run src/manage.py runscript init_db
 ## Other interesting projects
 * https://github.com/leo-pfeiffer/portfolio_dashboard
 * https://github.com/lucalaringe/degiro_portfolio_analytics
+* https://app.portfoliodividendtracker.com (Has some interesting diagrams and data)
 
 ## BUGS
 - Dashboard: JNJ & JPM are associated with the wrong sector
