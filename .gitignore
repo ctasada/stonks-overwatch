@@ -131,9 +131,13 @@ config/config.json
 poetry.lock
 http_cache.sqlite
 
+# Ignore NPM modules
+node_modules
+
 # Ignore folder with imported files
 /import/
 portfolio-performance/Account.csv
 portfolio-performance/degiro_account_converted.csv
 portfolio-performance/degiro_portofolio_converted.csv
 portfolio-performance/Transactions.csv
+
