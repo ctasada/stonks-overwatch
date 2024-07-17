@@ -61,12 +61,12 @@ poetry run src/manage.py runscript init_db
 
 ## BUGS
 - Dashboard: JNJ & JPM are associated with the wrong sector
-- Start: Potentially old cache is causing problems
 - Start: Is updating the portfolio properly ?
 - Migration: Is duplicating cash contributions?
+- Dividends: Should consolidate the currency to Euros
 
 ## TODOs
-- [ ] Make it easier to keep the JS dependencies up-to-date
+- [ ] Make it easier to keep the JS dependencies up-to-date. NPM seems to be the way
 - [ ] DeGiro Client: Replace the Singleton by a proper session instance
 - [ ] DeGiro Client: Stop using Totp and request 2FA for each connection
 - [ ] Portfolio: Show filter to see Open/Close/All stocks
