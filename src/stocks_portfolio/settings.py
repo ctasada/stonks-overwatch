@@ -15,6 +15,8 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# This is the Project Root
+PROJECT_PATH = BASE_DIR.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -39,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'degiro.apps.DegiroConfig',
     'django_extensions',
+    'django_node_assets',
 ]
 
 MIDDLEWARE = [
@@ -117,13 +120,62 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = '/static/'
-
+STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / STATIC_URL
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
+    STATIC_ROOT,
 ]
+
+STATICFILES_FINDERS = [
+    # 'django.contrib.staticfiles.finders.FileSystemFinder',
+    # 'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    # 'django_node_assets.finders.NodeModulesFinder',
+    'django_node_assets.finders.ManifestNodeModulesFinder',
+]
+
+NODE_PACKAGE_JSON = PROJECT_PATH / 'package.json'
+NODE_MODULES_ROOT = PROJECT_PATH / 'node_modules'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'degiro_connector':{
+            'handlers': ['console'],
+            'level': 'WARN',
+            'propagate': False,
+        },
+    },
+}

@@ -17,6 +17,7 @@ requests-cache = "^1.2.1"
 django-extensions = "^3.2.3"
 python-dateutil = "^2.8.2"
 currencyconverter = "^0.17.26"
+django-node-assets = "^0.9.14"
 
 [build-system]
 requires = ["poetry-core"]
