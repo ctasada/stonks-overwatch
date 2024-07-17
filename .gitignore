@@ -134,6 +134,11 @@ http_cache.sqlite
 # Ignore NPM modules
 node_modules
 
+# Ignore static files
+/src/static
+!/src/static/degiro-32x32.png
+!/src/static/styles.css
+
 # Ignore folder with imported files
 /import/
 portfolio-performance/Account.csv

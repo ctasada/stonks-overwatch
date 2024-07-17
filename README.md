@@ -13,6 +13,7 @@ docker compose up
 Install Dependencies
 ```shell
 poetry install
+poetry run src/manage.py npminstall
 ```
 
 Run the server
