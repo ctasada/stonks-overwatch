@@ -42,7 +42,7 @@ class DeGiro(metaclass=SingleInstanceMetaClass):
         degiro = DeGiro()
 
         # CONNECT
-        with requests_cache.enabled(expire_after=timedelta(minutes=30), allowable_methods=["GET", "HEAD", "POST"], ignored_parameters=["oneTimePassword"]): 
+        with requests_cache.enabled(expire_after=timedelta(minutes=15), allowable_methods=["GET", "HEAD", "POST"], ignored_parameters=["oneTimePassword"]): 
             degiro.apiClient.connect()
 
         return degiro.apiClient
