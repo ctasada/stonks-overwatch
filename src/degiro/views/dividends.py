@@ -7,11 +7,13 @@ import logging
 from degiro.integration.account_overview import AccountOverviewData
 from degiro.utils.localization import LocalizationUtility
 
+import logging
 import json
 
 logger = logging.getLogger(__name__)
 class Dividends(View):
 
+    logger = logging.getLogger("stocks_portfolio.dividends.views")
     DATETIME_PATTERN = '%Y-%m-%d %H:%M:%S'
 
     def __init__(self):
@@ -72,6 +74,8 @@ class Dividends(View):
             'dividendsGrowth': dividendsGrowth
         }
         
+        # self.logger.info(f"Dividends: {json.dumps(dividends, indent=4)}")
+
         return render(request, 'dividends.html', context)
 
     def get_dividends_calendar(self, dividendsOverview):
