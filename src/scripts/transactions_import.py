@@ -25,7 +25,7 @@ def get_import_from_date() -> date:
         date: the latest update from the DB and increases to next day or defaults to January 2020
     """
     try:
-        entry = Transactions.objects.all().order_by('date').first()
+        entry = Transactions.objects.all().order_by('-date').first()
         if entry is not None:
             oldest_day = model_to_dict( entry )['date']
             oldest_day += timedelta(days=1)
