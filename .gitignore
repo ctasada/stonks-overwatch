@@ -141,8 +141,5 @@ node_modules
 
 # Ignore folder with imported files
 /import/
-portfolio-performance/Account.csv
-portfolio-performance/degiro_account_converted.csv
-portfolio-performance/degiro_portofolio_converted.csv
-portfolio-performance/Transactions.csv
-
+portfolio-performance/*.csv
+portfolio-performance/*.pdf
