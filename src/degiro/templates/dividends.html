@@ -28,23 +28,26 @@
                         {{ value.formatedTotal }}
                     </div>
                 </div>
-                {% for day, dividends in value.days.items %}
-                    {% for key, dividend in dividends.items %}
-                        {% if dividend.change != 0 %}
-                            <div class="row m-2 border rounded-pill" style="background-color: #A6B9FF">
-                                <div class="col-sm-1 text-left">
-                                    {{ day }}
+                {% if value.payouts > 0 %}
+                    <!-- When there's no Payout, there is no Day field, so skip the condition to avoid a silent error -->
+                    {% for day, dividends in value.days.items %}
+                        {% for key, dividend in dividends.items %}
+                            {% if dividend.change != 0 %}
+                                <div class="row m-2 border rounded-pill" style="background-color: #A6B9FF">
+                                    <div class="col-sm-1 text-left">
+                                        {{ day }}
+                                    </div>
+                                    <div class="col-sm-8 text-truncate">
+                                        {{ dividend.stockName }}
+                                    </div>
+                                    <div class="col-sm-3 text-right">
+                                        {{ dividend.formatedChange }}
+                                    </div>
                                 </div>
-                                <div class="col-sm-8 text-truncate">
-                                    {{ dividend.stockName }}
-                                </div>
-                                <div class="col-sm-3 text-right">
-                                    {{ dividend.formatedChange }}
-                                </div>
-                            </div>
-                        {% endif %}
+                            {% endif %}
+                        {% endfor %}
                     {% endfor %}
-                {% endfor %}
+                {% endif %}
             </div>
 
             {% if forloop.counter|divisibleby:3 %}
