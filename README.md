@@ -63,7 +63,6 @@ poetry run src/manage.py runscript init_db
 ## BUGS
 - Dashboard: JNJ & JPM are associated with the wrong sector
 - Start: Is updating the portfolio properly ?
-- Migration: Is duplicating cash contributions?
 - Dividends: Should consolidate the currency to Euros
 
 ## TODOs

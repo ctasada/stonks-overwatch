@@ -26,7 +26,7 @@ def get_import_from_date() -> date:
         date: the latest update from the DB and increases to next day or defaults to January 2020
     """
     try:
-        entry = CashMovements.objects.all().order_by('date').first()
+        entry = CashMovements.objects.all().order_by('-date').first()
         if entry is not None:
             oldest_day = model_to_dict( entry )['date']
             oldest_day += timedelta(days=1)
@@ -74,19 +74,22 @@ def transform_json(json_file_path: str, output_file_path: str) -> None:
     with open(json_file_path) as json_file:
         data = json.load(json_file)
 
-    # Use pd.json_normalize to convert the JSON to a DataFrame
-    df = pd.json_normalize(data['data']['cashMovements'], sep='_')
-    # Fix id values format after Pandas
-    for col in ['productId', 'id']:
-        df[col] = df[col].apply(lambda x: None if pd.isnull(x) else str(x).replace('.0', ''))
+    if data['data']:
+        # Use pd.json_normalize to convert the JSON to a DataFrame
+        df = pd.json_normalize(data['data']['cashMovements'], sep='_')
+        # Fix id values format after Pandas
+        for col in ['productId', 'id']:
+            df[col] = df[col].apply(lambda x: None if pd.isnull(x) else str(x).replace('.0', ''))
 
-    # Set the index explicitly
-    df.set_index('date', inplace=True)
+        # Set the index explicitly
+        df.set_index('date', inplace=True)
 
-    # Sort the DataFrame by the 'date' column
-    df = df.sort_values(by='date')
+        # Sort the DataFrame by the 'date' column
+        df = df.sort_values(by='date')
 
-    transformed_json = json.loads(df.reset_index().to_json(orient='records'))
+        transformed_json = json.loads(df.reset_index().to_json(orient='records'))
+    else:
+        transformed_json = None
 
     # ## Save the JSON to a file
     save_to_json(transformed_json, output_file_path)
@@ -103,27 +106,28 @@ def import_cash_movements(file_path: str) -> None:
     with open(file_path) as json_file:
         data = json.load(json_file)
 
-    conv = lambda i : i or None
-    for row in data:
-        try :
-            CashMovements.objects.create(
-                date=datetime.strptime(row['date'], TIME_DATE_FORMAT),
-                valueDate=datetime.strptime(row['valueDate'], TIME_DATE_FORMAT),
-                description=row['description'],
-                productId=row.get('productId'),
-                currency=row['currency'],
-                type=row['type'],
-                change=conv(row.get('change', None)),
-                balance_unsettledCash=row.get('balance_unsettledCash', None),
-                balance_flatexCash=row.get('balance_flatexCash', None),
-                balance_cashFund=row.get('balance_cashFund', None),
-                balance_total=row.get('balance_total', None),
-                exchangeRate=conv(row.get('exchangeRate', None)),
-                orderId=row.get('orderId', None)
-            )
-        except Exception as error:
-            print(f"Cannot import row: {row}")
-            print("Exception: ", error)
+    if data:
+        conv = lambda i : i or None
+        for row in data:
+            try :
+                CashMovements.objects.create(
+                    date=datetime.strptime(row['date'], TIME_DATE_FORMAT),
+                    valueDate=datetime.strptime(row['valueDate'], TIME_DATE_FORMAT),
+                    description=row['description'],
+                    productId=row.get('productId'),
+                    currency=row['currency'],
+                    type=row['type'],
+                    change=conv(row.get('change', None)),
+                    balance_unsettledCash=row.get('balance_unsettledCash', None),
+                    balance_flatexCash=row.get('balance_flatexCash', None),
+                    balance_cashFund=row.get('balance_cashFund', None),
+                    balance_total=row.get('balance_total', None),
+                    exchangeRate=conv(row.get('exchangeRate', None)),
+                    orderId=row.get('orderId', None)
+                )
+            except Exception as error:
+                print(f"Cannot import row: {row}")
+                print("Exception: ", error)
 
 def run():
     """
