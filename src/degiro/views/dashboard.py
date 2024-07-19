@@ -11,9 +11,12 @@ from degiro.utils.localization import LocalizationUtility
 from degiro_connector.quotecast.models.chart import Interval
 from degiro.utils.degiro import DeGiro
 
+import logging
 import json
 
 class Dashboard(View):
+    logger = logging.getLogger("stocks_portfolio.dashboard.views")
+
     def __init__(self):
         self.portfolio = PortfolioData()
 
@@ -26,7 +29,7 @@ class Dashboard(View):
             "sectors": sectorsContext
         }
 
-        print(context)
+        self.logger.debug(context)
         
         # FIXME: Simplify this response
         return render(request, 'dashboard.html', context)
@@ -177,7 +180,7 @@ class Dashboard(View):
         return dataset
 
     def _calculate_position_growth(self, entry: dict) -> dict:
-        print(f"Processing {entry['product']['name']}")
+        self.logger.info(f"Processing {entry['product']['name']}")
         
         product_history_dates = list(entry['history'].keys())
         

@@ -177,5 +177,10 @@ LOGGING = {
             'level': 'WARN',
             'propagate': False,
         },
+        'stocks_portfolio':{
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
     },
 }
