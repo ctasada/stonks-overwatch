@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'degiro.apps.DegiroConfig',
     'django_extensions',
     'django_node_assets',
+    'fontawesomefree',
 ]
 
 MIDDLEWARE = [
