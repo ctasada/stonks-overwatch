@@ -3,15 +3,21 @@ from degiro.utils.localization import LocalizationUtility
 
 from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
 
+from currency_converter import CurrencyConverter
+
+import logging
 import json
 
 class PortfolioData:
+    logger = logging.getLogger("stocks_portfolio.portfolio_data")
+    currencyConverter = CurrencyConverter()
 
     def get_portfolio(self):
         # SETUP REQUEST
         update = DeGiro.get_client().get_update(request_list=[
             UpdateRequest(option=UpdateOption.PORTFOLIO, last_updated=0),
         ], raw=True)
+        # self.logger.debug(json.dumps(update, indent = 4))
 
         products_ids = []
 
@@ -23,11 +29,10 @@ class PortfolioData:
 
         products_info = DeGiro.get_products_info(products_ids)
 
-        # DEBUG Values
-        # print(json.dumps(update_dict, indent = 4))
 
         # Get user's base currency
         baseCurrencySymbol = LocalizationUtility.get_base_currency_symbol()
+        baseCurrency = LocalizationUtility.get_base_currency()
 
         myPortfolio = []
 
@@ -48,12 +53,22 @@ class PortfolioData:
                     sector = company_profile['data']['sector']
                     industry = company_profile['data']['industry']
 
-                price = LocalizationUtility.format_money_value(value = portfolio['price'], currency = info['currency'])
-                value = LocalizationUtility.format_money_value(value = portfolio['value'], currencySymbol = baseCurrencySymbol)
-                breakEvenPrice = LocalizationUtility.format_money_value(value = portfolio['breakEvenPrice'], currency = info['currency'])
+                currency = info['currency']
+                price = portfolio['price']
+                value = portfolio['value']
+                breakEvenPrice = portfolio['breakEvenPrice']
+                if (currency != baseCurrency):
+                    price = self.currencyConverter.convert(price, currency, baseCurrency)
+                    value = self.currencyConverter.convert(value, currency, baseCurrency)
+                    breakEvenPrice = self.currencyConverter.convert(breakEvenPrice, currency, baseCurrency)
+                    currency = baseCurrency
 
-                unrealizedGain = (portfolio['price'] - portfolio['breakEvenPrice']) * portfolio['size']
-                formattedUnrealizedGain = LocalizationUtility.format_money_value(value = unrealizedGain, currency = info['currency'])
+                formattedPrice = LocalizationUtility.format_money_value(value = price, currency = currency)
+                value = LocalizationUtility.format_money_value(value = value, currencySymbol = baseCurrencySymbol)
+                formattedBreakEvenPrice = LocalizationUtility.format_money_value(value = breakEvenPrice, currency = currency)
+
+                unrealizedGain = (price - breakEvenPrice) * portfolio['size']
+                formattedUnrealizedGain = LocalizationUtility.format_money_value(value = unrealizedGain, currency = currency)
 
                 myPortfolio.append(
                     dict(
@@ -64,8 +79,8 @@ class PortfolioData:
                         shares = portfolio['size'],
                         price = portfolio['price'],
                         breakEvenPrice = portfolio['breakEvenPrice'],
-                        formattedPrice = price,
-                        formattedBreakEvenPrice = breakEvenPrice, # GAK: Average Purchase Price
+                        formattedPrice = formattedPrice,
+                        formattedBreakEvenPrice = formattedBreakEvenPrice, # GAK: Average Purchase Price
                         value = portfolio['value'],
                         formattedValue = value,
                         isOpen = (portfolio['size'] != 0.0 and portfolio['value'] != 0.0),

@@ -9,11 +9,17 @@ class LocalizationUtility(object):
     # Get user's base currency
     @staticmethod
     def get_base_currency_symbol():
-        accountInfo = DeGiro.get_account_info()
-        baseCurrency = accountInfo['data']['baseCurrency']
+        baseCurrency = LocalizationUtility.get_base_currency()
         baseCurrencySymbol = CurrencySymbols.get_symbol(baseCurrency)
 
         return baseCurrencySymbol
+    
+    @staticmethod
+    def get_base_currency():
+        accountInfo = DeGiro.get_account_info()
+        baseCurrency = accountInfo['data']['baseCurrency']
+
+        return baseCurrency
 
     @staticmethod
     def format_money_value(value: float, currency: str = None, currencySymbol : str = None):

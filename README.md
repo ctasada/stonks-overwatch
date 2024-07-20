@@ -77,7 +77,10 @@ poetry run src/manage.py runscript init_db
         Totale W/V € - Gain/Loss Total (Realized + unrealized) - totalPl
 - [ ] Would be interesting to add filters to the Account Overview page and aggregate
 - [ ] Add graph with Portfolio Cumulative P&L / Cumulative Net Contributions / Portfolio NAV (https://www.investopedia.com/terms/n/nav.asp)
-- [ ] Check migration from ChartJS to https://plotly.com/javascript/
+- [ ] Check migration from ChartJS to https://plotly.com/javascript/ or https://recharts.org/
 - [ ] BUG: Calculated Cash Balance is 26 cents larger (see src/scripts/account_report.py)
 - [ ] Track https://github.com/chartjs/Chart.js/issues/11005
 - [ ] Review Portfolio growth. Indicates negative growth, which never really happened.
+- [ ] Show used Exchanges to help consolidating costs
+- [ ] Show Countries to help with the risk distribution
+- [ ] Some stocks (mainly Spanish) don't have Sector or other data. Find workaround
