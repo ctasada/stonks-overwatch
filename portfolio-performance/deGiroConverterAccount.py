@@ -11,7 +11,6 @@ from util import *
 c = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
 convert_isin_usd_to_euro = ['IE00B3RBWM25', 'IE00B0M62Q58', 'IE0031442068', 'IE00BZ163M45']
 
-
 def convert_currency(isin: str, value: str, date):
     if isin in convert_isin_usd_to_euro:
         try:
@@ -32,10 +31,11 @@ class DeGiroConverterAccount:
         else:
             self.inputdata = data
         self.df = self.inputdata
+
+    def convert(self):
         self.outputdata = pd.DataFrame(
             index=self.inputdata.index, columns=EXPORT_COLUMNS_ACCOUNT, data=None)
 
-    def convert(self):
         self.outputdata['Date'] = self.df['Datum'].apply(convert_date)
         self.outputdata['Time'] = self.df['Tijd']
         self.outputdata['ISIN'] = self.df['ISIN']
@@ -51,6 +51,32 @@ class DeGiroConverterAccount:
         self.outputdata['Value'] = self.df.apply(lambda row: convert_currency(row['ISIN'], row['Value'], row['Datum']),
                                                  axis=1)
 
+    def merge_rows(self, df: pd.DataFrame) -> pd.DataFrame:
+        koop_row = df[df['Omschrijving'].str.contains('Koop', na=False)]
+        valuta_credit_row = df[df['Omschrijving'].str.contains('Valuta Creditering', na=False)]       
+
+        if not koop_row.empty and not valuta_credit_row.empty:
+            koop_row = koop_row.iloc[0]
+            koop_row['FX'] = valuta_credit_row['FX'].values[0]
+            frame = pd.DataFrame([koop_row])
+            print(frame)
+            df.update(frame)
+
+        return df
+
+    def new_convert(self):
+        # Reverse the lines, so we have it chronologically sorted
+        df = self.df.iloc[::-1]
+
+        grouped = df.groupby(['Datum', 'Tijd', 'Valutadatum', 'Product', 'ISIN', 'Order Id'], as_index=False, sort=False)
+        merged_df = grouped.apply(self.merge_rows, include_groups=True)
+        merged_df = merged_df.reset_index()
+        merged_df = merged_df.drop(columns=['level_0', 'level_1'])
+        # df.update(merged_df)
+        
+        # Reverse again to keep the original order
+        self.outputdata = df.reset_index().iloc[::-1]
+
     def write_outputfile(self, outputfile: str):
         self.outputdata.to_csv(outputfile, index=False, decimal=CSV_DECIMAL, sep=CSV_SEPARATOR)
         print("Wrote output to: " + outputfile)
@@ -58,5 +84,6 @@ class DeGiroConverterAccount:
 if __name__ == '__main__':
     converter = DeGiroConverterAccount(os.path.dirname(sys.argv[0]) + 'Account.csv')
     converter.convert()
+    # converter.new_convert()
     filename = os.path.join(os.getcwd(), "degiro_account_converted.csv")
     converter.write_outputfile(filename)

@@ -6,15 +6,28 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-autocolors"></script>
   
-<h4 class="mb-3">Dividends</h4>
-<div class="container-fluid">
-    <div class="row">
+<div class="container-fluid row-gap-5">
+    <div class="row border border-primary-subtle bg-light rounded mb-3">
+        <div class="row mt-2">
+            <div class="col">
+                <h5 class="mb-1">Divident Cash Flow</h5>
+            </div>
+            <div class="col float-end text-end">
+                <div class="btn-group btn-group-sm" role="group">
+                    <input type="radio" class="btn-check" name="btnradio" id="yearButton" autocomplete="off">
+                    <label class="btn btn-outline-primary" for="yearButton">Year</label>
+                
+                    <input type="radio" class="btn-check" name="btnradio" id="monthButton" autocomplete="off" checked>
+                    <label class="btn btn-outline-primary" for="monthButton">Month</label>
+                </div>
+            </div>
+        </div>
         <div id="container" style="width: 100%;">
             <canvas id="dividends-growth"></canvas>
         </div>
     </div>
-    <div class="row"><h5 class="mb-4">Calendar</h4></div>
-    <div class="row" style="background-color:#dbf5ff">
+    <div class="row border border-primary-subtle bg-light rounded mb-3" style="background-color:#dbf5ff">
+        <div class="row"><h5 class="mb-1">Dividends Overview</h5></div>
         {% for key, value in dividendsCalendar.items %}
             <div class="col-sm-4 border">
                 <div class="row-sm mt-1 fs-5">
