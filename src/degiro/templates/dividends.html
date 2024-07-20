@@ -14,10 +14,10 @@
             </div>
             <div class="col float-end text-end">
                 <div class="btn-group btn-group-sm" role="group">
-                    <input type="radio" class="btn-check" name="btnradio" id="yearButton" autocomplete="off">
+                    <input type="radio" class="btn-check" name="dividendsTime" id="yearButton" autocomplete="off">
                     <label class="btn btn-outline-primary" for="yearButton">Year</label>
                 
-                    <input type="radio" class="btn-check" name="btnradio" id="monthButton" autocomplete="off" checked>
+                    <input type="radio" class="btn-check" name="dividendsTime" id="monthButton" autocomplete="off" checked>
                     <label class="btn btn-outline-primary" for="monthButton">Month</label>
                 </div>
             </div>
@@ -72,45 +72,95 @@
 </div>
 
 <script>
-    // Customize colors with https://www.npmjs.com/package/@seahsky/chartjs-plugin-autocolors#customize
-    const autocolors = window['chartjs-plugin-autocolors'];
+    $('#yearButton').on('click', function () {
+        console.log('Clicked Year Button');
+        drawDividends("Year")
+    })
+    $('#monthButton').on('click', function () {
+        console.log('Clicked Month Button');
+        drawDividends("Month")
+    })
 
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    const data = {
-        labels: months,
-        datasets: [
-            {% for key, value in dividendsGrowth.items %}
-            {
-                label: "{{ key }}",
-                data: {{ value }},
-                borderWidth: 1
-            },
-            {% endfor %}
-        ]
-    };
-    const config = {
-        type: 'bar',
-        data: data,
-        plugins: [
-            autocolors
-        ],
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            },
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top',
+    function getDividendsPerMonth() {
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        const data = {
+            labels: months,
+            datasets: [
+                {% for key, value in dividendsGrowth.items %}
+                {
+                    label: "{{ key }}",
+                    data: {{ value }},
+                    borderWidth: 1
                 },
-                title: {
-                    display: false,
+                {% endfor %}
+            ]
+        };
+
+        return data
+    }
+
+    function getDividendsPerYear() {
+        const values = []
+        const years = []
+
+        {% for year, data in dividendsGrowth.items %}
+        {
+            const sum = {{ data }}.reduce((acc, val) => acc + val, 0);
+            years.push({{ year }})
+            values.push(sum)
+        }
+        {% endfor %}
+
+        const data = {
+            labels: years,
+            datasets: [
+                {
+                    data: values,
+                    borderWidth: 1
                 }
-            }
-        },
-    };
-    let chart = new Chart(document.getElementById("dividends-growth").getContext("2d"), config);
+            ]
+        };
+
+        return data
+    }
+
+    function drawDividends(datatype) {
+        // Customize colors with https://www.npmjs.com/package/@seahsky/chartjs-plugin-autocolors#customize
+        const autocolors = window['chartjs-plugin-autocolors'];
+
+        const config = {
+            type: 'bar',
+            data: datatype == "Month" ? getDividendsPerMonth() : getDividendsPerYear(),
+            plugins: [
+                autocolors
+            ],
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false,
+                        position: 'top',
+                    },
+                    title: {
+                        display: false,
+                    }
+                }
+            },
+        }
+
+        let chartStatus = Chart.getChart("dividends-growth"); // <canvas> id
+        if (chartStatus != undefined) {
+            chartStatus.destroy();
+        }
+
+        let chart = new Chart(document.getElementById("dividends-growth").getContext("2d"), config);
+    }
+
+    drawDividends("Month")
 </script>
 {% endblock %}
