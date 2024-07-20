@@ -8,7 +8,6 @@ from degiro.integration.account_overview import AccountOverviewData
 from degiro.utils.localization import LocalizationUtility
 
 from currency_converter import CurrencyConverter
-from currency_converter import ECB_URL
 
 import logging
 import json
@@ -17,7 +16,7 @@ logger = logging.getLogger(__name__)
 class Dividends(View):
 
     logger = logging.getLogger("stocks_portfolio.dividends.views")
-    currencyConverter = CurrencyConverter(currency_file=ECB_URL, fallback_on_missing_rate=True)
+    currencyConverter = CurrencyConverter(fallback_on_missing_rate=True)
     DATETIME_PATTERN = '%Y-%m-%d %H:%M:%S'
 
     def __init__(self):

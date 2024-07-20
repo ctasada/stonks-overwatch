@@ -169,7 +169,7 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console', 'file'],
-            'level': 'DEBUG',
+            'level': 'WARN',
             'propagate': True,
         },
         'degiro_connector':{
@@ -179,7 +179,7 @@ LOGGING = {
         },
         'stocks_portfolio':{
             'handlers': ['console', 'file'],
-            'level': 'DEBUG',
+            'level': 'WARN',
             'propagate': False,
         },
     },
