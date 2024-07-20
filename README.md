@@ -63,7 +63,6 @@ poetry run src/manage.py runscript init_db
 ## BUGS
 - Dashboard: JNJ & JPM are associated with the wrong sector
 - Start: Is updating the portfolio properly ?
-- Dividends: Should consolidate the currency to Euros
 
 ## TODOs
 - [ ] Make it easier to keep the JS dependencies up-to-date. NPM seems to be the way
