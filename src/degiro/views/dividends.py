@@ -7,6 +7,9 @@ import logging
 from degiro.integration.account_overview import AccountOverviewData
 from degiro.utils.localization import LocalizationUtility
 
+from currency_converter import CurrencyConverter
+from currency_converter import ECB_URL
+
 import logging
 import json
 
@@ -14,10 +17,12 @@ logger = logging.getLogger(__name__)
 class Dividends(View):
 
     logger = logging.getLogger("stocks_portfolio.dividends.views")
+    currencyConverter = CurrencyConverter(currency_file=ECB_URL, fallback_on_missing_rate=True)
     DATETIME_PATTERN = '%Y-%m-%d %H:%M:%S'
 
     def __init__(self):
         self.accountOverview = AccountOverviewData()
+        self.baseCurrency = LocalizationUtility.get_base_currency()
 
     def get(self, request):
         # We don't need to sort the dict, since it's already coming sorted in DESC date order
@@ -42,11 +47,18 @@ class Dividends(View):
             days = monthEntry.setdefault("days", dict())
             dayEntry = days.setdefault(day, dict())
             stockEntry = dayEntry.setdefault(stock, dict())
+            transactionChange = transaction['change']
+           
+            currency = transaction['currency']
+            if currency != self.baseCurrency:
+                date = datetime.datetime.strptime(transaction['date'], self.DATETIME_PATTERN).date()
+                transactionChange = self.currencyConverter.convert(transactionChange, currency, self.baseCurrency, date)
+                currency = self.baseCurrency
 
             stockEntry['stockName'] = transaction['stockName']
-            stockEntry['change'] = stockEntry.setdefault('change', 0) + transaction['change']
-            stockEntry['currency'] = transaction['currency']
-            stockEntry['formatedChange'] = LocalizationUtility.format_money_value(value = stockEntry['change'], currency = transaction['currency'])
+            stockEntry['change'] = stockEntry.setdefault('change', 0) + transactionChange
+            stockEntry['currency'] = currency
+            stockEntry['formatedChange'] = LocalizationUtility.format_money_value(value = stockEntry['change'], currency = currency)
 
             monthEntry.setdefault("dividends", []).append({
                 'day': self.get_date_day(transaction['date']),
@@ -61,8 +73,8 @@ class Dividends(View):
                 monthEntry["payouts"] = payouts + 1
             # Total payout in the month
             total = monthEntry.setdefault("total", 0)
-            monthEntry["total"] = total + transaction['change']
-            monthEntry["formatedTotal"] = LocalizationUtility.format_money_value(value = monthEntry['total'], currency = transaction['currency'])
+            monthEntry["total"] = total + transactionChange
+            monthEntry["formatedTotal"] = LocalizationUtility.format_money_value(value = monthEntry['total'], currency = currency)
 
             dividendsGrowth[year][monthNumber - 1] = round(monthEntry["total"], 2)
 
