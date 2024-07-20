@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -120,16 +121,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / STATIC_URL
-STATICFILES_DIRS = [
-    STATIC_ROOT,
-]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 STATICFILES_FINDERS = [
-    # 'django.contrib.staticfiles.finders.FileSystemFinder',
-    # 'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    # 'django_node_assets.finders.NodeModulesFinder',
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'django_node_assets.finders.NodeModulesFinder',
     'django_node_assets.finders.ManifestNodeModulesFinder',
 ]
 
@@ -178,7 +177,7 @@ LOGGING = {
             'propagate': False,
         },
         'stocks_portfolio':{
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'DEBUG',
             'propagate': False,
         },

@@ -29,7 +29,7 @@ class Dashboard(View):
             "sectors": sectorsContext
         }
 
-        self.logger.debug(context)
+        # self.logger.debug(context)
         
         # FIXME: Simplify this response
         return render(request, 'dashboard.html', context)
@@ -37,7 +37,7 @@ class Dashboard(View):
     def _getSectors(self):
         portfolio = self.portfolio.get_portfolio()
         portfolio = sorted(portfolio, key=lambda k: k['sector'])
-        # print (json.dumps(portfolio, indent=2))
+        # self.logger.debug(json.dumps(portfolio, indent=2))
 
         sectors = {}
 
