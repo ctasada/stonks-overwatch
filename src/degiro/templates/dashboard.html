@@ -57,6 +57,7 @@
             label: 'Portfolio Growth',
             data: {{ growth.portfolio_growth|safe }},
             stepped: false,
+            lineTension: 0.5
         }],
     };
 
@@ -72,11 +73,16 @@
                 time: {
                     unit: 'month',
                     round: 'day',
-                }
+                },
             },
             y: {
 						  beginAtZero: true,
 					  }
+        },
+        elements: {
+          point: {
+            radius: 0
+          }
         },
         plugins: {
           legend: {
