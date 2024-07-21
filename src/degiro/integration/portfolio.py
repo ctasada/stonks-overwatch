@@ -86,6 +86,7 @@ class PortfolioData:
                         isOpen = (portfolio['size'] != 0.0 and portfolio['value'] != 0.0),
                         unrealizedGain = unrealizedGain,
                         formattedUnrealizedGain = formattedUnrealizedGain,
+                        logoUrl=f"https://logos.stockanalysis.com/{info['symbol'].lower()}.svg"
                     )
                 )
 
