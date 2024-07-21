@@ -8,6 +8,7 @@
             {% block table.thead %}
             <thead>
                 <tr>
+                  <th scope="col"></th>
                   <th scope="col">Stock</th>
                   <th scope="col">Sector</th>
                   <th scope="col">Shares</th>
@@ -23,6 +24,7 @@
                 {% for stock in portfolio %}
                     {% if stock.isOpen %}
                         <tr>
+                            <td><img src="{{ stock.logoUrl }}" width="30" height="30" onerror="this.style.display='none'"></td>
                             <td>{{ stock.symbol }}<br><small class="fw-lighter">{{ stock.name }}</small></td>
                             <td>{{ stock.sector }}<br><small class="fw-lighter">{{ stock.industry }}</small></td>
                             <td>{{ stock.shares }}</td>
