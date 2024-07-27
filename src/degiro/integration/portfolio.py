@@ -118,11 +118,13 @@ class PortfolioData:
             if value.get("value") is not None:
                 tmp_total_portfolio[value['name']] = value['value']
         # Finish conversion
+        roi = (portfolioTotalValue / (tmp_total_portfolio['totalDepositWithdrawal']) - 1) * 100
 
         total_portfolio = {
             "totalDepositWithdrawal": LocalizationUtility.format_money_value(value = tmp_total_portfolio['totalDepositWithdrawal'], currencySymbol = baseCurrencySymbol),
             "totalCash": LocalizationUtility.format_money_value(value = tmp_total_portfolio['totalCash'], currencySymbol = baseCurrencySymbol),
-            "currentValue": LocalizationUtility.format_money_value(value = portfolioTotalValue, currencySymbol = baseCurrencySymbol)
+            "currentValue": LocalizationUtility.format_money_value(value = portfolioTotalValue, currencySymbol = baseCurrencySymbol),
+            "totalROI": "{:,.2f}%".format(roi)
         }
 
         return total_portfolio
