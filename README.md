@@ -10,6 +10,12 @@ docker compose up
 
 ### Without Docker
 
+Update Dependencies
+```shell
+poetry update
+npm update
+```
+
 Install Dependencies
 ```shell
 poetry install
@@ -58,11 +64,12 @@ poetry run src/manage.py runscript init_db
 ## Other interesting projects
 * https://github.com/leo-pfeiffer/portfolio_dashboard
 * https://github.com/lucalaringe/degiro_portfolio_analytics
-* https://app.portfoliodividendtracker.com (Has some interesting diagrams and data)
+* https://app.portfoliodividendtracker.com/p/jongbeleggen?locale=en (Has some interesting diagrams and data)
+* https://divvydiary.com/en/p/24094?tab=depot
 
 ## BUGS
 - Dashboard: JNJ & JPM are associated with the wrong sector
-- Start: Is updating the portfolio properly ?
+- Portfolio is not updated on startup. A migration needs to be forced
 
 ## TODOs
 - [ ] Make it easier to keep the JS dependencies up-to-date. NPM seems to be the way
@@ -76,10 +83,24 @@ poetry run src/manage.py runscript init_db
         Totale W/V € - Gain/Loss Total (Realized + unrealized) - totalPl
 - [ ] Would be interesting to add filters to the Account Overview page and aggregate
 - [ ] Add graph with Portfolio Cumulative P&L / Cumulative Net Contributions / Portfolio NAV (https://www.investopedia.com/terms/n/nav.asp)
-- [ ] Check migration from ChartJS to https://plotly.com/javascript/ or https://recharts.org/
+- [ ] Check migration from ChartJS to https://plotly.com/javascript/ or https://recharts.org/ or https://d3js.org
 - [ ] BUG: Calculated Cash Balance is 26 cents larger (see src/scripts/account_report.py)
 - [ ] Track https://github.com/chartjs/Chart.js/issues/11005
 - [ ] Review Portfolio growth. Indicates negative growth, which never really happened.
 - [ ] Show used Exchanges to help consolidating costs
 - [ ] Show Countries to help with the risk distribution
 - [ ] Some stocks (mainly Spanish) don't have Sector or other data. Find workaround
+
+## Logos
+- https://eodhd.com/financial-apis-blog/40000-company-logos (requires API Key)
+- https://github.com/nvstly/icons (misses icons)
+- https://github.com/ahmeterenodaci/Nasdaq-Stock-Exchange-including-Symbols-and-Logos?tab=readme-ov-file (misses many icons)
+- https://data.nasdaq.com/databases/LOGO (requires Token)
+- https://logos.stockanalysis.com/aapl.svg (misses some stocks)
+
+# Portfolio Performance
+- https://portfolioslab.com/tools/stock-comparison/AAPL/MSFT
+
+# Libraries
+- https://pypi.org/project/QuantStats/
+- https://github.com/wilsonfreitas/awesome-quant?tab=readme-ov-file#python

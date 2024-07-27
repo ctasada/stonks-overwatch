@@ -51,6 +51,10 @@ span {
     display: inline-block;
 }
 
+.nav-link.active {
+    text-decoration: underline;
+}
+
 /* ---------------------------------------------------
     SIDEBAR STYLE
 ----------------------------------------------------- */

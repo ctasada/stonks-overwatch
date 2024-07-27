@@ -10,7 +10,7 @@ import json
 
 class PortfolioData:
     logger = logging.getLogger("stocks_portfolio.portfolio_data")
-    currencyConverter = CurrencyConverter()
+    currencyConverter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
 
     def get_portfolio(self):
         # SETUP REQUEST
