@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class Dividends(View):
 
     logger = logging.getLogger("stocks_portfolio.dividends.views")
-    currencyConverter = CurrencyConverter(fallback_on_missing_rate=True)
+    currencyConverter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
     DATETIME_PATTERN = '%Y-%m-%d %H:%M:%S'
 
     def __init__(self):

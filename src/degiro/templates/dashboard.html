@@ -12,7 +12,13 @@
     <div class="row border border-primary-subtle bg-light rounded mb-3">
       <div class="row mt-2">
           <div class="col">
-              <h5 class="mb-1">Portfolio Value</h5>
+              <span><h5 class="mb-1">Portfolio </h5></span>
+              <span>
+                <nav class="nav px-1" id="portfolioType">
+                  <a class="nav-link px-1 active" id="valuePortfolio" aria-selected="true" href="#">Value</a>
+                  <a class="nav-link px-1" id="performancePortfolio" aria-selected="false" href="#">Performance</a>
+                </nav>
+            </span>
           </div>
           <div class="col float-end text-end">
             <div class="btn-group btn-group-sm" role="group">
@@ -34,7 +40,7 @@
         </div>
       </div>
       <div class="row w-100">
-        <canvas id="growth-chart"></canvas>
+        <canvas id="portofolio-chart"></canvas>
       </div>
     </div>
     <div class="row border border-primary-subtle bg-light rounded mb-3">
@@ -47,6 +53,11 @@
   </div>
 
   <script>
+    const PortfolioTypes = {
+      VALUE: "Value",
+      PERFORMANCE: "Performance",
+    }
+
     const TimeRanges = {
       YTD: "YTD",
       Y1: "1Y",
@@ -55,20 +66,62 @@
       MAX: "MAX",
     }
 
+    function getSelectedPortfolioType() {
+      var activeTab = $('#portfolioType .nav-link.active');
+      var id = activeTab.attr('id');
+      if (id == "performancePortfolio") {
+        return PortfolioTypes.PERFORMANCE
+      }
+      return PortfolioTypes.VALUE
+    }
+
+    function getSelectedTimeRange() {
+      var activeButton = $('.btn-group input[type="radio"]:checked');
+      switch(activeButton.attr('id')) {
+        case "YTDButton":
+          return TimeRanges.YTD
+        case "1YButton":
+          return TimeRanges.Y1
+        case "3YButton":
+          return TimeRanges.Y3
+        case "5YButton":
+          return TimeRanges.Y5
+        case "maxButton":
+        default:
+          return TimeRanges.MAX
+      }
+    }
+
+    $('#portfolioType a').on('click', function (e) {
+      e.preventDefault()
+      $(".active").removeClass("active").attr('aria-selected', 'false');
+      $(this).addClass("active").attr('aria-selected', 'true');
+
+      var portfolioType = getSelectedPortfolioType()
+      var timeRange = getSelectedTimeRange()
+
+      drawPortfolio(portfolioType, timeRange)
+    })
+
     $('#YTDButton').on('click', function () {
-        drawPortfolioGrowth(TimeRanges.YTD)
+      var portfolioType = getSelectedPortfolioType()
+      drawPortfolio(portfolioType, TimeRanges.YTD)
     })
     $('#1YButton').on('click', function () {
-        drawPortfolioGrowth(TimeRanges.Y1)
+      var portfolioType = getSelectedPortfolioType()
+      drawPortfolio(portfolioType, TimeRanges.Y1)
     })
     $('#3YButton').on('click', function () {
-        drawPortfolioGrowth(TimeRanges.Y3)
+      var portfolioType = getSelectedPortfolioType()
+      drawPortfolio(portfolioType, TimeRanges.Y3)
     })
     $('#5YButton').on('click', function () {
-        drawPortfolioGrowth(TimeRanges.Y5)
+      var portfolioType = getSelectedPortfolioType()
+      drawPortfolio(portfolioType, TimeRanges.Y5)
     })
     $('#maxButton').on('click', function () {
-        drawPortfolioGrowth(TimeRanges.MAX)
+      var portfolioType = getSelectedPortfolioType()
+      drawPortfolio(portfolioType, TimeRanges.MAX)
     })
     // Customize colors with https://www.npmjs.com/package/@seahsky/chartjs-plugin-autocolors#customize
     const autocolors = window['@seahsky/chartjs-plugin-autocolors'];
@@ -105,37 +158,69 @@
       return config
     }
 
-    function drawPortfolioGrowth(timeRange) {
-      const dataGrowth = {
+    function drawPortfolio(portfolioType, timeRange) {
+      console.log("Drawing Portfolio Graph: " + portfolioType + " / " + timeRange);
+
+      if (portfolioType == PortfolioTypes.PERFORMANCE) {
+        drawPortfolioPerformance(timeRange)
+      } else {
+        drawPortfolioValue(timeRange)
+      }
+    }
+
+    function drawPortfolioValue(timeRange) {
+      const dataValue = {
         datasets: [{
               label: 'Cash Contributions',
-              data: {{ growth.cash_contributions|safe }},
+              data: {{ portfolio.value.cash_contributions|safe }},
               stepped: true,
           },
           {
-              label: 'Portfolio Growth',
-              data: {{ growth.portfolio_growth|safe }},
+              label: 'Portfolio Value',
+              data: {{ portfolio.value.portfolio_value|safe }},
               stepped: false,
               lineTension: 0.5
           }],
       };
-      const minimumDate = new Date('{{ growth.portfolio_growth.0.x }}')
+      const minimumDate = new Date('{{ portfolio.value.portfolio_value.0.x }}')
 
-      const timeRanteConfig = getTimeRangeConfig(timeRange, minimumDate)
+      redrawPortfolioGraph(dataValue, timeRange, minimumDate)
+    }
 
-      const configGrowth = {
+    function drawPortfolioPerformance(timeRange) {
+      const dataPerformance = {
+        datasets: [
+          {
+              label: 'Portfolio Performance',
+              // data: {{ portfolio.performance.portfolio_performance|safe }},
+              data: {{ portfolio.value.portfolio_value|safe }},
+              stepped: false,
+              lineTension: 0.5
+          }],
+      };
+      const minimumDate = new Date('{{ portfolio.performance.portfolio_growth.0.x }}')
+
+      redrawPortfolioGraph(dataPerformance, timeRange, minimumDate)
+    }
+
+    function redrawPortfolioGraph(datasets, timeRange, minimumDate) {
+      const timeRangeConfig = getTimeRangeConfig(timeRange, minimumDate)
+
+      const configPortfolio = {
         type: 'line',
-        data: dataGrowth,
+        data: datasets,
         options: {
           responsive: true,
           scales: {
               x: {
                   type: 'time',
-                  min: timeRanteConfig.minDate,
-                  max: timeRanteConfig.maxDate,
+                  min: timeRangeConfig.minDate,
+                  max: timeRangeConfig.maxDate,
                   time: {
-                      unit: timeRanteConfig.timeUnit,
-                      round: timeRanteConfig.timeRound,
+                      // Luxon format string
+                      tooltipFormat: 'DD',
+                      unit: timeRangeConfig.timeUnit,
+                      round: timeRangeConfig.timeRound,
                   },
               },
               y: {
@@ -151,15 +236,31 @@
             legend: {
               position: 'top',
             },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        let label = context.dataset.label || '';
+
+                        if (label) {
+                            label += ': ';
+                        }
+                        if (context.parsed.y !== null) {
+                            label += new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(context.parsed.y);
+                        }
+                        return label;
+                    }
+                }
+            }
           }
         },
       };
-      let chartStatus = Chart.getChart("growth-chart"); // <canvas> id
+
+      let chartStatus = Chart.getChart("portofolio-chart"); // <canvas> id
       if (chartStatus != undefined) {
           chartStatus.destroy();
       }
 
-      let growthChart = new Chart(document.getElementById("growth-chart").getContext("2d"), configGrowth);
+      let portofolioChart = new Chart(document.getElementById("portofolio-chart").getContext("2d"), configPortfolio);
     }
 
     function drawSectorPositions() {
@@ -234,7 +335,7 @@
       let doughnutSectorsChart = new Chart(document.getElementById("sectors-chart").getContext("2d"), configSectors);
     }
 
-    drawPortfolioGrowth(TimeRanges.MAX)
+    drawPortfolio(PortfolioTypes.VALUE, TimeRanges.MAX)
     drawSectorPositions()
   </script>
 {% endblock %}

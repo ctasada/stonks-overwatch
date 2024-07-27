@@ -11,21 +11,28 @@ from degiro.utils.localization import LocalizationUtility
 from degiro_connector.quotecast.models.chart import Interval
 from degiro.utils.degiro import DeGiro
 
+from currency_converter import CurrencyConverter
+
 import logging
 import json
 
 class Dashboard(View):
     logger = logging.getLogger("stocks_portfolio.dashboard.views")
+    DATETIME_PATTERN = '%Y-%m-%d'
+    currencyConverter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
 
     def __init__(self):
         self.portfolio = PortfolioData()
 
     def get(self, request):
         sectorsContext = self._getSectors()
-        growthContext = self._getGrowth()
+        valueContext = self._getPortfolioValue()
 
         context = {
-            "growth": growthContext,
+            "portfolio": {
+                "value": valueContext,
+                "performance": None
+            },
             "sectors": sectorsContext
         }
 
@@ -69,13 +76,13 @@ class Dashboard(View):
                 "currencySymbol": LocalizationUtility.get_base_currency_symbol(),
             }
     
-    def _getGrowth(self):
+    def _getPortfolioValue(self):
         cash_contributions = self._calculate_cash_contributions()
-        portfolio_growth = self._calculate_growth()
+        portfolio_value = self._calculate_value()
 
         return {
             "cash_contributions": cash_contributions,
-            "portfolio_growth": portfolio_growth
+            "portfolio_value": portfolio_value
         }
 
     def _calculate_cash_contributions(self) -> dict:
@@ -153,22 +160,23 @@ class Dashboard(View):
         
         return json.loads(results)
 
-    def _calculate_growth(self) -> list:
+    def _calculate_value(self) -> list:
         data = self._create_products_quotation()
 
-        fx_rate = self._get_usd_conversion()
-        # FIXME: Maybe Pandas/Polar provides a better way
-        # FIXME: We need to convert USD/EUR, here we ignore the currency
-        # FIXME: Result seems that needs to be divided by TODAY's USD/EUR exchange rate.
+        baseCurrency = LocalizationUtility.get_base_currency()
         aggregate = dict()
         for key in data:
             entry = data[key]
             position_value_growth = self._calculate_position_growth(entry)
-            convert_fx = entry['product']['currency'] == 'USD'
+            convert_fx = entry['product']['currency'] != baseCurrency
             for date in position_value_growth:
                 aggregate_value = aggregate.get(date, 0)
-                if fx_rate:
-                    aggregate_value += position_value_growth[date] / fx_rate
+
+                if convert_fx:
+                    currency = entry['product']['currency']
+                    fx_date = datetime.strptime(date, self.DATETIME_PATTERN).date()
+                    value = self.currencyConverter.convert(position_value_growth[date], currency, baseCurrency, fx_date)
+                    aggregate_value += value
                 else:
                     aggregate_value += position_value_growth[date]
                 aggregate[date] = aggregate_value
@@ -180,8 +188,6 @@ class Dashboard(View):
         return dataset
 
     def _calculate_position_growth(self, entry: dict) -> dict:
-        self.logger.info(f"Processing {entry['product']['name']}")
-        
         product_history_dates = list(entry['history'].keys())
         
         start_date = datetime.strptime(product_history_dates[0], LocalizationUtility.DATE_FORMAT).date()
@@ -211,23 +217,6 @@ class Dashboard(View):
             aggregate[date] = position_value[date] * entry['quotation']['quotes'][date]
 
         return aggregate
-
-    def _get_usd_conversion(self) -> float:
-        """
-        Gets the USD/EUR relation.
-
-        The value is retrieved from the DeGiro `get_products_info` method.
-
-        ### Returns
-            fx: The USD-EUR conversion rate
-        """
-        trading_api = DeGiro.get_client()
-        usd_info = trading_api.get_products_info(
-            product_list=[705366], # 705366 is the product id for the USD/EUR
-            raw=True,
-        )
-
-        return usd_info['data']['705366']['closePrice']
     
     def _calculate_interval(self, date_from) -> Interval:
         """
