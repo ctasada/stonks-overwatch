@@ -4,7 +4,6 @@ import pycountry
 
 from degiro.integration.user import UserData
 
-import json
 
 class User(View):
     def __init__(self):

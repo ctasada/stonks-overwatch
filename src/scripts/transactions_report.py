@@ -22,6 +22,7 @@ def run():
     portfolio_value = dashboard._calculate_value()
     save_to_json(portfolio_value, f"{IMPORT_FOLDER}/portfolio_growth/portfolio_value.json")
 
+
 if __name__ == '__main__':
     run()
 
@@ -30,12 +31,12 @@ if __name__ == '__main__':
 $ jq .data.cashMovements ./import/backup/account.json | in2csv -f json
 """
 
-### Cash Types
+# Cash Types
 """
 CASH_FUND_NAV_CHANGE - Only 2020, seems to be replaced by FLATEX_CASH_SWEEP
 CASH_FUND_TRANSACTION  - Only 2020, seems to be replaced by FLATEX_CASH_SWEEP
 CASH_TRANSACTION - >> Real transaction << That's the one we need to track!
-    * Description: 
+    * Description:
         - "iDEAL storting" reprepresent an iDEAL payment
         - "iDEAL Deposit" reprepresent an iDEAL payment
         - "Terugstorting" Money returned to the associated Bank

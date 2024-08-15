@@ -2,9 +2,10 @@ import json
 import os
 from typing import Any
 
-IMPORT_FOLDER = './import'
-TIME_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S%z'
-DATE_FORMAT = '%Y-%m-%d'
+IMPORT_FOLDER = "./import"
+TIME_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
+DATE_FORMAT = "%Y-%m-%d"
+
 
 def init() -> None:
     """
@@ -17,6 +18,7 @@ def init() -> None:
     if not os.path.exists(IMPORT_FOLDER):
         os.makedirs(IMPORT_FOLDER)
 
+
 def save_to_json(data: Any, json_file_path: str) -> None:
     """
     Saves the data into the specified file using JSON format
@@ -28,6 +30,6 @@ def save_to_json(data: Any, json_file_path: str) -> None:
     ### Returns:
         None
     """
-    data_file = open(json_file_path, 'w')
-    data_file.write(json.dumps(data, indent = 4))
+    data_file = open(json_file_path, "w")
+    data_file.write(json.dumps(data, indent=4))
     data_file.close()

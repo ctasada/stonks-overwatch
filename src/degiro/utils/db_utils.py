@@ -1,4 +1,4 @@
-from django.db import connection
+
 
 def dictfetchall(cursor):
     """

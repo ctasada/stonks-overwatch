@@ -6,7 +6,6 @@ Usage:
     poetry run src/manage.py runscript transactions_import
 """
 import json
-import os
 
 from datetime import date, datetime, time, timedelta
 from django.forms import model_to_dict
@@ -18,6 +17,7 @@ from degiro_connector.trading.models.transaction import HistoryRequest
 
 from scripts.commons import IMPORT_FOLDER, TIME_DATE_FORMAT, init
 
+
 def get_import_from_date() -> date:
     """
     Returns the latest update from the DB and increases to next day or defaults to January 2020
@@ -27,13 +27,14 @@ def get_import_from_date() -> date:
     try:
         entry = Transactions.objects.all().order_by('-date').first()
         if entry is not None:
-            oldest_day = model_to_dict( entry )['date']
+            oldest_day = model_to_dict(entry)['date']
             oldest_day += timedelta(days=1)
             return datetime.combine(oldest_day, time.min)
-    except:
+    except Exception:
         print("Something went wrong, defaulting to oldest date")
 
     return date(year=2020, month=1, day=1)
+
 
 def get_transactions(from_date, json_file_path) -> None:
     """
@@ -56,10 +57,11 @@ def get_transactions(from_date, json_file_path) -> None:
         raw=True,
     )
 
-    ## Save the JSON to a file
+    # Save the JSON to a file
     data_file = open(json_file_path, 'w')
-    data_file.write(json.dumps(transactions_history, indent = 4))
+    data_file.write(json.dumps(transactions_history, indent=4))
     data_file.close()
+
 
 def import_transactions(file_path) -> None:
     """
@@ -73,7 +75,6 @@ def import_transactions(file_path) -> None:
     with open(file_path) as json_file:
         data = json.load(json_file)
 
-    conv = lambda i : i or None
     for row in data['data']:
         try :
             Transactions.objects.update_or_create(
@@ -106,11 +107,13 @@ def import_transactions(file_path) -> None:
             print(f"Cannot import row: {row}")
             print("Exception: ", error)
 
+
 def run():
     init()
     from_date = get_import_from_date()
     get_transactions(from_date, f"{IMPORT_FOLDER}/transactions.json")
     import_transactions(f"{IMPORT_FOLDER}/transactions.json")
+
 
 if __name__ == '__main__':
     run()

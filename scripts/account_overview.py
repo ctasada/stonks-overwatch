@@ -1,13 +1,10 @@
 # IMPORTATIONS
 import common
 import json
-import numpy as np
 import pandas as pd
 
-from datetime import date, datetime
+from datetime import date
 
-from degiro_connector.trading.api import API as TradingAPI
-from degiro_connector.trading.models.credentials import Credentials
 from degiro_connector.trading.models.account import OverviewRequest
 
 trading_api = common.connectToDegiro()
@@ -30,7 +27,7 @@ account_overview = trading_api.get_account_overview(
     raw=True,
 )
 
-print(json.dumps(account_overview, indent = 4))
+print(json.dumps(account_overview, indent=4))
 
 cash_contributions = []
 
@@ -43,16 +40,16 @@ for cash_movement in account_overview.get('data').get('cashMovements'):
             if cash_movement['currency'] == 'EUR':
                 cash_contributions.append(
                     dict(
-                        date = pd.to_datetime(cash_movement['date']).to_period('D'),
-                        cash = cash_movement['change'],
+                        date=pd.to_datetime(cash_movement['date']).to_period('D'),
+                        cash=cash_movement['change'],
                     )
                 )
     if cash_movement['type'] in ['FLATEX_CASH_SWEEP']:
         if 'productId' in cash_movement:
             cash_contributions.append(
                 dict(
-                    date = pd.to_datetime(cash_movement['date']).to_period('D'),
-                    cash = cash_movement['change'],
+                    date=pd.to_datetime(cash_movement['date']).to_period('D'),
+                    cash=cash_movement['change'],
                 )
             )
 

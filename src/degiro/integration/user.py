@@ -1,5 +1,5 @@
 from degiro.utils.degiro import DeGiro
-import json
+
 
 class UserData:
     clientDetails = None

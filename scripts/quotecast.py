@@ -61,11 +61,11 @@ match delta:
         print(Interval.P6M)
     case diff if diff in range(180, 365):
         print(Interval.P1Y)
-    case diff if diff in range(365, 3*365):
+    case diff if diff in range(365, 3 * 365):
         print(Interval.P3Y)
-    case diff if diff in range(3*365, 5*365):
+    case diff if diff in range(3 * 365, 5 * 365):
         print(Interval.P5Y)
-    case diff if diff in range(5*365, 10*365):
+    case diff if diff in range(5 * 365, 10 * 365):
         print(Interval.P10Y)
 
 # Convert values to dates

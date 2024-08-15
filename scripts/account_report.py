@@ -1,13 +1,6 @@
 # IMPORTATIONS
 import common
-import json
-import numpy as np
-import pandas as pd
-
-from datetime import date, datetime
-
-from degiro_connector.trading.api import API as TradingAPI
-from degiro_connector.trading.models.credentials import Credentials
+from datetime import date
 from degiro_connector.trading.models.account import Format, ReportRequest
 
 trading_api = common.connectToDegiro()

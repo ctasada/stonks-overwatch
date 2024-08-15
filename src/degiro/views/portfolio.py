@@ -3,6 +3,7 @@ from django.shortcuts import render
 
 from degiro.integration.portfolio import PortfolioData
 
+
 class Portfolio(View):
     def __init__(self):
         self.portfolio = PortfolioData()
