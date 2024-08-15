@@ -292,8 +292,12 @@ def import_products_quotation() -> None:
     for key in product_growth.keys():
         product = get_productInfo(key)
         
+        # FIXME: Code copied from dashboard._create_products_quotation()
         # If the product is NOT tradable, we shouldn't consider it for Growth
-        if product['tradable'] == False:
+        # The 'tradable' attribute identifies old Stocks, like the ones that are
+        # renamed for some reason, and it's not good enough to identify stocks
+        # that are provided as dividends, for example.
+        if "Non tradeable" in product['name']:
             delete_keys.append(key)
             continue
         

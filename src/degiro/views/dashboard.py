@@ -1,4 +1,6 @@
+from collections import defaultdict
 from datetime import date, datetime, timedelta
+from pprint import pprint
 from django.views import View
 from django.shortcuts import render
 from django.db import connection
@@ -15,10 +17,10 @@ from currency_converter import CurrencyConverter
 
 import logging
 import json
+import math
 
 class Dashboard(View):
     logger = logging.getLogger("stocks_portfolio.dashboard.views")
-    DATETIME_PATTERN = '%Y-%m-%d'
     currencyConverter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
 
     def __init__(self):
@@ -26,12 +28,19 @@ class Dashboard(View):
 
     def get(self, request):
         sectorsContext = self._getSectors()
-        valueContext = self._getPortfolioValue()
+        cash_contributions = self._calculate_cash_contributions()
+        portfolio_value = self._calculate_value()
+        performanceTWR = self._calculate_performance_twr(portfolio_value)
+
+        valueContext = {
+            "cash_contributions": cash_contributions,
+            "portfolio_value": portfolio_value
+        }
 
         context = {
             "portfolio": {
                 "value": valueContext,
-                "performance": None
+                "performance": performanceTWR
             },
             "sectors": sectorsContext
         }
@@ -40,6 +49,66 @@ class Dashboard(View):
         
         # FIXME: Simplify this response
         return render(request, 'dashboard.html', context)
+
+    def _calculate_performance_twr(self, portfolio_value: dict):
+        """
+            Formula to calculate TWR = [(1+RPN) x (1+ RPN) x … – 1] x 100
+            Where RPN= ((NAVF-CF)/NAVI ) -1
+            RPN: Return for period N
+            NAVF: Portfolio final value for the period
+            NAVI: Portfolio initial value for the period
+            CF: Cashflow
+        """
+        tmpData = self._calculate_cash_contributions()
+        cash_contributions = {item['x']: item['y'] for item in tmpData}
+        portfolio_value = {item['x']: item['y'] for item in portfolio_value}
+
+        # print(cash_contributions)
+        # {
+        #  '2020-03-10': 10000.01, '2020-03-11': 5000.01, '2020-08-21': 10000.01, 
+        #  '2020-12-03': 20000.010000000002, '2021-02-10': 22000.010000000002, 
+        #  '2021-05-27': 25000.010000000002, '2021-06-24': 30000.010000000002, 
+        #  '2022-02-01': 35000.01, '2023-01-09': 49000.01, '2024-02-23': 54000.01, 
+        #  '2024-07-28': 54000.01
+        # }
+
+        start_date = next(iter(cash_contributions))
+        end_date = date.today()
+
+        dataset = []
+
+        finalValue = None
+        aggregated_twr = 1
+
+        count = 0
+        for day in pd.date_range(start=start_date, end=end_date,freq='d'):
+            day = day.strftime(LocalizationUtility.DATE_FORMAT)
+
+            cf = cash_contributions.get(day, 0)
+            if finalValue == None:
+                finalValue = cf
+            initialValue = finalValue
+            finalValue = portfolio_value.get(day, None)
+            if finalValue == None:
+                finalValue = initialValue
+
+            if initialValue == 0:
+                break
+
+            rpn = ((finalValue - initialValue) / initialValue)
+            
+            # TWR = [(1+RPN) x (1+ RPN) x … – 1] x 100
+            aggregated_twr = aggregated_twr * (1 + rpn)
+            performance = (aggregated_twr - 1)
+
+            # count += 1
+            # if (count < 10 or math.isinf(performance)):
+            #     print(f"{day}: {rpn} = (({finalValue} - {initialValue}) / {initialValue})")
+            #     print(f"       {performance}")
+
+            dataset.append({'x': day, 'y': performance})
+
+        return dataset
 
     def _getSectors(self):
         portfolio = self.portfolio.get_portfolio()
@@ -76,17 +145,15 @@ class Dashboard(View):
                 "currencySymbol": LocalizationUtility.get_base_currency_symbol(),
             }
     
-    def _getPortfolioValue(self):
-        cash_contributions = self._calculate_cash_contributions()
-        portfolio_value = self._calculate_value()
-
-        return {
-            "cash_contributions": cash_contributions,
-            "portfolio_value": portfolio_value
-        }
-
     def _calculate_cash_contributions(self) -> dict:
         # FIXME: DeGiro doesn't have a consistent description or type. Missing the new value for 'Refund'
+        # Known types:
+        # CASH_FUND_NAV_CHANGE
+        # CASH_FUND_TRANSACTION
+        # CASH_TRANSACTION
+        # FLATEX_CASH_SWEEP
+        # PAYMENT
+        # TRANSACTION
         with connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -114,10 +181,46 @@ class Dashboard(View):
 
         dataset = []
         for contribution in cashContributions:
-            dataset.append({'x': contribution['date'], 'y': contribution['contributed']})
+            dataset.append({
+                'x': contribution['date'], 
+                'y': LocalizationUtility.round_value(contribution['contributed'])
+            })
 
         # Append today with the last value to draw the line properly
         dataset.append({'x': date.today().strftime('%Y-%m-%d'), 'y': cashContributions[-1]['contributed']})
+
+        return dataset
+
+    def _calculate_cash_account_value(self) -> dict:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT date, balance_total 
+                FROM degiro_cashmovements 
+                WHERE currency = 'EUR' 
+                    AND type = 'CASH_TRANSACTION'
+                """
+            )
+            cashContributions = dictfetchall(cursor)
+
+        # Create DataFrame from the fetched data
+        df = pd.DataFrame.from_dict(cashContributions)
+
+        # Convert the 'date' column to datetime and remove the time component
+        df['date'] = pd.to_datetime(df['date']).dt.normalize()
+
+        # Group by date and take the last balance_total for each day
+        df = df.groupby('date', as_index=False).last()
+
+        # Sort values by date (just in case)
+        df = df.sort_values(by='date')
+
+        # Set the 'date' column as the index and fill missing dates
+        df.set_index('date', inplace=True)
+        df = df.resample('D').ffill()
+
+        # Convert the DataFrame to a dictionary with date as the key (converted to string) and balance_total as the value
+        dataset = {date.strftime('%Y-%m-%d'): float(balance) for date, balance in df['balance_total'].items()}
 
         return dataset
 
@@ -162,32 +265,48 @@ class Dashboard(View):
 
     def _calculate_value(self) -> list:
         data = self._create_products_quotation()
+        stockSplits = self._get_stock_splits()
 
         baseCurrency = LocalizationUtility.get_base_currency()
         aggregate = dict()
         for key in data:
             entry = data[key]
-            position_value_growth = self._calculate_position_growth(entry)
+            position_value_growth = self._calculate_position_growth(entry, stockSplits)
             convert_fx = entry['product']['currency'] != baseCurrency
             for date in position_value_growth:
                 aggregate_value = aggregate.get(date, 0)
 
                 if convert_fx:
                     currency = entry['product']['currency']
-                    fx_date = datetime.strptime(date, self.DATETIME_PATTERN).date()
+                    fx_date = datetime.strptime(date, LocalizationUtility.DATE_FORMAT).date()
                     value = self.currencyConverter.convert(position_value_growth[date], currency, baseCurrency, fx_date)
                     aggregate_value += value
                 else:
                     aggregate_value += position_value_growth[date]
                 aggregate[date] = aggregate_value
 
+        cash_account = self._calculate_cash_account_value()
+
         dataset = []
+        latest_day = None
         for day in aggregate:
-            dataset.append({'x': day, 'y': aggregate[day]})
+            # Merges the portfolio value with the cash value to get the full picture
+            cash_value = 0.0
+            if day in cash_account:
+                cash_value = cash_account[day]
+                latest_day = day
+            else:
+                cash_value = cash_account[latest_day]
+            
+            day_value = aggregate[day] + cash_value
+            dataset.append({
+                'x': day, 
+                'y': LocalizationUtility.round_value(day_value)
+            })
 
         return dataset
 
-    def _calculate_position_growth(self, entry: dict) -> dict:
+    def _calculate_position_growth(self, entry: dict, stockSplits: dict) -> dict:
         product_history_dates = list(entry['history'].keys())
         
         start_date = datetime.strptime(product_history_dates[0], LocalizationUtility.DATE_FORMAT).date()
@@ -211,6 +330,19 @@ class Dashboard(View):
             index = dates.index(date)
             for d in dates[index:]:
                 position_value[d] = entry['history'][date]
+        
+        splittedStock = False
+        if entry['productId'] in stockSplits:
+            splittedStock = True
+
+        if splittedStock:
+            stocksMultiplier = 1
+            for splitDate in reversed(stockSplits[entry['productId']]):
+                splitData = stockSplits[entry['productId']][splitDate]
+                stocksMultiplier = stocksMultiplier * splitData['split_ratio']
+                for date in reversed(position_value):
+                    if date < splitDate:
+                        position_value[date] = position_value[date] * stocksMultiplier
 
         aggregate = dict()
         for date in entry['quotation']['quotes']:
@@ -253,11 +385,53 @@ class Dashboard(View):
 
         return interval
 
+    def _get_stock_splits(self) -> dict:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT date, productId, buysell, quantity FROM degiro_transactions
+                    WHERE transactionTypeId = '101'
+                """
+                )
+            results = dictfetchall(cursor)
+
+        # Dictionary to hold grouped data
+        grouped_data = defaultdict(lambda: {'B': None, 'S': None})
+        # Grouping the data by date and productId
+        for entry in results:
+            date = entry['date'].strftime(LocalizationUtility.DATE_FORMAT)
+            buysell = entry['buysell']
+            grouped_data[date][buysell] = entry
+
+        splitted_stocks = {}
+        for date, transactions in grouped_data.items():
+            sell_quantity = abs(transactions['S']['quantity'])
+            buy_quantity = transactions['B']['quantity']
+            ratio = buy_quantity / sell_quantity
+
+            sell_productId = transactions['S']['productId']
+            buy_productId = transactions['B']['productId']
+            productSplit = {
+                'productId_sell': sell_productId,
+                'productId_buy': buy_productId,
+                'is_renamed': transactions['S']['productId'] != transactions['B']['productId'],
+                'split_ratio': ratio
+            }
+            if sell_productId not in splitted_stocks:
+                splitted_stocks[sell_productId] = {}
+            if buy_productId not in splitted_stocks:
+                splitted_stocks[buy_productId] = {}
+
+            splitted_stocks[sell_productId][date] = productSplit
+            splitted_stocks[buy_productId][date] = productSplit
+
+        return splitted_stocks
+
     def _create_products_quotation(self) -> dict:
         with connection.cursor() as cursor:
             cursor.execute(
                 """
-                SELECT date, productId, buysell, quantity, price, total FROM degiro_transactions
+                SELECT date, productId, quantity FROM degiro_transactions
                 """
                 )
             results = dictfetchall(cursor)
@@ -276,20 +450,22 @@ class Dashboard(View):
                 product['history'] = {}    
             product['history'][stock_date] = carry_total
             product_growth[key] = product
-        
-        # Cleanup 'carry_total' from result
-        for key in product_growth.keys():
-            del product_growth[key]['carry_total']
 
         delete_keys = []
         for key in product_growth.keys():
+            # Cleanup 'carry_total' from result
+            del product_growth[key]['carry_total']
             product = self._get_productInfo(key)
             
             # If the product is NOT tradable, we shouldn't consider it for Growth
-            if product['tradable'] == False:
+            # The 'tradable' attribute identifies old Stocks, like the ones that are
+            # renamed for some reason, and it's not good enough to identify stocks
+            # that are provided as dividends, for example.
+            if "Non tradeable" in product['name']:
                 delete_keys.append(key)
                 continue
             
+            product_growth[key]['productId'] = key
             product_growth[key]['product'] = {}
             product_growth[key]['product']['name'] = product['name']
             product_growth[key]['product']['isin'] = product['isin']
