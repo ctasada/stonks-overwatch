@@ -172,12 +172,12 @@ LOGGING = {
             'level': 'WARN',
             'propagate': True,
         },
-        'degiro_connector':{
+        'degiro_connector': {
             'handlers': ['console'],
             'level': 'WARN',
             'propagate': False,
         },
-        'stocks_portfolio':{
+        'stocks_portfolio': {
             'handlers': ['console', 'file'],
             'level': 'WARN',
             'propagate': False,

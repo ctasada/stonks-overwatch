@@ -1,11 +1,6 @@
 # IMPORTATIONS
 import common
 import json
-import pandas as pd
-
-# from IPython.display import display
-from degiro_connector.trading.api import API as TradingAPI
-from degiro_connector.trading.models.credentials import Credentials
 from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
 
 trading_api = common.connectToDegiro()
@@ -20,7 +15,7 @@ update = trading_api.get_update(request_list=[
 # print(update)
 # print(json.dumps(update, indent = 4))
 
-# update_dict['portfolio']['values] => 
+# update_dict['portfolio']['values] =>
 # {
 #     "realizedFxPl": 0.0,
 #     "plBase": {
@@ -41,7 +36,7 @@ update = trading_api.get_update(request_list=[
 #     "breakEvenPrice": 138.805,
 #     "positionType": "PRODUCT"
 # },
-# 
+#
 # update_dict['total_portfolio']['values'] =>
 # {
 #     "totalDepositWithdrawal": 22000.01, => Deposited Money
@@ -63,11 +58,11 @@ update = trading_api.get_update(request_list=[
 
 # for value in update_dict['portfolio']['values']:
 
-result = dict (
-    totalCash = update['totalPortfolio']['value']['totalCash'],
-    totalDepositWithdrawal = update['totalPortfolio']['value']['totalDepositWithdrawal'],
+result = dict(
+    totalCash=update['totalPortfolio']['value']['totalCash'],
+    totalDepositWithdrawal=update['totalPortfolio']['value']['totalDepositWithdrawal'],
 )
 
-print(json.dumps(result, indent = 4))
+print(json.dumps(result, indent=4))
 
 trading_api.logout()

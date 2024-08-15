@@ -3,9 +3,6 @@ import common
 import json
 
 from datetime import date
-from degiro_connector.trading.api import API as TradingAPI
-from degiro_connector.trading.models.credentials import Credentials
-from degiro_connector.trading.models.product import ProductInfo
 from degiro_connector.trading.models.transaction import HistoryRequest
 
 trading_api = common.connectToDegiro()
@@ -26,7 +23,7 @@ transactions_history = trading_api.get_transactions_history(
     raw=True,
 )
 
-print(json.dumps(transactions_history, indent = 4))
+print(json.dumps(transactions_history, indent=4))
 
 products_ids = []
 
@@ -43,6 +40,6 @@ products_info = trading_api.get_products_info(
 )
 
 # DISPLAY PRODUCTS_INFO
-print(json.dumps(products_info, indent = 4))
+print(json.dumps(products_info, indent=4))
 
 trading_api.logout()

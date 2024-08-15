@@ -3,8 +3,8 @@ from degiro.utils.localization import LocalizationUtility
 
 from degiro_connector.trading.models.transaction import HistoryRequest
 from datetime import date
-import json
 import logging
+
 
 class TransactionsData:
     def __init__(self):
@@ -36,8 +36,8 @@ class TransactionsData:
         products_ids = []
 
         # ITERATION OVER THE TRANSACTIONS TO OBTAIN THE PRODUCTS
-        for transaction in transactions_history['data']:
-            products_ids.append(int(transaction['productId']))
+        for transaction in transactions_history["data"]:
+            products_ids.append(int(transaction["productId"]))
 
         products_info = DeGiro.get_products_info(products_ids)
 
@@ -46,34 +46,46 @@ class TransactionsData:
 
         # DISPLAY PRODUCTS_INFO
         myTransactions = []
-        for transaction in transactions_history['data']:
-            info = products_info[str(int(transaction['productId']))]
+        for transaction in transactions_history["data"]:
+            info = products_info[str(int(transaction["productId"]))]
 
-            fees = transaction['totalPlusFeeInBaseCurrency'] - transaction['totalInBaseCurrency']
+            fees = (
+                transaction["totalPlusFeeInBaseCurrency"]
+                - transaction["totalInBaseCurrency"]
+            )
 
             myTransactions.append(
                 dict(
-                    name=info['name'],
-                    symbol = info['symbol'],
-                    date = LocalizationUtility.format_date_time(transaction['date']),
-                    buysell = self.convertBuySell(transaction['buysell']),
-                    transactionType = self.convertTransactionTypeId(transaction['transactionTypeId']),
-                    price = transaction['price'],
-                    quantity = transaction['quantity'],
-                    total = LocalizationUtility.format_money_value(value = transaction['total'], currency = info['currency']),
-                    totalInBaseCurrency = LocalizationUtility.format_money_value(value = transaction['totalInBaseCurrency'], currencySymbol = baseCurrencySymbol),
-                    fees = LocalizationUtility.format_money_value(value = fees, currencySymbol = baseCurrencySymbol)
+                    name=info["name"],
+                    symbol=info["symbol"],
+                    date=LocalizationUtility.format_date_time(transaction["date"]),
+                    buysell=self.convertBuySell(transaction["buysell"]),
+                    transactionType=self.convertTransactionTypeId(
+                        transaction["transactionTypeId"]
+                    ),
+                    price=transaction["price"],
+                    quantity=transaction["quantity"],
+                    total=LocalizationUtility.format_money_value(
+                        value=transaction["total"], currency=info["currency"]
+                    ),
+                    totalInBaseCurrency=LocalizationUtility.format_money_value(
+                        value=transaction["totalInBaseCurrency"],
+                        currencySymbol=baseCurrencySymbol,
+                    ),
+                    fees=LocalizationUtility.format_money_value(
+                        value=fees, currencySymbol=baseCurrencySymbol
+                    ),
                 )
             )
 
-        return sorted(myTransactions, key=lambda k: k['date'], reverse=True)
+        return sorted(myTransactions, key=lambda k: k["date"], reverse=True)
 
     def convertBuySell(self, buysell: str):
-        if (buysell == "B"):
+        if buysell == "B":
             return "Buy"
-        elif (buysell == "S"):
+        elif buysell == "S":
             return "Sell"
-        
+
         return "Unknown"
 
     def convertTransactionTypeId(self, transactionTypeId: int):

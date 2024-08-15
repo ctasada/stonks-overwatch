@@ -3,7 +3,6 @@ from django.shortcuts import render
 
 from degiro.integration.transactions import TransactionsData
 
-import json
 
 class Transactions(View):
     def __init__(self):

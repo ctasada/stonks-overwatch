@@ -1,4 +1,3 @@
-import datetime
 import logging
 import os
 import sys
@@ -6,17 +5,18 @@ import sys
 import pandas as pd
 from currency_converter import CurrencyConverter
 
-from util import *
+from util import convert_date, EXPORT_COLUMNS_ACCOUNT, CSV_DECIMAL, CSV_SEPARATOR
 
 c = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
 convert_isin_usd_to_euro = ['IE00B3RBWM25', 'IE00B0M62Q58', 'IE0031442068', 'IE00BZ163M45']
+
 
 def convert_currency(isin: str, value: str, date):
     if isin in convert_isin_usd_to_euro:
         try:
             converted = c.convert(value, 'USD', 'EUR', date=date)
             return round(converted, 2)
-        except Exception as e:
+        except Exception:
             logging.exception("message")
             print(isin + str(value) + str(date))
             return value
@@ -53,7 +53,7 @@ class DeGiroConverterAccount:
 
     def merge_rows(self, df: pd.DataFrame) -> pd.DataFrame:
         koop_row = df[df['Omschrijving'].str.contains('Koop', na=False)]
-        valuta_credit_row = df[df['Omschrijving'].str.contains('Valuta Creditering', na=False)]       
+        valuta_credit_row = df[df['Omschrijving'].str.contains('Valuta Creditering', na=False)]
 
         if not koop_row.empty and not valuta_credit_row.empty:
             koop_row = koop_row.iloc[0]
@@ -73,13 +73,14 @@ class DeGiroConverterAccount:
         merged_df = merged_df.reset_index()
         merged_df = merged_df.drop(columns=['level_0', 'level_1'])
         # df.update(merged_df)
-        
+
         # Reverse again to keep the original order
         self.outputdata = df.reset_index().iloc[::-1]
 
     def write_outputfile(self, outputfile: str):
         self.outputdata.to_csv(outputfile, index=False, decimal=CSV_DECIMAL, sep=CSV_SEPARATOR)
         print("Wrote output to: " + outputfile)
+
 
 if __name__ == '__main__':
     converter = DeGiroConverterAccount(os.path.dirname(sys.argv[0]) + 'Account.csv')

@@ -1,16 +1,13 @@
 # IMPORTATIONS
-import datetime
 import json
 import logging
 
-from datetime import date
-
 from degiro_connector.trading.api import API as TradingAPI
 from degiro_connector.trading.models.credentials import Credentials
-from degiro_connector.trading.models.account import OverviewRequest
 
 # SETUP LOGGING LEVEL
 logging.basicConfig(level=logging.DEBUG)
+
 
 def connectToDegiro():
     # SETUP CONFIG DICT

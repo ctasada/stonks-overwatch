@@ -2,11 +2,6 @@
 import common
 import json
 
-from datetime import date
-
-from degiro_connector.trading.api import API as TradingAPI
-from degiro_connector.trading.models.credentials import Credentials
-from degiro_connector.trading.models.account import OverviewRequest
 
 trading_api = common.connectToDegiro()
 

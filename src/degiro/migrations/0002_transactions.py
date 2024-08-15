@@ -6,35 +6,73 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('degiro', '0001_initial'),
+        ("degiro", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Transactions',
+            name="Transactions",
             fields=[
-                ('id', models.PositiveIntegerField(primary_key=True, serialize=False)),
-                ('productId', models.PositiveIntegerField()),
-                ('date', models.DateTimeField()),
-                ('buysell', models.CharField(max_length=1)),
-                ('price', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('quantity', models.IntegerField()),
-                ('total', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('orderTypeId', models.PositiveIntegerField(blank=True, default=None, null=True)),
-                ('counterParty', models.CharField(blank=True, default=None, max_length=5, null=True)),
-                ('transfered', models.BooleanField()),
-                ('fxRate', models.DecimalField(decimal_places=4, max_digits=10)),
-                ('nettFxRate', models.DecimalField(decimal_places=4, max_digits=10)),
-                ('grossFxRate', models.DecimalField(decimal_places=4, max_digits=10)),
-                ('autoFxFeeInBaseCurrency', models.DecimalField(decimal_places=10, max_digits=15)),
-                ('totalInBaseCurrency', models.DecimalField(decimal_places=10, max_digits=15)),
-                ('feeInBaseCurrency', models.DecimalField(blank=True, decimal_places=2, default=None, max_digits=10, null=True)),
-                ('totalFeesInBaseCurrency', models.DecimalField(decimal_places=10, max_digits=15)),
-                ('totalPlusFeeInBaseCurrency', models.DecimalField(decimal_places=10, max_digits=15)),
-                ('totalPlusAllFeesInBaseCurrency', models.DecimalField(decimal_places=10, max_digits=15)),
-                ('transactionTypeId', models.PositiveIntegerField()),
-                ('tradingVenue', models.CharField(blank=True, default=None, max_length=5, null=True)),
-                ('executingEntityId', models.CharField(blank=True, default=None, max_length=30, null=True)),
+                ("id", models.PositiveIntegerField(primary_key=True, serialize=False)),
+                ("productId", models.PositiveIntegerField()),
+                ("date", models.DateTimeField()),
+                ("buysell", models.CharField(max_length=1)),
+                ("price", models.DecimalField(decimal_places=2, max_digits=10)),
+                ("quantity", models.IntegerField()),
+                ("total", models.DecimalField(decimal_places=2, max_digits=10)),
+                (
+                    "orderTypeId",
+                    models.PositiveIntegerField(blank=True, default=None, null=True),
+                ),
+                (
+                    "counterParty",
+                    models.CharField(blank=True, default=None, max_length=5, null=True),
+                ),
+                ("transfered", models.BooleanField()),
+                ("fxRate", models.DecimalField(decimal_places=4, max_digits=10)),
+                ("nettFxRate", models.DecimalField(decimal_places=4, max_digits=10)),
+                ("grossFxRate", models.DecimalField(decimal_places=4, max_digits=10)),
+                (
+                    "autoFxFeeInBaseCurrency",
+                    models.DecimalField(decimal_places=10, max_digits=15),
+                ),
+                (
+                    "totalInBaseCurrency",
+                    models.DecimalField(decimal_places=10, max_digits=15),
+                ),
+                (
+                    "feeInBaseCurrency",
+                    models.DecimalField(
+                        blank=True,
+                        decimal_places=2,
+                        default=None,
+                        max_digits=10,
+                        null=True,
+                    ),
+                ),
+                (
+                    "totalFeesInBaseCurrency",
+                    models.DecimalField(decimal_places=10, max_digits=15),
+                ),
+                (
+                    "totalPlusFeeInBaseCurrency",
+                    models.DecimalField(decimal_places=10, max_digits=15),
+                ),
+                (
+                    "totalPlusAllFeesInBaseCurrency",
+                    models.DecimalField(decimal_places=10, max_digits=15),
+                ),
+                ("transactionTypeId", models.PositiveIntegerField()),
+                (
+                    "tradingVenue",
+                    models.CharField(blank=True, default=None, max_length=5, null=True),
+                ),
+                (
+                    "executingEntityId",
+                    models.CharField(
+                        blank=True, default=None, max_length=30, null=True
+                    ),
+                ),
             ],
         ),
     ]

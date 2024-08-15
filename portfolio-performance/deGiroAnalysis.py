@@ -2,7 +2,7 @@
 #
 # Degiro trading tracker:
 # Simplified tracking of your investments
-# 
+#
 # Blog post: https://foolcontrol.org/?p=3614
 # GitHub: https://github.com/AdnanHodzic/degiro-trading-tracker
 #
@@ -11,6 +11,7 @@
 
 # FIXME: Numbers do not seem to match. Needs to be reviewed
 
+import numpy as np
 import pandas as pd
 import sys
 
@@ -52,9 +53,8 @@ for line in pc:
     if line > 0:
         ps.append(line)
 
-# convert str + int to float (sales) 
-import numpy as np
-ps=np.array(ps,float)
+# convert str + int to float (sales)
+ps = np.array(ps, float)
 
 ps = sum(ps)
 ps = round(ps, 2)

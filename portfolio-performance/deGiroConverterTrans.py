@@ -1,8 +1,8 @@
 import sys
 import os
 import pandas as pd
-from util import *
-import datetime
+from util import convert_date, EXPORT_COLUMNS_TRANSACTIONS, CSV_DECIMAL, CSV_SEPARATOR
+
 
 class DeGiroConverterTrans:
 
@@ -11,7 +11,7 @@ class DeGiroConverterTrans:
             self.inputdata = pd.read_csv(inputfile, parse_dates=[0], date_format="%d-%m-%Y")
         else:
             self.inputdata = data
-        
+
         self.outputdata = pd.DataFrame(
             index=self.inputdata.index, columns=EXPORT_COLUMNS_TRANSACTIONS, data=None)
 

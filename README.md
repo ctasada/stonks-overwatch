@@ -28,6 +28,11 @@ poetry run src/manage.py runserver
 open http://127.0.0.1:8000/degiro
 ```
 
+Run Linter
+```shell
+poetry run flake8
+```
+
 Create Migrations
 ```shell
 poetry run src/manage.py makemigrations degiro

@@ -2,14 +2,9 @@
 import common
 import json
 
-import logging
-import requests
 from datetime import datetime, timedelta
 
-from degiro_connector.trading.api import API as TradingAPI
-from degiro_connector.trading.models.credentials import build_credentials
 from degiro_connector.trading.models.agenda import AgendaRequest, CalendarType
-from degiro_connector.core.constants import urls
 
 trading_api = common.connectToDegiro()
 
@@ -49,4 +44,4 @@ agenda = trading_api.get_agenda(
 #     ]
 # }
 
-print(json.dumps(agenda, indent = 4))
+print(json.dumps(agenda, indent=4))

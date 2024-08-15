@@ -6,6 +6,7 @@ EXPORT_COLUMNS_ACCOUNT = ["Date", "Time", "Value", "Shares", "Fees", 'Transactio
 CSV_SEPARATOR = ','
 CSV_DECIMAL = '.'
 
+
 def convert_date(date):
     year = str(date.year)
     month = str(date.month)

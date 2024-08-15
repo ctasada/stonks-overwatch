@@ -7,27 +7,82 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='CashMovements',
+            name="CashMovements",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('date', models.DateTimeField()),
-                ('valueDate', models.DateTimeField()),
-                ('description', models.CharField(max_length=200)),
-                ('currency', models.CharField(max_length=3)),
-                ('type', models.CharField(max_length=200)),
-                ('balance_unsettledCash', models.CharField(blank=True, default=None, max_length=200, null=True)),
-                ('balance_flatexCash', models.CharField(blank=True, default=None, max_length=200, null=True)),
-                ('balance_cashFund', models.CharField(blank=True, default=None, max_length=200, null=True)),
-                ('balance_total', models.CharField(blank=True, default=None, max_length=200, null=True)),
-                ('productId', models.CharField(blank=True, default=None, max_length=20, null=True)),
-                ('change', models.DecimalField(blank=True, decimal_places=2, default=None, max_digits=10, null=True)),
-                ('exchangeRate', models.DecimalField(blank=True, decimal_places=2, default=None, max_digits=10, null=True)),
-                ('orderId', models.CharField(blank=True, default=None, max_length=200, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("date", models.DateTimeField()),
+                ("valueDate", models.DateTimeField()),
+                ("description", models.CharField(max_length=200)),
+                ("currency", models.CharField(max_length=3)),
+                ("type", models.CharField(max_length=200)),
+                (
+                    "balance_unsettledCash",
+                    models.CharField(
+                        blank=True, default=None, max_length=200, null=True
+                    ),
+                ),
+                (
+                    "balance_flatexCash",
+                    models.CharField(
+                        blank=True, default=None, max_length=200, null=True
+                    ),
+                ),
+                (
+                    "balance_cashFund",
+                    models.CharField(
+                        blank=True, default=None, max_length=200, null=True
+                    ),
+                ),
+                (
+                    "balance_total",
+                    models.CharField(
+                        blank=True, default=None, max_length=200, null=True
+                    ),
+                ),
+                (
+                    "productId",
+                    models.CharField(
+                        blank=True, default=None, max_length=20, null=True
+                    ),
+                ),
+                (
+                    "change",
+                    models.DecimalField(
+                        blank=True,
+                        decimal_places=2,
+                        default=None,
+                        max_digits=10,
+                        null=True,
+                    ),
+                ),
+                (
+                    "exchangeRate",
+                    models.DecimalField(
+                        blank=True,
+                        decimal_places=2,
+                        default=None,
+                        max_digits=10,
+                        null=True,
+                    ),
+                ),
+                (
+                    "orderId",
+                    models.CharField(
+                        blank=True, default=None, max_length=200, null=True
+                    ),
+                ),
             ],
         ),
     ]

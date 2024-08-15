@@ -1,11 +1,6 @@
 # IMPORTATIONS
 import common
 import json
-import pandas as pd
-
-from degiro_connector.trading.api import API as TradingAPI
-from degiro_connector.trading.models.credentials import Credentials
-from degiro_connector.trading.models.product import ProductInfo
 from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
 
 trading_api = common.connectToDegiro()
@@ -30,8 +25,7 @@ products_info = trading_api.get_products_info(
 )
 
 # DEBUG Values
-#print(json.dumps(update_dict, indent = 4))
-print(json.dumps(products_info, indent = 4))
+print(json.dumps(products_info, indent=4))
 
 myPortfolio = []
 
@@ -41,13 +35,13 @@ for portfolio in update['portfolio']['value']:
         myPortfolio.append(
             dict(
                 name=info['name'],
-                symbol = info['symbol'],
+                symbol=info['symbol'],
                 # size = portfolio['size'],
                 # price = portfolio['closePrice'],
-                currency = info['currency'],
-                # breakEvenPrice = portfolio['breakEvenPrice'], # GAK: Average Purchase Price                
+                currency=info['currency'],
+                # breakEvenPrice = portfolio['breakEvenPrice'], # GAK: Average Purchase Price
                 # value = portfolio['value'],
-                isin = info['isin'],
+                isin=info['isin'],
             )
         )
 
