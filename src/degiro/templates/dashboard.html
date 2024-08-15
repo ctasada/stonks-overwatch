@@ -192,13 +192,12 @@
         datasets: [
           {
               label: 'Portfolio Performance',
-              // data: {{ portfolio.performance.portfolio_performance|safe }},
-              data: {{ portfolio.value.portfolio_value|safe }},
+              data: {{ portfolio.performance|safe }},
               stepped: false,
               lineTension: 0.5
           }],
       };
-      const minimumDate = new Date('{{ portfolio.performance.portfolio_growth.0.x }}')
+      const minimumDate = new Date('{{ portfolio.performance.0.x }}')
 
       redrawPortfolioGraph(dataPerformance, timeRange, minimumDate)
     }

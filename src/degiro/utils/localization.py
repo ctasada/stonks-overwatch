@@ -22,6 +22,10 @@ class LocalizationUtility(object):
         return baseCurrency
 
     @staticmethod
+    def round_value(value: float):
+        return round(value, 3)
+
+    @staticmethod
     def format_money_value(value: float, currency: str = None, currencySymbol : str = None):
         if (currency and not currencySymbol):
             currencySymbol = CurrencySymbols.get_symbol(currency)
