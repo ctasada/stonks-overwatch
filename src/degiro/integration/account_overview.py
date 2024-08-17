@@ -1,3 +1,4 @@
+from degiro.config.degiro_config import DegiroConfig
 from degiro.utils.degiro import DeGiro
 from degiro.utils.localization import LocalizationUtility
 from degiro_connector.trading.models.account import OverviewRequest
@@ -5,14 +6,15 @@ from datetime import date
 
 
 class AccountOverviewData:
+    degiro_config = DegiroConfig.default()
 
     def get_account_overview(self):
         # SETUP REQUEST
         today = date.today()
         from_date = date(
-            year=2020,
-            month=1,
-            day=1,
+            year=self.degiro_config.start_date.year,
+            month=self.degiro_config.start_date.month,
+            day=self.degiro_config.start_date.day,
         )
         to_date = date(
             year=today.year,

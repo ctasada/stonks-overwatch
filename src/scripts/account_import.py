@@ -6,6 +6,7 @@ Usage:
     poetry run src/manage.py runscript account_import
 """
 
+from degiro.config.degiro_config import DegiroConfig
 from scripts.commons import IMPORT_FOLDER, TIME_DATE_FORMAT, init, save_to_json
 
 import json
@@ -22,10 +23,11 @@ from degiro_connector.trading.models.account import OverviewRequest
 
 def get_import_from_date() -> date:
     """
-    Returns the latest update from the DB and increases to next day or defaults to January 2020
+    Returns the latest update from the DB and increases to next day or defaults to configured date
     ### Returns:
-        date: the latest update from the DB and increases to next day or defaults to January 2020
+        date: the latest update from the DB and increases to next day or defaults to configured date
     """
+    degiro_config = DegiroConfig.default()
     try:
         entry = CashMovements.objects.all().order_by("-date").first()
         if entry is not None:
@@ -35,7 +37,11 @@ def get_import_from_date() -> date:
     except Exception:
         print("Something went wrong, defaulting to oldest date")
 
-    return date(year=2020, month=1, day=1)
+    return date(
+        year=degiro_config.start_date.year,
+        month=degiro_config.start_date.month,
+        day=degiro_config.start_date.day,
+    )
 
 
 def get_cash_movements(from_date: date, json_file_path: str) -> None:

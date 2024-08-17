@@ -1,10 +1,10 @@
 from datetime import timedelta
-import json
 import logging
 import requests_cache
 
 from degiro_connector.trading.api import API as TradingAPI
 from degiro_connector.trading.models.credentials import Credentials
+from degiro.config.degiro_config import DegiroConfig
 from degiro.utils.single_instance_metaclass import SingleInstanceMetaClass
 
 
@@ -16,21 +16,15 @@ class DeGiro(metaclass=SingleInstanceMetaClass):
         # SETUP LOGGING LEVEL
         logging.basicConfig(level=logging.INFO)
 
-        # SETUP CONFIG DICT
-        with open("config/config.json") as config_file:
-            config_dict = json.load(config_file)
-
+        degiro_config = DegiroConfig.default()
+        degiro_credentials = degiro_config.credentials
         # SETUP CREDENTIALS
-        username = config_dict["username"]
-        password = config_dict["password"]
-        int_account = config_dict["int_account"]
-        # FIXME: Using Totp is convenient, but not secure
-        totp_secret_key = config_dict["totp_secret_key"]
         credentials = Credentials(
-            int_account=int_account,
-            username=username,
-            password=password,
-            totp_secret_key=totp_secret_key,
+            int_account=degiro_credentials.int_account,
+            username=degiro_credentials.username,
+            password=degiro_credentials.password,
+            # FIXME: Using Totp is convenient, but not secure
+            totp_secret_key=degiro_credentials.totp_secret_key,
         )
         # SETUP TRADING API
         self.apiClient = TradingAPI(credentials=credentials)

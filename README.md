@@ -71,6 +71,7 @@ poetry run src/manage.py runscript init_db
 * https://github.com/lucalaringe/degiro_portfolio_analytics
 * https://app.portfoliodividendtracker.com/p/jongbeleggen?locale=en (Has some interesting diagrams and data)
 * https://divvydiary.com/en/p/24094?tab=depot
+* https://capitalyse.app/app/degiro/ -> Seems to have some errors, but data and graphs are interesting
 
 ## BUGS
 - Dashboard: JNJ & JPM are associated with the wrong sector
@@ -79,8 +80,6 @@ poetry run src/manage.py runscript init_db
 
 ## TODOs
 - [ ] Make it easier to keep the JS dependencies up-to-date. NPM seems to be the way
-- [ ] Improve configuration:
-      - Oldest day should be configurable
 - [ ] DeGiro Client: Replace the Singleton by a proper session instance
 - [ ] DeGiro Client: Stop using Totp and request 2FA for each connection
 - [ ] Portfolio: Show filter to see Open/Close/All stocks
