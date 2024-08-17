@@ -5,11 +5,13 @@ This script is intended to be run as a Django script.
 Usage:
     poetry run src/manage.py runscript transactions_import
 """
+
 import json
 
 from datetime import date, datetime, time, timedelta
 from django.forms import model_to_dict
 
+from degiro.config.degiro_config import DegiroConfig
 from degiro.utils.degiro import DeGiro
 from degiro.models import Transactions
 
@@ -20,20 +22,25 @@ from scripts.commons import IMPORT_FOLDER, TIME_DATE_FORMAT, init
 
 def get_import_from_date() -> date:
     """
-    Returns the latest update from the DB and increases to next day or defaults to January 2020
+    Returns the latest update from the DB and increases to next day or defaults to configured date
     ### Returns:
-        date: the latest update from the DB and increases to next day or defaults to January 2020
+        date: the latest update from the DB and increases to next day or defaults to configured date
     """
+    degiro_config = DegiroConfig.default()
     try:
-        entry = Transactions.objects.all().order_by('-date').first()
+        entry = Transactions.objects.all().order_by("-date").first()
         if entry is not None:
-            oldest_day = model_to_dict(entry)['date']
+            oldest_day = model_to_dict(entry)["date"]
             oldest_day += timedelta(days=1)
             return datetime.combine(oldest_day, time.min)
     except Exception:
         print("Something went wrong, defaulting to oldest date")
 
-    return date(year=2020, month=1, day=1)
+    return date(
+        year=degiro_config.start_date.year,
+        month=degiro_config.start_date.month,
+        day=degiro_config.start_date.day,
+    )
 
 
 def get_transactions(from_date, json_file_path) -> None:
@@ -58,7 +65,7 @@ def get_transactions(from_date, json_file_path) -> None:
     )
 
     # Save the JSON to a file
-    data_file = open(json_file_path, 'w')
+    data_file = open(json_file_path, "w")
     data_file.write(json.dumps(transactions_history, indent=4))
     data_file.close()
 
@@ -75,33 +82,35 @@ def import_transactions(file_path) -> None:
     with open(file_path) as json_file:
         data = json.load(json_file)
 
-    for row in data['data']:
-        try :
+    for row in data["data"]:
+        try:
             Transactions.objects.update_or_create(
-                id=row['id'],
+                id=row["id"],
                 defaults={
-                    'productId': row['productId'],
-                    'date': datetime.strptime(row['date'], TIME_DATE_FORMAT),
-                    'buysell': row['buysell'],
-                    'price': row['price'],
-                    'quantity': row['quantity'],
-                    'total': row['total'],
-                    'orderTypeId': row.get('orderTypeId', None),
-                    'counterParty': row.get('counterParty', None),
-                    'transfered': row['transfered'],
-                    'fxRate': row['fxRate'],
-                    'nettFxRate': row['nettFxRate'],
-                    'grossFxRate': row['grossFxRate'],
-                    'autoFxFeeInBaseCurrency': row['autoFxFeeInBaseCurrency'],
-                    'totalInBaseCurrency': row['totalInBaseCurrency'],
-                    'feeInBaseCurrency': row.get('feeInBaseCurrency', None),
-                    'totalFeesInBaseCurrency': row['totalFeesInBaseCurrency'],
-                    'totalPlusFeeInBaseCurrency': row['totalPlusFeeInBaseCurrency'],
-                    'totalPlusAllFeesInBaseCurrency': row['totalPlusAllFeesInBaseCurrency'],
-                    'transactionTypeId': row['transactionTypeId'],
-                    'tradingVenue': row.get('tradingVenue', None),
-                    'executingEntityId': row.get('executingEntityId', None),
-                }
+                    "productId": row["productId"],
+                    "date": datetime.strptime(row["date"], TIME_DATE_FORMAT),
+                    "buysell": row["buysell"],
+                    "price": row["price"],
+                    "quantity": row["quantity"],
+                    "total": row["total"],
+                    "orderTypeId": row.get("orderTypeId", None),
+                    "counterParty": row.get("counterParty", None),
+                    "transfered": row["transfered"],
+                    "fxRate": row["fxRate"],
+                    "nettFxRate": row["nettFxRate"],
+                    "grossFxRate": row["grossFxRate"],
+                    "autoFxFeeInBaseCurrency": row["autoFxFeeInBaseCurrency"],
+                    "totalInBaseCurrency": row["totalInBaseCurrency"],
+                    "feeInBaseCurrency": row.get("feeInBaseCurrency", None),
+                    "totalFeesInBaseCurrency": row["totalFeesInBaseCurrency"],
+                    "totalPlusFeeInBaseCurrency": row["totalPlusFeeInBaseCurrency"],
+                    "totalPlusAllFeesInBaseCurrency": row[
+                        "totalPlusAllFeesInBaseCurrency"
+                    ],
+                    "transactionTypeId": row["transactionTypeId"],
+                    "tradingVenue": row.get("tradingVenue", None),
+                    "executingEntityId": row.get("executingEntityId", None),
+                },
             )
         except Exception as error:
             print(f"Cannot import row: {row}")
@@ -115,5 +124,5 @@ def run():
     import_transactions(f"{IMPORT_FOLDER}/transactions.json")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()

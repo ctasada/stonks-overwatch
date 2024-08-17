@@ -1,0 +1,46 @@
+from datetime import date, datetime
+import json
+import os
+from typing import Self
+
+from stocks_portfolio.settings import PROJECT_PATH
+
+
+class DegiroCredentials:
+    def __init__(self, username, password, int_account, totp_secret_key, user_token):
+        self.username = username
+        self.password = password
+        self.int_account = int_account
+        self.totp_secret_key = totp_secret_key
+        self.user_token = user_token
+
+
+class DegiroConfig:
+    def __init__(self, credentials: DegiroCredentials, start_date: date):
+        self.credentials = credentials
+        self.start_date = start_date
+
+    @classmethod
+    def from_dict(cls, data: dict) -> Self:
+        credentials_data = data.get('credentials', {})
+        credentials = DegiroCredentials(
+            username=credentials_data["username"],
+            password=credentials_data["password"],
+            int_account=credentials_data["int_account"],
+            totp_secret_key=credentials_data["totp_secret_key"],
+            user_token=credentials_data["user_token"]
+        )
+        start_date = data.get('start_date', '')
+        # LocalizationUtility.convert_string_to_date(start_date)
+        return cls(credentials, datetime.strptime(start_date, "%Y-%m-%d"))
+
+    @classmethod
+    def from_json_file(cls, file_path) -> Self:
+        with open(file_path, 'r') as f:
+            data = json.load(f)
+        return cls.from_dict(data.get('degiro', {}))
+
+    @classmethod
+    def default(cls) -> Self:
+        DEGIRO_CONFIG_PATH = os.path.join(PROJECT_PATH, 'config', 'config.json')
+        return cls.from_json_file(DEGIRO_CONFIG_PATH)
