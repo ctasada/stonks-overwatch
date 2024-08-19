@@ -137,7 +137,7 @@ node_modules
 # Ignore static files
 /src/static
 !/src/static/degiro-32x32.png
-!/src/static/styles.css
+!/src/static/style.css
 
 # Ignore folder with imported files
 /import/
