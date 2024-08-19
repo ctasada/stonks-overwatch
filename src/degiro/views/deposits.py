@@ -5,25 +5,30 @@ from django.db import connection
 
 import pandas as pd
 
+from degiro.integration.portfolio import PortfolioData
 from degiro.utils.db_utils import dictfetchall
 from degiro.utils.localization import LocalizationUtility
 
-from currency_converter import CurrencyConverter
-
 import logging
+
+from scripts.commons import DATE_FORMAT
 
 
 class Deposits(View):
-    logger = logging.getLogger("stocks_portfolio.dashboard.views")
-    currencyConverter = CurrencyConverter(
-        fallback_on_missing_rate=True, fallback_on_wrong_date=True
-    )
+    logger = logging.getLogger("stocks_portfolio.deposits.views")
+
+    def __init__(self):
+        self.portfolio = PortfolioData()
 
     def get(self, request):
         cash_contributions = self._calculate_cash_contributions()
+        deposits = self._get_cash_deposits()
+        total_portfolio = self.portfolio.get_portfolio_total()
 
         context = {
-            "deposits": {"value": cash_contributions},
+            "total_deposits": total_portfolio['totalDepositWithdrawal'],
+            "deposits": deposits,
+            "deposit_growth": {"value": cash_contributions},
         }
 
         return render(request, "deposits.html", context)
@@ -73,38 +78,38 @@ class Deposits(View):
 
         return dataset
 
-    def _calculate_cash_account_value(self) -> dict:
+    def _get_cash_deposits(self) -> dict:
         with connection.cursor() as cursor:
             cursor.execute(
                 """
-                SELECT date, balance_total
+                SELECT date, description, change
                 FROM degiro_cashmovements
                 WHERE currency = 'EUR'
-                    AND type = 'CASH_TRANSACTION'
+                    AND description IN ('iDEAL storting', 'iDEAL Deposit', 'Terugstorting')
                 """
             )
-            cashContributions = dictfetchall(cursor)
+            df = pd.DataFrame(cursor.fetchall(), columns=[col[0] for col in cursor.description])
 
-        # Create DataFrame from the fetched data
-        df = pd.DataFrame.from_dict(cashContributions)
-
-        # Convert the 'date' column to datetime and remove the time component
-        df["date"] = pd.to_datetime(df["date"]).dt.normalize()
-
-        # Group by date and take the last balance_total for each day
-        df = df.groupby("date", as_index=False).last()
-
-        # Sort values by date (just in case)
+        # Remove hours and keep only the day
+        df["date"] = pd.to_datetime(df["date"]).dt.strftime(DATE_FORMAT)
         df = df.sort_values(by="date")
 
-        # Set the 'date' column as the index and fill missing dates
-        df.set_index("date", inplace=True)
-        df = df.resample("D").ffill()
+        baseCurrencySymbol = LocalizationUtility.get_base_currency_symbol()
+        baseCurrency = LocalizationUtility.get_base_currency()
 
-        # Convert the DataFrame to a dictionary with date as the key (converted to string) and balance_total as the value
-        dataset = {
-            date.strftime("%Y-%m-%d"): float(balance)
-            for date, balance in df["balance_total"].items()
-        }
+        records = []
+        for _, row in df.iterrows():
+            records.append(
+                {
+                    'type': 'Deposit',
+                    'date': row['date'],
+                    'description': row['description'],
+                    'change': LocalizationUtility.format_money_value(
+                        value=row['change'],
+                        currency=baseCurrency,
+                        currencySymbol=baseCurrencySymbol
+                    )
+                }
+            )
 
-        return dataset
+        return records
