@@ -9,10 +9,16 @@
   <script src="https://cdn.jsdelivr.net/npm/@seahsky/chartjs-plugin-autocolors"></script>
 
   <div class="container-fluid row-gap-5">
+    <div class="row mt-2">
+      <div class="col-2 border border-primary-subtle bg-light rounded mb-3">
+        <label class="col-form-label-p-0 text-secondary">Total Deposits</label>
+        <span><h5 class="mb-1">{{ total_deposits }}</h5></span>
+      </div>
+    </div>
     <div class="row border border-primary-subtle bg-light rounded mb-3">
       <div class="row mt-2">
           <div class="col">
-              <span><h5 class="mb-1">Deposits </h5></span>
+              <span><h5 class="mb-1">Deposits</h5></span>
           </div>
           <div class="col float-end text-end">
             <div class="btn-group btn-group-sm" role="group">
@@ -36,6 +42,33 @@
       <div class="row w-100">
         <canvas id="deposits-chart"></canvas>
       </div>
+    </div>
+    <div class="col">
+      <h4 class="mb-3">Deposits</h4>
+      <table class="table table-hover table-sm">
+        {% block table.thead %}
+        <thead>
+            <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Type</th>
+                <th scope="col">Description</th>
+                <th scope="col">Amount</th>
+            </tr>
+        </thead>
+        {% endblock table.thead %}
+        {% block table.tbody %}
+        <tbody>
+            {% for entry in deposits %}
+                <tr>
+                    <td>{{ entry.date }}</td>
+                    <td>{{ entry.type }}</td>
+                    <td>{{ entry.description }}</td>
+                    <td>{{ entry.change }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        {% endblock table.tbody %}
+      </table>
     </div>
   </div>
 
@@ -118,8 +151,8 @@
     function drawDeposits(timeRange) {
       const dataValue = {
         datasets: [{
-              label: 'Cash Contributions',
-              data: {{ deposits.value|safe }},
+              label: 'Deposits',
+              data: {{ deposit_growth.value|safe }},
               stepped: true,
               fill: 'start',
           }],
