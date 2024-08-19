@@ -18,12 +18,12 @@
     <!-- jQuery CDN - Slim version (=without AJAX) -->
     <script src="{% static 'jquery/dist/jquery.slim.min.js' %}"></script>
 
-    <!-- Our Custom CSS -->
-    <link rel="stylesheet" href="/static/style.css">
-
     <!-- Font Awesome JS -->
     <script src="{% static 'fontawesomefree/js/solid.js' %}"></script>
     <script src="{% static 'fontawesomefree/js/fontawesome.js' %}"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 
 <body>
@@ -68,6 +68,14 @@
                     <a href="{{ url }}">
                         <i class="fas fa-coins"></i>
                         Dividends
+                    </a>
+                </li>
+
+                {% url 'deposits' as url %}
+                <li class="{% if request.path == url %}active{% endif %}">
+                    <a href="{{ url }}">
+                        <i class="fas fa-piggy-bank"></i>
+                        Deposits
                     </a>
                 </li>
 
