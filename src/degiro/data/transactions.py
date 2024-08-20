@@ -1,56 +1,30 @@
-from degiro.config.degiro_config import DegiroConfig
-from degiro.utils.degiro import DeGiro
+from django.db import connection
+from degiro.utils.db_utils import dictfetchall
 from degiro.utils.localization import LocalizationUtility
 
-from degiro_connector.trading.models.transaction import HistoryRequest
-from datetime import date
-import logging
 
-
+# FIXME: If data cannot be found in the DB, the code should get it from DeGiro, updating the DB
 class TransactionsData:
-    degiro_config = DegiroConfig.default()
-
-    def __init__(self):
-        self.deGiro = DeGiro()
 
     def get_transactions(self):
-        # SETUP REQUEST
-        today = date.today()
-        from_date = date(
-            year=self.degiro_config.start_date.year,
-            month=self.degiro_config.start_date.month,
-            day=self.degiro_config.start_date.day,
-        )
-        to_date = date(
-            year=today.year,
-            month=today.month,
-            day=today.day,
-        )
-        logging.basicConfig(level=logging.DEBUG)
         # FETCH TRANSACTIONS DATA
-        transactions_history = DeGiro.get_client().get_transactions_history(
-            transaction_request=HistoryRequest(
-                from_date=from_date,
-                to_date=to_date,
-            ),
-            raw=True,
-        )
+        transactions_history = self.__getTransactions()
 
         products_ids = []
 
         # ITERATION OVER THE TRANSACTIONS TO OBTAIN THE PRODUCTS
-        for transaction in transactions_history["data"]:
+        for transaction in transactions_history:
             products_ids.append(int(transaction["productId"]))
 
-        products_info = DeGiro.get_products_info(products_ids)
+        products_info = self.__getProductsInfo(products_ids)
 
         # Get user's base currency
         baseCurrencySymbol = LocalizationUtility.get_base_currency_symbol()
 
         # DISPLAY PRODUCTS_INFO
         myTransactions = []
-        for transaction in transactions_history["data"]:
-            info = products_info[str(int(transaction["productId"]))]
+        for transaction in transactions_history:
+            info = products_info[transaction["productId"]]
 
             fees = (
                 transaction["totalPlusFeeInBaseCurrency"]
@@ -61,9 +35,9 @@ class TransactionsData:
                 dict(
                     name=info["name"],
                     symbol=info["symbol"],
-                    date=LocalizationUtility.format_date_time(transaction["date"]),
-                    buysell=self.convertBuySell(transaction["buysell"]),
-                    transactionType=self.convertTransactionTypeId(
+                    date=transaction["date"],
+                    buysell=self.__convertBuySell(transaction["buysell"]),
+                    transactionType=self.__convertTransactionTypeId(
                         transaction["transactionTypeId"]
                     ),
                     price=transaction["price"],
@@ -83,7 +57,7 @@ class TransactionsData:
 
         return sorted(myTransactions, key=lambda k: k["date"], reverse=True)
 
-    def convertBuySell(self, buysell: str):
+    def __convertBuySell(self, buysell: str):
         if buysell == "B":
             return "Buy"
         elif buysell == "S":
@@ -91,8 +65,33 @@ class TransactionsData:
 
         return "Unknown"
 
-    def convertTransactionTypeId(self, transactionTypeId: int):
+    def __convertTransactionTypeId(self, transactionTypeId: int):
         return {
             0: "",
             101: "Stock Split",
         }.get(transactionTypeId, "Unkown Transaction")
+
+    def __getTransactions(self):
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT *
+                FROM degiro_transactions
+                """
+            )
+            return dictfetchall(cursor)
+
+    def __getProductsInfo(self, ids):
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"""
+                SELECT *
+                FROM degiro_productinfo
+                WHERE id IN ({", ".join(map(str, ids))})
+                """
+            )
+            rows = dictfetchall(cursor)
+
+        # Convert the list of dictionaries into a dictionary indexed by 'productId'
+        result_map = {row['id']: row for row in rows}
+        return result_map

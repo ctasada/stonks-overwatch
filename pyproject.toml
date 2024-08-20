@@ -22,7 +22,7 @@ fontawesomefree = "^6.6.0"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^7.1.1"
-flake8-bugbear = "^24.4.26"
+flake8-bugbear = "^24.8.19"
 
 [build-system]
 requires = ["poetry-core"]
