@@ -126,7 +126,6 @@ class PortfolioData:
             ],
             raw=True,
         )
-        # print(json.dumps(update, indent = 4))
 
         baseCurrencySymbol = LocalizationUtility.get_base_currency_symbol()
 

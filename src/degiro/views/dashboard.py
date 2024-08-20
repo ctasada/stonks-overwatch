@@ -1,5 +1,6 @@
 from collections import defaultdict
 from datetime import date, datetime, timedelta
+import math
 from django.views import View
 from django.shortcuts import render
 from django.db import connection
@@ -30,7 +31,7 @@ class Dashboard(View):
         sectorsContext = self._getSectors()
         cash_contributions = self._calculate_cash_contributions()
         portfolio_value = self._calculate_value()
-        performanceTWR = self._calculate_performance_twr(portfolio_value)
+        performanceTWR = self._calculate_performance_twr(cash_contributions, portfolio_value)
 
         valueContext = {
             "cash_contributions": cash_contributions,
@@ -47,20 +48,19 @@ class Dashboard(View):
         # FIXME: Simplify this response
         return render(request, "dashboard.html", context)
 
-    def _calculate_performance_twr(self, portfolio_value: dict):
+    def _calculate_performance_twr(self, cash_contributions: dict, portfolio_value: dict) -> dict:
         """
-        Formula to calculate TWR = [(1+RPN) x (1+ RPN) x … – 1] x 100
+        Formula to calculate TWR = [(1+RPN) x (1+ RPN) x … - 1] x 100
         Where RPN= ((NAVF-CF)/NAVI ) -1
         RPN: Return for period N
         NAVF: Portfolio final value for the period
         NAVI: Portfolio initial value for the period
         CF: Cashflow
         """
-        tmpData = self._calculate_cash_contributions()
-        cash_contributions = {item["x"]: item["y"] for item in tmpData}
+        cash_contributions = {item["x"]: item["y"] for item in cash_contributions}
         portfolio_value = {item["x"]: item["y"] for item in portfolio_value}
 
-        # print(cash_contributions)
+        print(cash_contributions)
         # {
         #  '2020-03-10': 10000.01, '2020-03-11': 5000.01, '2020-08-21': 10000.01,
         #  '2020-12-03': 20000.010000000002, '2021-02-10': 22000.010000000002,
@@ -72,35 +72,40 @@ class Dashboard(View):
         start_date = next(iter(cash_contributions))
         end_date = date.today()
 
+        print(f"StartDate = {start_date}, EndDate = {end_date}")
+
         dataset = []
 
-        finalValue = None
+        endValue = None
         aggregated_twr = 1
-
+        cf = 0
+        count = 0
         for day in pd.date_range(start=start_date, end=end_date, freq="d"):
             day = day.strftime(LocalizationUtility.DATE_FORMAT)
-
             cf = cash_contributions.get(day, 0)
-            if finalValue is None:
-                finalValue = cf
-            initialValue = finalValue
-            finalValue = portfolio_value.get(day, None)
-            if finalValue is None:
-                finalValue = initialValue
+            portfolioValue = portfolio_value.get(day, None)
+
+            if endValue is None:
+                endValue = cf
+            initialValue = endValue
+            endValue = portfolioValue
+            if endValue is None:
+                endValue = initialValue
 
             if initialValue == 0:
                 break
 
-            rpn = (finalValue - initialValue) / initialValue
+            rpn = (endValue - initialValue) / initialValue
 
-            # TWR = [(1+RPN) x (1+ RPN) x … – 1] x 100
+            # TWR = [(1+RPN) x (1+RPN) x … – 1] x 100
             aggregated_twr = aggregated_twr * (1 + rpn)
             performance = aggregated_twr - 1
 
-            # count += 1
-            # if (count < 10 or math.isinf(performance)):
-            #     print(f"{day}: {rpn} = (({finalValue} - {initialValue}) / {initialValue})")
-            #     print(f"       {performance}")
+            count += 1
+            if (count < 10 or math.isinf(performance)):
+                print(f"{day}: CF={cf}, PV={portfolioValue}")
+                print(f"{day}: {rpn} = (({endValue} - {initialValue}) / {initialValue})")
+                print(f"       {performance}")
 
             dataset.append({"x": day, "y": performance})
 
@@ -142,14 +147,6 @@ class Dashboard(View):
         }
 
     def _calculate_cash_contributions(self) -> dict:
-        # FIXME: DeGiro doesn't have a consistent description or type. Missing the new value for 'Refund'
-        # Known types:
-        # CASH_FUND_NAV_CHANGE
-        # CASH_FUND_TRANSACTION
-        # CASH_TRANSACTION
-        # FLATEX_CASH_SWEEP
-        # PAYMENT
-        # TRANSACTION
         with connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -298,15 +295,13 @@ class Dashboard(View):
         cash_account = self._calculate_cash_account_value()
 
         dataset = []
-        latest_day = None
         for day in aggregate:
             # Merges the portfolio value with the cash value to get the full picture
             cash_value = 0.0
             if day in cash_account:
                 cash_value = cash_account[day]
-                latest_day = day
             else:
-                cash_value = cash_account[latest_day]
+                cash_value = list(cash_account.values())[-1]
 
             day_value = aggregate[day] + cash_value
             dataset.append({"x": day, "y": LocalizationUtility.round_value(day_value)})

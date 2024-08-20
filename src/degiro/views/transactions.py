@@ -1,7 +1,7 @@
 from django.views import View
 from django.shortcuts import render
 
-from degiro.integration.transactions import TransactionsData
+from degiro.data.transactions import TransactionsData
 
 
 class Transactions(View):
@@ -10,8 +10,6 @@ class Transactions(View):
 
     def get(self, request):
         transactions = self.transactions.get_transactions()
-
-        # print (json.dumps(transactions, indent=2))
 
         context = {
             "transactions": transactions,
