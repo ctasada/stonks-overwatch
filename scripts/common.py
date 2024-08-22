@@ -14,11 +14,13 @@ def connectToDegiro():
     with open('./config/config.json') as config_file:
         config_dict = json.load(config_file)
 
+    degiro_credentials = config_dict['degiro']['credentials']
+
     # SETUP CREDENTIALS
-    int_account = config_dict['int_account']
-    username = config_dict['username']
-    password = config_dict['password']
-    totp_secret_key = config_dict['totp_secret_key']
+    int_account = degiro_credentials['int_account']
+    username = degiro_credentials['username']
+    password = degiro_credentials['password']
+    totp_secret_key = degiro_credentials['totp_secret_key']
     credentials = Credentials(
         int_account=int_account,
         username=username,

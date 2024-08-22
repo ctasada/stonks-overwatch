@@ -1,5 +1,7 @@
+"""
+poetry run python ./scripts/quotecast.py
+"""
 # IMPORTATIONS
-
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 

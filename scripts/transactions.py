@@ -1,3 +1,6 @@
+"""
+poetry run python ./scripts/transactions.py
+"""
 # IMPORTATIONS
 import common
 import json

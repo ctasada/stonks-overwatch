@@ -1,3 +1,6 @@
+"""
+poetry run python ./scripts/agenda_dividends.py
+"""
 # IMPORTATIONS
 import common
 import json

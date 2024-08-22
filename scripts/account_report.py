@@ -1,3 +1,6 @@
+"""
+poetry run python ./scripts/account_report.py
+"""
 # IMPORTATIONS
 import common
 from datetime import date
