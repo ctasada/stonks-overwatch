@@ -61,7 +61,11 @@
             {% for entry in deposits %}
                 <tr>
                     <td>{{ entry.date }}</td>
-                    <td>{{ entry.type }}</td>
+                    {% if entry.type == "Deposit" %}
+                      <td><span class="green-pill">{{ entry.type }}</span></td>
+                    {% else %}
+                      <td><span class="red-pill">{{ entry.type }}</span></td>
+                    {% endif %}
                     <td>{{ entry.description }}</td>
                     <td>{{ entry.changeFormatted }}</td>
                 </tr>

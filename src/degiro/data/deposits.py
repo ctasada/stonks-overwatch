@@ -21,7 +21,7 @@ class DepositsData:
 
         # Remove hours and keep only the day
         df["date"] = pd.to_datetime(df["date"]).dt.strftime(LocalizationUtility.DATE_FORMAT)
-        df = df.sort_values(by="date")
+        df = df.sort_values(by="date", ascending=False)
 
         baseCurrencySymbol = LocalizationUtility.get_base_currency_symbol()
         baseCurrency = LocalizationUtility.get_base_currency()
@@ -30,7 +30,7 @@ class DepositsData:
         for _, row in df.iterrows():
             records.append(
                 {
-                    'type': 'Deposit',
+                    'type': 'Deposit' if row['change'] > 0 else 'Withdrawal',
                     'date': row['date'],
                     'description': row['description'],
                     'change': row['change'],
