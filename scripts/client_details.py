@@ -1,3 +1,6 @@
+"""
+poetry run python ./scripts/client_details.py
+"""
 # IMPORTATIONS
 import common
 import json

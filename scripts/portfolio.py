@@ -1,3 +1,6 @@
+"""
+poetry run python ./scripts/portfolio.py
+"""
 # IMPORTATIONS
 import common
 import json

@@ -1,3 +1,6 @@
+"""
+poetry run python ./scripts/account_overview.py
+"""
 # IMPORTATIONS
 import common
 import json
