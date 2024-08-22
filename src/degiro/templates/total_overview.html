@@ -6,16 +6,30 @@
 {% block content %}
 <div class="row">
     <div class="col-5">
-        <label for="totalCash" class="col-form-label-p-0">Current Value: {{ total_portfolio.currentValue }}</label>
+        <label for="currentValue" class="col-form-label-p-0">Current Value: {{ total_portfolio.currentValue }}</label>
     </div>
     <div class="col-5">
         <label for="totalCash" class="col-form-label-p-0">Total Cash: {{ total_portfolio.totalCash }}</label>
     </div>
     <div class="col-5">
-        <label for="totalCash" class="col-form-label-p-0">Total Deposit: {{ total_portfolio.totalDepositWithdrawal }}</label>
+        <label for="totalPL" class="col-form-label-p-0">Total P/L:
+            {% if total_portfolio.total_pl > 0 %}
+                <span class="fw-semibold text-success">
+            {% else %}
+                <span class="fw-semibold text-danger">
+            {% endif %}
+            {{ total_portfolio.total_pl_formatted }}</span>
+        </label>
     </div>
     <div class="col-5">
-        <label for="totalCash" class="col-form-label-p-0">ROI: {{ total_portfolio.totalROI }}</label>
+        <label for="totalROI" class="col-form-label-p-0">ROI: 
+            {% if total_portfolio.totalROI > 0 %}
+                <span class="fw-semibold text-success">
+            {% else %}
+                <span class="fw-semibold text-danger">
+            {% endif %}
+            {{ total_portfolio.totalROI_formatted }}</span>
+        </label>
     </div>
 </div>
 {% endblock %}
