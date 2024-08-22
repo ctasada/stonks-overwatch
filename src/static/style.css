@@ -252,3 +252,21 @@ a.article:hover {
         display: none;
     }
 }
+
+/* ---------------------------------------------------
+    CUSTOM COMPONENTS
+----------------------------------------------------- */
+
+.green-pill {
+    background-color: #d4edda;
+    color: #155724;
+    border-radius: 0.25rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.red-pill {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-radius: 0.25rem;
+    padding: 0.25rem 0.5rem;
+}
