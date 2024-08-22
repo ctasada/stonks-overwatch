@@ -138,10 +138,12 @@ class PortfolioData:
         roi = (
             portfolioTotalValue / (tmp_total_portfolio["totalDepositWithdrawal"]) - 1
         ) * 100
+        total_profit_loss = portfolioTotalValue - tmp_total_portfolio["totalDepositWithdrawal"]
 
         total_portfolio = {
-            "totalDepositWithdrawal": LocalizationUtility.format_money_value(
-                value=tmp_total_portfolio["totalDepositWithdrawal"],
+            "total_pl": total_profit_loss,
+            "total_pl_formatted": LocalizationUtility.format_money_value(
+                value=total_profit_loss,
                 currencySymbol=baseCurrencySymbol,
             ),
             "totalCash": LocalizationUtility.format_money_value(
@@ -151,7 +153,8 @@ class PortfolioData:
             "currentValue": LocalizationUtility.format_money_value(
                 value=portfolioTotalValue, currencySymbol=baseCurrencySymbol
             ),
-            "totalROI": "{:,.2f}%".format(roi),
+            "totalROI": roi,
+            "totalROI_formatted": "{:,.2f}%".format(roi),
         }
 
         return total_portfolio
