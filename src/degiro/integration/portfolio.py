@@ -155,6 +155,10 @@ class PortfolioData:
             ),
             "totalROI": roi,
             "totalROI_formatted": "{:,.2f}%".format(roi),
+            "totalDepositWithdrawal": LocalizationUtility.format_money_value(
+                value=tmp_total_portfolio["totalDepositWithdrawal"],
+                currencySymbol=baseCurrencySymbol,
+            ),
         }
 
         return total_portfolio

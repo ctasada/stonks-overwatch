@@ -5,6 +5,7 @@ from degiro_connector.trading.models.account import OverviewRequest
 from datetime import date
 
 
+# FIXME: Read from DB and fallback to DeGiro for missing data
 class AccountOverviewData:
     degiro_config = DegiroConfig.default()
 
@@ -73,10 +74,10 @@ class AccountOverviewData:
 
             overview.append(
                 dict(
-                    date=LocalizationUtility.format_date_time(cash_movement["date"]),
-                    valueDate=LocalizationUtility.format_date_time(
-                        cash_movement["valueDate"]
-                    ),
+                    date=LocalizationUtility.format_date(cash_movement["date"]),
+                    time=LocalizationUtility.format_time(cash_movement["date"]),
+                    valueDate=LocalizationUtility.format_date(cash_movement["valueDate"]),
+                    valueTime=LocalizationUtility.format_time(cash_movement["valueDate"]),
                     stockName=stockName,
                     stockSymbol=stockSymbol,
                     description=cash_movement["description"],

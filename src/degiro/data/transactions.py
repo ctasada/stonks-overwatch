@@ -35,7 +35,8 @@ class TransactionsData:
                 dict(
                     name=info["name"],
                     symbol=info["symbol"],
-                    date=transaction["date"],
+                    date=transaction["date"].strftime(LocalizationUtility.DATE_FORMAT),
+                    time=transaction["date"].strftime(LocalizationUtility.TIME_FORMAT),
                     buysell=self.__convertBuySell(transaction["buysell"]),
                     transactionType=self.__convertTransactionTypeId(
                         transaction["transactionTypeId"]

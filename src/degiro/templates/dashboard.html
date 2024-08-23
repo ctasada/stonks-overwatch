@@ -3,7 +3,7 @@
 
 {% block content %}
   <!-- ChartJS -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4"></script>
   <script src="https://cdn.jsdelivr.net/npm/luxon@3.5.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1"></script>
   <script src="https://cdn.jsdelivr.net/npm/@seahsky/chartjs-plugin-autocolors"></script>
@@ -184,7 +184,23 @@
       };
       const minimumDate = new Date('{{ portfolio.value.portfolio_value.0.x }}')
 
-      redrawPortfolioGraph(dataValue, timeRange, minimumDate)
+      var currencyTooltipLabel = function(context) {
+          let label = context.dataset.label || '';
+
+          if (label) {
+              label += ': ';
+          }
+          if (context.parsed.y !== null) {
+              label += new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(context.parsed.y);
+          }
+          return label;
+      }
+
+      var ticksCallback = function(value, index, ticks) {
+          return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(value);
+      }
+
+      redrawPortfolioGraph(dataValue, ticksCallback, currencyTooltipLabel, timeRange, minimumDate)
     }
 
     function drawPortfolioPerformance(timeRange) {
@@ -199,10 +215,26 @@
       };
       const minimumDate = new Date('{{ portfolio.performance.0.x }}')
 
-      redrawPortfolioGraph(dataPerformance, timeRange, minimumDate)
+      var percentageTooltipLabel = function(context) {
+          let label = context.dataset.label || '';
+
+          if (label) {
+              label += ': ';
+          }
+          if (context.parsed.y !== null) {
+              label += (context.parsed.y * 100).toFixed(2) + "%";
+          }
+          return label;
+      }
+
+      var ticksCallback = function(value, index, ticks) {
+        return (value * 100).toFixed(2) + "%";
+      }
+
+      redrawPortfolioGraph(dataPerformance, ticksCallback, percentageTooltipLabel, timeRange, minimumDate)
     }
 
-    function redrawPortfolioGraph(datasets, timeRange, minimumDate) {
+    function redrawPortfolioGraph(datasets, ticksCallback, tooltipLabelCallback, timeRange, minimumDate) {
       const timeRangeConfig = getTimeRangeConfig(timeRange, minimumDate)
 
       const configPortfolio = {
@@ -224,6 +256,9 @@
               },
               y: {
                 beginAtZero: true,
+                ticks: {
+                    callback: ticksCallback,
+                }
               }
           },
           elements: {
@@ -237,17 +272,7 @@
             },
             tooltip: {
                 callbacks: {
-                    label: function(context) {
-                        let label = context.dataset.label || '';
-
-                        if (label) {
-                            label += ': ';
-                        }
-                        if (context.parsed.y !== null) {
-                            label += new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(context.parsed.y);
-                        }
-                        return label;
-                    }
+                  label: tooltipLabelCallback,
                 }
             }
           }

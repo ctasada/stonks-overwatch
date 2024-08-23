@@ -1,12 +1,12 @@
-from collections import defaultdict
-from datetime import date, datetime, timedelta
-import math
+from collections import OrderedDict, defaultdict
+from datetime import datetime, timedelta
 from django.views import View
 from django.shortcuts import render
 from django.db import connection
 
 import pandas as pd
 
+from degiro.data.deposits import DepositsData
 from degiro.utils.db_utils import dictfetchall
 from degiro.integration.portfolio import PortfolioData
 from degiro.utils.localization import LocalizationUtility
@@ -26,12 +26,32 @@ class Dashboard(View):
 
     def __init__(self):
         self.portfolio = PortfolioData()
+        self.deposits = DepositsData()
+
+    def _get_simple_cash_deposits(self):
+        result = {}
+
+        for item in self.deposits.get_cash_deposits():
+            date = item['date']
+            change = item['change']
+
+            if date in result:
+                result[date] += change
+            else:
+                result[date] = change
+
+        sorted_result = OrderedDict(sorted(result.items()))
+
+        return sorted_result
 
     def get(self, request):
         sectorsContext = self._getSectors()
-        cash_contributions = self._calculate_cash_contributions()
-        portfolio_value = self._calculate_value()
-        performanceTWR = self._calculate_performance_twr(cash_contributions, portfolio_value)
+        cash_contributions = [{'x': item['date'], 'y': item['total_deposit']}
+                              for item in self.deposits.cash_deposits_history()]
+        cash_account = self.deposits.calculate_cash_account_value()
+        portfolio_value = self._calculate_value(cash_account)
+        cash_deposits_simple = self._get_simple_cash_deposits()
+        performanceTWR = self._calculate_performance_twr(cash_deposits_simple, portfolio_value)
 
         valueContext = {
             "cash_contributions": cash_contributions,
@@ -48,6 +68,7 @@ class Dashboard(View):
         # FIXME: Simplify this response
         return render(request, "dashboard.html", context)
 
+    # FIXME: The TWR calculation seems off
     def _calculate_performance_twr(self, cash_contributions: dict, portfolio_value: dict) -> dict:
         """
         Formula to calculate TWR = [(1+RPN) x (1+ RPN) x … - 1] x 100
@@ -57,55 +78,34 @@ class Dashboard(View):
         NAVI: Portfolio initial value for the period
         CF: Cashflow
         """
-        cash_contributions = {item["x"]: item["y"] for item in cash_contributions}
         portfolio_value = {item["x"]: item["y"] for item in portfolio_value}
 
-        print(cash_contributions)
-        # {
-        #  '2020-03-10': 10000.01, '2020-03-11': 5000.01, '2020-08-21': 10000.01,
-        #  '2020-12-03': 20000.010000000002, '2021-02-10': 22000.010000000002,
-        #  '2021-05-27': 25000.010000000002, '2021-06-24': 30000.010000000002,
-        #  '2022-02-01': 35000.01, '2023-01-09': 49000.01, '2024-02-23': 54000.01,
-        #  '2024-07-28': 54000.01
-        # }
-
-        start_date = next(iter(cash_contributions))
-        end_date = date.today()
-
-        print(f"StartDate = {start_date}, EndDate = {end_date}")
+        start_date = min(list(cash_contributions)[0], list(portfolio_value)[0])
+        end_date = max(list(cash_contributions)[-1], list(portfolio_value)[-1])
 
         dataset = []
 
-        endValue = None
-        aggregated_twr = 1
-        cf = 0
-        count = 0
+        initialValue = 0
+        endValue = 0
+        product = 1
+        cash_flow = 0
         for day in pd.date_range(start=start_date, end=end_date, freq="d"):
             day = day.strftime(LocalizationUtility.DATE_FORMAT)
-            cf = cash_contributions.get(day, 0)
-            portfolioValue = portfolio_value.get(day, None)
-
-            if endValue is None:
-                endValue = cf
-            initialValue = endValue
+            cash_flow = cash_contributions.get(day, 0)
+            portfolioValue = portfolio_value.get(day, 0)
             endValue = portfolioValue
-            if endValue is None:
-                endValue = initialValue
 
             if initialValue == 0:
-                break
+                initialValue = cash_flow
+                continue
 
-            rpn = (endValue - initialValue) / initialValue
+            rate = (endValue - initialValue + (-1 * cash_flow)) / initialValue
 
             # TWR = [(1+RPN) x (1+RPN) x … – 1] x 100
-            aggregated_twr = aggregated_twr * (1 + rpn)
-            performance = aggregated_twr - 1
+            product = product * (1 + rate)
+            performance = product - 1
 
-            count += 1
-            if (count < 10 or math.isinf(performance)):
-                print(f"{day}: CF={cf}, PV={portfolioValue}")
-                print(f"{day}: {rpn} = (({endValue} - {initialValue}) / {initialValue})")
-                print(f"       {performance}")
+            initialValue = endValue
 
             dataset.append({"x": day, "y": performance})
 
@@ -146,87 +146,6 @@ class Dashboard(View):
             "currencySymbol": LocalizationUtility.get_base_currency_symbol(),
         }
 
-    def _calculate_cash_contributions(self) -> dict:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT date, description, change
-                FROM degiro_cashmovements
-                WHERE currency = 'EUR'
-                    AND description IN ('iDEAL storting', 'iDEAL Deposit', 'Terugstorting')
-                """
-            )
-            cashContributions = dictfetchall(cursor)
-
-        df = pd.DataFrame.from_dict(cashContributions)
-        # Remove hours and keep only the day
-        df["date"] = pd.to_datetime(df["date"]).dt.date
-        # Group by day, adding the values
-        df.set_index("date", inplace=True)
-        df = df.sort_values(by="date")
-        df = df.groupby(df.index)["change"].sum().reset_index()
-        # Do the cummulative sum
-        df["contributed"] = df["change"].cumsum()
-
-        cashContributions = df.to_dict("records")
-        for contribution in cashContributions:
-            contribution["date"] = contribution["date"].strftime("%Y-%m-%d")
-
-        dataset = []
-        for contribution in cashContributions:
-            dataset.append(
-                {
-                    "x": contribution["date"],
-                    "y": LocalizationUtility.round_value(contribution["contributed"]),
-                }
-            )
-
-        # Append today with the last value to draw the line properly
-        dataset.append(
-            {
-                "x": date.today().strftime("%Y-%m-%d"),
-                "y": cashContributions[-1]["contributed"],
-            }
-        )
-
-        return dataset
-
-    def _calculate_cash_account_value(self) -> dict:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT date, balance_total
-                FROM degiro_cashmovements
-                WHERE currency = 'EUR'
-                    AND type = 'CASH_TRANSACTION'
-                """
-            )
-            cashContributions = dictfetchall(cursor)
-
-        # Create DataFrame from the fetched data
-        df = pd.DataFrame.from_dict(cashContributions)
-
-        # Convert the 'date' column to datetime and remove the time component
-        df["date"] = pd.to_datetime(df["date"]).dt.normalize()
-
-        # Group by date and take the last balance_total for each day
-        df = df.groupby("date", as_index=False).last()
-
-        # Sort values by date (just in case)
-        df = df.sort_values(by="date")
-
-        # Set the 'date' column as the index and fill missing dates
-        df.set_index("date", inplace=True)
-        df = df.resample("D").ffill()
-
-        # Convert the DataFrame to a dictionary with date as the key (converted to string) and balance_total as the value
-        dataset = {
-            date.strftime("%Y-%m-%d"): float(balance)
-            for date, balance in df["balance_total"].items()
-        }
-
-        return dataset
-
     def _get_productInfo(self, productId: int) -> dict:
         """
         Gets product information from the given product id. The information is retrieved from the DB.
@@ -266,7 +185,7 @@ class Dashboard(View):
 
         return json.loads(results)
 
-    def _calculate_value(self) -> list:
+    def _calculate_value(self, cash_account: dict) -> list:
         data = self._create_products_quotation()
         stockSplits = self._get_stock_splits()
 
@@ -291,8 +210,6 @@ class Dashboard(View):
                 else:
                     aggregate_value += position_value_growth[date_value]
                 aggregate[date_value] = aggregate_value
-
-        cash_account = self._calculate_cash_account_value()
 
         dataset = []
         for day in aggregate:

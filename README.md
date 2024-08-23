@@ -107,6 +107,7 @@ poetry run src/manage.py runscript init_db
 
 # Portfolio Performance
 - https://portfolioslab.com/tools/stock-comparison/AAPL/MSFT
+- https://stonksfolio.com/portfolios/4qltYv/performance
 
 # Libraries
 - https://pypi.org/project/QuantStats/
