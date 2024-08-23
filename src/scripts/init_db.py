@@ -13,11 +13,8 @@ from scripts.products_info_import import run as products_info_import
 
 
 def run():
-    print("Importing DeGiro Account Information...")
     account_import()
-    print("Importing DeGiro Transactions...")
     transactions_import()
-    print("Importing DeGiro Products Information...")
     products_info_import()
 
 
