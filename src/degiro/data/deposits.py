@@ -5,6 +5,7 @@ from degiro.utils.localization import LocalizationUtility
 import pandas as pd
 
 
+# FIXME: If data cannot be found in the DB, the code should get it from DeGiro, updating the DB
 class DepositsData:
 
     def get_cash_deposits(self) -> dict:

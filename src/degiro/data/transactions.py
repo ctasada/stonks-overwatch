@@ -16,6 +16,8 @@ class TransactionsData:
         for transaction in transactions_history:
             products_ids.append(int(transaction["productId"]))
 
+        # Remove duplicates from list
+        products_ids = list(set(products_ids))
         products_info = self.__getProductsInfo(products_ids)
 
         # Get user's base currency

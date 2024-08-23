@@ -32,12 +32,15 @@ def get_productIds() -> list:
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT productId FROM degiro_transactions GROUP BY productId
+            SELECT productId FROM degiro_transactions
+            UNION
+            SELECT productId FROM degiro_cashmovements
             """
         )
         results = dictfetchall(cursor)
 
-    productIds = [entry["productId"] for entry in results]
+    productIds = [str(entry["productId"]) for entry in results if entry["productId"] is not None]
+    productIds = list(dict.fromkeys(productIds))
 
     return productIds
 
@@ -93,7 +96,7 @@ def import_products_info(file_path: str) -> None:
                 active=row["active"],
                 exchangeId=row["exchangeId"],
                 onlyEodPrices=row["onlyEodPrices"],
-                isShortable=row["isShortable"],
+                isShortable=row.get("isShortable", False),
                 feedQuality=row.get("feedQuality"),
                 orderBookDepth=row.get("orderBookDepth"),
                 vwdIdentifierType=row.get("vwdIdentifierType"),

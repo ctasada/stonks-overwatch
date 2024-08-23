@@ -52,3 +52,11 @@ class LocalizationUtility(object):
     def format_time(value: str) -> str:
         time = datetime.strptime(value, LocalizationUtility.TIME_DATE_FORMAT)
         return time.strftime(LocalizationUtility.TIME_FORMAT)
+
+    @staticmethod
+    def format_date_from_date(value: datetime) -> str:
+        return value.strftime(LocalizationUtility.DATE_FORMAT)
+
+    @staticmethod
+    def format_time_from_date(value: datetime) -> str:
+        return value.strftime(LocalizationUtility.TIME_FORMAT)

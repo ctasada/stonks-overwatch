@@ -1,59 +1,36 @@
-from degiro.config.degiro_config import DegiroConfig
-from degiro.utils.degiro import DeGiro
+from django.db import connection
+from degiro.utils.db_utils import dictfetchall
 from degiro.utils.localization import LocalizationUtility
-from degiro_connector.trading.models.account import OverviewRequest
-from datetime import date
 
 
-# FIXME: Read from DB and fallback to DeGiro for missing data
+# FIXME: If data cannot be found in the DB, the code should get it from DeGiro, updating the DB
 class AccountOverviewData:
-    degiro_config = DegiroConfig.default()
 
     def get_account_overview(self):
-        # SETUP REQUEST
-        today = date.today()
-        from_date = date(
-            year=self.degiro_config.start_date.year,
-            month=self.degiro_config.start_date.month,
-            day=self.degiro_config.start_date.day,
-        )
-        to_date = date(
-            year=today.year,
-            month=today.month,
-            day=today.day,
-        )
-        request = OverviewRequest(
-            from_date=from_date,
-            to_date=to_date,
-        )
-
         # FETCH DATA
-        account_overview = DeGiro.get_client().get_account_overview(
-            overview_request=request,
-            raw=True,
-        )
+        account_overview = self.__get_cash_movements()
 
         products_ids = []
-        for cash_movement in account_overview.get("data").get("cashMovements"):
-            if "productId" in cash_movement:
-                products_ids.append(int(cash_movement["productId"]))
+        for cash_movement in account_overview:
+            if cash_movement["productId"] is not None:
+                products_ids.append(cash_movement["productId"])
 
-        products_info = DeGiro.get_products_info(products_ids)
-
-        # print(json.dumps(account_overview, indent = 4))
+        # Remove duplicates from list
+        products_ids = list(set(products_ids))
+        products_info = self.__getProductsInfo(products_ids)
 
         overview = []
-        for cash_movement in account_overview.get("data").get("cashMovements"):
+        for cash_movement in account_overview:
 
             stockName = ""
             stockSymbol = ""
-            if "productId" in cash_movement:
-                info = products_info[str(int(cash_movement["productId"]))]
+            if cash_movement["productId"] is not None:
+                info = products_info[int(cash_movement["productId"])]
                 stockName = info["name"]
                 stockSymbol = info["symbol"]
 
             formatedChange = ""
-            if "change" in cash_movement:
+            if cash_movement["change"] is not None:
                 formatedChange = LocalizationUtility.format_money_value(
                     value=cash_movement["change"], currency=cash_movement["currency"]
                 )
@@ -74,10 +51,10 @@ class AccountOverviewData:
 
             overview.append(
                 dict(
-                    date=LocalizationUtility.format_date(cash_movement["date"]),
-                    time=LocalizationUtility.format_time(cash_movement["date"]),
-                    valueDate=LocalizationUtility.format_date(cash_movement["valueDate"]),
-                    valueTime=LocalizationUtility.format_time(cash_movement["valueDate"]),
+                    date=LocalizationUtility.format_date_from_date(cash_movement["date"]),
+                    time=LocalizationUtility.format_time_from_date(cash_movement["date"]),
+                    valueDate=LocalizationUtility.format_date_from_date(cash_movement["valueDate"]),
+                    valueTime=LocalizationUtility.format_time_from_date(cash_movement["valueDate"]),
                     stockName=stockName,
                     stockSymbol=stockSymbol,
                     description=cash_movement["description"],
@@ -110,3 +87,30 @@ class AccountOverviewData:
                 dividends.append(transaction)
 
         return dividends
+
+    def __get_cash_movements(self):
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT *
+                FROM degiro_cashmovements
+                ORDER BY date DESC
+                """
+            )
+            return dictfetchall(cursor)
+
+    # FIXME: Duplicated code
+    def __getProductsInfo(self, ids):
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"""
+                SELECT *
+                FROM degiro_productinfo
+                WHERE id IN ({", ".join(map(str, ids))})
+                """
+            )
+            rows = dictfetchall(cursor)
+
+        # Convert the list of dictionaries into a dictionary indexed by 'productId'
+        result_map = {row['id']: row for row in rows}
+        return result_map
