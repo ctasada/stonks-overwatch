@@ -120,6 +120,7 @@ def import_transactions(file_path) -> None:
 def run():
     init()
     from_date = get_import_from_date()
+    print(f"Importing DeGiro Transactions from {from_date}...")
     get_transactions(from_date, f"{IMPORT_FOLDER}/transactions.json")
     import_transactions(f"{IMPORT_FOLDER}/transactions.json")
 

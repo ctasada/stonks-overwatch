@@ -366,6 +366,7 @@ def run():
     """
     init()
     product_ids = get_productIds()
+    print("Importing DeGiro Products Information...")
     get_products_info(product_ids, f"{IMPORT_FOLDER}/products_info.json")
     import_products_info(f"{IMPORT_FOLDER}/products_info.json")
     import_products_quotation()

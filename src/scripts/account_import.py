@@ -151,6 +151,7 @@ def run():
     """
     init()
     from_date = get_import_from_date()
+    print(f"Importing DeGiro Account Information from {from_date}...")
     get_cash_movements(from_date, f"{IMPORT_FOLDER}/account.json")
     transform_json(
         f"{IMPORT_FOLDER}/account.json", f"{IMPORT_FOLDER}/account_transform.json"
