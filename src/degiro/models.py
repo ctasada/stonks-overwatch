@@ -78,7 +78,7 @@ class ProductInfo(models.Model):
     active = models.BooleanField()
     exchangeId = models.CharField(max_length=4)
     onlyEodPrices = models.BooleanField()
-    isShortable = models.BooleanField()
+    isShortable = models.BooleanField(default=None, blank=True, null=True)
     feedQuality = models.CharField(max_length=2, default=None, blank=True, null=True)
     orderBookDepth = models.PositiveIntegerField(default=None, blank=True, null=True)
     vwdIdentifierType = models.CharField(

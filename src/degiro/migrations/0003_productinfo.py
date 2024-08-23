@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                 ('active', models.BooleanField()),
                 ('exchangeId', models.CharField(max_length=4)),
                 ('onlyEodPrices', models.BooleanField()),
-                ('isShortable', models.BooleanField()),
+                ('isShortable', models.BooleanField(blank=True, default=None, null=True)),
                 ('feedQuality', models.CharField(blank=True, default=None, max_length=2, null=True)),
                 ('orderBookDepth', models.PositiveIntegerField(blank=True, default=None, null=True)),
                 ('vwdIdentifierType', models.CharField(blank=True, default=None, max_length=16, null=True)),

@@ -4,7 +4,7 @@ import datetime
 import pandas as pd
 import logging
 
-from degiro.integration.account_overview import AccountOverviewData
+from degiro.data.account_overview import AccountOverviewData
 from degiro.utils.localization import LocalizationUtility
 
 from currency_converter import CurrencyConverter
