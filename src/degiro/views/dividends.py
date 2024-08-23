@@ -9,8 +9,6 @@ from degiro.utils.localization import LocalizationUtility
 
 from currency_converter import CurrencyConverter
 
-logger = logging.getLogger(__name__)
-
 
 class Dividends(View):
 
@@ -18,7 +16,8 @@ class Dividends(View):
     currencyConverter = CurrencyConverter(
         fallback_on_missing_rate=True, fallback_on_wrong_date=True
     )
-    DATETIME_PATTERN = "%Y-%m-%d %H:%M:%S"
+    # FIXME: Replace by common Localization Pattern
+    DATE_FORMAT = "%Y-%m-%d"
 
     def __init__(self):
         self.accountOverview = AccountOverviewData()
@@ -52,7 +51,7 @@ class Dividends(View):
             currency = transaction["currency"]
             if currency != self.baseCurrency:
                 date = datetime.datetime.strptime(
-                    transaction["date"], self.DATETIME_PATTERN
+                    transaction["date"], self.DATE_FORMAT
                 ).date()
                 transactionChange = self.currencyConverter.convert(
                     transactionChange, currency, self.baseCurrency, date
@@ -97,8 +96,6 @@ class Dividends(View):
 
         context = {"dividendsCalendar": dividends, "dividendsGrowth": dividendsGrowth}
 
-        # self.logger.info(f"Dividends: {json.dumps(dividends, indent=4)}")
-
         return render(request, "dividends.html", context)
 
     def get_dividends_calendar(self, dividendsOverview):
@@ -123,18 +120,19 @@ class Dividends(View):
             )
         return dividends
 
+    # FIXME: Move methods to Localization class
     def format_date_to_month_year(self, value: str):
-        time = datetime.datetime.strptime(value, self.DATETIME_PATTERN)
+        time = datetime.datetime.strptime(value, self.DATE_FORMAT)
         return time.strftime("%B %Y")
 
     def get_date_day(self, value: str):
-        time = datetime.datetime.strptime(value, self.DATETIME_PATTERN)
+        time = datetime.datetime.strptime(value, self.DATE_FORMAT)
         return time.strftime("%d")
 
     def format_date_to_month_number(self, value: str):
-        time = datetime.datetime.strptime(value, self.DATETIME_PATTERN)
+        time = datetime.datetime.strptime(value, self.DATE_FORMAT)
         return time.strftime("%m")
 
     def format_date_to_year(self, value: str):
-        time = datetime.datetime.strptime(value, self.DATETIME_PATTERN)
+        time = datetime.datetime.strptime(value, self.DATE_FORMAT)
         return time.strftime("%Y")

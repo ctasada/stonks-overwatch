@@ -88,3 +88,39 @@ class DepositsData:
         )
 
         return dataset
+
+    def calculate_cash_account_value(self) -> dict:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT date, balance_total
+                FROM degiro_cashmovements
+                WHERE currency = 'EUR'
+                    AND type = 'CASH_TRANSACTION'
+                """
+            )
+            cashContributions = dictfetchall(cursor)
+
+        # Create DataFrame from the fetched data
+        df = pd.DataFrame.from_dict(cashContributions)
+
+        # Convert the 'date' column to datetime and remove the time component
+        df["date"] = pd.to_datetime(df["date"]).dt.normalize()
+
+        # Group by date and take the last balance_total for each day
+        df = df.groupby("date", as_index=False).last()
+
+        # Sort values by date (just in case)
+        df = df.sort_values(by="date")
+
+        # Set the 'date' column as the index and fill missing dates
+        df.set_index("date", inplace=True)
+        df = df.resample("D").ffill()
+
+        # Convert the DataFrame to a dictionary with date as the key (converted to string) and balance_total as the value
+        dataset = {
+            date.strftime("%Y-%m-%d"): float(balance)
+            for date, balance in df["balance_total"].items()
+        }
+
+        return dataset

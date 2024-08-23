@@ -23,7 +23,7 @@
             <tbody>
                 {% for transaction in transactions %}
                     <tr>
-                        <td>{{ transaction.date }}</td>
+                        <td>{{ transaction.date }}<br><small class="fw-lighter">{{ transaction.time }}</small></td>
                         <td>{{ transaction.buysell }}<br><small class="fw-lighter">{{ transaction.transactionType }}</small></td>
                         <td>{{ transaction.symbol }}<br><small class="fw-lighter">{{ transaction.name }}</small></td>
                         <td>{{ transaction.price }}</td>

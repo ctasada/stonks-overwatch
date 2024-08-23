@@ -6,41 +6,49 @@ from datetime import datetime
 class LocalizationUtility(object):
     TIME_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
     DATE_FORMAT = "%Y-%m-%d"
+    TIME_FORMAT = "%H:%M:%S"
 
     # Get user's base currency
     @staticmethod
-    def get_base_currency_symbol():
+    def get_base_currency_symbol() -> str:
         baseCurrency = LocalizationUtility.get_base_currency()
         baseCurrencySymbol = CurrencySymbols.get_symbol(baseCurrency)
 
         return baseCurrencySymbol
 
     @staticmethod
-    def get_base_currency():
+    def get_base_currency() -> str:
         accountInfo = DeGiro.get_account_info()
         baseCurrency = accountInfo["data"]["baseCurrency"]
 
         return baseCurrency
 
     @staticmethod
-    def round_value(value: float):
+    def round_value(value: float) -> float:
         return round(value, 3)
 
     @staticmethod
     def format_money_value(
         value: float, currency: str = None, currencySymbol: str = None
-    ):
+    ) -> str:
         if currency and not currencySymbol:
             currencySymbol = CurrencySymbols.get_symbol(currency)
 
         return currencySymbol + " {:,.2f}".format(value)
 
     @staticmethod
-    def format_date_time(value: str):
+    def format_date_time(value: str) -> str:
         time = datetime.strptime(value, LocalizationUtility.TIME_DATE_FORMAT)
-        return time.strftime("%Y-%m-%d %H:%M:%S")
+        return time.strftime(LocalizationUtility.DATE_FORMAT
+                             + " "
+                             + LocalizationUtility.TIME_FORMAT)
 
     @staticmethod
-    def convert_datetime_to_date(value: str):
+    def format_date(value: str) -> str:
         time = datetime.strptime(value, LocalizationUtility.TIME_DATE_FORMAT)
         return time.strftime(LocalizationUtility.DATE_FORMAT)
+
+    @staticmethod
+    def format_time(value: str) -> str:
+        time = datetime.strptime(value, LocalizationUtility.TIME_DATE_FORMAT)
+        return time.strftime(LocalizationUtility.TIME_FORMAT)
