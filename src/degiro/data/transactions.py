@@ -1,14 +1,18 @@
-from django.db import connection
-from degiro.utils.db_utils import dictfetchall
+from degiro.repositories.product_info import ProductInfoRepository
+from degiro.repositories.transactions import TransactionsRepository
 from degiro.utils.localization import LocalizationUtility
 
 
 # FIXME: If data cannot be found in the DB, the code should get it from DeGiro, updating the DB
 class TransactionsData:
 
+    def __init__(self):
+        self.transactions_repository = TransactionsRepository()
+        self.product_info_repository = ProductInfoRepository()
+
     def get_transactions(self):
         # FETCH TRANSACTIONS DATA
-        transactions_history = self.__getTransactions()
+        transactions_history = self.transactions_repository.get_transactions_raw()
 
         products_ids = []
 
@@ -18,7 +22,7 @@ class TransactionsData:
 
         # Remove duplicates from list
         products_ids = list(set(products_ids))
-        products_info = self.__getProductsInfo(products_ids)
+        products_info = self.product_info_repository.get_products_info_raw(products_ids)
 
         # Get user's base currency
         baseCurrencySymbol = LocalizationUtility.get_base_currency_symbol()
@@ -73,28 +77,3 @@ class TransactionsData:
             0: "",
             101: "Stock Split",
         }.get(transactionTypeId, "Unkown Transaction")
-
-    def __getTransactions(self):
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT *
-                FROM degiro_transactions
-                """
-            )
-            return dictfetchall(cursor)
-
-    def __getProductsInfo(self, ids):
-        with connection.cursor() as cursor:
-            cursor.execute(
-                f"""
-                SELECT *
-                FROM degiro_productinfo
-                WHERE id IN ({", ".join(map(str, ids))})
-                """
-            )
-            rows = dictfetchall(cursor)
-
-        # Convert the list of dictionaries into a dictionary indexed by 'productId'
-        result_map = {row['id']: row for row in rows}
-        return result_map
