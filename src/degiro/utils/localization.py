@@ -1,4 +1,4 @@
-from degiro.utils.degiro import DeGiro
+from degiro.config.degiro_config import DegiroConfig
 from currency_symbols import CurrencySymbols
 from datetime import datetime
 
@@ -18,10 +18,8 @@ class LocalizationUtility(object):
 
     @staticmethod
     def get_base_currency() -> str:
-        accountInfo = DeGiro.get_account_info()
-        baseCurrency = accountInfo["data"]["baseCurrency"]
-
-        return baseCurrency
+        degiro_config = DegiroConfig.default()
+        return degiro_config.base_currency
 
     @staticmethod
     def round_value(value: float) -> float:

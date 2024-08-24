@@ -16,9 +16,10 @@ class DegiroCredentials:
 
 
 class DegiroConfig:
-    def __init__(self, credentials: DegiroCredentials, start_date: date):
+    def __init__(self, credentials: DegiroCredentials, base_currency: str, start_date: date):
         self.credentials = credentials
         self.start_date = start_date
+        self.base_currency = base_currency
 
     @classmethod
     def from_dict(cls, data: dict) -> Self:
@@ -30,9 +31,10 @@ class DegiroConfig:
             totp_secret_key=credentials_data["totp_secret_key"],
             user_token=credentials_data["user_token"]
         )
+        base_currency = data.get('base_currency', '')
         start_date = data.get('start_date', '')
-        # LocalizationUtility.convert_string_to_date(start_date)
-        return cls(credentials, datetime.strptime(start_date, "%Y-%m-%d"))
+        # FIXME: Use Localization method
+        return cls(credentials, base_currency, datetime.strptime(start_date, "%Y-%m-%d"))
 
     @classmethod
     def from_json_file(cls, file_path) -> Self:
