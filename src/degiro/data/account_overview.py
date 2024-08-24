@@ -1,6 +1,5 @@
-from django.db import connection
-from degiro.repositories.product_info import ProductInfoRepository
-from degiro.utils.db_utils import dictfetchall
+from degiro.repositories.cash_movements_repository import CashMovementsRepository
+from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.utils.localization import LocalizationUtility
 
 
@@ -8,10 +7,11 @@ from degiro.utils.localization import LocalizationUtility
 class AccountOverviewData:
     def __init__(self):
         self.product_info_repository = ProductInfoRepository()
+        self.cash_movements_repository = CashMovementsRepository()
 
     def get_account_overview(self):
         # FETCH DATA
-        account_overview = self.__get_cash_movements()
+        account_overview = self.cash_movements_repository.get_cash_movements_raw()
 
         products_ids = []
         for cash_movement in account_overview:
@@ -90,14 +90,3 @@ class AccountOverviewData:
                 dividends.append(transaction)
 
         return dividends
-
-    def __get_cash_movements(self):
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT *
-                FROM degiro_cashmovements
-                ORDER BY date DESC
-                """
-            )
-            return dictfetchall(cursor)

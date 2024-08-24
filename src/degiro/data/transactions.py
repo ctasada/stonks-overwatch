@@ -1,5 +1,5 @@
-from degiro.repositories.product_info import ProductInfoRepository
-from degiro.repositories.transactions import TransactionsRepository
+from degiro.repositories.product_info_repository import ProductInfoRepository
+from degiro.repositories.transactions_repository import TransactionsRepository
 from degiro.utils.localization import LocalizationUtility
 
 
@@ -10,7 +10,7 @@ class TransactionsData:
         self.transactions_repository = TransactionsRepository()
         self.product_info_repository = ProductInfoRepository()
 
-    def get_transactions(self):
+    def get_transactions(self) -> dict:
         # FETCH TRANSACTIONS DATA
         transactions_history = self.transactions_repository.get_transactions_raw()
 
@@ -64,7 +64,7 @@ class TransactionsData:
 
         return sorted(myTransactions, key=lambda k: k["date"], reverse=True)
 
-    def __convertBuySell(self, buysell: str):
+    def __convertBuySell(self, buysell: str) -> str:
         if buysell == "B":
             return "Buy"
         elif buysell == "S":
@@ -72,7 +72,7 @@ class TransactionsData:
 
         return "Unknown"
 
-    def __convertTransactionTypeId(self, transactionTypeId: int):
+    def __convertTransactionTypeId(self, transactionTypeId: int) -> str:
         return {
             0: "",
             101: "Stock Split",
