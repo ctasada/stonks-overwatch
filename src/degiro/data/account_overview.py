@@ -1,10 +1,13 @@
 from django.db import connection
+from degiro.repositories.product_info import ProductInfoRepository
 from degiro.utils.db_utils import dictfetchall
 from degiro.utils.localization import LocalizationUtility
 
 
 # FIXME: If data cannot be found in the DB, the code should get it from DeGiro, updating the DB
 class AccountOverviewData:
+    def __init__(self):
+        self.product_info_repository = ProductInfoRepository()
 
     def get_account_overview(self):
         # FETCH DATA
@@ -17,7 +20,7 @@ class AccountOverviewData:
 
         # Remove duplicates from list
         products_ids = list(set(products_ids))
-        products_info = self.__getProductsInfo(products_ids)
+        products_info = self.product_info_repository.get_products_info_raw(products_ids)
 
         overview = []
         for cash_movement in account_overview:
@@ -98,19 +101,3 @@ class AccountOverviewData:
                 """
             )
             return dictfetchall(cursor)
-
-    # FIXME: Duplicated code
-    def __getProductsInfo(self, ids):
-        with connection.cursor() as cursor:
-            cursor.execute(
-                f"""
-                SELECT *
-                FROM degiro_productinfo
-                WHERE id IN ({", ".join(map(str, ids))})
-                """
-            )
-            rows = dictfetchall(cursor)
-
-        # Convert the list of dictionaries into a dictionary indexed by 'productId'
-        result_map = {row['id']: row for row in rows}
-        return result_map
