@@ -52,15 +52,6 @@ class DeGiro(metaclass=SingleInstanceMetaClass):
         # FETCH CONFIG TABLE
         client_details_table = DeGiro.get_client().get_client_details()
 
-        # EXTRACT DATA
-        # int_account = client_details_table["data"]["intAccount"]
-        # user_token = client_details_table["data"]["id"]
-        # client_details_pretty = json.dumps(
-        #     client_details_table,
-        #     sort_keys=True,
-        #     indent=4,
-        # )
-
         return client_details_table
 
     @staticmethod
