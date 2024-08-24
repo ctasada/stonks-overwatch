@@ -8,6 +8,7 @@ from currency_converter import CurrencyConverter
 import logging
 
 
+# FIXME: Retrieve data from DB
 class PortfolioData:
     logger = logging.getLogger("stocks_portfolio.portfolio_data")
     currencyConverter = CurrencyConverter(
