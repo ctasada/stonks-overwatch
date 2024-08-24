@@ -37,16 +37,6 @@
             </div>
 
             <ul class="list-unstyled components">
-                {% url 'user' as url %}
-                <li class="{% if request.path == url %}active{% endif %}">
-                    <a href="{{ url }}">
-                        <i class="fas fa-user"></i>
-                        {% username %} - {% clientrole %}
-                    </a>
-                </li>
-            </ul> 
-
-            <ul class="list-unstyled components">
                 {% url 'dashboard' as url %}
                 <li class="{% if request.path == url %}active{% endif %}">
                     <a href="{{ url }}">

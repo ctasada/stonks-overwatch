@@ -6,7 +6,6 @@ from degiro.views.deposits import Deposits
 from degiro.views.dividends import Dividends
 from degiro.views.transactions import Transactions
 from degiro.views.account_overview import AccountOverview
-from degiro.views.user import User
 
 
 urlpatterns = [
@@ -17,5 +16,4 @@ urlpatterns = [
     path("transactions", Transactions.as_view(), name="transactions"),
     path("deposits", Deposits.as_view(), name="deposits"),
     path("account_overview", AccountOverview.as_view(), name="account_overview"),
-    path("user", User.as_view(), name="user"),
 ]

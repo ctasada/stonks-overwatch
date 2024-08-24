@@ -227,9 +227,7 @@ def get_product_quotation(issueid, period: Interval) -> list:
         list: List with the quotations
     """
     # Retrieve user_token
-    trading_api = DeGiro.get_client()
-    client_details_table = trading_api.get_client_details()
-    # int_account = client_details_table['data']['intAccount']
+    client_details_table = DeGiro.get_client_details()
     user_token = client_details_table["data"]["id"]
 
     chart_fetcher = ChartFetcher(user_token=user_token)
