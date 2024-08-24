@@ -1,5 +1,6 @@
 from datetime import date
 from django.db import connection
+from degiro.repositories.cash_movements_repository import CashMovementsRepository
 from degiro.utils.db_utils import dictfetchall
 from degiro.utils.localization import LocalizationUtility
 import pandas as pd
@@ -7,8 +8,11 @@ import pandas as pd
 
 # FIXME: If data cannot be found in the DB, the code should get it from DeGiro, updating the DB
 class DepositsData:
+    def __init__(self):
+        self.cash_movements_repository = CashMovementsRepository()
 
     def get_cash_deposits(self) -> dict:
+        # FIXME: Replace by CashMovementsRepository call
         with connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -46,17 +50,7 @@ class DepositsData:
         return records
 
     def cash_deposits_history(self) -> dict:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT date, description, change
-                FROM degiro_cashmovements
-                WHERE currency = 'EUR'
-                    AND description IN ('iDEAL storting', 'iDEAL Deposit', 'Terugstorting')
-                """
-            )
-            cashContributions = dictfetchall(cursor)
-
+        cashContributions = self.cash_movements_repository.get_cash_deposits_raw()
         df = pd.DataFrame.from_dict(cashContributions)
         # Remove hours and keep only the day
         df["date"] = pd.to_datetime(df["date"]).dt.date
