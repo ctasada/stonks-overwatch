@@ -60,6 +60,14 @@
                         Dividends
                     </a>
                 </li>
+                
+                {% url 'fees' as url %}
+                <li class="{% if request.path == url %}active{% endif %}">
+                    <a href="{{ url }}">
+                        <i class="fas fa-dollar-sign"></i>
+                        Fees
+                    </a>
+                </li>
 
                 {% url 'deposits' as url %}
                 <li class="{% if request.path == url %}active{% endif %}">
