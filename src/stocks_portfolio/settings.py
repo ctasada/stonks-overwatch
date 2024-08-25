@@ -172,6 +172,11 @@ LOGGING = {
             'level': 'WARN',
             'propagate': True,
         },
+        'django.db': {
+            'handlers': ['console', 'file'],
+            'level': 'WARN',
+            'propagate': True,
+        },
         'degiro_connector': {
             'handlers': ['console'],
             'level': 'WARN',
