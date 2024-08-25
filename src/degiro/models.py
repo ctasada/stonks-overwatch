@@ -114,3 +114,9 @@ class ProductInfo(models.Model):
 class ProductQuotation(models.Model):
     id = models.PositiveIntegerField(primary_key=True)
     quotations = models.JSONField()
+
+
+class CompanyProfile(models.Model):
+    id = models.PositiveIntegerField(primary_key=True)
+    isin = models.CharField(max_length=25, unique=True)
+    data = models.JSONField()
