@@ -2,7 +2,7 @@ from django.views import View
 from django.shortcuts import render
 
 from degiro.data.deposits import DepositsData
-from degiro.integration.portfolio import PortfolioData
+from degiro.data.portfolio import PortfolioData
 
 import logging
 

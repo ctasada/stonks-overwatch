@@ -23,3 +23,10 @@ class ProductQuotationsRepository:
             results = dictfetchall(cursor)[0]["quotations"]
 
         return json.loads(results)
+
+    def get_product_price(self, productId: int) -> float:
+        quotations = self.get_product_quotations(productId)
+
+        last_quotation = list(quotations.keys())[-1]
+
+        return quotations[last_quotation]
