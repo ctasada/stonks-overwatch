@@ -6,6 +6,14 @@ from degiro.utils.db_utils import dictfetchall
 
 class ProductInfoRepository:
     def get_products_info_raw(self, ids) -> dict:
+        """
+        Gets product information from the given product id. The information is retrieved from the DB.
+        ### Parameters
+            * productIds: list of ints
+                - The product ids to query
+        ### Returns
+            list: list of product infos
+        """
         with connection.cursor() as cursor:
             cursor.execute(
                 f"""
