@@ -1,7 +1,7 @@
 from django.views import View
 from django.shortcuts import render
 
-from degiro.integration.portfolio import PortfolioData
+from degiro.data.portfolio import PortfolioData
 
 
 class Portfolio(View):
@@ -10,7 +10,6 @@ class Portfolio(View):
 
     def get(self, request):
         portfolio = self.portfolio.get_portfolio()
-        # print (json.dumps(portfolio, indent=2))
 
         context = {
             "portfolio": portfolio,

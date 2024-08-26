@@ -10,7 +10,7 @@ from degiro.data.deposits import DepositsData
 from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.product_quotations_repository import ProductQuotationsRepository
 from degiro.utils.db_utils import dictfetchall
-from degiro.integration.portfolio import PortfolioData
+from degiro.data.portfolio import PortfolioData
 from degiro.utils.localization import LocalizationUtility
 from degiro_connector.quotecast.models.chart import Interval
 

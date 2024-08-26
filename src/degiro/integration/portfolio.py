@@ -8,8 +8,7 @@ from currency_converter import CurrencyConverter
 import logging
 
 
-# FIXME: Retrieve data from DB
-class PortfolioData:
+class PortofolioIntegration:
     logger = logging.getLogger("stocks_portfolio.portfolio_data")
     currencyConverter = CurrencyConverter(
         fallback_on_missing_rate=True, fallback_on_wrong_date=True
@@ -96,9 +95,9 @@ class PortfolioData:
                         sector=sector,
                         industry=industry,
                         shares=portfolio["size"],
-                        price=portfolio["price"],
-                        breakEvenPrice=portfolio["breakEvenPrice"],
+                        price=price,
                         formattedPrice=formattedPrice,
+                        breakEvenPrice=breakEvenPrice,
                         formattedBreakEvenPrice=formattedBreakEvenPrice,  # GAK: Average Purchase Price
                         value=portfolio["value"],
                         formattedValue=value,
