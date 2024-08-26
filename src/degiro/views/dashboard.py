@@ -7,6 +7,8 @@ from django.db import connection
 import pandas as pd
 
 from degiro.data.deposits import DepositsData
+from degiro.repositories.product_info_repository import ProductInfoRepository
+from degiro.repositories.product_quotations_repository import ProductQuotationsRepository
 from degiro.utils.db_utils import dictfetchall
 from degiro.integration.portfolio import PortfolioData
 from degiro.utils.localization import LocalizationUtility
@@ -15,7 +17,6 @@ from degiro_connector.quotecast.models.chart import Interval
 from currency_converter import CurrencyConverter
 
 import logging
-import json
 
 
 class Dashboard(View):
@@ -27,6 +28,8 @@ class Dashboard(View):
     def __init__(self):
         self.portfolio = PortfolioData()
         self.deposits = DepositsData()
+        self.product_quotations_repository = ProductQuotationsRepository()
+        self.product_info_repository = ProductInfoRepository()
 
     def _get_simple_cash_deposits(self):
         result = {}
@@ -145,45 +148,6 @@ class Dashboard(View):
             },
             "currencySymbol": LocalizationUtility.get_base_currency_symbol(),
         }
-
-    def _get_productInfo(self, productId: int) -> dict:
-        """
-        Gets product information from the given product id. The information is retrieved from the DB.
-        ### Parameters
-            * productId: int
-                - The product id to query
-        ### Returns
-            list: list of product ids
-        """
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT * FROM degiro_productinfo WHERE id = %s
-                """,
-                [productId],
-            )
-            result = dictfetchall(cursor)[0]
-
-        return result
-
-    def _get_product_quotations(self, productId: int) -> dict:
-        """
-        Gets the list of product ids from the DB.
-
-        ### Returns
-            list: list of product ids
-        """
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT quotations FROM degiro_productquotation WHERE id = %s
-                """,
-                [productId],
-            )
-            # FIXME: Avoid this manual conversion
-            results = dictfetchall(cursor)[0]["quotations"]
-
-        return json.loads(results)
 
     def _calculate_value(self, cash_account: dict) -> list:
         data = self._create_products_quotation()
@@ -379,7 +343,8 @@ class Dashboard(View):
         for key in product_growth.keys():
             # Cleanup 'carry_total' from result
             del product_growth[key]["carry_total"]
-            product = self._get_productInfo(key)
+            # FIXME: the method returns a key-value object
+            product = self.product_info_repository.get_products_info_raw([key])[key]
 
             # If the product is NOT tradable, we shouldn't consider it for Growth
             # The 'tradable' attribute identifies old Stocks, like the ones that are
@@ -420,7 +385,7 @@ class Dashboard(View):
 
         # We need to use the productIds to get the daily quote for each product
         for key in product_growth.keys():
-            quotes_dict = self._get_product_quotations(key)
+            quotes_dict = self.product_quotations_repository.get_product_quotations(key)
 
             product_growth[key]["quotation"]["quotes"] = quotes_dict
 
