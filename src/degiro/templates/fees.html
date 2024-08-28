@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 {% load custom_tags %}
-
+{% load static %}
 {% block content %}
 <!-- ChartJS -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-autocolors"></script>
+<script src="{% static 'chart.js/dist/chart.umd.js' %}"></script>
+<script src="{% static 'chartjs-plugin-autocolors/dist/chartjs-plugin-autocolors.min.js' %}"></script>
   
 <div class="container-fluid row-gap-5">
     <div class="row mt-2 column-gap-3">

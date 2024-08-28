@@ -79,7 +79,6 @@ poetry run src/manage.py runscript init_db
 - IBERDROLA Non-Tradable Dividends: Are properly calculated? Doesn't seem to calculate quantity properly
 
 ## TODOs
-- [ ] Make it easier to keep the JS dependencies up-to-date. NPM seems to be the way
 - [ ] DeGiro Client: Replace the Singleton by a proper session instance
 - [ ] DeGiro Client: Stop using Totp and request 2FA for each connection
 - [ ] Portfolio: Show filter to see Open/Close/All stocks
