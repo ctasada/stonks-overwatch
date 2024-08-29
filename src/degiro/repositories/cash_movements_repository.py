@@ -27,3 +27,15 @@ class CashMovementsRepository:
                 """
             )
             return dictfetchall(cursor)
+
+    def get_total_cash_deposits_raw(self) -> dict:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT SUM(change)
+                FROM degiro_cashmovements
+                WHERE currency = 'EUR'
+                    AND description IN ('iDEAL storting', 'iDEAL Deposit', 'Terugstorting')
+                """
+            )
+            return cursor.fetchone()[0]

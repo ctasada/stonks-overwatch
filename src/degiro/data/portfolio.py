@@ -1,4 +1,5 @@
 from django.db import connection
+from degiro.repositories.cash_movements_repository import CashMovementsRepository
 from degiro.repositories.company_profile_repository import CompanyProfileRepository
 from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.product_quotations_repository import ProductQuotationsRepository
@@ -22,13 +23,21 @@ class PortfolioData:
         self.company_profile_repository = CompanyProfileRepository()
         self.product_quotation_repository = ProductQuotationsRepository()
         self.portfolioIntegration = PortofolioIntegration()
+        self.cash_movements_repository = CashMovementsRepository()
 
     def get_portfolio(self):
         try:
             return self.portfolioIntegration.get_portfolio()
         except Exception:
             logging.exception("Cannot connecto to DeGiro, getting last known data")
-            return self.__get_portfolio
+            return self.__get_portfolio()
+
+    def get_portfolio_total(self):
+        try:
+            return self.portfolioIntegration.get_portfolio_total()
+        except Exception:
+            logging.exception("Cannot connecto to DeGiro, getting last known data")
+            return self.__get_portfolio_total()
 
     def __get_portfolio(self):
         portfolioTransactions = self.__get_porfolio_data()
@@ -70,7 +79,7 @@ class PortfolioData:
             formattedPrice = LocalizationUtility.format_money_value(
                 value=price, currency=currency
             )
-            value = LocalizationUtility.format_money_value(
+            formattedValue = LocalizationUtility.format_money_value(
                 value=value, currencySymbol=baseCurrencySymbol
             )
             formattedBreakEvenPrice = LocalizationUtility.format_money_value(
@@ -94,7 +103,7 @@ class PortfolioData:
                     formattedPrice=formattedPrice,
                     formattedBreakEvenPrice=formattedBreakEvenPrice,  # GAK: Average Purchase Price
                     value=value,
-                    formattedValue=value,
+                    formattedValue=formattedValue,
                     isOpen=True,
                     unrealizedGain=unrealizedGain,
                     formattedUnrealizedGain=formattedUnrealizedGain,
@@ -104,9 +113,49 @@ class PortfolioData:
 
         return sorted(myPortfolio, key=lambda k: k["symbol"])
 
-    # FIXME: Get rid of this wrapper. Should call DeGiro or calculate locally if fails
-    def get_portfolio_total(self):
-        return self.portfolioIntegration.get_portfolio_total()
+    def __get_portfolio_total(self):
+        # Calculate current value
+        portfolio = self.get_portfolio()
+
+        portfolioTotalValue = 0.0
+
+        tmp_total_portfolio = {}
+        for entry in portfolio:
+            portfolioTotalValue += entry["value"]
+            tmp_total_portfolio[entry["name"]] = entry["value"]
+
+        baseCurrencySymbol = LocalizationUtility.get_base_currency_symbol()
+
+        tmp_total_portfolio["totalDepositWithdrawal"] = self.cash_movements_repository.get_total_cash_deposits_raw()
+        # FIXME: Calculate cash
+        tmp_total_portfolio["totalCash"] = -1
+        roi = (
+            portfolioTotalValue / tmp_total_portfolio["totalDepositWithdrawal"] - 1
+        ) * 100
+        total_profit_loss = portfolioTotalValue - tmp_total_portfolio["totalDepositWithdrawal"]
+
+        total_portfolio = {
+            "total_pl": total_profit_loss,
+            "total_pl_formatted": LocalizationUtility.format_money_value(
+                value=total_profit_loss,
+                currencySymbol=baseCurrencySymbol,
+            ),
+            "totalCash": LocalizationUtility.format_money_value(
+                value=tmp_total_portfolio["totalCash"],
+                currencySymbol=baseCurrencySymbol,
+            ),
+            "currentValue": LocalizationUtility.format_money_value(
+                value=portfolioTotalValue, currencySymbol=baseCurrencySymbol
+            ),
+            "totalROI": roi,
+            "totalROI_formatted": "{:,.2f}%".format(roi),
+            "totalDepositWithdrawal": LocalizationUtility.format_money_value(
+                value=tmp_total_portfolio["totalDepositWithdrawal"],
+                currencySymbol=baseCurrencySymbol,
+            ),
+        }
+
+        return total_portfolio
 
     def __get_porfolio_data(self) -> dict:
         with connection.cursor() as cursor:
