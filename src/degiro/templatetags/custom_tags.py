@@ -1,5 +1,5 @@
 from django import template
-from degiro.integration.portfolio import PortofolioIntegration
+from degiro.data.portfolio import PortfolioData
 
 register = template.Library()
 
@@ -11,7 +11,7 @@ def index(sequence, position):
 
 @register.inclusion_tag("total_overview.html")
 def show_total_portfolio():
-    portfolio = PortofolioIntegration()
+    portfolio = PortfolioData()
     total_portfolio = portfolio.get_portfolio_total()
 
     # print(json.dumps(total_portfolio, indent = 4))

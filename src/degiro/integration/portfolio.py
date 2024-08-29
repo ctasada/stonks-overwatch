@@ -76,7 +76,7 @@ class PortofolioIntegration:
                 formattedPrice = LocalizationUtility.format_money_value(
                     value=price, currency=currency
                 )
-                value = LocalizationUtility.format_money_value(
+                formattedValue = LocalizationUtility.format_money_value(
                     value=value, currencySymbol=baseCurrencySymbol
                 )
                 formattedBreakEvenPrice = LocalizationUtility.format_money_value(
@@ -100,7 +100,7 @@ class PortofolioIntegration:
                         breakEvenPrice=breakEvenPrice,
                         formattedBreakEvenPrice=formattedBreakEvenPrice,  # GAK: Average Purchase Price
                         value=portfolio["value"],
-                        formattedValue=value,
+                        formattedValue=formattedValue,
                         isOpen=(portfolio["size"] != 0.0 and portfolio["value"] != 0.0),
                         unrealizedGain=unrealizedGain,
                         formattedUnrealizedGain=formattedUnrealizedGain,
@@ -136,7 +136,7 @@ class PortofolioIntegration:
                 tmp_total_portfolio[value["name"]] = value["value"]
         # Finish conversion
         roi = (
-            portfolioTotalValue / (tmp_total_portfolio["totalDepositWithdrawal"]) - 1
+            portfolioTotalValue / tmp_total_portfolio["totalDepositWithdrawal"] - 1
         ) * 100
         total_profit_loss = portfolioTotalValue - tmp_total_portfolio["totalDepositWithdrawal"]
 

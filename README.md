@@ -96,6 +96,7 @@ poetry run src/manage.py runscript init_db
 - [ ] Show used Exchanges to help consolidating costs
 - [ ] Show Countries to help with the risk distribution
 - [ ] Some stocks (mainly Spanish) don't have Sector or other data. Find workaround
+- [ ] Fontawesome is replaceble by https://icons.getbootstrap.com
 
 ## Logos
 - https://eodhd.com/financial-apis-blog/40000-company-logos (requires API Key)
