@@ -1,5 +1,4 @@
-"""poetry run python ./scripts/quotecast.py
-"""
+"""poetry run python ./scripts/quotecast.py"""
 
 # IMPORTATIONS
 import logging

@@ -295,6 +295,7 @@ def __calculate_product_growth() -> dict:
 
     return product_growth
 
+
 def import_products_quotation() -> None:
     product_growth = __calculate_product_growth()
 

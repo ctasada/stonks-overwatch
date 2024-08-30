@@ -74,10 +74,7 @@ def import_company_profiles(file_path) -> None:
 
     for key in data:
         try:
-            CompanyProfile.objects.update_or_create(
-                isin=key,
-                data=data[key]
-            )
+            CompanyProfile.objects.update_or_create(isin=key, data=data[key])
         except Exception as error:
             print(f"Cannot import ISIN: {key}")
             print("Exception: ", error)

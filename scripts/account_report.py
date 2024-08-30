@@ -1,5 +1,4 @@
-"""poetry run python ./scripts/account_report.py
-"""
+"""poetry run python ./scripts/account_report.py"""
 
 # IMPORTATIONS
 from datetime import date
