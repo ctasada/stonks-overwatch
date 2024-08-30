@@ -40,7 +40,7 @@ class PortfolioData:
     def __get_portfolio(self):
         portfolio_transactions = self.__get_porfolio_data()
 
-        products_ids = [row["productId"] for row in portfolio_transactions]
+        products_ids = [row["product_id"] for row in portfolio_transactions]
         products_info = self.product_info_repository.get_products_info_raw(products_ids)
 
         # Get user's base currency
@@ -50,7 +50,7 @@ class PortfolioData:
         my_portfolio = []
 
         for tmp in portfolio_transactions:
-            info = products_info[tmp["productId"]]
+            info = products_info[tmp["product_id"]]
             company_profile = company_profile = self.company_profile_repository.get_company_profile_raw(info["isin"])
             sector = "Unknown"
             industry = "Unknown"
@@ -59,9 +59,9 @@ class PortfolioData:
                 industry = company_profile["data"]["industry"]
 
             currency = info["currency"]
-            price = self.product_quotation_repository.get_product_price(tmp["productId"])
+            price = self.product_quotation_repository.get_product_price(tmp["product_id"])
             value = tmp["size"] * price
-            break_even_price = abs(tmp["totalPlusAllFeesInBaseCurrency"]) / tmp["size"]
+            break_even_price = abs(tmp["total_plus_all_fees_in_base_currency"]) / tmp["size"]
             if currency != base_currency:
                 price = self.currency_converter.convert(price, currency, base_currency)
                 value = self.currency_converter.convert(value, currency, base_currency)
@@ -85,8 +85,8 @@ class PortfolioData:
                     "industry": industry,
                     "shares": tmp["size"],
                     "price": price,
-                    "breakEvenPrice": break_even_price,
                     "formattedPrice": formatted_price,
+                    "breakEvenPrice": break_even_price,
                     "formattedBreakEvenPrice": formatted_break_even_price,  # GAK: Average Purchase Price
                     "value": value,
                     "formattedValue": formatted_value,
@@ -145,10 +145,10 @@ class PortfolioData:
         with connection.cursor() as cursor:
             cursor.execute(
                 """
-                SELECT productId, SUM(quantity) AS size,
-                    SUM(totalPlusAllFeesInBaseCurrency) as totalPlusAllFeesInBaseCurrency
+                SELECT product_id, SUM(quantity) AS size,
+                    SUM(total_plus_all_fees_in_base_currency) as total_plus_all_fees_in_base_currency
                 FROM degiro_transactions
-                GROUP BY productId
+                GROUP BY product_id
                 HAVING SUM(quantity) > 0;
                 """
             )
