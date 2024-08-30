@@ -1,5 +1,5 @@
-from django.views import View
 from django.shortcuts import render
+from django.views import View
 
 from degiro.data.fees import FeesData
 from degiro.utils.localization import LocalizationUtility
@@ -12,7 +12,7 @@ class Fees(View):
     def get(self, request):
         fees = self.fees.get_fees()
 
-        baseCurrencySymbol = LocalizationUtility.get_base_currency_symbol()
+        base_currency_symbol = LocalizationUtility.get_base_currency_symbol()
         transaction_fees = 0
         exchange_fees = 0
         ftt_fees = 0
@@ -29,22 +29,14 @@ class Fees(View):
 
         context = {
             "transaction_fees": LocalizationUtility.format_money_value(
-                value=transaction_fees,
-                currencySymbol=baseCurrencySymbol
+                value=transaction_fees, currency_symbol=base_currency_symbol
             ),
             "exchange_fees": LocalizationUtility.format_money_value(
-                value=exchange_fees,
-                currencySymbol=baseCurrencySymbol
+                value=exchange_fees, currency_symbol=base_currency_symbol
             ),
-            "ftt_fees": LocalizationUtility.format_money_value(
-                value=ftt_fees,
-                currencySymbol=baseCurrencySymbol
-            ),
-            "adr_fees": LocalizationUtility.format_money_value(
-                value=adr_fees,
-                currencySymbol=baseCurrencySymbol
-            ),
+            "ftt_fees": LocalizationUtility.format_money_value(value=ftt_fees, currency_symbol=base_currency_symbol),
+            "adr_fees": LocalizationUtility.format_money_value(value=adr_fees, currency_symbol=base_currency_symbol),
             "fees": fees,
         }
 
-        return render(request, 'fees.html', context)
+        return render(request, "fees.html", context)

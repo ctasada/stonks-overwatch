@@ -2,5 +2,5 @@ from django.apps import AppConfig
 
 
 class DegiroConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'degiro'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "degiro"

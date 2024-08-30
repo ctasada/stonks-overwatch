@@ -1,12 +1,12 @@
+"""poetry run python ./scripts/client_details.py
 """
-poetry run python ./scripts/client_details.py
-"""
+
 # IMPORTATIONS
-import common
 import json
 
+import common
 
-trading_api = common.connectToDegiro()
+trading_api = common.connect_to_degiro()
 
 # FETCH CONFIG TABLE
 client_details_table = trading_api.get_client_details()

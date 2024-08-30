@@ -1,6 +1,8 @@
-from degiro.config.degiro_config import DegiroConfig
-from currency_symbols import CurrencySymbols
 from datetime import datetime
+
+from currency_symbols import CurrencySymbols
+
+from degiro.config.degiro_config import DegiroConfig
 
 
 class LocalizationUtility(object):
@@ -11,10 +13,10 @@ class LocalizationUtility(object):
     # Get user's base currency
     @staticmethod
     def get_base_currency_symbol() -> str:
-        baseCurrency = LocalizationUtility.get_base_currency()
-        baseCurrencySymbol = CurrencySymbols.get_symbol(baseCurrency)
+        base_currency = LocalizationUtility.get_base_currency()
+        base_currency_symbol = CurrencySymbols.get_symbol(base_currency)
 
-        return baseCurrencySymbol
+        return base_currency_symbol
 
     @staticmethod
     def get_base_currency() -> str:
@@ -26,20 +28,16 @@ class LocalizationUtility(object):
         return round(value, 3)
 
     @staticmethod
-    def format_money_value(
-        value: float, currency: str = None, currencySymbol: str = None
-    ) -> str:
-        if currency and not currencySymbol:
-            currencySymbol = CurrencySymbols.get_symbol(currency)
+    def format_money_value(value: float, currency: str = None, currency_symbol: str = None) -> str:
+        if currency and not currency_symbol:
+            currency_symbol = CurrencySymbols.get_symbol(currency)
 
-        return currencySymbol + " {:,.2f}".format(value)
+        return currency_symbol + " {:,.2f}".format(value)
 
     @staticmethod
     def format_date_time(value: str) -> str:
         time = datetime.strptime(value, LocalizationUtility.TIME_DATE_FORMAT)
-        return time.strftime(LocalizationUtility.DATE_FORMAT
-                             + " "
-                             + LocalizationUtility.TIME_FORMAT)
+        return time.strftime(LocalizationUtility.DATE_FORMAT + " " + LocalizationUtility.TIME_FORMAT)
 
     @staticmethod
     def format_date(value: str) -> str:

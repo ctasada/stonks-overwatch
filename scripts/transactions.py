@@ -1,14 +1,14 @@
+"""poetry run python ./scripts/transactions.py
 """
-poetry run python ./scripts/transactions.py
-"""
-# IMPORTATIONS
-import common
-import json
 
+# IMPORTATIONS
+import json
 from datetime import date
+
+import common
 from degiro_connector.trading.models.transaction import HistoryRequest
 
-trading_api = common.connectToDegiro()
+trading_api = common.connect_to_degiro()
 
 # SETUP REQUEST
 from_date = date(
@@ -31,8 +31,8 @@ print(json.dumps(transactions_history, indent=4))
 products_ids = []
 
 # ITERATION OVER THE TRANSACTIONS TO OBTAIN THE PRODUCTS
-for transaction in transactions_history['data']:
-    products_ids.append(int(transaction['productId']))
+for transaction in transactions_history["data"]:
+    products_ids.append(int(transaction["productId"]))
 
 products_ids = list(set(products_ids))
 

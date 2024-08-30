@@ -1,15 +1,15 @@
+"""poetry run python ./scripts/company_profile.py
 """
-poetry run python ./scripts/company_profile.py
-"""
+
 # IMPORTATIONS
-import common
 import json
 
+import common
 
-trading_api = common.connectToDegiro()
+trading_api = common.connect_to_degiro()
 
 # FETCH DATA
-product_isin = 'US0378331005'
+product_isin = "US0378331005"
 company_profile = trading_api.get_company_profile(
     product_isin=product_isin,
     raw=True,

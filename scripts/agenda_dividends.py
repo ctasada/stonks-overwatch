@@ -1,15 +1,14 @@
+"""poetry run python ./scripts/agenda_dividends.py
 """
-poetry run python ./scripts/agenda_dividends.py
-"""
-# IMPORTATIONS
-import common
-import json
 
+# IMPORTATIONS
+import json
 from datetime import datetime, timedelta
 
+import common
 from degiro_connector.trading.models.agenda import AgendaRequest, CalendarType
 
-trading_api = common.connectToDegiro()
+trading_api = common.connect_to_degiro()
 
 # FETCH AGENDA
 agenda = trading_api.get_agenda(
@@ -19,7 +18,7 @@ agenda = trading_api.get_agenda(
         start_date=datetime.now() - timedelta(days=30),
         offset=0,
         limit=25,
-        company_name='IBERDROLA',
+        company_name="IBERDROLA",
     ),
     raw=True,
 )

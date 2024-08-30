@@ -1,10 +1,10 @@
-from django.views import View
+import logging
+
 from django.shortcuts import render
+from django.views import View
 
 from degiro.data.deposits import DepositsData
 from degiro.data.portfolio import PortfolioData
-
-import logging
 
 
 class Deposits(View):
@@ -16,13 +16,13 @@ class Deposits(View):
 
     def get(self, request):
         data = self.deposits_data.cash_deposits_history()
-        cash_contributions = [{'x': item['date'], 'y': item['total_deposit']} for item in data]
+        cash_contributions = [{"x": item["date"], "y": item["total_deposit"]} for item in data]
 
         deposits = self.deposits_data.get_cash_deposits()
         total_portfolio = self.portfolio.get_portfolio_total()
 
         context = {
-            "total_deposits": total_portfolio['totalDepositWithdrawal'],
+            "total_deposits": total_portfolio["totalDepositWithdrawal"],
             "deposits": deposits,
             "deposit_growth": {"value": cash_contributions},
         }

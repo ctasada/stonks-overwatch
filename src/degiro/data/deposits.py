@@ -1,9 +1,11 @@
 from datetime import date
+
+import pandas as pd
 from django.db import connection
+
 from degiro.repositories.cash_movements_repository import CashMovementsRepository
 from degiro.utils.db_utils import dictfetchall
 from degiro.utils.localization import LocalizationUtility
-import pandas as pd
 
 
 # FIXME: If data cannot be found in the DB, the code should get it from DeGiro, updating the DB
@@ -28,30 +30,28 @@ class DepositsData:
         df["date"] = pd.to_datetime(df["date"]).dt.strftime(LocalizationUtility.DATE_FORMAT)
         df = df.sort_values(by="date", ascending=False)
 
-        baseCurrencySymbol = LocalizationUtility.get_base_currency_symbol()
-        baseCurrency = LocalizationUtility.get_base_currency()
+        base_currency_symbol = LocalizationUtility.get_base_currency_symbol()
+        base_currency = LocalizationUtility.get_base_currency()
 
         records = []
         for _, row in df.iterrows():
             records.append(
                 {
-                    'type': 'Deposit' if row['change'] > 0 else 'Withdrawal',
-                    'date': row['date'],
-                    'description': row['description'],
-                    'change': row['change'],
-                    'changeFormatted': LocalizationUtility.format_money_value(
-                        value=row['change'],
-                        currency=baseCurrency,
-                        currencySymbol=baseCurrencySymbol
-                    )
+                    "type": "Deposit" if row["change"] > 0 else "Withdrawal",
+                    "date": row["date"],
+                    "description": row["description"],
+                    "change": row["change"],
+                    "changeFormatted": LocalizationUtility.format_money_value(
+                        value=row["change"], currency=base_currency, currency_symbol=base_currency_symbol
+                    ),
                 }
             )
 
         return records
 
     def cash_deposits_history(self) -> dict:
-        cashContributions = self.cash_movements_repository.get_cash_deposits_raw()
-        df = pd.DataFrame.from_dict(cashContributions)
+        cash_contributions = self.cash_movements_repository.get_cash_deposits_raw()
+        df = pd.DataFrame.from_dict(cash_contributions)
         # Remove hours and keep only the day
         df["date"] = pd.to_datetime(df["date"]).dt.date
         # Group by day, adding the values
@@ -61,12 +61,12 @@ class DepositsData:
         # Do the cummulative sum
         df["contributed"] = df["change"].cumsum()
 
-        cashContributions = df.to_dict("records")
-        for contribution in cashContributions:
+        cash_contributions = df.to_dict("records")
+        for contribution in cash_contributions:
             contribution["date"] = contribution["date"].strftime(LocalizationUtility.DATE_FORMAT)
 
         dataset = []
-        for contribution in cashContributions:
+        for contribution in cash_contributions:
             dataset.append(
                 {
                     "date": contribution["date"],
@@ -78,7 +78,7 @@ class DepositsData:
         dataset.append(
             {
                 "date": date.today().strftime(LocalizationUtility.DATE_FORMAT),
-                "total_deposit": cashContributions[-1]["contributed"],
+                "total_deposit": cash_contributions[-1]["contributed"],
             }
         )
 
@@ -94,10 +94,10 @@ class DepositsData:
                     AND type = 'CASH_TRANSACTION'
                 """
             )
-            cashContributions = dictfetchall(cursor)
+            cash_contributions = dictfetchall(cursor)
 
         # Create DataFrame from the fetched data
-        df = pd.DataFrame.from_dict(cashContributions)
+        df = pd.DataFrame.from_dict(cash_contributions)
 
         # Convert the 'date' column to datetime and remove the time component
         df["date"] = pd.to_datetime(df["date"]).dt.normalize()
@@ -112,10 +112,8 @@ class DepositsData:
         df.set_index("date", inplace=True)
         df = df.resample("D").ffill()
 
-        # Convert the DataFrame to a dictionary with date as the key (converted to string) and balance_total as the value
-        dataset = {
-            date.strftime("%Y-%m-%d"): float(balance)
-            for date, balance in df["balance_total"].items()
-        }
+        # Convert the DataFrame to a dictionary with date as the key (converted to string)
+        # and balance_total as the value
+        dataset = {date.strftime("%Y-%m-%d"): float(balance) for date, balance in df["balance_total"].items()}
 
         return dataset

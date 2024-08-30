@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("degiro", "0001_initial"),
     ]
@@ -14,34 +13,34 @@ class Migration(migrations.Migration):
             name="Transactions",
             fields=[
                 ("id", models.PositiveIntegerField(primary_key=True, serialize=False)),
-                ("productId", models.PositiveIntegerField()),
+                ("product_id", models.PositiveIntegerField()),
                 ("date", models.DateTimeField()),
                 ("buysell", models.CharField(max_length=1)),
                 ("price", models.DecimalField(decimal_places=2, max_digits=10)),
                 ("quantity", models.IntegerField()),
                 ("total", models.DecimalField(decimal_places=2, max_digits=10)),
                 (
-                    "orderTypeId",
+                    "order_type_id",
                     models.PositiveIntegerField(blank=True, default=None, null=True),
                 ),
                 (
-                    "counterParty",
+                    "counter_party",
                     models.CharField(blank=True, default=None, max_length=5, null=True),
                 ),
                 ("transfered", models.BooleanField()),
-                ("fxRate", models.DecimalField(decimal_places=4, max_digits=10)),
-                ("nettFxRate", models.DecimalField(decimal_places=4, max_digits=10)),
-                ("grossFxRate", models.DecimalField(decimal_places=4, max_digits=10)),
+                ("fx_rate", models.DecimalField(decimal_places=4, max_digits=10)),
+                ("nett_fx_rate", models.DecimalField(decimal_places=4, max_digits=10)),
+                ("gross_fx_rate", models.DecimalField(decimal_places=4, max_digits=10)),
                 (
-                    "autoFxFeeInBaseCurrency",
+                    "auto_fx_fee_in_base_currency",
                     models.DecimalField(decimal_places=10, max_digits=15),
                 ),
                 (
-                    "totalInBaseCurrency",
+                    "total_in_base_currency",
                     models.DecimalField(decimal_places=10, max_digits=15),
                 ),
                 (
-                    "feeInBaseCurrency",
+                    "fee_in_base_currency",
                     models.DecimalField(
                         blank=True,
                         decimal_places=2,
@@ -51,27 +50,25 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "totalFeesInBaseCurrency",
+                    "total_fees_in_base_currency",
                     models.DecimalField(decimal_places=10, max_digits=15),
                 ),
                 (
-                    "totalPlusFeeInBaseCurrency",
+                    "total_plus_fee_in_base_currency",
                     models.DecimalField(decimal_places=10, max_digits=15),
                 ),
                 (
-                    "totalPlusAllFeesInBaseCurrency",
+                    "total_plus_all_fees_in_base_currency",
                     models.DecimalField(decimal_places=10, max_digits=15),
                 ),
-                ("transactionTypeId", models.PositiveIntegerField()),
+                ("transaction_type_id", models.PositiveIntegerField()),
                 (
-                    "tradingVenue",
+                    "trading_venue",
                     models.CharField(blank=True, default=None, max_length=5, null=True),
                 ),
                 (
-                    "executingEntityId",
-                    models.CharField(
-                        blank=True, default=None, max_length=30, null=True
-                    ),
+                    "executing_entity_id",
+                    models.CharField(blank=True, default=None, max_length=30, null=True),
                 ),
             ],
         ),

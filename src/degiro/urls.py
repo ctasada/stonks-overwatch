@@ -1,13 +1,13 @@
 from django.urls import path
+from django.views.generic import RedirectView
+
 from degiro.views.account_overview import AccountOverview
 from degiro.views.dashboard import Dashboard
 from degiro.views.deposits import Deposits
 from degiro.views.dividends import Dividends
 from degiro.views.fees import Fees
-from django.views.generic import RedirectView
 from degiro.views.portfolio import Portfolio
 from degiro.views.transactions import Transactions
-
 
 urlpatterns = [
     path("", RedirectView.as_view(url="dashboard")),

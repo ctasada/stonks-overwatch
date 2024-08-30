@@ -1,4 +1,5 @@
 from django import template
+
 from degiro.data.portfolio import PortfolioData
 
 register = template.Library()

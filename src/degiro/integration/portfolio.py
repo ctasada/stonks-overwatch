@@ -1,18 +1,15 @@
-from degiro.utils.degiro import DeGiro
-from degiro.utils.localization import LocalizationUtility
-
-from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
+import logging
 
 from currency_converter import CurrencyConverter
+from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
 
-import logging
+from degiro.utils.degiro import DeGiro
+from degiro.utils.localization import LocalizationUtility
 
 
 class PortofolioIntegration:
     logger = logging.getLogger("stocks_portfolio.portfolio_data")
-    currencyConverter = CurrencyConverter(
-        fallback_on_missing_rate=True, fallback_on_wrong_date=True
-    )
+    currency_converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
 
     def get_portfolio(self):
         # SETUP REQUEST
@@ -35,10 +32,10 @@ class PortofolioIntegration:
         products_info = DeGiro.get_products_info(products_ids)
 
         # Get user's base currency
-        baseCurrencySymbol = LocalizationUtility.get_base_currency_symbol()
-        baseCurrency = LocalizationUtility.get_base_currency()
+        base_currency_symbol = LocalizationUtility.get_base_currency_symbol()
+        base_currency = LocalizationUtility.get_base_currency()
 
-        myPortfolio = []
+        my_portfolio = []
 
         for tmp in update["portfolio"]["value"]:
             # Portfolio has a weird structure, lets convert it here
@@ -60,64 +57,56 @@ class PortofolioIntegration:
                 currency = info["currency"]
                 price = portfolio["price"]
                 value = portfolio["value"]
-                breakEvenPrice = portfolio["breakEvenPrice"]
-                if currency != baseCurrency:
-                    price = self.currencyConverter.convert(
-                        price, currency, baseCurrency
-                    )
-                    value = self.currencyConverter.convert(
-                        value, currency, baseCurrency
-                    )
-                    breakEvenPrice = self.currencyConverter.convert(
-                        breakEvenPrice, currency, baseCurrency
-                    )
-                    currency = baseCurrency
+                break_even_price = portfolio["breakEvenPrice"]
+                if currency != base_currency:
+                    price = self.currency_converter.convert(price, currency, base_currency)
+                    value = self.currency_converter.convert(value, currency, base_currency)
+                    break_even_price = self.currency_converter.convert(break_even_price, currency, base_currency)
+                    currency = base_currency
 
-                formattedPrice = LocalizationUtility.format_money_value(
-                    value=price, currency=currency
+                formatted_price = LocalizationUtility.format_money_value(value=price, currency=currency)
+                formatted_value = LocalizationUtility.format_money_value(
+                    value=value, currency_symbol=base_currency_symbol
                 )
-                formattedValue = LocalizationUtility.format_money_value(
-                    value=value, currencySymbol=baseCurrencySymbol
-                )
-                formattedBreakEvenPrice = LocalizationUtility.format_money_value(
-                    value=breakEvenPrice, currency=currency
+                formatted_break_even_price = LocalizationUtility.format_money_value(
+                    value=break_even_price, currency=currency
                 )
 
-                unrealizedGain = (price - breakEvenPrice) * portfolio["size"]
-                formattedUnrealizedGain = LocalizationUtility.format_money_value(
-                    value=unrealizedGain, currency=currency
+                unrealized_gain = (price - break_even_price) * portfolio["size"]
+                formatted_unrealized_gain = LocalizationUtility.format_money_value(
+                    value=unrealized_gain, currency=currency
                 )
 
-                myPortfolio.append(
-                    dict(
-                        name=info["name"],
-                        symbol=info["symbol"],
-                        sector=sector,
-                        industry=industry,
-                        shares=portfolio["size"],
-                        price=price,
-                        formattedPrice=formattedPrice,
-                        breakEvenPrice=breakEvenPrice,
-                        formattedBreakEvenPrice=formattedBreakEvenPrice,  # GAK: Average Purchase Price
-                        value=portfolio["value"],
-                        formattedValue=formattedValue,
-                        isOpen=(portfolio["size"] != 0.0 and portfolio["value"] != 0.0),
-                        unrealizedGain=unrealizedGain,
-                        formattedUnrealizedGain=formattedUnrealizedGain,
-                        logoUrl=f"https://logos.stockanalysis.com/{info['symbol'].lower()}.svg",
-                    )
+                my_portfolio.append(
+                    {
+                        "name": info["name"],
+                        "symbol": info["symbol"],
+                        "sector": sector,
+                        "industry": industry,
+                        "shares": portfolio["size"],
+                        "price": price,
+                        "formattedPrice": formatted_price,
+                        "breakEvenPrice": break_even_price,
+                        "formattedBreakEvenPrice": formatted_break_even_price,  # GAK: Average Purchase Price
+                        "value": portfolio["value"],
+                        "formattedValue": formatted_value,
+                        "isOpen": (portfolio["size"] != 0.0 and portfolio["value"] != 0.0),
+                        "unrealizedGain": unrealized_gain,
+                        "formattedUnrealizedGain": formatted_unrealized_gain,
+                        "logoUrl": f"https://logos.stockanalysis.com/{info['symbol'].lower()}.svg",
+                    }
                 )
 
-        return sorted(myPortfolio, key=lambda k: k["symbol"])
+        return sorted(my_portfolio, key=lambda k: k["symbol"])
 
     def get_portfolio_total(self):
         # Calculate current value
         portfolio = self.get_portfolio()
 
-        portfolioTotalValue = 0.0
+        portfolio_total_value = 0.0
 
         for equity in portfolio:
-            portfolioTotalValue += equity["value"]
+            portfolio_total_value += equity["value"]
 
         # SETUP REQUEST
         update = DeGiro.get_client().get_update(
@@ -127,7 +116,7 @@ class PortofolioIntegration:
             raw=True,
         )
 
-        baseCurrencySymbol = LocalizationUtility.get_base_currency_symbol()
+        base_currency_symbol = LocalizationUtility.get_base_currency_symbol()
 
         # Portfolio has a weird structure, lets convert it here
         tmp_total_portfolio = {}
@@ -135,29 +124,27 @@ class PortofolioIntegration:
             if value.get("value") is not None:
                 tmp_total_portfolio[value["name"]] = value["value"]
         # Finish conversion
-        roi = (
-            portfolioTotalValue / tmp_total_portfolio["totalDepositWithdrawal"] - 1
-        ) * 100
-        total_profit_loss = portfolioTotalValue - tmp_total_portfolio["totalDepositWithdrawal"]
+        roi = (portfolio_total_value / tmp_total_portfolio["totalDepositWithdrawal"] - 1) * 100
+        total_profit_loss = portfolio_total_value - tmp_total_portfolio["totalDepositWithdrawal"]
 
         total_portfolio = {
             "total_pl": total_profit_loss,
             "total_pl_formatted": LocalizationUtility.format_money_value(
                 value=total_profit_loss,
-                currencySymbol=baseCurrencySymbol,
+                currency_symbol=base_currency_symbol,
             ),
             "totalCash": LocalizationUtility.format_money_value(
                 value=tmp_total_portfolio["totalCash"],
-                currencySymbol=baseCurrencySymbol,
+                currency_symbol=base_currency_symbol,
             ),
             "currentValue": LocalizationUtility.format_money_value(
-                value=portfolioTotalValue, currencySymbol=baseCurrencySymbol
+                value=portfolio_total_value, currency_symbol=base_currency_symbol
             ),
             "totalROI": roi,
             "totalROI_formatted": "{:,.2f}%".format(roi),
             "totalDepositWithdrawal": LocalizationUtility.format_money_value(
                 value=tmp_total_portfolio["totalDepositWithdrawal"],
-                currencySymbol=baseCurrencySymbol,
+                currency_symbol=base_currency_symbol,
             ),
         }
 

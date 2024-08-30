@@ -1,5 +1,5 @@
-from django.views import View
 from django.shortcuts import render
+from django.views import View
 
 from degiro.data.transactions import TransactionsData
 
@@ -15,4 +15,4 @@ class Transactions(View):
             "transactions": transactions,
         }
 
-        return render(request, 'transactions.html', context)
+        return render(request, "transactions.html", context)

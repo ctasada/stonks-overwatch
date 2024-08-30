@@ -11,9 +11,10 @@
 
 # FIXME: Numbers do not seem to match. Needs to be reviewed
 
+import sys
+
 import numpy as np
 import pandas as pd
-import sys
 
 sepup = "\n" + 6 * "----" + " Degiro trading tracker " + 6 * "---" + "\n"
 sep = "\n" + 22 * "---" + "\n"

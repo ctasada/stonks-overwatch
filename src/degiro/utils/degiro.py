@@ -1,16 +1,17 @@
-from datetime import timedelta
 import logging
-import requests_cache
+from datetime import timedelta
 
-from degiro_connector.trading.api import API as TradingAPI
+import requests_cache
+from degiro_connector.trading.api import API as TRADING_API
 from degiro_connector.trading.models.credentials import Credentials
+
 from degiro.config.degiro_config import DegiroConfig
 from degiro.utils.single_instance_metaclass import SingleInstanceMetaClass
 
 
 # TODO: A singleton is nice, but doesn't allow for multiple users
 class DeGiro(metaclass=SingleInstanceMetaClass):
-    apiClient = None
+    api_client = None
 
     def __init__(self):
         # SETUP LOGGING LEVEL
@@ -27,10 +28,10 @@ class DeGiro(metaclass=SingleInstanceMetaClass):
             totp_secret_key=degiro_credentials.totp_secret_key,
         )
         # SETUP TRADING API
-        self.apiClient = TradingAPI(credentials=credentials)
+        self.api_client = TRADING_API(credentials=credentials)
 
     @staticmethod
-    def get_client() -> TradingAPI:
+    def get_client() -> TRADING_API:
         degiro = DeGiro()
 
         # CONNECT
@@ -39,9 +40,9 @@ class DeGiro(metaclass=SingleInstanceMetaClass):
             allowable_methods=["GET", "HEAD", "POST"],
             ignored_parameters=["oneTimePassword"],
         ):
-            degiro.apiClient.connect()
+            degiro.api_client.connect()
 
-        return degiro.apiClient
+        return degiro.api_client
 
     @staticmethod
     def get_account_info():

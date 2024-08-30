@@ -4,18 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('degiro', '0004_productquotation'),
+        ("degiro", "0004_productquotation"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='CompanyProfile',
+            name="CompanyProfile",
             fields=[
-                ('id', models.PositiveIntegerField(primary_key=True, serialize=False)),
-                ('isin', models.CharField(max_length=25, unique=True)),
-                ('data', models.JSONField()),
+                ("isin", models.CharField(max_length=25, primary_key=True, serialize=False)),
+                ("data", models.JSONField()),
             ],
         ),
     ]

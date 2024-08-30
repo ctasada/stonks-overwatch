@@ -6,25 +6,23 @@ Usage:
     poetry run src/manage.py runscript products_info_import
 """
 
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
 import json
-import polars as pl
+from datetime import datetime
 
+import polars as pl
+from dateutil.relativedelta import relativedelta
+from degiro_connector.quotecast.models.chart import ChartRequest, Interval
+from degiro_connector.quotecast.tools.chart_fetcher import ChartFetcher
 from django.db import connection
 
-from scripts.commons import DATE_FORMAT, IMPORT_FOLDER, init, save_to_json
-
-from degiro.utils.degiro import DeGiro
 from degiro.models import ProductInfo, ProductQuotation
 from degiro.utils.db_utils import dictfetchall
-from degiro_connector.quotecast.tools.chart_fetcher import ChartFetcher
-from degiro_connector.quotecast.models.chart import ChartRequest, Interval
+from degiro.utils.degiro import DeGiro
+from scripts.commons import DATE_FORMAT, IMPORT_FOLDER, init, save_to_json
 
 
-def get_productIds() -> list:
-    """
-    Gets the list of product ids from the DB.
+def get_product_ids() -> list:
+    """Get the list of product ids from the DB.
 
     ### Returns
         list: list of product ids
@@ -32,29 +30,29 @@ def get_productIds() -> list:
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT productId FROM degiro_transactions
+            SELECT product_id FROM degiro_transactions
             UNION
-            SELECT productId FROM degiro_cashmovements
+            SELECT product_id FROM degiro_cashmovements
             """
         )
         results = dictfetchall(cursor)
 
-    productIds = [str(entry["productId"]) for entry in results if entry["productId"] is not None]
-    productIds = list(dict.fromkeys(productIds))
+    product_ids = [str(entry["product_id"]) for entry in results if entry["product_id"] is not None]
+    product_ids = list(dict.fromkeys(product_ids))
 
-    return productIds
+    return product_ids
 
 
 def get_products_info(product_ids: list, json_file_path: str) -> None:
-    """
-    Retrieves from DeGiro the product information of the indicated products.
+    """Retrieve from DeGiro the product information of the indicated products.
+
     ### Parameters
         * product_ids: list
             - List with the product_ids to import
         * json_file_path : str
             - Path to the Json file to store the account information
     ### Returns
-        None
+        None.
     """
     trading_api = DeGiro.get_client()
 
@@ -68,13 +66,13 @@ def get_products_info(product_ids: list, json_file_path: str) -> None:
 
 
 def import_products_info(file_path: str) -> None:
-    """
-    Stores the products information into the DB.
+    """Store the products information into the DB.
+
     ### Parameters
         * file_path : str
             - Path to the Json file that stores the product information data
     ### Returns:
-        None
+        None.
     """
     with open(file_path) as json_file:
         data = json.load(json_file)
@@ -87,51 +85,51 @@ def import_products_info(file_path: str) -> None:
                 name=row["name"],
                 isin=row["isin"],
                 symbol=row["symbol"],
-                contractSize=row["contractSize"],
-                productType=row["productType"],
-                productTypeId=row["productTypeId"],
+                contract_size=row["contractSize"],
+                product_type=row["productType"],
+                product_type_id=row["productTypeId"],
                 tradable=row["tradable"],
                 category=row["category"],
                 currency=row["currency"],
                 active=row["active"],
-                exchangeId=row["exchangeId"],
-                onlyEodPrices=row["onlyEodPrices"],
-                isShortable=row.get("isShortable", False),
-                feedQuality=row.get("feedQuality"),
-                orderBookDepth=row.get("orderBookDepth"),
-                vwdIdentifierType=row.get("vwdIdentifierType"),
-                vwdId=row.get("vwdId"),
-                qualitySwitchable=row.get("qualitySwitchable"),
-                qualitySwitchFree=row.get("qualitySwitchFree"),
-                vwdModuleId=row.get("vwdModuleId"),
-                feedQualitySecondary=row.get("feedQualitySecondary"),
-                orderBookDepthSecondary=row.get("orderBookDepthSecondary"),
-                vwdIdentifierTypeSecondary=row.get("vwdIdentifierTypeSecondary"),
-                vwdIdSecondary=row.get("vwdIdSecondary"),
-                qualitySwitchableSecondary=row.get("qualitySwitchableSecondary"),
-                qualitySwitchFreeSecondary=row.get("qualitySwitchFreeSecondary"),
-                vwdModuleIdSecondary=row.get("vwdModuleIdSecondary"),
+                exchange_id=row["exchangeId"],
+                only_eod_prices=row["onlyEodPrices"],
+                is_shortable=row.get("isShortable", False),
+                feed_quality=row.get("feedQuality"),
+                order_book_depth=row.get("orderBookDepth"),
+                vwd_identifier_type=row.get("vwdIdentifierType"),
+                vwd_id=row.get("vwdId"),
+                quality_switchable=row.get("qualitySwitchable"),
+                quality_switch_free=row.get("qualitySwitchFree"),
+                vwd_module_id=row.get("vwdModuleId"),
+                feed_quality_secondary=row.get("feedQualitySecondary"),
+                order_book_depth_secondary=row.get("orderBookDepthSecondary"),
+                vwd_identifier_type_secondary=row.get("vwdIdentifierTypeSecondary"),
+                vwd_id_secondary=row.get("vwdIdSecondary"),
+                quality_switchable_secondary=row.get("qualitySwitchableSecondary"),
+                quality_switch_free_secondary=row.get("qualitySwitchFreeSecondary"),
+                vwd_module_id_secondary=row.get("vwdModuleIdSecondary"),
             )
         except Exception as error:
             print(f"Cannot import row: {row}")
             print("Exception: ", error)
 
 
-def get_productInfo(productId: int) -> dict:
-    """
-    Gets product information from the given product id. The information is retrieved from the DB.
+def get_product_info(product_id: int) -> dict:
+    """Get product information from the given product id. The information is retrieved from the DB.
+
     ### Parameters
         * productId: int
             - The product id to query
     ### Returns
-        list: list of product ids
+        list: list of product ids.
     """
     with connection.cursor() as cursor:
         cursor.execute(
             """
             SELECT * FROM degiro_productinfo WHERE id = %s
             """,
-            [productId],
+            [product_id],
         )
         result = dictfetchall(cursor)[0]
 
@@ -139,12 +137,12 @@ def get_productInfo(productId: int) -> dict:
 
 
 def calculate_interval(date_from) -> Interval:
-    """
-    Calculates the interval between the provided date and today
+    """Calculate the interval between the provided date and today.
+
     ### Parameters
-        date_from: date from to calculate the interval
+        date_from: date from to calculate the interval.
     ### Returns
-        Interval: Interval that representes the range from date_from to today
+        Interval: Interval that representes the range from date_from to today.
     """
     # Convert String to date object
     d1 = datetime.strptime(date_from, DATE_FORMAT)
@@ -175,12 +173,12 @@ def calculate_interval(date_from) -> Interval:
 
 
 def convert_interval_to_days(interval: Interval) -> int:
-    """
-    Converts and interval into the number of days
+    """Convert and interval into the number of days.
+
     ### Parameters
         interval: Interval
     ### Returns
-        int: Number of days in the interval
+        int: Number of days in the interval.
     """
     match interval:
         case Interval.P1W:
@@ -215,8 +213,7 @@ def _calculate_dates(interval) -> list:
 
 
 def get_product_quotation(issueid, period: Interval) -> list:
-    """
-    Get the list of quotations for the provided product for the indicated Interval.
+    """Get the list of quotations for the provided product for the indicated Interval.
 
     ### Parameters
         * issueid
@@ -268,18 +265,18 @@ def get_product_quotation(issueid, period: Interval) -> list:
     return quotes
 
 
-def import_products_quotation() -> None:
+def __calculate_product_growth() -> dict:
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT date, productId, buysell, quantity, price, total FROM degiro_transactions
+            SELECT date, product_id, buysell, quantity, price, total FROM degiro_transactions
             """
         )
         results = dictfetchall(cursor)
 
     product_growth = {}
     for entry in results:
-        key = entry["productId"]
+        key = entry["product_id"]
         product = product_growth.get(key, {})
         carry_total = product.get("carry_total", 0)
 
@@ -296,9 +293,14 @@ def import_products_quotation() -> None:
     for key in product_growth.keys():
         del product_growth[key]["carry_total"]
 
+    return product_growth
+
+def import_products_quotation() -> None:
+    product_growth = __calculate_product_growth()
+
     delete_keys = []
     for key in product_growth.keys():
-        product = get_productInfo(key)
+        product = get_product_info(key)
 
         # FIXME: Code copied from dashboard._create_products_quotation()
         # If the product is NOT tradable, we shouldn't consider it for Growth
@@ -314,8 +316,8 @@ def import_products_quotation() -> None:
         product_growth[key]["product"]["isin"] = product["isin"]
         product_growth[key]["product"]["symbol"] = product["symbol"]
         product_growth[key]["product"]["currency"] = product["currency"]
-        product_growth[key]["product"]["vwdId"] = product["vwdId"]
-        product_growth[key]["product"]["vwdIdSecondary"] = product["vwdIdSecondary"]
+        product_growth[key]["product"]["vwd_id"] = product["vwd_id"]
+        product_growth[key]["product"]["vwd_id_secondary"] = product["vwd_id_secondary"]
 
         # Calculate Quotation Range
         product_growth[key]["quotation"] = {}
@@ -337,13 +339,13 @@ def import_products_quotation() -> None:
 
     # We need to use the productIds to get the daily quote for each product
     for key in product_growth.keys():
-        if product_growth[key]["product"].get("vwdIdSecondary") is not None:
-            issueId = product_growth[key]["product"].get("vwdIdSecondary")
+        if product_growth[key]["product"].get("vwd_id_secondary") is not None:
+            issue_id = product_growth[key]["product"].get("vwd_id_secondary")
         else:
-            issueId = product_growth[key]["product"].get("vwdId")
+            issue_id = product_growth[key]["product"].get("vwd_id")
 
         interval = product_growth[key]["quotation"]["interval"]
-        quotes = get_product_quotation(issueId, interval)
+        quotes = get_product_quotation(issue_id, interval)
         dates = _calculate_dates(interval)
         quotes_dict = {}
         for count, date in enumerate(dates):
@@ -356,17 +358,13 @@ def import_products_quotation() -> None:
             ):
                 quotes_dict[date.strftime(DATE_FORMAT)] = quotes[count]
 
-        ProductQuotation.objects.update_or_create(
-            id=int(key), defaults={"quotations": quotes_dict}
-        )
+        ProductQuotation.objects.update_or_create(id=int(key), defaults={"quotations": quotes_dict})
 
 
 def run():
-    """
-    Imports Product Information from DeGiro.
-    """
+    """Import Product Information from DeGiro."""
     init()
-    product_ids = get_productIds()
+    product_ids = get_product_ids()
     print("Importing DeGiro Products Information...")
     get_products_info(product_ids, f"{IMPORT_FOLDER}/products_info.json")
     import_products_info(f"{IMPORT_FOLDER}/products_info.json")

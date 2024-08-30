@@ -1,5 +1,5 @@
-from django.views import View
 from django.shortcuts import render
+from django.views import View
 
 from degiro.data.portfolio import PortfolioData
 
@@ -15,4 +15,4 @@ class Portfolio(View):
             "portfolio": portfolio,
         }
 
-        return render(request, 'portfolio.html', context)
+        return render(request, "portfolio.html", context)
