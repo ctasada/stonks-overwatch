@@ -7,10 +7,10 @@ from degiro.utils.db_utils import dictfetchall
 
 class ProductQuotationsRepository:
     def get_product_quotations(self, product_id: int) -> dict:
-        """Gets the list of product ids from the DB.
+        """Gets the quotations from the specified product_id from the DB.
 
         ### Returns
-            list: list of product ids
+            List of quotations, or None if the product is not found
         """
         with connection.cursor() as cursor:
             cursor.execute(
@@ -19,13 +19,18 @@ class ProductQuotationsRepository:
                 """,
                 [product_id],
             )
-            results = dictfetchall(cursor)[0]["quotations"]
+            results = dictfetchall(cursor)
 
-        return json.loads(results)
+        if results:
+            return json.loads(results[0]["quotations"])
+
+        return None
 
     def get_product_price(self, product_id: int) -> float:
         quotations = self.get_product_quotations(product_id)
+        if quotations:
+            last_quotation = list(quotations.keys())[-1]
 
-        last_quotation = list(quotations.keys())[-1]
+            return quotations[last_quotation]
 
-        return quotations[last_quotation]
+        return 0.0

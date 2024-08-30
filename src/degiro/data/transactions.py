@@ -45,8 +45,7 @@ class TransactionsData:
                     "price": transaction["price"],
                     "quantity": transaction["quantity"],
                     "total": LocalizationUtility.format_money_value(
-                        value=transaction["total"],
-                        currency=info["currency"]
+                        value=transaction["total"], currency=info["currency"]
                     ),
                     "totalInBaseCurrency": LocalizationUtility.format_money_value(
                         value=transaction["total_in_base_currency"],
