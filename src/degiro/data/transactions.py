@@ -5,7 +5,6 @@ from degiro.utils.localization import LocalizationUtility
 
 # FIXME: If data cannot be found in the DB, the code should get it from DeGiro, updating the DB
 class TransactionsData:
-
     def __init__(self):
         self.transactions_repository = TransactionsRepository()
         self.product_info_repository = ProductInfoRepository()
@@ -18,53 +17,48 @@ class TransactionsData:
 
         # ITERATION OVER THE TRANSACTIONS TO OBTAIN THE PRODUCTS
         for transaction in transactions_history:
-            products_ids.append(int(transaction["productId"]))
+            products_ids.append(int(transaction["product_id"]))
 
         # Remove duplicates from list
         products_ids = list(set(products_ids))
         products_info = self.product_info_repository.get_products_info_raw(products_ids)
 
         # Get user's base currency
-        baseCurrencySymbol = LocalizationUtility.get_base_currency_symbol()
+        base_currency_symbol = LocalizationUtility.get_base_currency_symbol()
 
         # DISPLAY PRODUCTS_INFO
-        myTransactions = []
+        my_transactions = []
         for transaction in transactions_history:
-            info = products_info[transaction["productId"]]
+            info = products_info[transaction["product_id"]]
 
-            fees = (
-                transaction["totalPlusFeeInBaseCurrency"]
-                - transaction["totalInBaseCurrency"]
+            fees = transaction["total_plus_fee_in_base_currency"] - transaction["total_in_base_currency"]
+
+            my_transactions.append(
+                {
+                    "name": info["name"],
+                    "symbol": info["symbol"],
+                    "date": transaction["date"].strftime(LocalizationUtility.DATE_FORMAT),
+                    "time": transaction["date"].strftime(LocalizationUtility.TIME_FORMAT),
+                    "buysell": self.__convert_buy_sell(transaction["buysell"]),
+                    "transactionType": self.__convert_transaction_type_id(transaction["transaction_type_id"]),
+                    # FIXME: Should include currency
+                    "price": transaction["price"],
+                    "quantity": transaction["quantity"],
+                    "total": LocalizationUtility.format_money_value(
+                        value=transaction["total"],
+                        currency=info["currency"]
+                    ),
+                    "totalInBaseCurrency": LocalizationUtility.format_money_value(
+                        value=transaction["total_in_base_currency"],
+                        currency_symbol=base_currency_symbol,
+                    ),
+                    "fees": LocalizationUtility.format_money_value(value=fees, currency_symbol=base_currency_symbol),
+                }
             )
 
-            myTransactions.append(
-                dict(
-                    name=info["name"],
-                    symbol=info["symbol"],
-                    date=transaction["date"].strftime(LocalizationUtility.DATE_FORMAT),
-                    time=transaction["date"].strftime(LocalizationUtility.TIME_FORMAT),
-                    buysell=self.__convertBuySell(transaction["buysell"]),
-                    transactionType=self.__convertTransactionTypeId(
-                        transaction["transactionTypeId"]
-                    ),
-                    price=transaction["price"],
-                    quantity=transaction["quantity"],
-                    total=LocalizationUtility.format_money_value(
-                        value=transaction["total"], currency=info["currency"]
-                    ),
-                    totalInBaseCurrency=LocalizationUtility.format_money_value(
-                        value=transaction["totalInBaseCurrency"],
-                        currencySymbol=baseCurrencySymbol,
-                    ),
-                    fees=LocalizationUtility.format_money_value(
-                        value=fees, currencySymbol=baseCurrencySymbol
-                    ),
-                )
-            )
+        return sorted(my_transactions, key=lambda k: k["date"], reverse=True)
 
-        return sorted(myTransactions, key=lambda k: k["date"], reverse=True)
-
-    def __convertBuySell(self, buysell: str) -> str:
+    def __convert_buy_sell(self, buysell: str) -> str:
         if buysell == "B":
             return "Buy"
         elif buysell == "S":
@@ -72,8 +66,8 @@ class TransactionsData:
 
         return "Unknown"
 
-    def __convertTransactionTypeId(self, transactionTypeId: int) -> str:
+    def __convert_transaction_type_id(self, transaction_type_id: int) -> str:
         return {
             0: "",
             101: "Stock Split",
-        }.get(transactionTypeId, "Unkown Transaction")
+        }.get(transaction_type_id, "Unkown Transaction")

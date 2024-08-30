@@ -6,24 +6,22 @@ Usage:
     poetry run src/manage.py runscript account_import
 """
 
-from degiro.config.degiro_config import DegiroConfig
-from scripts.commons import IMPORT_FOLDER, TIME_DATE_FORMAT, init, save_to_json
-
 import json
-import pandas as pd
-
 from datetime import date, datetime, time, timedelta
+
+import pandas as pd
+from degiro_connector.trading.models.account import OverviewRequest
 from django.forms import model_to_dict
 
-from degiro.utils.degiro import DeGiro
+from degiro.config.degiro_config import DegiroConfig
 from degiro.models import CashMovements
-
-from degiro_connector.trading.models.account import OverviewRequest
+from degiro.utils.degiro import DeGiro
+from scripts.commons import IMPORT_FOLDER, TIME_DATE_FORMAT, init, save_to_json
 
 
 def get_import_from_date() -> date:
-    """
-    Returns the latest update from the DB and increases to next day or defaults to configured date
+    """Return the latest update from the DB and increases to next day or defaults to configured date.
+
     ### Returns:
         date: the latest update from the DB and increases to next day or defaults to configured date
     """
@@ -45,8 +43,8 @@ def get_import_from_date() -> date:
 
 
 def get_cash_movements(from_date: date, json_file_path: str) -> None:
-    """
-    Import Account data from DeGiro. Uses the `get_account_overview` method.
+    """Import Account data from DeGiro. Uses the `get_account_overview` method.
+
     ### Parameters
         * from_date : date
             - Starting date to import the data
@@ -70,8 +68,8 @@ def get_cash_movements(from_date: date, json_file_path: str) -> None:
 
 
 def transform_json(json_file_path: str, output_file_path: str) -> None:
-    """
-    Flattens the data from deGiro `get_account_overview` method for easier manipulation when inserting it into the DB.
+    """Flattens the data from deGiro `get_account_overview`.
+
     ### Parameters
         * json_file_path : str
             - Path to the Json file that stores the account information
@@ -88,9 +86,7 @@ def transform_json(json_file_path: str, output_file_path: str) -> None:
         df = pd.json_normalize(data["data"]["cashMovements"], sep="_")
         # Fix id values format after Pandas
         for col in ["productId", "id"]:
-            df[col] = df[col].apply(
-                lambda x: None if pd.isnull(x) else str(x).replace(".0", "")
-            )
+            df[col] = df[col].apply(lambda x: None if pd.isnull(x) else str(x).replace(".0", ""))
 
         # Set the index explicitly
         df.set_index("date", inplace=True)
@@ -111,8 +107,8 @@ def _conv(i):
 
 
 def import_cash_movements(file_path: str) -> None:
-    """
-    Stores the cash movements into the DB.
+    """Store the cash movements into the DB.
+
     ### Parameters
         * file_path : str
             - Path to the Json file that stores the flatten account information data
@@ -127,18 +123,18 @@ def import_cash_movements(file_path: str) -> None:
             try:
                 CashMovements.objects.create(
                     date=datetime.strptime(row["date"], TIME_DATE_FORMAT),
-                    valueDate=datetime.strptime(row["valueDate"], TIME_DATE_FORMAT),
+                    value_date=datetime.strptime(row["valueDate"], TIME_DATE_FORMAT),
                     description=row["description"],
-                    productId=row.get("productId"),
+                    product_id=row.get("productId"),
                     currency=row["currency"],
                     type=row["type"],
                     change=_conv(row.get("change", None)),
-                    balance_unsettledCash=row.get("balance_unsettledCash", None),
-                    balance_flatexCash=row.get("balance_flatexCash", None),
-                    balance_cashFund=row.get("balance_cashFund", None),
+                    balance_unsettled_cash=row.get("balance_unsettledCash", None),
+                    balance_flatex_cash=row.get("balance_flatexCash", None),
+                    balance_cash_fund=row.get("balance_cashFund", None),
                     balance_total=row.get("balance_total", None),
-                    exchangeRate=_conv(row.get("exchangeRate", None)),
-                    orderId=row.get("orderId", None),
+                    exchange_rate=_conv(row.get("exchangeRate", None)),
+                    order_id=row.get("orderId", None),
                 )
             except Exception as error:
                 print(f"Cannot import row: {row}")
@@ -146,16 +142,12 @@ def import_cash_movements(file_path: str) -> None:
 
 
 def run():
-    """
-    Imports DeGiro Account information.
-    """
+    """Import DeGiro Account information."""
     init()
     from_date = get_import_from_date()
     print(f"Importing DeGiro Account Information from {from_date}...")
     get_cash_movements(from_date, f"{IMPORT_FOLDER}/account.json")
-    transform_json(
-        f"{IMPORT_FOLDER}/account.json", f"{IMPORT_FOLDER}/account_transform.json"
-    )
+    transform_json(f"{IMPORT_FOLDER}/account.json", f"{IMPORT_FOLDER}/account_transform.json")
     import_cash_movements(f"{IMPORT_FOLDER}/account_transform.json")
 
 

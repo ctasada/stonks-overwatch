@@ -1,21 +1,18 @@
-from django.views import View
-from django.shortcuts import render
 import datetime
-import pandas as pd
 import logging
+
+import pandas as pd
+from currency_converter import CurrencyConverter
+from django.shortcuts import render
+from django.views import View
 
 from degiro.data.account_overview import AccountOverviewData
 from degiro.utils.localization import LocalizationUtility
 
-from currency_converter import CurrencyConverter
-
 
 class Dividends(View):
-
     logger = logging.getLogger("stocks_portfolio.dividends.views")
-    currencyConverter = CurrencyConverter(
-        fallback_on_missing_rate=True, fallback_on_wrong_date=True
-    )
+    currency_converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
     # FIXME: Replace by common Localization Pattern
     DATE_FORMAT = "%Y-%m-%d"
 
@@ -25,49 +22,45 @@ class Dividends(View):
 
     def get(self, request):
         # We don't need to sort the dict, since it's already coming sorted in DESC date order
-        dividendsOverview = self.accountOverview.get_dividends()
+        dividends_overview = self.accountOverview.get_dividends()
 
-        dividends = self.get_dividends_calendar(dividendsOverview)
-        dividendsGrowth = {}
+        dividends = self.get_dividends_calendar(dividends_overview)
+        dividends_growth = {}
 
-        for transaction in dividendsOverview:
+        for transaction in dividends_overview:
             # Group dividends by month. We may only need the dividend name and amount
-            monthYear = self.format_date_to_month_year(transaction["date"])
-            monthNumber = int(self.format_date_to_month_number(transaction["date"]))
+            month_year = self.format_date_to_month_year(transaction["date"])
+            month_number = int(self.format_date_to_month_number(transaction["date"]))
             year = int(self.format_date_to_year(transaction["date"]))
 
-            if year not in dividendsGrowth:
-                dividendsGrowth[year] = [0] * 12
+            if year not in dividends_growth:
+                dividends_growth[year] = [0] * 12
 
             day = self.get_date_day(transaction["date"])
             stock = transaction["stockSymbol"]
 
-            monthEntry = dividends.setdefault(monthYear, dict())
-            days = monthEntry.setdefault("days", dict())
-            dayEntry = days.setdefault(day, dict())
-            stockEntry = dayEntry.setdefault(stock, dict())
-            transactionChange = transaction["change"]
+            month_entry = dividends.setdefault(month_year, {})
+            days = month_entry.setdefault("days", {})
+            day_entry = days.setdefault(day, {})
+            stock_entry = day_entry.setdefault(stock, {})
+            transaction_change = transaction["change"]
 
             currency = transaction["currency"]
             if currency != self.baseCurrency:
-                date = datetime.datetime.strptime(
-                    transaction["date"], self.DATE_FORMAT
-                ).date()
-                transactionChange = self.currencyConverter.convert(
-                    transactionChange, currency, self.baseCurrency, date
+                date = datetime.datetime.strptime(transaction["date"], self.DATE_FORMAT).date()
+                transaction_change = self.currency_converter.convert(
+                    transaction_change, currency, self.baseCurrency, date
                 )
                 currency = self.baseCurrency
 
-            stockEntry["stockName"] = transaction["stockName"]
-            stockEntry["change"] = (
-                stockEntry.setdefault("change", 0) + transactionChange
-            )
-            stockEntry["currency"] = currency
-            stockEntry["formatedChange"] = LocalizationUtility.format_money_value(
-                value=stockEntry["change"], currency=currency
+            stock_entry["stockName"] = transaction["stockName"]
+            stock_entry["change"] = stock_entry.setdefault("change", 0) + transaction_change
+            stock_entry["currency"] = currency
+            stock_entry["formatedChange"] = LocalizationUtility.format_money_value(
+                value=stock_entry["change"], currency=currency
             )
 
-            monthEntry.setdefault("dividends", []).append(
+            month_entry.setdefault("dividends", []).append(
                 {
                     "day": self.get_date_day(transaction["date"]),
                     "stockName": transaction["stockName"],
@@ -77,45 +70,43 @@ class Dividends(View):
             )
 
             # Number of Payouts in the month
-            payouts = monthEntry.setdefault("payouts", 0)
+            payouts = month_entry.setdefault("payouts", 0)
             if transaction["change"] > 0:
-                monthEntry["payouts"] = payouts + 1
+                month_entry["payouts"] = payouts + 1
             # Total payout in the month
-            total = monthEntry.setdefault("total", 0)
-            monthEntry["total"] = total + transactionChange
-            monthEntry["formatedTotal"] = LocalizationUtility.format_money_value(
-                value=monthEntry["total"], currency=currency
+            total = month_entry.setdefault("total", 0)
+            month_entry["total"] = total + transaction_change
+            month_entry["formatedTotal"] = LocalizationUtility.format_money_value(
+                value=month_entry["total"], currency=currency
             )
 
-            dividendsGrowth[year][monthNumber - 1] = round(monthEntry["total"], 2)
+            dividends_growth[year][month_number - 1] = round(month_entry["total"], 2)
 
         # We want the Dividends Growth chronologically sorted
-        dividendsGrowth = dict(
-            sorted(dividendsGrowth.items(), key=lambda item: item[0])
-        )
+        dividends_growth = dict(sorted(dividends_growth.items(), key=lambda item: item[0]))
 
-        context = {"dividendsCalendar": dividends, "dividendsGrowth": dividendsGrowth}
+        context = {"dividendsCalendar": dividends, "dividendsGrowth": dividends_growth}
 
         return render(request, "dividends.html", context)
 
-    def get_dividends_calendar(self, dividendsOverview):
-        dividends = dict()
+    def get_dividends_calendar(self, dividends_overview):
+        dividends = {}
 
-        df = pd.DataFrame(dividendsOverview)
-        periodStart = min(df["date"])
-        periodEnd = datetime.date.today()
-        period = pd.period_range(start=periodStart, end=periodEnd, freq="M")[::-1]
+        df = pd.DataFrame(dividends_overview)
+        period_start = min(df["date"])
+        period_end = datetime.date.today()
+        period = pd.period_range(start=period_start, end=period_end, freq="M")[::-1]
 
         for month in period:
             month = month.strftime("%B %Y")
-            monthEntry = dividends.setdefault(month, dict())
-            monthEntry.setdefault("payouts", 0)
-            monthEntry.setdefault("total", 0)
-            monthEntry.setdefault(
+            month_entry = dividends.setdefault(month, {})
+            month_entry.setdefault("payouts", 0)
+            month_entry.setdefault("total", 0)
+            month_entry.setdefault(
                 "formatedTotal",
                 LocalizationUtility.format_money_value(
                     value=0,
-                    currencySymbol=LocalizationUtility.get_base_currency_symbol(),
+                    currency_symbol=LocalizationUtility.get_base_currency_symbol(),
                 ),
             )
         return dividends

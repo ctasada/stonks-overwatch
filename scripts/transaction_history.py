@@ -1,14 +1,14 @@
+"""poetry run python ./scripts/transaction_history.py
 """
-poetry run python ./scripts/transaction_history.py
-"""
-# IMPORTATIONS
-import common
-import json
 
+# IMPORTATIONS
+import json
 from datetime import date
+
+import common
 from degiro_connector.trading.models.transaction import HistoryRequest
 
-trading_api = common.connectToDegiro()
+trading_api = common.connect_to_degiro()
 
 # SETUP REQUEST
 from_date = date(

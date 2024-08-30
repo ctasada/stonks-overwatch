@@ -1,5 +1,5 @@
-from django.views import View
 from django.shortcuts import render
+from django.views import View
 
 from degiro.data.account_overview import AccountOverviewData
 
@@ -15,4 +15,4 @@ class AccountOverview(View):
             "accountOverview": overview,
         }
 
-        return render(request, 'account_overview.html', context)
+        return render(request, "account_overview.html", context)

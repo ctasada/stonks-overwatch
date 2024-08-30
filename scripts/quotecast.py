@@ -1,26 +1,24 @@
+"""poetry run python ./scripts/quotecast.py
 """
-poetry run python ./scripts/quotecast.py
-"""
+
 # IMPORTATIONS
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
-
 import logging
+from datetime import datetime
 
-import polars as pl
 import common
-
-from degiro_connector.quotecast.tools.chart_fetcher import ChartFetcher
+import polars as pl
+from dateutil.relativedelta import relativedelta
 from degiro_connector.quotecast.models.chart import ChartRequest, Interval
+from degiro_connector.quotecast.tools.chart_fetcher import ChartFetcher
 
 # SETUP LOGGING
 logging.basicConfig(level=logging.INFO)
 
 # Retrieve user_token
-trading_api = common.connectToDegiro()
+trading_api = common.connect_to_degiro()
 client_details_table = trading_api.get_client_details()
-int_account = client_details_table['data']['intAccount']
-user_token = client_details_table['data']['id']
+int_account = client_details_table["data"]["intAccount"]
+user_token = client_details_table["data"]["id"]
 
 chart_fetcher = ChartFetcher(user_token=user_token)
 chart_request = ChartRequest(
@@ -44,13 +42,13 @@ for series in chart.series:
     # if (series.type == 'time'):
     #     print(pl.DataFrame(data=series.data, orient="row"))
 
-str_d1 = '2024/1/20'
+str_d1 = "2024/1/20"
 # convert string to date object
 d1 = datetime.strptime(str_d1, "%Y/%m/%d")
 today = datetime.today()
 # difference between dates in timedelta
 delta = (today - d1).days
-print(f'Difference is {delta} days')
+print(f"Difference is {delta} days")
 
 match delta:
     case diff if diff in range(1, 7):
@@ -76,4 +74,4 @@ print(f"Today is {today.date()}")
 print(start_date.date())
 for i in range(1, 32):
     day = start_date + relativedelta(days=i)
-    print(f'{i} - {day.date()}')
+    print(f"{i} - {day.date()}")

@@ -1,12 +1,13 @@
+"""poetry run python ./scripts/account_report.py
 """
-poetry run python ./scripts/account_report.py
-"""
+
 # IMPORTATIONS
-import common
 from datetime import date
+
+import common
 from degiro_connector.trading.models.account import Format, ReportRequest
 
-trading_api = common.connectToDegiro()
+trading_api = common.connect_to_degiro()
 
 # SETUP REQUEST
 from_date = date(
@@ -31,6 +32,6 @@ report = trading_api.get_account_report(
 
 print(report)
 
-csvFile = open("account.csv", "w")
-csvFile.write(report.content)
-csvFile.close()
+csv_file = open("account.csv", "w")
+csv_file.write(report.content)
+csv_file.close()

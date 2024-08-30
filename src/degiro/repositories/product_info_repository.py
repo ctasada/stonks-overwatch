@@ -1,4 +1,3 @@
-
 from django.db import connection
 
 from degiro.utils.db_utils import dictfetchall
@@ -6,8 +5,7 @@ from degiro.utils.db_utils import dictfetchall
 
 class ProductInfoRepository:
     def get_products_info_raw(self, ids) -> dict:
-        """
-        Gets product information from the given product id. The information is retrieved from the DB.
+        """Gets product information from the given product id. The information is retrieved from the DB.
         ### Parameters
             * productIds: list of ints
                 - The product ids to query
@@ -25,5 +23,5 @@ class ProductInfoRepository:
             rows = dictfetchall(cursor)
 
         # Convert the list of dictionaries into a dictionary indexed by 'productId'
-        result_map = {row['id']: row for row in rows}
+        result_map = {row["id"]: row for row in rows}
         return result_map

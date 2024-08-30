@@ -1,5 +1,5 @@
-
 import json
+
 from django.db import connection
 
 from degiro.utils.db_utils import dictfetchall
@@ -14,8 +14,8 @@ class CompanyProfileRepository:
                 FROM degiro_companyprofile
                 WHERE isin = %s
                 """,
-                [isin]
+                [isin],
             )
             rows = dictfetchall(cursor)
 
-        return json.loads(rows[0]['data'])
+        return json.loads(rows[0]["data"])

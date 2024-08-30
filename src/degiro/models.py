@@ -7,61 +7,43 @@ from django.db import models
 # CashMovements are obtained from the AccountOverview or AccountReport DeGiro calls
 class CashMovements(models.Model):
     date = models.DateTimeField()
-    valueDate = models.DateTimeField()
+    value_date = models.DateTimeField()
     description = models.CharField(max_length=200)
     currency = models.CharField(max_length=3)
     type = models.CharField(max_length=200)
-    balance_unsettledCash = models.CharField(
-        max_length=200, default=None, blank=True, null=True
-    )
-    balance_flatexCash = models.CharField(
-        max_length=200, default=None, blank=True, null=True
-    )
-    balance_cashFund = models.CharField(
-        max_length=200, default=None, blank=True, null=True
-    )
-    balance_total = models.CharField(
-        max_length=200, default=None, blank=True, null=True
-    )
-    productId = models.CharField(max_length=20, default=None, blank=True, null=True)
-    change = models.DecimalField(
-        max_digits=10, decimal_places=2, default=None, blank=True, null=True
-    )
-    exchangeRate = models.DecimalField(
-        max_digits=10, decimal_places=2, default=None, blank=True, null=True
-    )
-    orderId = models.CharField(max_length=200, default=None, blank=True, null=True)
+    balance_unsettled_cash = models.CharField(max_length=200, default=None, blank=True, null=True)
+    balance_flatex_cash = models.CharField(max_length=200, default=None, blank=True, null=True)
+    balance_cash_fund = models.CharField(max_length=200, default=None, blank=True, null=True)
+    balance_total = models.CharField(max_length=200, default=None, blank=True, null=True)
+    product_id = models.CharField(max_length=20, default=None, blank=True, null=True)
+    change = models.DecimalField(max_digits=10, decimal_places=2, default=None, blank=True, null=True)
+    exchange_rate = models.DecimalField(max_digits=10, decimal_places=2, default=None, blank=True, null=True)
+    order_id = models.CharField(max_length=200, default=None, blank=True, null=True)
 
 
 class Transactions(models.Model):
     id = models.PositiveIntegerField(primary_key=True)
-    productId = models.PositiveIntegerField()
+    product_id = models.PositiveIntegerField()
     date = models.DateTimeField()
     buysell = models.CharField(max_length=1)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.IntegerField()
     total = models.DecimalField(max_digits=10, decimal_places=2)
-    orderTypeId = models.PositiveIntegerField(default=None, blank=True, null=True)
-    counterParty = models.CharField(max_length=5, default=None, blank=True, null=True)
+    order_type_id = models.PositiveIntegerField(default=None, blank=True, null=True)
+    counter_party = models.CharField(max_length=5, default=None, blank=True, null=True)
     transfered = models.BooleanField()
-    fxRate = models.DecimalField(max_digits=10, decimal_places=4)
-    nettFxRate = models.DecimalField(max_digits=10, decimal_places=4)
-    grossFxRate = models.DecimalField(max_digits=10, decimal_places=4)
-    autoFxFeeInBaseCurrency = models.DecimalField(max_digits=15, decimal_places=10)
-    totalInBaseCurrency = models.DecimalField(max_digits=15, decimal_places=10)
-    feeInBaseCurrency = models.DecimalField(
-        max_digits=10, decimal_places=2, default=None, blank=True, null=True
-    )
-    totalFeesInBaseCurrency = models.DecimalField(max_digits=15, decimal_places=10)
-    totalPlusFeeInBaseCurrency = models.DecimalField(max_digits=15, decimal_places=10)
-    totalPlusAllFeesInBaseCurrency = models.DecimalField(
-        max_digits=15, decimal_places=10
-    )
-    transactionTypeId = models.PositiveIntegerField()
-    tradingVenue = models.CharField(max_length=5, default=None, blank=True, null=True)
-    executingEntityId = models.CharField(
-        max_length=30, default=None, blank=True, null=True
-    )
+    fx_rate = models.DecimalField(max_digits=10, decimal_places=4)
+    nett_fx_rate = models.DecimalField(max_digits=10, decimal_places=4)
+    gross_fx_rate = models.DecimalField(max_digits=10, decimal_places=4)
+    auto_fx_fee_in_base_currency = models.DecimalField(max_digits=15, decimal_places=10)
+    total_in_base_currency = models.DecimalField(max_digits=15, decimal_places=10)
+    fee_in_base_currency = models.DecimalField(max_digits=10, decimal_places=2, default=None, blank=True, null=True)
+    total_fees_in_base_currency = models.DecimalField(max_digits=15, decimal_places=10)
+    total_plus_fee_in_base_currency = models.DecimalField(max_digits=15, decimal_places=10)
+    total_plus_all_fees_in_base_currency = models.DecimalField(max_digits=15, decimal_places=10)
+    transaction_type_id = models.PositiveIntegerField()
+    trading_venue = models.CharField(max_length=5, default=None, blank=True, null=True)
+    executing_entity_id = models.CharField(max_length=30, default=None, blank=True, null=True)
 
 
 class ProductInfo(models.Model):
@@ -69,46 +51,30 @@ class ProductInfo(models.Model):
     name = models.CharField(max_length=200)
     isin = models.CharField(max_length=25)
     symbol = models.CharField(max_length=8)
-    contractSize = models.DecimalField(max_digits=10, decimal_places=1)
-    productType = models.CharField(max_length=25)
-    productTypeId = models.PositiveIntegerField()
+    contract_size = models.DecimalField(max_digits=10, decimal_places=1)
+    product_type = models.CharField(max_length=25)
+    product_type_id = models.PositiveIntegerField()
     tradable = models.BooleanField()
     category = models.CharField(max_length=1)
     currency = models.CharField(max_length=3)
     active = models.BooleanField()
-    exchangeId = models.CharField(max_length=4)
-    onlyEodPrices = models.BooleanField()
-    isShortable = models.BooleanField(default=None, blank=True, null=True)
-    feedQuality = models.CharField(max_length=2, default=None, blank=True, null=True)
-    orderBookDepth = models.PositiveIntegerField(default=None, blank=True, null=True)
-    vwdIdentifierType = models.CharField(
-        max_length=16, default=None, blank=True, null=True
-    )
-    vwdId = models.CharField(max_length=32, default=None, blank=True, null=True)
-    qualitySwitchable = models.BooleanField(default=None, blank=True, null=True)
-    qualitySwitchFree = models.BooleanField(default=None, blank=True, null=True)
-    vwdModuleId = models.PositiveIntegerField(default=None, blank=True, null=True)
-    feedQualitySecondary = models.CharField(
-        max_length=8, default=None, blank=True, null=True
-    )
-    orderBookDepthSecondary = models.PositiveIntegerField(
-        default=None, blank=True, null=True
-    )
-    vwdIdentifierTypeSecondary = models.CharField(
-        max_length=8, default=None, blank=True, null=True
-    )
-    vwdIdSecondary = models.CharField(
-        max_length=16, default=None, blank=True, null=True
-    )
-    qualitySwitchableSecondary = models.BooleanField(
-        default=None, blank=True, null=True
-    )
-    qualitySwitchFreeSecondary = models.BooleanField(
-        default=None, blank=True, null=True
-    )
-    vwdModuleIdSecondary = models.PositiveIntegerField(
-        default=None, blank=True, null=True
-    )
+    exchange_id = models.CharField(max_length=4)
+    only_eod_prices = models.BooleanField()
+    is_shortable = models.BooleanField(default=None, blank=True, null=True)
+    feed_quality = models.CharField(max_length=2, default=None, blank=True, null=True)
+    order_book_depth = models.PositiveIntegerField(default=None, blank=True, null=True)
+    vwd_identifier_type = models.CharField(max_length=16, default=None, blank=True, null=True)
+    vwd_id = models.CharField(max_length=32, default=None, blank=True, null=True)
+    quality_switchable = models.BooleanField(default=None, blank=True, null=True)
+    quality_switch_free = models.BooleanField(default=None, blank=True, null=True)
+    vwd_module_id = models.PositiveIntegerField(default=None, blank=True, null=True)
+    feed_quality_secondary = models.CharField(max_length=8, default=None, blank=True, null=True)
+    order_book_depth_secondary = models.PositiveIntegerField(default=None, blank=True, null=True)
+    vwd_identifier_type_secondary = models.CharField(max_length=8, default=None, blank=True, null=True)
+    vwd_id_secondary = models.CharField(max_length=16, default=None, blank=True, null=True)
+    quality_switchable_secondary = models.BooleanField(default=None, blank=True, null=True)
+    quality_switch_free_secondary = models.BooleanField(default=None, blank=True, null=True)
+    vwd_module_id_secondary = models.PositiveIntegerField(default=None, blank=True, null=True)
 
 
 class ProductQuotation(models.Model):
@@ -117,6 +83,5 @@ class ProductQuotation(models.Model):
 
 
 class CompanyProfile(models.Model):
-    id = models.PositiveIntegerField(primary_key=True)
-    isin = models.CharField(max_length=25, unique=True)
+    isin = models.CharField(max_length=25, primary_key=True)
     data = models.JSONField()

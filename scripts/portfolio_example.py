@@ -1,19 +1,23 @@
+"""poetry run python ./scripts/portfolio_example.py
 """
-poetry run python ./scripts/portfolio_example.py
-"""
+
 # IMPORTATIONS
-import common
 import json
+
+import common
 from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
 
-trading_api = common.connectToDegiro()
+trading_api = common.connect_to_degiro()
 
 # SETUP REQUEST
-update = trading_api.get_update(request_list=[
-    # Update.Request(option=Update.Option.ORDERS, last_updated=0),
-    UpdateRequest(option=UpdateOption.PORTFOLIO, last_updated=0),
-    UpdateRequest(option=UpdateOption.TOTAL_PORTFOLIO, last_updated=0),
-], raw=False)
+update = trading_api.get_update(
+    request_list=[
+        # Update.Request(option=Update.Option.ORDERS, last_updated=0),
+        UpdateRequest(option=UpdateOption.PORTFOLIO, last_updated=0),
+        UpdateRequest(option=UpdateOption.TOTAL_PORTFOLIO, last_updated=0),
+    ],
+    raw=False,
+)
 
 # print(update)
 # print(json.dumps(update, indent = 4))
@@ -61,10 +65,10 @@ update = trading_api.get_update(request_list=[
 
 # for value in update_dict['portfolio']['values']:
 
-result = dict(
-    totalCash=update['totalPortfolio']['value']['totalCash'],
-    totalDepositWithdrawal=update['totalPortfolio']['value']['totalDepositWithdrawal'],
-)
+result = {
+    "totalCash": update["totalPortfolio"]["value"]["totalCash"],
+    "totalDepositWithdrawal": update["totalPortfolio"]["value"]["totalDepositWithdrawal"],
+}
 
 print(json.dumps(result, indent=4))
 

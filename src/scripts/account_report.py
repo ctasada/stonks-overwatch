@@ -1,6 +1,6 @@
 import pandas as pd
-
 from django.db import connection
+
 from degiro.utils.db_utils import dictfetchall
 
 
@@ -32,9 +32,9 @@ def calculate_cash_contributions() -> None:
                 AND description IN ('iDEAL storting', 'iDEAL Deposit', 'Terugstorting')
             """
         )
-        cashContributions = dictfetchall(cursor)
+        cash_contributions = dictfetchall(cursor)
 
-    df = pd.DataFrame.from_dict(cashContributions)
+    df = pd.DataFrame.from_dict(cash_contributions)
 
     # Remove hours and keep only the day
     df["date"] = pd.to_datetime(df["date"]).dt.date

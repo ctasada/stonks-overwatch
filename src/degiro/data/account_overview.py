@@ -15,8 +15,8 @@ class AccountOverviewData:
 
         products_ids = []
         for cash_movement in account_overview:
-            if cash_movement["productId"] is not None:
-                products_ids.append(cash_movement["productId"])
+            if cash_movement["product_id"] is not None:
+                products_ids.append(cash_movement["product_id"])
 
         # Remove duplicates from list
         products_ids = list(set(products_ids))
@@ -24,54 +24,53 @@ class AccountOverviewData:
 
         overview = []
         for cash_movement in account_overview:
+            stock_name = ""
+            stock_symbol = ""
+            if cash_movement["product_id"] is not None:
+                info = products_info[int(cash_movement["product_id"])]
+                stock_name = info["name"]
+                stock_symbol = info["symbol"]
 
-            stockName = ""
-            stockSymbol = ""
-            if cash_movement["productId"] is not None:
-                info = products_info[int(cash_movement["productId"])]
-                stockName = info["name"]
-                stockSymbol = info["symbol"]
-
-            formatedChange = ""
+            formated_change = ""
             if cash_movement["change"] is not None:
-                formatedChange = LocalizationUtility.format_money_value(
+                formated_change = LocalizationUtility.format_money_value(
                     value=cash_movement["change"], currency=cash_movement["currency"]
                 )
 
-            unsettledCash = 0
-            formatedUnsettledCash = ""
-            formatedTotalBalance = ""
-            totalBalance = 0
+            unsettled_cash = 0
+            formated_unsettled_cash = ""
+            formated_total_balance = ""
+            total_balance = 0
             if "balance" in cash_movement:
-                totalBalance = cash_movement.get("balance").get("total")
-                formatedTotalBalance = LocalizationUtility.format_money_value(
-                    value=totalBalance, currency=cash_movement["currency"]
+                total_balance = cash_movement.get("balance").get("total")
+                formated_total_balance = LocalizationUtility.format_money_value(
+                    value=total_balance, currency=cash_movement["currency"]
                 )
-                unsettledCash = cash_movement.get("balance").get("unsettledCash")
-                formatedUnsettledCash = LocalizationUtility.format_money_value(
-                    value=unsettledCash, currency=cash_movement["currency"]
+                unsettled_cash = cash_movement.get("balance").get("unsettledCash")
+                formated_unsettled_cash = LocalizationUtility.format_money_value(
+                    value=unsettled_cash, currency=cash_movement["currency"]
                 )
 
             overview.append(
-                dict(
-                    date=LocalizationUtility.format_date_from_date(cash_movement["date"]),
-                    time=LocalizationUtility.format_time_from_date(cash_movement["date"]),
-                    valueDate=LocalizationUtility.format_date_from_date(cash_movement["valueDate"]),
-                    valueTime=LocalizationUtility.format_time_from_date(cash_movement["valueDate"]),
-                    stockName=stockName,
-                    stockSymbol=stockSymbol,
-                    description=cash_movement["description"],
-                    type=cash_movement["type"],
-                    typeStr=cash_movement["type"].replace("_", " ").title(),
-                    currency=cash_movement["currency"],
-                    change=cash_movement.get("change", ""),
-                    formatedChange=formatedChange,
-                    totalBalance=totalBalance,
-                    formatedTotalBalance=formatedTotalBalance,
+                {
+                    "date": LocalizationUtility.format_date_from_date(cash_movement["date"]),
+                    "time": LocalizationUtility.format_time_from_date(cash_movement["date"]),
+                    "valueDate": LocalizationUtility.format_date_from_date(cash_movement["value_date"]),
+                    "valueTime": LocalizationUtility.format_time_from_date(cash_movement["value_date"]),
+                    "stockName": stock_name,
+                    "stockSymbol": stock_symbol,
+                    "description": cash_movement["description"],
+                    "type": cash_movement["type"],
+                    "typeStr": cash_movement["type"].replace("_", " ").title(),
+                    "currency": cash_movement["currency"],
+                    "change": cash_movement.get("change", ""),
+                    "formatedChange": formated_change,
+                    "totalBalance": total_balance,
+                    "formatedTotalBalance": formated_total_balance,
                     # Seems that this value is the proper one for Dividends. Checking ...
-                    unsettledCash=unsettledCash,
-                    formatedUnsettledCash=formatedUnsettledCash,
-                )
+                    "unsettledCash": unsettled_cash,
+                    "formatedUnsettledCash": formated_unsettled_cash,
+                }
             )
 
         return overview

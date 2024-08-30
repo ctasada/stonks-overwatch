@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = []
@@ -23,39 +22,29 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("date", models.DateTimeField()),
-                ("valueDate", models.DateTimeField()),
+                ("value_date", models.DateTimeField()),
                 ("description", models.CharField(max_length=200)),
                 ("currency", models.CharField(max_length=3)),
                 ("type", models.CharField(max_length=200)),
                 (
-                    "balance_unsettledCash",
-                    models.CharField(
-                        blank=True, default=None, max_length=200, null=True
-                    ),
+                    "balance_unsettled_cash",
+                    models.CharField(blank=True, default=None, max_length=200, null=True),
                 ),
                 (
-                    "balance_flatexCash",
-                    models.CharField(
-                        blank=True, default=None, max_length=200, null=True
-                    ),
+                    "balance_flatex_cash",
+                    models.CharField(blank=True, default=None, max_length=200, null=True),
                 ),
                 (
-                    "balance_cashFund",
-                    models.CharField(
-                        blank=True, default=None, max_length=200, null=True
-                    ),
+                    "balance_cash_fund",
+                    models.CharField(blank=True, default=None, max_length=200, null=True),
                 ),
                 (
                     "balance_total",
-                    models.CharField(
-                        blank=True, default=None, max_length=200, null=True
-                    ),
+                    models.CharField(blank=True, default=None, max_length=200, null=True),
                 ),
                 (
-                    "productId",
-                    models.CharField(
-                        blank=True, default=None, max_length=20, null=True
-                    ),
+                    "product_id",
+                    models.CharField(blank=True, default=None, max_length=20, null=True),
                 ),
                 (
                     "change",
@@ -68,7 +57,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "exchangeRate",
+                    "exchange_rate",
                     models.DecimalField(
                         blank=True,
                         decimal_places=2,
@@ -78,10 +67,8 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "orderId",
-                    models.CharField(
-                        blank=True, default=None, max_length=200, null=True
-                    ),
+                    "order_id",
+                    models.CharField(blank=True, default=None, max_length=200, null=True),
                 ),
             ],
         ),

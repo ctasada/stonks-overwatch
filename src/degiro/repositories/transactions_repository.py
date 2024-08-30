@@ -1,4 +1,3 @@
-
 from django.db import connection
 
 from degiro.utils.db_utils import dictfetchall

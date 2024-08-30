@@ -8,8 +8,7 @@ DATE_FORMAT = "%Y-%m-%d"
 
 
 def init() -> None:
-    """
-    Executes needed initializations for the scripts.
+    """Execute needed initializations for the scripts.
 
     * Creates the folder to put the imported files
     ### Returns:
@@ -20,8 +19,8 @@ def init() -> None:
 
 
 def save_to_json(data: Any, json_file_path: str) -> None:
-    """
-    Saves the data into the specified file using JSON format
+    """Save the data into the specified file using JSON format.
+
     ### Parameters
     * data: Any
         - The data structure we want to save

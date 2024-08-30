@@ -7,6 +7,7 @@ The script is used to update or re-create the DB with all the needed data from D
 Usage:
     poetry run src/manage.py runscript init_db
 """
+
 from scripts.account_import import run as account_import
 from scripts.company_profile_import import run as company_profile_import
 from scripts.products_info_import import run as products_info_import
@@ -20,5 +21,5 @@ def run():
     company_profile_import()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()

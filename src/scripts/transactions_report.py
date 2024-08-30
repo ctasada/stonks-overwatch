@@ -7,6 +7,7 @@ Temporal script to easily test the Dashboard Portfolio methods
 Usage:
     poetry run src/manage.py runscript transactions_report
 """
+
 from degiro.views.dashboard import Dashboard
 from scripts.commons import IMPORT_FOLDER, save_to_json
 
@@ -23,7 +24,7 @@ def run():
     save_to_json(portfolio_value, f"{IMPORT_FOLDER}/portfolio_growth/portfolio_value.json")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()
 
 """
