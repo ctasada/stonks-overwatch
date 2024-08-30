@@ -1,5 +1,4 @@
-"""poetry run python ./scripts/transaction_history.py
-"""
+"""poetry run python ./scripts/transaction_history.py"""
 
 # IMPORTATIONS
 import json

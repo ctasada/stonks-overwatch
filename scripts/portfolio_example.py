@@ -1,5 +1,4 @@
-"""poetry run python ./scripts/portfolio_example.py
-"""
+"""poetry run python ./scripts/portfolio_example.py"""
 
 # IMPORTATIONS
 import json
