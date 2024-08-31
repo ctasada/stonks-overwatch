@@ -100,9 +100,9 @@ class PortfolioData:
         base_currency_symbol = LocalizationUtility.get_base_currency_symbol()
 
         tmp_total_portfolio["totalDepositWithdrawal"] = self.cash_movements_repository.get_total_cash_deposits_raw()
-        # FIXME: Calculate cash
-        tmp_total_portfolio["totalCash"] = -1
+        tmp_total_portfolio["totalCash"] = self.cash_movements_repository.get_total_cash()
 
+        # Try to get the data directly from DeGiro, so we get up-to-date values
         realtime_total_portfolio = self.__get_realtime_portfolio_total()
         if realtime_total_portfolio:
             tmp_total_portfolio = realtime_total_portfolio
