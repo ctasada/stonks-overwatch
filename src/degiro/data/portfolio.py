@@ -35,6 +35,7 @@ class PortfolioData:
         base_currency = LocalizationUtility.get_base_currency()
 
         my_portfolio = []
+        portfolio_total_value = 0.0
 
         for tmp in portfolio_transactions:
             info = products_info[tmp["product_id"]]
@@ -63,6 +64,11 @@ class PortfolioData:
             is_open = tmp["size"] != 0.0 and tmp["value"] != 0.0
             unrealized_gain = (price - break_even_price) * tmp["size"]
             formatted_unrealized_gain = LocalizationUtility.format_money_value(value=unrealized_gain, currency=currency)
+            percentageGain = 0.0
+            if value > 0:
+                percentageGain = unrealized_gain / (value - unrealized_gain)
+
+            portfolio_total_value += value
 
             my_portfolio.append(
                 {
@@ -80,9 +86,16 @@ class PortfolioData:
                     "isOpen": is_open,
                     "unrealizedGain": unrealized_gain,
                     "formattedUnrealizedGain": formatted_unrealized_gain,
+                    "percentageGain": f"{percentageGain:.2%}",
                     "logoUrl": f"https://logos.stockanalysis.com/{info['symbol'].lower()}.svg",
+                    "formattedPortfolioSize": 0.0, # Calculated in the next loop
                 }
             )
+
+        # Calculate Stock Portfolio Size
+        for entry in my_portfolio:
+            size = entry["value"] / portfolio_total_value
+            entry["formattedPortfolioSize"] = f"{size:.2%}"
 
         return sorted(my_portfolio, key=lambda k: k["symbol"])
 
@@ -116,11 +129,13 @@ class PortfolioData:
                 value=total_profit_loss,
                 currency_symbol=base_currency_symbol,
             ),
-            "totalCash": LocalizationUtility.format_money_value(
+            "totalCash": tmp_total_portfolio["totalCash"],
+            "totalCash_formatted": LocalizationUtility.format_money_value(
                 value=tmp_total_portfolio["totalCash"],
                 currency_symbol=base_currency_symbol,
             ),
-            "currentValue": LocalizationUtility.format_money_value(
+            "currentValue": portfolio_total_value,
+            "currentValue_formatted": LocalizationUtility.format_money_value(
                 value=portfolio_total_value, currency_symbol=base_currency_symbol
             ),
             "totalROI": roi,
