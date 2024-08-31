@@ -77,6 +77,14 @@
                     </a>
                 </li>
 
+                {% url 'diversification' as url %}
+                <li class="{% if request.path == url %}active{% endif %}">
+                    <a href="{{ url }}">
+                        <i class="fas fa-chart-pie"></i>
+                        Diversification
+                    </a>
+                </li>
+
                 {% url 'transactions' as url %}
                 <li class="{% if request.path == url %}active{% endif %}">
                     <a href="{{ url }}">

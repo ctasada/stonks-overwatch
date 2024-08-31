@@ -64,9 +64,9 @@ class PortfolioData:
             is_open = tmp["size"] != 0.0 and tmp["value"] != 0.0
             unrealized_gain = (price - break_even_price) * tmp["size"]
             formatted_unrealized_gain = LocalizationUtility.format_money_value(value=unrealized_gain, currency=currency)
-            percentageGain = 0.0
+            percentage_gain = 0.0
             if value > 0:
-                percentageGain = unrealized_gain / (value - unrealized_gain)
+                percentage_gain = unrealized_gain / (value - unrealized_gain)
 
             portfolio_total_value += value
 
@@ -86,7 +86,7 @@ class PortfolioData:
                     "isOpen": is_open,
                     "unrealizedGain": unrealized_gain,
                     "formattedUnrealizedGain": formatted_unrealized_gain,
-                    "percentageGain": f"{percentageGain:.2%}",
+                    "percentageGain": f"{percentage_gain:.2%}",
                     "logoUrl": f"https://logos.stockanalysis.com/{info['symbol'].lower()}.svg",
                     "formattedPortfolioSize": 0.0, # Calculated in the next loop
                 }

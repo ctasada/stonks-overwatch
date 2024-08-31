@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+{% load static %}
+{% block content %}
+  <!-- ChartJS -->
+  <script src="{% static 'chart.js/dist/chart.umd.js' %}"></script>
+  <script src="{% static 'luxon/build/global/luxon.js' %}"></script>
+  <script src="{% static 'chartjs-adapter-luxon/dist/chartjs-adapter-luxon.umd.min.js' %}"></script>
+  <script src="{% static '@seahsky/chartjs-plugin-autocolors/dist/chartjs-plugin-autocolors.min.js' %}"></script>
+  
+  <div class="container-fluid row-gap-5">
+    <div class="row border border-primary-subtle bg-light rounded mb-3 pb-3">
+      <div class="col-sm" style="position: relative; height:40vh">
+        <canvas id="holdings-chart"></canvas>
+      </div>
+      <div class="col-sm"></div>
+    </div>
+    <div class="row border border-primary-subtle bg-light rounded mb-3 pb-3">
+      <div class="col-sm" style="position: relative; height:40vh">
+        <canvas id="industries-chart"></canvas>
+      </div>
+      <div class="col-sm"></div>
+    </div>
+  </div>
+
+  <script>
+    // Customize colors with https://www.npmjs.com/package/@seahsky/chartjs-plugin-autocolors#customize
+    const autocolors = window['@seahsky/chartjs-plugin-autocolors'];
+
+    function drawHoldingsPositions() {
+      let currencySymbol = "{{ currencySymbol }}";
+      
+      let valuesDict = [
+        [
+        {% for stock in holdings.labels %}
+          {
+            "label" : "{{ stock }}",
+            "value" : {{ holdings.values|index:forloop.counter0 }},
+          },
+        {% endfor %}
+        ]
+      ];
+      const dataSectors = {
+        labels: {{ holdings.labels|safe }},
+        datasets: [
+          {
+            data: {{ holdings.values }},
+            borderWidth: 1,
+          }
+        ]
+      };
+
+      const configSectors = {
+        type: 'doughnut',
+        data: dataSectors,
+        plugins: [
+          autocolors
+        ],
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: false,
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  var stockValue = valuesDict[context.datasetIndex][context.dataIndex].value;
+                  stockValue = Intl.NumberFormat().format(stockValue);
+                  return currencySymbol + ' ' + stockValue;
+                }
+              }
+            },
+            title: {
+              display: true,
+              text: 'Holdings',
+              font: {
+                size: 20
+              }
+            },
+            autocolors: {
+              mode: 'data',
+              offset: 5,
+            }
+          }
+        },
+      };
+
+      let doughnutHoldingsChart = new Chart(document.getElementById("holdings-chart").getContext("2d"), configSectors);
+    }
+
+    function drawIndustriesPositions() {
+      let currencySymbol = "{{ currencySymbol }}";
+      
+      let valuesDict = [
+        [
+        {% for industry in industries.labels %}
+          {
+            "label" : "{{ industry }}",
+            "value" : {{ industries.values|index:forloop.counter0 }},
+          },
+        {% endfor %}
+        ]
+      ];
+      const dataSectors = {
+        labels: {{ industries.labels|safe }},
+        datasets: [
+          {
+            data: {{ industries.values }},
+            borderWidth: 1,
+          }
+        ]
+      };
+
+      const configSectors = {
+        type: 'doughnut',
+        data: dataSectors,
+        plugins: [
+          autocolors
+        ],
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: false,
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  var industryValue = valuesDict[context.datasetIndex][context.dataIndex].value;
+                  industryValue = Intl.NumberFormat().format(industryValue);
+                  return currencySymbol + ' ' + industryValue;
+                }
+              }
+            },
+            title: {
+              display: true,
+              text: 'Industries',
+              font: {
+                size: 20
+              }
+            },
+            autocolors: {
+              mode: 'data',
+              offset: 5,
+            }
+          }
+        },
+      };
+
+      let doughnutIndustriesChart = new Chart(document.getElementById("industries-chart").getContext("2d"), configSectors);
+    }
+
+    drawHoldingsPositions()
+    drawIndustriesPositions()
+  </script>
+{% endblock %}
