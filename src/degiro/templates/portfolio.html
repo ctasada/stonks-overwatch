@@ -13,9 +13,9 @@
                   <th scope="col">Sector</th>
                   <th scope="col">Shares</th>
                   <th scope="col">Price</th>
-                  <th scope="col">Cost Per Share</th>
                   <th scope="col">Unrealized Gain</th>
                   <th scope="col">Value</th>
+                  <th scope="col">Size</th>
                 </tr>
             </thead>
             {% endblock table.thead %}
@@ -28,15 +28,15 @@
                             <td>{{ stock.symbol }}<br><small class="fw-lighter">{{ stock.name }}</small></td>
                             <td>{{ stock.sector }}<br><small class="fw-lighter">{{ stock.industry }}</small></td>
                             <td>{{ stock.shares }}</td>
-                            <td>{{ stock.formattedPrice }}</td>
-                            <td>{{ stock.formattedBreakEvenPrice }}</td>
+                            <td>{{ stock.formattedPrice }}<br><small class="fw-lighter">{{ stock.formattedBreakEvenPrice }}</small></td>
                             {% if stock.unrealizedGain > 0 %}
                                 <td class="text-success" >
                             {% else %}
                                 <td class="text-danger" >
                             {% endif %}
-                            {{ stock.formattedUnrealizedGain }}</td>
+                            {{ stock.formattedUnrealizedGain }}<br><small class="fw-lighter">{{ stock.percentageGain }}</small></td>
                             <td>{{ stock.formattedValue }}</td>
+                            <td>{{ stock.formattedPortfolioSize }}</td>
                         </tr>
                     {% endif %}
                 {% endfor %}
