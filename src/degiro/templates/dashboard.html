@@ -39,16 +39,9 @@
             </div>
         </div>
       </div>
-      <div class="row w-100" style="position: relative; width: 100%; height: 300px;">
+      <div class="row w-100" style="position: relative; width: 100%; height: 40vh;">
         <canvas id="portofolio-chart"></canvas>
       </div>
-    </div>
-    <div class="row border border-primary-subtle bg-light rounded mb-3">
-      <div class="col-sm"></div>
-      <div class="col-sm" style="position: relative; height:40vh">
-        <canvas id="sectors-chart"></canvas>
-      </div>
-      <div class="col-sm"></div>
     </div>
   </div>
 
@@ -288,79 +281,6 @@
       let portofolioChart = new Chart(document.getElementById("portofolio-chart").getContext("2d"), configPortfolio);
     }
 
-    function drawSectorPositions() {
-      let currencySymbol = "{{ sectors.currencySymbol }}";
-      let valuesDict = [
-        [
-        {% for stock in sectors.stocks.labels %}
-          {
-            "label" : "{{ stock }}",
-            "value" : {{ sectors.stocks.values|index:forloop.counter0 }},
-          },
-        {% endfor %}
-        ], [
-        {% for sector in sectors.sectors.labels %}
-          {
-            "label" : "{{ sector }}",
-            "value" : {{ sectors.sectors.values|index:forloop.counter0 }},
-          },
-        {% endfor %}
-        ],
-      ];
-      const dataSectors = {
-        labels: {{ sectors.sectors.labels|safe }},
-        datasets: [
-          {
-            data: {{ sectors.stocks.values }},
-            borderWidth: 1,
-          },
-          {
-            data: {{ sectors.sectors.values }},
-            borderWidth: 2,
-          }
-        ]
-      };
-
-      const configSectors = {
-        type: 'doughnut',
-        data: dataSectors,
-        plugins: [
-          autocolors
-        ],
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              position: 'bottom',
-            },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  var stockValue = valuesDict[context.datasetIndex][context.dataIndex].value;
-                  stockValue = Intl.NumberFormat().format(stockValue);
-                  return valuesDict[context.datasetIndex][context.dataIndex].label + ': ' + currencySymbol + ' ' + stockValue;
-                }
-              }
-            },
-            title: {
-              display: true,
-              text: 'Sector Position Sizes',
-              font: {
-                size: 20
-              }
-            },
-            autocolors: {
-              mode: 'data',
-              offset: 5,
-            }
-          }
-        },
-      };
-
-      let doughnutSectorsChart = new Chart(document.getElementById("sectors-chart").getContext("2d"), configSectors);
-    }
-
     drawPortfolio(PortfolioTypes.VALUE, TimeRanges.MAX)
-    drawSectorPositions()
   </script>
 {% endblock %}

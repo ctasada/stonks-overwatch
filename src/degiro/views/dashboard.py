@@ -11,7 +11,6 @@ from django.views import View
 
 from degiro.data.deposits import DepositsData
 from degiro.data.dividends import DividendsData
-from degiro.data.portfolio import PortfolioData
 from degiro.repositories.cash_movements_repository import CashMovementsRepository
 from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.product_quotations_repository import ProductQuotationsRepository
@@ -24,7 +23,6 @@ class Dashboard(View):
     currency_converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
 
     def __init__(self):
-        self.portfolio = PortfolioData()
         self.deposits = DepositsData()
         self.dividends = DividendsData()
         self.product_quotations_repository = ProductQuotationsRepository()
@@ -32,7 +30,6 @@ class Dashboard(View):
         self.cash_movements_repository = CashMovementsRepository()
 
     def get(self, request):
-        sectors_context = self._get_sectors()
         total_costs = [
             {"x": item["date"], "y": item["total_cost"]} for item in self._total_costs_history()
         ]
@@ -48,7 +45,6 @@ class Dashboard(View):
 
         context = {
             "portfolio": {"value": value_context, "performance": performance_twr},
-            "sectors": sectors_context,
         }
 
         # FIXME: Simplify this response
@@ -167,41 +163,6 @@ class Dashboard(View):
             dataset.append({"x": day, "y": performance})
 
         return dataset
-
-    def _get_sectors(self):
-        portfolio = self.portfolio.get_portfolio()
-        portfolio = sorted(portfolio, key=lambda k: k["sector"])
-        # self.logger.debug(json.dumps(portfolio, indent=2))
-
-        sectors = {}
-
-        stock_labels = []
-        stock_values = []
-
-        for stock in portfolio:
-            if stock["isOpen"]:
-                sector_name = stock["sector"]
-                sectors[sector_name] = sectors.get(sector_name, 0) + stock["value"]
-                stock_labels.append(stock["symbol"])
-                stock_values.append(stock["value"])
-
-        sector_labels = []
-        sector_values = []
-        for key in sectors:
-            sector_labels.append(key)
-            sector_values.append(sectors[key])
-
-        return {
-            "sectors": {
-                "labels": sector_labels,
-                "values": sector_values,
-            },
-            "stocks": {
-                "labels": stock_labels,
-                "values": stock_values,
-            },
-            "currencySymbol": LocalizationUtility.get_base_currency_symbol(),
-        }
 
     def _calculate_value(self, cash_account: dict) -> list:
         data = self._create_products_quotation()
