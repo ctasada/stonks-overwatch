@@ -13,8 +13,6 @@ from degiro.utils.localization import LocalizationUtility
 class Dividends(View):
     logger = logging.getLogger("stocks_portfolio.dividends.views")
     currency_converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
-    # FIXME: Replace by common Localization Pattern
-    DATE_FORMAT = "%Y-%m-%d"
 
     def __init__(self):
         self.accountOverview = AccountOverviewData()
@@ -29,14 +27,14 @@ class Dividends(View):
 
         for transaction in dividends_overview:
             # Group dividends by month. We may only need the dividend name and amount
-            month_year = self.format_date_to_month_year(transaction["date"])
-            month_number = int(self.format_date_to_month_number(transaction["date"]))
-            year = int(self.format_date_to_year(transaction["date"]))
+            month_year = LocalizationUtility.format_date_to_month_year(transaction["date"])
+            month_number = int(LocalizationUtility.format_date_to_month_number(transaction["date"]))
+            year = int(LocalizationUtility.format_date_to_year(transaction["date"]))
 
             if year not in dividends_growth:
                 dividends_growth[year] = [0] * 12
 
-            day = self.get_date_day(transaction["date"])
+            day = LocalizationUtility.get_date_day(transaction["date"])
             stock = transaction["stockSymbol"]
 
             month_entry = dividends.setdefault(month_year, {})
@@ -47,7 +45,7 @@ class Dividends(View):
 
             currency = transaction["currency"]
             if currency != self.baseCurrency:
-                date = datetime.datetime.strptime(transaction["date"], self.DATE_FORMAT).date()
+                date = LocalizationUtility.convert_string_to_date(transaction["date"])
                 transaction_change = self.currency_converter.convert(
                     transaction_change, currency, self.baseCurrency, date
                 )
@@ -62,7 +60,7 @@ class Dividends(View):
 
             month_entry.setdefault("dividends", []).append(
                 {
-                    "day": self.get_date_day(transaction["date"]),
+                    "day": LocalizationUtility.get_date_day(transaction["date"]),
                     "stockName": transaction["stockName"],
                     "stockSymbol": transaction["stockSymbol"],
                     "formatedChange": transaction["formatedChange"],
@@ -110,20 +108,3 @@ class Dividends(View):
                 ),
             )
         return dividends
-
-    # FIXME: Move methods to Localization class
-    def format_date_to_month_year(self, value: str):
-        time = datetime.datetime.strptime(value, self.DATE_FORMAT)
-        return time.strftime("%B %Y")
-
-    def get_date_day(self, value: str):
-        time = datetime.datetime.strptime(value, self.DATE_FORMAT)
-        return time.strftime("%d")
-
-    def format_date_to_month_number(self, value: str):
-        time = datetime.datetime.strptime(value, self.DATE_FORMAT)
-        return time.strftime("%m")
-
-    def format_date_to_year(self, value: str):
-        time = datetime.datetime.strptime(value, self.DATE_FORMAT)
-        return time.strftime("%Y")

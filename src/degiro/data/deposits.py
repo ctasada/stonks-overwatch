@@ -14,17 +14,7 @@ class DepositsData:
         self.cash_movements_repository = CashMovementsRepository()
 
     def get_cash_deposits(self) -> dict:
-        # FIXME: Replace by CashMovementsRepository call
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT date, description, change
-                FROM degiro_cashmovements
-                WHERE currency = 'EUR'
-                    AND description IN ('iDEAL storting', 'iDEAL Deposit', 'Terugstorting')
-                """
-            )
-            df = pd.DataFrame(cursor.fetchall(), columns=[col[0] for col in cursor.description])
+        df = pd.DataFrame(self.cash_movements_repository.get_cash_deposits_raw())
 
         # Remove hours and keep only the day
         df["date"] = pd.to_datetime(df["date"]).dt.strftime(LocalizationUtility.DATE_FORMAT)

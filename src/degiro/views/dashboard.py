@@ -162,7 +162,7 @@ class Dashboard(View):
 
                 if convert_fx:
                     currency = entry["product"]["currency"]
-                    fx_date = datetime.strptime(date_value, LocalizationUtility.DATE_FORMAT).date()
+                    fx_date = LocalizationUtility.convert_string_to_date(date_value)
                     value = self.currency_converter.convert(
                         position_value_growth[date_value], currency, base_currency, fx_date
                     )
@@ -187,19 +187,15 @@ class Dashboard(View):
 
     def _get_growth_final_date(self, date_str: str):
         if date_str == 0:
-            return datetime.strptime(date_str, LocalizationUtility.DATE_FORMAT).date()
+            return LocalizationUtility.convert_string_to_date(date_str)
         else:
             return datetime.today().date()
 
     def _calculate_position_growth(self, entry: dict, stock_splits: dict) -> dict:
         product_history_dates = list(entry["history"].keys())
 
-        start_date = datetime.strptime(product_history_dates[0], LocalizationUtility.DATE_FORMAT).date()
+        start_date = LocalizationUtility.convert_string_to_date(product_history_dates[0])
         final_date = self._get_growth_final_date(product_history_dates[-1])
-        # if product_history_dates[-1] == 0:
-        #     final_date = datetime.strptime(product_history_dates[-1], LocalizationUtility.DATE_FORMAT).date()
-        # else:
-        #     final_date = datetime.today().date()
 
         # difference between current and previous date
         delta = timedelta(days=1)
@@ -245,8 +241,8 @@ class Dashboard(View):
             Interval: Interval that representes the range from date_from to today.
         """
         # Convert String to date object
-        d1 = datetime.strptime(date_from, LocalizationUtility.DATE_FORMAT)
-        today = datetime.today()
+        d1 = LocalizationUtility.convert_string_to_date(date_from)
+        today = datetime.today().date()
         # difference between dates in timedelta
         delta = (today - d1).days
 
@@ -365,7 +361,7 @@ class Dashboard(View):
             product_growth[key]["quotation"] = {}
             product_history_dates = list(product_growth[key]["history"].keys())
             start_date = product_history_dates[0]
-            final_date = datetime.today().strftime(LocalizationUtility.DATE_FORMAT)
+            final_date = LocalizationUtility.format_date_from_date(datetime.today())
             tmp_last = product_history_dates[-1]
             if product_growth[key]["history"][tmp_last] == 0:
                 final_date = tmp_last
