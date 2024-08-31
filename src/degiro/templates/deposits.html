@@ -39,7 +39,7 @@
             </div>
         </div>
       </div>
-      <div class="row w-100">
+      <div class="row w-100" style="position: relative; width: 100%; height: 300px;">
         <canvas id="deposits-chart"></canvas>
       </div>
     </div>
@@ -161,7 +161,7 @@
               fill: 'start',
           }],
       };
-      const minimumDate = new Date('{{ deposits.value.0.x }}')
+      const minimumDate = new Date('{{ deposit_growth.value.0.x }}')
 
       redrawDepositsGraph(dataValue, timeRange, minimumDate)
     }
@@ -174,6 +174,7 @@
         data: datasets,
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           scales: {
               x: {
                   type: 'time',
@@ -187,7 +188,7 @@
                   },
               },
               y: {
-                beginAtZero: true,
+                beginAtZero: false,
               }
           },
           elements: {

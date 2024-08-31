@@ -39,7 +39,7 @@
             </div>
         </div>
       </div>
-      <div class="row w-100">
+      <div class="row w-100" style="position: relative; width: 100%; height: 300px;">
         <canvas id="portofolio-chart"></canvas>
       </div>
     </div>
@@ -242,6 +242,7 @@
         data: datasets,
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           scales: {
               x: {
                   type: 'time',
@@ -255,7 +256,7 @@
                   },
               },
               y: {
-                beginAtZero: true,
+                beginAtZero: false,
                 ticks: {
                     callback: ticksCallback,
                 }
