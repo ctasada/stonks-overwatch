@@ -171,8 +171,8 @@
     function drawPortfolioValue(timeRange) {
       const dataValue = {
         datasets: [{
-              label: 'Cash Contributions',
-              data: {{ portfolio.value.cash_contributions|safe }},
+              label: 'Total Costs',
+              data: {{ portfolio.value.total_costs|safe }},
               stepped: true,
           },
           {
