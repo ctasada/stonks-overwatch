@@ -74,18 +74,3 @@ class AccountOverviewData:
             )
 
         return overview
-
-    def get_dividends(self):
-        overview = self.get_account_overview()
-
-        dividends = []
-        for transaction in overview:
-            # We don't include 'Dividendbelasting' because the 'value' seems to already include the taxes
-            if transaction["description"] in [
-                "Dividend",
-                "Dividendbelasting",
-                "Vermogenswinst",
-            ]:
-                dividends.append(transaction)
-
-        return dividends

@@ -7,6 +7,7 @@ from django.shortcuts import render
 from django.views import View
 
 from degiro.data.account_overview import AccountOverviewData
+from degiro.data.dividends import DividendsData
 from degiro.utils.localization import LocalizationUtility
 
 
@@ -16,11 +17,12 @@ class Dividends(View):
 
     def __init__(self):
         self.accountOverview = AccountOverviewData()
+        self.dividens = DividendsData()
         self.baseCurrency = LocalizationUtility.get_base_currency()
 
     def get(self, request):
         # We don't need to sort the dict, since it's already coming sorted in DESC date order
-        dividends_overview = self.accountOverview.get_dividends()
+        dividends_overview = self.dividens.get_dividends()
 
         dividends = self.get_dividends_calendar(dividends_overview)
         dividends_growth = {}

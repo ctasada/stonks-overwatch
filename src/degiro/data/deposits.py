@@ -67,7 +67,7 @@ class DepositsData:
         # Append today with the last value to draw the line properly
         dataset.append(
             {
-                "date": date.today().strftime(LocalizationUtility.DATE_FORMAT),
+                "date": LocalizationUtility.format_date_from_date(date.today()),
                 "total_deposit": cash_contributions[-1]["contributed"],
             }
         )

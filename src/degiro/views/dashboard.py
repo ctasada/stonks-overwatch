@@ -1,6 +1,6 @@
 import logging
 from collections import OrderedDict, defaultdict
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 import pandas as pd
 from currency_converter import CurrencyConverter
@@ -10,7 +10,9 @@ from django.shortcuts import render
 from django.views import View
 
 from degiro.data.deposits import DepositsData
+from degiro.data.dividends import DividendsData
 from degiro.data.portfolio import PortfolioData
+from degiro.repositories.cash_movements_repository import CashMovementsRepository
 from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.product_quotations_repository import ProductQuotationsRepository
 from degiro.utils.db_utils import dictfetchall
@@ -24,8 +26,33 @@ class Dashboard(View):
     def __init__(self):
         self.portfolio = PortfolioData()
         self.deposits = DepositsData()
+        self.dividends = DividendsData()
         self.product_quotations_repository = ProductQuotationsRepository()
         self.product_info_repository = ProductInfoRepository()
+        self.cash_movements_repository = CashMovementsRepository()
+
+    def get(self, request):
+        sectors_context = self._get_sectors()
+        total_costs = [
+            {"x": item["date"], "y": item["total_cost"]} for item in self._total_costs_history()
+        ]
+        cash_account = self.deposits.calculate_cash_account_value()
+        portfolio_value = self._calculate_value(cash_account)
+        cash_deposits_simple = self._get_simple_cash_deposits()
+        performance_twr = self._calculate_performance_twr(cash_deposits_simple, portfolio_value)
+
+        value_context = {
+            "total_costs": total_costs,
+            "portfolio_value": portfolio_value,
+        }
+
+        context = {
+            "portfolio": {"value": value_context, "performance": performance_twr},
+            "sectors": sectors_context,
+        }
+
+        # FIXME: Simplify this response
+        return render(request, "dashboard.html", context)
 
     def _get_simple_cash_deposits(self):
         result = {}
@@ -43,30 +70,59 @@ class Dashboard(View):
 
         return sorted_result
 
-    def get(self, request):
-        sectors_context = self._get_sectors()
-        cash_contributions = [
-            {"x": item["date"], "y": item["total_deposit"]} for item in self.deposits.cash_deposits_history()
-        ]
-        cash_account = self.deposits.calculate_cash_account_value()
-        portfolio_value = self._calculate_value(cash_account)
-        cash_deposits_simple = self._get_simple_cash_deposits()
-        performance_twr = self._calculate_performance_twr(cash_deposits_simple, portfolio_value)
+    def _get_dividend_deposits(self) -> list:
+        # {'date': '2020-05-15', 'currency': 'USD', 'change': 8.2, 'formatedChange': '$ 8.20']
+        dividends = []
+        base_currency = LocalizationUtility.get_base_currency()
+        for dividend in self.dividends.get_dividends():
+            dividend_date = LocalizationUtility.convert_string_to_date(dividend['date'])
+            dividends.append(
+                {
+                    "date": dividend_date,
+                    "change": self.currency_converter.convert(
+                        dividend['change'], dividend['currency'], base_currency, dividend_date
+                    )
+                }
+            )
 
-        value_context = {
-            "cash_contributions": cash_contributions,
-            "portfolio_value": portfolio_value,
-        }
+        return dividends
 
-        context = {
-            "portfolio": {"value": value_context, "performance": performance_twr},
-            "sectors": sectors_context,
-        }
+    def _total_costs_history(self) -> dict:
+        cash_contributions = self.cash_movements_repository.get_cash_deposits_raw()
+        dividends = self._get_dividend_deposits()
 
-        # self.logger.debug(context)
+        df = pd.DataFrame.from_dict(cash_contributions + dividends)
+        # Remove hours and keep only the day
+        df["date"] = pd.to_datetime(df["date"]).dt.date
+        # Group by day, adding the values
+        df.set_index("date", inplace=True)
+        df = df.sort_values(by="date")
+        df = df.groupby(df.index)["change"].sum().reset_index()
+        # Do the cummulative sum
+        df["contributed"] = df["change"].cumsum()
 
-        # FIXME: Simplify this response
-        return render(request, "dashboard.html", context)
+        cash_contributions = df.to_dict("records")
+        for contribution in cash_contributions:
+            contribution["date"] = contribution["date"].strftime(LocalizationUtility.DATE_FORMAT)
+
+        dataset = []
+        for contribution in cash_contributions:
+            dataset.append(
+                {
+                    "date": contribution["date"],
+                    "total_cost": LocalizationUtility.round_value(contribution["contributed"]),
+                }
+            )
+
+        # Append today with the last value to draw the line properly
+        dataset.append(
+            {
+                "date": LocalizationUtility.format_date_from_date(date.today()),
+                "total_cost": LocalizationUtility.round_value(cash_contributions[-1]["contributed"]),
+            }
+        )
+
+        return dataset
 
     # FIXME: The TWR calculation seems off
     def _calculate_performance_twr(self, cash_contributions: dict, portfolio_value: dict) -> dict:

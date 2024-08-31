@@ -15,7 +15,7 @@ class CashMovementsRepository:
             )
             return dictfetchall(cursor)
 
-    def get_cash_deposits_raw(self) -> dict:
+    def get_cash_deposits_raw(self) -> list:
         with connection.cursor() as cursor:
             cursor.execute(
                 """
