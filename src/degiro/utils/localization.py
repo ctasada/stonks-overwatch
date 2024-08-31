@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 
 from currency_symbols import CurrencySymbols
 
@@ -56,3 +56,27 @@ class LocalizationUtility(object):
     @staticmethod
     def format_time_from_date(value: datetime) -> str:
         return value.strftime(LocalizationUtility.TIME_FORMAT)
+
+    @staticmethod
+    def format_date_to_month_year(value: str) -> str:
+        time = datetime.strptime(value, LocalizationUtility.DATE_FORMAT)
+        return time.strftime("%B %Y")
+
+    @staticmethod
+    def get_date_day(value: str) -> str:
+        time = datetime.strptime(value, LocalizationUtility.DATE_FORMAT)
+        return time.strftime("%d")
+
+    @staticmethod
+    def format_date_to_month_number(value: str) -> str:
+        time = datetime.strptime(value, LocalizationUtility.DATE_FORMAT)
+        return time.strftime("%m")
+
+    @staticmethod
+    def format_date_to_year(value: str) -> str:
+        time = datetime.strptime(value, LocalizationUtility.DATE_FORMAT)
+        return time.strftime("%Y")
+
+    @staticmethod
+    def convert_string_to_date(value: str) -> date:
+        return datetime.strptime(value, LocalizationUtility.DATE_FORMAT).date()

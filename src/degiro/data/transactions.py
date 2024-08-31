@@ -41,8 +41,9 @@ class TransactionsData:
                     "time": transaction["date"].strftime(LocalizationUtility.TIME_FORMAT),
                     "buysell": self.__convert_buy_sell(transaction["buysell"]),
                     "transactionType": self.__convert_transaction_type_id(transaction["transaction_type_id"]),
-                    # FIXME: Should include currency
-                    "price": transaction["price"],
+                    "price": LocalizationUtility.format_money_value(
+                        transaction["price"], currency=info["currency"]
+                    ),
                     "quantity": transaction["quantity"],
                     "total": LocalizationUtility.format_money_value(
                         value=transaction["total"], currency=info["currency"]
