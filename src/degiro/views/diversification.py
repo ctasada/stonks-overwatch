@@ -19,14 +19,15 @@ class Diversification(View):
         portfolio = self.portfolio.get_portfolio()
         holdings = self._get_holdings(portfolio)
         sectors = self._get_sectors(portfolio)
+        currencies = self._get_currencies(portfolio)
 
         context = {
             "holdings": holdings,
             "sectors": sectors,
+            "currencies": currencies,
             "currencySymbol": LocalizationUtility.get_base_currency_symbol(),
         }
 
-        # FIXME: Simplify this response
         return render(request, "diversification.html", context)
 
     def _get_holdings(self, portfolio: dict) -> dict:
@@ -96,4 +97,46 @@ class Diversification(View):
                 "values": sector_values,
             },
             "table": sectors_table
+        }
+
+    def _get_currencies(self, portfolio: dict) -> dict:
+        currencies_table = []
+        currencies = {}
+
+        max_percentage = 0.0
+
+        for stock in portfolio:
+            if stock["isOpen"]:
+                currency_name = stock["productCurrency"]
+                currency_value = 0.0
+                portfolio_size = 0.0
+                if currency_name in currencies:
+                    currency_value = currencies[currency_name]["value"]
+                    portfolio_size = currencies[currency_name]["portfolioSize"]
+                currencies[currency_name] = {
+                    "value": currency_value + stock["value"],
+                    "portfolioSize": portfolio_size + stock["portfolioSize"],
+                }
+                max_percentage = max(max_percentage, currencies[currency_name]["portfolioSize"])
+
+        for key in currencies:
+            portfolio_size = currencies[key]["portfolioSize"]
+            currencies_table.append({
+                "name": key,
+                "value": currencies[key]["value"],
+                "portfolioSize": portfolio_size,
+                "formattedPortfolioSize": f"{portfolio_size:.2%}",
+                "weight": (currencies[key]["portfolioSize"] / max_percentage) * 100,
+            })
+        currencies_table = sorted(currencies_table, key=lambda k: k["value"], reverse=True)
+
+        currencies_labels = [row["name"] for row in currencies_table]
+        currencies_values = [row["value"] for row in currencies_table]
+
+        return {
+            "chart": {
+                "labels": currencies_labels,
+                "values": currencies_values,
+            },
+            "table": currencies_table
         }
