@@ -7,52 +7,51 @@
   <script src="{% static 'luxon/build/global/luxon.js' %}"></script>
   <script src="{% static 'chartjs-adapter-luxon/dist/chartjs-adapter-luxon.umd.min.js' %}"></script>
   <script src="{% static '@seahsky/chartjs-plugin-autocolors/dist/chartjs-plugin-autocolors.min.js' %}"></script>
-  
+
   <div class="container-fluid row-gap-5">
     <div class="row border border-primary-subtle bg-light rounded mb-3 pb-3">
       <div class="col-sm" style="position: relative; height:40vh">
         <canvas id="holdings-chart"></canvas>
       </div>
-      <div class="col-sm"></div>
+      <div class="col-sm scrollable-list list-group mt-3" style="height:40vh">
+        {% for stock in holdings.table %}
+        <div class="list-group-item rounded m-1">
+          <div class="progress-bar-background" style="width: {{ stock.weight }}%;"></div>
+          <div class="diversification-weight">
+              <div>{{ stock.name }}</div>
+              <div>{{ stock.formattedPortfolioSize }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
     </div>
     <div class="row border border-primary-subtle bg-light rounded mb-3 pb-3">
       <div class="col-sm" style="position: relative; height:40vh">
-        <canvas id="industries-chart"></canvas>
+        <canvas id="sectors-chart"></canvas>
       </div>
-      <div class="col-sm"></div>
+      <div class="col-sm scrollable-list list-group mt-3" style="height:40vh">
+        {% for sectors in sectors.table %}
+        <div class="list-group-item rounded m-1">
+          <div class="progress-bar-background" style="width: {{ sectors.weight }}%;"></div>
+          <div class="diversification-weight">
+              <div>{{ sectors.name }}</div>
+              <div>{{ sectors.formattedPortfolioSize }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
     </div>
   </div>
 
   <script>
     // Customize colors with https://www.npmjs.com/package/@seahsky/chartjs-plugin-autocolors#customize
     const autocolors = window['@seahsky/chartjs-plugin-autocolors'];
+    const currencySymbol = "{{ currencySymbol }}";
 
-    function drawHoldingsPositions() {
-      let currencySymbol = "{{ currencySymbol }}";
-      
-      let valuesDict = [
-        [
-        {% for stock in holdings.labels %}
-          {
-            "label" : "{{ stock }}",
-            "value" : {{ holdings.values|index:forloop.counter0 }},
-          },
-        {% endfor %}
-        ]
-      ];
-      const dataSectors = {
-        labels: {{ holdings.labels|safe }},
-        datasets: [
-          {
-            data: {{ holdings.values }},
-            borderWidth: 1,
-          }
-        ]
-      };
-
-      const configSectors = {
+    function getDoughnutConfig(pieTitle, data, valuesDict) {
+      return {
         type: 'doughnut',
-        data: dataSectors,
+        data: data,
         plugins: [
           autocolors
         ],
@@ -65,15 +64,15 @@
             tooltip: {
               callbacks: {
                 label: function(context) {
-                  var stockValue = valuesDict[context.datasetIndex][context.dataIndex].value;
-                  stockValue = Intl.NumberFormat().format(stockValue);
-                  return currencySymbol + ' ' + stockValue;
+                  var value = valuesDict[context.datasetIndex][context.dataIndex].value;
+                  value = Intl.NumberFormat().format(value);
+                  return currencySymbol + ' ' + value;
                 }
               }
             },
             title: {
               display: true,
-              text: 'Holdings',
+              text: pieTitle,
               font: {
                 size: 20
               }
@@ -85,73 +84,59 @@
           }
         },
       };
-
-      let doughnutHoldingsChart = new Chart(document.getElementById("holdings-chart").getContext("2d"), configSectors);
     }
 
-    function drawIndustriesPositions() {
-      let currencySymbol = "{{ currencySymbol }}";
-      
+    function drawHoldingsPositions() {
       let valuesDict = [
         [
-        {% for industry in industries.labels %}
+        {% for stock in holdings.chart.labels %}
           {
-            "label" : "{{ industry }}",
-            "value" : {{ industries.values|index:forloop.counter0 }},
+            "label" : "{{ stock }}",
+            "value" : {{ holdings.chart.values|index:forloop.counter0 }},
           },
         {% endfor %}
         ]
       ];
-      const dataSectors = {
-        labels: {{ industries.labels|safe }},
+      const data = {
+        labels: {{ holdings.chart.labels|safe }},
         datasets: [
           {
-            data: {{ industries.values }},
+            data: {{ holdings.chart.values }},
             borderWidth: 1,
           }
         ]
       };
 
-      const configSectors = {
-        type: 'doughnut',
-        data: dataSectors,
-        plugins: [
-          autocolors
-        ],
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              display: false,
-            },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  var industryValue = valuesDict[context.datasetIndex][context.dataIndex].value;
-                  industryValue = Intl.NumberFormat().format(industryValue);
-                  return currencySymbol + ' ' + industryValue;
-                }
-              }
-            },
-            title: {
-              display: true,
-              text: 'Industries',
-              font: {
-                size: 20
-              }
-            },
-            autocolors: {
-              mode: 'data',
-              offset: 5,
-            }
+      const configDoughnut = getDoughnutConfig('Holdings', data, valuesDict);
+      let doughnutHoldingsChart = new Chart(document.getElementById("holdings-chart").getContext("2d"), configDoughnut);
+    }
+
+    function drawSectorsPositions() {
+      let valuesDict = [
+        [
+        {% for sector in sectors.chart.labels %}
+          {
+            "label" : "{{ sector }}",
+            "value" : {{ sectors.chart.values|index:forloop.counter0 }},
+          },
+        {% endfor %}
+        ]
+      ];
+      const data = {
+        labels: {{ sectors.chart.labels|safe }},
+        datasets: [
+          {
+            data: {{ sectors.chart.values }},
+            borderWidth: 1,
           }
-        },
+        ]
       };
 
-      let doughnutIndustriesChart = new Chart(document.getElementById("industries-chart").getContext("2d"), configSectors);
+      const configDoughnut = getDoughnutConfig('Sectors', data, valuesDict);
+      let doughnutSectorsChart = new Chart(document.getElementById("sectors-chart").getContext("2d"), configDoughnut);
     }
 
     drawHoldingsPositions()
-    drawIndustriesPositions()
+    drawSectorsPositions()
   </script>
 {% endblock %}
