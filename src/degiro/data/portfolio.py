@@ -78,6 +78,7 @@ class PortfolioData:
                     "industry": industry,
                     "shares": tmp["size"],
                     "price": price,
+                    "productCurrency": info["currency"],
                     "formattedPrice": formatted_price,
                     "breakEvenPrice": break_even_price,
                     "formattedBreakEvenPrice": formatted_break_even_price,  # GAK: Average Purchase Price
