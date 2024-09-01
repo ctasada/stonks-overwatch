@@ -30,12 +30,28 @@
         <canvas id="sectors-chart"></canvas>
       </div>
       <div class="col-sm scrollable-list list-group mt-3" style="height:40vh">
-        {% for sectors in sectors.table %}
+        {% for sector in sectors.table %}
         <div class="list-group-item rounded m-1">
-          <div class="progress-bar-background" style="width: {{ sectors.weight }}%;"></div>
+          <div class="progress-bar-background" style="width: {{ sector.weight }}%;"></div>
           <div class="diversification-weight">
-              <div>{{ sectors.name }}</div>
-              <div>{{ sectors.formattedPortfolioSize }}</div>
+              <div>{{ sector.name }}</div>
+              <div>{{ sector.formattedPortfolioSize }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="row border border-primary-subtle bg-light rounded mb-3 pb-3">
+      <div class="col-sm" style="position: relative; height:40vh">
+        <canvas id="currencies-chart"></canvas>
+      </div>
+      <div class="col-sm scrollable-list list-group mt-3" style="height:40vh">
+        {% for currency in currencies.table %}
+        <div class="list-group-item rounded m-1">
+          <div class="progress-bar-background" style="width: {{ currency.weight }}%;"></div>
+          <div class="diversification-weight">
+              <div>{{ currency.name }}</div>
+              <div>{{ currency.formattedPortfolioSize }}</div>
           </div>
         </div>
         {% endfor %}
@@ -136,7 +152,33 @@
       let doughnutSectorsChart = new Chart(document.getElementById("sectors-chart").getContext("2d"), configDoughnut);
     }
 
+    function drawCurrencyPositions() {
+      let valuesDict = [
+        [
+        {% for currency in currencies.chart.labels %}
+          {
+            "label" : "{{ currency }}",
+            "value" : {{ currencies.chart.values|index:forloop.counter0 }},
+          },
+        {% endfor %}
+        ]
+      ];
+      const data = {
+        labels: {{ currencies.chart.labels|safe }},
+        datasets: [
+          {
+            data: {{ currencies.chart.values }},
+            borderWidth: 1,
+          }
+        ]
+      };
+
+      const configDoughnut = getDoughnutConfig('Currencies', data, valuesDict);
+      let doughnutCurrenciesChart = new Chart(document.getElementById("currencies-chart").getContext("2d"), configDoughnut);
+    }
+
     drawHoldingsPositions()
     drawSectorsPositions()
+    drawCurrencyPositions()
   </script>
 {% endblock %}
