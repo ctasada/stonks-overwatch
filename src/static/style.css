@@ -270,3 +270,23 @@ a.article:hover {
     border-radius: 0.25rem;
     padding: 0.25rem 0.5rem;
 }
+
+.scrollable-list {
+    max-height: 400px; /* Adjust this height as needed */
+    overflow-y: auto;
+}
+.progress-bar-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background-color: #A6B9FF; /* Progress bar color */
+    z-index: 0;
+}
+.diversification-weight {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
