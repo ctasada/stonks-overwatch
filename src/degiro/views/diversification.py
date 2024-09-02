@@ -42,19 +42,21 @@ class Diversification(View):
             if stock["isOpen"]:
                 stock_labels.append(stock["name"])
                 stock_values.append(stock["value"])
-                stocks_table.append({
-                    "name": stock["name"],
-                    "portfolioSize": stock["portfolioSize"],
-                    "formattedPortfolioSize": stock["formattedPortfolioSize"],
-                    "weight": (stock["portfolioSize"] / max_percentage) * 100,
-                })
+                stocks_table.append(
+                    {
+                        "name": stock["name"],
+                        "portfolioSize": stock["portfolioSize"],
+                        "formattedPortfolioSize": stock["formattedPortfolioSize"],
+                        "weight": (stock["portfolioSize"] / max_percentage) * 100,
+                    }
+                )
 
         return {
             "chart": {
                 "labels": stock_labels,
                 "values": stock_values,
             },
-            "table": stocks_table
+            "table": stocks_table,
         }
 
     def _get_sectors(self, portfolio: dict) -> dict:
@@ -79,13 +81,15 @@ class Diversification(View):
 
         for key in sectors:
             portfolio_size = sectors[key]["portfolioSize"]
-            sectors_table.append({
-                "name": key,
-                "value": sectors[key]["value"],
-                "portfolioSize": portfolio_size,
-                "formattedPortfolioSize": f"{portfolio_size:.2%}",
-                "weight": (sectors[key]["portfolioSize"] / max_percentage) * 100,
-            })
+            sectors_table.append(
+                {
+                    "name": key,
+                    "value": sectors[key]["value"],
+                    "portfolioSize": portfolio_size,
+                    "formattedPortfolioSize": f"{portfolio_size:.2%}",
+                    "weight": (sectors[key]["portfolioSize"] / max_percentage) * 100,
+                }
+            )
         sectors_table = sorted(sectors_table, key=lambda k: k["value"], reverse=True)
 
         sector_labels = [row["name"] for row in sectors_table]
@@ -96,7 +100,7 @@ class Diversification(View):
                 "labels": sector_labels,
                 "values": sector_values,
             },
-            "table": sectors_table
+            "table": sectors_table,
         }
 
     def _get_currencies(self, portfolio: dict) -> dict:
@@ -121,13 +125,15 @@ class Diversification(View):
 
         for key in currencies:
             portfolio_size = currencies[key]["portfolioSize"]
-            currencies_table.append({
-                "name": key,
-                "value": currencies[key]["value"],
-                "portfolioSize": portfolio_size,
-                "formattedPortfolioSize": f"{portfolio_size:.2%}",
-                "weight": (currencies[key]["portfolioSize"] / max_percentage) * 100,
-            })
+            currencies_table.append(
+                {
+                    "name": key,
+                    "value": currencies[key]["value"],
+                    "portfolioSize": portfolio_size,
+                    "formattedPortfolioSize": f"{portfolio_size:.2%}",
+                    "weight": (currencies[key]["portfolioSize"] / max_percentage) * 100,
+                }
+            )
         currencies_table = sorted(currencies_table, key=lambda k: k["value"], reverse=True)
 
         currencies_labels = [row["name"] for row in currencies_table]
@@ -138,5 +144,5 @@ class Diversification(View):
                 "labels": currencies_labels,
                 "values": currencies_values,
             },
-            "table": currencies_table
+            "table": currencies_table,
         }
