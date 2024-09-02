@@ -89,8 +89,8 @@ class PortfolioData:
                     "formattedUnrealizedGain": formatted_unrealized_gain,
                     "percentageGain": f"{percentage_gain:.2%}",
                     "logoUrl": f"https://logos.stockanalysis.com/{info['symbol'].lower()}.svg",
-                    "portfolioSize": 0.0, # Calculated in the next loop
-                    "formattedPortfolioSize": 0.0, # Calculated in the next loop
+                    "portfolioSize": 0.0,  # Calculated in the next loop
+                    "formattedPortfolioSize": 0.0,  # Calculated in the next loop
                 }
             )
 

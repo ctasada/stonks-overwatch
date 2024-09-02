@@ -30,9 +30,7 @@ class Dashboard(View):
         self.cash_movements_repository = CashMovementsRepository()
 
     def get(self, request):
-        total_costs = [
-            {"x": item["date"], "y": item["total_cost"]} for item in self._total_costs_history()
-        ]
+        total_costs = [{"x": item["date"], "y": item["total_cost"]} for item in self._total_costs_history()]
         cash_account = self.deposits.calculate_cash_account_value()
         portfolio_value = self._calculate_value(cash_account)
         cash_deposits_simple = self._get_simple_cash_deposits()
@@ -71,13 +69,13 @@ class Dashboard(View):
         dividends = []
         base_currency = LocalizationUtility.get_base_currency()
         for dividend in self.dividends.get_dividends():
-            dividend_date = LocalizationUtility.convert_string_to_date(dividend['date'])
+            dividend_date = LocalizationUtility.convert_string_to_date(dividend["date"])
             dividends.append(
                 {
                     "date": dividend_date,
                     "change": self.currency_converter.convert(
-                        dividend['change'], dividend['currency'], base_currency, dividend_date
-                    )
+                        dividend["change"], dividend["currency"], base_currency, dividend_date
+                    ),
                 }
             )
 

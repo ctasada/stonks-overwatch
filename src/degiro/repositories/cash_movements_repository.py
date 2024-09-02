@@ -49,5 +49,5 @@ class CashMovementsRepository:
                 LIMIT 1
                 """
             )
-            balance_total = dictfetchall(cursor)[0]['balance_total']
+            balance_total = dictfetchall(cursor)[0]["balance_total"]
             return float(balance_total)
