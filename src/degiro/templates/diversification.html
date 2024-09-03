@@ -13,7 +13,7 @@
       <div class="col-sm" style="position: relative; height:40vh">
         <canvas id="holdings-chart"></canvas>
       </div>
-      <div class="col-sm scrollable-list list-group mt-3" style="height:40vh">
+      <div class="col-sm diversification-scrollable-list list-group mt-3" style="height:40vh">
         {% for stock in holdings.table %}
         <div class="list-group-item rounded m-1">
           <div class="progress-bar-background" style="width: {{ stock.weight }}%;"></div>
@@ -29,7 +29,7 @@
       <div class="col-sm" style="position: relative; height:40vh">
         <canvas id="sectors-chart"></canvas>
       </div>
-      <div class="col-sm scrollable-list list-group mt-3" style="height:40vh">
+      <div class="col-sm diversification-scrollable-list list-group mt-3" style="height:40vh">
         {% for sector in sectors.table %}
         <div class="list-group-item rounded m-1">
           <div class="progress-bar-background" style="width: {{ sector.weight }}%;"></div>
@@ -45,7 +45,7 @@
       <div class="col-sm" style="position: relative; height:40vh">
         <canvas id="currencies-chart"></canvas>
       </div>
-      <div class="col-sm scrollable-list list-group mt-3" style="height:40vh">
+      <div class="col-sm diversification-scrollable-list list-group mt-3" style="height:40vh">
         {% for currency in currencies.table %}
         <div class="list-group-item rounded m-1">
           <div class="progress-bar-background" style="width: {{ currency.weight }}%;"></div>

@@ -1,5 +1,5 @@
-import datetime
 import logging
+from datetime import datetime
 
 import pandas as pd
 from currency_converter import CurrencyConverter
@@ -24,22 +24,47 @@ class Dividends(View):
         # We don't need to sort the dict, since it's already coming sorted in DESC date order
         dividends_overview = self.dividens.get_dividends()
 
-        dividends = self.get_dividends_calendar(dividends_overview)
-        dividends_growth = {}
+        dividends_calendar = self._get_dividends_calendar(dividends_overview)
+        dividends_growth = self._get_dividends_growth(dividends_calendar)
+        dividends_diversification = self._get_diversification(dividends_overview)
+
+        context = {
+            "dividendsCalendar": dividends_calendar,
+            "dividendsDiversification": dividends_diversification,
+            "dividendsGrowth": dividends_growth,
+            "currencySymbol": LocalizationUtility.get_base_currency_symbol(),
+        }
+
+        return render(request, "dividends.html", context)
+
+    def _get_dividends_calendar(self, dividends_overview):
+        dividends_calendar = {}
+
+        df = pd.DataFrame(dividends_overview)
+        period_start = min(df["date"])
+        period_end = datetime.today()
+        period = pd.period_range(start=period_start, end=period_end, freq="M")[::-1]
+
+        for month in period:
+            month = month.strftime("%B %Y")
+            month_entry = dividends_calendar.setdefault(month, {})
+            month_entry.setdefault("payouts", 0)
+            month_entry.setdefault("total", 0)
+            month_entry.setdefault(
+                "formatedTotal",
+                LocalizationUtility.format_money_value(
+                    value=0,
+                    currency_symbol=LocalizationUtility.get_base_currency_symbol(),
+                ),
+            )
 
         for transaction in dividends_overview:
             # Group dividends by month. We may only need the dividend name and amount
             month_year = LocalizationUtility.format_date_to_month_year(transaction["date"])
-            month_number = int(LocalizationUtility.format_date_to_month_number(transaction["date"]))
-            year = int(LocalizationUtility.format_date_to_year(transaction["date"]))
-
-            if year not in dividends_growth:
-                dividends_growth[year] = [0] * 12
-
             day = LocalizationUtility.get_date_day(transaction["date"])
             stock = transaction["stockSymbol"]
 
-            month_entry = dividends.setdefault(month_year, {})
+            month_entry = dividends_calendar.setdefault(month_year, {})
             days = month_entry.setdefault("days", {})
             day_entry = days.setdefault(day, {})
             stock_entry = day_entry.setdefault(stock, {})
@@ -80,33 +105,78 @@ class Dividends(View):
                 value=month_entry["total"], currency=currency
             )
 
+        return dividends_calendar
+
+    def _get_dividends_growth(self, dividends_calendar) -> dict:
+        dividends_growth = {}
+
+        for month_year in dividends_calendar.keys():
+            month_number = int(datetime.strptime(month_year, "%B %Y").strftime("%m"))
+            year = int(datetime.strptime(month_year, "%B %Y").strftime("%Y"))
+
+            if year not in dividends_growth:
+                dividends_growth[year] = [0] * 12
+
+            month_entry = dividends_calendar.setdefault(month_year, {})
+
             dividends_growth[year][month_number - 1] = round(month_entry["total"], 2)
 
         # We want the Dividends Growth chronologically sorted
         dividends_growth = dict(sorted(dividends_growth.items(), key=lambda item: item[0]))
+        return dividends_growth
 
-        context = {"dividendsCalendar": dividends, "dividendsGrowth": dividends_growth}
-
-        return render(request, "dividends.html", context)
-
-    def get_dividends_calendar(self, dividends_overview):
+    def _get_diversification(self, dividends_overview: dict) -> dict:
+        dividends_table = []
         dividends = {}
 
-        df = pd.DataFrame(dividends_overview)
-        period_start = min(df["date"])
-        period_end = datetime.date.today()
-        period = pd.period_range(start=period_start, end=period_end, freq="M")[::-1]
+        total_dividends = 0
+        max_percentage = 0.0
 
-        for month in period:
-            month = month.strftime("%B %Y")
-            month_entry = dividends.setdefault(month, {})
-            month_entry.setdefault("payouts", 0)
-            month_entry.setdefault("total", 0)
-            month_entry.setdefault(
-                "formatedTotal",
-                LocalizationUtility.format_money_value(
-                    value=0,
-                    currency_symbol=LocalizationUtility.get_base_currency_symbol(),
-                ),
+        for entry in dividends_overview:
+            dividend_name = entry["stockName"]
+            dividend_value = 0.0
+            if dividend_name in dividends:
+                dividend_value = dividends[dividend_name]["value"]
+
+            dividend_currency = entry["currency"]
+            dividend_change = entry["change"]
+            if dividend_currency != self.baseCurrency:
+                date = LocalizationUtility.convert_string_to_date(entry["date"])
+                dividend_change = self.currency_converter.convert(
+                    dividend_change, dividend_currency, self.baseCurrency, date
+                )
+                dividend_currency = self.baseCurrency
+
+            total_dividends += dividend_change
+            dividends[dividend_name] = {
+                "value": dividend_value + dividend_change,
+            }
+
+        # Calculate dividend ratios
+        for key in dividends:
+            dividends[key]["dividendsSize"] = dividends[key]["value"] / total_dividends
+            max_percentage = max(max_percentage, dividends[key]["dividendsSize"])
+
+        for key in dividends:
+            dividends_size = dividends[key]["dividendsSize"]
+            dividends_table.append(
+                {
+                    "name": key,
+                    "value": dividends[key]["value"],
+                    "dividendsSize": dividends_size,
+                    "formattedDividendsSize": f"{dividends_size:.2%}",
+                    "weight": (dividends[key]["dividendsSize"] / max_percentage) * 100,
+                }
             )
-        return dividends
+        dividends_table = sorted(dividends_table, key=lambda k: k["value"], reverse=True)
+
+        dividends_labels = [row["name"] for row in dividends_table]
+        dividends_values = [row["value"] for row in dividends_table]
+
+        return {
+            "chart": {
+                "labels": dividends_labels,
+                "values": dividends_values,
+            },
+            "table": dividends_table,
+        }
