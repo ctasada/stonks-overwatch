@@ -1,27 +1,30 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="row g-5">
-    <div class="col">
+<div class="container-fluid row-gap-5">
+    <div class="row">
         <h4 class="mb-3">Portfolio</h4>
+    </div>
+    <div class="row">
+        <h5 class="mb-3">Shares</h5>
         <table class="table table-hover table-sm">
-            {% block table.thead %}
+            {% block shares.table.head %}
             <thead>
                 <tr>
-                  <th scope="col"></th>
-                  <th scope="col">Stock</th>
-                  <th scope="col">Sector</th>
-                  <th scope="col">Shares</th>
-                  <th scope="col">Price</th>
-                  <th scope="col">Unrealized Gain</th>
-                  <th scope="col">Value</th>
-                  <th scope="col">Size</th>
+                <th scope="col"></th>
+                <th scope="col">Product</th>
+                <th scope="col">Sector</th>
+                <th scope="col">Shares</th>
+                <th scope="col">Price</th>
+                <th scope="col">Unrealized Gain</th>
+                <th scope="col">Value</th>
+                <th scope="col">Size</th>
                 </tr>
             </thead>
-            {% endblock table.thead %}
-            {% block table.tbody %}
+            {% endblock shares.table.head %}
+            {% block shares.table.body %}
             <tbody>
-                {% for stock in portfolio %}
+                {% for stock in stocks %}
                     {% if stock.isOpen %}
                         <tr>
                             <td><img src="{{ stock.logoUrl }}" width="30" height="30" onerror="this.style.display='none'"></td>
@@ -41,8 +44,52 @@
                     {% endif %}
                 {% endfor %}
             </tbody>
-            {% endblock table.tbody %}
+            {% endblock shares.table.body %}
         </table>
     </div>
+    {% if trackers %}
+    <div class="row">
+        <h5 class="mb-3">Trackers (ETF)</h5>
+        <table class="table table-hover table-sm">
+            {% block trackers.table.head %}
+            <thead>
+                <tr>
+                <th scope="col"></th>
+                <th scope="col">Product</th>
+                <th scope="col">Sector</th>
+                <th scope="col">Shares</th>
+                <th scope="col">Price</th>
+                <th scope="col">Unrealized Gain</th>
+                <th scope="col">Value</th>
+                <th scope="col">Size</th>
+                </tr>
+            </thead>
+            {% endblock trackers.table.head %}
+            {% block trackers.table.body %}
+            <tbody>
+                {% for etf in trackers %}
+                    {% if etf.isOpen %}
+                        <tr>
+                            <td><img src="{{ etf.logoUrl }}" width="30" height="30" onerror="this.style.display='none'"></td>
+                            <td>{{ etf.symbol }}<br><small class="fw-lighter">{{ etf.name }}</small></td>
+                            <td>{{ etf.sector }}<br><small class="fw-lighter">{{ etf.industry }}</small></td>
+                            <td>{{ etf.shares }}</td>
+                            <td>{{ etf.formattedPrice }}<br><small class="fw-lighter">{{ etf.formattedBreakEvenPrice }}</small></td>
+                            {% if etf.unrealizedGain > 0 %}
+                                <td class="text-success" >
+                            {% else %}
+                                <td class="text-danger" >
+                            {% endif %}
+                            {{ etf.formattedUnrealizedGain }}<br><small class="fw-lighter">{{ etf.percentageGain }}</small></td>
+                            <td>{{ etf.formattedValue }}</td>
+                            <td>{{ etf.formattedPortfolioSize }}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+            {% endblock trackers.table.body %}
+        </table>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

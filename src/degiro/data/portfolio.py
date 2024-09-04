@@ -78,6 +78,7 @@ class PortfolioData:
                     "industry": industry,
                     "shares": tmp["size"],
                     "price": price,
+                    "productType": info["productType"],
                     "productCurrency": info["currency"],
                     "formattedPrice": formatted_price,
                     "breakEvenPrice": break_even_price,
