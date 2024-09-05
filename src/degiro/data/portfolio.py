@@ -1,5 +1,4 @@
 import logging
-import re
 
 from currency_converter import CurrencyConverter
 from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
@@ -9,7 +8,7 @@ from degiro.repositories.cash_movements_repository import CashMovementsRepositor
 from degiro.repositories.company_profile_repository import CompanyProfileRepository
 from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.product_quotations_repository import ProductQuotationsRepository
-from degiro.utils.db_utils import dictfetchall
+from degiro.utils.db_utils import camel_to_snake_case, dictfetchall
 from degiro.utils.degiro import DeGiro
 from degiro.utils.localization import LocalizationUtility
 
@@ -33,6 +32,8 @@ class PortfolioData:
         # Get user's base currency
         base_currency_symbol = LocalizationUtility.get_base_currency_symbol()
         base_currency = LocalizationUtility.get_base_currency()
+
+        products_config = self.__get_product_config()
 
         my_portfolio = []
         portfolio_total_value = 0.0
@@ -70,12 +71,26 @@ class PortfolioData:
 
             portfolio_total_value += value
 
+            exchange_abbr = None
+            exchange_name = None
+            exchange_id = info["exchangeId"]
+            if "exchanges" in products_config and products_config["exchanges"]:
+                for exchange in products_config["exchanges"]:
+                    if exchange["id"] == int(exchange_id):
+                        exchange_abbr = exchange["hiqAbbr"]
+                        exchange_name = exchange["name"]
+                        break
+
             my_portfolio.append(
                 {
                     "name": info["name"],
                     "symbol": info["symbol"],
                     "sector": sector,
                     "industry": industry,
+                    "category": info["category"],
+                    "exchangeId": exchange_id,
+                    "exchangeAbbr": exchange_abbr,
+                    "exchangeName": exchange_name,
                     "shares": tmp["size"],
                     "price": price,
                     "productType": info["productType"],
@@ -202,13 +217,16 @@ class PortfolioData:
                     SELECT product_id,
                         SUM(quantity) AS size,
                         SUM(total_plus_all_fees_in_base_currency) as total_plus_all_fees_in_base_currency,
-                        ABS(SUM(total_plus_all_fees_in_base_currency) / SUM(quantity)) AS break_evenPrice
+                        ABS(SUM(total_plus_all_fees_in_base_currency) / SUM(quantity)) AS break_even_price
                     FROM degiro_transactions
                     GROUP BY product_id
                     HAVING SUM(quantity) > 0;
                     """
                 )
-                return dictfetchall(cursor)
+                local_portfolio = dictfetchall(cursor)
+                for entry in local_portfolio:
+                    entry["value"] = 1.0 # FIXME
+                return local_portfolio
 
     def __get_products_info(self, products_ids):
         try:
@@ -217,23 +235,10 @@ class PortfolioData:
             logging.exception("Cannot connecto to DeGiro, getting last known data")
             return self.product_info_repository.get_products_info_raw(products_ids)
 
-    def __get_company_profile(self, product_isin) -> dict:
+    def __get_product_config(self) -> dict:
         try:
-            company_profile = DeGiro.get_client().get_company_profile(
-                product_isin=product_isin,
-                raw=True,
-            )
+            products_config = DeGiro.get_client().get_products_config()
 
-            return company_profile
+            return products_config
         except Exception:
-            logging.exception("Cannot connecto to DeGiro, getting last known data")
-            return self.company_profile_repository.get_company_profile_raw(isin=product_isin)
-
-
-def camel_to_snake_case(camel_str):
-    # Insert an underscore before each uppercase letter
-    snake_str = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", camel_str)
-    # Handle cases where there are multiple uppercase letters together (e.g., HTTPResponse)
-    snake_str = re.sub("([a-z0-9])([A-Z])", r"\1_\2", snake_str)
-    # Convert the entire string to lowercase
-    return snake_str.lower()
+            return {}
