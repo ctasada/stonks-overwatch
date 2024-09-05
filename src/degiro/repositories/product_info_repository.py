@@ -1,6 +1,6 @@
 from django.db import connection
 
-from degiro.utils.db_utils import dictfetchall
+from degiro.utils.db_utils import dictfetchall, dictfetchone
 
 
 class ProductInfoRepository:
@@ -25,3 +25,21 @@ class ProductInfoRepository:
         # Convert the list of dictionaries into a dictionary indexed by 'productId'
         result_map = {row["id"]: row for row in rows}
         return result_map
+
+    def get_product_info_from_name(self, name: str) -> dict:
+        """Gets product information from the given product name. The information is retrieved from the DB.
+        ### Parameters
+            * productName
+        ### Returns
+            Product Info
+        """
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"""
+                SELECT *
+                FROM degiro_productinfo
+                WHERE name = '{name}'
+                LIMIT 1
+                """
+            )
+            return dictfetchone(cursor)

@@ -23,8 +23,9 @@ class Dividends(View):
     def get(self, request):
         # We don't need to sort the dict, since it's already coming sorted in DESC date order
         dividends_overview = self.dividens.get_dividends()
+        upcoming_dividends = self.dividens.get_upcoming_dividends()
 
-        dividends_calendar = self._get_dividends_calendar(dividends_overview)
+        dividends_calendar = self._get_dividends_calendar(dividends_overview, upcoming_dividends)
         dividends_growth = self._get_dividends_growth(dividends_calendar)
         dividends_diversification = self._get_diversification(dividends_overview)
 
@@ -37,10 +38,10 @@ class Dividends(View):
 
         return render(request, "dividends.html", context)
 
-    def _get_dividends_calendar(self, dividends_overview):
+    def _get_dividends_calendar(self, dividends_overview: list, upcoming_dividends: list):
         dividends_calendar = {}
-
-        df = pd.DataFrame(dividends_overview)
+        joined_dividends = dividends_overview + upcoming_dividends
+        df = pd.DataFrame(joined_dividends)
         period_start = min(df["date"])
         period_end = datetime.today()
         period = pd.period_range(start=period_start, end=period_end, freq="M")[::-1]
@@ -58,7 +59,7 @@ class Dividends(View):
                 ),
             )
 
-        for transaction in dividends_overview:
+        for transaction in joined_dividends:
             # Group dividends by month. We may only need the dividend name and amount
             month_year = LocalizationUtility.format_date_to_month_year(transaction["date"])
             day = LocalizationUtility.get_date_day(transaction["date"])
