@@ -13,6 +13,7 @@
                 <tr>
                 <th scope="col"></th>
                 <th scope="col">Product</th>
+                <th scope="col"></th>
                 <th scope="col">Sector</th>
                 <th scope="col">Shares</th>
                 <th scope="col">Price</th>
@@ -29,6 +30,17 @@
                         <tr>
                             <td><img src="{{ stock.logoUrl }}" width="30" height="30" onerror="this.style.display='none'"></td>
                             <td>{{ stock.symbol }}<br><small class="fw-lighter">{{ stock.name }}</small></td>
+                            <td>
+                                <div class="d-inline-flex gap-1">
+                                    <small class="p-1 fw-lighter text-light bg-dark square-box border d-flex justify-content-center align-items-center">
+                                        {{ stock.category }}
+                                    </small>
+                                    <small class="p-1 fw-lighter square-box border d-flex justify-content-center align-items-center"
+                                        data-bs-toggle="tooltip" title="{{ stock.exchangeName }}">
+                                        {{ stock.exchangeAbbr }}
+                                    </small>
+                                </div>
+                            </td>
                             <td>{{ stock.sector }}<br><small class="fw-lighter">{{ stock.industry }}</small></td>
                             <td>{{ stock.shares }}</td>
                             <td>{{ stock.formattedPrice }}<br><small class="fw-lighter">{{ stock.formattedBreakEvenPrice }}</small></td>
@@ -56,6 +68,7 @@
                 <tr>
                 <th scope="col"></th>
                 <th scope="col">Product</th>
+                <th scope="col"></th>
                 <th scope="col">Sector</th>
                 <th scope="col">Shares</th>
                 <th scope="col">Price</th>
@@ -72,6 +85,17 @@
                         <tr>
                             <td><img src="{{ etf.logoUrl }}" width="30" height="30" onerror="this.style.display='none'"></td>
                             <td>{{ etf.symbol }}<br><small class="fw-lighter">{{ etf.name }}</small></td>
+                            <td>
+                                <div class="d-inline-flex gap-1">
+                                    <small class="p-1 fw-lighter text-light bg-dark square-box border d-flex justify-content-center align-items-center">
+                                        {{ etf.category }}
+                                    </small>
+                                    <small class="p-1 fw-lighter square-box border d-flex justify-content-center align-items-center"
+                                        data-bs-toggle="tooltip" title="{{ etf.exchangeName }}">
+                                        {{ etf.exchangeAbbr }}
+                                    </small>
+                                </div>
+                            </td>
                             <td>{{ etf.sector }}<br><small class="fw-lighter">{{ etf.industry }}</small></td>
                             <td>{{ etf.shares }}</td>
                             <td>{{ etf.formattedPrice }}<br><small class="fw-lighter">{{ etf.formattedBreakEvenPrice }}</small></td>
