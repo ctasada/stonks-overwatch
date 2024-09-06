@@ -27,7 +27,7 @@ class CashMovementsRepository:
             )
             return dictfetchall(cursor)
 
-    def get_total_cash_deposits_raw(self) -> dict:
+    def get_total_cash_deposits_raw(self) -> float:
         with connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -49,5 +49,5 @@ class CashMovementsRepository:
                 LIMIT 1
                 """
             )
-            balance_total = dictfetchall(cursor)[0]["balance_total"]
+            balance_total = dictfetchall(cursor)[0]["balanceTotal"]
             return float(balance_total)
