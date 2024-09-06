@@ -37,7 +37,7 @@ def get_product_ids() -> list:
         )
         results = dictfetchall(cursor)
 
-    product_ids = [str(entry["product_id"]) for entry in results if entry["product_id"] is not None]
+    product_ids = [str(entry["productId"]) for entry in results if entry["productId"] is not None]
     product_ids = list(dict.fromkeys(product_ids))
 
     return product_ids
@@ -276,7 +276,7 @@ def __calculate_product_growth() -> dict:
 
     product_growth = {}
     for entry in results:
-        key = entry["product_id"]
+        key = entry["productId"]
         product = product_growth.get(key, {})
         carry_total = product.get("carry_total", 0)
 
@@ -317,8 +317,8 @@ def import_products_quotation() -> None:
         product_growth[key]["product"]["isin"] = product["isin"]
         product_growth[key]["product"]["symbol"] = product["symbol"]
         product_growth[key]["product"]["currency"] = product["currency"]
-        product_growth[key]["product"]["vwd_id"] = product["vwd_id"]
-        product_growth[key]["product"]["vwd_id_secondary"] = product["vwd_id_secondary"]
+        product_growth[key]["product"]["vwdId"] = product["vwdId"]
+        product_growth[key]["product"]["vwdIdSecondary"] = product["vwdIdSecondary"]
 
         # Calculate Quotation Range
         product_growth[key]["quotation"] = {}
@@ -340,10 +340,10 @@ def import_products_quotation() -> None:
 
     # We need to use the productIds to get the daily quote for each product
     for key in product_growth.keys():
-        if product_growth[key]["product"].get("vwd_id_secondary") is not None:
-            issue_id = product_growth[key]["product"].get("vwd_id_secondary")
+        if product_growth[key]["product"].get("vwdIdSecondary") is not None:
+            issue_id = product_growth[key]["product"].get("vwdIdSecondary")
         else:
-            issue_id = product_growth[key]["product"].get("vwd_id")
+            issue_id = product_growth[key]["product"].get("vwdId")
 
         interval = product_growth[key]["quotation"]["interval"]
         quotes = get_product_quotation(issue_id, interval)
