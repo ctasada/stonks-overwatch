@@ -17,7 +17,7 @@ class TransactionsData:
 
         # ITERATION OVER THE TRANSACTIONS TO OBTAIN THE PRODUCTS
         for transaction in transactions_history:
-            products_ids.append(int(transaction["product_id"]))
+            products_ids.append(int(transaction["productId"]))
 
         # Remove duplicates from list
         products_ids = list(set(products_ids))
@@ -29,9 +29,9 @@ class TransactionsData:
         # DISPLAY PRODUCTS_INFO
         my_transactions = []
         for transaction in transactions_history:
-            info = products_info[transaction["product_id"]]
+            info = products_info[transaction["productId"]]
 
-            fees = transaction["total_plus_fee_in_base_currency"] - transaction["total_in_base_currency"]
+            fees = transaction["totalPlusFeeInBaseCurrency"] - transaction["totalInBaseCurrency"]
 
             my_transactions.append(
                 {
@@ -40,14 +40,14 @@ class TransactionsData:
                     "date": transaction["date"].strftime(LocalizationUtility.DATE_FORMAT),
                     "time": transaction["date"].strftime(LocalizationUtility.TIME_FORMAT),
                     "buysell": self.__convert_buy_sell(transaction["buysell"]),
-                    "transactionType": self.__convert_transaction_type_id(transaction["transaction_type_id"]),
+                    "transactionType": self.__convert_transaction_type_id(transaction["transactionTypeId"]),
                     "price": LocalizationUtility.format_money_value(transaction["price"], currency=info["currency"]),
                     "quantity": transaction["quantity"],
                     "total": LocalizationUtility.format_money_value(
                         value=transaction["total"], currency=info["currency"]
                     ),
                     "totalInBaseCurrency": LocalizationUtility.format_money_value(
-                        value=transaction["total_in_base_currency"],
+                        value=transaction["totalInBaseCurrency"],
                         currency_symbol=base_currency_symbol,
                     ),
                     "fees": LocalizationUtility.format_money_value(value=fees, currency_symbol=base_currency_symbol),

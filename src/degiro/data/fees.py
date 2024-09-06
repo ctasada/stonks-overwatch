@@ -72,7 +72,7 @@ class FeesData:
 
         # ITERATION OVER THE TRANSACTIONS TO OBTAIN THE PRODUCTS
         for transaction in transactions_history:
-            products_ids.append(int(transaction["product_id"]))
+            products_ids.append(int(transaction["productId"]))
 
         # Remove duplicates from list
         products_ids = list(set(products_ids))
@@ -83,9 +83,9 @@ class FeesData:
 
         my_fees = []
         for transaction in transactions_history:
-            info = products_info[transaction["product_id"]]
+            info = products_info[transaction["productId"]]
             # FIXME: # feeInBaseCurrency vs totalFeesInBaseCurrency
-            fees = transaction["total_fees_in_base_currency"]
+            fees = transaction["totalFeesInBaseCurrency"]
 
             if fees is None or fees == 0:
                 continue

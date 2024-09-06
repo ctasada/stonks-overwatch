@@ -8,7 +8,7 @@ from degiro.repositories.cash_movements_repository import CashMovementsRepositor
 from degiro.repositories.company_profile_repository import CompanyProfileRepository
 from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.product_quotations_repository import ProductQuotationsRepository
-from degiro.utils.db_utils import camel_to_snake_case, dictfetchall
+from degiro.utils.db_utils import dictfetchall
 from degiro.utils.degiro import DeGiro
 from degiro.utils.localization import LocalizationUtility
 
@@ -26,7 +26,7 @@ class PortfolioData:
     def get_portfolio(self):
         portfolio_transactions = self.__get_porfolio_products()
 
-        products_ids = [row["product_id"] for row in portfolio_transactions]
+        products_ids = [row["productId"] for row in portfolio_transactions]
         products_info = self.__get_products_info(products_ids=products_ids)
 
         # Get user's base currency
@@ -39,7 +39,7 @@ class PortfolioData:
         portfolio_total_value = 0.0
 
         for tmp in portfolio_transactions:
-            info = products_info[tmp["product_id"]]
+            info = products_info[tmp["productId"]]
             company_profile = self.company_profile_repository.get_company_profile_raw(info["isin"])
             sector = "Unknown"
             industry = "Unknown"
@@ -48,9 +48,9 @@ class PortfolioData:
                 industry = company_profile["data"]["industry"]
 
             currency = info["currency"]
-            price = self.product_quotation_repository.get_product_price(tmp["product_id"])
+            price = self.product_quotation_repository.get_product_price(tmp["productId"])
             value = tmp["size"] * price
-            break_even_price = tmp["break_even_price"]
+            break_even_price = tmp["breakEvenPrice"]
             if currency != base_currency:
                 price = self.currency_converter.convert(price, currency, base_currency)
                 value = self.currency_converter.convert(value, currency, base_currency)
@@ -89,7 +89,7 @@ class PortfolioData:
                     "industry": industry,
                     "category": info["category"],
                     "exchangeId": exchange_id,
-                    "exchangeAbbr": exchange_abbr,
+                    **({"exchangeAbbr": exchange_abbr} if exchange_abbr is not None else {}),
                     "exchangeName": exchange_name,
                     "shares": tmp["size"],
                     "price": price,
@@ -200,10 +200,9 @@ class PortfolioData:
                     portfolio = {}
                     for value in tmp["value"]:
                         if value.get("value") is not None:
-                            if value["name"] == "id":
-                                key = "product_id"
-                            else:
-                                key = camel_to_snake_case(value["name"])
+                            key = value["name"]
+                            if key == "id":
+                                key = "productId"
                             portfolio[key] = value["value"]
 
                     my_portfolio.append(portfolio)

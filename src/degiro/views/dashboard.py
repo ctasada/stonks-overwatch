@@ -306,12 +306,12 @@ class Dashboard(View):
             buy_quantity = transactions["B"]["quantity"]
             ratio = buy_quantity / sell_quantity
 
-            sell_product_id = transactions["S"]["product_id"]
-            buy_product_id = transactions["B"]["product_id"]
+            sell_product_id = transactions["S"]["productId"]
+            buy_product_id = transactions["B"]["productId"]
             product_split = {
                 "productId_sell": sell_product_id,
                 "productId_buy": buy_product_id,
-                "is_renamed": transactions["S"]["product_id"] != transactions["B"]["product_id"],
+                "is_renamed": transactions["S"]["productId"] != transactions["B"]["productId"],
                 "split_ratio": ratio,
             }
             if sell_product_id not in splitted_stocks:
@@ -335,14 +335,14 @@ class Dashboard(View):
 
         product_growth = {}
         for entry in results:
-            key = entry["product_id"]
+            key = entry["productId"]
             product = product_growth.get(key, {})
-            carry_total = product.get("carry_total", 0)
+            carry_total = product.get("carryTotal", 0)
 
             stock_date = entry["date"].strftime(LocalizationUtility.DATE_FORMAT)
             carry_total += entry["quantity"]
 
-            product["carry_total"] = carry_total
+            product["carryTotal"] = carry_total
             if "history" not in product:
                 product["history"] = {}
             product["history"][stock_date] = carry_total
@@ -351,7 +351,7 @@ class Dashboard(View):
         delete_keys = []
         for key in product_growth.keys():
             # Cleanup 'carry_total' from result
-            del product_growth[key]["carry_total"]
+            del product_growth[key]["carryTotal"]
             # FIXME: the method returns a key-value object
             product = self.product_info_repository.get_products_info_raw([key])[key]
 
@@ -369,8 +369,8 @@ class Dashboard(View):
             product_growth[key]["product"]["isin"] = product["isin"]
             product_growth[key]["product"]["symbol"] = product["symbol"]
             product_growth[key]["product"]["currency"] = product["currency"]
-            product_growth[key]["product"]["vwdId"] = product["vwd_id"]
-            product_growth[key]["product"]["vwdIdSecondary"] = product["vwd_id_secondary"]
+            product_growth[key]["product"]["vwdId"] = product["vwdId"]
+            product_growth[key]["product"]["vwdIdSecondary"] = product["vwdIdSecondary"]
 
             # Calculate Quotation Range
             product_growth[key]["quotation"] = {}
@@ -381,8 +381,8 @@ class Dashboard(View):
             if product_growth[key]["history"][tmp_last] == 0:
                 final_date = tmp_last
 
-            product_growth[key]["quotation"]["from_date"] = start_date
-            product_growth[key]["quotation"]["to_date"] = final_date
+            product_growth[key]["quotation"]["fromDate"] = start_date
+            product_growth[key]["quotation"]["toDate"] = final_date
             # Interval should be from start_date, since the QuoteCast query doesn't support more granularity
             product_growth[key]["quotation"]["interval"] = self._calculate_interval(start_date)
 

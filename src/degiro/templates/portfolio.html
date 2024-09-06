@@ -35,10 +35,12 @@
                                     <small class="p-1 fw-lighter text-light bg-dark square-box border d-flex justify-content-center align-items-center">
                                         {{ stock.category }}
                                     </small>
+                                    {% if stock.exchangeAbbr %}
                                     <small class="p-1 fw-lighter square-box border d-flex justify-content-center align-items-center"
                                         data-bs-toggle="tooltip" title="{{ stock.exchangeName }}">
                                         {{ stock.exchangeAbbr }}
                                     </small>
+                                    {% endif %}
                                 </div>
                             </td>
                             <td>{{ stock.sector }}<br><small class="fw-lighter">{{ stock.industry }}</small></td>

@@ -15,8 +15,8 @@ class AccountOverviewData:
 
         products_ids = []
         for cash_movement in account_overview:
-            if cash_movement["product_id"] is not None:
-                products_ids.append(cash_movement["product_id"])
+            if cash_movement["productId"] is not None:
+                products_ids.append(cash_movement["productId"])
 
         # Remove duplicates from list
         products_ids = list(set(products_ids))
@@ -26,8 +26,8 @@ class AccountOverviewData:
         for cash_movement in account_overview:
             stock_name = ""
             stock_symbol = ""
-            if cash_movement["product_id"] is not None:
-                info = products_info[int(cash_movement["product_id"])]
+            if cash_movement["productId"] is not None:
+                info = products_info[int(cash_movement["productId"])]
                 stock_name = info["name"]
                 stock_symbol = info["symbol"]
 
@@ -55,8 +55,8 @@ class AccountOverviewData:
                 {
                     "date": LocalizationUtility.format_date_from_date(cash_movement["date"]),
                     "time": LocalizationUtility.format_time_from_date(cash_movement["date"]),
-                    "valueDate": LocalizationUtility.format_date_from_date(cash_movement["value_date"]),
-                    "valueTime": LocalizationUtility.format_time_from_date(cash_movement["value_date"]),
+                    "valueDate": LocalizationUtility.format_date_from_date(cash_movement["valueDate"]),
+                    "valueTime": LocalizationUtility.format_time_from_date(cash_movement["valueDate"]),
                     "stockName": stock_name,
                     "stockSymbol": stock_symbol,
                     "description": cash_movement["description"],
