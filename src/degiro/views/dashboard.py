@@ -4,16 +4,17 @@ from datetime import date, datetime, timedelta
 
 import pandas as pd
 from currency_converter import CurrencyConverter
-from degiro_connector.quotecast.models.chart import Interval
 from django.db import connection
 from django.shortcuts import render
 from django.views import View
 
 from degiro.data.deposits import DepositsData
 from degiro.data.dividends import DividendsData
+from degiro.data.portfolio import PortfolioData
 from degiro.repositories.cash_movements_repository import CashMovementsRepository
 from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.product_quotations_repository import ProductQuotationsRepository
+from degiro.utils.datetime import calculate_interval
 from degiro.utils.db_utils import dictfetchall
 from degiro.utils.localization import LocalizationUtility
 
@@ -25,6 +26,7 @@ class Dashboard(View):
     def __init__(self):
         self.deposits = DepositsData()
         self.dividends = DividendsData()
+        self.portfolio_data = PortfolioData()
         self.product_quotations_repository = ProductQuotationsRepository()
         self.product_info_repository = ProductInfoRepository()
         self.cash_movements_repository = CashMovementsRepository()
@@ -247,41 +249,6 @@ class Dashboard(View):
 
         return aggregate
 
-    def _calculate_interval(self, date_from) -> Interval:
-        """Calculate the interval between the provided date and today.
-
-        ### Parameters
-            date_from: date from to calculate the interval
-        ### Returns
-            Interval: Interval that representes the range from date_from to today.
-        """
-        # Convert String to date object
-        d1 = LocalizationUtility.convert_string_to_date(date_from)
-        today = datetime.today().date()
-        # difference between dates in timedelta
-        delta = (today - d1).days
-
-        interval = None
-        match delta:
-            case diff if diff in range(1, 7):
-                interval = Interval.P1W
-            case diff if diff in range(7, 30):
-                interval = Interval.P1M
-            case diff if diff in range(30, 90):
-                interval = Interval.P3M
-            case diff if diff in range(90, 180):
-                interval = Interval.P6M
-            case diff if diff in range(180, 365):
-                interval = Interval.P1Y
-            case diff if diff in range(365, 3 * 365):
-                interval = Interval.P3Y
-            case diff if diff in range(3 * 365, 5 * 365):
-                interval = Interval.P5Y
-            case diff if diff in range(5 * 365, 10 * 365):
-                interval = Interval.P10Y
-
-        return interval
-
     def _get_stock_splits(self) -> dict:
         with connection.cursor() as cursor:
             cursor.execute(
@@ -325,33 +292,10 @@ class Dashboard(View):
         return splitted_stocks
 
     def _create_products_quotation(self) -> dict:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT date, product_id, quantity FROM degiro_transactions
-                """
-            )
-            results = dictfetchall(cursor)
-
-        product_growth = {}
-        for entry in results:
-            key = entry["productId"]
-            product = product_growth.get(key, {})
-            carry_total = product.get("carryTotal", 0)
-
-            stock_date = entry["date"].strftime(LocalizationUtility.DATE_FORMAT)
-            carry_total += entry["quantity"]
-
-            product["carryTotal"] = carry_total
-            if "history" not in product:
-                product["history"] = {}
-            product["history"][stock_date] = carry_total
-            product_growth[key] = product
+        product_growth = self.portfolio_data.calculate_product_growth()
 
         delete_keys = []
         for key in product_growth.keys():
-            # Cleanup 'carry_total' from result
-            del product_growth[key]["carryTotal"]
             # FIXME: the method returns a key-value object
             product = self.product_info_repository.get_products_info_raw([key])[key]
 
@@ -384,7 +328,7 @@ class Dashboard(View):
             product_growth[key]["quotation"]["fromDate"] = start_date
             product_growth[key]["quotation"]["toDate"] = final_date
             # Interval should be from start_date, since the QuoteCast query doesn't support more granularity
-            product_growth[key]["quotation"]["interval"] = self._calculate_interval(start_date)
+            product_growth[key]["quotation"]["interval"] = calculate_interval(start_date)
 
         # Delete the non-tradable products
         for key in delete_keys:
