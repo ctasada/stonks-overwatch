@@ -12,6 +12,7 @@ from django.db import connection
 
 from degiro.models import CompanyProfile
 from degiro.utils.db_utils import dictfetchall
+from degiro.utils.debug import save_to_json
 from degiro.utils.degiro import DeGiro
 from scripts.commons import IMPORT_FOLDER, init
 
@@ -37,9 +38,7 @@ def get_company_profiles(json_file_path) -> None:
         company_profiles[isin] = company_profile
 
     # Save the JSON to a file
-    data_file = open(json_file_path, "w")
-    data_file.write(json.dumps(company_profiles, indent=4))
-    data_file.close()
+    save_to_json(company_profile, json_file_path)
 
 
 def __get_products_isin() -> dict:

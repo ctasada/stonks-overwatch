@@ -1,15 +1,40 @@
+from datetime import date
+
+from degiro_connector.trading.models.transaction import HistoryRequest
+
+from degiro.config.degiro_config import DegiroConfig
+from degiro.models import Transactions
 from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.transactions_repository import TransactionsRepository
+from degiro.utils.debug import save_to_json
+from degiro.utils.degiro import DeGiro
 from degiro.utils.localization import LocalizationUtility
 
 
-# FIXME: If data cannot be found in the DB, the code should get it from DeGiro, updating the DB
 class TransactionsData:
     def __init__(self):
         self.transactions_repository = TransactionsRepository()
         self.product_info_repository = ProductInfoRepository()
 
     def get_transactions(self) -> dict:
+        self.update_account()
+        return self.__get_transactions()
+
+    def update_account(self, debug_json_files: dict = None):
+        """Update the Account DB data. Only does it if the data is older than today."""
+        today = date.today()
+        last_movement = self.transactions_repository.get_last_movement()
+        if last_movement is None:
+            last_movement = DegiroConfig.default().start_date
+
+        if last_movement < today:
+            transactions_history = self.__get_transaction_history(last_movement)
+            if debug_json_files and "transactions.json" in debug_json_files:
+                save_to_json(transactions_history, debug_json_files["transactions.json"])
+
+            self.__import_transactions(transactions_history)
+
+    def __get_transactions(self) -> dict:
         # FETCH TRANSACTIONS DATA
         transactions_history = self.transactions_repository.get_transactions_raw()
 
@@ -69,3 +94,49 @@ class TransactionsData:
             0: "",
             101: "Stock Split",
         }.get(transaction_type_id, "Unkown Transaction")
+
+    def __get_transaction_history(self, from_date: date) -> date:
+        """Import Transactions data from DeGiro. Uses the `get_transactions_history` method."""
+        trading_api = DeGiro.get_client()
+
+        # FETCH DATA
+        return trading_api.get_transactions_history(
+            transaction_request=HistoryRequest(from_date=from_date, to_date=date.today()),
+            raw=True,
+        )
+
+
+    def __import_transactions(self, transactions_history: dict) -> None:
+        """Store the Transactions into the DB."""
+
+        for row in transactions_history["data"]:
+            try:
+                Transactions.objects.update_or_create(
+                    id=row["id"],
+                    defaults={
+                        "product_id": row["productId"],
+                        "date": LocalizationUtility.convert_string_to_datetime(row["date"]),
+                        "buysell": row["buysell"],
+                        "price": row["price"],
+                        "quantity": row["quantity"],
+                        "total": row["total"],
+                        "order_type_id": row.get("orderTypeId", None),
+                        "counter_party": row.get("counterParty", None),
+                        "transfered": row["transfered"],
+                        "fx_rate": row["fxRate"],
+                        "nett_fx_rate": row["nettFxRate"],
+                        "gross_fx_rate": row["grossFxRate"],
+                        "auto_fx_fee_in_base_currency": row["autoFxFeeInBaseCurrency"],
+                        "total_in_base_currency": row["totalInBaseCurrency"],
+                        "fee_in_base_currency": row.get("feeInBaseCurrency", None),
+                        "total_fees_in_base_currency": row["totalFeesInBaseCurrency"],
+                        "total_plus_fee_in_base_currency": row["totalPlusFeeInBaseCurrency"],
+                        "total_plus_all_fees_in_base_currency": row["totalPlusAllFeesInBaseCurrency"],
+                        "transaction_type_id": row["transactionTypeId"],
+                        "trading_venue": row.get("tradingVenue", None),
+                        "executing_entity_id": row.get("executingEntityId", None),
+                    },
+                )
+            except Exception as error:
+                print(f"Cannot import row: {row}")
+                print("Exception: ", error)

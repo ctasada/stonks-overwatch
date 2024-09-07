@@ -1,5 +1,9 @@
-from django.db import connection
+from datetime import date
 
+from django.db import connection
+from django.forms import model_to_dict
+
+from degiro.models import CashMovements
 from degiro.utils.db_utils import dictfetchall
 
 
@@ -51,3 +55,19 @@ class CashMovementsRepository:
             )
             balance_total = dictfetchall(cursor)[0]["balanceTotal"]
             return float(balance_total)
+
+    def get_last_movement(self) -> date:
+        """Return the latest update from the DB.
+
+        ### Returns:
+            date: the latest update from the DB, None if there is no entry
+        """
+        try:
+            entry = CashMovements.objects.all().order_by("-date").first()
+            if entry is not None:
+                oldest_day = model_to_dict(entry)["date"]
+                return oldest_day.date()
+        except Exception:
+            """Ignore. The Database doesn't contain anything"""
+
+        return None
