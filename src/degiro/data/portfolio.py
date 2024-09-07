@@ -1,24 +1,17 @@
 import logging
-from datetime import date
 
 from currency_converter import CurrencyConverter
 from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
-from django.core.cache import cache
 from django.db import connection
 
-from degiro.models import CompanyProfile, ProductInfo, ProductQuotation
 from degiro.repositories.cash_movements_repository import CashMovementsRepository
 from degiro.repositories.company_profile_repository import CompanyProfileRepository
 from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.product_quotations_repository import ProductQuotationsRepository
-from degiro.utils.datetime import calculate_dates_in_interval, calculate_interval
 from degiro.utils.db_utils import dictfetchall
-from degiro.utils.debug import save_to_json
 from degiro.utils.degiro import DeGiro
 from degiro.utils.localization import LocalizationUtility
 
-CACHE_KEY_UPDATE_PORTFOLIO = 'portfolio_data_update_from_degiro'
-CACHE_KEY_UPDATE_COMPANIES = 'company_profile_update_from_degiro'
 
 class PortfolioData:
     logger = logging.getLogger("stocks_portfolio.portfolio_data")
@@ -30,70 +23,7 @@ class PortfolioData:
         self.product_quotation_repository = ProductQuotationsRepository()
         self.cash_movements_repository = CashMovementsRepository()
 
-    def get_portfolio(self):
-        self.update_portfolio()
-        self.update_company_profile()
-        return self.__get_portfolio()
-
-    def update_portfolio(self, debug_json_files: dict = None):
-        """Updating the Portfolio is a expensive and time consuming task.
-        This method caches the result for a period of time.
-        """
-        cached_data = cache.get(CACHE_KEY_UPDATE_PORTFOLIO)
-
-        # If result is already cached, return it
-        if cached_data is None:
-            print("Portfolio data not found in cache. Calling DeGiro")
-            self.logger.info("Portfolio data not found in cache. Calling DeGiro")
-            # Otherwise, call the expensive method
-            result = self.__update_portfolio(debug_json_files)
-
-            # Cache the result for 1 hour (3600 seconds)
-            cache.set(CACHE_KEY_UPDATE_PORTFOLIO, result, timeout=3600)
-
-            return result
-
-        return cached_data
-
-    def __update_portfolio(self, debug_json_files: dict = None):
-        """Update the Portfolio DB data."""
-        product_ids = self.__get_product_ids()
-
-        products_info = self.__get_products_info(product_ids)
-        if debug_json_files and "products_info.json" in debug_json_files:
-            save_to_json(products_info, debug_json_files["products_info.json"])
-
-        self.__import_products_info(products_info)
-        self.__import_products_quotation()
-
-    def update_company_profile(self, debug_json_files: dict = None):
-        """Updating the Company Profiles is a expensive and time consuming task.
-        This method caches the result for a period of time.
-        """
-        cached_data = cache.get(CACHE_KEY_UPDATE_COMPANIES)
-
-        # If result is already cached, return it
-        if cached_data is None:
-            print("Companies Profile data not found in cache. Calling DeGiro")
-            self.logger.info("Companies Profile data not found in cache. Calling DeGiro")
-            # Otherwise, call the expensive method
-            result = self.__update_company_profile(debug_json_files)
-
-            # Cache the result for 1 hour (3600 seconds)
-            cache.set(CACHE_KEY_UPDATE_COMPANIES, result, timeout=3600)
-
-            return result
-
-        return cached_data
-
-    def __update_company_profile(self, debug_json_files: dict = None):
-        company_profiles = self.__get_company_profiles()
-        if debug_json_files and "company_profiles.json" in debug_json_files:
-            save_to_json(company_profiles, debug_json_files["company_profiles.json"])
-
-        self.__import_company_profiles(company_profiles)
-
-    def __get_portfolio(self):
+    def get_portfolio(self) -> dict:
         portfolio_transactions = self.__get_porfolio_products()
 
         products_ids = [row["productId"] for row in portfolio_transactions]
@@ -312,67 +242,6 @@ class PortfolioData:
         except Exception:
             return {}
 
-    def __get_product_ids(self) -> list:
-        """Get the list of product ids from the DB.
-
-        ### Returns
-            list: list of product ids
-        """
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT product_id FROM degiro_transactions
-                UNION
-                SELECT product_id FROM degiro_cashmovements
-                """
-            )
-            results = dictfetchall(cursor)
-
-        product_ids = [str(entry["productId"]) for entry in results if entry["productId"] is not None]
-        product_ids = list(dict.fromkeys(product_ids))
-
-        return product_ids
-
-    def __import_products_info(self, products_info: dict) -> None:
-        """Store the products information into the DB."""
-
-        for key in products_info:
-            row = products_info[key]
-            try:
-                ProductInfo.objects.update_or_create(
-                    id=int(row["id"]),
-                    name=row["name"],
-                    isin=row["isin"],
-                    symbol=row["symbol"],
-                    contract_size=row["contractSize"],
-                    product_type=row["productType"],
-                    product_type_id=row["productTypeId"],
-                    tradable=row["tradable"],
-                    category=row["category"],
-                    currency=row["currency"],
-                    active=row["active"],
-                    exchange_id=row["exchangeId"],
-                    only_eod_prices=row["onlyEodPrices"],
-                    is_shortable=row.get("isShortable", False),
-                    feed_quality=row.get("feedQuality"),
-                    order_book_depth=row.get("orderBookDepth"),
-                    vwd_identifier_type=row.get("vwdIdentifierType"),
-                    vwd_id=row.get("vwdId"),
-                    quality_switchable=row.get("qualitySwitchable"),
-                    quality_switch_free=row.get("qualitySwitchFree"),
-                    vwd_module_id=row.get("vwdModuleId"),
-                    feed_quality_secondary=row.get("feedQualitySecondary"),
-                    order_book_depth_secondary=row.get("orderBookDepthSecondary"),
-                    vwd_identifier_type_secondary=row.get("vwdIdentifierTypeSecondary"),
-                    vwd_id_secondary=row.get("vwdIdSecondary"),
-                    quality_switchable_secondary=row.get("qualitySwitchableSecondary"),
-                    quality_switch_free_secondary=row.get("qualitySwitchFreeSecondary"),
-                    vwd_module_id_secondary=row.get("vwdModuleIdSecondary"),
-                )
-            except Exception as error:
-                print(f"Cannot import row: {row}")
-                print("Exception: ", error)
-
     def calculate_product_growth(self) -> dict:
         with connection.cursor() as cursor:
             cursor.execute(
@@ -402,102 +271,3 @@ class PortfolioData:
             del product_growth[key]["carryTotal"]
 
         return product_growth
-
-    def __import_products_quotation(self) -> None:
-        """FIXME"""
-        product_growth = self.calculate_product_growth()
-
-        delete_keys = []
-        for key in product_growth.keys():
-            product = self.product_info_repository.get_product_info_from_id(key)
-
-            # FIXME: Code copied from dashboard._create_products_quotation()
-            # If the product is NOT tradable, we shouldn't consider it for Growth
-            # The 'tradable' attribute identifies old Stocks, like the ones that are
-            # renamed for some reason, and it's not good enough to identify stocks
-            # that are provided as dividends, for example.
-            if "Non tradeable" in product["name"]:
-                delete_keys.append(key)
-                continue
-
-            product_growth[key]["product"] = {}
-            product_growth[key]["product"]["name"] = product["name"]
-            product_growth[key]["product"]["isin"] = product["isin"]
-            product_growth[key]["product"]["symbol"] = product["symbol"]
-            product_growth[key]["product"]["currency"] = product["currency"]
-            product_growth[key]["product"]["vwdId"] = product["vwdId"]
-            product_growth[key]["product"]["vwdIdSecondary"] = product["vwdIdSecondary"]
-
-            # Calculate Quotation Range
-            product_growth[key]["quotation"] = {}
-            product_history_dates = list(product_growth[key]["history"].keys())
-            start_date = product_history_dates[0]
-            final_date = LocalizationUtility.format_date_from_date(date.today())
-            tmp_last = product_history_dates[-1]
-            if product_growth[key]["history"][tmp_last] == 0:
-                final_date = tmp_last
-
-            product_growth[key]["quotation"]["from_date"] = start_date
-            product_growth[key]["quotation"]["to_date"] = final_date
-            # Interval should be from start_date, since the QuoteCast query doesn't support more granularity
-            product_growth[key]["quotation"]["interval"] = calculate_interval(start_date)
-
-        # Delete the non-tradable products
-        for key in delete_keys:
-            del product_growth[key]
-
-        # We need to use the productIds to get the daily quote for each product
-        for key in product_growth.keys():
-            if product_growth[key]["product"].get("vwdIdSecondary") is not None:
-                issue_id = product_growth[key]["product"].get("vwdIdSecondary")
-            else:
-                issue_id = product_growth[key]["product"].get("vwdId")
-
-            interval = product_growth[key]["quotation"]["interval"]
-            quotes = DeGiro.get_product_quotation(issue_id, interval)
-            dates = calculate_dates_in_interval(date.today(), interval)
-            quotes_dict = {}
-            for count, day in enumerate(dates):
-                # Keep only the dates that are in the quotation range
-                from_date = product_growth[key]["quotation"]["from_date"]
-                to_date = product_growth[key]["quotation"]["to_date"]
-                if (
-                    day >= LocalizationUtility.convert_string_to_date(from_date)
-                    and day <= LocalizationUtility.convert_string_to_date(to_date)
-                ):
-                    quotes_dict[LocalizationUtility.format_date_from_date(day)] = quotes[count]
-
-            ProductQuotation.objects.update_or_create(id=int(key), defaults={"quotations": quotes_dict})
-
-
-    def __get_company_profiles(self) -> dict:
-        """Import Company Profiles data from DeGiro. Uses the `get_transactions_history` method."""
-        products_isin = self.product_info_repository.get_products_isin()
-
-        company_profiles = {}
-
-        for isin in products_isin:
-            company_profile = DeGiro.get_client().get_company_profile(
-                product_isin=isin,
-                raw=True,
-            )
-            company_profiles[isin] = company_profile
-
-        return company_profiles
-
-    def __import_company_profiles(self, company_profiles: dict) -> None:
-        """Store the Company Profiles into the DB.
-
-        ### Parameters
-            * file_path : str
-                - Path to the Json file that stores the company profiles
-        ### Returns:
-            None.
-        """
-
-        for key in company_profiles:
-            try:
-                CompanyProfile.objects.update_or_create(isin=key, defaults={"data": company_profiles[key]})
-            except Exception as error:
-                self.logger.error(f"Cannot import ISIN: {key}")
-                self.logger.error("Exception: ", error)

@@ -14,9 +14,7 @@ Usage:
 
 import os
 
-from degiro.data.account_overview import AccountOverviewData
-from degiro.data.portfolio import PortfolioData
-from degiro.data.transactions import TransactionsData
+from degiro.services.update_service import UpdateService
 from scripts.commons import IMPORT_FOLDER
 
 
@@ -30,57 +28,55 @@ def init() -> None:
     if not os.path.exists(IMPORT_FOLDER):
         os.makedirs(IMPORT_FOLDER)
 
-def account_import():
+def account_import(update_service: UpdateService) -> None:
     """Import DeGiro Account information."""
     print("Importing DeGiro Account Information...")
-    account_overview_data = AccountOverviewData()
-    account_overview_data.update_account(
+    update_service.update_account(
         {
             "account.json": f"{IMPORT_FOLDER}/account.json",
             "account_transform.json": f"{IMPORT_FOLDER}/account_transform.json"
         }
     )
 
-def transactions_import():
+def transactions_import(update_service: UpdateService) -> None:
     print("Importing DeGiro Transactions...")
-    transactions = TransactionsData()
-    transactions.update_transactions(
+    update_service.update_transactions(
         {
             "transactions.json": f"{IMPORT_FOLDER}/transactions.json"
         }
     )
 
-def products_info_import():
+def products_info_import(update_service: UpdateService) -> None:
     """Import Product Information from DeGiro."""
     print("Importing DeGiro Products Information...")
-    portfolio_data = PortfolioData()
-    portfolio_data.update_portfolio({
+    update_service.update_portfolio({
         "products_info.json": f"{IMPORT_FOLDER}/products_info.json",
     })
 
-def company_profile_import():
+def company_profile_import(update_service: UpdateService) -> None:
     print("Importing DeGiro Company Profiles...")
-    portfolio_data = PortfolioData()
-    portfolio_data.update_company_profile({
+    update_service.update_company_profile({
         "company_profiles.json": f"{IMPORT_FOLDER}/company_profiles.json"
     })
 
 def run(*args):
     init()
 
+    update_service = UpdateService()
+
     if 'account' in args:
-        account_import()
+        account_import(update_service)
     elif 'transactions' in args:
-        transactions_import()
+        transactions_import(update_service)
     elif 'products' in args:
-        products_info_import()
+        products_info_import(update_service)
     elif 'companies' in args:
-        company_profile_import()
+        company_profile_import(update_service)
     else:
-        account_import()
-        transactions_import()
-        products_info_import()
-        company_profile_import()
+        account_import(update_service)
+        transactions_import(update_service)
+        products_info_import(update_service)
+        company_profile_import(update_service)
 
 
 if __name__ == "__main__":
