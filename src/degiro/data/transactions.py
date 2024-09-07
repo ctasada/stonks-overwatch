@@ -17,10 +17,10 @@ class TransactionsData:
         self.product_info_repository = ProductInfoRepository()
 
     def get_transactions(self) -> dict:
-        self.update_account()
+        self.update_transactions()
         return self.__get_transactions()
 
-    def update_account(self, debug_json_files: dict = None):
+    def update_transactions(self, debug_json_files: dict = None):
         """Update the Account DB data. Only does it if the data is older than today."""
         today = date.today()
         last_movement = self.transactions_repository.get_last_movement()

@@ -13,7 +13,7 @@ from scripts.commons import IMPORT_FOLDER, init
 def run():
     init()
     transactions = TransactionsData()
-    transactions.update_account(
+    transactions.update_transactions(
         {
             "transactions.json": f"{IMPORT_FOLDER}/transactions.json"
         }
