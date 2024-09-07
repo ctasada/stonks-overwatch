@@ -36,7 +36,7 @@ class DegiroConfig:
         base_currency = data.get("base_currency", "")
         start_date = data.get("start_date", "")
         # FIXME: Use Localization method
-        return cls(credentials, base_currency, datetime.strptime(start_date, "%Y-%m-%d"))
+        return cls(credentials, base_currency, datetime.strptime(start_date, "%Y-%m-%d").date())
 
     @classmethod
     def from_json_file(cls, file_path) -> Self:

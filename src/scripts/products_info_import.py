@@ -17,8 +17,9 @@ from django.db import connection
 
 from degiro.models import ProductInfo, ProductQuotation
 from degiro.utils.db_utils import dictfetchall
+from degiro.utils.debug import save_to_json
 from degiro.utils.degiro import DeGiro
-from scripts.commons import DATE_FORMAT, IMPORT_FOLDER, init, save_to_json
+from scripts.commons import DATE_FORMAT, IMPORT_FOLDER, init
 
 
 def get_product_ids() -> list:

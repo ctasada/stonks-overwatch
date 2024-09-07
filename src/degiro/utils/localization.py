@@ -80,3 +80,7 @@ class LocalizationUtility(object):
     @staticmethod
     def convert_string_to_date(value: str) -> date:
         return datetime.strptime(value, LocalizationUtility.DATE_FORMAT).date()
+
+    @staticmethod
+    def convert_string_to_datetime(value: str) -> date:
+        return datetime.strptime(value, LocalizationUtility.TIME_DATE_FORMAT)

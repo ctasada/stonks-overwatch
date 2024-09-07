@@ -8,8 +8,9 @@ Usage:
     poetry run src/manage.py runscript transactions_report
 """
 
+from degiro.utils.debug import save_to_json
 from degiro.views.dashboard import Dashboard
-from scripts.commons import IMPORT_FOLDER, save_to_json
+from scripts.commons import IMPORT_FOLDER
 
 
 def run():
