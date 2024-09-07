@@ -3,10 +3,10 @@ from datetime import date
 
 from currency_converter import CurrencyConverter
 from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
-from django.core.cache import cache, caches
+from django.core.cache import cache
 from django.db import connection
 
-from degiro.models import ProductInfo, ProductQuotation
+from degiro.models import CompanyProfile, ProductInfo, ProductQuotation
 from degiro.repositories.cash_movements_repository import CashMovementsRepository
 from degiro.repositories.company_profile_repository import CompanyProfileRepository
 from degiro.repositories.product_info_repository import ProductInfoRepository
@@ -17,6 +17,8 @@ from degiro.utils.debug import save_to_json
 from degiro.utils.degiro import DeGiro
 from degiro.utils.localization import LocalizationUtility
 
+CACHE_KEY_UPDATE_PORTFOLIO = 'portfolio_data_update_from_degiro'
+CACHE_KEY_UPDATE_COMPANIES = 'company_profile_update_from_degiro'
 
 class PortfolioData:
     logger = logging.getLogger("stocks_portfolio.portfolio_data")
@@ -30,14 +32,14 @@ class PortfolioData:
 
     def get_portfolio(self):
         self.update_portfolio()
+        self.update_company_profile()
         return self.__get_portfolio()
 
     def update_portfolio(self, debug_json_files: dict = None):
-        """Updating the Portfolio is a expensive anc time consuming task.
+        """Updating the Portfolio is a expensive and time consuming task.
         This method caches the result for a period of time.
         """
-        cache_key = "portfolio_data_update_from_degiro"
-        cached_data = cache.get(cache_key)
+        cached_data = cache.get(CACHE_KEY_UPDATE_PORTFOLIO)
 
         # If result is already cached, return it
         if cached_data is None:
@@ -47,7 +49,7 @@ class PortfolioData:
             result = self.__update_portfolio(debug_json_files)
 
             # Cache the result for 1 hour (3600 seconds)
-            cache.set(cache_key, result, timeout=3600)
+            cache.set(CACHE_KEY_UPDATE_PORTFOLIO, result, timeout=3600)
 
             return result
 
@@ -63,6 +65,33 @@ class PortfolioData:
 
         self.__import_products_info(products_info)
         self.__import_products_quotation()
+
+    def update_company_profile(self, debug_json_files: dict = None):
+        """Updating the Company Profiles is a expensive and time consuming task.
+        This method caches the result for a period of time.
+        """
+        cached_data = cache.get(CACHE_KEY_UPDATE_COMPANIES)
+
+        # If result is already cached, return it
+        if cached_data is None:
+            print("Companies Profile data not found in cache. Calling DeGiro")
+            self.logger.info("Companies Profile data not found in cache. Calling DeGiro")
+            # Otherwise, call the expensive method
+            result = self.__update_company_profile(debug_json_files)
+
+            # Cache the result for 1 hour (3600 seconds)
+            cache.set(CACHE_KEY_UPDATE_COMPANIES, result, timeout=3600)
+
+            return result
+
+        return cached_data
+
+    def __update_company_profile(self, debug_json_files: dict = None):
+        company_profiles = self.__get_company_profiles()
+        if debug_json_files and "company_profiles.json" in debug_json_files:
+            save_to_json(company_profiles, debug_json_files["company_profiles.json"])
+
+        self.__import_company_profiles(company_profiles)
 
     def __get_portfolio(self):
         portfolio_transactions = self.__get_porfolio_products()
@@ -441,3 +470,34 @@ class PortfolioData:
             ProductQuotation.objects.update_or_create(id=int(key), defaults={"quotations": quotes_dict})
 
 
+    def __get_company_profiles(self) -> dict:
+        """Import Company Profiles data from DeGiro. Uses the `get_transactions_history` method."""
+        products_isin = self.product_info_repository.get_products_isin()
+
+        company_profiles = {}
+
+        for isin in products_isin:
+            company_profile = DeGiro.get_client().get_company_profile(
+                product_isin=isin,
+                raw=True,
+            )
+            company_profiles[isin] = company_profile
+
+        return company_profiles
+
+    def __import_company_profiles(self, company_profiles: dict) -> None:
+        """Store the Company Profiles into the DB.
+
+        ### Parameters
+            * file_path : str
+                - Path to the Json file that stores the company profiles
+        ### Returns:
+            None.
+        """
+
+        for key in company_profiles:
+            try:
+                CompanyProfile.objects.update_or_create(isin=key, defaults={"data": company_profiles[key]})
+            except Exception as error:
+                self.logger.error(f"Cannot import ISIN: {key}")
+                self.logger.error("Exception: ", error)

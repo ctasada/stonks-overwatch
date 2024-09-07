@@ -136,8 +136,11 @@ class AccountOverviewData:
             # Use pd.json_normalize to convert the JSON to a DataFrame
             df = pd.json_normalize(account_overview["data"]["cashMovements"], sep="_")
             # Fix id values format after Pandas
-            for col in ["productId", "id", "change"]:
-                df[col] = df[col].apply(lambda x: None if (pd.isnull(x) or pd.isna(x) ) else str(x).replace(".0", ""))
+            for col in ["productId", "id", "change", "exchangeRate", "orderId"]:
+                if col in df:
+                    df[col] = df[col].apply(
+                        lambda x: None if (pd.isnull(x) or pd.isna(x) ) else str(x).replace(".0", "")
+                    )
 
             # Set the index explicitly
             df.set_index("date", inplace=True)
