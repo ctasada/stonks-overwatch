@@ -12,13 +12,23 @@ Usage:
     poetry run src/manage.py runscript init_db --script-args companies
 """
 
+import os
 
 from degiro.data.account_overview import AccountOverviewData
 from degiro.data.portfolio import PortfolioData
 from degiro.data.transactions import TransactionsData
-from scripts.commons import IMPORT_FOLDER, init
-from scripts.company_profile_import import run as company_profile_import
+from scripts.commons import IMPORT_FOLDER
 
+
+def init() -> None:
+    """Execute needed initializations for the scripts.
+
+    * Creates the folder to put the imported files
+    ### Returns:
+        None
+    """
+    if not os.path.exists(IMPORT_FOLDER):
+        os.makedirs(IMPORT_FOLDER)
 
 def account_import():
     """Import DeGiro Account information."""
@@ -46,6 +56,13 @@ def products_info_import():
     portfolio_data = PortfolioData()
     portfolio_data.update_portfolio({
         "products_info.json": f"{IMPORT_FOLDER}/products_info.json",
+    })
+
+def company_profile_import():
+    print("Importing DeGiro Company Profiles...")
+    portfolio_data = PortfolioData()
+    portfolio_data.update_company_profile({
+        "company_profiles.json": f"{IMPORT_FOLDER}/company_profiles.json"
     })
 
 def run(*args):

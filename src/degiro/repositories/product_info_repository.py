@@ -47,3 +47,20 @@ class ProductInfoRepository:
                 """
             )
             return dictfetchone(cursor)
+
+    def get_products_isin(self) -> dict:
+        """Get product information. The information is retrieved from the DB.
+
+        ### Returns
+            list: list of product ISINs
+        """
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT isin FROM degiro_productinfo
+                """,
+            )
+            result = dictfetchall(cursor)
+
+        isin_list = [row["isin"] for row in result]
+        return list(set(isin_list))
