@@ -1,7 +1,10 @@
 import logging
 from datetime import timedelta
 
+import polars as pl
 import requests_cache
+from degiro_connector.quotecast.models.chart import ChartRequest, Interval
+from degiro_connector.quotecast.tools.chart_fetcher import ChartFetcher
 from degiro_connector.trading.api import API as TRADING_API
 from degiro_connector.trading.models.credentials import Credentials
 
@@ -72,3 +75,56 @@ class DeGiro(metaclass=SingleInstanceMetaClass):
         )
 
         return products_info["data"]
+
+    @staticmethod
+    def get_product_quotation(issueid, period: Interval) -> list:
+        """Get the list of quotations for the provided product for the indicated Interval.
+
+        ### Parameters
+            * issueid
+                - ID representing the product. Should be 'vwdIdSecondary' or 'vwdId'
+            * interval:
+                - Time period from today to the past to retrieve the quotations
+        ### Returns
+            list: List with the quotations
+        """
+        # Retrieve user_token
+        client_details_table = DeGiro.get_client_details()
+        user_token = client_details_table["data"]["id"]
+
+        chart_fetcher = ChartFetcher(user_token=user_token)
+        chart_request = ChartRequest(
+            culture="nl-NL",
+            period=period,
+            requestid="1",
+            resolution=Interval.P1D,
+            series=[
+                f"issueid:{issueid}",
+                f"price:issueid:{issueid}",
+            ],
+            tz="Europe/Amsterdam",
+        )
+        chart = chart_fetcher.get_chart(
+            chart_request=chart_request,
+            raw=False,
+        )
+
+        quotes = None
+        for series in chart.series:
+            if series.type == "time":
+                # 'column_0' is the position, and 'column_1' is the value.
+                data_frame = pl.DataFrame(data=series.data, orient="row")
+                quotes = []
+                i = 1
+                for row in data_frame.rows(named=True):
+                    # Some values are missing, lets fill them re-using the last know value
+                    if row["column_0"] != i:
+                        for _j in range(i, row["column_0"]):
+                            # Even the first entry may be empty, in that case we need to use the provided value
+                            value = quotes[-1] if len(quotes) > 0 else row["column_1"]
+                            quotes.append(value)
+                            i += 1
+                    quotes.append(row["column_1"])
+                    i += 1
+
+        return quotes

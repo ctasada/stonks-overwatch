@@ -26,6 +26,10 @@ class ProductInfoRepository:
         result_map = {row["id"]: row for row in rows}
         return result_map
 
+    def get_product_info_from_id(self, product_id: int) -> dict:
+        """Get product information from the given product id. The information is retrieved from the DB."""
+        return self.get_products_info_raw([product_id])[product_id]
+
     def get_product_info_from_name(self, name: str) -> dict:
         """Gets product information from the given product name. The information is retrieved from the DB.
         ### Parameters
