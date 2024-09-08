@@ -34,6 +34,8 @@ class UpdateService():
 
     def update_account(self, debug_json_files: dict = None):
         """Update the Account DB data. Only does it if the data is older than today."""
+        self.logger.info("Updating Account Data....")
+
         today = date.today()
         last_movement = self.cash_movements_repository.get_last_movement()
         if last_movement is None:
@@ -52,6 +54,8 @@ class UpdateService():
 
     def update_transactions(self, debug_json_files: dict = None):
         """Update the Account DB data. Only does it if the data is older than today."""
+        self.logger.info("Updating Transactions Data....")
+
         today = date.today()
         last_movement = self.transactions_repository.get_last_movement()
         if last_movement is None:
@@ -69,6 +73,8 @@ class UpdateService():
         """Updating the Portfolio is a expensive and time consuming task.
         This method caches the result for a period of time.
         """
+        self.logger.info("Updating Portfolio Data....")
+
         cached_data = cache.get(CACHE_KEY_UPDATE_PORTFOLIO)
 
         # If result is already cached, return it
@@ -89,6 +95,8 @@ class UpdateService():
         """Updating the Company Profiles is a expensive and time consuming task.
         This method caches the result for a period of time.
         """
+        self.logger.info("Updating Company Profiles Data....")
+
         cached_data = cache.get(CACHE_KEY_UPDATE_COMPANIES)
 
         # If result is already cached, return it
