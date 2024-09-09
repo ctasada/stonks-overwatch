@@ -5,7 +5,7 @@ import polars as pl
 import requests_cache
 from degiro_connector.quotecast.models.chart import ChartRequest, Interval
 from degiro_connector.quotecast.tools.chart_fetcher import ChartFetcher
-from degiro_connector.trading.api import API as TRADING_API
+from degiro_connector.trading.api import API as TradigApi  # noqa: N811
 from degiro_connector.trading.models.credentials import Credentials
 
 from degiro.config.degiro_config import DegiroConfig
@@ -31,10 +31,10 @@ class DeGiro(metaclass=SingleInstanceMetaClass):
             totp_secret_key=degiro_credentials.totp_secret_key,
         )
         # SETUP TRADING API
-        self.api_client = TRADING_API(credentials=credentials)
+        self.api_client = TradigApi(credentials=credentials)
 
     @staticmethod
-    def get_client() -> TRADING_API:
+    def get_client() -> TradigApi:
         degiro = DeGiro()
 
         # CONNECT
