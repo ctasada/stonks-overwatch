@@ -8,8 +8,8 @@ from degiro.repositories.cash_movements_repository import CashMovementsRepositor
 from degiro.repositories.company_profile_repository import CompanyProfileRepository
 from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.product_quotations_repository import ProductQuotationsRepository
+from degiro.services.degiro_service import DeGiroService
 from degiro.utils.db_utils import dictfetchall
-from degiro.utils.degiro import DeGiro
 from degiro.utils.localization import LocalizationUtility
 
 
@@ -22,6 +22,7 @@ class PortfolioData:
         self.company_profile_repository = CompanyProfileRepository()
         self.product_quotation_repository = ProductQuotationsRepository()
         self.cash_movements_repository = CashMovementsRepository()
+        self.degiro_service = DeGiroService()
 
     def get_portfolio(self) -> dict:
         portfolio_transactions = self.__get_porfolio_products()
@@ -169,7 +170,7 @@ class PortfolioData:
 
     def __get_realtime_portfolio_total(self) -> dict:
         try:
-            update = DeGiro.get_client().get_update(
+            update = self.degiro_service.get_client().get_update(
                 request_list=[
                     UpdateRequest(option=UpdateOption.TOTAL_PORTFOLIO, last_updated=0),
                 ],
@@ -186,7 +187,7 @@ class PortfolioData:
 
     def __get_porfolio_products(self) -> dict:
         try:
-            update = DeGiro.get_client().get_update(
+            update = self.degiro_service.get_client().get_update(
                 request_list=[
                     UpdateRequest(option=UpdateOption.PORTFOLIO, last_updated=0),
                 ],
@@ -209,7 +210,7 @@ class PortfolioData:
             return my_portfolio
 
         except Exception:
-            logging.exception("Cannot connecto to DeGiro, getting last known data")
+            logging.exception("Cannot connect to DeGiro, getting last known data")
             with connection.cursor() as cursor:
                 cursor.execute(
                     """
@@ -229,14 +230,14 @@ class PortfolioData:
 
     def __get_products_info(self, products_ids: list) -> dict:
         try:
-            return DeGiro.get_products_info(products_ids)
+            return self.degiro_service.get_products_info(products_ids)
         except Exception:
-            logging.exception("Cannot connecto to DeGiro, getting last known data")
+            logging.exception("Cannot connect to DeGiro, getting last known data")
             return self.product_info_repository.get_products_info_raw(products_ids)
 
     def __get_product_config(self) -> dict:
         try:
-            products_config = DeGiro.get_client().get_products_config()
+            products_config = self.degiro_service.get_client().get_products_config()
 
             return products_config
         except Exception:

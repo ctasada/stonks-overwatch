@@ -9,11 +9,9 @@ from degiro_connector.trading.api import API as TradigApi  # noqa: N811
 from degiro_connector.trading.models.credentials import Credentials
 
 from degiro.config.degiro_config import DegiroConfig
-from degiro.utils.single_instance_metaclass import SingleInstanceMetaClass
 
 
-# TODO: A singleton is nice, but doesn't allow for multiple users
-class DeGiro(metaclass=SingleInstanceMetaClass):
+class DeGiroService():
     api_client = None
 
     def __init__(self):
@@ -33,51 +31,54 @@ class DeGiro(metaclass=SingleInstanceMetaClass):
         # SETUP TRADING API
         self.api_client = TradigApi(credentials=credentials)
 
-    @staticmethod
-    def get_client() -> TradigApi:
-        degiro = DeGiro()
-
+    def connect(self):
         # CONNECT
         with requests_cache.enabled(
             expire_after=timedelta(minutes=15),
             allowable_methods=["GET", "HEAD", "POST"],
             ignored_parameters=["oneTimePassword"],
         ):
-            degiro.api_client.connect()
+            self.api_client.connect()
 
-        return degiro.api_client
+    def is_connected(self) -> bool:
+        return self.api_client.connection_storage and self.api_client.connection_storage.connected.isSet()
 
-    @staticmethod
-    def get_account_info():
-        return DeGiro.get_client().get_account_info()
+    def __check_connection__(self):
+        if not self.is_connected():
+            self.connect()
 
-    @staticmethod
-    def get_client_details():
-        # FETCH CONFIG TABLE
-        client_details_table = DeGiro.get_client().get_client_details()
+    def get_client(self) -> TradigApi:
+        self.__check_connection__()
+        return self.api_client
+
+    def get_account_info(self):
+        self.__check_connection__()
+        return self.api_client.get_account_info()
+
+    def get_client_details(self):
+        self.__check_connection__()
+        client_details_table = self.api_client.get_client_details()
 
         return client_details_table
 
-    @staticmethod
-    def get_config():
-        config_table = DeGiro.get_client().get_config()
+    def get_config(self):
+        config_table = self.api_client.get_config()
 
         return config_table
 
-    @staticmethod
-    def get_products_info(products_ids):
+    def get_products_info(self, products_ids):
+        self.__check_connection__()
         products_ids = list(set(products_ids))
 
         # FETCH DATA
-        products_info = DeGiro.get_client().get_products_info(
+        products_info = self.api_client.get_products_info(
             product_list=products_ids,
             raw=True,
         )
 
         return products_info["data"]
 
-    @staticmethod
-    def get_product_quotation(issueid, period: Interval) -> list:
+    def get_product_quotation(self, issueid, period: Interval) -> list:
         """Get the list of quotations for the provided product for the indicated Interval.
 
         ### Parameters
@@ -89,7 +90,7 @@ class DeGiro(metaclass=SingleInstanceMetaClass):
             list: List with the quotations
         """
         # Retrieve user_token
-        client_details_table = DeGiro.get_client_details()
+        client_details_table = self.get_client_details()
         user_token = client_details_table["data"]["id"]
 
         chart_fetcher = ChartFetcher(user_token=user_token)

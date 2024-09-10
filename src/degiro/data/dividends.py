@@ -1,6 +1,6 @@
 from degiro.data.account_overview import AccountOverviewData
 from degiro.repositories.product_info_repository import ProductInfoRepository
-from degiro.utils.degiro import DeGiro
+from degiro.services.degiro_service import DeGiroService
 from degiro.utils.localization import LocalizationUtility
 
 
@@ -8,6 +8,7 @@ class DividendsData:
     def __init__(self):
         self.account_overview = AccountOverviewData()
         self.product_info_repository = ProductInfoRepository()
+        self.degiro_service = DeGiroService()
 
     def get_dividends(self):
         overview = self.account_overview.get_account_overview()
@@ -27,7 +28,7 @@ class DividendsData:
     def get_upcoming_dividends(self):
         result = []
         try:
-            upcoming_payments = DeGiro.get_client().get_upcoming_payments(raw=True)
+            upcoming_payments = self.degiro_service.get_client().get_upcoming_payments(raw=True)
             if ("data" in upcoming_payments and upcoming_payments["data"]):
                 for payment in upcoming_payments["data"]:
                     stock_name = payment["product"]
