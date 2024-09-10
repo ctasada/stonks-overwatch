@@ -14,10 +14,10 @@ from degiro.models import CashMovements, CompanyProfile, ProductInfo, ProductQuo
 from degiro.repositories.cash_movements_repository import CashMovementsRepository
 from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.transactions_repository import TransactionsRepository
+from degiro.services.degiro_service import DeGiroService
 from degiro.utils.datetime import calculate_dates_in_interval, calculate_interval
 from degiro.utils.db_utils import dictfetchall
 from degiro.utils.debug import save_to_json
-from degiro.utils.degiro import DeGiro
 from degiro.utils.localization import LocalizationUtility
 
 CACHE_KEY_UPDATE_PORTFOLIO = 'portfolio_data_update_from_degiro'
@@ -31,6 +31,7 @@ class UpdateService():
         self.product_info_repository = ProductInfoRepository()
         self.transactions_repository = TransactionsRepository()
         self.portfolio_data = PortfolioData()
+        self.degiro_service = DeGiroService()
 
     def update_account(self, debug_json_files: dict = None):
         """Update the Account DB data. Only does it if the data is older than today."""
@@ -140,7 +141,7 @@ class UpdateService():
         ### Returns:
             account information
         """
-        trading_api = DeGiro.get_client()
+        trading_api = self.degiro_service.get_client()
 
         request = OverviewRequest(from_date=from_date, to_date=date.today())
 
@@ -153,7 +154,7 @@ class UpdateService():
         return account_overview
 
     def __get_products_info(self, products_ids: list) -> dict:
-        return DeGiro.get_products_info(products_ids)
+        return self.degiro_service.get_products_info(products_ids)
 
     def __conv(self, i):
         return i or None
@@ -208,7 +209,7 @@ class UpdateService():
 
     def __get_transaction_history(self, from_date: date) -> date:
         """Import Transactions data from DeGiro. Uses the `get_transactions_history` method."""
-        trading_api = DeGiro.get_client()
+        trading_api = self.degiro_service.get_client()
 
         # FETCH DATA
         return trading_api.get_transactions_history(
@@ -365,7 +366,7 @@ class UpdateService():
                 issue_id = product_growth[key]["product"].get("vwdId")
 
             interval = product_growth[key]["quotation"]["interval"]
-            quotes = DeGiro.get_product_quotation(issue_id, interval)
+            quotes = self.degiro_service.get_product_quotation(issue_id, interval)
             dates = calculate_dates_in_interval(date.today(), interval)
             quotes_dict = {}
             for count, day in enumerate(dates):
@@ -388,7 +389,7 @@ class UpdateService():
         company_profiles = {}
 
         for isin in products_isin:
-            company_profile = DeGiro.get_client().get_company_profile(
+            company_profile = self.degiro_service.get_client().get_company_profile(
                 product_isin=isin,
                 raw=True,
             )
