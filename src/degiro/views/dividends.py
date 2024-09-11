@@ -21,7 +21,6 @@ class Dividends(View):
         self.baseCurrency = LocalizationUtility.get_base_currency()
 
     def get(self, request):
-        # We don't need to sort the dict, since it's already coming sorted in DESC date order
         dividends_overview = self.dividens.get_dividends()
         upcoming_dividends = self.dividens.get_upcoming_dividends()
 
@@ -41,6 +40,9 @@ class Dividends(View):
     def _get_dividends_calendar(self, dividends_overview: list, upcoming_dividends: list):
         dividends_calendar = {}
         joined_dividends = dividends_overview + upcoming_dividends
+        # After merging dividends and upcoming dividends, we need to sort the result
+        joined_dividends = sorted(joined_dividends, key=lambda x: x['date'], reverse=True)
+
         df = pd.DataFrame(joined_dividends)
         period_start = min(df["date"])
         period_end = datetime.today()

@@ -49,7 +49,7 @@ class UpdateService():
 
             transformed_data = self.__transform_json(account_overview)
             if debug_json_files and "account_transform.json" in debug_json_files:
-                save_to_json(account_overview, debug_json_files["account_transform.json"])
+                save_to_json(transformed_data, debug_json_files["account_transform.json"])
 
             self.__import_cash_movements(transformed_data)
 
@@ -191,10 +191,15 @@ class UpdateService():
             # Use pd.json_normalize to convert the JSON to a DataFrame
             df = pd.json_normalize(account_overview["data"]["cashMovements"], sep="_")
             # Fix id values format after Pandas
-            for col in ["productId", "id", "change", "exchangeRate", "orderId"]:
+            for col in ["productId", "id", "exchangeRate", "orderId"]:
                 if col in df:
                     df[col] = df[col].apply(
                         lambda x: None if (pd.isnull(x) or pd.isna(x) ) else str(x).replace(".0", "")
+                    )
+            for col in ["change"]:
+                if col in df:
+                    df[col] = df[col].apply(
+                        lambda x: None if (pd.isnull(x) or pd.isna(x) ) else str(x)
                     )
 
             # Set the index explicitly
