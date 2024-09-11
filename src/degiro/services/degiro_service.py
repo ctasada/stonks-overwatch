@@ -14,7 +14,7 @@ from degiro.config.degiro_config import DegiroConfig
 class DeGiroService():
     api_client = None
 
-    def __init__(self):
+    def __init__(self, credentials: Credentials = None):
         # SETUP LOGGING LEVEL
         logging.basicConfig(level=logging.INFO)
 
@@ -22,14 +22,21 @@ class DeGiroService():
         degiro_credentials = degiro_config.credentials
         # SETUP CREDENTIALS
         credentials = Credentials(
-            int_account=degiro_credentials.int_account,
-            username=degiro_credentials.username,
-            password=degiro_credentials.password,
-            # FIXME: Using Totp is convenient, but not secure
-            totp_secret_key=degiro_credentials.totp_secret_key,
+            int_account=self.__getattr__(credentials, degiro_credentials, 'int_account', None),
+            username=self.__getattr__(credentials, degiro_credentials, 'username', ""),
+            password=self.__getattr__(credentials, degiro_credentials, 'password', ""),
+            totp_secret_key=self.__getattr__(credentials, degiro_credentials, 'totp_secret_key', None),
         )
         # SETUP TRADING API
         self.api_client = TradigApi(credentials=credentials)
+
+    @classmethod
+    def __getattr__(cls, obj1, obj2, field, default):
+        return getattr(obj1, field, default) or getattr(obj2, field, default)
+
+    @property
+    def credentials(self) -> Credentials:
+        return self.api_client.credentials
 
     def connect(self):
         # CONNECT
@@ -40,23 +47,31 @@ class DeGiroService():
         ):
             self.api_client.connect()
 
-    def is_connected(self) -> bool:
+    def check_connection(self) -> bool:
+        is_connected = self.__check_connection__()
+        if not is_connected:
+            try:
+                self.connect()
+            except ConnectionError:
+                # Just try to connect and validate the connection.
+                # If we want more details we can always call the connect method
+                pass
+
+        return self.__check_connection__()
+
+    def __check_connection__(self) -> bool:
         return self.api_client.connection_storage and self.api_client.connection_storage.connected.isSet()
 
-    def __check_connection__(self):
-        if not self.is_connected():
-            self.connect()
-
     def get_client(self) -> TradigApi:
-        self.__check_connection__()
+        self.check_connection()
         return self.api_client
 
     def get_account_info(self):
-        self.__check_connection__()
+        self.check_connection()
         return self.api_client.get_account_info()
 
     def get_client_details(self):
-        self.__check_connection__()
+        self.check_connection()
         client_details_table = self.api_client.get_client_details()
 
         return client_details_table
@@ -67,7 +82,7 @@ class DeGiroService():
         return config_table
 
     def get_products_info(self, products_ids):
-        self.__check_connection__()
+        self.check_connection()
         products_ids = list(set(products_ids))
 
         # FETCH DATA

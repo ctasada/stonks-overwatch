@@ -32,7 +32,8 @@
                             <td>{{ stock.symbol }}<br><small class="fw-lighter">{{ stock.name }}</small></td>
                             <td>
                                 <div class="d-inline-flex gap-1">
-                                    <small class="p-1 fw-lighter text-light bg-dark square-box border d-flex justify-content-center align-items-center">
+                                    <small class="p-1 fw-lighter text-light bg-dark square-box border d-flex justify-content-center align-items-center"
+                                        data-bs-toggle="tooltip" title="Category-{{ stock.category }}">
                                         {{ stock.category }}
                                     </small>
                                     {% if stock.exchangeAbbr %}
