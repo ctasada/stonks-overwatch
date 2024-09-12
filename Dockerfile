@@ -6,7 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE 1 \
 
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install sqlite3 && \
+    apt-get install sqlite3 npm -y && \
     apt-get autoremove && \
     apt-get clean -y
 
@@ -20,8 +20,9 @@ RUN pip install poetry
 WORKDIR /app
 
 # install dependencies
-COPY pyproject.toml poetry.lock ./
-RUN poetry install  --without dev --no-root && rm -rf $POETRY_CACHE_DIR
+COPY pyproject.toml poetry.lock package.json ./
+RUN npm install
+RUN poetry install --without dev --no-root && rm -rf $POETRY_CACHE_DIR
 
 # The runtime image, used to just run the code provided its virtual environment
 FROM python:3-slim as runtime
