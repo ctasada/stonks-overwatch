@@ -78,14 +78,15 @@ class Dividends(View):
             transaction_change = transaction["change"]
 
             currency = transaction["currency"]
+            payment_date = LocalizationUtility.convert_string_to_date(transaction["date"])
             if currency != self.baseCurrency:
-                date = LocalizationUtility.convert_string_to_date(transaction["date"])
                 transaction_change = self.currency_converter.convert(
-                    transaction_change, currency, self.baseCurrency, date
+                    transaction_change, currency, self.baseCurrency, payment_date
                 )
                 currency = self.baseCurrency
 
             stock_entry["stockName"] = transaction["stockName"]
+            stock_entry["isUpcoming"] = payment_date > today.date()
             stock_entry["change"] = stock_entry.setdefault("change", 0) + transaction_change
             stock_entry["currency"] = currency
             stock_entry["formatedChange"] = LocalizationUtility.format_money_value(
