@@ -5,7 +5,7 @@
 <!-- ChartJS -->
 <script src="{% static 'chart.js/dist/chart.umd.js' %}"></script>
 <script src="{% static '@seahsky/chartjs-plugin-autocolors/dist/chartjs-plugin-autocolors.min.js' %}"></script>
-
+  
 <div class="container-fluid row-gap-5">
     <div class="row border border-primary-subtle bg-light rounded mb-3">
         <div class="row mt-2">
@@ -62,7 +62,11 @@
                     {% for day, dividends in value.days.items %}
                         {% for key, dividend in dividends.items %}
                             {% if dividend.change != 0 %}
-                                <div class="row m-2 border rounded-pill" style="background-color: #A6B9FF">
+                                {% if dividend.isUpcoming %}
+                                <div class="row m-2 border rounded-pill upcoming-dividends">
+                                {% else %}
+                                <div class="row m-2 border rounded-pill dividends">
+                                {% endif %}
                                     <div class="col-sm-1 text-left">
                                         {{ day }}
                                     </div>

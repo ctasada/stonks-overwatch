@@ -52,7 +52,12 @@
                             {% else %}
                                 <td class="text-danger" >
                             {% endif %}
-                            {{ stock.formattedUnrealizedGain }}<br><small class="fw-lighter">{{ stock.percentageGain }}</small></td>
+                            {{ stock.formattedUnrealizedGain }}<br>
+                            {% if stock.unrealizedGain > 0 %}
+                                <small class="fw-lighter bi bi-arrow-up-right">
+                            {% else %}
+                                <small class="fw-lighter bi bi-arrow-down-right">
+                            {% endif %}{{ stock.percentageGain }}</small></td>
                             <td>{{ stock.formattedValue }}</td>
                             <td>{{ stock.formattedPortfolioSize }}</td>
                         </tr>
