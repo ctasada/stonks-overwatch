@@ -80,7 +80,6 @@ poetry run src/manage.py runscript init_db
 - IBERDROLA Non-Tradable Dividends: Are properly calculated? Doesn't seem to calculate quantity properly
 
 ## TODOs
-- [ ] DeGiro Client: Replace the Singleton by a proper session instance
 - [ ] DeGiro Client: Stop using Totp and request 2FA for each connection
 - [ ] Portfolio: Show filter to see Open/Close/All stocks
 - [ ] Improve side-bar behaviour
@@ -94,8 +93,6 @@ poetry run src/manage.py runscript init_db
 - [ ] BUG: Calculated Cash Balance is 26 cents larger (see src/scripts/account_report.py)
 - [ ] Track https://github.com/chartjs/Chart.js/issues/11005
 - [ ] Review Portfolio growth. Indicates negative growth, which never really happened.
-- [ ] Show used Exchanges to help consolidating costs
-- [ ] Show Countries to help with the risk distribution
 - [ ] Some stocks (mainly Spanish) don't have Sector or other data. Find workaround
 - [ ] Fontawesome is replaceble by https://icons.getbootstrap.com
 

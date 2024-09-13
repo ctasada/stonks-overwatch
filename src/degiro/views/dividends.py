@@ -45,7 +45,11 @@ class Dividends(View):
 
         df = pd.DataFrame(joined_dividends)
         period_start = min(df["date"])
-        period_end = datetime.today()
+        # Find the maximum date. Since we have upcoming payments, it can be today or some point
+        # in the future
+        date_as_datetime = pd.to_datetime(df['date'], format='%Y-%m-%d')
+        today = pd.Timestamp('today').normalize()
+        period_end = max(date_as_datetime.max(), today)
         period = pd.period_range(start=period_start, end=period_end, freq="M")[::-1]
 
         for month in period:
