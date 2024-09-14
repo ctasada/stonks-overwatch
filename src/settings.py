@@ -13,7 +13,7 @@ import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent
 
 # This is the Project Root
 PROJECT_PATH = BASE_DIR.parent
@@ -58,7 +58,7 @@ MIDDLEWARE = [
     "django.middleware.cache.FetchFromCacheMiddleware",
 ]
 
-ROOT_URLCONF = "stocks_portfolio.urls"
+ROOT_URLCONF = "urls"
 
 TEMPLATES = [
     {
@@ -76,7 +76,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "stocks_portfolio.wsgi.application"
+WSGI_APPLICATION = "wsgi.application"
 
 
 # Database

@@ -21,7 +21,7 @@ django-node-assets = "^0.9.14"
 fontawesomefree = "^6.6.0"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.6.4"
+ruff = "^0.6.5"
 
 [build-system]
 requires = ["poetry-core"]

@@ -3,7 +3,7 @@ import os
 from datetime import date, datetime
 from typing import Optional
 
-from stocks_portfolio.settings import PROJECT_PATH
+from settings import PROJECT_PATH
 
 
 class DegiroCredentials:
