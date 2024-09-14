@@ -80,7 +80,6 @@ class UpdateService():
 
         # If result is already cached, return it
         if cached_data is None:
-            print("Portfolio data not found in cache. Calling DeGiro")
             self.logger.info("Portfolio data not found in cache. Calling DeGiro")
             # Otherwise, call the expensive method
             result = self.__update_portfolio(debug_json_files)
@@ -102,7 +101,6 @@ class UpdateService():
 
         # If result is already cached, return it
         if cached_data is None:
-            print("Companies Profile data not found in cache. Calling DeGiro")
             self.logger.info("Companies Profile data not found in cache. Calling DeGiro")
             # Otherwise, call the expensive method
             result = self.__update_company_profile(debug_json_files)
