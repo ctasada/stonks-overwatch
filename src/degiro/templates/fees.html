@@ -5,56 +5,56 @@
 <!-- ChartJS -->
 <script src="{% static 'chart.js/dist/chart.umd.js' %}"></script>
 <script src="{% static '@seahsky/chartjs-plugin-autocolors/dist/chartjs-plugin-autocolors.min.js' %}"></script>
-  
+
 <div class="container-fluid row-gap-5">
     <div class="row mt-2 column-gap-3">
-      <div class="col-md-auto border border-primary-subtle bg-light rounded mb-3">
-        <label class="col-form-label-p-0 text-secondary">Transaction Fees</label>
-        <br>
-        <span class="h5 fw-semibold text-danger">{{ transaction_fees }}</span>
-      </div>
-      <div class="col-md-auto border border-primary-subtle bg-light rounded mb-3">
-        <label class="col-form-label-p-0 text-secondary">Exchange Connection Fees</label>
-        <br>
-        <span class="h5 fw-semibold text-danger">{{ exchange_fees }}</span>
-      </div>
-      <div class="col-md-auto border border-primary-subtle bg-light rounded mb-3">
-        <label class="col-form-label-p-0 text-secondary">Financial Transaction Tax</label>
-        <br>
-        <span class="h5 fw-semibold text-danger">{{ ftt_fees }}</span>
-      </div>
-      <div class="col-md-auto border border-primary-subtle bg-light rounded mb-3">
-        <label class="col-form-label-p-0 text-secondary">ADR/GDR Passthrough Fees</label>
-        <br>
-        <span class="h5 fw-semibold text-danger">{{ adr_fees }}</span>
-      </div>
+        <div class="col-md-auto border border-primary-subtle bg-light rounded mb-3">
+            <label class="col-form-label-p-0 text-secondary">Transaction Fees</label>
+            <br>
+            <span class="h5 fw-semibold text-danger">{{ transaction_fees }}</span>
+        </div>
+        <div class="col-md-auto border border-primary-subtle bg-light rounded mb-3">
+            <label class="col-form-label-p-0 text-secondary">Exchange Connection Fees</label>
+            <br>
+            <span class="h5 fw-semibold text-danger">{{ exchange_fees }}</span>
+        </div>
+        <div class="col-md-auto border border-primary-subtle bg-light rounded mb-3">
+            <label class="col-form-label-p-0 text-secondary">Financial Transaction Tax</label>
+            <br>
+            <span class="h5 fw-semibold text-danger">{{ ftt_fees }}</span>
+        </div>
+        <div class="col-md-auto border border-primary-subtle bg-light rounded mb-3">
+            <label class="col-form-label-p-0 text-secondary">ADR/GDR Passthrough Fees</label>
+            <br>
+            <span class="h5 fw-semibold text-danger">{{ adr_fees }}</span>
+        </div>
     </div>
     <div class="col">
-      <h4 class="mb-3">Fees</h4>
-      <table class="table table-hover table-sm">
-        {% block table.thead %}
-        <thead>
-            <tr>
-                <th scope="col">Date</th>
-                <th scope="col">Type</th>
-                <th scope="col">Description</th>
-                <th scope="col">Fee Amount</th>
-            </tr>
-        </thead>
-        {% endblock table.thead %}
-        {% block table.tbody %}
-        <tbody>
-            {% for fee in fees %}
+        <h4 class="mb-3">Fees</h4>
+        <table class="table table-hover table-sm">
+            {% block table.thead %}
+            <thead>
                 <tr>
-                    <td>{{ fee.date }}<br><small class="fw-lighter">{{ fee.time }}</small></td>  
+                    <th scope="col">Date</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Fee Amount</th>
+                </tr>
+            </thead>
+            {% endblock table.thead %}
+            {% block table.tbody %}
+            <tbody>
+                {% for fee in fees %}
+                <tr>
+                    <td>{{ fee.date }}<br><small class="fw-lighter">{{ fee.time }}</small></td>
                     <td><span class="red-pill">{{ fee.type }}</span></td>
                     <td>{{ fee.description }}</td>
                     <td>{{ fee.fees }}</td>
                 </tr>
-            {% endfor %}
-        </tbody>
-        {% endblock table.tbody %}
-      </table>
+                {% endfor %}
+            </tbody>
+            {% endblock table.tbody %}
+        </table>
     </div>
-  </div>
+</div>
 {% endblock %}
