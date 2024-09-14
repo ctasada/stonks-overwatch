@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from typing import Optional
 
 from currency_symbols import CurrencySymbols
 
@@ -40,7 +41,7 @@ class LocalizationUtility:
         return round(value, 3)
 
     @staticmethod
-    def format_money_value(value: float, currency: str = None, currency_symbol: str = None) -> str:
+    def format_money_value(value: float, currency: Optional[str] = None, currency_symbol: Optional[str] = None) -> str:
         """
         Formats a numeric value as a currency string with the specified currency symbol.
         If no currency symbol is provided, it uses the base currency symbol.

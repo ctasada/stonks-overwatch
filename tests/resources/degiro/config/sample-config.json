@@ -1,0 +1,14 @@
+{
+    "degiro": {
+        "credentials": {
+            "username": "testuser",
+            "password": "testpassword",
+            "int_account": 987654,
+            "totp_secret_key": "ABCDEFGHIJKLMNOP",
+            "one_time_password": 123456,
+            "user_token": "token123"
+        },
+        "base_currency": "EUR",
+        "start_date": "2023-01-01"
+    }
+}

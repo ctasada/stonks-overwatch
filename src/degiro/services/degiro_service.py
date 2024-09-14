@@ -1,5 +1,3 @@
-import logging
-import os
 from datetime import timedelta
 from typing import Any, List, Optional
 
@@ -26,10 +24,12 @@ class CredentialsManager:
             password=getattr(credentials, 'password', '') or getattr(degiro_credentials, 'password', ''),
             totp_secret_key=getattr(credentials, 'totp_secret_key', None)
                 or getattr(degiro_credentials, 'totp_secret_key', None),
+            one_time_password=getattr(credentials, 'one_time_password', None)
+                or getattr(degiro_credentials, 'one_time_password', None),
         )
 
 class DeGiroService:
-    def __init__(self, credentials_manager: CredentialsManager = None):
+    def __init__(self, credentials_manager: Optional[CredentialsManager] = None):
         self.credentials_manager = credentials_manager or CredentialsManager()
         self.api_client = TradingApi(credentials=self.credentials_manager.credentials)
 
