@@ -34,6 +34,11 @@ poetry run ruff check
 poetry run ruff format
 ```
 
+Run Tests
+```shell
+poetry run pytest
+```
+
 Create Migrations
 ```shell
 poetry run src/manage.py makemigrations degiro
@@ -78,6 +83,7 @@ poetry run src/manage.py runscript init_db
 - Dashboard: JNJ & JPM are associated with the wrong sector
 - Portfolio is not updated on startup. A migration needs to be forced
 - IBERDROLA Non-Tradable Dividends: Are properly calculated? Doesn't seem to calculate quantity properly
+- When Login, connection needs to be recreated if int_account or user_token are not initially provided
 
 ## TODOs
 - [ ] DeGiro Client: Stop using Totp and request 2FA for each connection

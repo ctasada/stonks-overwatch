@@ -10,9 +10,9 @@ class DegiroCredentials:
     def __init__(self,
                  username: str,
                  password: str,
-                 int_account: Optional[str] = None,
+                 int_account: Optional[int] = None,
                  totp_secret_key: Optional[str] = None,
-                 one_time_password: Optional[str] = None,
+                 one_time_password: Optional[int] = None,
                  user_token: Optional[str] = None):
         self.username = username
         self.password = password
@@ -20,6 +20,17 @@ class DegiroCredentials:
         self.totp_secret_key = totp_secret_key
         self.user_token = user_token
         self.one_time_password = one_time_password
+
+    def __eq__(self, value: object) -> bool:
+        if isinstance(value, DegiroCredentials):
+            return (
+                self.username == value.username
+                and self.password == value.password
+                and self.int_account == value.int_account
+                and self.totp_secret_key == value.totp_secret_key
+                and self.user_token == value.user_token
+                and self.one_time_password == value.one_time_password
+            )
 
     def to_dict(self) -> dict:
         return {
@@ -68,6 +79,15 @@ class DegiroConfig:
         self.base_currency = base_currency
         self.start_date = start_date
 
+    def __eq__(self, value: object) -> bool:
+        if isinstance(value, DegiroConfig):
+            return (
+                self.credentials == value.credentials
+                and self.base_currency == value.base_currency
+                and self.start_date == value.start_date
+            )
+        return False
+
     @classmethod
     def from_dict(cls, data: dict) -> "DegiroConfig":
         credentials_data = data.get("credentials")
@@ -76,6 +96,7 @@ class DegiroConfig:
         start_date_str = data.get("start_date", "")
         # FIXME: Use Localization method
         start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date() if start_date_str else date.today()
+
         return cls(credentials, base_currency, start_date)
 
     @classmethod

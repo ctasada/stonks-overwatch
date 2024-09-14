@@ -63,7 +63,7 @@ class DateTimeUtility:
         """
         days = DateTimeUtility.convert_interval_to_days(interval)
         start_date = from_date - timedelta(days=days)
-        return [start_date + timedelta(days=i) for i in range(1, days)]
+        return [start_date + timedelta(days=i) for i in range(0, days)]
 
     @staticmethod
     def convert_interval_to_days(interval: Interval) -> int:
