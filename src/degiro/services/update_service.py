@@ -15,7 +15,7 @@ from degiro.repositories.cash_movements_repository import CashMovementsRepositor
 from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.transactions_repository import TransactionsRepository
 from degiro.services.degiro_service import DeGiroService
-from degiro.utils.datetime import calculate_dates_in_interval, calculate_interval
+from degiro.utils.datetime import DateTimeUtility
 from degiro.utils.db_utils import dictfetchall
 from degiro.utils.debug import save_to_json
 from degiro.utils.localization import LocalizationUtility
@@ -357,7 +357,7 @@ class UpdateService():
             product_growth[key]["quotation"]["from_date"] = start_date
             product_growth[key]["quotation"]["to_date"] = final_date
             # Interval should be from start_date, since the QuoteCast query doesn't support more granularity
-            product_growth[key]["quotation"]["interval"] = calculate_interval(start_date)
+            product_growth[key]["quotation"]["interval"] = DateTimeUtility.calculate_interval(start_date)
 
         # Delete the non-tradable products
         for key in delete_keys:
@@ -372,7 +372,7 @@ class UpdateService():
 
             interval = product_growth[key]["quotation"]["interval"]
             quotes = self.degiro_service.get_product_quotation(issue_id, interval)
-            dates = calculate_dates_in_interval(date.today(), interval)
+            dates = DateTimeUtility.calculate_dates_in_interval(date.today(), interval)
             quotes_dict = {}
             for count, day in enumerate(dates):
                 # Keep only the dates that are in the quotation range

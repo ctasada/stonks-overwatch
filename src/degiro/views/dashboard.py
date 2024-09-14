@@ -14,7 +14,7 @@ from degiro.data.portfolio import PortfolioData
 from degiro.repositories.cash_movements_repository import CashMovementsRepository
 from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.product_quotations_repository import ProductQuotationsRepository
-from degiro.utils.datetime import calculate_interval
+from degiro.utils.datetime import DateTimeUtility
 from degiro.utils.db_utils import dictfetchall
 from degiro.utils.localization import LocalizationUtility
 
@@ -328,7 +328,7 @@ class Dashboard(View):
             product_growth[key]["quotation"]["fromDate"] = start_date
             product_growth[key]["quotation"]["toDate"] = final_date
             # Interval should be from start_date, since the QuoteCast query doesn't support more granularity
-            product_growth[key]["quotation"]["interval"] = calculate_interval(start_date)
+            product_growth[key]["quotation"]["interval"] = DateTimeUtility.calculate_interval(start_date)
 
         # Delete the non-tradable products
         for key in delete_keys:
