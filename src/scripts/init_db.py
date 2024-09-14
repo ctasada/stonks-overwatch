@@ -18,6 +18,7 @@ import os
 from degiro.services.update_service import UpdateService
 from scripts.commons import IMPORT_FOLDER
 
+
 def init() -> None:
     """Execute needed initializations for the scripts.
 

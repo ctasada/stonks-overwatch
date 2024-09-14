@@ -5,8 +5,16 @@
 <!-- ChartJS -->
 <script src="{% static 'chart.js/dist/chart.umd.js' %}"></script>
 <script src="{% static '@seahsky/chartjs-plugin-autocolors/dist/chartjs-plugin-autocolors.min.js' %}"></script>
-  
+
 <div class="container-fluid row-gap-5">
+    <div class="row mt-2">
+        <div class="col-2 border border-primary-subtle bg-light rounded mb-3">
+            <label class="col-form-label-p-0 text-secondary">Total Deposits</label>
+            <span>
+                <h5 class="mb-1">{{ total_deposits }}</h5>
+            </span>
+        </div>
+    </div>
     <div class="row border border-primary-subtle bg-light rounded mb-3">
         <div class="row mt-2">
             <div class="col">
@@ -16,7 +24,7 @@
                 <div class="btn-group btn-group-sm" role="group">
                     <input type="radio" class="btn-check" name="dividendsTime" id="yearButton" autocomplete="off">
                     <label class="btn btn-outline-primary" for="yearButton">Year</label>
-                
+
                     <input type="radio" class="btn-check" name="dividendsTime" id="monthButton" autocomplete="off" checked>
                     <label class="btn btn-outline-primary" for="monthButton">Month</label>
                 </div>
@@ -28,238 +36,241 @@
     </div>
     <div class="row border border-primary-subtle bg-light rounded mb-3 pb-3">
         <div class="col-sm" style="position: relative; height:40vh">
-          <canvas id="dividends-chart"></canvas>
+            <canvas id="dividends-chart"></canvas>
         </div>
         <div class="col-sm diversification-scrollable-list list-group mt-3" style="height:40vh">
-          {% for dividend in dividendsDiversification.table %}
-          <div class="list-group-item rounded m-1">
-            <div class="progress-bar-background" style="width: {{ dividend.weight }}%;"></div>
-            <div class="diversification-weight">
-                <div>{{ dividend.name }}</div>
-                <div>{{ dividend.formattedDividendsSize }}</div>
+            {% for dividend in dividendsDiversification.table %}
+            <div class="list-group-item rounded m-1">
+                <div class="progress-bar-background" style="width: {{ dividend.weight }}%;"></div>
+                <div class="diversification-weight">
+                    <div>{{ dividend.name }}</div>
+                    <div>{{ dividend.formattedDividendsSize }}</div>
+                </div>
             </div>
-          </div>
-          {% endfor %}
+            {% endfor %}
         </div>
     </div>
     <div class="row border border-primary-subtle bg-light rounded mb-3" style="background-color:#dbf5ff">
-        <div class="row"><h5 class="mb-1">Dividends Overview</h5></div>
+        <div class="row">
+            <h5 class="mb-1">Dividends Overview</h5>
+        </div>
         {% for key, value in dividendsCalendar.items %}
-            <div class="col-sm-4 border">
-                <div class="row-sm mt-1 fs-5">
-                    {{ key }}
+        <div class="col-sm-4 border">
+            <div class="row-sm mt-1 fs-5">
+                {{ key }}
+            </div>
+            <div class="row m-2">
+                <div class="col text-left">
+                    {{ value.payouts }} payouts
                 </div>
-                <div class="row m-2">
-                    <div class="col text-left">
-                        {{ value.payouts }} payouts
-                    </div>
-                    <div class="col-md-auto text-right border rounded-pill" style="background-color: #7386D5; color: white">
-                        {{ value.formatedTotal }}
-                    </div>
+                <div class="col-md-auto text-right border rounded-pill" style="background-color: #7386D5; color: white">
+                    {{ value.formatedTotal }}
                 </div>
-                {% if value.payouts > 0 %}
-                    <!-- When there's no Payout, there is no Day field, so skip the condition to avoid a silent error -->
-                    {% for day, dividends in value.days.items %}
-                        {% for key, dividend in dividends.items %}
-                            {% if dividend.change != 0 %}
-                                {% if dividend.isUpcoming %}
-                                <div class="row m-2 border rounded-pill upcoming-dividends">
-                                {% else %}
-                                <div class="row m-2 border rounded-pill dividends">
-                                {% endif %}
-                                    <div class="col-sm-1 text-left">
-                                        {{ day }}
-                                    </div>
-                                    <div class="col-sm-8 text-truncate">
-                                        {{ dividend.stockName }}
-                                    </div>
-                                    <div class="col-sm-3 text-right">
-                                        {{ dividend.formatedChange }}
-                                    </div>
-                                </div>
+            </div>
+            {% if value.payouts > 0 %}
+                <!-- When there's no Payout, there is no Day field, so skip the condition to avoid a silent error -->
+                {% for day, dividends in value.days.items %}
+                    {% for key, dividend in dividends.items %}
+                        {% if dividend.change != 0 %}
+                            {% if dividend.isUpcoming %}
+                            <div class="row m-2 border rounded-pill upcoming-dividends">
+                            {% else %}
+                            <div class="row m-2 border rounded-pill dividends">
                             {% endif %}
-                        {% endfor %}
+                                <div class="col-sm-1 text-left">
+                                    {{ day }}
+                                </div>
+                                <div class="col-sm-8 text-truncate">
+                                    {{ dividend.stockName }}
+                                </div>
+                                <div class="col-sm-3 text-right">
+                                    {{ dividend.formatedChange }}
+                                </div>
+                            </div>
+                        {% endif %}
                     {% endfor %}
-                {% endif %}
+                {% endfor %}
+            {% endif %}
             </div>
 
             {% if forloop.counter|divisibleby:3 %}
-                <!-- Force next columns to break to new line at md breakpoint and up -->
-                <div class="w-100 d-none d-md-block"></div>
+            <!-- Force next columns to break to new line at md breakpoint and up -->
+            <div class="w-100 d-none d-md-block"></div>
             {% endif %}
         {% endfor %}
+        </div>
     </div>
-</div>
 
-<script>
-    // Customize colors with https://www.npmjs.com/package/@seahsky/chartjs-plugin-autocolors#customize
-    const autocolors = window['@seahsky/chartjs-plugin-autocolors'];
-    const currencySymbol = "{{ currencySymbol }}";
+    <script>
+        // Customize colors with https://www.npmjs.com/package/@seahsky/chartjs-plugin-autocolors#customize
+        const autocolors = window['@seahsky/chartjs-plugin-autocolors'];
+        const currencySymbol = "{{ currencySymbol }}";
 
-    $('#yearButton').on('click', function () {
-        drawDividends("Year")
-    })
-    $('#monthButton').on('click', function () {
-        drawDividends("Month")
-    })
+        $('#yearButton').on('click', function () {
+            drawDividends("Year")
+        })
+        $('#monthButton').on('click', function () {
+            drawDividends("Month")
+        })
 
-    function getDividendsPerMonth() {
-        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-        const data = {
-            labels: months,
-            datasets: [
-                {% for key, value in dividendsGrowth.items %}
-                {
-                    label: "{{ key }}",
-                    data: {{ value }},
-                    borderWidth: 1
-                },
-                {% endfor %}
-            ]
-        };
+        function getDividendsPerMonth() {
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            const data = {
+                labels: months,
+                datasets: [
+                    {% for key, value in dividendsGrowth.items %}
+                    {
+                        label: "{{ key }}",
+                        data: {{ value }},
+                        borderWidth: 1
+                    },
+                    {% endfor %}
+                ]
+            };
 
-        return data
-    }
-
-    function getDividendsPerYear() {
-        const values = []
-        const years = []
-
-        {% for year, data in dividendsGrowth.items %}
-        {
-            const sum = {{ data }}.reduce((acc, val) => acc + val, 0);
-            years.push({{ year }})
-            values.push(sum)
+            return data
         }
-        {% endfor %}
 
-        const data = {
-            labels: years,
-            datasets: [
-                {
-                    data: values,
-                    borderWidth: 1
-                }
-            ]
-        };
+        function getDividendsPerYear() {
+            const values = []
+            const years = []
 
-        return data
-    }
+            {% for year, data in dividendsGrowth.items %}
+            {
+                const sum = {{ data }}.reduce((acc, val) => acc + val, 0);
+                years.push({{ year }})
+                values.push(sum)
+            }
+            {% endfor %}
 
-    function drawDividends(datatype) {
-        const config = {
-            type: 'bar',
-            data: datatype == "Month" ? getDividendsPerMonth() : getDividendsPerYear(),
-            plugins: [
-                autocolors
-            ],
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
+            const data = {
+                labels: years,
+                datasets: [
+                    {
+                        data: values,
+                        borderWidth: 1
                     }
-                },
-                maintainAspectRatio: false,
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false,
-                        position: 'top',
-                    },
-                    title: {
-                        display: false,
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
+                ]
+            };
 
-                                if (label) {
-                                    label += ': ';
+            return data
+        }
+
+        function drawDividends(datatype) {
+            const config = {
+                type: 'bar',
+                data: datatype == "Month" ? getDividendsPerMonth() : getDividendsPerYear(),
+                plugins: [
+                    autocolors
+                ],
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false,
+                            position: 'top',
+                        },
+                        title: {
+                            display: false,
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    let label = context.dataset.label || '';
+
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(context.parsed.y);
+                                    }
+                                    return label;
                                 }
-                                if (context.parsed.y !== null) {
-                                    label += new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(context.parsed.y);
-                                }
-                                return label;
                             }
                         }
                     }
-                }
-            },
-        }
-
-        let chartStatus = Chart.getChart("dividends-growth"); // <canvas> id
-        if (chartStatus != undefined) {
-            chartStatus.destroy();
-        }
-
-        let chart = new Chart(document.getElementById("dividends-growth").getContext("2d"), config);
-    }
-
-    function getDoughnutConfig(pieTitle, data, valuesDict) {
-      return {
-        type: 'doughnut',
-        data: data,
-        plugins: [
-          autocolors
-        ],
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              display: false,
-            },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  var value = valuesDict[context.datasetIndex][context.dataIndex].value;
-                  value = Intl.NumberFormat().format(value);
-                  return currencySymbol + ' ' + value;
-                }
-              }
-            },
-            title: {
-              display: true,
-              text: pieTitle,
-              font: {
-                size: 20
-              }
-            },
-            autocolors: {
-              mode: 'data',
-              offset: 5,
+                },
             }
-          }
-        },
-      };
-    }
 
-    function drawDividendsDiversification() {
-      let valuesDict = [
-        [
-        {% for dividend in dividendsDiversification.chart.labels %}
-          {
-            "label" : "{{ dividend }}",
-            "value" : {{ dividendsDiversification.chart.values|index:forloop.counter0 }},
-          },
-        {% endfor %}
-        ]
-      ];
-      const data = {
-        labels: {{ dividendsDiversification.chart.labels|safe }},
-        datasets: [
-          {
-            data: {{ dividendsDiversification.chart.values }},
-            borderWidth: 1,
-          }
-        ]
-      };
+            let chartStatus = Chart.getChart("dividends-growth"); // <canvas> id
+            if (chartStatus != undefined) {
+                chartStatus.destroy();
+            }
 
-      const configDoughnut = getDoughnutConfig('Dividends', data, valuesDict);
-      let doughnutHoldingsChart = new Chart(document.getElementById("dividends-chart").getContext("2d"), configDoughnut);
-    }
+            let chart = new Chart(document.getElementById("dividends-growth").getContext("2d"), config);
+        }
 
-    drawDividends("Month")
-    drawDividendsDiversification()
-</script>
+        function getDoughnutConfig(pieTitle, data, valuesDict) {
+            return {
+                type: 'doughnut',
+                data: data,
+                plugins: [
+                    autocolors
+                ],
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false,
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    var value = valuesDict[context.datasetIndex][context.dataIndex].value;
+                                    value = Intl.NumberFormat().format(value);
+                                    return currencySymbol + ' ' + value;
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: pieTitle,
+                            font: {
+                                size: 20
+                            }
+                        },
+                        autocolors: {
+                            mode: 'data',
+                            offset: 5,
+                        }
+                    }
+                },
+            };
+        }
+
+        function drawDividendsDiversification() {
+            let valuesDict = [
+                [
+                    {% for dividend in dividendsDiversification.chart.labels %}
+                    {
+                        "label" : "{{ dividend }}",
+                        "value" : {{ dividendsDiversification.chart.values|index:forloop.counter0 }},
+                    },
+                    {% endfor %}
+                ]
+            ];
+            const data = {
+                labels: {{ dividendsDiversification.chart.labels|safe }},
+                datasets: [
+                    {
+                        data: {{ dividendsDiversification.chart.values }},
+                        borderWidth: 1,
+                    }
+                ]
+            };
+
+            const configDoughnut = getDoughnutConfig('Dividends', data, valuesDict);
+            let doughnutHoldingsChart = new Chart(document.getElementById("dividends-chart").getContext("2d"), configDoughnut);
+        }
+
+        drawDividends("Month")
+        drawDividendsDiversification()
+    </script>
+</div>
 {% endblock %}

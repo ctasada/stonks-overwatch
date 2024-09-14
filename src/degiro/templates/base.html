@@ -10,7 +10,7 @@
     <title>DeGiro Stocks Portfolio</title>
 
     <link rel="icon" type="image/png" href="{%  static 'degiro-32x32.png' %}" sizes="32x32">
-    
+
     <!-- Bootstrap CSS CDN -->
     <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
     <link href="{% static 'bootstrap-icons/font/bootstrap-icons.css' %}" rel="stylesheet">
@@ -61,7 +61,7 @@
                         Dividends
                     </a>
                 </li>
-                
+
                 {% url 'fees' as url %}
                 <li class="{% if request.path == url %}active{% endif %}">
                     <a href="{{ url }}">
@@ -100,7 +100,7 @@
                         Account Statement
                     </a>
                 </li>
-            </ul> 
+            </ul>
         </nav>
 
         <!-- Page Content  -->
@@ -111,7 +111,9 @@
                     <button type="button" id="sidebarCollapse" class="btn btn-info">
                         <i class="fas fa-bars"></i>
                     </button>
-                    <button class="btn btn-dark d-inline-block d-lg-none ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <button class="btn btn-dark d-inline-block d-lg-none ml-auto" type="button" data-toggle="collapse"
+                        data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
                         <i class="fas fa-align-justify"></i>
                     </button>
                     <!-- Shows Total Portfolio  -->
@@ -120,8 +122,8 @@
             </nav>
 
             <div class="scrollable-area" style="height:100vh">
-            {% block content %}
-            {% endblock %}
+                {% block content %}
+                {% endblock %}
             </div>
         </div>
     </div>
