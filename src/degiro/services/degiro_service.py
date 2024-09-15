@@ -56,7 +56,7 @@ class DeGiroService:
         return self.__check_connection__()
 
     def __check_connection__(self) -> bool:
-        return self.api_client.connection_storage and self.api_client.connection_storage.connected.isSet()
+        return self.api_client.connection_storage and self.api_client.connection_storage.connected.is_set()
 
     def get_client(self) -> TradingApi:
         self.check_connection()
