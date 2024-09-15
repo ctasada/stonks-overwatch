@@ -27,8 +27,10 @@ class Dividends(View):
         dividends_calendar = self._get_dividends_calendar(dividends_overview, upcoming_dividends)
         dividends_growth = self._get_dividends_growth(dividends_calendar)
         dividends_diversification = self._get_diversification(dividends_overview)
+        total_dividends = self._get_total_dividends(dividends_calendar)
 
         context = {
+            "total_dividends": total_dividends,
             "dividendsCalendar": dividends_calendar,
             "dividendsDiversification": dividends_diversification,
             "dividendsGrowth": dividends_growth,
@@ -115,7 +117,7 @@ class Dividends(View):
 
         return dividends_calendar
 
-    def _get_dividends_growth(self, dividends_calendar) -> dict:
+    def _get_dividends_growth(self, dividends_calendar: dict) -> dict:
         dividends_growth = {}
 
         for month_year in dividends_calendar.keys():
@@ -132,6 +134,14 @@ class Dividends(View):
         # We want the Dividends Growth chronologically sorted
         dividends_growth = dict(sorted(dividends_growth.items(), key=lambda item: item[0]))
         return dividends_growth
+
+    def _get_total_dividends(self, dividends_calendar: dict) -> str:
+        total_dividends = 0
+        for month_year in dividends_calendar.keys():
+            month_entry = dividends_calendar.setdefault(month_year, {})
+            total_dividends += month_entry["total"]
+
+        return LocalizationUtility.format_money_value(value=total_dividends, currency=self.baseCurrency)
 
     def _get_diversification(self, dividends_overview: dict) -> dict:
         dividends_table = []
