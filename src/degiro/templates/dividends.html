@@ -7,12 +7,11 @@
 <script src="{% static '@seahsky/chartjs-plugin-autocolors/dist/chartjs-plugin-autocolors.min.js' %}"></script>
 
 <div class="container-fluid row-gap-5">
-    <div class="row mt-2">
-        <div class="col-2 border border-primary-subtle bg-light rounded mb-3">
-            <label class="col-form-label-p-0 text-secondary">Total Deposits</label>
-            <span>
-                <h5 class="mb-1">{{ total_deposits }}</h5>
-            </span>
+    <div class="row mt-2 column-gap-3">
+        <div class="col-md-auto border border-primary-subtle bg-light rounded mb-3">
+            <label class="col-form-label-p-0 text-secondary">Total Dividends</label>
+            <br>
+            <span class="h5 fw-semibold text-success">{{ total_dividends }}</span>
         </div>
     </div>
     <div class="row border border-primary-subtle bg-light rounded mb-3">
