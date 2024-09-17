@@ -25,7 +25,7 @@ poetry run src/manage.py npminstall
 Run the server
 ```shell
 poetry run src/manage.py runserver
-open http://127.0.0.1:8000/degiro
+open http://127.0.0.1:8000
 ```
 
 Run Linter
