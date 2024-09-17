@@ -48,7 +48,7 @@ class ProductInfoRepository:
             )
             return dictfetchone(cursor)
 
-    def get_products_isin(self) -> dict:
+    def get_products_isin(self) -> list[str]:
         """Get product information. The information is retrieved from the DB.
 
         ### Returns

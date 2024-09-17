@@ -1,0 +1,26 @@
+{
+    "Apple_Buy": {
+        "id": 188748018,
+        "product_id": 331868,
+        "date": "2020-03-11T18:01:46Z",
+        "buysell": "B",
+        "price": 275.0,
+        "quantity": 10,
+        "total": -2750.0,
+        "order_type_id": 0,
+        "counter_party": "MK",
+        "transfered": false,
+        "fx_rate": 1.127,
+        "nett_fx_rate": 1.1259,
+        "gross_fx_rate": 1.127,
+        "auto_fx_fee_in_base_currency": -2.440108825,
+        "total_in_base_currency": -2440.108825,
+        "fee_in_base_currency": -0.54,
+        "total_fees_in_base_currency": -2.980108825,
+        "total_plus_fee_in_base_currency": -2440.648825,
+        "total_plus_all_fees_in_base_currency": -2443.088933825,
+        "transaction_type_id": 0,
+        "trading_venue": "ARCX",
+        "executing_entity_id": "4PQUHN3JPFGFNF3BB653"
+    }
+}

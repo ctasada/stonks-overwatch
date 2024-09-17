@@ -25,6 +25,7 @@ ruff = "^0.6.5"
 pytest = "^8.3.3"
 pytest-cov = "^5.0.0"
 requests-mock = "^1.12.1"
+pytest-django = "^4.9.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -121,6 +122,13 @@ docstring-code-line-length = "dynamic"
 source = ['src']
 
 [tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "src.settings"
+testpaths = ["tests"]
+python_files = [
+    "test_*.py"
+]
+pythonpath = "src"
 addopts = [
+    '--import-mode=importlib',
     '--cov-report=html:pytest'
 ]
