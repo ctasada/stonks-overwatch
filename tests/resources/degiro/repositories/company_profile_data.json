@@ -1,0 +1,663 @@
+{
+    "US5949181045": {
+        "data": {
+            "contacts": {
+                "NAME": "Microsoft Corp",
+                "ADDRESS": "One Microsoft Way",
+                "POSTCODE": "98052-6399",
+                "CITY": "REDMOND",
+                "COUNTRY": "United States (USA)",
+                "TELEPHONE": "(+1) 425 8828080",
+                "FAX": "(+1) 425 7067329",
+                "EMAIL": "msft@microsoft.com",
+                "WEBSITE": "https://www.microsoft.com/en-us",
+                "STATEREGION": "WA"
+            },
+            "management": [
+                {
+                    "name": "Satya Nadella",
+                    "function": "Chmn./CEO",
+                    "longFunction": "Chairman of the Board, Chief Executive Officer",
+                    "age": 56,
+                    "since": "2011-02-09",
+                    "titleStart": "2021-06-16"
+                },
+                {
+                    "name": "Bradford Lee Smith",
+                    "function": "Pres./Vice Ch.-Mgt.",
+                    "longFunction": "President and Vice Chair",
+                    "age": 65,
+                    "since": "2001-11-21",
+                    "titleStart": "2021-09-01"
+                },
+                {
+                    "name": "Amy E. Hood",
+                    "function": "CFO/Exec. VP",
+                    "longFunction": "Chief Financial Officer, Executive Vice President",
+                    "age": 52,
+                    "since": "2013-05-08",
+                    "titleStart": "2013-07-01"
+                },
+                {
+                    "name": "Kathleen T. Hogan",
+                    "function": "Chief HR/Exec. VP",
+                    "longFunction": "Executive Vice President, Chief Human Resource Officer",
+                    "age": 58,
+                    "since": "2014-11-01",
+                    "titleStart": "2023-01-01"
+                },
+                {
+                    "name": "Takeshi Numoto",
+                    "function": "Exec. VP/CMO",
+                    "longFunction": "Executive Vice President, Chief Marketing Officer",
+                    "since": "2023-10-01",
+                    "titleStart": "2023-10-01"
+                },
+                {
+                    "name": "Judson B. Althoff",
+                    "function": "Exec. VP",
+                    "longFunction": "Executive Vice President, Chief Commercial Officer",
+                    "age": 51,
+                    "since": "2021-07-01",
+                    "titleStart": "2021-07-01"
+                },
+                {
+                    "name": "Christopher D. Young",
+                    "function": "Exec. VP",
+                    "longFunction": "Executive Vice President - Business Development, Strategy, and Ventures",
+                    "age": 52,
+                    "since": "2020-11-11",
+                    "titleStart": "2020-11-11"
+                }
+            ],
+            "issues": [
+                {
+                    "id": 1,
+                    "name": "Ordinary Shares",
+                    "ticker": "MSFT",
+                    "exchange": "NASDAQ",
+                    "description": "Common Stock (C)",
+                    "mostRecentSplitValue": "2.0",
+                    "mostRecentSplitDate": "2003-02-18T01:00:00+01:00"
+                },
+                {
+                    "id": 2,
+                    "name": "Preference Shares",
+                    "exchange": "Over The Counter",
+                    "description": "Preferred Stock (P)"
+                }
+            ],
+            "sector": "Technology",
+            "industry": "Software (NEC)",
+            "employees": 228000,
+            "businessSummary": "Microsoft Corporation is a technology company. The Company develops and supports software, services, devices, and solutions. The Company\u2019s segments include Productivity and Business Processes, Intelligent Cloud, and More Personal Computing. The Productivity and Business Processes segment consists of products and services in its portfolio of productivity, communication, and information services. This segment primarily comprises: Office Commercial, Office Consumer, LinkedIn, and Dynamics business solutions. The Intelligent Cloud segment consists of server products and cloud services, including Azure and other cloud services, SQL Server, Windows Server, Visual Studio, System Center, and related Client Access Licenses (CALs), and Nuance and GitHub; and Enterprise Services, including enterprise support services, industry solutions and Nuance professional services. The More Personal Computing segment primarily comprises Windows, devices, gaming, and search and news advertising.",
+            "financialSummary": "BRIEF: For the fiscal year ended 30 June 2024, Microsoft Corp revenues increased 16% to $245.12B. Net income increased 22% to $88.14B. Revenues reflect Intelligent Cloud segment increase of 20% to $105.36B, Productivity and Business Processes segment increase of 12% to $77.73B, More Personal Computing segment increase of 13% to $62.03B, United States segment increase of 17% to $124.7B, Other countries segment increase of 14% to $120.42B.",
+            "ratios": {
+                "ratiosGroups": [
+                    {
+                        "name": "Price and Volume",
+                        "items": [
+                            {
+                                "id": "NPRICE",
+                                "name": "Price - closing or last bid",
+                                "type": "N",
+                                "value": "430.59000"
+                            },
+                            {
+                                "id": "NHIG",
+                                "name": "Price - 12 month high",
+                                "type": "N",
+                                "value": "468.35000"
+                            },
+                            {
+                                "id": "NLOW",
+                                "name": "Price - 12 month low",
+                                "type": "N",
+                                "value": "309.45000"
+                            },
+                            {
+                                "id": "PDATE",
+                                "name": "Pricing date",
+                                "type": "D",
+                                "value": "2024-09-13T00:00:00"
+                            },
+                            {
+                                "id": "VOL10DAVG",
+                                "name": "Volume - avg. trading volume for the last ten days",
+                                "type": "N",
+                                "value": "18101240.00000"
+                            },
+                            {
+                                "id": "EV",
+                                "name": "EV",
+                                "type": "N",
+                                "value": "3203824000000.00000"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Income Statement",
+                        "items": [
+                            {
+                                "id": "MKTCAP",
+                                "name": "Market capitalization",
+                                "type": "N",
+                                "value": "3200592000000.00000"
+                            },
+                            {
+                                "id": "TTMREV",
+                                "name": "Revenue - trailing 12 month",
+                                "type": "N",
+                                "value": "245122000000.00000"
+                            },
+                            {
+                                "id": "TTMEBITD",
+                                "name": "EBITD - trailing 12 month",
+                                "type": "N",
+                                "value": "131720000000.00000"
+                            },
+                            {
+                                "id": "TTMNIAC",
+                                "name": "Net Income available to common - trailing 12 months",
+                                "type": "N",
+                                "value": "88136000000.00000"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Per share data",
+                        "items": [
+                            {
+                                "id": "TTMEPSXCLX",
+                                "name": "EPS excluding extraordinary items - trailing 12 month",
+                                "type": "N",
+                                "value": "11.79988"
+                            },
+                            {
+                                "id": "TTMREVPS",
+                                "name": "Revenue/share - trailing 12 month",
+                                "type": "N",
+                                "value": "32.81749"
+                            },
+                            {
+                                "id": "QBVPS",
+                                "name": "Book value (Total Equity) per share - most recent quarter",
+                                "type": "N",
+                                "value": "36.11474"
+                            },
+                            {
+                                "id": "QCSHPS",
+                                "name": "Cash per share - most recent quarter",
+                                "type": "N",
+                                "value": "10.16182"
+                            },
+                            {
+                                "id": "TTMCFSHR",
+                                "name": "Cash Flow per share  - trailing 12 month",
+                                "type": "N",
+                                "value": "14.78368"
+                            },
+                            {
+                                "id": "TTMDIVSHR",
+                                "name": "Dividends per share - trailing 12 month",
+                                "type": "N",
+                                "value": "3.00000"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Other Ratios",
+                        "items": [
+                            {
+                                "id": "TTMGROSMGN",
+                                "name": "Gross Margin - trailing 12 month",
+                                "type": "N",
+                                "value": "69.76444"
+                            },
+                            {
+                                "id": "TTMROEPCT",
+                                "name": "Return on average equity - trailing 12 month",
+                                "type": "N",
+                                "value": "37.13335"
+                            },
+                            {
+                                "id": "TTMPR2REV",
+                                "name": "Price to sales - trailing 12 month",
+                                "type": "N",
+                                "value": "13.05714"
+                            },
+                            {
+                                "id": "PEEXCLXOR",
+                                "name": "P/E excluding extraordinary items - TTM",
+                                "type": "N",
+                                "value": "36.49105"
+                            },
+                            {
+                                "id": "PRICE2BK",
+                                "name": "Price to Book - most recent quarter",
+                                "type": "N",
+                                "value": "11.92283"
+                            },
+                            {
+                                "id": "Employees",
+                                "name": "Employees",
+                                "type": "N",
+                                "value": "228000"
+                            }
+                        ]
+                    }
+                ],
+                "currency": "USD",
+                "priceCurrency": "USD"
+            },
+            "forecastData": {
+                "ratios": [
+                    {
+                        "id": "ConsRecom",
+                        "name": "ConsRecom",
+                        "type": "N",
+                        "value": "1.6792"
+                    },
+                    {
+                        "id": "TargetPrice",
+                        "name": "TargetPrice",
+                        "type": "N",
+                        "value": "488.04290"
+                    },
+                    {
+                        "id": "ProjLTGrowthRate",
+                        "name": "ProjLTGrowthRate",
+                        "type": "N",
+                        "value": "16.2360"
+                    },
+                    {
+                        "id": "ProjPE",
+                        "name": "ProjPE",
+                        "type": "N",
+                        "value": "36.51079"
+                    },
+                    {
+                        "id": "ProjSales",
+                        "name": "ProjSales",
+                        "type": "N",
+                        "value": "244924644800.00000"
+                    },
+                    {
+                        "id": "ProjSalesQ",
+                        "name": "ProjSalesQ",
+                        "type": "N",
+                        "value": "64347631100.00000"
+                    },
+                    {
+                        "id": "ProjEPS",
+                        "name": "ProjEPS",
+                        "type": "N",
+                        "value": "11.79350"
+                    },
+                    {
+                        "id": "ProjEPSQ",
+                        "name": "ProjEPSQ",
+                        "type": "N",
+                        "value": "2.92990"
+                    },
+                    {
+                        "id": "ProjProfit",
+                        "name": "ProjProfit",
+                        "type": "N",
+                        "value": "88076068100.00000"
+                    },
+                    {
+                        "id": "ProjDPS",
+                        "name": "ProjDPS",
+                        "type": "N",
+                        "value": "2.92330"
+                    }
+                ],
+                "interimEndCalYear": "2024",
+                "interimEndCalMonth": "6",
+                "fiscalYear": "2024",
+                "endMonth": "6",
+                "earningsBasis": "PRX",
+                "consensusType": "Mean"
+            },
+            "businessSummaryLastModified": "2024-08-07T20:43:50",
+            "financialSummaryLastModified": "2024-08-01T20:46:12",
+            "shrFloating": "7427876144.0",
+            "shrOutstanding": "7433038381.0",
+            "laInterimData": "2024-06-30T00:00:00",
+            "laAnnualData": "2024-06-30T00:00:00",
+            "luEmployees": "2024-06-30T00:00:00",
+            "luShares": "2024-07-25T00:00:00",
+            "lastUpdated": "2024-08-01T00:00:00",
+            "usIrsNo": "911144442",
+            "usCikNo": "0000789019",
+            "currency": "U.S. Dollars"
+        }
+    },
+    "US0378331005": {
+        "data": {
+            "contacts": {
+                "NAME": "Apple Inc",
+                "ADDRESS": "One Apple Park Way",
+                "POSTCODE": "95014",
+                "CITY": "CUPERTINO",
+                "COUNTRY": "United States (USA)",
+                "TELEPHONE": "(+1) 408 9961010",
+                "WEBSITE": "https://www.apple.com/",
+                "STATEREGION": "CA"
+            },
+            "management": [
+                {
+                    "name": "Timothy D. Cook",
+                    "function": "CEO/Dir.",
+                    "longFunction": "Chief Executive Officer, Director",
+                    "age": 63,
+                    "since": "1998-03-01",
+                    "titleStart": "2011-08-24"
+                },
+                {
+                    "name": "Luca Maestri",
+                    "function": "CFO/Sr. VP",
+                    "longFunction": "Chief Financial Officer, Senior Vice President",
+                    "age": 60,
+                    "since": "2014-05-29",
+                    "titleStart": "2014-05-29"
+                },
+                {
+                    "name": "Kevan Parekh",
+                    "function": "CFO",
+                    "longFunction": "Chief Financial Officer",
+                    "since": "2025-01-01",
+                    "titleStart": "2025-01-01"
+                },
+                {
+                    "name": "Jeffrey E. Williams",
+                    "function": "COO",
+                    "longFunction": "Chief Operating Officer",
+                    "age": 60,
+                    "since": "2010-07-01",
+                    "titleStart": "2018-11-13"
+                },
+                {
+                    "name": "Katherine L. Adams",
+                    "function": "Sr. VP/Counsel",
+                    "longFunction": "Senior Vice President, General Counsel, Secretary",
+                    "age": 59,
+                    "since": "2017-11-13",
+                    "titleStart": "2017-11-13"
+                },
+                {
+                    "name": "Deirdre O'Brien",
+                    "function": "Sr. VP",
+                    "longFunction": "Senior Vice President - Retail and People",
+                    "age": 57,
+                    "since": "2019-02-05",
+                    "titleStart": "2019-02-05"
+                }
+            ],
+            "issues": [
+                {
+                    "id": 1,
+                    "name": "Ordinary Shares",
+                    "ticker": "AAPL",
+                    "exchange": "NASDAQ",
+                    "description": "Common Stock (C)",
+                    "mostRecentSplitValue": "4.0",
+                    "mostRecentSplitDate": "2020-08-31T02:00:00+02:00"
+                },
+                {
+                    "id": 2,
+                    "name": "Preference Shares",
+                    "exchange": "Not Available",
+                    "description": "Preferred Stock (P)"
+                }
+            ],
+            "sector": "Technology",
+            "industry": "Phones & Smart Phones",
+            "employees": 161000,
+            "businessSummary": "Apple Inc. designs, manufactures and markets smartphones, personal computers, tablets, wearables and accessories, and sells a variety of related services. Its product categories include iPhone, Mac, iPad, and Wearables, Home and Accessories. Its software platforms include iOS, iPadOS, macOS, watchOS, and tvOS. Its services include advertising, AppleCare, cloud services, digital content and payment services. It operates various platforms, including the App Store, that allow customers to discover and download applications and digital content, such as books, music, video, games and podcasts. It also offers digital content through subscription-based services, including Apple Arcade, Apple Fitness+, Apple Music, Apple News+ and Apple TV+. Its products include iPhone 15 Pro, iPhone 15, iPhone 14, iPhone 13, MacBook Air, MacBook Pro, iMac, Mac mini, Mac Studio, Mac Pro, and others. It also provides DarwinAI, which specializes in visual quality inspection using its Explainable AI platform.",
+            "financialSummary": "BRIEF: For the 39 weeks ended 29 June 2024, Apple Inc revenues increased 1% to $296.11B. Net income increased 7% to $79B. Revenues reflect Europe segment increase of 6% to $76.4B, Americas segment increase of 2% to $125.38B, Japan segment increase of 2% to $19.13B. Net income benefited from Americas segment income increase of 13% to $50.64B, Europe segment income increase of 16% to $31.87B, Rest of Asia Pacific segment income increase of 6% to $10B.",
+            "ratios": {
+                "ratiosGroups": [
+                    {
+                        "name": "Price and Volume",
+                        "items": [
+                            {
+                                "id": "NPRICE",
+                                "name": "Price - closing or last bid",
+                                "type": "N",
+                                "value": "222.50000"
+                            },
+                            {
+                                "id": "NHIG",
+                                "name": "Price - 12 month high",
+                                "type": "N",
+                                "value": "237.23000"
+                            },
+                            {
+                                "id": "NLOW",
+                                "name": "Price - 12 month low",
+                                "type": "N",
+                                "value": "164.07500"
+                            },
+                            {
+                                "id": "PDATE",
+                                "name": "Pricing date",
+                                "type": "D",
+                                "value": "2024-09-13T00:00:00"
+                            },
+                            {
+                                "id": "VOL10DAVG",
+                                "name": "Volume - avg. trading volume for the last ten days",
+                                "type": "N",
+                                "value": "46968290.00000"
+                            },
+                            {
+                                "id": "EV",
+                                "name": "EV",
+                                "type": "N",
+                                "value": "3422424000000.00000"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Income Statement",
+                        "items": [
+                            {
+                                "id": "MKTCAP",
+                                "name": "Market capitalization",
+                                "type": "N",
+                                "value": "3382921000000.00000"
+                            },
+                            {
+                                "id": "TTMREV",
+                                "name": "Revenue - trailing 12 month",
+                                "type": "N",
+                                "value": "385603000000.00000"
+                            },
+                            {
+                                "id": "TTMEBITD",
+                                "name": "EBITD - trailing 12 month",
+                                "type": "N",
+                                "value": "131781000000.00000"
+                            },
+                            {
+                                "id": "TTMNIAC",
+                                "name": "Net Income available to common - trailing 12 months",
+                                "type": "N",
+                                "value": "101956000000.00000"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Per share data",
+                        "items": [
+                            {
+                                "id": "TTMEPSXCLX",
+                                "name": "EPS excluding extraordinary items - trailing 12 month",
+                                "type": "N",
+                                "value": "6.56791"
+                            },
+                            {
+                                "id": "TTMREVPS",
+                                "name": "Revenue/share - trailing 12 month",
+                                "type": "N",
+                                "value": "24.85279"
+                            },
+                            {
+                                "id": "QBVPS",
+                                "name": "Book value (Total Equity) per share - most recent quarter",
+                                "type": "N",
+                                "value": "4.38227"
+                            },
+                            {
+                                "id": "QCSHPS",
+                                "name": "Cash per share - most recent quarter",
+                                "type": "N",
+                                "value": "4.05991"
+                            },
+                            {
+                                "id": "TTMCFSHR",
+                                "name": "Cash Flow per share  - trailing 12 month",
+                                "type": "N",
+                                "value": "7.29227"
+                            },
+                            {
+                                "id": "TTMDIVSHR",
+                                "name": "Dividends per share - trailing 12 month",
+                                "type": "N",
+                                "value": "0.97000"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Other Ratios",
+                        "items": [
+                            {
+                                "id": "TTMGROSMGN",
+                                "name": "Gross Margin - trailing 12 month",
+                                "type": "N",
+                                "value": "45.96204"
+                            },
+                            {
+                                "id": "TTMROEPCT",
+                                "name": "Return on average equity - trailing 12 month",
+                                "type": "N",
+                                "value": "160.58340"
+                            },
+                            {
+                                "id": "TTMPR2REV",
+                                "name": "Price to sales - trailing 12 month",
+                                "type": "N",
+                                "value": "8.77307"
+                            },
+                            {
+                                "id": "PEEXCLXOR",
+                                "name": "P/E excluding extraordinary items - TTM",
+                                "type": "N",
+                                "value": "33.87683"
+                            },
+                            {
+                                "id": "PRICE2BK",
+                                "name": "Price to Book - most recent quarter",
+                                "type": "N",
+                                "value": "50.77281"
+                            },
+                            {
+                                "id": "Employees",
+                                "name": "Employees",
+                                "type": "N",
+                                "value": "161000"
+                            }
+                        ]
+                    }
+                ],
+                "currency": "USD",
+                "priceCurrency": "USD"
+            },
+            "forecastData": {
+                "ratios": [
+                    {
+                        "id": "ConsRecom",
+                        "name": "ConsRecom",
+                        "type": "N",
+                        "value": "2.0714"
+                    },
+                    {
+                        "id": "TargetPrice",
+                        "name": "TargetPrice",
+                        "type": "N",
+                        "value": "208.96600"
+                    },
+                    {
+                        "id": "ProjLTGrowthRate",
+                        "name": "ProjLTGrowthRate",
+                        "type": "N",
+                        "value": "10.5000"
+                    },
+                    {
+                        "id": "ProjPE",
+                        "name": "ProjPE",
+                        "type": "N",
+                        "value": "33.74894"
+                    },
+                    {
+                        "id": "ProjSales",
+                        "name": "ProjSales",
+                        "type": "N",
+                        "value": "386988014600.00000"
+                    },
+                    {
+                        "id": "ProjSalesQ",
+                        "name": "ProjSalesQ",
+                        "type": "N",
+                        "value": "83781901700.00000"
+                    },
+                    {
+                        "id": "ProjEPS",
+                        "name": "ProjEPS",
+                        "type": "N",
+                        "value": "6.59280"
+                    },
+                    {
+                        "id": "ProjEPSQ",
+                        "name": "ProjEPSQ",
+                        "type": "N",
+                        "value": "1.32550"
+                    },
+                    {
+                        "id": "ProjProfit",
+                        "name": "ProjProfit",
+                        "type": "N",
+                        "value": "101395966200.00000"
+                    },
+                    {
+                        "id": "ProjDPS",
+                        "name": "ProjDPS",
+                        "type": "N",
+                        "value": "0.99210"
+                    }
+                ],
+                "interimEndCalYear": "2024",
+                "interimEndCalMonth": "6",
+                "fiscalYear": "2024",
+                "endMonth": "9",
+                "earningsBasis": "PRX",
+                "consensusType": "Mean"
+            },
+            "businessSummaryLastModified": "2024-03-18T06:47:00",
+            "financialSummaryLastModified": "2024-08-02T16:32:59",
+            "shrFloating": "14792853875.0",
+            "shrOutstanding": "15204137000.0",
+            "laInterimData": "2024-06-29T00:00:00",
+            "laAnnualData": "2023-09-30T00:00:00",
+            "luEmployees": "2023-09-30T00:00:00",
+            "luShares": "2024-07-19T00:00:00",
+            "lastUpdated": "2024-08-02T00:00:00",
+            "usIrsNo": "942404110",
+            "usCikNo": "0000320193",
+            "currency": "U.S. Dollars"
+        }
+    },
+    "US04546C1062": {}
+}

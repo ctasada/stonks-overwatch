@@ -86,8 +86,13 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
+    },
+    'test': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'test_db.sqlite3',
     }
 }
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 
 # Password validation
@@ -188,7 +193,7 @@ LOGGING = {
         },
         "degiro_connector": {
             "handlers": ["console"],
-            "level": "WARN",
+            "level": "INFO",
             "propagate": False,
         },
         "stocks_portfolio": {

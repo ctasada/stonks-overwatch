@@ -10,11 +10,12 @@ from degiro.utils.db_utils import dictfetchall
 class CashMovementsRepository:
     def get_cash_movements_raw(self) -> dict:
         with connection.cursor() as cursor:
+            # In case the date is the same, use the id to provide a consistent sorting
             cursor.execute(
                 """
                 SELECT *
                 FROM degiro_cashmovements
-                ORDER BY date DESC
+                ORDER BY date DESC, id DESC
                 """
             )
             return dictfetchall(cursor)

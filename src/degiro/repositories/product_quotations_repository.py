@@ -27,6 +27,11 @@ class ProductQuotationsRepository:
         return None
 
     def get_product_price(self, product_id: int) -> float:
+        """Gets the last quotation from the specified product_id from the DB.
+
+        ### Returns
+            Last quotation, or 0.0 if the product is not found
+        """
         quotations = self.get_product_quotations(product_id)
         if quotations:
             last_quotation = list(quotations.keys())[-1]
