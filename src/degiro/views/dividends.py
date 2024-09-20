@@ -6,8 +6,8 @@ from currency_converter import CurrencyConverter
 from django.shortcuts import render
 from django.views import View
 
-from degiro.data.account_overview import AccountOverviewData
-from degiro.data.dividends import DividendsData
+from degiro.services.account_overview import AccountOverviewService
+from degiro.services.dividends import DividendsService
 from degiro.utils.localization import LocalizationUtility
 
 
@@ -16,8 +16,8 @@ class Dividends(View):
     currency_converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
 
     def __init__(self):
-        self.accountOverview = AccountOverviewData()
-        self.dividens = DividendsData()
+        self.accountOverview = AccountOverviewService()
+        self.dividens = DividendsService()
         self.baseCurrency = LocalizationUtility.get_base_currency()
 
     def get(self, request):

@@ -9,7 +9,7 @@ from degiro.utils.localization import LocalizationUtility
 
 
 # FIXME: If data cannot be found in the DB, the code should get it from DeGiro, updating the DB
-class DepositsData:
+class DepositsService:
     def __init__(self):
         self.cash_movements_repository = CashMovementsRepository()
 

@@ -3,16 +3,16 @@ import logging
 from django.shortcuts import render
 from django.views import View
 
-from degiro.data.deposits import DepositsData
-from degiro.data.portfolio import PortfolioData
+from degiro.services.deposits import DepositsService
+from degiro.services.portfolio import PortfolioService
 
 
 class Deposits(View):
     logger = logging.getLogger("stocks_portfolio.deposits.views")
 
     def __init__(self):
-        self.portfolio = PortfolioData()
-        self.deposits_data = DepositsData()
+        self.portfolio = PortfolioService()
+        self.deposits_data = DepositsService()
 
     def get(self, request):
         data = self.deposits_data.cash_deposits_history()

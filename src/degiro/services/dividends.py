@@ -1,12 +1,12 @@
-from degiro.data.account_overview import AccountOverviewData
 from degiro.repositories.product_info_repository import ProductInfoRepository
+from degiro.services.account_overview import AccountOverviewService
 from degiro.services.degiro_service import DeGiroService
 from degiro.utils.localization import LocalizationUtility
 
 
-class DividendsData:
+class DividendsService:
     def __init__(self):
-        self.account_overview = AccountOverviewData()
+        self.account_overview = AccountOverviewService()
         self.product_info_repository = ProductInfoRepository()
         self.degiro_service = DeGiroService()
 

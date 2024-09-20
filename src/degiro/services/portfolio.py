@@ -13,7 +13,7 @@ from degiro.utils.db_utils import dictfetchall
 from degiro.utils.localization import LocalizationUtility
 
 
-class PortfolioData:
+class PortfolioService:
     logger = logging.getLogger("stocks_portfolio.portfolio_data")
     currency_converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
 

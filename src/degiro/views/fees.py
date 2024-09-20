@@ -1,13 +1,13 @@
 from django.shortcuts import render
 from django.views import View
 
-from degiro.data.fees import FeesData
+from degiro.services.fees import FeesService
 from degiro.utils.localization import LocalizationUtility
 
 
 class Fees(View):
     def __init__(self):
-        self.fees = FeesData()
+        self.fees = FeesService()
 
     def get(self, request):
         fees = self.fees.get_fees()

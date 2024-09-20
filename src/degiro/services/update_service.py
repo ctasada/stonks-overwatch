@@ -9,12 +9,12 @@ from django.core.cache import cache
 from django.db import connection
 
 from degiro.config.degiro_config import DegiroConfig
-from degiro.data.portfolio import PortfolioData
 from degiro.models import CashMovements, CompanyProfile, ProductInfo, ProductQuotation, Transactions
 from degiro.repositories.cash_movements_repository import CashMovementsRepository
 from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.transactions_repository import TransactionsRepository
 from degiro.services.degiro_service import DeGiroService
+from degiro.services.portfolio import PortfolioService
 from degiro.utils.datetime import DateTimeUtility
 from degiro.utils.db_utils import dictfetchall
 from degiro.utils.debug import save_to_json
@@ -30,7 +30,7 @@ class UpdateService():
         self.cash_movements_repository = CashMovementsRepository()
         self.product_info_repository = ProductInfoRepository()
         self.transactions_repository = TransactionsRepository()
-        self.portfolio_data = PortfolioData()
+        self.portfolio_data = PortfolioService()
         self.degiro_service = DeGiroService()
 
     def update_account(self, debug_json_files: dict = None):

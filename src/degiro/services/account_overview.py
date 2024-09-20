@@ -5,7 +5,7 @@ from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.utils.localization import LocalizationUtility
 
 
-class AccountOverviewData:
+class AccountOverviewService:
     logger = logging.getLogger("stocks_portfolio.account_overview_data")
 
     def __init__(self):

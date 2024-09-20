@@ -1,12 +1,12 @@
 from django.shortcuts import render
 from django.views import View
 
-from degiro.data.account_overview import AccountOverviewData
+from degiro.services.account_overview import AccountOverviewService
 
 
 class AccountOverview(View):
     def __init__(self):
-        self.accountOverview = AccountOverviewData()
+        self.accountOverview = AccountOverviewService()
 
     def get(self, request):
         overview = self.accountOverview.get_account_overview()
