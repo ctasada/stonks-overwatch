@@ -5,10 +5,13 @@ from degiro.utils.localization import LocalizationUtility
 
 
 class DividendsService:
-    def __init__(self):
-        self.account_overview = AccountOverviewService()
-        self.product_info_repository = ProductInfoRepository()
-        self.degiro_service = DeGiroService()
+    def __init__(self,
+                 account_overview: AccountOverviewService,
+                 degiro_service: DeGiroService,
+                 product_info_repository: ProductInfoRepository):
+        self.account_overview = account_overview
+        self.degiro_service = degiro_service
+        self.product_info_repository = product_info_repository
 
     def get_dividends(self):
         overview = self.account_overview.get_account_overview()

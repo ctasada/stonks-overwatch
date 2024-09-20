@@ -1,13 +1,24 @@
 from django.shortcuts import render
 from django.views import View
 
+from degiro.repositories.cash_movements_repository import CashMovementsRepository
+from degiro.repositories.product_info_repository import ProductInfoRepository
+from degiro.repositories.transactions_repository import TransactionsRepository
 from degiro.services.fees import FeesService
 from degiro.utils.localization import LocalizationUtility
 
 
 class Fees(View):
     def __init__(self):
-        self.fees = FeesService()
+        self.cash_movements_repository = CashMovementsRepository()
+        self.product_info_repository = ProductInfoRepository()
+        self.transactions_repository = TransactionsRepository()
+
+        self.fees = FeesService(
+            cash_movements_repository=self.cash_movements_repository,
+            product_info_repository=self.product_info_repository,
+            transactions_repository=self.transactions_repository
+        )
 
     def get(self, request):
         fees = self.fees.get_fees()

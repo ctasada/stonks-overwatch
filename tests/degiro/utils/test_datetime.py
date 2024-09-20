@@ -1,8 +1,8 @@
 from datetime import date, timedelta
 
-import pytest
 from degiro_connector.quotecast.models.chart import Interval
 
+import pytest
 from degiro.utils.datetime import DateTimeUtility
 
 

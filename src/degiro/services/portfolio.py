@@ -17,12 +17,18 @@ class PortfolioService:
     logger = logging.getLogger("stocks_portfolio.portfolio_data")
     currency_converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
 
-    def __init__(self):
-        self.product_info_repository = ProductInfoRepository()
-        self.company_profile_repository = CompanyProfileRepository()
-        self.product_quotation_repository = ProductQuotationsRepository()
-        self.cash_movements_repository = CashMovementsRepository()
-        self.degiro_service = DeGiroService()
+    def __init__(self,
+                 cash_movements_repository: CashMovementsRepository,
+                 company_profile_repository: CompanyProfileRepository,
+                 degiro_service: DeGiroService,
+                 product_info_repository: ProductInfoRepository,
+                 product_quotation_repository: ProductQuotationsRepository,
+                 ):
+        self.cash_movements_repository = cash_movements_repository
+        self.company_profile_repository = company_profile_repository
+        self.degiro_service = degiro_service
+        self.product_info_repository = product_info_repository
+        self.product_quotation_repository = product_quotation_repository
 
     def get_portfolio(self) -> dict:
         portfolio_transactions = self.__get_porfolio_products()
