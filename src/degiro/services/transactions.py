@@ -6,9 +6,12 @@ from degiro.utils.localization import LocalizationUtility
 
 
 class TransactionsService:
-    def __init__(self):
-        self.transactions_repository = TransactionsRepository()
-        self.product_info_repository = ProductInfoRepository()
+    def __init__(self,
+                 product_info_repository: ProductInfoRepository,
+                 transactions_repository: TransactionsRepository):
+        self.product_info_repository = product_info_repository
+        self.transactions_repository = transactions_repository
+
 
     def get_transactions(self) -> dict:
         # FETCH TRANSACTIONS DATA

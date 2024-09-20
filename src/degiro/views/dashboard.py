@@ -9,8 +9,11 @@ from django.shortcuts import render
 from django.views import View
 
 from degiro.repositories.cash_movements_repository import CashMovementsRepository
+from degiro.repositories.company_profile_repository import CompanyProfileRepository
 from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.product_quotations_repository import ProductQuotationsRepository
+from degiro.services.account_overview import AccountOverviewService
+from degiro.services.degiro_service import DeGiroService
 from degiro.services.deposits import DepositsService
 from degiro.services.dividends import DividendsService
 from degiro.services.portfolio import PortfolioService
@@ -24,12 +27,31 @@ class Dashboard(View):
     currency_converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
 
     def __init__(self):
-        self.deposits = DepositsService()
-        self.dividends = DividendsService()
-        self.portfolio_data = PortfolioService()
-        self.product_quotations_repository = ProductQuotationsRepository()
-        self.product_info_repository = ProductInfoRepository()
         self.cash_movements_repository = CashMovementsRepository()
+        self.company_profile_repository = CompanyProfileRepository()
+        self.degiro_service = DeGiroService()
+        self.product_info_repository = ProductInfoRepository()
+        self.product_quotations_repository = ProductQuotationsRepository()
+
+        self.account_overview = AccountOverviewService(
+            cash_movements_repository=self.cash_movements_repository,
+            product_info_repository=self.product_info_repository,
+        )
+        self.deposits = DepositsService(
+            cash_movements_repository=self.cash_movements_repository
+        )
+        self.dividends = DividendsService(
+            account_overview=self.account_overview,
+            degiro_service=self.degiro_service,
+            product_info_repository=self.product_info_repository,
+        )
+        self.portfolio_data = PortfolioService(
+            cash_movements_repository=self.cash_movements_repository,
+            company_profile_repository=self.company_profile_repository,
+            degiro_service=self.degiro_service,
+            product_info_repository=self.product_info_repository,
+            product_quotation_repository=self.product_quotations_repository,
+        )
 
     def get(self, request):
         total_costs = [{"x": item["date"], "y": item["total_cost"]} for item in self._total_costs_history()]

@@ -11,7 +11,9 @@ from django.db import connection
 from degiro.config.degiro_config import DegiroConfig
 from degiro.models import CashMovements, CompanyProfile, ProductInfo, ProductQuotation, Transactions
 from degiro.repositories.cash_movements_repository import CashMovementsRepository
+from degiro.repositories.company_profile_repository import CompanyProfileRepository
 from degiro.repositories.product_info_repository import ProductInfoRepository
+from degiro.repositories.product_quotations_repository import ProductQuotationsRepository
 from degiro.repositories.transactions_repository import TransactionsRepository
 from degiro.services.degiro_service import DeGiroService
 from degiro.services.portfolio import PortfolioService
@@ -28,10 +30,19 @@ class UpdateService():
 
     def __init__(self):
         self.cash_movements_repository = CashMovementsRepository()
-        self.product_info_repository = ProductInfoRepository()
-        self.transactions_repository = TransactionsRepository()
-        self.portfolio_data = PortfolioService()
+        self.company_profile_repository = CompanyProfileRepository()
         self.degiro_service = DeGiroService()
+        self.product_info_repository = ProductInfoRepository()
+        self.product_quotation_repository = ProductQuotationsRepository()
+        self.transactions_repository = TransactionsRepository()
+
+        self.portfolio_data = PortfolioService(
+            cash_movements_repository=self.cash_movements_repository,
+            company_profile_repository=self.company_profile_repository,
+            degiro_service=self.degiro_service,
+            product_info_repository=self.product_info_repository,
+            product_quotation_repository=self.product_quotation_repository,
+        )
 
     def update_account(self, debug_json_files: dict = None):
         """Update the Account DB data. Only does it if the data is older than today."""
