@@ -5,7 +5,7 @@ from degiro.repositories.transactions_repository import TransactionsRepository
 from degiro.utils.localization import LocalizationUtility
 
 
-class TransactionsData:
+class TransactionsService:
     def __init__(self):
         self.transactions_repository = TransactionsRepository()
         self.product_info_repository = ProductInfoRepository()

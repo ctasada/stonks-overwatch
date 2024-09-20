@@ -1,12 +1,12 @@
 from django.shortcuts import render
 from django.views import View
 
-from degiro.data.transactions import TransactionsData
+from degiro.services.transactions import TransactionsService
 
 
 class Transactions(View):
     def __init__(self):
-        self.transactions = TransactionsData()
+        self.transactions = TransactionsService()
 
     def get(self, request):
         transactions = self.transactions.get_transactions()

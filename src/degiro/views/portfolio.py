@@ -1,12 +1,12 @@
 from django.shortcuts import render
 from django.views import View
 
-from degiro.data.portfolio import PortfolioData
+from degiro.services.portfolio import PortfolioService
 
 
 class Portfolio(View):
     def __init__(self):
-        self.portfolio = PortfolioData()
+        self.portfolio = PortfolioService()
 
     def get(self, request):
         portfolio = self.portfolio.get_portfolio()

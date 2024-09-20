@@ -6,7 +6,7 @@ from degiro.repositories.transactions_repository import TransactionsRepository
 from degiro.utils.localization import LocalizationUtility
 
 
-class FeesData:
+class FeesService:
     currency_converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
 
     def __init__(self):

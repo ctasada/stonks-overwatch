@@ -8,12 +8,12 @@ from django.db import connection
 from django.shortcuts import render
 from django.views import View
 
-from degiro.data.deposits import DepositsData
-from degiro.data.dividends import DividendsData
-from degiro.data.portfolio import PortfolioData
 from degiro.repositories.cash_movements_repository import CashMovementsRepository
 from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.product_quotations_repository import ProductQuotationsRepository
+from degiro.services.deposits import DepositsService
+from degiro.services.dividends import DividendsService
+from degiro.services.portfolio import PortfolioService
 from degiro.utils.datetime import DateTimeUtility
 from degiro.utils.db_utils import dictfetchall
 from degiro.utils.localization import LocalizationUtility
@@ -24,9 +24,9 @@ class Dashboard(View):
     currency_converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
 
     def __init__(self):
-        self.deposits = DepositsData()
-        self.dividends = DividendsData()
-        self.portfolio_data = PortfolioData()
+        self.deposits = DepositsService()
+        self.dividends = DividendsService()
+        self.portfolio_data = PortfolioService()
         self.product_quotations_repository = ProductQuotationsRepository()
         self.product_info_repository = ProductInfoRepository()
         self.cash_movements_repository = CashMovementsRepository()

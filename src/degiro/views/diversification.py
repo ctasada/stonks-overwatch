@@ -4,7 +4,7 @@ from currency_converter import CurrencyConverter
 from django.shortcuts import render
 from django.views import View
 
-from degiro.data.portfolio import PortfolioData
+from degiro.services.portfolio import PortfolioService
 from degiro.utils.localization import LocalizationUtility
 
 
@@ -13,7 +13,7 @@ class Diversification(View):
     currency_converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
 
     def __init__(self):
-        self.portfolio = PortfolioData()
+        self.portfolio = PortfolioService()
 
     def get(self, request):
         portfolio = self.portfolio.get_portfolio()
