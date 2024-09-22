@@ -42,7 +42,7 @@ class TestCashMovementsRepository(TestCase):
 
     def test_get_cash_movements_raw(self):
         cash_movements = self.repository.get_cash_movements_raw()
-        assert len(cash_movements) == 7
+        assert len(cash_movements) == 8
         assert_dates_descending(cash_movements)
 
     def test_get_cash_deposits_raw(self):
