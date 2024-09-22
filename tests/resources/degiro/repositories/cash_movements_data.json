@@ -35,6 +35,16 @@
       "balance_total": 299.99,
       "type": "CASH_FUND_NAV_CHANGE"
     },
+    "dividend": {
+        "date": "2021-03-12T08:16:38Z",
+        "value_date": "2021-03-11T23:59:59Z",
+        "description": "Dividend",
+        "change": 8.4,
+        "currency": "USD",
+        "balance_total": 300.0,
+        "product_id": 332111,
+        "type": "CASH_TRANSACTION"
+    },
     "payment": {
       "date": "2024-02-22T10:32:00Z",
       "value_date": "2024-02-22T10:32:00Z",
@@ -51,6 +61,7 @@
       "change": -200.0,
       "currency": "EUR",
       "balance_total": 300.0,
+      "product_id": 331868,
       "type": "TRANSACTION"
     },
     "flatex_cash_sweep": {

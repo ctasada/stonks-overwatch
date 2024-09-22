@@ -12,7 +12,7 @@ degiro-connector = {path = "../degiro-connector/dist/degiro_connector-3.0.23-py3
 django = "^5.1.1"
 pycountry = "^23.12.11"
 currency-symbols = "^2.0.3"
-pandas = "^2.2.2"
+pandas = "^2.2.3"
 requests-cache = "^1.2.1"
 django-extensions = "^3.2.3"
 python-dateutil = "^2.8.2"
@@ -21,7 +21,7 @@ django-node-assets = "^0.9.14"
 fontawesomefree = "^6.6.0"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.6.5"
+ruff = "^0.6.7"
 pytest = "^8.3.3"
 pytest-cov = "^5.0.0"
 requests-mock = "^1.12.1"
@@ -123,11 +123,11 @@ source = ['src']
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "src.settings"
+pythonpath = [".", "src"]
 testpaths = ["tests"]
 python_files = [
     "test_*.py"
 ]
-pythonpath = "src"
 addopts = [
     '--import-mode=importlib',
     '--cov-report=html:pytest'

@@ -1,35 +1,15 @@
-import pathlib
-from unittest.mock import patch
 
-import requests
 import requests_mock
 from degiro_connector.core.constants import urls
 from degiro_connector.core.exceptions import DeGiroConnectionError
 
 import pytest
-from degiro.config.degiro_config import DegiroConfig, DegiroCredentials
+from degiro.config.degiro_config import DegiroCredentials
 from degiro.services.degiro_service import CredentialsManager, DeGiroService
+from tests.degiro.fixtures import disable_requests_cache, mock_degiro_config, mock_full_credentials
 
 
-@pytest.fixture
-def mock_degiro_config():
-    with patch("degiro.config.degiro_config.DegiroConfig.default") as mock_config:
-        file = pathlib.Path("tests/resources/degiro/config/sample-config.json")
-        mock_config.return_value = DegiroConfig.from_json_file(file)
-        yield mock_config
-
-@pytest.fixture
-def mock_full_credentials():
-    return DegiroCredentials(
-        username="testuser",
-        password="testpassword",
-        int_account=987654,
-        totp_secret_key="ABCDEFGHIJKLMNOP",
-        one_time_password=123456,
-        user_token="token123"
-    )
-
-def test_credentials_manager_init(mock_degiro_config, mock_full_credentials):
+def test_credentials_manager_init(mock_degiro_config:mock_degiro_config, mock_full_credentials:mock_full_credentials):
     manager = CredentialsManager(mock_full_credentials)
     assert manager.credentials.username == mock_full_credentials.username
     assert manager.credentials.password == mock_full_credentials.password
@@ -38,20 +18,16 @@ def test_credentials_manager_init(mock_degiro_config, mock_full_credentials):
     assert manager.credentials.one_time_password == mock_full_credentials.one_time_password
     # assert manager.credentials.user_token == mock_credentials.user_token
 
-def test_degiro_service_init(mock_degiro_config, mock_full_credentials):
+def test_degiro_service_init(mock_degiro_config:mock_degiro_config, mock_full_credentials:mock_full_credentials):
     manager = CredentialsManager(mock_full_credentials)
     service = DeGiroService(manager)
     assert service.credentials_manager == manager
 
-# Pytest Fixture to disable the usage of request-cache
-@pytest.fixture(scope='function', autouse=True)
-def disable_requests_cache():
-    """Replace CachedSession with a regular Session for all test functions"""
-    with patch('requests_cache.CachedSession', requests.Session):
-        yield
 
-@pytest.fixture(scope='function')
-def test_degiro_service_connect_with_full_credential(disable_requests_cache, mock_full_credentials):
+def test_degiro_service_connect_with_full_credential(
+    disable_requests_cache:disable_requests_cache,
+    mock_full_credentials:mock_full_credentials
+):
     manager = CredentialsManager(mock_full_credentials)
 
     with requests_mock.Mocker() as m:
@@ -61,8 +37,7 @@ def test_degiro_service_connect_with_full_credential(disable_requests_cache, moc
 
     assert service.check_connection() is True
 
-@pytest.fixture(scope='function')
-def test_degiro_service_connect_with_credential(disable_requests_cache):
+def test_degiro_service_connect_with_credential(disable_requests_cache:disable_requests_cache):
     credential = DegiroCredentials(
         username="testuser",
         password="testpassword",
@@ -71,7 +46,14 @@ def test_degiro_service_connect_with_credential(disable_requests_cache):
     manager = CredentialsManager(credential)
 
     with requests_mock.Mocker() as m:
-        m.post(urls.LOGIN + "/totp", json={'sessionId': 'abcdefg12345'}, status_code=200)
+        m.post(urls.LOGIN + "/totp", json={
+            'isPassCodeEnabled': True,
+            'locale': 'nl_NL',
+            'redirectUrl': 'https://trader.degiro.nl/trader/',
+            'sessionId': 'abcdefg12345',
+            'status': 0,
+            'statusText': 'success'
+        }, status_code=200)
         service = DeGiroService(manager)
 
         # Check we have the right credentials
@@ -85,13 +67,13 @@ def test_degiro_service_connect_with_credential(disable_requests_cache):
     assert service.check_connection() is True
     assert service.api_client.connection_storage.session_id == 'abcdefg12345'
 
-@pytest.fixture(scope='function')
-def test_degiro_service_connect_with_bad_credentials(disable_requests_cache):
+def test_degiro_service_connect_with_bad_credentials(disable_requests_cache:disable_requests_cache):
     credential = DegiroCredentials(
         username="testuser",
         password="testpassword"
     )
     manager = CredentialsManager(credential)
+
     with requests_mock.Mocker() as m:
         m.post(urls.LOGIN, json={"loginFailures": 1,"status": 3,"statusText": "badCredentials"}, status_code=400)
         service = DeGiroService(manager)
@@ -108,8 +90,7 @@ def test_degiro_service_connect_with_bad_credentials(disable_requests_cache):
         assert exception_info.type is DeGiroConnectionError
         assert exception_info.value.error_details.status == 3
 
-@pytest.fixture(scope='function')
-def test_degiro_service_connect_with_missing_totp(disable_requests_cache):
+def test_degiro_service_connect_with_missing_totp(disable_requests_cache:disable_requests_cache):
     credentials = DegiroCredentials(
             username="testuser",
             password="testpassword"
@@ -131,8 +112,7 @@ def test_degiro_service_connect_with_missing_totp(disable_requests_cache):
         assert exception_info.type is DeGiroConnectionError
         assert exception_info.value.error_details.status == 6
 
-@pytest.fixture(scope='function')
-def test_degiro_service_update_credentials(disable_requests_cache):
+def test_degiro_service_update_credentials(disable_requests_cache:disable_requests_cache):
     credentials = DegiroCredentials(
         username="testuser",
         password="testpassword"
@@ -161,11 +141,11 @@ def test_degiro_service_update_credentials(disable_requests_cache):
         assert service.api_client.credentials.totp_secret_key is None
         assert service.api_client.credentials.one_time_password == 123456
 
-        m.post(urls.LOGIN, json={
+        m.post(urls.LOGIN + "/totp", json={
             'isPassCodeEnabled': True,
             'locale': 'nl_NL',
             'redirectUrl': 'https://trader.degiro.nl/trader/',
-            'sessionId': 'xyz456abc',
+            'sessionId': 'abcdefg12345',
             'status': 0,
             'statusText': 'success'
         }, status_code=200)
@@ -173,4 +153,4 @@ def test_degiro_service_update_credentials(disable_requests_cache):
         service.connect()
 
         assert service.check_connection() is True
-        assert service.api_client.connection_storage.session_id == 'xyz456abc'
+        assert service.api_client.connection_storage.session_id == 'abcdefg12345'
