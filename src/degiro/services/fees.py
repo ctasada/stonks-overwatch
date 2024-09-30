@@ -9,10 +9,12 @@ from degiro.utils.localization import LocalizationUtility
 class FeesService:
     currency_converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
 
-    def __init__(self,
-                 cash_movements_repository: CashMovementsRepository,
-                 product_info_repository: ProductInfoRepository,
-                 transactions_repository: TransactionsRepository):
+    def __init__(
+        self,
+        cash_movements_repository: CashMovementsRepository,
+        product_info_repository: ProductInfoRepository,
+        transactions_repository: TransactionsRepository,
+    ):
         self.cash_movements_repository = cash_movements_repository
         self.product_info_repository = product_info_repository
         self.transactions_repository = transactions_repository

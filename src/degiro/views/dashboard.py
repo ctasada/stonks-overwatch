@@ -37,9 +37,7 @@ class Dashboard(View):
             cash_movements_repository=self.cash_movements_repository,
             product_info_repository=self.product_info_repository,
         )
-        self.deposits = DepositsService(
-            cash_movements_repository=self.cash_movements_repository
-        )
+        self.deposits = DepositsService(cash_movements_repository=self.cash_movements_repository)
         self.dividends = DividendsService(
             account_overview=self.account_overview,
             degiro_service=self.degiro_service,

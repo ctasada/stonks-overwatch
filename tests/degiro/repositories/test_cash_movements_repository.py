@@ -23,13 +23,13 @@ class TestCashMovementsRepository(TestCase):
         self.repository = CashMovementsRepository()
         data_file = pathlib.Path("tests/resources/degiro/repositories/cash_movements_data.json")
 
-        with open(data_file, 'r') as file:
+        with open(data_file, "r") as file:
             data = json.load(file)
 
         self.created_objects = {}
         for key, value in data.items():
-            value['date'] = parse_datetime(value['date'])
-            value['value_date'] = parse_datetime(value['value_date'])
+            value["date"] = parse_datetime(value["date"])
+            value["value_date"] = parse_datetime(value["value_date"])
 
             # Create and save the CashMovements object
             obj = CashMovements.objects.create(**value)
@@ -48,8 +48,8 @@ class TestCashMovementsRepository(TestCase):
     def test_get_cash_deposits_raw(self):
         cash_deposits = self.repository.get_cash_deposits_raw()
         assert len(cash_deposits) == 2
-        assert cash_deposits[0]['description'] == 'iDEAL storting'
-        assert cash_deposits[1]['description'] == 'iDEAL Deposit'
+        assert cash_deposits[0]["description"] == "iDEAL storting"
+        assert cash_deposits[1]["description"] == "iDEAL Deposit"
 
     def test_get_total_cash_deposits_raw(self):
         total_cash_deposits = self.repository.get_total_cash_deposits_raw()
@@ -61,7 +61,7 @@ class TestCashMovementsRepository(TestCase):
 
     def test_get_last_movement(self):
         last_movement = self.repository.get_last_movement()
-        assert last_movement == self.created_objects['flatex_cash_sweep'].date.date()
+        assert last_movement == self.created_objects["flatex_cash_sweep"].date.date()
 
     def test_get_last_movement_with_empty_db(self):
         CashMovements.objects.all().delete()

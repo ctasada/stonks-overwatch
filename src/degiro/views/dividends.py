@@ -57,14 +57,14 @@ class Dividends(View):
         dividends_calendar = {}
         joined_dividends = dividends_overview + upcoming_dividends
         # After merging dividends and upcoming dividends, we need to sort the result
-        joined_dividends = sorted(joined_dividends, key=lambda x: x['date'], reverse=True)
+        joined_dividends = sorted(joined_dividends, key=lambda x: x["date"], reverse=True)
 
         df = pd.DataFrame(joined_dividends)
         period_start = min(df["date"])
         # Find the maximum date. Since we have upcoming payments, it can be today or some point
         # in the future
-        date_as_datetime = pd.to_datetime(df['date'], format='%Y-%m-%d')
-        today = pd.Timestamp('today').normalize()
+        date_as_datetime = pd.to_datetime(df["date"], format="%Y-%m-%d")
+        today = pd.Timestamp("today").normalize()
         period_end = max(date_as_datetime.max(), today)
         period = pd.period_range(start=period_start, end=period_end, freq="M")[::-1]
 

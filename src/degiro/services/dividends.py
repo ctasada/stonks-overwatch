@@ -5,10 +5,12 @@ from degiro.utils.localization import LocalizationUtility
 
 
 class DividendsService:
-    def __init__(self,
-                 account_overview: AccountOverviewService,
-                 degiro_service: DeGiroService,
-                 product_info_repository: ProductInfoRepository):
+    def __init__(
+        self,
+        account_overview: AccountOverviewService,
+        degiro_service: DeGiroService,
+        product_info_repository: ProductInfoRepository,
+    ):
         self.account_overview = account_overview
         self.degiro_service = degiro_service
         self.product_info_repository = product_info_repository
@@ -40,14 +42,16 @@ class DividendsService:
 
                     amount = float(payment["amount"])
                     currency = payment["currency"]
-                    result.append({
-                        "date": payment["payDate"],
-                        "stockName": stock_name,
-                        "stockSymbol": stock_symbol,
-                        "currency": currency,
-                        "change": amount,
-                        "formatedChange": LocalizationUtility.format_money_value(value=amount, currency=currency),
-                    })
+                    result.append(
+                        {
+                            "date": payment["payDate"],
+                            "stockName": stock_name,
+                            "stockSymbol": stock_symbol,
+                            "currency": currency,
+                            "change": amount,
+                            "formatedChange": LocalizationUtility.format_money_value(value=amount, currency=currency),
+                        }
+                    )
 
             return result
         except Exception:

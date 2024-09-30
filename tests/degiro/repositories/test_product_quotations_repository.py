@@ -1,4 +1,3 @@
-
 import json
 import pathlib
 
@@ -11,13 +10,12 @@ from degiro.repositories.product_quotations_repository import ProductQuotationsR
 
 @pytest.mark.django_db
 class TestProductQuotationsRepository(TestCase):
-
     def setUp(self):
         self.repository = ProductQuotationsRepository()
 
         data_file = pathlib.Path("tests/resources/degiro/repositories/product_quotations_data.json")
 
-        with open(data_file, 'r') as file:
+        with open(data_file, "r") as file:
             data = json.load(file)
 
         self.created_objects = {}

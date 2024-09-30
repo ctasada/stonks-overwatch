@@ -19,14 +19,15 @@ class CredentialsManager:
         degiro_credentials = degiro_config.credentials
 
         self.credentials = credentials or Credentials(
-            int_account=getattr(credentials, 'int_account', None) or getattr(degiro_credentials, 'int_account', None),
-            username=getattr(credentials, 'username', '') or getattr(degiro_credentials, 'username', ''),
-            password=getattr(credentials, 'password', '') or getattr(degiro_credentials, 'password', ''),
-            totp_secret_key=getattr(credentials, 'totp_secret_key', None)
-                or getattr(degiro_credentials, 'totp_secret_key', None),
-            one_time_password=getattr(credentials, 'one_time_password', None)
-                or getattr(degiro_credentials, 'one_time_password', None),
+            int_account=getattr(credentials, "int_account", None) or getattr(degiro_credentials, "int_account", None),
+            username=getattr(credentials, "username", "") or getattr(degiro_credentials, "username", ""),
+            password=getattr(credentials, "password", "") or getattr(degiro_credentials, "password", ""),
+            totp_secret_key=getattr(credentials, "totp_secret_key", None)
+            or getattr(degiro_credentials, "totp_secret_key", None),
+            one_time_password=getattr(credentials, "one_time_password", None)
+            or getattr(degiro_credentials, "one_time_password", None),
         )
+
 
 class DeGiroService:
     def __init__(self, credentials_manager: Optional[CredentialsManager] = None):

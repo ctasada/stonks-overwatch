@@ -61,7 +61,6 @@ class LocalizationUtility:
         time = datetime.fromisoformat(value)
         return time.strftime(f"{LocalizationUtility.DATE_FORMAT} {LocalizationUtility.TIME_FORMAT}")
 
-
     @staticmethod
     def format_date(value: str) -> str:
         """

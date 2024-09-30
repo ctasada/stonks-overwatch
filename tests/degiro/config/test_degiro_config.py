@@ -18,7 +18,7 @@ def test_degiro_credentials_init():
         int_account=int_account,
         totp_secret_key=totp_secret_key,
         one_time_password=one_time_password,
-        user_token=user_token
+        user_token=user_token,
     )
 
     assert credentials.username == username
@@ -28,6 +28,7 @@ def test_degiro_credentials_init():
     assert credentials.one_time_password == one_time_password
     assert credentials.user_token == user_token
 
+
 def test_degiro_credentials_to_dict():
     credentials = DegiroCredentials(
         username="testuser",
@@ -35,7 +36,7 @@ def test_degiro_credentials_to_dict():
         int_account="123456",
         totp_secret_key="ABCDEFGHIJKLMNOP",
         one_time_password="123456",
-        user_token="token123"
+        user_token="token123",
     )
 
     credentials_dict = credentials.to_dict()
@@ -47,6 +48,7 @@ def test_degiro_credentials_to_dict():
     assert credentials_dict["one_time_password"] == "123456"
     assert credentials_dict["user_token"] == "token123"
 
+
 def test_degiro_credentials_from_dict():
     credentials_dict = {
         "username": "testuser",
@@ -54,7 +56,7 @@ def test_degiro_credentials_from_dict():
         "int_account": "123456",
         "totp_secret_key": "ABCDEFGHIJKLMNOP",
         "one_time_password": "123456",
-        "user_token": "token123"
+        "user_token": "token123",
     }
 
     credentials = DegiroCredentials.from_dict(credentials_dict)
@@ -65,6 +67,7 @@ def test_degiro_credentials_from_dict():
     assert credentials.totp_secret_key == "ABCDEFGHIJKLMNOP"
     assert credentials.one_time_password == "123456"
     assert credentials.user_token == "token123"
+
 
 def test_degiro_credentials_from_empty_dict():
     credentials_dict = {}
@@ -78,11 +81,9 @@ def test_degiro_credentials_from_empty_dict():
     assert credentials.one_time_password is None
     assert credentials.user_token is None
 
+
 def test_degiro_credentials_from_minimum_dict():
-    credentials_dict = {
-        "username": "testuser",
-        "password": "testpassword"
-    }
+    credentials_dict = {"username": "testuser", "password": "testpassword"}
 
     credentials = DegiroCredentials.from_dict(credentials_dict)
 
@@ -92,6 +93,7 @@ def test_degiro_credentials_from_minimum_dict():
     assert credentials.totp_secret_key is None
     assert credentials.one_time_password is None
     assert credentials.user_token is None
+
 
 def test_degiro_config_init():
     username = "testuser"
@@ -110,7 +112,7 @@ def test_degiro_config_init():
         int_account=int_account,
         totp_secret_key=totp_secret_key,
         one_time_password=one_time_password,
-        user_token=user_token
+        user_token=user_token,
     )
 
     config = DegiroConfig(credentials=credentials, base_currency=base_currency, start_date=start_date_as_date)
@@ -119,6 +121,7 @@ def test_degiro_config_init():
     assert config.base_currency == base_currency
     assert config.start_date == start_date_as_date
 
+
 def test_degiro_config_from_dict():
     credentials_dict = {
         "username": "testuser",
@@ -126,23 +129,20 @@ def test_degiro_config_from_dict():
         "int_account": 123456,
         "totp_secret_key": "ABCDEFGHIJKLMNOP",
         "one_time_password": 123456,
-        "user_token": "token123"
+        "user_token": "token123",
     }
     base_currency = "EUR"
     start_date = "2023-01-01"
     start_date_as_date = datetime.fromisoformat(start_date).date()
 
-    config_dict = {
-        "credentials": credentials_dict,
-        "base_currency": base_currency,
-        "start_date": start_date
-    }
+    config_dict = {"credentials": credentials_dict, "base_currency": base_currency, "start_date": start_date}
 
     config = DegiroConfig.from_dict(config_dict)
 
     assert config.credentials == DegiroCredentials.from_dict(credentials_dict)
     assert config.base_currency == base_currency
     assert config.start_date == start_date_as_date
+
 
 def test_degiro_config_from_json_file():
     credentials_dict = {
@@ -151,7 +151,7 @@ def test_degiro_config_from_json_file():
         "int_account": 987654,
         "totp_secret_key": "ABCDEFGHIJKLMNOP",
         "one_time_password": 123456,
-        "user_token": "token123"
+        "user_token": "token123",
     }
     base_currency = "EUR"
     start_date = "2023-01-01"

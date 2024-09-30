@@ -17,13 +17,14 @@ class PortfolioService:
     logger = logging.getLogger("stocks_portfolio.portfolio_data")
     currency_converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
 
-    def __init__(self,
-                 cash_movements_repository: CashMovementsRepository,
-                 company_profile_repository: CompanyProfileRepository,
-                 degiro_service: DeGiroService,
-                 product_info_repository: ProductInfoRepository,
-                 product_quotation_repository: ProductQuotationsRepository,
-                 ):
+    def __init__(
+        self,
+        cash_movements_repository: CashMovementsRepository,
+        company_profile_repository: CompanyProfileRepository,
+        degiro_service: DeGiroService,
+        product_info_repository: ProductInfoRepository,
+        product_quotation_repository: ProductQuotationsRepository,
+    ):
         self.cash_movements_repository = cash_movements_repository
         self.company_profile_repository = company_profile_repository
         self.degiro_service = degiro_service
@@ -231,7 +232,7 @@ class PortfolioService:
                 )
                 local_portfolio = dictfetchall(cursor)
                 for entry in local_portfolio:
-                    entry["value"] = 1.0 # FIXME
+                    entry["value"] = 1.0  # FIXME
                 return local_portfolio
 
     def __get_products_info(self, products_ids: list) -> dict:

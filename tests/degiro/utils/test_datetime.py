@@ -26,17 +26,20 @@ def test_calculate_interval_valid_dates():
         interval = DateTimeUtility.calculate_interval(date_str)
         assert interval == expected_interval
 
+
 def test_calculate_interval_future_date():
     # Test case for a future date
     future_date = (date.today() + timedelta(days=1)).isoformat()
     interval = DateTimeUtility.calculate_interval(future_date)
     assert interval is None
 
+
 def test_calculate_interval_invalid_date():
     # Test case for an invalid date
     invalid_date = "2023-02-30"
     with pytest.raises(ValueError):
         DateTimeUtility.calculate_interval(invalid_date)
+
 
 def test_calculate_dates_in_interval():
     from_date = date(2023, 4, 1)
@@ -52,6 +55,7 @@ def test_calculate_dates_in_interval():
 
     dates = DateTimeUtility.calculate_dates_in_interval(from_date, Interval.P1W)
     assert dates == expected_dates
+
 
 def test_convert_interval_to_days():
     test_cases = [

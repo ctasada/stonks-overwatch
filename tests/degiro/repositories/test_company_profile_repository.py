@@ -11,11 +11,10 @@ from degiro.repositories.company_profile_repository import CompanyProfileReposit
 @pytest.mark.django_db
 class TestCompanyProfileRepository(TestCase):
     def setUp(self):
-
         self.repository = CompanyProfileRepository()
         data_file = pathlib.Path("tests/resources/degiro/repositories/company_profile_data.json")
 
-        with open(data_file, 'r') as file:
+        with open(data_file, "r") as file:
             data = json.load(file)
 
         self.created_objects = {}
@@ -30,8 +29,8 @@ class TestCompanyProfileRepository(TestCase):
             obj.delete()
 
     def test_get_company_profile_raw(self):
-        company_profile = self.repository.get_company_profile_raw('US5949181045')
-        assert company_profile['data']['employees'] == 228000
+        company_profile = self.repository.get_company_profile_raw("US5949181045")
+        assert company_profile["data"]["employees"] == 228000
 
-        company_profile = self.repository.get_company_profile_raw('US04546C1062')
+        company_profile = self.repository.get_company_profile_raw("US04546C1062")
         assert company_profile == {}
