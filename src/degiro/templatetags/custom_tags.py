@@ -17,7 +17,6 @@ def index(sequence, position):
 
 @register.inclusion_tag("total_overview.html")
 def show_total_portfolio():
-
     portfolio = PortfolioService(
         cash_movements_repository=CashMovementsRepository(),
         company_profile_repository=CompanyProfileRepository(),

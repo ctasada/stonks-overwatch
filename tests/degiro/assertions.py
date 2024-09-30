@@ -1,9 +1,7 @@
-
-
 from datetime import datetime
 
 
-def assert_dates_descending(data:dict, date_column:str = 'date', convert_from_str:bool = False):
+def assert_dates_descending(data: dict, date_column: str = "date", convert_from_str: bool = False):
     """
     Asserts that the dates in the given dictionary are in descending order.
     """

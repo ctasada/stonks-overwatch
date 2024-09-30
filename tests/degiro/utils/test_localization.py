@@ -4,10 +4,12 @@ from degiro.utils.localization import LocalizationUtility
 
 
 def test_get_base_currency():
-    assert LocalizationUtility.get_base_currency() == 'EUR'
+    assert LocalizationUtility.get_base_currency() == "EUR"
+
 
 def test_get_base_currency_symbol():
-    assert LocalizationUtility.get_base_currency_symbol() == '€'
+    assert LocalizationUtility.get_base_currency_symbol() == "€"
+
 
 def test_round_value():
     assert LocalizationUtility.round_value(1.2345) == 1.234
@@ -16,57 +18,70 @@ def test_round_value():
     assert LocalizationUtility.round_value(1.2) == 1.2
     assert LocalizationUtility.round_value(1.0) == 1.0
 
+
 def test_format_money_value():
-    assert LocalizationUtility.format_money_value(1.2345) == '€ 1.23'
-    assert LocalizationUtility.format_money_value(1.2355) == '€ 1.24'
-    assert LocalizationUtility.format_money_value(1.2) == '€ 1.20'
-    assert LocalizationUtility.format_money_value(1.0) == '€ 1.00'
+    assert LocalizationUtility.format_money_value(1.2345) == "€ 1.23"
+    assert LocalizationUtility.format_money_value(1.2355) == "€ 1.24"
+    assert LocalizationUtility.format_money_value(1.2) == "€ 1.20"
+    assert LocalizationUtility.format_money_value(1.0) == "€ 1.00"
+
 
 def test_format_money_value_with_currency():
-    assert LocalizationUtility.format_money_value(value=1.2345, currency='EUR') == '€ 1.23'
-    assert LocalizationUtility.format_money_value(value=1.2345, currency='USD') == '$ 1.23'
+    assert LocalizationUtility.format_money_value(value=1.2345, currency="EUR") == "€ 1.23"
+    assert LocalizationUtility.format_money_value(value=1.2345, currency="USD") == "$ 1.23"
+
 
 def test_format_money_value_with_currency_symbol():
-    assert LocalizationUtility.format_money_value(value=1.2345, currency_symbol='€') == '€ 1.23'
-    assert LocalizationUtility.format_money_value(value=1.2345, currency_symbol='$') == '$ 1.23'
+    assert LocalizationUtility.format_money_value(value=1.2345, currency_symbol="€") == "€ 1.23"
+    assert LocalizationUtility.format_money_value(value=1.2345, currency_symbol="$") == "$ 1.23"
+
 
 def test_format_money_value_with_currency_and_symbol():
-    assert LocalizationUtility.format_money_value(value=1.2345, currency='EUR', currency_symbol='€') == '€ 1.23'
-    assert LocalizationUtility.format_money_value(value=1.2345, currency='USD', currency_symbol='€') == '€ 1.23'
-    assert LocalizationUtility.format_money_value(value=1.2345, currency='USD', currency_symbol='$') == '$ 1.23'
-    assert LocalizationUtility.format_money_value(value=1.2345, currency='EUR', currency_symbol='$') == '$ 1.23'
+    assert LocalizationUtility.format_money_value(value=1.2345, currency="EUR", currency_symbol="€") == "€ 1.23"
+    assert LocalizationUtility.format_money_value(value=1.2345, currency="USD", currency_symbol="€") == "€ 1.23"
+    assert LocalizationUtility.format_money_value(value=1.2345, currency="USD", currency_symbol="$") == "$ 1.23"
+    assert LocalizationUtility.format_money_value(value=1.2345, currency="EUR", currency_symbol="$") == "$ 1.23"
+
 
 def test_format_date_time():
-    assert LocalizationUtility.format_date_time('2020-01-01') == '2020-01-01 00:00:00'
-    assert LocalizationUtility.format_date_time('2020-01-01 10:10:30') == '2020-01-01 10:10:30'
-    assert LocalizationUtility.format_date_time('2020-01-01T10:10:30Z') == '2020-01-01 10:10:30'
+    assert LocalizationUtility.format_date_time("2020-01-01") == "2020-01-01 00:00:00"
+    assert LocalizationUtility.format_date_time("2020-01-01 10:10:30") == "2020-01-01 10:10:30"
+    assert LocalizationUtility.format_date_time("2020-01-01T10:10:30Z") == "2020-01-01 10:10:30"
+
 
 def test_format_date():
-    assert LocalizationUtility.format_date('2020-01-01T10:10:30Z') == '2020-01-01'
+    assert LocalizationUtility.format_date("2020-01-01T10:10:30Z") == "2020-01-01"
+
 
 def test_format_time():
-    assert LocalizationUtility.format_time('2020-01-01T10:10:30Z') == '10:10:30'
+    assert LocalizationUtility.format_time("2020-01-01T10:10:30Z") == "10:10:30"
+
 
 def test_format_date_from_date():
-    assert LocalizationUtility.format_date_from_date(datetime.fromisoformat('2020-01-01')) == '2020-01-01'
-    assert LocalizationUtility.format_date_from_date(datetime.fromisoformat('2020-01-01 10:10:30')) == '2020-01-01'
-    assert LocalizationUtility.format_date_from_date(datetime.fromisoformat('2020-01-01T10:10:30Z')) == '2020-01-01'
+    assert LocalizationUtility.format_date_from_date(datetime.fromisoformat("2020-01-01")) == "2020-01-01"
+    assert LocalizationUtility.format_date_from_date(datetime.fromisoformat("2020-01-01 10:10:30")) == "2020-01-01"
+    assert LocalizationUtility.format_date_from_date(datetime.fromisoformat("2020-01-01T10:10:30Z")) == "2020-01-01"
+
 
 def format_time_from_date():
-    assert LocalizationUtility.format_time_from_date(datetime.fromisoformat('2020-01-01')) == '00:00:00'
-    assert LocalizationUtility.format_time_from_date(datetime.fromisoformat('2020-01-01 10:10:30')) == '10:10:30'
-    assert LocalizationUtility.format_time_from_date(datetime.fromisoformat('2020-01-01T10:10:30Z')) == '10:10:30'
+    assert LocalizationUtility.format_time_from_date(datetime.fromisoformat("2020-01-01")) == "00:00:00"
+    assert LocalizationUtility.format_time_from_date(datetime.fromisoformat("2020-01-01 10:10:30")) == "10:10:30"
+    assert LocalizationUtility.format_time_from_date(datetime.fromisoformat("2020-01-01T10:10:30Z")) == "10:10:30"
+
 
 def test_format_date_to_month_year():
-    assert LocalizationUtility.format_date_to_month_year('2020-01-01') == 'January 2020'
+    assert LocalizationUtility.format_date_to_month_year("2020-01-01") == "January 2020"
+
 
 def test_get_date_day():
-    assert LocalizationUtility.get_date_day('2020-01-01') == '01'
+    assert LocalizationUtility.get_date_day("2020-01-01") == "01"
+
 
 def test_format_date_to_month_number():
-    assert LocalizationUtility.format_date_to_month_number('2020-01-01') == '01'
-    assert LocalizationUtility.format_date_to_month_number('2020-12-01') == '12'
+    assert LocalizationUtility.format_date_to_month_number("2020-01-01") == "01"
+    assert LocalizationUtility.format_date_to_month_number("2020-12-01") == "12"
+
 
 def test_format_date_to_year():
-    assert LocalizationUtility.format_date_to_year('2020-01-01') == '2020'
-    assert LocalizationUtility.format_date_to_year('2020-12-31') == '2020'
+    assert LocalizationUtility.format_date_to_year("2020-01-01") == "2020"
+    assert LocalizationUtility.format_date_to_year("2020-12-31") == "2020"

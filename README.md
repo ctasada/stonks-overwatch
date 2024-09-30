@@ -74,7 +74,8 @@ poetry run src/manage.py runscript init_db
 
 ## Other interesting projects
 * https://github.com/leo-pfeiffer/portfolio_dashboard
-* https://github.com/lucalaringe/degiro_portfolio_analytics
+* https://github.com/lucalaringe/degiro_portfolio_analytics <<< CHECK!!!!
+* https://github.com/CNugteren/DGPC
 * https://app.portfoliodividendtracker.com/p/jongbeleggen?locale=en (Has some interesting diagrams and data)
 * https://divvydiary.com/en/p/24094?tab=depot
 * https://capitalyse.app/app/degiro/ -> Seems to have some errors, but data and graphs are interesting

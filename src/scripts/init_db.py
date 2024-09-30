@@ -30,7 +30,7 @@ def init() -> None:
         os.makedirs(IMPORT_FOLDER)
 
     # Configure logging for the stocks_portfolio module
-    stocks_portfolio_logger = logging.getLogger('stocks_portfolio')
+    stocks_portfolio_logger = logging.getLogger("stocks_portfolio")
     stocks_portfolio_logger.setLevel(logging.INFO)
 
     # Create a console handler
@@ -38,12 +38,13 @@ def init() -> None:
     console_handler.setLevel(logging.INFO)
 
     # Create a formatter and add it to the console handler
-    format = '%(levelname)s %(asctime)s %(module)s %(message)s'
+    format = "%(levelname)s %(asctime)s %(module)s %(message)s"
     formatter = logging.Formatter(format)
     console_handler.setFormatter(formatter)
 
     # Configure logging
     logging.basicConfig(level=logging.INFO, format=format)
+
 
 def account_import(update_service: UpdateService) -> None:
     """Import DeGiro Account information."""
@@ -51,43 +52,43 @@ def account_import(update_service: UpdateService) -> None:
     update_service.update_account(
         {
             "account.json": f"{IMPORT_FOLDER}/account.json",
-            "account_transform.json": f"{IMPORT_FOLDER}/account_transform.json"
+            "account_transform.json": f"{IMPORT_FOLDER}/account_transform.json",
         }
     )
 
+
 def transactions_import(update_service: UpdateService) -> None:
     logging.info("Importing DeGiro Transactions...")
-    update_service.update_transactions(
-        {
-            "transactions.json": f"{IMPORT_FOLDER}/transactions.json"
-        }
-    )
+    update_service.update_transactions({"transactions.json": f"{IMPORT_FOLDER}/transactions.json"})
+
 
 def products_info_import(update_service: UpdateService) -> None:
     """Import Product Information from DeGiro."""
     logging.info("Importing DeGiro Products Information...")
-    update_service.update_portfolio({
-        "products_info.json": f"{IMPORT_FOLDER}/products_info.json",
-    })
+    update_service.update_portfolio(
+        {
+            "products_info.json": f"{IMPORT_FOLDER}/products_info.json",
+        }
+    )
+
 
 def company_profile_import(update_service: UpdateService) -> None:
     logging.info("Importing DeGiro Company Profiles...")
-    update_service.update_company_profile({
-        "company_profiles.json": f"{IMPORT_FOLDER}/company_profiles.json"
-    })
+    update_service.update_company_profile({"company_profiles.json": f"{IMPORT_FOLDER}/company_profiles.json"})
+
 
 def run(*args):
     init()
 
     update_service = UpdateService()
 
-    if 'account' in args:
+    if "account" in args:
         account_import(update_service)
-    elif 'transactions' in args:
+    elif "transactions" in args:
         transactions_import(update_service)
-    elif 'products' in args:
+    elif "products" in args:
         products_info_import(update_service)
-    elif 'companies' in args:
+    elif "companies" in args:
         company_profile_import(update_service)
     else:
         account_import(update_service)

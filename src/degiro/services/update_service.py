@@ -1,4 +1,3 @@
-
 import logging
 from datetime import date
 
@@ -22,10 +21,11 @@ from degiro.utils.db_utils import dictfetchall
 from degiro.utils.debug import save_to_json
 from degiro.utils.localization import LocalizationUtility
 
-CACHE_KEY_UPDATE_PORTFOLIO = 'portfolio_data_update_from_degiro'
-CACHE_KEY_UPDATE_COMPANIES = 'company_profile_update_from_degiro'
+CACHE_KEY_UPDATE_PORTFOLIO = "portfolio_data_update_from_degiro"
+CACHE_KEY_UPDATE_COMPANIES = "company_profile_update_from_degiro"
 
-class UpdateService():
+
+class UpdateService:
     logger = logging.getLogger("stocks_portfolio.update_service")
 
     def __init__(self):
@@ -79,7 +79,6 @@ class UpdateService():
                 save_to_json(transactions_history, debug_json_files["transactions.json"])
 
             self.__import_transactions(transactions_history)
-
 
     def update_portfolio(self, debug_json_files: dict = None):
         """Updating the Portfolio is a expensive and time consuming task.
@@ -203,13 +202,11 @@ class UpdateService():
             for col in ["productId", "id", "exchangeRate", "orderId"]:
                 if col in df:
                     df[col] = df[col].apply(
-                        lambda x: None if (pd.isnull(x) or pd.isna(x) ) else str(x).replace(".0", "")
+                        lambda x: None if (pd.isnull(x) or pd.isna(x)) else str(x).replace(".0", "")
                     )
             for col in ["change"]:
                 if col in df:
-                    df[col] = df[col].apply(
-                        lambda x: None if (pd.isnull(x) or pd.isna(x) ) else str(x)
-                    )
+                    df[col] = df[col].apply(lambda x: None if (pd.isnull(x) or pd.isna(x)) else str(x))
 
             # Set the index explicitly
             df.set_index("date", inplace=True)
@@ -230,7 +227,6 @@ class UpdateService():
             transaction_request=HistoryRequest(from_date=from_date, to_date=date.today()),
             raw=True,
         )
-
 
     def __import_transactions(self, transactions_history: dict) -> None:
         """Store the Transactions into the DB."""
@@ -266,7 +262,6 @@ class UpdateService():
             except Exception as error:
                 self.logger.error(f"Cannot import row: {row}")
                 self.logger.error("Exception: ", error)
-
 
     def __get_product_ids(self) -> list:
         """Get the list of product ids from the DB.
@@ -329,7 +324,6 @@ class UpdateService():
                 self.logger.error(f"Cannot import row: {row}")
                 self.logger.error("Exception: ", error)
 
-
     def __import_products_quotation(self) -> None:
         product_growth = self.portfolio_data.calculate_product_growth()
 
@@ -387,14 +381,12 @@ class UpdateService():
                 # Keep only the dates that are in the quotation range
                 from_date = product_growth[key]["quotation"]["from_date"]
                 to_date = product_growth[key]["quotation"]["to_date"]
-                if (
-                    day >= LocalizationUtility.convert_string_to_date(from_date)
-                    and day <= LocalizationUtility.convert_string_to_date(to_date)
-                ):
+                if day >= LocalizationUtility.convert_string_to_date(
+                    from_date
+                ) and day <= LocalizationUtility.convert_string_to_date(to_date):
                     quotes_dict[LocalizationUtility.format_date_from_date(day)] = quotes[count]
 
             ProductQuotation.objects.update_or_create(id=int(key), defaults={"quotations": quotes_dict})
-
 
     def __get_company_profiles(self) -> dict:
         """Import Company Profiles data from DeGiro. Uses the `get_transactions_history` method."""

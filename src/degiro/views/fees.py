@@ -17,7 +17,7 @@ class Fees(View):
         self.fees = FeesService(
             cash_movements_repository=self.cash_movements_repository,
             product_info_repository=self.product_info_repository,
-            transactions_repository=self.transactions_repository
+            transactions_repository=self.transactions_repository,
         )
 
     def get(self, request):

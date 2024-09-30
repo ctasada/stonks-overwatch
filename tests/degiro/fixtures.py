@@ -1,4 +1,3 @@
-
 import pathlib
 from unittest.mock import patch
 
@@ -15,6 +14,7 @@ def mock_degiro_config():
         mock_config.return_value = DegiroConfig.from_json_file(file)
         yield mock_config
 
+
 @pytest.fixture
 def mock_full_credentials():
     return DegiroCredentials(
@@ -23,12 +23,13 @@ def mock_full_credentials():
         int_account=987654,
         totp_secret_key="ABCDEFGHIJKLMNOP",
         one_time_password=123456,
-        user_token="token123"
+        user_token="token123",
     )
 
+
 # Pytest Fixture to disable the usage of request-cache
-@pytest.fixture(scope='function', autouse=True)
+@pytest.fixture(scope="function", autouse=True)
 def disable_requests_cache():
     """Replace CachedSession with a regular Session for all test functions"""
-    with patch('requests_cache.CachedSession', requests.Session):
+    with patch("requests_cache.CachedSession", requests.Session):
         yield
