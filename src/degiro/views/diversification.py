@@ -37,11 +37,13 @@ class Diversification(View):
         holdings = self._get_holdings(portfolio)
         sectors = self._get_sectors(portfolio)
         currencies = self._get_currencies(portfolio)
+        countries = self._get_countries(portfolio)
 
         context = {
             "holdings": holdings,
             "sectors": sectors,
             "currencies": currencies,
+            "countries": countries,
             "currencySymbol": LocalizationUtility.get_base_currency_symbol(),
         }
 
@@ -77,89 +79,54 @@ class Diversification(View):
         }
 
     def _get_sectors(self, portfolio: dict) -> dict:
-        sectors_table = []
-        sectors = {}
-
-        max_percentage = 0.0
-
-        for stock in portfolio:
-            if stock["isOpen"]:
-                sector_name = stock["sector"]
-                sector_value = 0.0
-                portfolio_size = 0.0
-                if sector_name in sectors:
-                    sector_value = sectors[sector_name]["value"]
-                    portfolio_size = sectors[sector_name]["portfolioSize"]
-                sectors[sector_name] = {
-                    "value": sector_value + stock["value"],
-                    "portfolioSize": portfolio_size + stock["portfolioSize"],
-                }
-                max_percentage = max(max_percentage, sectors[sector_name]["portfolioSize"])
-
-        for key in sectors:
-            portfolio_size = sectors[key]["portfolioSize"]
-            sectors_table.append(
-                {
-                    "name": key,
-                    "value": sectors[key]["value"],
-                    "portfolioSize": portfolio_size,
-                    "formattedPortfolioSize": f"{portfolio_size:.2%}",
-                    "weight": (sectors[key]["portfolioSize"] / max_percentage) * 100,
-                }
-            )
-        sectors_table = sorted(sectors_table, key=lambda k: k["value"], reverse=True)
-
-        sector_labels = [row["name"] for row in sectors_table]
-        sector_values = [row["value"] for row in sectors_table]
-
-        return {
-            "chart": {
-                "labels": sector_labels,
-                "values": sector_values,
-            },
-            "table": sectors_table,
-        }
+        return self._get_data("sector", portfolio)
 
     def _get_currencies(self, portfolio: dict) -> dict:
-        currencies_table = []
-        currencies = {}
+        return self._get_data("productCurrency", portfolio)
+
+    def _get_countries(self, portfolio: dict) -> dict:
+        return self._get_data("country", portfolio)
+
+    def _get_data(self, field_name: str, portfolio: dict) -> dict:
+        data_table = []
+        data = {}
 
         max_percentage = 0.0
 
         for stock in portfolio:
             if stock["isOpen"]:
-                currency_name = stock["productCurrency"]
-                currency_value = 0.0
+                name = stock[field_name]
+                value = 0.0
                 portfolio_size = 0.0
-                if currency_name in currencies:
-                    currency_value = currencies[currency_name]["value"]
-                    portfolio_size = currencies[currency_name]["portfolioSize"]
-                currencies[currency_name] = {
-                    "value": currency_value + stock["value"],
+                if name in data:
+                    value = data[name]["value"]
+                    portfolio_size = data[name]["portfolioSize"]
+                data[name] = {
+                    "value": value + stock["value"],
                     "portfolioSize": portfolio_size + stock["portfolioSize"],
                 }
-                max_percentage = max(max_percentage, currencies[currency_name]["portfolioSize"])
+                max_percentage = max(max_percentage, data[name]["portfolioSize"])
 
-        for key in currencies:
-            portfolio_size = currencies[key]["portfolioSize"]
-            currencies_table.append(
+        for key in data:
+            portfolio_size = data[key]["portfolioSize"]
+            data_table.append(
                 {
                     "name": key,
-                    "value": currencies[key]["value"],
+                    "value": data[key]["value"],
                     "portfolioSize": portfolio_size,
                     "formattedPortfolioSize": f"{portfolio_size:.2%}",
-                    "weight": (currencies[key]["portfolioSize"] / max_percentage) * 100,
+                    "weight": (data[key]["portfolioSize"] / max_percentage) * 100,
                 }
             )
-        currencies_table = sorted(currencies_table, key=lambda k: k["value"], reverse=True)
+        data_table = sorted(data_table, key=lambda k: k["value"], reverse=True)
 
-        currencies_labels = [row["name"] for row in currencies_table]
-        currencies_values = [row["value"] for row in currencies_table]
+        labels = [row["name"] for row in data_table]
+        values = [row["value"] for row in data_table]
 
         return {
             "chart": {
-                "labels": currencies_labels,
-                "values": currencies_values,
+                "labels": labels,
+                "values": values,
             },
-            "table": currencies_table,
+            "table": data_table,
         }
