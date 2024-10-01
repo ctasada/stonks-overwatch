@@ -57,6 +57,22 @@
             {% endfor %}
         </div>
     </div>
+    <div class="row border border-primary-subtle bg-light rounded mb-3 pb-3">
+        <div class="col-sm" style="position: relative; height:40vh">
+            <canvas id="countries-chart"></canvas>
+        </div>
+        <div class="col-sm diversification-scrollable-list list-group mt-3" style="height:40vh">
+            {% for country in countries.table %}
+            <div class="list-group-item rounded m-1">
+                <div class="progress-bar-background" style="width: {{ country.weight }}%;"></div>
+                <div class="diversification-weight">
+                    <div>{{ country.name }}</div>
+                    <div>{{ country.formattedPortfolioSize }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 </div>
 
 <script>
@@ -158,7 +174,7 @@
                 {% for currency in currencies.chart.labels %}
                 {
                     "label" : "{{ currency }}",
-                        "value" : {{ currencies.chart.values|index:forloop.counter0 }},
+                    "value" : {{ currencies.chart.values|index:forloop.counter0 }},
                 },
                 {% endfor %}
             ]
@@ -177,8 +193,34 @@
         let doughnutCurrenciesChart = new Chart(document.getElementById("currencies-chart").getContext("2d"), configDoughnut);
     }
 
+    function drawCountriesPositions() {
+        let valuesDict = [
+            [
+                {% for country in countries.chart.labels %}
+                {
+                    "label" : "{{ country }}",
+                    "value" : {{ countries.chart.values|index:forloop.counter0 }},
+                },
+                {% endfor %}
+            ]
+        ];
+        const data = {
+            labels: {{ countries.chart.labels| safe }},
+            datasets: [
+                {
+                    data: {{ countries.chart.values }},
+                    borderWidth: 1,
+                }
+            ]
+        };
+
+        const configDoughnut = getDoughnutConfig('Countries', data, valuesDict);
+        let doughnutCountriesChart = new Chart(document.getElementById("countries-chart").getContext("2d"), configDoughnut);
+    }
+
     drawHoldingsPositions()
     drawSectorsPositions()
     drawCurrencyPositions()
+    drawCountriesPositions()
 </script>
 {% endblock %}

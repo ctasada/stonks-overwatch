@@ -8,9 +8,9 @@ from degiro.utils.localization import LocalizationUtility
 class AccountOverviewService:
     logger = logging.getLogger("stocks_portfolio.account_overview_data")
 
-    def __init__(self,
-                 cash_movements_repository: CashMovementsRepository,
-                 product_info_repository: ProductInfoRepository):
+    def __init__(
+        self, cash_movements_repository: CashMovementsRepository, product_info_repository: ProductInfoRepository
+    ):
         self.cash_movements_repository = cash_movements_repository
         self.product_info_repository = product_info_repository
 

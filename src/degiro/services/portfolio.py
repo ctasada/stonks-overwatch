@@ -51,9 +51,11 @@ class PortfolioService:
             company_profile = self.company_profile_repository.get_company_profile_raw(info["isin"])
             sector = "Unknown"
             industry = "Unknown"
+            country = "Unknown"
             if company_profile.get("data"):
                 sector = company_profile["data"]["sector"]
                 industry = company_profile["data"]["industry"]
+                country = company_profile["data"]["contacts"]["COUNTRY"]
 
             currency = info["currency"]
             price = self.product_quotation_repository.get_product_price(tmp["productId"])
@@ -103,6 +105,7 @@ class PortfolioService:
                     "price": price,
                     "productType": info["productType"],
                     "productCurrency": info["currency"],
+                    "country": country,
                     "formattedPrice": formatted_price,
                     "breakEvenPrice": break_even_price,
                     "formattedBreakEvenPrice": formatted_break_even_price,  # GAK: Average Purchase Price
