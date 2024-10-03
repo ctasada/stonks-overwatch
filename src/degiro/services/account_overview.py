@@ -8,15 +8,9 @@ from degiro.utils.localization import LocalizationUtility
 class AccountOverviewService:
     logger = logging.getLogger("stocks_portfolio.account_overview_data")
 
-    def __init__(
-        self, cash_movements_repository: CashMovementsRepository, product_info_repository: ProductInfoRepository
-    ):
-        self.cash_movements_repository = cash_movements_repository
-        self.product_info_repository = product_info_repository
-
     def get_account_overview(self) -> list:
         # FETCH DATA
-        account_overview = self.cash_movements_repository.get_cash_movements_raw()
+        account_overview = CashMovementsRepository.get_cash_movements_raw()
 
         products_ids = []
         for cash_movement in account_overview:
@@ -25,7 +19,7 @@ class AccountOverviewService:
 
         # Remove duplicates from list
         products_ids = list(set(products_ids))
-        products_info = self.product_info_repository.get_products_info_raw(products_ids)
+        products_info = ProductInfoRepository.get_products_info_raw(products_ids)
 
         overview = []
         for cash_movement in account_overview:

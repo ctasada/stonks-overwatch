@@ -19,17 +19,9 @@ class PortfolioService:
 
     def __init__(
         self,
-        cash_movements_repository: CashMovementsRepository,
-        company_profile_repository: CompanyProfileRepository,
         degiro_service: DeGiroService,
-        product_info_repository: ProductInfoRepository,
-        product_quotation_repository: ProductQuotationsRepository,
     ):
-        self.cash_movements_repository = cash_movements_repository
-        self.company_profile_repository = company_profile_repository
         self.degiro_service = degiro_service
-        self.product_info_repository = product_info_repository
-        self.product_quotation_repository = product_quotation_repository
 
     def get_portfolio(self) -> dict:
         portfolio_transactions = self.__get_porfolio_products()
@@ -48,7 +40,7 @@ class PortfolioService:
 
         for tmp in portfolio_transactions:
             info = products_info[tmp["productId"]]
-            company_profile = self.company_profile_repository.get_company_profile_raw(info["isin"])
+            company_profile = CompanyProfileRepository.get_company_profile_raw(info["isin"])
             sector = "Unknown"
             industry = "Unknown"
             country = "Unknown"
@@ -58,7 +50,7 @@ class PortfolioService:
                 country = company_profile["data"]["contacts"]["COUNTRY"]
 
             currency = info["currency"]
-            price = self.product_quotation_repository.get_product_price(tmp["productId"])
+            price = ProductQuotationsRepository.get_product_price(tmp["productId"])
             value = tmp["size"] * price
             break_even_price = tmp["breakEvenPrice"]
             if currency != base_currency:
@@ -142,8 +134,8 @@ class PortfolioService:
 
         base_currency_symbol = LocalizationUtility.get_base_currency_symbol()
 
-        tmp_total_portfolio["totalDepositWithdrawal"] = self.cash_movements_repository.get_total_cash_deposits_raw()
-        tmp_total_portfolio["totalCash"] = self.cash_movements_repository.get_total_cash()
+        tmp_total_portfolio["totalDepositWithdrawal"] = CashMovementsRepository.get_total_cash_deposits_raw()
+        tmp_total_portfolio["totalCash"] = CashMovementsRepository.get_total_cash()
 
         # Try to get the data directly from DeGiro, so we get up-to-date values
         realtime_total_portfolio = self.__get_realtime_portfolio_total()
@@ -178,7 +170,7 @@ class PortfolioService:
 
         return total_portfolio
 
-    def __get_realtime_portfolio_total(self) -> dict:
+    def __get_realtime_portfolio_total(self) -> dict | None:
         try:
             update = self.degiro_service.get_client().get_update(
                 request_list=[
@@ -243,7 +235,7 @@ class PortfolioService:
             return self.degiro_service.get_products_info(products_ids)
         except Exception:
             logging.exception("Cannot connect to DeGiro, getting last known data")
-            return self.product_info_repository.get_products_info_raw(products_ids)
+            return ProductInfoRepository.get_products_info_raw(products_ids)
 
     def __get_product_config(self) -> dict:
         try:

@@ -1,7 +1,7 @@
 from django.db.backends.utils import CursorWrapper
 
 
-def dictfetchall(cursor: CursorWrapper) -> dict:
+def dictfetchall(cursor: CursorWrapper) -> list[dict]:
     """Return all rows from a cursor as a dict.
     Assume the column names are unique.
     """

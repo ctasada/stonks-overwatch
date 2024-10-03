@@ -8,7 +8,8 @@ from degiro.utils.db_utils import dictfetchall
 
 
 class CashMovementsRepository:
-    def get_cash_movements_raw(self) -> dict:
+    @staticmethod
+    def get_cash_movements_raw() -> list[dict]:
         with connection.cursor() as cursor:
             # In case the date is the same, use the id to provide a consistent sorting
             cursor.execute(
@@ -20,7 +21,8 @@ class CashMovementsRepository:
             )
             return dictfetchall(cursor)
 
-    def get_cash_deposits_raw(self) -> list:
+    @staticmethod
+    def get_cash_deposits_raw() -> list[dict]:
         with connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -32,7 +34,8 @@ class CashMovementsRepository:
             )
             return dictfetchall(cursor)
 
-    def get_total_cash_deposits_raw(self) -> float:
+    @staticmethod
+    def get_total_cash_deposits_raw() -> float:
         with connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -44,7 +47,8 @@ class CashMovementsRepository:
             )
             return cursor.fetchone()[0]
 
-    def get_total_cash(self) -> float:
+    @staticmethod
+    def get_total_cash() -> float:
         with connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -57,7 +61,8 @@ class CashMovementsRepository:
             balance_total = dictfetchall(cursor)[0]["balanceTotal"]
             return float(balance_total)
 
-    def get_last_movement(self) -> date:
+    @staticmethod
+    def get_last_movement() -> date|None:
         """Return the latest update from the DB.
 
         ### Returns:

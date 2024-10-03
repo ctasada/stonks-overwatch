@@ -9,7 +9,6 @@ from django.shortcuts import render
 from django.views import View
 
 from degiro.repositories.cash_movements_repository import CashMovementsRepository
-from degiro.repositories.company_profile_repository import CompanyProfileRepository
 from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.product_quotations_repository import ProductQuotationsRepository
 from degiro.services.account_overview import AccountOverviewService
@@ -26,29 +25,18 @@ class Dashboard(View):
     logger = logging.getLogger("stocks_portfolio.dashboard.views")
     currency_converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
 
-    def __init__(self):
-        self.cash_movements_repository = CashMovementsRepository()
-        self.company_profile_repository = CompanyProfileRepository()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.degiro_service = DeGiroService()
-        self.product_info_repository = ProductInfoRepository()
-        self.product_quotations_repository = ProductQuotationsRepository()
 
-        self.account_overview = AccountOverviewService(
-            cash_movements_repository=self.cash_movements_repository,
-            product_info_repository=self.product_info_repository,
-        )
-        self.deposits = DepositsService(cash_movements_repository=self.cash_movements_repository)
+        self.account_overview = AccountOverviewService()
+        self.deposits = DepositsService()
         self.dividends = DividendsService(
             account_overview=self.account_overview,
             degiro_service=self.degiro_service,
-            product_info_repository=self.product_info_repository,
         )
         self.portfolio_data = PortfolioService(
-            cash_movements_repository=self.cash_movements_repository,
-            company_profile_repository=self.company_profile_repository,
             degiro_service=self.degiro_service,
-            product_info_repository=self.product_info_repository,
-            product_quotation_repository=self.product_quotations_repository,
         )
 
     def get(self, request):
@@ -104,7 +92,7 @@ class Dashboard(View):
         return dividends
 
     def _total_costs_history(self) -> dict:
-        cash_contributions = self.cash_movements_repository.get_cash_deposits_raw()
+        cash_contributions = CashMovementsRepository.get_cash_deposits_raw()
         dividends = self._get_dividend_deposits()
 
         df = pd.DataFrame.from_dict(cash_contributions + dividends)
@@ -317,7 +305,7 @@ class Dashboard(View):
         delete_keys = []
         for key in product_growth.keys():
             # FIXME: the method returns a key-value object
-            product = self.product_info_repository.get_products_info_raw([key])[key]
+            product = ProductInfoRepository.get_products_info_raw([key])[key]
 
             # If the product is NOT tradable, we shouldn't consider it for Growth
             # The 'tradable' attribute identifies old Stocks, like the ones that are
@@ -356,7 +344,7 @@ class Dashboard(View):
 
         # We need to use the productIds to get the daily quote for each product
         for key in product_growth.keys():
-            quotes_dict = self.product_quotations_repository.get_product_quotations(key)
+            quotes_dict = ProductQuotationsRepository.get_product_quotations(key)
 
             product_growth[key]["quotation"]["quotes"] = quotes_dict
 

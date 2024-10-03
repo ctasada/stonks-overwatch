@@ -7,9 +7,9 @@ from degiro.config.degiro_config import DegiroConfig, DegiroCredentials
 def test_degiro_credentials_init():
     username = "testuser"
     password = "testpassword"
-    int_account = "123456"
+    int_account = 123456
     totp_secret_key = "ABCDEFGHIJKLMNOP"
-    one_time_password = "123456"
+    one_time_password = 123456
     user_token = "token123"
 
     credentials = DegiroCredentials(
@@ -33,9 +33,9 @@ def test_degiro_credentials_to_dict():
     credentials = DegiroCredentials(
         username="testuser",
         password="testpassword",
-        int_account="123456",
+        int_account=123456,
         totp_secret_key="ABCDEFGHIJKLMNOP",
-        one_time_password="123456",
+        one_time_password=123456,
         user_token="token123",
     )
 
@@ -43,9 +43,9 @@ def test_degiro_credentials_to_dict():
 
     assert credentials_dict["username"] == "testuser"
     assert credentials_dict["password"] == "testpassword"
-    assert credentials_dict["int_account"] == "123456"
+    assert credentials_dict["int_account"] == 123456
     assert credentials_dict["totp_secret_key"] == "ABCDEFGHIJKLMNOP"
-    assert credentials_dict["one_time_password"] == "123456"
+    assert credentials_dict["one_time_password"] == 123456
     assert credentials_dict["user_token"] == "token123"
 
 

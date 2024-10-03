@@ -9,11 +9,9 @@ class DividendsService:
         self,
         account_overview: AccountOverviewService,
         degiro_service: DeGiroService,
-        product_info_repository: ProductInfoRepository,
     ):
         self.account_overview = account_overview
         self.degiro_service = degiro_service
-        self.product_info_repository = product_info_repository
 
     def get_dividends(self):
         overview = self.account_overview.get_account_overview()
@@ -37,7 +35,7 @@ class DividendsService:
             if "data" in upcoming_payments and upcoming_payments["data"]:
                 for payment in upcoming_payments["data"]:
                     stock_name = payment["product"]
-                    stock = self.product_info_repository.get_product_info_from_name(stock_name)
+                    stock = ProductInfoRepository.get_product_info_from_name(stock_name)
                     stock_symbol = stock["symbol"]
 
                     amount = float(payment["amount"])

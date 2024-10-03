@@ -6,7 +6,8 @@ from degiro.utils.db_utils import dictfetchall
 
 
 class CompanyProfileRepository:
-    def get_company_profile_raw(self, isin: str) -> dict:
+    @staticmethod
+    def get_company_profile_raw(isin: str) -> dict:
         with connection.cursor() as cursor:
             cursor.execute(
                 """

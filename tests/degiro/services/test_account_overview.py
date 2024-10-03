@@ -6,47 +6,47 @@ from isodate import parse_datetime
 
 import pytest
 from degiro.models import CashMovements, ProductInfo
-from degiro.repositories.cash_movements_repository import CashMovementsRepository
-from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.services.account_overview import AccountOverviewService
 
 
 @pytest.mark.django_db
 class TestAccountOverviewService(TestCase):
     def setUp(self):
-        self.cash_movements_repository = self.fixture_cash_movements_repository()
-        self.product_repository = self.fixture_product_info_repository()
+        self.created_objects = {}
+        self.fixture_cash_movements_repository()
+        self.fixture_product_info_repository()
 
-        self.account_overview = AccountOverviewService(self.cash_movements_repository, self.product_repository)
+        self.account_overview = AccountOverviewService()
 
     def fixture_cash_movements_repository(self):
-        repository = CashMovementsRepository()
         data_file = pathlib.Path("tests/resources/degiro/repositories/cash_movements_data.json")
 
         with open(data_file, "r") as file:
             data = json.load(file)
 
-        for _key, value in data.items():
+        for key, value in data.items():
             value["date"] = parse_datetime(value["date"])
             value["value_date"] = parse_datetime(value["value_date"])
 
             # Create and save the CashMovements object
-            CashMovements.objects.create(**value)
-
-        return repository
+            obj = CashMovements.objects.create(**value)
+            self.created_objects[key] = obj
 
     def fixture_product_info_repository(self):
-        repository = ProductInfoRepository()
         data_file = pathlib.Path("tests/resources/degiro/repositories/product_info_data.json")
 
         with open(data_file, "r") as file:
             data = json.load(file)
 
-        for _key, value in data.items():
+        for key, value in data.items():
             # Create and save the ProductInfo object
-            ProductInfo.objects.create(**value)
+            obj = ProductInfo.objects.create(**value)
+            self.created_objects[key] = obj
 
-        return repository
+    def tearDown(self):
+        # Clean up the created objects
+        for obj in self.created_objects.values():
+            obj.delete()
 
     def test_get_account_overview(self):
         overview = self.account_overview.get_account_overview()

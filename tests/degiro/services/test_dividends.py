@@ -11,60 +11,56 @@ from isodate import parse_datetime
 
 import pytest
 from degiro.models import CashMovements, ProductInfo
-from degiro.repositories.cash_movements_repository import CashMovementsRepository
-from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.services.account_overview import AccountOverviewService
 from degiro.services.degiro_service import DeGiroService
 from degiro.services.dividends import DividendsService
 
 
-def fixture_cash_movements_repository():
-    repository = CashMovementsRepository()
-    data_file = pathlib.Path("tests/resources/degiro/repositories/cash_movements_data.json")
-
-    with open(data_file, "r") as file:
-        data = json.load(file)
-
-    for _key, value in data.items():
-        value["date"] = parse_datetime(value["date"])
-        value["value_date"] = parse_datetime(value["value_date"])
-
-        # Create and save the CashMovements object
-        CashMovements.objects.create(**value)
-
-    return repository
-
-
-def fixture_product_info_repository():
-    repository = ProductInfoRepository()
-    data_file = pathlib.Path("tests/resources/degiro/repositories/product_info_data.json")
-
-    with open(data_file, "r") as file:
-        data = json.load(file)
-
-    for _key, value in data.items():
-        # Create and save the ProductInfo object
-        ProductInfo.objects.create(**value)
-
-    return repository
-
-
 @pytest.mark.django_db
 class TestDividendsService(TestCase):
     def setUp(self):
-        self.cash_movements_repository = fixture_cash_movements_repository()
-        self.product_repository = fixture_product_info_repository()
+        self.created_objects = {}
+        self.fixture_cash_movements_repository()
+        self.fixture_product_info_repository()
         self.degiro_service = DeGiroService()
 
-        self.account_overview = AccountOverviewService(
-            cash_movements_repository=self.cash_movements_repository, product_info_repository=self.product_repository
-        )
+        self.account_overview = AccountOverviewService()
 
         self.dividends_service = DividendsService(
             account_overview=self.account_overview,
             degiro_service=self.degiro_service,
-            product_info_repository=self.product_repository,
         )
+
+    def fixture_cash_movements_repository(self):
+        data_file = pathlib.Path("tests/resources/degiro/repositories/cash_movements_data.json")
+
+        with open(data_file, "r") as file:
+            data = json.load(file)
+
+        for key, value in data.items():
+            value["date"] = parse_datetime(value["date"])
+            value["value_date"] = parse_datetime(value["value_date"])
+
+            # Create and save the CashMovements object
+            obj = CashMovements.objects.create(**value)
+            self.created_objects[key] = obj
+
+
+    def fixture_product_info_repository(self):
+        data_file = pathlib.Path("tests/resources/degiro/repositories/product_info_data.json")
+
+        with open(data_file, "r") as file:
+            data = json.load(file)
+
+        for key, value in data.items():
+            # Create and save the ProductInfo object
+            obj = ProductInfo.objects.create(**value)
+            self.created_objects[key] = obj
+
+    def tearDown(self):
+        # Clean up the created objects
+        for obj in self.created_objects.values():
+            obj.delete()
 
     def test_get_dividends_from_account_overview(self):
         dividends = self.dividends_service.get_dividends()

@@ -20,7 +20,6 @@ class TestCashMovementsRepository(TestCase):
         # FLATEX_CASH_SWEEP
         # PAYMENT
         # TRANSACTION
-        self.repository = CashMovementsRepository()
         data_file = pathlib.Path("tests/resources/degiro/repositories/cash_movements_data.json")
 
         with open(data_file, "r") as file:
@@ -41,29 +40,29 @@ class TestCashMovementsRepository(TestCase):
             obj.delete()
 
     def test_get_cash_movements_raw(self):
-        cash_movements = self.repository.get_cash_movements_raw()
+        cash_movements = CashMovementsRepository.get_cash_movements_raw()
         assert len(cash_movements) == 8
         assert_dates_descending(cash_movements)
 
     def test_get_cash_deposits_raw(self):
-        cash_deposits = self.repository.get_cash_deposits_raw()
+        cash_deposits = CashMovementsRepository.get_cash_deposits_raw()
         assert len(cash_deposits) == 2
         assert cash_deposits[0]["description"] == "iDEAL storting"
         assert cash_deposits[1]["description"] == "iDEAL Deposit"
 
     def test_get_total_cash_deposits_raw(self):
-        total_cash_deposits = self.repository.get_total_cash_deposits_raw()
+        total_cash_deposits = CashMovementsRepository.get_total_cash_deposits_raw()
         assert total_cash_deposits == 300.0
 
     def test_get_total_cash(self):
-        total_cash = self.repository.get_total_cash()
+        total_cash = CashMovementsRepository.get_total_cash()
         assert total_cash == 300.0
 
     def test_get_last_movement(self):
-        last_movement = self.repository.get_last_movement()
+        last_movement = CashMovementsRepository.get_last_movement()
         assert last_movement == self.created_objects["flatex_cash_sweep"].date.date()
 
     def test_get_last_movement_with_empty_db(self):
         CashMovements.objects.all().delete()
-        last_movement = self.repository.get_last_movement()
+        last_movement = CashMovementsRepository.get_last_movement()
         assert last_movement is None

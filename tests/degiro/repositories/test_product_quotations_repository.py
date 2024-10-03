@@ -11,8 +11,6 @@ from degiro.repositories.product_quotations_repository import ProductQuotationsR
 @pytest.mark.django_db
 class TestProductQuotationsRepository(TestCase):
     def setUp(self):
-        self.repository = ProductQuotationsRepository()
-
         data_file = pathlib.Path("tests/resources/degiro/repositories/product_quotations_data.json")
 
         with open(data_file, "r") as file:
@@ -30,7 +28,7 @@ class TestProductQuotationsRepository(TestCase):
             obj.delete()
 
     def test_get_product_quotations(self):
-        quotations = self.repository.get_product_quotations(332111)
+        quotations = ProductQuotationsRepository.get_product_quotations(332111)
 
         assert quotations is not None
         assert len(quotations) > 0
@@ -38,11 +36,11 @@ class TestProductQuotationsRepository(TestCase):
         assert quotations["2020-03-15"] == 54.43
 
     def test_get_product_price(self):
-        quotation = self.repository.get_product_price(332111)
+        quotation = ProductQuotationsRepository.get_product_price(332111)
 
         assert quotation == 54.43
 
     def test_get_product_price_when_not_found(self):
-        quotation = self.repository.get_product_price(123456)
+        quotation = ProductQuotationsRepository.get_product_price(123456)
 
         assert quotation == 0.0

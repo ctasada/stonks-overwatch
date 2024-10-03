@@ -8,7 +8,8 @@ from degiro.utils.db_utils import dictfetchall
 
 
 class TransactionsRepository:
-    def get_transactions_raw(self) -> dict:
+    @staticmethod
+    def get_transactions_raw() -> list[dict]:
         with connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -18,7 +19,8 @@ class TransactionsRepository:
             )
             return dictfetchall(cursor)
 
-    def get_last_movement(self) -> date:
+    @staticmethod
+    def get_last_movement() -> date | None:
         """Return the latest update from the DB.
 
         ### Returns:
