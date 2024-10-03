@@ -9,17 +9,7 @@ from degiro.utils.localization import LocalizationUtility
 class FeesService:
     currency_converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
 
-    def __init__(
-        self,
-        cash_movements_repository: CashMovementsRepository,
-        product_info_repository: ProductInfoRepository,
-        transactions_repository: TransactionsRepository,
-    ):
-        self.cash_movements_repository = cash_movements_repository
-        self.product_info_repository = product_info_repository
-        self.transactions_repository = transactions_repository
-
-    def get_fees(self) -> dict:
+    def get_fees(self) -> list:
         transaction_fees = self.get_transaction_fees()
         account_fees = self.get_account_fees()
 
@@ -28,7 +18,7 @@ class FeesService:
         return sorted(total_fees, key=lambda k: k["date"], reverse=True)
 
     def get_account_fees(self) -> dict:
-        cash_movements = self.cash_movements_repository.get_cash_movements_raw()
+        cash_movements = CashMovementsRepository.get_cash_movements_raw()
         base_currency = LocalizationUtility.get_base_currency()
 
         my_fees = []
@@ -57,7 +47,7 @@ class FeesService:
 
         return my_fees
 
-    def __get_fee_type(self, description: str) -> str:
+    def __get_fee_type(self, description: str) -> str | None:
         # description = "Spanish Transaction Tax" -> FTT (Finance Transaction Tax)
         # description = "ADR/GDR Externe Kosten" -> ADR/GDR
         # description = "DEGIRO Aansluitingskosten" -> Connection
@@ -71,7 +61,7 @@ class FeesService:
             return None
 
     def get_transaction_fees(self) -> dict:
-        transactions_history = self.transactions_repository.get_transactions_raw()
+        transactions_history = TransactionsRepository.get_transactions_raw()
 
         products_ids = []
 
@@ -81,7 +71,7 @@ class FeesService:
 
         # Remove duplicates from list
         products_ids = list(set(products_ids))
-        products_info = self.product_info_repository.get_products_info_raw(products_ids)
+        products_info = ProductInfoRepository.get_products_info_raw(products_ids)
 
         # Get user's base currency
         base_currency_symbol = LocalizationUtility.get_base_currency_symbol()

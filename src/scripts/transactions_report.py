@@ -21,7 +21,7 @@ def run():
     save_to_json(cash_account_value, f"{IMPORT_FOLDER}/portfolio_growth/cash_account.json")
     products_quotation = dashboard._create_products_quotation()
     save_to_json(products_quotation, f"{IMPORT_FOLDER}/portfolio_growth/product_quotations.json")
-    portfolio_value = dashboard._calculate_value()
+    portfolio_value = dashboard._calculate_value(cash_account_value)
     save_to_json(portfolio_value, f"{IMPORT_FOLDER}/portfolio_growth/portfolio_value.json")
 
 

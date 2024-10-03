@@ -1,6 +1,7 @@
 import json
 import os
 from datetime import date, datetime
+from pathlib import Path
 from typing import Optional
 
 from settings import PROJECT_PATH
@@ -99,7 +100,7 @@ class DegiroConfig:
         return cls(credentials, base_currency, start_date)
 
     @classmethod
-    def from_json_file(cls, file_path: str) -> "DegiroConfig":
+    def from_json_file(cls, file_path: str | Path) -> "DegiroConfig":
         """Loads the configuration from a JSON file."""
         data = {}
         with open(file_path, "r") as f:

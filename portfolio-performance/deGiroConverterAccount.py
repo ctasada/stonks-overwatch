@@ -24,6 +24,7 @@ def convert_currency(isin: str, value: str, date):
 
 class DeGiroConverterAccount:
     def __init__(self, inputfile: str = None, data=None):
+        self.outputdata = None
         if data is None:
             self.inputdata = pd.read_csv(inputfile, parse_dates=[0], date_format="%d-%m-%Y", decimal=",")
         else:

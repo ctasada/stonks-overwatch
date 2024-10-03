@@ -10,9 +10,7 @@ from django.db import connection
 from degiro.config.degiro_config import DegiroConfig
 from degiro.models import CashMovements, CompanyProfile, ProductInfo, ProductQuotation, Transactions
 from degiro.repositories.cash_movements_repository import CashMovementsRepository
-from degiro.repositories.company_profile_repository import CompanyProfileRepository
 from degiro.repositories.product_info_repository import ProductInfoRepository
-from degiro.repositories.product_quotations_repository import ProductQuotationsRepository
 from degiro.repositories.transactions_repository import TransactionsRepository
 from degiro.services.degiro_service import DeGiroService
 from degiro.services.portfolio import PortfolioService
@@ -29,19 +27,10 @@ class UpdateService:
     logger = logging.getLogger("stocks_portfolio.update_service")
 
     def __init__(self):
-        self.cash_movements_repository = CashMovementsRepository()
-        self.company_profile_repository = CompanyProfileRepository()
         self.degiro_service = DeGiroService()
-        self.product_info_repository = ProductInfoRepository()
-        self.product_quotation_repository = ProductQuotationsRepository()
-        self.transactions_repository = TransactionsRepository()
 
         self.portfolio_data = PortfolioService(
-            cash_movements_repository=self.cash_movements_repository,
-            company_profile_repository=self.company_profile_repository,
             degiro_service=self.degiro_service,
-            product_info_repository=self.product_info_repository,
-            product_quotation_repository=self.product_quotation_repository,
         )
 
     def update_account(self, debug_json_files: dict = None):
@@ -49,7 +38,7 @@ class UpdateService:
         self.logger.info("Updating Account Data....")
 
         today = date.today()
-        last_movement = self.cash_movements_repository.get_last_movement()
+        last_movement = CashMovementsRepository.get_last_movement()
         if last_movement is None:
             last_movement = DegiroConfig.default().start_date
 
@@ -69,7 +58,7 @@ class UpdateService:
         self.logger.info("Updating Transactions Data....")
 
         today = date.today()
-        last_movement = self.transactions_repository.get_last_movement()
+        last_movement = TransactionsRepository.get_last_movement()
         if last_movement is None:
             last_movement = DegiroConfig.default().start_date
 
@@ -192,7 +181,7 @@ class UpdateService:
                     self.logger.error(f"Cannot import row: {row}")
                     self.logger.error("Exception: ", error)
 
-    def __transform_json(self, account_overview: dict) -> dict:
+    def __transform_json(self, account_overview: dict) -> list[dict] | None:
         """Flattens the data from deGiro `get_account_overview`."""
 
         if account_overview["data"]:
@@ -329,7 +318,7 @@ class UpdateService:
 
         delete_keys = []
         for key in product_growth.keys():
-            product = self.product_info_repository.get_product_info_from_id(key)
+            product = ProductInfoRepository.get_product_info_from_id(key)
 
             # FIXME: Code copied from dashboard._create_products_quotation()
             # If the product is NOT tradable, we shouldn't consider it for Growth
@@ -390,7 +379,7 @@ class UpdateService:
 
     def __get_company_profiles(self) -> dict:
         """Import Company Profiles data from DeGiro. Uses the `get_transactions_history` method."""
-        products_isin = self.product_info_repository.get_products_isin()
+        products_isin = ProductInfoRepository.get_products_isin()
 
         company_profiles = {}
 

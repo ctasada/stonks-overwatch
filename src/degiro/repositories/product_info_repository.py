@@ -4,7 +4,8 @@ from degiro.utils.db_utils import dictfetchall, dictfetchone
 
 
 class ProductInfoRepository:
-    def get_products_info_raw(self, ids) -> dict:
+    @staticmethod
+    def get_products_info_raw(ids) -> dict:
         """Gets product information from the given product id. The information is retrieved from the DB.
         ### Parameters
             * productIds: list of ints
@@ -26,11 +27,13 @@ class ProductInfoRepository:
         result_map = {row["id"]: row for row in rows}
         return result_map
 
-    def get_product_info_from_id(self, product_id: int) -> dict:
+    @staticmethod
+    def get_product_info_from_id(product_id: int) -> dict:
         """Get product information from the given product id. The information is retrieved from the DB."""
-        return self.get_products_info_raw([product_id])[product_id]
+        return ProductInfoRepository.get_products_info_raw([product_id])[product_id]
 
-    def get_product_info_from_name(self, name: str) -> dict:
+    @staticmethod
+    def get_product_info_from_name(name: str) -> dict:
         """Gets product information from the given product name. The information is retrieved from the DB.
         ### Parameters
             * productName
@@ -48,7 +51,8 @@ class ProductInfoRepository:
             )
             return dictfetchone(cursor)
 
-    def get_products_isin(self) -> list[str]:
+    @staticmethod
+    def get_products_isin() -> list[str]:
         """Get product information. The information is retrieved from the DB.
 
         ### Returns

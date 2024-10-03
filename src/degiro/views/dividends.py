@@ -6,8 +6,6 @@ from currency_converter import CurrencyConverter
 from django.shortcuts import render
 from django.views import View
 
-from degiro.repositories.cash_movements_repository import CashMovementsRepository
-from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.services.account_overview import AccountOverviewService
 from degiro.services.degiro_service import DeGiroService
 from degiro.services.dividends import DividendsService
@@ -18,25 +16,20 @@ class Dividends(View):
     logger = logging.getLogger("stocks_portfolio.dividends.views")
     currency_converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
 
-    def __init__(self):
-        self.cash_movements_repository = CashMovementsRepository()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.degiro_service = DeGiroService()
-        self.product_info_repository = ProductInfoRepository()
 
-        self.account_overview = AccountOverviewService(
-            cash_movements_repository=self.cash_movements_repository,
-            product_info_repository=self.product_info_repository,
-        )
-        self.dividens = DividendsService(
+        self.account_overview = AccountOverviewService()
+        self.dividends = DividendsService(
             account_overview=self.account_overview,
             degiro_service=self.degiro_service,
-            product_info_repository=self.product_info_repository,
         )
         self.base_currency = LocalizationUtility.get_base_currency()
 
     def get(self, request):
-        dividends_overview = self.dividens.get_dividends()
-        upcoming_dividends = self.dividens.get_upcoming_dividends()
+        dividends_overview = self.dividends.get_dividends()
+        upcoming_dividends = self.dividends.get_upcoming_dividends()
 
         dividends_calendar = self._get_dividends_calendar(dividends_overview, upcoming_dividends)
         dividends_growth = self._get_dividends_growth(dividends_calendar)
@@ -177,7 +170,6 @@ class Dividends(View):
                 dividend_change = self.currency_converter.convert(
                     dividend_change, dividend_currency, self.base_currency, date
                 )
-                dividend_currency = self.base_currency
 
             total_dividends += dividend_change
             dividends[dividend_name] = {

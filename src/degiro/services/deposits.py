@@ -10,11 +10,9 @@ from degiro.utils.localization import LocalizationUtility
 
 # FIXME: If data cannot be found in the DB, the code should get it from DeGiro, updating the DB
 class DepositsService:
-    def __init__(self, cash_movements_repository: CashMovementsRepository):
-        self.cash_movements_repository = cash_movements_repository
 
     def get_cash_deposits(self) -> dict:
-        df = pd.DataFrame(self.cash_movements_repository.get_cash_deposits_raw())
+        df = pd.DataFrame(CashMovementsRepository.get_cash_deposits_raw())
 
         # Remove hours and keep only the day
         df["date"] = pd.to_datetime(df["date"]).dt.strftime(LocalizationUtility.DATE_FORMAT)
@@ -40,7 +38,7 @@ class DepositsService:
         return records
 
     def cash_deposits_history(self) -> dict:
-        cash_contributions = self.cash_movements_repository.get_cash_deposits_raw()
+        cash_contributions = CashMovementsRepository.get_cash_deposits_raw()
         df = pd.DataFrame.from_dict(cash_contributions)
         # Remove hours and keep only the day
         df["date"] = pd.to_datetime(df["date"]).dt.date

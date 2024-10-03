@@ -6,13 +6,10 @@ from degiro.utils.localization import LocalizationUtility
 
 
 class TransactionsService:
-    def __init__(self, product_info_repository: ProductInfoRepository, transactions_repository: TransactionsRepository):
-        self.product_info_repository = product_info_repository
-        self.transactions_repository = transactions_repository
 
     def get_transactions(self) -> dict:
         # FETCH TRANSACTIONS DATA
-        transactions_history = self.transactions_repository.get_transactions_raw()
+        transactions_history = TransactionsRepository.get_transactions_raw()
 
         products_ids = []
 
@@ -22,7 +19,7 @@ class TransactionsService:
 
         # Remove duplicates from list
         products_ids = list(set(products_ids))
-        products_info = self.product_info_repository.get_products_info_raw(products_ids)
+        products_info = ProductInfoRepository.get_products_info_raw(products_ids)
 
         # Get user's base currency
         base_currency_symbol = LocalizationUtility.get_base_currency_symbol()

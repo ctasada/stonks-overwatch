@@ -38,12 +38,12 @@ def init() -> None:
     console_handler.setLevel(logging.INFO)
 
     # Create a formatter and add it to the console handler
-    format = "%(levelname)s %(asctime)s %(module)s %(message)s"
-    formatter = logging.Formatter(format)
+    _format = "%(levelname)s %(asctime)s %(module)s %(message)s"
+    formatter = logging.Formatter(_format)
     console_handler.setFormatter(formatter)
 
     # Configure logging
-    logging.basicConfig(level=logging.INFO, format=format)
+    logging.basicConfig(level=logging.INFO, format=_format)
 
 
 def account_import(update_service: UpdateService) -> None:
