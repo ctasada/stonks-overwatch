@@ -1,10 +1,8 @@
 from datetime import date
 
 import pandas as pd
-from django.db import connection
 
 from degiro.repositories.cash_movements_repository import CashMovementsRepository
-from degiro.utils.db_utils import dictfetchall
 from degiro.utils.localization import LocalizationUtility
 
 
@@ -73,19 +71,10 @@ class DepositsService:
         return dataset
 
     def calculate_cash_account_value(self) -> dict:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT date, balance_total
-                FROM degiro_cashmovements
-                WHERE currency = 'EUR'
-                    AND type = 'CASH_TRANSACTION'
-                """
-            )
-            cash_contributions = dictfetchall(cursor)
+        cash_balance = CashMovementsRepository.get_cash_balance_by_date()
 
         # Create DataFrame from the fetched data
-        df = pd.DataFrame.from_dict(cash_contributions)
+        df = pd.DataFrame.from_dict(cash_balance)
 
         # Convert the 'date' column to datetime and remove the time component
         df["date"] = pd.to_datetime(df["date"]).dt.normalize()

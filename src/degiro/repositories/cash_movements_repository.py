@@ -35,6 +35,19 @@ class CashMovementsRepository:
             return dictfetchall(cursor)
 
     @staticmethod
+    def get_cash_balance_by_date() -> list[dict]:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT date, balance_total
+                FROM degiro_cashmovements
+                WHERE currency = 'EUR'
+                    AND type = 'CASH_TRANSACTION'
+                """
+            )
+            return dictfetchall(cursor)
+
+    @staticmethod
     def get_total_cash_deposits_raw() -> float:
         with connection.cursor() as cursor:
             cursor.execute(
