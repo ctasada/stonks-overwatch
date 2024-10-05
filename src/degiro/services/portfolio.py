@@ -2,14 +2,13 @@ import logging
 
 from currency_converter import CurrencyConverter
 from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
-from django.db import connection
 
 from degiro.repositories.cash_movements_repository import CashMovementsRepository
 from degiro.repositories.company_profile_repository import CompanyProfileRepository
 from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.product_quotations_repository import ProductQuotationsRepository
+from degiro.repositories.transactions_repository import TransactionsRepository
 from degiro.services.degiro_service import DeGiroService
-from degiro.utils.db_utils import dictfetchall
 from degiro.utils.localization import LocalizationUtility
 
 
@@ -187,7 +186,7 @@ class PortfolioService:
         except Exception:
             return None
 
-    def __get_porfolio_products(self) -> dict:
+    def __get_porfolio_products(self) -> list[dict]:
         try:
             update = self.degiro_service.get_client().get_update(
                 request_list=[
@@ -213,22 +212,11 @@ class PortfolioService:
 
         except Exception:
             logging.exception("Cannot connect to DeGiro, getting last known data")
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    """
-                    SELECT product_id,
-                        SUM(quantity) AS size,
-                        SUM(total_plus_all_fees_in_base_currency) as total_plus_all_fees_in_base_currency,
-                        ABS(SUM(total_plus_all_fees_in_base_currency) / SUM(quantity)) AS break_even_price
-                    FROM degiro_transactions
-                    GROUP BY product_id
-                    HAVING SUM(quantity) > 0;
-                    """
-                )
-                local_portfolio = dictfetchall(cursor)
-                for entry in local_portfolio:
-                    entry["value"] = 1.0  # FIXME
-                return local_portfolio
+            local_portfolio = TransactionsRepository.get_portfolio_products()
+            for entry in local_portfolio:
+                entry["value"] = 1.0  # FIXME
+
+            return local_portfolio
 
     def __get_products_info(self, products_ids: list) -> dict:
         try:
@@ -246,13 +234,7 @@ class PortfolioService:
             return {}
 
     def calculate_product_growth(self) -> dict:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT date, product_id, quantity FROM degiro_transactions
-                """
-            )
-            results = dictfetchall(cursor)
+        results = TransactionsRepository.get_products_transactions()
 
         product_growth = {}
         for entry in results:

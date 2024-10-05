@@ -4,20 +4,19 @@ from datetime import date, datetime, timedelta
 
 import pandas as pd
 from currency_converter import CurrencyConverter
-from django.db import connection
 from django.shortcuts import render
 from django.views import View
 
 from degiro.repositories.cash_movements_repository import CashMovementsRepository
 from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.product_quotations_repository import ProductQuotationsRepository
+from degiro.repositories.transactions_repository import TransactionsRepository
 from degiro.services.account_overview import AccountOverviewService
 from degiro.services.degiro_service import DeGiroService
 from degiro.services.deposits import DepositsService
 from degiro.services.dividends import DividendsService
 from degiro.services.portfolio import PortfolioService
 from degiro.utils.datetime import DateTimeUtility
-from degiro.utils.db_utils import dictfetchall
 from degiro.utils.localization import LocalizationUtility
 
 
@@ -258,14 +257,7 @@ class Dashboard(View):
         return aggregate
 
     def _get_stock_splits(self) -> dict:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT date, product_id, buysell, quantity FROM degiro_transactions
-                    WHERE transaction_type_id = '101'
-                """
-            )
-            results = dictfetchall(cursor)
+        results = TransactionsRepository.get_stock_split_transactions()
 
         # Dictionary to hold grouped data
         grouped_data = defaultdict(lambda: {"B": None, "S": None})

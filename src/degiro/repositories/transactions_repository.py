@@ -4,6 +4,7 @@ from django.db import connection
 from django.forms import model_to_dict
 
 from degiro.models import Transactions
+from degiro.utils.constants import TransactionType
 from degiro.utils.db_utils import dictfetchall
 
 
@@ -15,6 +16,32 @@ class TransactionsRepository:
                 """
                 SELECT *
                 FROM degiro_transactions
+                """
+            )
+            return dictfetchall(cursor)
+
+    @staticmethod
+    def get_products_transactions() -> list[dict]:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT date, product_id, quantity FROM degiro_transactions
+                """
+            )
+            return dictfetchall(cursor)
+
+    @staticmethod
+    def get_portfolio_products() -> list[dict]:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT product_id,
+                    SUM(quantity) AS size,
+                    SUM(total_plus_all_fees_in_base_currency) as total_plus_all_fees_in_base_currency,
+                    ABS(SUM(total_plus_all_fees_in_base_currency) / SUM(quantity)) AS break_even_price
+                FROM degiro_transactions
+                GROUP BY product_id
+                HAVING SUM(quantity) > 0;
                 """
             )
             return dictfetchall(cursor)
@@ -35,3 +62,15 @@ class TransactionsRepository:
             """Ignore. The Database doesn't contain anything"""
 
         return None
+
+    @staticmethod
+    def get_stock_split_transactions() -> list[dict]:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT date, product_id, buysell, quantity FROM degiro_transactions
+                    WHERE transaction_type_id = %s
+                """,
+                [TransactionType.STOCK_SPLIT.value]
+            )
+            return dictfetchall(cursor)
