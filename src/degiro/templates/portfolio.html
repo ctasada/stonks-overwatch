@@ -48,7 +48,7 @@
                         </td>
                         <td>{{ stock.sector }}<br><small class="fw-lighter">{{ stock.industry }}</small></td>
                         <td>{{ stock.shares }}</td>
-                        <td>{{ stock.formattedPrice }}<br><small class="fw-lighter">{{ stock.formattedBreakEvenPrice }}</small></td>
+                        <td data-bs-toggle="tooltip" title="{{ stock.formattedPrice }}">{{ stock.formattedBaseCurrencyPrice }}<br><small class="fw-lighter" data-bs-toggle="tooltip" title="{{ stock.formattedBreakEvenPrice }}">{{ stock.formattedBaseCurrencyBreakEvenPrice }}</small></td>
                         {% if stock.unrealizedGain > 0 %}
                         <td class="text-success">
                         {% else %}
@@ -61,7 +61,7 @@
                             <small class="fw-lighter bi bi-arrow-down-right">
                             {% endif %}{{ stock.percentageGain }}</small>
                         </td>
-                        <td>{{ stock.formattedValue }}</td>
+                        <td>{{ stock.formattedBaseCurrencyValue }}</td>
                         <td>{{ stock.formattedPortfolioSize }}</td>
                     </tr>
                     {% endif %}
@@ -111,7 +111,7 @@
                     </td>
                     <td>{{ etf.sector }}<br><small class="fw-lighter">{{ etf.industry }}</small></td>
                     <td>{{ etf.shares }}</td>
-                    <td>{{ etf.formattedPrice }}<br><small class="fw-lighter">{{ etf.formattedBreakEvenPrice }}</small></td>
+                    <td data-bs-toggle="tooltip" title="{{ etf.formattedPrice }}">{{ etf.formattedBaseCurrencyPrice }}<br><small class="fw-lighter" data-bs-toggle="tooltip" title="{{ etf.formattedBreakEvenPrice }}">{{ etf.formattedBaseCurrencyBreakEvenPrice }}</small></td>
                     {% if etf.unrealizedGain > 0 %}
                     <td class="text-success">
                         {% else %}
@@ -119,7 +119,7 @@
                         {% endif %}
                         {{ etf.formattedUnrealizedGain }}<br><small class="fw-lighter">{{ etf.percentageGain }}</small>
                     </td>
-                    <td>{{ etf.formattedValue }}</td>
+                    <td>{{ etf.formattedBaseCurrencyValue }}</td>
                     <td>{{ etf.formattedPortfolioSize }}</td>
                 </tr>
                 {% endif %}

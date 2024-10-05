@@ -22,14 +22,13 @@ class PortfolioService:
     ):
         self.degiro_service = degiro_service
 
-    def get_portfolio(self) -> dict:
+    def get_portfolio(self) -> list[dict]:
         portfolio_transactions = self.__get_porfolio_products()
 
         products_ids = [row["productId"] for row in portfolio_transactions]
         products_info = self.__get_products_info(products_ids=products_ids)
 
         # Get user's base currency
-        base_currency_symbol = LocalizationUtility.get_base_currency_symbol()
         base_currency = LocalizationUtility.get_base_currency()
 
         products_config = self.__get_product_config()
@@ -52,20 +51,22 @@ class PortfolioService:
             price = ProductQuotationsRepository.get_product_price(tmp["productId"])
             value = tmp["size"] * price
             break_even_price = tmp["breakEvenPrice"]
-            if currency != base_currency:
-                price = self.currency_converter.convert(price, currency, base_currency)
-                value = self.currency_converter.convert(value, currency, base_currency)
-                break_even_price = self.currency_converter.convert(break_even_price, currency, base_currency)
-                currency = base_currency
 
-            formatted_price = LocalizationUtility.format_money_value(value=price, currency=currency)
-            formatted_value = LocalizationUtility.format_money_value(value=value, currency_symbol=base_currency_symbol)
-            formatted_break_even_price = LocalizationUtility.format_money_value(
-                value=break_even_price, currency=currency
-            )
             is_open = tmp["size"] != 0.0 and tmp["value"] != 0.0
             unrealized_gain = (price - break_even_price) * tmp["size"]
-            formatted_unrealized_gain = LocalizationUtility.format_money_value(value=unrealized_gain, currency=currency)
+
+            if currency != base_currency:
+                base_currency_price = self.currency_converter.convert(price, currency, base_currency)
+                base_currency_value = self.currency_converter.convert(value, currency, base_currency)
+                base_currency_break_even_price = self.currency_converter.convert(
+                    break_even_price, currency, base_currency
+                )
+                unrealized_gain = (base_currency_price - base_currency_break_even_price) * tmp["size"]
+            else:
+                base_currency_price = price
+                base_currency_value = value
+                base_currency_break_even_price = break_even_price
+
             percentage_gain = 0.0
             if value > 0:
                 percentage_gain = unrealized_gain / (value - unrealized_gain)
@@ -92,19 +93,33 @@ class PortfolioService:
                     "exchangeId": exchange_id,
                     **({"exchangeAbbr": exchange_abbr} if exchange_abbr is not None else {}),
                     "exchangeName": exchange_name,
-                    "shares": tmp["size"],
-                    "price": price,
-                    "productType": info["productType"],
-                    "productCurrency": info["currency"],
                     "country": country,
-                    "formattedPrice": formatted_price,
+                    "productType": info["productType"],
+                    "shares": tmp["size"],
+                    "productCurrency": currency,
+                    "price": price,
+                    "formattedPrice": LocalizationUtility.format_money_value(value=price, currency=currency),
+                    **({"formattedBaseCurrencyPrice": LocalizationUtility.format_money_value(
+                        value=base_currency_price, currency=base_currency
+                    )} if base_currency_price is not None else {}),
                     "breakEvenPrice": break_even_price,
-                    "formattedBreakEvenPrice": formatted_break_even_price,  # GAK: Average Purchase Price
+                    "formattedBreakEvenPrice": LocalizationUtility.format_money_value(
+                        value=break_even_price, currency=currency
+                    ),  # GAK: Average Purchase Price
+                    **({"formattedBaseCurrencyBreakEvenPrice": LocalizationUtility.format_money_value(
+                        value=base_currency_break_even_price, currency=base_currency
+                    )} if base_currency_break_even_price is not None else {}),
                     "value": value,
-                    "formattedValue": formatted_value,
+                    "formattedValue": LocalizationUtility.format_money_value(value=value, currency_symbol=currency),
+                    "baseCurrencyValue": base_currency_value,
+                    **({"formattedBaseCurrencyValue": LocalizationUtility.format_money_value(
+                        value=base_currency_value, currency=base_currency
+                    )} if base_currency_value is not None else {}),
                     "isOpen": is_open,
                     "unrealizedGain": unrealized_gain,
-                    "formattedUnrealizedGain": formatted_unrealized_gain,
+                    "formattedUnrealizedGain": LocalizationUtility.format_money_value(
+                        value=unrealized_gain, currency=base_currency
+                    ),
                     "percentageGain": f"{percentage_gain:.2%}",
                     "logoUrl": f"https://logos.stockanalysis.com/{info['symbol'].lower()}.svg",
                     "portfolioSize": 0.0,  # Calculated in the next loop
@@ -128,8 +143,9 @@ class PortfolioService:
 
         tmp_total_portfolio = {}
         for entry in portfolio:
-            portfolio_total_value += entry["value"]
-            tmp_total_portfolio[entry["name"]] = entry["value"]
+            if entry["isOpen"]:
+                portfolio_total_value += entry["baseCurrencyValue"]
+                tmp_total_portfolio[entry["name"]] = entry["baseCurrencyValue"]
 
         base_currency_symbol = LocalizationUtility.get_base_currency_symbol()
 
