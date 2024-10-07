@@ -50,23 +50,23 @@ class DateTimeUtility:
         return interval
 
     @staticmethod
-    def calculate_dates_in_interval(from_date: date, interval: Interval) -> list[date]:
+    def calculate_dates_in_interval(to_date: date, interval: Interval) -> list[date]:
         """
         Calculate the list of dates within the given interval.
 
         Args:
-            from_date (date): The start date.
+            to_date (date): The start date.
             interval (Interval): The interval for which to calculate the dates.
 
         Returns:
             list[date]: A list of dates within the given interval.
         """
         days = DateTimeUtility.convert_interval_to_days(interval)
-        start_date = from_date - timedelta(days=days)
+        start_date = to_date - timedelta(days=days - 1)
         return [start_date + timedelta(days=i) for i in range(0, days)]
 
     @staticmethod
-    def convert_interval_to_days(interval: Interval) -> int:
+    def convert_interval_to_days(interval: Interval) -> int: # noqa: C901
         """
         Convert an interval into the number of days.
 
@@ -93,5 +93,9 @@ class DateTimeUtility:
                 return 5 * 365
             case Interval.P10Y:
                 return 10 * 365
+            case Interval.P50Y:
+                return 50 * 365
+            case Interval.YTD:
+                return (date.today() - date(date.today().year, 1, 1)).days
             case _:
                 raise ValueError(f"Invalid interval: {interval}")

@@ -1,0 +1,40 @@
+{
+  "data": {
+    "address": {
+      "city": "Amsterdam",
+      "country": "NL",
+      "streetAddress": "BrokerStraat",
+      "streetAddressNumber": "2",
+      "zip": "1234AB"
+    },
+    "canEnableDebitMoney": true,
+    "canUpgrade": true,
+    "cellphoneNumber": "+31647882867",
+    "clientRole": "basic",
+    "contractType": "PRIVATE",
+    "culture": "NL",
+    "displayLanguage": "en",
+    "displayName": "User Name",
+    "effectiveClientRole": "basic",
+    "email": "username@gmail.com",
+    "id": 123456,
+    "intAccount": 1122339,
+    "isAllocationAvailable": false,
+    "isAmClientActive": false,
+    "isCollectivePortfolio": false,
+    "isDebitMoneyEnabled": false,
+    "isIskClient": false,
+    "isUsPerson": false,
+    "isWithdrawalAvailable": true,
+    "language": "nl",
+    "locale": "nl_NL",
+    "loggedInPersonId": 456789,
+    "memberCode": "4H83BB94",
+    "taxResidency": {
+      "primaryTaxResidencies": [
+        "NL"
+      ]
+    },
+    "username": "username"
+  }
+}

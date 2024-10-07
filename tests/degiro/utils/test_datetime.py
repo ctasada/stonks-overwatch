@@ -42,20 +42,19 @@ def test_calculate_interval_invalid_date():
 
 
 def test_calculate_dates_in_interval():
-    from_date = date(2023, 4, 1)
+    to_date = date(2023, 4, 1)
     expected_dates = [
-        date(2023, 3, 25),
         date(2023, 3, 26),
         date(2023, 3, 27),
         date(2023, 3, 28),
         date(2023, 3, 29),
         date(2023, 3, 30),
         date(2023, 3, 31),
+        date(2023, 4, 1),
     ]
 
-    dates = DateTimeUtility.calculate_dates_in_interval(from_date, Interval.P1W)
+    dates = DateTimeUtility.calculate_dates_in_interval(to_date, Interval.P1W)
     assert dates == expected_dates
-
 
 def test_convert_interval_to_days():
     test_cases = [
@@ -67,6 +66,7 @@ def test_convert_interval_to_days():
         (Interval.P3Y, 3 * 365),
         (Interval.P5Y, 5 * 365),
         (Interval.P10Y, 10 * 365),
+        (Interval.P50Y, 50 * 365),
     ]
 
     for interval, expected_days in test_cases:
