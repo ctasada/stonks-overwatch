@@ -2,225 +2,46 @@
 {% load custom_tags %}
 {% load static %}
 {% block content %}
+<div class="container-fluid row-gap-5">
+    {% include 'distribution_with_list.html' with chart_id="holdings-chart" items=holdings.table %}
+    {% include 'distribution_with_list.html' with chart_id="sectors-chart" items=sectors.table %}
+    {% include 'distribution_with_list.html' with chart_id="currencies-chart" items=currencies.table %}
+    {% include 'distribution_with_list.html' with chart_id="countries-chart" items=countries.table %}
+</div>
+
 <!-- ChartJS -->
 <script src="{% static 'chart.js/dist/chart.umd.js' %}"></script>
 <script src="{% static 'luxon/build/global/luxon.js' %}"></script>
 <script src="{% static 'chartjs-adapter-luxon/dist/chartjs-adapter-luxon.umd.min.js' %}"></script>
 <script src="{% static '@seahsky/chartjs-plugin-autocolors/dist/chartjs-plugin-autocolors.min.js' %}"></script>
-
-<div class="container-fluid row-gap-5">
-    <div class="row border border-primary-subtle bg-light rounded mb-3 pb-3">
-        <div class="col-sm" style="position: relative; height:40vh">
-            <canvas id="holdings-chart"></canvas>
-        </div>
-        <div class="col-sm diversification-scrollable-list list-group mt-3" style="height:40vh">
-            {% for stock in holdings.table %}
-            <div class="list-group-item rounded m-1">
-                <div class="progress-bar-background" style="width: {{ stock.weight }}%;"></div>
-                <div class="diversification-weight">
-                    <div>{{ stock.name }}</div>
-                    <div>{{ stock.formattedPortfolioSize }}</div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    <div class="row border border-primary-subtle bg-light rounded mb-3 pb-3">
-        <div class="col-sm" style="position: relative; height:40vh">
-            <canvas id="sectors-chart"></canvas>
-        </div>
-        <div class="col-sm diversification-scrollable-list list-group mt-3" style="height:40vh">
-            {% for sector in sectors.table %}
-            <div class="list-group-item rounded m-1">
-                <div class="progress-bar-background" style="width: {{ sector.weight }}%;"></div>
-                <div class="diversification-weight">
-                    <div>{{ sector.name }}</div>
-                    <div>{{ sector.formattedPortfolioSize }}</div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    <div class="row border border-primary-subtle bg-light rounded mb-3 pb-3">
-        <div class="col-sm" style="position: relative; height:40vh">
-            <canvas id="currencies-chart"></canvas>
-        </div>
-        <div class="col-sm diversification-scrollable-list list-group mt-3" style="height:40vh">
-            {% for currency in currencies.table %}
-            <div class="list-group-item rounded m-1">
-                <div class="progress-bar-background" style="width: {{ currency.weight }}%;"></div>
-                <div class="diversification-weight">
-                    <div>{{ currency.name }}</div>
-                    <div>{{ currency.formattedPortfolioSize }}</div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    <div class="row border border-primary-subtle bg-light rounded mb-3 pb-3">
-        <div class="col-sm" style="position: relative; height:40vh">
-            <canvas id="countries-chart"></canvas>
-        </div>
-        <div class="col-sm diversification-scrollable-list list-group mt-3" style="height:40vh">
-            {% for country in countries.table %}
-            <div class="list-group-item rounded m-1">
-                <div class="progress-bar-background" style="width: {{ country.weight }}%;"></div>
-                <div class="diversification-weight">
-                    <div>{{ country.name }}</div>
-                    <div>{{ country.formattedPortfolioSize }}</div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</div>
-
+<script src="{% static 'js/distribution-char-utils.js' %}"></script>
 <script>
-    // Customize colors with https://www.npmjs.com/package/@seahsky/chartjs-plugin-autocolors#customize
-    const autocolors = window['@seahsky/chartjs-plugin-autocolors'];
-    const currencySymbol = "{{ currencySymbol }}";
+    drawDoughnutChart(
+        "holdings-chart",
+        "Holdings",
+        {{ holdings.chart.labels|safe }},
+        {{ holdings.chart.values|safe }}
+    );
 
-    function getDoughnutConfig(pieTitle, data, valuesDict) {
-        return {
-            type: 'doughnut',
-            data: data,
-            plugins: [
-                autocolors
-            ],
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false,
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                var value = valuesDict[context.datasetIndex][context.dataIndex].value;
-                                value = Intl.NumberFormat().format(value);
-                                return currencySymbol + ' ' + value;
-                            }
-                        }
-                    },
-                    title: {
-                        display: true,
-                        text: pieTitle,
-                        font: {
-                            size: 20
-                        }
-                    },
-                    autocolors: {
-                        mode: 'data',
-                        offset: 5,
-                    }
-                }
-            },
-        };
-    }
+    drawDoughnutChart(
+        "sectors-chart",
+        "Sectors",
+        {{ sectors.chart.labels|safe }},
+        {{ sectors.chart.values|safe }}
+    );
 
-    function drawHoldingsPositions() {
-        let valuesDict = [
-            [
-                {% for stock in holdings.chart.labels %}
-                {
-                    "label" : "{{ stock }}",
-                    "value" : {{ holdings.chart.values|index:forloop.counter0 }},
-                },
-                {% endfor %}
-        ]
-      ];
-    const data = {
-        labels: {{ holdings.chart.labels|safe }},
-        datasets: [
-            {
-                data: {{ holdings.chart.values }},
-                borderWidth: 1,
-            }
-        ]
-      };
+    drawDoughnutChart(
+        "currencies-chart",
+        "Currencies",
+        {{ currencies.chart.labels|safe }},
+        {{ currencies.chart.values|safe }}
+    );
 
-    const configDoughnut = getDoughnutConfig('Holdings', data, valuesDict);
-    let doughnutHoldingsChart = new Chart(document.getElementById("holdings-chart").getContext("2d"), configDoughnut);
-    }
-
-    function drawSectorsPositions() {
-        let valuesDict = [
-            [
-                {% for sector in sectors.chart.labels %}
-                {
-                    "label" : "{{ sector }}",
-                    "value" : {{ sectors.chart.values|index:forloop.counter0 }},
-                },
-                {% endfor %}
-            ]
-        ];
-        const data = {
-            labels: {{ sectors.chart.labels|safe }},
-            datasets: [
-                {
-                    data: {{ sectors.chart.values }},
-                    borderWidth: 1,
-                }
-            ]
-        };
-
-        const configDoughnut = getDoughnutConfig('Sectors', data, valuesDict);
-        let doughnutSectorsChart = new Chart(document.getElementById("sectors-chart").getContext("2d"), configDoughnut);
-    }
-
-    function drawCurrencyPositions() {
-        let valuesDict = [
-            [
-                {% for currency in currencies.chart.labels %}
-                {
-                    "label" : "{{ currency }}",
-                    "value" : {{ currencies.chart.values|index:forloop.counter0 }},
-                },
-                {% endfor %}
-            ]
-        ];
-        const data = {
-            labels: {{ currencies.chart.labels| safe }},
-            datasets: [
-                {
-                    data: {{ currencies.chart.values }},
-                    borderWidth: 1,
-                }
-            ]
-        };
-
-        const configDoughnut = getDoughnutConfig('Currencies', data, valuesDict);
-        let doughnutCurrenciesChart = new Chart(document.getElementById("currencies-chart").getContext("2d"), configDoughnut);
-    }
-
-    function drawCountriesPositions() {
-        let valuesDict = [
-            [
-                {% for country in countries.chart.labels %}
-                {
-                    "label" : "{{ country }}",
-                    "value" : {{ countries.chart.values|index:forloop.counter0 }},
-                },
-                {% endfor %}
-            ]
-        ];
-        const data = {
-            labels: {{ countries.chart.labels| safe }},
-            datasets: [
-                {
-                    data: {{ countries.chart.values }},
-                    borderWidth: 1,
-                }
-            ]
-        };
-
-        const configDoughnut = getDoughnutConfig('Countries', data, valuesDict);
-        let doughnutCountriesChart = new Chart(document.getElementById("countries-chart").getContext("2d"), configDoughnut);
-    }
-
-    drawHoldingsPositions()
-    drawSectorsPositions()
-    drawCurrencyPositions()
-    drawCountriesPositions()
+    drawDoughnutChart(
+        "countries-chart",
+        "Countries",
+        {{ countries.chart.labels|safe }},
+        {{ countries.chart.values|safe }}
+    );
 </script>
 {% endblock %}

@@ -187,8 +187,8 @@ class Dividends(View):
                 {
                     "name": key,
                     "value": dividends[key]["value"],
-                    "dividendsSize": dividends_size,
-                    "formattedDividendsSize": f"{dividends_size:.2%}",
+                    "size": dividends_size,
+                    "formattedSize": f"{dividends_size:.2%}",
                     "weight": (dividends[key]["dividendsSize"] / max_percentage) * 100,
                 }
             )
