@@ -53,8 +53,8 @@ class Diversification(View):
                 stocks_table.append(
                     {
                         "name": stock["name"],
-                        "portfolioSize": stock["portfolioSize"],
-                        "formattedPortfolioSize": stock["formattedPortfolioSize"],
+                        "size": stock["portfolioSize"],
+                        "formattedSize": stock["formattedPortfolioSize"],
                         "weight": (stock["portfolioSize"] / max_percentage) * 100,
                     }
                 )
@@ -102,8 +102,8 @@ class Diversification(View):
                 {
                     "name": key,
                     "value": data[key]["value"],
-                    "portfolioSize": portfolio_size,
-                    "formattedPortfolioSize": f"{portfolio_size:.2%}",
+                    "size": portfolio_size,
+                    "formattedSize": f"{portfolio_size:.2%}",
                     "weight": (data[key]["portfolioSize"] / max_percentage) * 100,
                 }
             )
