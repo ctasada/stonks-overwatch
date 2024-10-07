@@ -1,0 +1,154 @@
+{
+  "requestid": "1",
+  "start": "2024-09-05T00:00:00",
+  "end": "2024-10-04T00:00:00",
+  "resolution": "P1D",
+  "series": [
+    {
+      "expires": "2024-10-06T11:16:47.5635722+02:00",
+      "data": {
+        "issueId": 350015372,
+        "companyId": 10887,
+        "name": "Apple",
+        "identifier": "issueid:350015372",
+        "isin": "US0378331005",
+        "alfa": "AAPL",
+        "market": "XNAS",
+        "currency": "USD",
+        "type": "AAN",
+        "quality": "DELAYED",
+        "lastPrice": 226.73,
+        "lastTime": "2024-10-04T22:00:10",
+        "absDiff": 1.13,
+        "relDiff": 0.00501,
+        "highPrice": 228.0,
+        "highTime": "2024-10-04T15:30:00",
+        "lowPrice": 224.13,
+        "lowTime": "2024-10-04T03:00:41",
+        "openPrice": 227.9,
+        "openTime": "2024-10-04T15:30:00",
+        "closePrice": 227.9,
+        "closeTime": "2024-10-04T15:30:00",
+        "cumulativeVolume": 37345098.0,
+        "previousClosePrice": 225.67,
+        "previousCloseTime": "2024-10-03T22:00:11",
+        "tradingStartTime": "15:30:00",
+        "tradingEndTime": "22:00:00",
+        "tradingAddedTime": "00:45:00",
+        "lowPriceP1Y": 164.075,
+        "highPriceP1Y": 237.194,
+        "windowStart": "2024-09-05T00:00:00",
+        "windowEnd": "2024-10-04T00:00:00",
+        "windowFirst": "2024-09-05T00:00:00",
+        "windowLast": "2024-10-04T00:00:00",
+        "windowHighTime": "2024-09-30T00:00:00",
+        "windowHighPrice": 233.0,
+        "windowLowTime": "2024-09-16T00:00:00",
+        "windowLowPrice": 216.32,
+        "windowOpenTime": "2024-09-05T00:00:00",
+        "windowOpenPrice": 221.625,
+        "windowPreviousCloseTime": "2024-09-04T00:00:00",
+        "windowPreviousClosePrice": 220.85,
+        "windowTrend": 0.02694136291600634
+      },
+      "id": "issueid:350015372",
+      "type": "object"
+    },
+    {
+      "times": "2024-09-05/P1D",
+      "expires": "2024-10-06T11:16:47.5635722+02:00",
+      "data": [
+        [
+          0,
+          222.38
+        ],
+        [
+          1,
+          220.8
+        ],
+        [
+          4,
+          220.91
+        ],
+        [
+          5,
+          220.11
+        ],
+        [
+          6,
+          222.66
+        ],
+        [
+          7,
+          222.77
+        ],
+        [
+          8,
+          222.5
+        ],
+        [
+          11,
+          216.32
+        ],
+        [
+          12,
+          216.79
+        ],
+        [
+          13,
+          220.69
+        ],
+        [
+          14,
+          228.87
+        ],
+        [
+          15,
+          228.29
+        ],
+        [
+          18,
+          226.47
+        ],
+        [
+          19,
+          227.37
+        ],
+        [
+          20,
+          226.37
+        ],
+        [
+          21,
+          227.52
+        ],
+        [
+          22,
+          227.725
+        ],
+        [
+          25,
+          233.0
+        ],
+        [
+          26,
+          226.21
+        ],
+        [
+          27,
+          226.78
+        ],
+        [
+          28,
+          225.67
+        ],
+        [
+          29,
+          226.8
+        ]
+      ],
+      "id": "price:issueid:350015372",
+      "type": "time"
+    }
+  ]
+}

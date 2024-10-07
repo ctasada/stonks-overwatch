@@ -1,6 +1,10 @@
+import json
+import pathlib
+
 import requests_mock
 from degiro_connector.core.constants import urls
 from degiro_connector.core.exceptions import DeGiroConnectionError
+from degiro_connector.quotecast.models.chart import Interval
 
 import pytest
 from degiro.config.degiro_config import DegiroCredentials
@@ -156,3 +160,39 @@ def test_degiro_service_update_credentials(disable_requests_cache: disable_reque
 
         assert service.check_connection() is True
         assert service.api_client.connection_storage.session_id == "abcdefg12345"
+
+def test_get_product_quotation(
+        disable_requests_cache: disable_requests_cache,
+        mock_full_credentials: mock_full_credentials
+):
+    manager = CredentialsManager(mock_full_credentials)
+    chart_data_file = pathlib.Path("tests/resources/degiro/services/aapl-chart-fetcher.json")
+    with open(chart_data_file, "r") as file:
+        chart_data = f"vwd.hchart.seriesRequestManager.sync_response({file.read()})"
+
+    client_details_file = pathlib.Path("tests/resources/degiro/services/client-details.json")
+    with open(client_details_file, "r") as file:
+        client_details = json.load(file)
+
+    with requests_mock.Mocker() as m:
+        m.post(urls.LOGIN + "/totp", json={"sessionId": "abcdefg12345"}, status_code=200)
+        m.register_uri(method="GET",
+                       url=urls.CLIENT_DETAILS + "?sessionId=abcdefg12345",
+                       json=client_details,
+                       status_code=200
+        )
+        m.get(urls.CHART, text=chart_data, status_code=200),
+
+        service = DeGiroService(manager)
+        service.connect()
+
+        quotes = service.get_product_quotation("350015372", Interval.P1M)
+
+    assert service.check_connection() is True
+    assert len(quotes.keys()) == 30
+    assert quotes["2024-09-05"] == 222.38
+    assert quotes["2024-09-06"] == 220.80
+    assert quotes["2024-09-07"] == 220.80
+    assert quotes["2024-09-08"] == 220.80
+    assert quotes["2024-09-09"] == 220.91
+    assert quotes["2024-10-04"] == 226.8

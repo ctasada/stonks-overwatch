@@ -1,3 +1,5 @@
+import logging
+
 from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.services.account_overview import AccountOverviewService
 from degiro.services.degiro_service import DeGiroService
@@ -5,6 +7,8 @@ from degiro.utils.localization import LocalizationUtility
 
 
 class DividendsService:
+    logger = logging.getLogger("stocks_portfolio.dividends_service")
+
     def __init__(
         self,
         account_overview: AccountOverviewService,
@@ -52,5 +56,6 @@ class DividendsService:
                     )
 
             return result
-        except Exception:
+        except Exception as error:
+            self.logger.error(error)
             return result

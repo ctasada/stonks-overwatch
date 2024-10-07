@@ -237,11 +237,7 @@ class Dashboard(View):
             for d in dates[index:]:
                 position_value[d] = entry["history"][date_change]
 
-        splitted_stock = False
         if entry["productId"] in stock_splits:
-            splitted_stock = True
-
-        if splitted_stock:
             stocks_multiplier = 1
             for split_date in reversed(stock_splits[entry["productId"]]):
                 split_data = stock_splits[entry["productId"]][split_date]
@@ -252,7 +248,8 @@ class Dashboard(View):
 
         aggregate = {}
         for date_quote in entry["quotation"]["quotes"]:
-            aggregate[date_quote] = position_value[date_quote] * entry["quotation"]["quotes"][date_quote]
+            if date_quote in position_value:
+                aggregate[date_quote] = position_value[date_quote] * entry["quotation"]["quotes"][date_quote]
 
         return aggregate
 
@@ -336,8 +333,6 @@ class Dashboard(View):
 
         # We need to use the productIds to get the daily quote for each product
         for key in product_growth.keys():
-            quotes_dict = ProductQuotationsRepository.get_product_quotations(key)
-
-            product_growth[key]["quotation"]["quotes"] = quotes_dict
+            product_growth[key]["quotation"]["quotes"] = ProductQuotationsRepository.get_product_quotations(key)
 
         return product_growth

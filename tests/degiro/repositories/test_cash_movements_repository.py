@@ -13,13 +13,10 @@ from tests.degiro.assertions import assert_dates_descending
 @pytest.mark.django_db
 class TestCashMovementsRepository(TestCase):
     def setUp(self):
-        # Known Cash Movement Types:
-        # CASH_FUND_NAV_CHANGE
-        # CASH_FUND_TRANSACTION
-        # CASH_TRANSACTION
-        # FLATEX_CASH_SWEEP
-        # PAYMENT
-        # TRANSACTION
+        self.fixture_cash_movements_repository()
+
+
+    def fixture_cash_movements_repository(self):
         data_file = pathlib.Path("tests/resources/degiro/repositories/cash_movements_data.json")
 
         with open(data_file, "r") as file:

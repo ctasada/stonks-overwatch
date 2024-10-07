@@ -363,17 +363,7 @@ class UpdateService:
                 issue_id = product_growth[key]["product"].get("vwdId")
 
             interval = product_growth[key]["quotation"]["interval"]
-            quotes = self.degiro_service.get_product_quotation(issue_id, interval)
-            dates = DateTimeUtility.calculate_dates_in_interval(date.today(), interval)
-            quotes_dict = {}
-            for count, day in enumerate(dates):
-                # Keep only the dates that are in the quotation range
-                from_date = product_growth[key]["quotation"]["from_date"]
-                to_date = product_growth[key]["quotation"]["to_date"]
-                if day >= LocalizationUtility.convert_string_to_date(
-                    from_date
-                ) and day <= LocalizationUtility.convert_string_to_date(to_date):
-                    quotes_dict[LocalizationUtility.format_date_from_date(day)] = quotes[count]
+            quotes_dict = self.degiro_service.get_product_quotation(issue_id, interval)
 
             ProductQuotation.objects.update_or_create(id=int(key), defaults={"quotations": quotes_dict})
 

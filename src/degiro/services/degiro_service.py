@@ -9,6 +9,7 @@ from degiro_connector.trading.api import API as TradingApi  # noqa: N811
 from degiro_connector.trading.models.credentials import Credentials
 
 from degiro.config.degiro_config import DegiroConfig
+from degiro.utils.localization import LocalizationUtility
 
 
 class CredentialsManager:
@@ -85,8 +86,10 @@ class DeGiroService:
         products_info = self.api_client.get_products_info(product_list=product_ids, raw=True)
         return products_info["data"]
 
-    def get_product_quotation(self, issue_id: str, period: Interval) -> List[float]:
-        """Get the list of quotations for the provided product for the indicated interval."""
+    def get_product_quotation(self, issue_id: str, period: Interval) -> dict:
+        """Get the list of quotations for the provided product for the indicated interval.
+        The response is a list of date-value pairs.
+        """
         self.check_connection()
 
         client_details = self.get_client_details()
@@ -106,17 +109,31 @@ class DeGiroService:
         )
         chart = chart_fetcher.get_chart(chart_request=chart_request, raw=False)
 
-        quotes = []
+        quotes = {}
         for series in chart.series:
             if series.type == "time":
+                init_date = series.times.split('/')[0]
+                last_date = LocalizationUtility.convert_string_to_date(init_date)
                 data_frame = pl.DataFrame(data=series.data, orient="row")
-                i = 1
                 for row in data_frame.rows(named=True):
-                    if row["column_0"] != i:
-                        last_value = quotes[-1] if quotes else row["column_1"]
-                        quotes.extend([last_value] * (row["column_0"] - i))
-                        i = row["column_0"]
-                    quotes.append(row["column_1"])
-                    i += 1
+                    delta_days = row["column_0"]
+                    current_date = LocalizationUtility.convert_string_to_date(init_date) + timedelta(days=delta_days)
+
+                    if (current_date - last_date).days > 1:
+                        last_date_str = LocalizationUtility.format_date_from_date(last_date)
+                        for missing_day in (range(1, (current_date - last_date).days)):
+                            missing_day_str = LocalizationUtility.format_date_from_date(
+                                last_date + timedelta(days=missing_day)
+                            )
+                            # Sometimes the first value is skipped, so we need to look at the current one
+                            if last_date_str in quotes:
+                                last_known_value = quotes[last_date_str]
+                            else:
+                                last_known_value = row["column_1"]
+                            quotes[missing_day_str] = last_known_value
+
+                    current_date_str = LocalizationUtility.format_date_from_date(current_date)
+                    quotes[current_date_str] = row["column_1"]
+                    last_date = current_date
 
         return quotes
