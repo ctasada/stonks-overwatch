@@ -171,7 +171,7 @@ class Dashboard(View):
 
         return dataset
 
-    def _calculate_value(self, cash_account: dict) -> list:
+    def _calculate_value(self, cash_account: dict) -> list[dict]:
         data = self._create_products_quotation()
         stock_splits = self._get_stock_splits()
 
