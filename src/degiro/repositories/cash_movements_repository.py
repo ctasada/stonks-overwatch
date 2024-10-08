@@ -23,6 +23,7 @@ class CashMovementsRepository:
 
     @staticmethod
     def get_cash_deposits_raw() -> list[dict]:
+        # FIXME: DeGiro doesn't a consistent description or type. Missing the new value for 'Refund'
         with connection.cursor() as cursor:
             cursor.execute(
                 """

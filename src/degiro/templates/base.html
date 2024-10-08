@@ -30,14 +30,14 @@
 <body>
     <div class="wrapper">
         <!-- Sidebar  -->
-        <nav id="sidebar">
+        <nav class="d-flex flex-column vh-100" id="sidebar">
             <div class="sidebar-header">
                 <h3>Stocks Portfolio</h3>
                 <!-- FIXME: Cutted when side-bar collapsed -->
                 <strong>Stocks</strong>
             </div>
 
-            <ul class="list-unstyled components">
+            <ul class="list-unstyled components nav flex-column">
                 {% url 'dashboard' as url %}
                 <li class="{% if request.path == url %}active{% endif %}">
                     <a href="{{ url }}">
@@ -99,6 +99,17 @@
                         <i class="fas fa-file-invoice-dollar"></i>
                         Account Statement
                     </a>
+                </li>
+            </ul>
+
+            <ul class="list-unstyled components nav flex-column mt-auto">
+                {% is_connected_to_degiro as is_degiro_connected %}
+                <li class="text-center">
+                    {%  if is_degiro_connected %}
+                        <small>DeGiro - Online <i class="bi-cloud-check-fill"></i></small>
+                    {% else %}
+                        <small>DeGiro - Offline <i class="bi-cloud-slash-fill"></i></small>
+                    {% endif %}
                 </li>
             </ul>
         </nav>

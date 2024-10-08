@@ -12,12 +12,14 @@ def index(sequence, position):
 
 
 @register.inclusion_tag("total_overview.html")
-def show_total_portfolio():
+def show_total_portfolio() -> dict:
     portfolio = PortfolioService(
         degiro_service=DeGiroService(),
     )
     total_portfolio = portfolio.get_portfolio_total()
 
-    # print(json.dumps(total_portfolio, indent = 4))
-
     return {"total_portfolio": total_portfolio}
+
+@register.simple_tag
+def is_connected_to_degiro() -> bool:
+    return DeGiroService().check_connection()

@@ -1,7 +1,7 @@
 import pandas as pd
 from django.db import connection
 
-from degiro.utils.db_utils import dictfetchall
+from degiro.repositories.cash_movements_repository import CashMovementsRepository
 
 
 def calculate_cash_account() -> None:
@@ -22,18 +22,7 @@ def calculate_cash_account() -> None:
 
 
 def calculate_cash_contributions() -> None:
-    # FIXME: DeGiro doesn't a consistent description or type. Missing the new value for 'Refund'
-    with connection.cursor() as cursor:
-        cursor.execute(
-            """
-            SELECT date, description, change
-            FROM degiro_cashmovements
-            WHERE currency = 'EUR'
-                AND description IN ('iDEAL storting', 'iDEAL Deposit', 'Terugstorting')
-            """
-        )
-        cash_contributions = dictfetchall(cursor)
-
+    cash_contributions = CashMovementsRepository.get_cash_deposits_raw()
     df = pd.DataFrame.from_dict(cash_contributions)
 
     # Remove hours and keep only the day

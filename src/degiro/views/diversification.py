@@ -40,7 +40,7 @@ class Diversification(View):
 
         return render(request, "diversification.html", context)
 
-    def _get_holdings(self, portfolio: dict) -> dict:
+    def _get_holdings(self, portfolio: list[dict]) -> dict:
         stock_labels = []
         stock_values = []
         stocks_table = []
@@ -69,19 +69,19 @@ class Diversification(View):
             "table": stocks_table,
         }
 
-    def _get_product_types(self, portfolio: dict) -> dict:
+    def _get_product_types(self, portfolio: list[dict]) -> dict:
         return self._get_data("productType", portfolio)
 
-    def _get_sectors(self, portfolio: dict) -> dict:
+    def _get_sectors(self, portfolio: list[dict]) -> dict:
         return self._get_data("sector", portfolio)
 
-    def _get_currencies(self, portfolio: dict) -> dict:
+    def _get_currencies(self, portfolio: list[dict]) -> dict:
         return self._get_data("productCurrency", portfolio)
 
-    def _get_countries(self, portfolio: dict) -> dict:
+    def _get_countries(self, portfolio: list[dict]) -> dict:
         return self._get_data("country", portfolio)
 
-    def _get_data(self, field_name: str, portfolio: dict) -> dict:
+    def _get_data(self, field_name: str, portfolio: list[dict]) -> dict:
         data_table = []
         data = {}
 
