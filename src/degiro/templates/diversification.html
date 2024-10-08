@@ -3,6 +3,7 @@
 {% load static %}
 {% block content %}
 <div class="container-fluid row-gap-5">
+    {% include 'distribution_with_list.html' with chart_id="type-chart" items=productTypes.table %}
     {% include 'distribution_with_list.html' with chart_id="holdings-chart" items=holdings.table %}
     {% include 'distribution_with_list.html' with chart_id="sectors-chart" items=sectors.table %}
     {% include 'distribution_with_list.html' with chart_id="currencies-chart" items=currencies.table %}
@@ -16,6 +17,13 @@
 <script src="{% static '@seahsky/chartjs-plugin-autocolors/dist/chartjs-plugin-autocolors.min.js' %}"></script>
 <script src="{% static 'js/distribution-char-utils.js' %}"></script>
 <script>
+    drawDoughnutChart(
+        "type-chart",
+        "Type",
+        {{ productTypes.chart.labels|safe }},
+        {{ productTypes.chart.values|safe }}
+    );
+
     drawDoughnutChart(
         "holdings-chart",
         "Holdings",

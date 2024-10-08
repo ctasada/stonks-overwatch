@@ -23,12 +23,14 @@ class Diversification(View):
 
     def get(self, request):
         portfolio = self.portfolio.get_portfolio()
+        product_types = self._get_product_types(portfolio)
         holdings = self._get_holdings(portfolio)
         sectors = self._get_sectors(portfolio)
         currencies = self._get_currencies(portfolio)
         countries = self._get_countries(portfolio)
 
         context = {
+            "productTypes": product_types,
             "holdings": holdings,
             "sectors": sectors,
             "currencies": currencies,
@@ -66,6 +68,9 @@ class Diversification(View):
             },
             "table": stocks_table,
         }
+
+    def _get_product_types(self, portfolio: dict) -> dict:
+        return self._get_data("productType", portfolio)
 
     def _get_sectors(self, portfolio: dict) -> dict:
         return self._get_data("sector", portfolio)
