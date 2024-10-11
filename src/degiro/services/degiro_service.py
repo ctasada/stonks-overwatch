@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta
 from typing import Any, List, Optional
 
@@ -31,6 +32,8 @@ class CredentialsManager:
 
 
 class DeGiroService:
+    logger = logging.getLogger("stocks_portfolio.degiro_service")
+
     def __init__(self, credentials_manager: Optional[CredentialsManager] = None):
         self.credentials_manager = credentials_manager or CredentialsManager()
         self.api_client = TradingApi(credentials=self.credentials_manager.credentials)
@@ -110,6 +113,10 @@ class DeGiroService:
         chart = chart_fetcher.get_chart(chart_request=chart_request, raw=False)
 
         quotes = {}
+        if not chart:
+            self.logger.warning(f"No chart found for {issue_id} / {period}")
+            return quotes
+
         for series in chart.series:
             if series.type == "time":
                 init_date = series.times.split('/')[0]
