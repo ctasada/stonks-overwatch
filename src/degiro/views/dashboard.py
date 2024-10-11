@@ -221,15 +221,9 @@ class Dashboard(View):
         start_date = LocalizationUtility.convert_string_to_date(product_history_dates[0])
         final_date = self._get_growth_final_date(product_history_dates[-1])
 
-        # difference between current and previous date
-        delta = timedelta(days=1)
-        # store the dates between two dates in a list
-        dates = []
-        while start_date <= final_date:
-            # add current date to list by converting  it to iso format
-            dates.append(start_date.strftime(LocalizationUtility.DATE_FORMAT))
-            # increment start date by timedelta
-            start_date += delta
+        # Generate a list of dates between start and final date
+        dates = [(start_date + timedelta(days=i)).strftime(LocalizationUtility.DATE_FORMAT)
+                 for i in range((final_date - start_date).days + 1)]
 
         position_value = {}
         for date_change in entry["history"]:
@@ -247,9 +241,12 @@ class Dashboard(View):
                         position_value[date_value] = position_value[date_value] * stocks_multiplier
 
         aggregate = {}
-        for date_quote in entry["quotation"]["quotes"]:
-            if date_quote in position_value:
-                aggregate[date_quote] = position_value[date_quote] * entry["quotation"]["quotes"][date_quote]
+        if entry["quotation"]["quotes"]:
+            for date_quote in entry["quotation"]["quotes"]:
+                if date_quote in position_value:
+                    aggregate[date_quote] = position_value[date_quote] * entry["quotation"]["quotes"][date_quote]
+        else:
+            self.logger.warning(f"No quotes found for '{entry['product']['symbol']}': productId {entry['productId']} ")
 
         return aggregate
 
