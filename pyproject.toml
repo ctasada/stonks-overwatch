@@ -9,7 +9,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.12"
 degiro-connector = {path = "../degiro-connector/dist/degiro_connector-3.0.23-py3-none-any.whl"}
-django = "^5.1.1"
+django = "^5.1.2"
 pycountry = "^24.6.1"
 currency-symbols = "^2.0.3"
 pandas = "^2.2.3"
@@ -21,7 +21,7 @@ django-node-assets = "^0.9.14"
 fontawesomefree = "^6.6.0"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.6.7"
+ruff = "^0.6.9"
 pytest = "^8.3.3"
 pytest-cov = "^5.0.0"
 requests-mock = "^1.12.1"
