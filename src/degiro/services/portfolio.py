@@ -71,21 +71,18 @@ class PortfolioService:
                 base_currency_value = value
                 base_currency_break_even_price = break_even_price
 
-            percentage_gain = 0.0
-            if value > 0:
-                percentage_gain = unrealized_gain / (value - unrealized_gain)
+            percentage_gain = unrealized_gain / (value - unrealized_gain) if value > 0 else 0.0
 
             portfolio_total_value += value
 
-            exchange_abbr = None
-            exchange_name = None
             exchange_id = info["exchangeId"]
-            if "exchanges" in products_config and products_config["exchanges"]:
-                for exchange in products_config["exchanges"]:
-                    if exchange["id"] == int(exchange_id):
-                        exchange_abbr = exchange["hiqAbbr"]
-                        exchange_name = exchange["name"]
-                        break
+            exchange_abbr = exchange_name = None
+
+            if exchanges := products_config.get("exchanges"):
+                exchange = next((ex for ex in exchanges if ex["id"] == int(exchange_id)), None)
+                if exchange:
+                    exchange_abbr = exchange["hiqAbbr"]
+                    exchange_name = exchange["name"]
 
             my_portfolio.append(
                 {
