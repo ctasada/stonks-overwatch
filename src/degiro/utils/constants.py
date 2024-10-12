@@ -93,3 +93,29 @@ class ProductType(Enum):
             ProductType.CASH: "Cash",
         }
         return readable_strings.get(self, "Unknown Product Type")
+
+class CurrencyFX(Enum):
+    EUR_USD = 705366
+    """Represents the EUR/USD ProductId"""
+
+    @staticmethod
+    def to_list() -> list[int]:
+        return [member.value for member in CurrencyFX]
+
+    @staticmethod
+    def to_str_list() -> list[str]:
+        return [str(member.value) for member in CurrencyFX]
+
+    @staticmethod
+    def known_currencies() -> list[str]:
+        pairs = []
+
+        for pair in CurrencyFX:
+            # Extract the currencies from the enum name
+            base, quote = pair.name.split('_')
+            pairs.append(base)
+            pairs.append(quote)
+
+        known_currencies = list(set(pairs))
+        known_currencies.sort()
+        return known_currencies

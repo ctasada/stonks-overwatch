@@ -1,6 +1,5 @@
 import logging
 
-from currency_converter import CurrencyConverter
 from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
 
 from degiro.repositories.cash_movements_repository import CashMovementsRepository
@@ -8,19 +7,20 @@ from degiro.repositories.company_profile_repository import CompanyProfileReposit
 from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.product_quotations_repository import ProductQuotationsRepository
 from degiro.repositories.transactions_repository import TransactionsRepository
+from degiro.services.currency_converter_service import CurrencyConverterService
 from degiro.services.degiro_service import DeGiroService
 from degiro.utils.localization import LocalizationUtility
 
 
 class PortfolioService:
     logger = logging.getLogger("stocks_portfolio.portfolio_data")
-    currency_converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
 
     def __init__(
         self,
         degiro_service: DeGiroService,
     ):
         self.degiro_service = degiro_service
+        self.currency_service = CurrencyConverterService()
 
     def get_portfolio(self) -> list[dict]:
         portfolio_transactions = self.__get_porfolio_products()
@@ -49,6 +49,10 @@ class PortfolioService:
 
             currency = info["currency"]
             price = ProductQuotationsRepository.get_product_price(tmp["productId"])
+            if price == 0.0 and "closePrince" in info:
+                self.logger.warning(f"No quotation found for product {tmp['productId']}, using closePrice")
+                price = info["closePrice"]
+
             value = tmp["size"] * price
             break_even_price = tmp["breakEvenPrice"]
 
@@ -56,9 +60,9 @@ class PortfolioService:
             unrealized_gain = (price - break_even_price) * tmp["size"]
 
             if currency != base_currency:
-                base_currency_price = self.currency_converter.convert(price, currency, base_currency)
-                base_currency_value = self.currency_converter.convert(value, currency, base_currency)
-                base_currency_break_even_price = self.currency_converter.convert(
+                base_currency_price = self.currency_service.convert(price, currency, base_currency)
+                base_currency_value = self.currency_service.convert(value, currency, base_currency)
+                base_currency_break_even_price = self.currency_service.convert(
                     break_even_price, currency, base_currency
                 )
                 unrealized_gain = (base_currency_price - base_currency_break_even_price) * tmp["size"]

@@ -1,9 +1,9 @@
 import logging
 
-from currency_converter import CurrencyConverter
 from django.shortcuts import render
 from django.views import View
 
+from degiro.services.currency_converter_service import CurrencyConverterService
 from degiro.services.degiro_service import DeGiroService
 from degiro.services.portfolio import PortfolioService
 from degiro.utils.localization import LocalizationUtility
@@ -11,12 +11,11 @@ from degiro.utils.localization import LocalizationUtility
 
 class Diversification(View):
     logger = logging.getLogger("stocks_portfolio.dashboard.views")
-    currency_converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.degiro_service = DeGiroService()
-
+        self.currency_service = CurrencyConverterService()
         self.portfolio = PortfolioService(
             degiro_service=self.degiro_service,
         )
