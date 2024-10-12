@@ -3,7 +3,6 @@ from collections import OrderedDict, defaultdict
 from datetime import date, datetime, timedelta
 
 import pandas as pd
-from currency_converter import CurrencyConverter
 from django.shortcuts import render
 from django.views import View
 
@@ -12,6 +11,7 @@ from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.product_quotations_repository import ProductQuotationsRepository
 from degiro.repositories.transactions_repository import TransactionsRepository
 from degiro.services.account_overview import AccountOverviewService
+from degiro.services.currency_converter_service import CurrencyConverterService
 from degiro.services.degiro_service import DeGiroService
 from degiro.services.deposits import DepositsService
 from degiro.services.dividends import DividendsService
@@ -22,13 +22,13 @@ from degiro.utils.localization import LocalizationUtility
 
 class Dashboard(View):
     logger = logging.getLogger("stocks_portfolio.dashboard.views")
-    currency_converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.degiro_service = DeGiroService()
 
         self.account_overview = AccountOverviewService()
+        self.currency_service = CurrencyConverterService()
         self.deposits = DepositsService()
         self.dividends = DividendsService(
             account_overview=self.account_overview,
@@ -82,7 +82,7 @@ class Dashboard(View):
             dividends.append(
                 {
                     "date": dividend_date,
-                    "change": self.currency_converter.convert(
+                    "change": self.currency_service.convert(
                         dividend["change"], dividend["currency"], base_currency, dividend_date
                     ),
                 }
@@ -187,7 +187,7 @@ class Dashboard(View):
                 if convert_fx:
                     currency = entry["product"]["currency"]
                     fx_date = LocalizationUtility.convert_string_to_date(date_value)
-                    value = self.currency_converter.convert(
+                    value = self.currency_service.convert(
                         position_value_growth[date_value], currency, base_currency, fx_date
                     )
                     aggregate_value += value

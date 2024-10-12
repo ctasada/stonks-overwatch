@@ -14,6 +14,7 @@ from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.transactions_repository import TransactionsRepository
 from degiro.services.degiro_service import DeGiroService
 from degiro.services.portfolio import PortfolioService
+from degiro.utils.constants import CurrencyFX
 from degiro.utils.datetime import DateTimeUtility
 from degiro.utils.db_utils import dictfetchall
 from degiro.utils.debug import save_to_json
@@ -270,6 +271,8 @@ class UpdateService:
 
         product_ids = [str(entry["productId"]) for entry in results if entry["productId"] is not None]
         product_ids = list(dict.fromkeys(product_ids))
+        # Adding Currencies to the list, so we can do FX
+        product_ids.extend(CurrencyFX.to_str_list())
 
         return product_ids
 
@@ -317,6 +320,15 @@ class UpdateService:
 
     def __import_products_quotation(self) -> None:
         product_growth = self.portfolio_data.calculate_product_growth()
+
+        # Include Currencies in the Quotations
+        start_date = DegiroConfig.default().start_date.strftime(LocalizationUtility.DATE_FORMAT)
+        for currency in CurrencyFX.to_list():
+            if currency not in product_growth:
+                product_growth[currency] = {
+                    "history": {}
+                }
+                product_growth[currency]["history"][start_date] = 1
 
         delete_keys = []
         for key in product_growth.keys():

@@ -2,11 +2,11 @@ import logging
 from datetime import datetime
 
 import pandas as pd
-from currency_converter import CurrencyConverter
 from django.shortcuts import render
 from django.views import View
 
 from degiro.services.account_overview import AccountOverviewService
+from degiro.services.currency_converter_service import CurrencyConverterService
 from degiro.services.degiro_service import DeGiroService
 from degiro.services.dividends import DividendsService
 from degiro.utils.localization import LocalizationUtility
@@ -14,13 +14,13 @@ from degiro.utils.localization import LocalizationUtility
 
 class Dividends(View):
     logger = logging.getLogger("stocks_portfolio.dividends.views")
-    currency_converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.degiro_service = DeGiroService()
 
         self.account_overview = AccountOverviewService()
+        self.currency_service = CurrencyConverterService()
         self.dividends = DividendsService(
             account_overview=self.account_overview,
             degiro_service=self.degiro_service,
@@ -89,7 +89,7 @@ class Dividends(View):
             currency = transaction["currency"]
             payment_date = LocalizationUtility.convert_string_to_date(transaction["date"])
             if currency != self.base_currency:
-                transaction_change = self.currency_converter.convert(
+                transaction_change = self.currency_service.convert(
                     transaction_change, currency, self.base_currency, payment_date
                 )
                 currency = self.base_currency
@@ -167,7 +167,7 @@ class Dividends(View):
             dividend_change = entry["change"]
             if dividend_currency != self.base_currency:
                 date = LocalizationUtility.convert_string_to_date(entry["date"])
-                dividend_change = self.currency_converter.convert(
+                dividend_change = self.currency_service.convert(
                     dividend_change, dividend_currency, self.base_currency, date
                 )
 

@@ -1,13 +1,14 @@
-from currency_converter import CurrencyConverter
-
 from degiro.repositories.cash_movements_repository import CashMovementsRepository
 from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.transactions_repository import TransactionsRepository
+from degiro.services.currency_converter_service import CurrencyConverterService
 from degiro.utils.localization import LocalizationUtility
 
 
 class FeesService:
-    currency_converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
+
+    def __init__(self):
+        self.currency_service = CurrencyConverterService()
 
     def get_fees(self) -> list:
         transaction_fees = self.get_transaction_fees()
@@ -31,7 +32,7 @@ class FeesService:
             currency_value = cash_movement["currency"]
             if currency_value != base_currency:
                 fx_date = cash_movement["date"].date()
-                fee_value = self.currency_converter.convert(fee_value, currency_value, base_currency, fx_date)
+                fee_value = self.currency_service.convert(fee_value, currency_value, base_currency, fx_date)
                 currency_value = base_currency
 
             my_fees.append(
