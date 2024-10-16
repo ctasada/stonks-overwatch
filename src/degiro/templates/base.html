@@ -28,113 +28,116 @@
 </head>
 
 <body>
-    <div class="wrapper">
-        <!-- Sidebar  -->
-        <nav class="d-flex flex-column vh-100" id="sidebar">
-            <div class="sidebar-header">
-                <h3>Stocks Portfolio</h3>
-                <!-- FIXME: Cutted when side-bar collapsed -->
-                <strong>Stocks</strong>
-            </div>
+    <div class="container-fluid">
+        <div class="row flex-nowrap">
+            <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0"  id="sidebar">
+                <!-- Sidebar  -->
+                <div class="d-flex flex-column align-items-left align-items-sm-start min-vh-100">
+                    <div class="sidebar-header">
+                        <h3 class="d-none d-sm-inline">Stocks Portfolio</h3>
+                        <strong class="d-inline d-sm-none">Stocks</strong>
+                    </div>
+                    <ul class="nav nav-pills list-unstyled components flex-column mb-sm-auto mb-0 align-items-left align-items-sm-start" id="menu">
+                        {% url 'dashboard' as url %}
+                        <li class="{% if request.path == url %}active{% endif %}">
+                            <a href="{{ url }}">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span class="ms-1 d-none d-sm-inline">Dashboard</span>
+                            </a>
+                        </li>
 
-            <ul class="list-unstyled components nav flex-column">
-                {% url 'dashboard' as url %}
-                <li class="{% if request.path == url %}active{% endif %}">
-                    <a href="{{ url }}">
-                        <i class="fas fa-tachometer-alt"></i>
-                        Dashboard
-                    </a>
-                </li>
+                        {% url 'portfolio' as url %}
+                        <li class="{% if request.path == url %}active{% endif %}">
+                            <a href="{{ url }}">
+                                <i class="fas fa-briefcase"></i>
+                                <span class="ms-1 d-none d-sm-inline">Portfolio</span>
+                            </a>
+                        </li>
 
-                {% url 'portfolio' as url %}
-                <li class="{% if request.path == url %}active{% endif %}">
-                    <a href="{{ url }}">
-                        <i class="fas fa-briefcase"></i>
-                        Portfolio
-                    </a>
-                </li>
+                        {% url 'dividends' as url %}
+                        <li class="{% if request.path == url %}active{% endif %}">
+                            <a href="{{ url }}">
+                                <i class="fas fa-coins"></i>
+                                <span class="ms-1 d-none d-sm-inline">Dividends</span>
+                            </a>
+                        </li>
 
-                {% url 'dividends' as url %}
-                <li class="{% if request.path == url %}active{% endif %}">
-                    <a href="{{ url }}">
-                        <i class="fas fa-coins"></i>
-                        Dividends
-                    </a>
-                </li>
+                        {% url 'fees' as url %}
+                        <li class="{% if request.path == url %}active{% endif %}">
+                            <a href="{{ url }}">
+                                <i class="fas fa-dollar-sign"></i>
+                                <span class="ms-1 d-none d-sm-inline">Fees</span>
+                            </a>
+                        </li>
 
-                {% url 'fees' as url %}
-                <li class="{% if request.path == url %}active{% endif %}">
-                    <a href="{{ url }}">
-                        <i class="fas fa-dollar-sign"></i>
-                        Fees
-                    </a>
-                </li>
+                        {% url 'deposits' as url %}
+                        <li class="{% if request.path == url %}active{% endif %}">
+                            <a href="{{ url }}">
+                                <i class="fas fa-piggy-bank"></i>
+                                <span class="ms-1 d-none d-sm-inline">Deposits</span>
+                            </a>
+                        </li>
 
-                {% url 'deposits' as url %}
-                <li class="{% if request.path == url %}active{% endif %}">
-                    <a href="{{ url }}">
-                        <i class="fas fa-piggy-bank"></i>
-                        Deposits
-                    </a>
-                </li>
+                        {% url 'diversification' as url %}
+                        <li class="{% if request.path == url %}active{% endif %}">
+                            <a href="{{ url }}">
+                                <i class="fas fa-chart-pie"></i>
+                                <span class="ms-1 d-none d-sm-inline">Diversification</span>
+                            </a>
+                        </li>
 
-                {% url 'diversification' as url %}
-                <li class="{% if request.path == url %}active{% endif %}">
-                    <a href="{{ url }}">
-                        <i class="fas fa-chart-pie"></i>
-                        Diversification
-                    </a>
-                </li>
-
-                {% url 'transactions' as url %}
-                <li class="{% if request.path == url %}active{% endif %}">
-                    <a href="{{ url }}">
-                        <i class="fas fa-receipt"></i>
-                        Transactions
-                    </a>
-                </li>
-                {% url 'account_overview' as url %}
-                <li class="{% if request.path == url %}active{% endif %}">
-                    <a href="{{ url }}">
-                        <i class="fas fa-file-invoice-dollar"></i>
-                        Account Statement
-                    </a>
-                </li>
-            </ul>
-
-            <ul class="list-unstyled components nav flex-column mt-auto">
-                {% is_connected_to_degiro as is_degiro_connected %}
-                <li class="text-center">
-                    {%  if is_degiro_connected %}
-                        <small>DeGiro - Online <i class="bi-cloud-check-fill"></i></small>
-                    {% else %}
-                        <small>DeGiro - Offline <i class="bi-cloud-slash-fill"></i></small>
-                    {% endif %}
-                </li>
-            </ul>
-        </nav>
-
-        <!-- Page Content  -->
-        <div id="content">
-            <!-- Top Navigation Bar  -->
-            <nav class="navbar navbar-expand-lg navbar-light bg-light">
-                <div class="container-fluid justify-content-start gap-4">
-                    <button type="button" id="sidebarCollapse" class="btn btn-info">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <button class="btn btn-dark d-inline-block d-lg-none ml-auto" type="button" data-toggle="collapse"
-                        data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                        <i class="fas fa-align-justify"></i>
-                    </button>
-                    <!-- Shows Total Portfolio  -->
-                    {% show_total_portfolio %}
+                        {% url 'transactions' as url %}
+                        <li class="{% if request.path == url %}active{% endif %}">
+                            <a href="{{ url }}">
+                                <i class="fas fa-receipt"></i>
+                                <span class="ms-1 d-none d-sm-inline">Transactions</span>
+                            </a>
+                        </li>
+                        {% url 'account_overview' as url %}
+                        <li class="{% if request.path == url %}active{% endif %}">
+                            <a href="{{ url }}">
+                                <i class="fas fa-file-invoice-dollar"></i>
+                                <span class="ms-1 d-none d-sm-inline">Account Statement</span>
+                            </a>
+                        </li>
+                    </ul>
+                    <hr>
+                    <div class="pb-4">
+                        {% is_connected_to_degiro as is_degiro_connected %}
+                        <a class="d-flex align-items-center text-white text-decoration-none">
+                            {%  if is_degiro_connected %}
+                                <span class="ms-1 d-none d-sm-inline px-1"><small>DeGiro - Online</small></span>
+                                <i class="bi-cloud-check-fill"></i>
+                            {% else %}
+                                <span class="ms-1 d-none d-sm-inline px-1"><small>DeGiro - Offline</small></span>
+                                <i class="bi-cloud-slash-fill"></i>
+                            {% endif %}
+                        </a>
+                    </div>
                 </div>
-            </nav>
+            </div>
+            <div class="col py-3 vh-100" id="content">
+                <!-- Page Content  -->
+                <!-- Top Navigation Bar  -->
+                <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                    <div class="container-fluid justify-content-start gap-4">
+                        <button type="button" id="sidebarCollapse" class="btn btn-info">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <button class="btn btn-dark d-inline-block d-lg-none ml-auto" type="button" data-toggle="collapse"
+                            data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                            <i class="fas fa-align-justify"></i>
+                        </button>
+                        <!-- Shows Total Portfolio  -->
+                        {% show_total_portfolio %}
+                    </div>
+                </nav>
 
-            <div class="scrollable-area" style="height:100vh">
-                {% block content %}
-                {% endblock %}
+                <div class="scrollable-area" style="height: calc(100vh - 100px)">
+                    {% block content %}
+                    {% endblock %}
+                </div>
             </div>
         </div>
     </div>
