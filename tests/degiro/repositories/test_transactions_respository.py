@@ -1,6 +1,6 @@
 import json
 import pathlib
-from datetime import date
+from datetime import datetime
 
 from django.test import TestCase
 
@@ -38,7 +38,7 @@ class TestTransactionsRepository(TestCase):
     def test_get_last_movement(self):
         last_movement = TransactionsRepository.get_last_movement()
 
-        assert last_movement == date.fromisoformat("2020-03-11")
+        assert last_movement == datetime.fromisoformat("2020-03-11T18:01:46Z")
 
     def test_get_last_movement_with_empty_db(self):
         Transactions.objects.all().delete()

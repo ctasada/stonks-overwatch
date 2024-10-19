@@ -13,6 +13,8 @@ class Migration(migrations.Migration):
             name="ProductQuotation",
             fields=[
                 ("id", models.PositiveIntegerField(primary_key=True, serialize=False)),
+                ("interval", models.CharField(max_length=10)),
+                ("last_import", models.DateTimeField()),
                 ("quotations", models.JSONField()),
             ],
         ),
