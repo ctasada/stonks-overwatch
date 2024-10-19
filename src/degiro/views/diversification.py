@@ -50,7 +50,7 @@ class Diversification(View):
         for stock in portfolio:
             if stock["isOpen"]:
                 stock_labels.append(stock["name"])
-                stock_values.append(stock["value"])
+                stock_values.append(stock["baseCurrencyValue"])
                 stocks_table.append(
                     {
                         "name": stock["name"],
@@ -95,7 +95,7 @@ class Diversification(View):
                     value = data[name]["value"]
                     portfolio_size = data[name]["portfolioSize"]
                 data[name] = {
-                    "value": value + stock["value"],
+                    "value": value + stock["baseCurrencyValue"],
                     "portfolioSize": portfolio_size + stock["portfolioSize"],
                 }
                 max_percentage = max(max_percentage, data[name]["portfolioSize"])
