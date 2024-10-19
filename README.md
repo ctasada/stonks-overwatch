@@ -85,7 +85,6 @@ poetry run src/manage.py runscript init_db
 - Portfolio is not updated on startup. A migration needs to be forced
 - IBERDROLA Non-Tradable Dividends: Are properly calculated? Doesn't seem to calculate quantity properly
 - When Login, connection needs to be recreated if int_account or user_token are not initially provided
-- Import seems to create duplicated entries in Cash. Needs review and replication
 
 ## TODOs
 - [ ] DeGiro Client: Stop using Totp and request 2FA for each connection
@@ -98,11 +97,10 @@ poetry run src/manage.py runscript init_db
 - [ ] Would be interesting to add filters to the Account Overview page and aggregate
 - [ ] Add graph with Portfolio Cumulative P&L / Cumulative Net Contributions / Portfolio NAV (https://www.investopedia.com/terms/n/nav.asp)
 - [ ] Check migration from ChartJS to https://plotly.com/javascript/ or https://recharts.org/ or https://d3js.org
-- [ ] BUG: Calculated Cash Balance is 26 cents larger (see src/scripts/account_report.py)
 - [ ] Track https://github.com/chartjs/Chart.js/issues/11005
 - [ ] Review Portfolio growth. Indicates negative growth, which never really happened.
 - [ ] Some stocks (mainly Spanish) don't have Sector or other data. Find workaround
-- [ ] Fontawesome is replaceble by https://icons.getbootstrap.com
+- [ ] Fontawesome is replaceable by https://icons.getbootstrap.com
 
 ## Logos
 - https://eodhd.com/financial-apis-blog/40000-company-logos (requires API Key)
