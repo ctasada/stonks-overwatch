@@ -2,48 +2,46 @@
 
 {% block content %}
 <div class="row g-5">
-    <div class="col">
-        <h4 class="mb-3">Transactions</h4>
-        <table class="table table-hover table-sm">
-            {% block table.thead %}
-            <thead>
-                <tr>
-                    <th scope="col">Date</th>
-                    <th scope="col">Action</th>
-                    <th scope="col">Stock</th>
-                    <th scope="col">Price</th>
-                    <th scope="col">Quantity</th>
-                    <th scope="col">Local Value</th>
-                    <th scope="col">Value</th>
-                    <th scope="col">Fees</th>
-                </tr>
-            </thead>
-            {% endblock table.thead %}
-            {% block table.tbody %}
-            <tbody>
-                {% for transaction in transactions %}
-                <tr>
-                    <td>{{ transaction.date }}<br><small class="fw-lighter">{{ transaction.time }}</small></td>
-                    <td>
-                        {% if transaction.buysell == "Buy" %}
-                        <span class="green-pill">{{ transaction.buysell }}</span>
-                        {% else %}
-                        <span class="red-pill">{{ transaction.buysell }}</span>
-                        {% endif %}
-                        <br>
-                        <small class="fw-lighter">{{ transaction.transactionType }}</small>
-                    </td>
-                    <td>{{ transaction.symbol }}<br><small class="fw-lighter">{{ transaction.name }}</small></td>
-                    <td>{{ transaction.price }}</td>
-                    <td>{{ transaction.quantity }}</td>
-                    <td>{{ transaction.total }}</td>
-                    <td>{{ transaction.totalInBaseCurrency }}</td>
-                    <td>{{ transaction.fees }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-            {% endblock table.tbody %}
-        </table>
-    </div>
+    <h4 class="mb-3">Transactions</h4>
+    <table class="table table-hover table-sm">
+        {% block table.thead %}
+        <thead>
+            <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Action</th>
+                <th scope="col">Stock</th>
+                <th scope="col">Price</th>
+                <th scope="col">Quantity</th>
+                <th scope="col">Local Value</th>
+                <th scope="col">Value</th>
+                <th scope="col">Fees</th>
+            </tr>
+        </thead>
+        {% endblock table.thead %}
+        {% block table.tbody %}
+        <tbody>
+            {% for transaction in transactions %}
+            <tr>
+                <td>{{ transaction.date }}<br><small class="fw-lighter">{{ transaction.time }}</small></td>
+                <td>
+                    {% if transaction.buysell == "Buy" %}
+                    <span class="green-pill">{{ transaction.buysell }}</span>
+                    {% else %}
+                    <span class="red-pill">{{ transaction.buysell }}</span>
+                    {% endif %}
+                    <br>
+                    <small class="fw-lighter">{{ transaction.transactionType }}</small>
+                </td>
+                <td>{{ transaction.symbol }}<br><small class="fw-lighter">{{ transaction.name }}</small></td>
+                <td>{{ transaction.price }}</td>
+                <td>{{ transaction.quantity }}</td>
+                <td>{{ transaction.total }}</td>
+                <td>{{ transaction.totalInBaseCurrency }}</td>
+                <td>{{ transaction.fees }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        {% endblock table.tbody %}
+    </table>
 </div>
 {% endblock %}

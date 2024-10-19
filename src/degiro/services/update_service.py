@@ -1,5 +1,5 @@
 import logging
-from datetime import date
+from datetime import date, datetime
 
 import pandas as pd
 from degiro_connector.trading.models.account import OverviewRequest
@@ -34,14 +34,33 @@ class UpdateService:
             degiro_service=self.degiro_service,
         )
 
+    def get_last_import(self) -> datetime:
+        last_cash_movement = self._get_last_cash_movement_import
+        last_transaction = self._get_last_transactions_import()
+
+        # return max([last_cash_movement, last_transaction])
+        return last_transaction
+
+    def _get_last_cash_movement_import(self) -> datetime:
+        last_movement = CashMovementsRepository.get_last_movement()
+        if last_movement is None:
+            last_movement = DegiroConfig.default().start_date
+
+        return last_movement
+
+    def _get_last_transactions_import(self) -> datetime:
+        last_movement = TransactionsRepository.get_last_movement()
+        if last_movement is None:
+            last_movement = DegiroConfig.default().start_date
+
+        return last_movement
+
     def update_account(self, debug_json_files: dict = None):
         """Update the Account DB data. Only does it if the data is older than today."""
         self.logger.info("Updating Account Data....")
 
         today = date.today()
-        last_movement = CashMovementsRepository.get_last_movement()
-        if last_movement is None:
-            last_movement = DegiroConfig.default().start_date
+        last_movement = self._get_last_cash_movement_import()
 
         if last_movement < today:
             account_overview = self.__get_cash_movements(last_movement)
@@ -59,9 +78,7 @@ class UpdateService:
         self.logger.info("Updating Transactions Data....")
 
         today = date.today()
-        last_movement = TransactionsRepository.get_last_movement()
-        if last_movement is None:
-            last_movement = DegiroConfig.default().start_date
+        last_movement = self._get_last_transactions_import()
 
         if last_movement < today:
             transactions_history = self.__get_transaction_history(last_movement)

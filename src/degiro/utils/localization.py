@@ -85,6 +85,13 @@ class LocalizationUtility:
         return value.strftime(LocalizationUtility.DATE_FORMAT)
 
     @staticmethod
+    def format_date_time_from_date(value: date | datetime) -> str:
+        """
+        Formats a datetime object to a datetime string.
+        """
+        return value.strftime(f"{LocalizationUtility.DATE_FORMAT} {LocalizationUtility.TIME_FORMAT}")
+
+    @staticmethod
     def format_time_from_date(value: datetime) -> str:
         """
         Formats a datetime object to a time string.
