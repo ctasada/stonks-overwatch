@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import Optional
 
 from currency_symbols import CurrencySymbols
@@ -143,3 +143,7 @@ class LocalizationUtility:
         Converts a string to a datetime object.
         """
         return datetime.fromisoformat(value)
+
+    @staticmethod
+    def now() -> datetime:
+        return datetime.now(timezone.utc)
