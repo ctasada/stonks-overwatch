@@ -57,7 +57,7 @@ class TestCashMovementsRepository(TestCase):
 
     def test_get_last_movement(self):
         last_movement = CashMovementsRepository.get_last_movement()
-        assert last_movement == self.created_objects["flatex_cash_sweep"].date.date()
+        assert last_movement == self.created_objects["flatex_cash_sweep"].date
 
     def test_get_last_movement_with_empty_db(self):
         CashMovements.objects.all().delete()

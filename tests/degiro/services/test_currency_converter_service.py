@@ -1,5 +1,6 @@
 import json
 import pathlib
+from datetime import datetime
 
 from django.test import TestCase
 
@@ -25,7 +26,7 @@ class TestCurrencyConverterService(TestCase):
         self.created_objects = {}
         for key, value in data.items():
             # Create and save the ProductQuotation object
-            obj = ProductQuotation.objects.create(id=key, quotations=value)
+            obj = ProductQuotation.objects.create(id=key, interval="P1D", last_import=datetime.now(), quotations=value)
             self.created_objects[key] = obj
 
     def tearDown(self):

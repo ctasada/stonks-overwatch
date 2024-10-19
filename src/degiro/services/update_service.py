@@ -2,6 +2,7 @@ import logging
 from datetime import date, datetime
 
 import pandas as pd
+from degiro_connector.quotecast.models.chart import Interval
 from degiro_connector.trading.models.account import OverviewRequest
 from degiro_connector.trading.models.transaction import HistoryRequest
 from django.core.cache import cache
@@ -11,6 +12,7 @@ from degiro.config.degiro_config import DegiroConfig
 from degiro.models import CashMovements, CompanyProfile, ProductInfo, ProductQuotation, Transactions
 from degiro.repositories.cash_movements_repository import CashMovementsRepository
 from degiro.repositories.product_info_repository import ProductInfoRepository
+from degiro.repositories.product_quotations_repository import ProductQuotationsRepository
 from degiro.repositories.transactions_repository import TransactionsRepository
 from degiro.services.degiro_service import DeGiroService
 from degiro.services.portfolio import PortfolioService
@@ -35,11 +37,11 @@ class UpdateService:
         )
 
     def get_last_import(self) -> datetime:
-        last_cash_movement = self._get_last_cash_movement_import
+        last_cash_movement = self._get_last_cash_movement_import()
         last_transaction = self._get_last_transactions_import()
+        last_quotation = ProductQuotationsRepository.get_last_update()
 
-        # return max([last_cash_movement, last_transaction])
-        return last_transaction
+        return max([last_cash_movement, last_transaction, last_quotation])
 
     def _get_last_cash_movement_import(self) -> datetime:
         last_movement = CashMovementsRepository.get_last_movement()
@@ -396,7 +398,11 @@ class UpdateService:
             interval = product_growth[key]["quotation"]["interval"]
             quotes_dict = self.degiro_service.get_product_quotation(issue_id, interval)
 
-            ProductQuotation.objects.update_or_create(id=int(key), defaults={"quotations": quotes_dict})
+            ProductQuotation.objects.update_or_create(id=int(key), defaults={
+                "interval": Interval.P1D,
+                "last_import": datetime.now(),
+                "quotations": quotes_dict
+            })
 
     def __get_company_profiles(self) -> dict:
         """Import Company Profiles data from DeGiro. Uses the `get_transactions_history` method."""

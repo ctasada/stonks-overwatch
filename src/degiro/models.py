@@ -79,6 +79,8 @@ class ProductInfo(models.Model):
 
 class ProductQuotation(models.Model):
     id = models.PositiveIntegerField(primary_key=True)
+    interval = models.CharField(max_length=10)
+    last_import = models.DateTimeField()
     quotations = models.JSONField()
 
 

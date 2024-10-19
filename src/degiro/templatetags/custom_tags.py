@@ -3,7 +3,6 @@ from django import template
 from degiro.services.degiro_service import DeGiroService
 from degiro.services.portfolio import PortfolioService
 from degiro.services.update_service import UpdateService
-from degiro.utils import datetime
 from degiro.utils.localization import LocalizationUtility
 
 register = template.Library()

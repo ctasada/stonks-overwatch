@@ -1,7 +1,6 @@
-from datetime import date
+from datetime import datetime
 
 from django.db import connection
-from django.forms import model_to_dict
 
 from degiro.models import Transactions
 from degiro.utils.constants import TransactionType
@@ -47,7 +46,7 @@ class TransactionsRepository:
             return dictfetchall(cursor)
 
     @staticmethod
-    def get_last_movement() -> date | None:
+    def get_last_movement() -> datetime | None:
         """Return the latest update from the DB.
 
         ### Returns:
@@ -56,8 +55,7 @@ class TransactionsRepository:
         try:
             entry = Transactions.objects.all().order_by("-date").first()
             if entry is not None:
-                oldest_day = model_to_dict(entry)["date"]
-                return oldest_day.date()
+                return entry.date
         except Exception:
             """Ignore. The Database doesn't contain anything"""
 

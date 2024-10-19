@@ -1,7 +1,9 @@
 import json
+from datetime import datetime
 
 from django.db import connection
 
+from degiro.models import ProductQuotation
 from degiro.utils.db_utils import dictfetchall
 
 
@@ -41,3 +43,19 @@ class ProductQuotationsRepository:
             return quotations[last_quotation]
 
         return 0.0
+
+    @staticmethod
+    def get_last_update() -> datetime|None:
+        """Return the latest update from the DB.
+
+        ### Returns:
+            date: the latest update from the DB, None if there is no entry
+        """
+        try:
+            entry = ProductQuotation.objects.all().order_by("-last_import").first()
+            if entry is not None:
+                return entry.last_import
+        except Exception:
+            """Ignore. The Database doesn't contain anything"""
+
+        return None
