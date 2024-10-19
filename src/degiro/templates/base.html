@@ -30,105 +30,86 @@
 <body>
     <div class="container-fluid">
         <div class="row flex-nowrap">
-            <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0"  id="sidebar">
+            <div class="col-1 px-0 sticky-top" id="sidebar">
                 <!-- Sidebar  -->
-                <div class="d-flex flex-column align-items-left align-items-sm-start min-vh-100">
-                    <div class="sidebar-header">
-                        <h3 class="d-none d-sm-inline">Stocks Portfolio</h3>
-                        <strong class="d-inline d-sm-none">Stocks</strong>
+                <div class="d-flex flex-sm-column flex-row flex-nowrap align-items-center sticky-top min-vh-100">
+                    <div class="d-block p-3 text-decoration-none text-white text-center border-bottom ">
+                        <p class="fw-semibold d-inline text-white fs-4">Stocks Portfolio</p>
                     </div>
-                    <ul class="nav nav-pills list-unstyled components flex-column mb-sm-auto mb-0 align-items-left align-items-sm-start" id="menu">
+                    <ul class="nav flex-column mb-auto text-center w-100">
                         {% url 'dashboard' as url %}
-                        <li class="{% if request.path == url %}active{% endif %}">
-                            <a href="{{ url }}">
+                        <li class="nav-item">
+                            <a href="{{ url }}" class="nav-link active py-3 px-2 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-title="Dashboard">
                                 <i class="fas fa-tachometer-alt"></i>
-                                <span class="ms-1 d-none d-sm-inline">Dashboard</span>
                             </a>
                         </li>
 
                         {% url 'portfolio' as url %}
-                        <li class="{% if request.path == url %}active{% endif %}">
-                            <a href="{{ url }}">
+                        <li class="nav-item">
+                            <a href="{{ url }}" class="nav-link active py-3 px-2 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-title="Portfolio">
                                 <i class="fas fa-briefcase"></i>
-                                <span class="ms-1 d-none d-sm-inline">Portfolio</span>
                             </a>
                         </li>
 
                         {% url 'dividends' as url %}
-                        <li class="{% if request.path == url %}active{% endif %}">
-                            <a href="{{ url }}">
+                        <li class="nav-item">
+                            <a href="{{ url }}" class="nav-link active py-3 px-2 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-title="Dividends">
                                 <i class="fas fa-coins"></i>
-                                <span class="ms-1 d-none d-sm-inline">Dividends</span>
                             </a>
                         </li>
 
                         {% url 'fees' as url %}
-                        <li class="{% if request.path == url %}active{% endif %}">
-                            <a href="{{ url }}">
+                        <li class="nav-item">
+                            <a href="{{ url }}" class="nav-link active py-3 px-2 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-title="Fees">
                                 <i class="fas fa-dollar-sign"></i>
-                                <span class="ms-1 d-none d-sm-inline">Fees</span>
                             </a>
                         </li>
 
                         {% url 'deposits' as url %}
-                        <li class="{% if request.path == url %}active{% endif %}">
-                            <a href="{{ url }}">
+                        <li class="nav-item">
+                            <a href="{{ url }}" class="nav-link active py-3 px-2 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-original-title="Deposits">
                                 <i class="fas fa-piggy-bank"></i>
-                                <span class="ms-1 d-none d-sm-inline">Deposits</span>
                             </a>
                         </li>
 
                         {% url 'diversification' as url %}
-                        <li class="{% if request.path == url %}active{% endif %}">
-                            <a href="{{ url }}">
+                        <li class="nav-item">
+                            <a href="{{ url }}" class="nav-link active py-3 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-original-title="Diversification">
                                 <i class="fas fa-chart-pie"></i>
-                                <span class="ms-1 d-none d-sm-inline">Diversification</span>
                             </a>
                         </li>
 
                         {% url 'transactions' as url %}
-                        <li class="{% if request.path == url %}active{% endif %}">
-                            <a href="{{ url }}">
+                        <li class="nav-item">
+                            <a href="{{ url }}" class="nav-link active py-3 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-original-title="Transactions">
                                 <i class="fas fa-receipt"></i>
-                                <span class="ms-1 d-none d-sm-inline">Transactions</span>
                             </a>
                         </li>
                         {% url 'account_overview' as url %}
-                        <li class="{% if request.path == url %}active{% endif %}">
-                            <a href="{{ url }}">
+                        <li class="nav-item">
+                            <a href="{{ url }}" class="nav-link active py-3 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-original-title="Account Statement">
                                 <i class="fas fa-file-invoice-dollar"></i>
-                                <span class="ms-1 d-none d-sm-inline">Account Statement</span>
                             </a>
                         </li>
                     </ul>
-                    <hr>
-                    <div class="pb-4">
+                    <div class="pb-2">
                         {% is_connected_to_degiro as is_degiro_connected %}
-                        <a class="d-flex align-items-center text-white text-decoration-none">
+                        {% get_connected_tooltip as get_connected_tooltip %}
+                        <a class="d-flex align-items-center text-white text-decoration-none w-100 text-center fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-html="true" data-bs-original-title="{{ get_connected_tooltip }}">
                             {%  if is_degiro_connected %}
-                                <span class="ms-1 d-none d-sm-inline px-1"><small>DeGiro - Online</small></span>
                                 <i class="bi-cloud-check-fill"></i>
                             {% else %}
-                                <span class="ms-1 d-none d-sm-inline px-1"><small>DeGiro - Offline</small></span>
                                 <i class="bi-cloud-slash-fill"></i>
                             {% endif %}
                         </a>
                     </div>
                 </div>
             </div>
-            <div class="col py-3 vh-100" id="content">
+            <div class="col-11 py-3" id="content">
                 <!-- Page Content  -->
                 <!-- Top Navigation Bar  -->
                 <nav class="navbar navbar-expand-lg navbar-light bg-light">
                     <div class="container-fluid justify-content-start gap-4">
-                        <button type="button" id="sidebarCollapse" class="btn btn-info">
-                            <i class="fas fa-bars"></i>
-                        </button>
-                        <button class="btn btn-dark d-inline-block d-lg-none ml-auto" type="button" data-toggle="collapse"
-                            data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                            aria-expanded="false" aria-label="Toggle navigation">
-                            <i class="fas fa-align-justify"></i>
-                        </button>
                         <!-- Shows Total Portfolio  -->
                         {% show_total_portfolio %}
                     </div>
@@ -143,10 +124,9 @@
     </div>
 
     <script type="text/javascript">
-        $(document).ready(function () {
-            $('#sidebarCollapse').on('click', function () {
-                $('#sidebar').toggleClass('active');
-            });
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
         });
     </script>
 </body>

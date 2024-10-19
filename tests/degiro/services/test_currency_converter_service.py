@@ -1,6 +1,5 @@
 import json
 import pathlib
-from datetime import datetime
 
 from django.test import TestCase
 
@@ -68,11 +67,13 @@ class TestCurrencyConverterService(TestCase):
         assert result == 1.0
 
     def test_convert_eur_to_usd_with_date(self):
-        result = self.currency_service.convert(1.0, "EUR", "USD", LocalizationUtility.convert_string_to_date("2020-03-14"))
+        result = self.currency_service.convert(1.0, "EUR", "USD",
+                                               LocalizationUtility.convert_string_to_date("2020-03-14"))
         assert round(result, 3) == round(1.1101, 3)
 
     def test_convert_usd_to_eur_with_date(self):
-        result = self.currency_service.convert(1.0, "USD", "EUR", LocalizationUtility.convert_string_to_date("2020-03-14"))
+        result = self.currency_service.convert(1.0, "USD", "EUR",
+                                               LocalizationUtility.convert_string_to_date("2020-03-14"))
         assert round(result, 3) == round(0.9008, 3)
 
     def test_convert_eur_to_usd(self):
