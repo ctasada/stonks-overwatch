@@ -15,6 +15,7 @@
 <script src="{% static 'luxon/build/global/luxon.js' %}"></script>
 <script src="{% static 'chartjs-adapter-luxon/dist/chartjs-adapter-luxon.umd.min.js' %}"></script>
 <script src="{% static '@seahsky/chartjs-plugin-autocolors/dist/chartjs-plugin-autocolors.min.js' %}"></script>
+{{ currencySymbol|json_script:"currency-symbol" }}
 <script src="{% static 'js/distribution-char-utils.js' %}"></script>
 <script>
     drawDoughnutChart(
