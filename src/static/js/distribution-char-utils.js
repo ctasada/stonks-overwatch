@@ -1,6 +1,6 @@
 // Customize colors with https://www.npmjs.com/package/@seahsky/chartjs-plugin-autocolors#customize
 const autocolors = window['@seahsky/chartjs-plugin-autocolors'];
-const currencySymbol = "{{ currencySymbol }}";
+const currencySymbol = JSON.parse(document.getElementById('currency-symbol').textContent);
 
 // Generalized function to draw a doughnut chart
 function drawDoughnutChart(chartId, pieTitle, chartLabels, chartValues) {
