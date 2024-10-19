@@ -1,5 +1,5 @@
 import logging
-from datetime import date, datetime
+from datetime import date, datetime, time, timezone
 
 import pandas as pd
 from degiro_connector.quotecast.models.chart import Interval
@@ -46,14 +46,14 @@ class UpdateService:
     def _get_last_cash_movement_import(self) -> datetime:
         last_movement = CashMovementsRepository.get_last_movement()
         if last_movement is None:
-            last_movement = DegiroConfig.default().start_date
+            last_movement = datetime.combine(DegiroConfig.default().start_date, time.min)
 
         return last_movement
 
     def _get_last_transactions_import(self) -> datetime:
         last_movement = TransactionsRepository.get_last_movement()
         if last_movement is None:
-            last_movement = DegiroConfig.default().start_date
+            last_movement = datetime.combine(DegiroConfig.default().start_date, time.min)
 
         return last_movement
 
@@ -61,11 +61,11 @@ class UpdateService:
         """Update the Account DB data. Only does it if the data is older than today."""
         self.logger.info("Updating Account Data....")
 
-        today = date.today()
-        last_movement = self._get_last_cash_movement_import()
+        now = LocalizationUtility.now()
+        last_movement = self._get_last_cash_movement_import().replace(tzinfo=timezone.utc)
 
-        if last_movement < today:
-            account_overview = self.__get_cash_movements(last_movement)
+        if last_movement < now:
+            account_overview = self.__get_cash_movements(last_movement.date())
             if debug_json_files and "account.json" in debug_json_files:
                 save_to_json(account_overview, debug_json_files["account.json"])
 
@@ -79,11 +79,11 @@ class UpdateService:
         """Update the Account DB data. Only does it if the data is older than today."""
         self.logger.info("Updating Transactions Data....")
 
-        today = date.today()
-        last_movement = self._get_last_transactions_import()
+        now = LocalizationUtility.now()
+        last_movement = self._get_last_transactions_import().replace(tzinfo=timezone.utc)
 
-        if last_movement < today:
-            transactions_history = self.__get_transaction_history(last_movement)
+        if last_movement < now:
+            transactions_history = self.__get_transaction_history(last_movement.date())
             if debug_json_files and "transactions.json" in debug_json_files:
                 save_to_json(transactions_history, debug_json_files["transactions.json"])
 
@@ -400,7 +400,7 @@ class UpdateService:
 
             ProductQuotation.objects.update_or_create(id=int(key), defaults={
                 "interval": Interval.P1D,
-                "last_import": datetime.now(),
+                "last_import": LocalizationUtility.now(),
                 "quotations": quotes_dict
             })
 
