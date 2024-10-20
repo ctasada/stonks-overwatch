@@ -10,5 +10,6 @@
         },
         "base_currency": "EUR",
         "start_date": "PORTFOLIO CREATION DATE"
+        "update_frequency_minutes": "How frequently the data from DeGiro should be updated"
     }
 }

@@ -74,10 +74,11 @@ class DegiroCredentials:
 class DegiroConfig:
     DEGIRO_CONFIG_PATH = os.path.join(PROJECT_PATH, "config", "config.json")
 
-    def __init__(self, credentials: Optional[DegiroCredentials], base_currency: str, start_date: date):
+    def __init__(self, credentials: Optional[DegiroCredentials], base_currency: str, start_date: date, update_frequency_minutes: int = 5) -> None:
         self.credentials = credentials
         self.base_currency = base_currency
         self.start_date = start_date
+        self.update_frequency_minutes = update_frequency_minutes
 
     def __eq__(self, value: object) -> bool:
         if isinstance(value, DegiroConfig):
@@ -96,8 +97,9 @@ class DegiroConfig:
         start_date_str = data.get("start_date", "")
         # FIXME: Use Localization method
         start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date() if start_date_str else date.today()
+        update_frequency_minutes = data.get("update_frequency_minutes", 5)
 
-        return cls(credentials, base_currency, start_date)
+        return cls(credentials, base_currency, start_date, update_frequency_minutes)
 
     @classmethod
     def from_json_file(cls, file_path: str | Path) -> "DegiroConfig":
