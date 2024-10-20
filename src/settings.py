@@ -170,13 +170,14 @@ LOGGING = {
     },
     "handlers": {
         "console": {
+            "level": "DEBUG",
             "class": "logging.StreamHandler",
             "formatter": "verbose",
         },
         "file": {
             "level": "DEBUG",
             "class": "logging.FileHandler",
-            "filename": "debug.log",
+            "filename": "stocks-portfolio.log",
             "formatter": "verbose",
         },
     },
@@ -198,7 +199,7 @@ LOGGING = {
         },
         "stocks_portfolio": {
             "handlers": ["console", "file"],
-            "level": "WARN",
+            "level": "INFO",
             "propagate": False,
         },
     },
