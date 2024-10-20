@@ -156,6 +156,7 @@ def test_degiro_config_from_json_file():
     base_currency = "EUR"
     start_date = "2023-01-01"
     start_date_as_date = datetime.fromisoformat(start_date).date()
+    update_frequency_minutes = 5
 
     file = pathlib.Path("tests/resources/degiro/config/sample-config.json")
     config = DegiroConfig.from_json_file(file)
@@ -163,3 +164,4 @@ def test_degiro_config_from_json_file():
     assert config.credentials == DegiroCredentials.from_dict(credentials_dict)
     assert config.base_currency == base_currency
     assert config.start_date == start_date_as_date
+    assert config.update_frequency_minutes == update_frequency_minutes
