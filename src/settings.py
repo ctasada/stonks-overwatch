@@ -87,12 +87,8 @@ DATABASES = {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
         "TEST": {
-            "NAME": None,  # Ensure this is None or not set; Django will generate a test DB name
+            "NAME": BASE_DIR / "test_db.sqlite3",
         },
-    },
-    "test": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "test_db.sqlite3",
     },
 }
 TEST_RUNNER = "django.test.runner.DiscoverRunner"
