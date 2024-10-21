@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 from degiro_connector.quotecast.models.chart import Interval
 
@@ -57,6 +57,9 @@ def test_calculate_dates_in_interval():
     assert dates == expected_dates
 
 def test_convert_interval_to_days():
+    today = datetime.today()
+    start_of_year = datetime(today.year, 1, 1)
+    ytd_days = (today - start_of_year).days
     test_cases = [
         (Interval.P1W, 7),
         (Interval.P1M, 30),
@@ -67,6 +70,7 @@ def test_convert_interval_to_days():
         (Interval.P5Y, 5 * 365),
         (Interval.P10Y, 10 * 365),
         (Interval.P50Y, 50 * 365),
+        (Interval.YTD, ytd_days)
     ]
 
     for interval, expected_days in test_cases:
