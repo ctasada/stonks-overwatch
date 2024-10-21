@@ -74,7 +74,13 @@ class DegiroCredentials:
 class DegiroConfig:
     DEGIRO_CONFIG_PATH = os.path.join(PROJECT_PATH, "config", "config.json")
 
-    def __init__(self, credentials: Optional[DegiroCredentials], base_currency: str, start_date: date, update_frequency_minutes: int = 5) -> None:
+    def __init__(
+            self,
+            credentials: Optional[DegiroCredentials],
+            base_currency: str,
+            start_date: date,
+            update_frequency_minutes: int = 5
+    ) -> None:
         self.credentials = credentials
         self.base_currency = base_currency
         self.start_date = start_date

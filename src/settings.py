@@ -86,6 +86,9 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
+        "TEST": {
+            "NAME": None,  # Ensure this is None or not set; Django will generate a test DB name
+        },
     },
     "test": {
         "ENGINE": "django.db.backends.sqlite3",
