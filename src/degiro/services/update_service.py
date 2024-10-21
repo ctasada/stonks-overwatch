@@ -182,20 +182,23 @@ class UpdateService:
         if cash_data:
             for row in cash_data:
                 try:
-                    CashMovements.objects.create(
-                        date=LocalizationUtility.convert_string_to_datetime(row["date"]),
-                        value_date=LocalizationUtility.convert_string_to_datetime(row["valueDate"]),
-                        description=row["description"],
-                        product_id=row.get("productId"),
-                        currency=row["currency"],
-                        type=row["type"],
-                        change=self.__conv(row.get("change", None)),
-                        balance_unsettled_cash=row.get("balance_unsettledCash", None),
-                        balance_flatex_cash=row.get("balance_flatexCash", None),
-                        balance_cash_fund=row.get("balance_cashFund", None),
-                        balance_total=row.get("balance_total", None),
-                        exchange_rate=self.__conv(row.get("exchangeRate", None)),
-                        order_id=row.get("orderId", None),
+                    CashMovements.objects.update_or_create(
+                        id=row["id"],
+                        defaults={
+                            "date": LocalizationUtility.convert_string_to_datetime(row["date"]),
+                            "value_date": LocalizationUtility.convert_string_to_datetime(row["valueDate"]),
+                            "description": row["description"],
+                            "product_id": row.get("productId"),
+                            "currency": row["currency"],
+                            "type": row["type"],
+                            "change": self.__conv(row.get("change", None)),
+                            "balance_unsettled_cash": row.get("balance_unsettledCash", None),
+                            "balance_flatex_cash": row.get("balance_flatexCash", None),
+                            "balance_cash_fund": row.get("balance_cashFund", None),
+                            "balance_total": row.get("balance_total", None),
+                            "exchange_rate": self.__conv(row.get("exchangeRate", None)),
+                            "order_id": row.get("orderId", None)
+                        }
                     )
                 except Exception as error:
                     self.logger.error(f"Cannot import row: {row}")
