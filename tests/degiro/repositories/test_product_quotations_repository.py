@@ -1,12 +1,12 @@
 import json
 import pathlib
-from datetime import datetime
 
 from django.test import TestCase
 
 import pytest
 from degiro.models import ProductQuotation
 from degiro.repositories.product_quotations_repository import ProductQuotationsRepository
+from degiro.utils.localization import LocalizationUtility
 
 
 @pytest.mark.django_db
@@ -20,7 +20,12 @@ class TestProductQuotationsRepository(TestCase):
         self.created_objects = {}
         for key, value in data.items():
             # Create and save the ProductQuotation object
-            obj = ProductQuotation.objects.create(id=key, interval="P1D", last_import=datetime.now(), quotations=value)
+            obj = ProductQuotation.objects.create(
+                id=key,
+                interval="P1D",
+                last_import=LocalizationUtility.now(),
+                quotations=value
+            )
             self.created_objects[key] = obj
 
     def tearDown(self):
