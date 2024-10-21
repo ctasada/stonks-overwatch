@@ -17,13 +17,14 @@ class TestProductQuotationsRepository(TestCase):
         with open(data_file, "r") as file:
             data = json.load(file)
 
+        self.last_update = LocalizationUtility.now()
         self.created_objects = {}
         for key, value in data.items():
             # Create and save the ProductQuotation object
             obj = ProductQuotation.objects.create(
                 id=key,
                 interval="P1D",
-                last_import=LocalizationUtility.now(),
+                last_import=self.last_update,
                 quotations=value
             )
             self.created_objects[key] = obj
@@ -50,3 +51,8 @@ class TestProductQuotationsRepository(TestCase):
         quotation = ProductQuotationsRepository.get_product_price(123456)
 
         assert quotation == 0.0
+
+    def test_get_last_update(self):
+        last_update = ProductQuotationsRepository.get_last_update()
+
+        assert last_update == self.last_update
