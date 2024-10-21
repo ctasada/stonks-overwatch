@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM python:3-slim as builder
+FROM python:3-slim AS builder
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1 \
     PYTHONUNBUFFERED 1
@@ -22,10 +22,10 @@ WORKDIR /app
 # install dependencies
 COPY pyproject.toml poetry.lock package.json ./
 RUN npm install
-RUN poetry install --without dev --no-root && rm -rf $POETRY_CACHE_DIR
+RUN poetry install --without dev --no-root && rm -rf "$POETRY_CACHE_DIR"
 
 # The runtime image, used to just run the code provided its virtual environment
-FROM python:3-slim as runtime
+FROM python:3-slim AS runtime
 
 WORKDIR /app
 
