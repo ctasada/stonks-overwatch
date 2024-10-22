@@ -33,7 +33,4 @@ class JobsScheduler:
     def update_portfolio():
         jobs_scheduler_logger.info("Updating Portfolio")
         update_service = UpdateService()
-        update_service.update_account()
-        update_service.update_transactions()
-        update_service.update_portfolio()
-        update_service.update_company_profile()
+        update_service.update_all()

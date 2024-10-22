@@ -57,6 +57,12 @@ class UpdateService:
 
         return last_movement
 
+    def update_all(self):
+        self.update_account()
+        self.update_transactions()
+        self.update_portfolio()
+        self.update_company_profile()
+
     def update_account(self, debug_json_files: dict = None):
         """Update the Account DB data. Only does it if the data is older than today."""
         self.logger.info("Updating Account Data....")
@@ -401,11 +407,13 @@ class UpdateService:
             interval = product_growth[key]["quotation"]["interval"]
             quotes_dict = self.degiro_service.get_product_quotation(issue_id, interval)
 
-            ProductQuotation.objects.update_or_create(id=int(key), defaults={
-                "interval": Interval.P1D,
-                "last_import": LocalizationUtility.now(),
-                "quotations": quotes_dict
-            })
+            # Update the data ONLY if we get something back from DeGiro
+            if quotes_dict:
+                ProductQuotation.objects.update_or_create(id=int(key), defaults={
+                    "interval": Interval.P1D,
+                    "last_import": LocalizationUtility.now(),
+                    "quotations": quotes_dict
+                })
 
     def __get_company_profiles(self) -> dict:
         """Import Company Profiles data from DeGiro. Uses the `get_transactions_history` method."""
