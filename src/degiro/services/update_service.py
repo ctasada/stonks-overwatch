@@ -58,10 +58,14 @@ class UpdateService:
         return last_movement
 
     def update_all(self):
-        self.update_account()
-        self.update_transactions()
-        self.update_portfolio()
-        self.update_company_profile()
+        try:
+            self.update_account()
+            self.update_transactions()
+            self.update_portfolio()
+            self.update_company_profile()
+        except Exception as error:
+            self.logger.error("Cannot Update Portfolio!")
+            self.logger.error(error)
 
     def update_account(self, debug_json_files: dict = None):
         """Update the Account DB data. Only does it if the data is older than today."""
