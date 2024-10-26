@@ -290,8 +290,7 @@ class Dashboard(View):
 
         delete_keys = []
         for key in product_growth.keys():
-            # FIXME: the method returns a key-value object
-            product = ProductInfoRepository.get_products_info_raw([key])[key]
+            product = ProductInfoRepository.get_product_info_from_id(key)
 
             # If the product is NOT tradable, we shouldn't consider it for Growth
             # The 'tradable' attribute identifies old Stocks, like the ones that are
@@ -314,7 +313,7 @@ class Dashboard(View):
             product_growth[key]["quotation"] = {}
             product_history_dates = list(product_growth[key]["history"].keys())
             start_date = product_history_dates[0]
-            final_date = LocalizationUtility.format_date_from_date(datetime.today())
+            final_date = LocalizationUtility.format_date_from_date(date.today())
             tmp_last = product_history_dates[-1]
             if product_growth[key]["history"][tmp_last] == 0:
                 final_date = tmp_last
