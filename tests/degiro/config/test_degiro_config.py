@@ -1,5 +1,5 @@
 import pathlib
-from datetime import datetime
+from datetime import datetime, date
 
 from degiro.config.degiro_config import DegiroConfig, DegiroCredentials
 
@@ -165,3 +165,36 @@ def test_degiro_config_from_json_file():
     assert config.base_currency == base_currency
     assert config.start_date == start_date_as_date
     assert config.update_frequency_minutes == update_frequency_minutes
+
+def test_degiro_config_default():
+    DegiroConfig.DEGIRO_CONFIG_PATH = "tests/resources/degiro/config/sample-config.json"
+    credentials_dict = {
+        "username": "testuser",
+        "password": "testpassword",
+        "int_account": 987654,
+        "totp_secret_key": "ABCDEFGHIJKLMNOP",
+        "one_time_password": 123456,
+        "user_token": "token123",
+    }
+    base_currency = "EUR"
+    start_date = "2023-01-01"
+    start_date_as_date = datetime.fromisoformat(start_date).date()
+    update_frequency_minutes = 5
+
+    config = DegiroConfig.default()
+
+    assert config.credentials == DegiroCredentials.from_dict(credentials_dict)
+    assert config.base_currency == base_currency
+    assert config.start_date == start_date_as_date
+    assert config.update_frequency_minutes == update_frequency_minutes
+
+
+def test_degiro_config_default_without_config_file():
+    DegiroConfig.DEGIRO_CONFIG_PATH = "tests/resources/degiro/config/unexisting-config.json"
+
+    config = DegiroConfig.default()
+
+    assert config.credentials is None
+    assert config.base_currency == "EUR"
+    assert config.start_date == date.today()
+    assert config.update_frequency_minutes == 5

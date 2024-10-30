@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 from datetime import date, datetime
 from pathlib import Path
@@ -70,7 +71,7 @@ class DegiroCredentials:
             one_time_password=session_credentials.get("one_time_password"),
         )
 
-
+degiro_config_logger = logging.getLogger("stocks_portfolio.degiro_config")
 class DegiroConfig:
     DEGIRO_CONFIG_PATH = os.path.join(PROJECT_PATH, "config", "config.json")
 
@@ -117,4 +118,13 @@ class DegiroConfig:
 
     @classmethod
     def default(cls) -> "DegiroConfig":
-        return cls.from_json_file(cls.DEGIRO_CONFIG_PATH)
+        try:
+            return cls.from_json_file(cls.DEGIRO_CONFIG_PATH)
+        except Exception:
+            degiro_config_logger.warning("Cannot find configuration file. Using default values")
+            return DegiroConfig(
+                credentials=None,
+                base_currency="EUR",
+                start_date=date.today(),
+                update_frequency_minutes=5
+            )
