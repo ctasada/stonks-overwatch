@@ -32,5 +32,8 @@ class JobsScheduler:
     @staticmethod
     def update_portfolio():
         jobs_scheduler_logger.info("Updating Portfolio")
-        update_service = UpdateService()
-        update_service.update_all()
+        try:
+            update_service = UpdateService()
+            update_service.update_all()
+        except Exception as error:
+            jobs_scheduler_logger.error(f"Update failed with {error}")
