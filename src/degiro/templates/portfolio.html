@@ -5,126 +5,18 @@
     <h4 class="mb-3">Portfolio</h4>
     <div class="row mt-2">
         <h5 class="mb-3">Shares</h5>
-        <table class="table table-hover table-sm">
-            {% block shares.table.head %}
-            <thead>
-                <tr>
-                    <th scope="col"></th>
-                    <th scope="col">Product</th>
-                    <th scope="col"></th>
-                    <th scope="col">Sector</th>
-                    <th scope="col">Shares</th>
-                    <th scope="col">Price</th>
-                    <th scope="col">Unrealized Gain</th>
-                    <th scope="col">Value</th>
-                    <th scope="col">Size</th>
-                </tr>
-            </thead>
-            {% endblock shares.table.head %}
-            {% block shares.table.body %}
-            <tbody>
-                {% for stock in stocks %}
-                    {% if stock.isOpen %}
-                    <tr>
-                        <td><img src="{{ stock.logoUrl }}" width="30" height="30" onerror="this.style.display='none'"></td>
-                        <td>{{ stock.symbol }}<br><small class="fw-lighter">{{ stock.name }}</small></td>
-                        <td>
-                            <div class="d-inline-flex gap-1">
-                                <small
-                                    class="p-1 fw-lighter text-light bg-dark square-box border d-flex justify-content-center align-items-center"
-                                    data-bs-toggle="tooltip" title="Category-{{ stock.category }}">
-                                    {{ stock.category }}
-                                </small>
-                                {% if stock.exchangeAbbr %}
-                                <small
-                                    class="p-1 fw-lighter square-box border d-flex justify-content-center align-items-center"
-                                    data-bs-toggle="tooltip" title="{{ stock.exchangeName }}">
-                                    {{ stock.exchangeAbbr }}
-                                </small>
-                                {% endif %}
-                            </div>
-                        </td>
-                        <td>{{ stock.sector }}<br><small class="fw-lighter">{{ stock.industry }}</small></td>
-                        <td>{{ stock.shares }}</td>
-                        <td data-bs-toggle="tooltip" title="{{ stock.formattedPrice }}">{{ stock.formattedBaseCurrencyPrice }}<br><small class="fw-lighter" data-bs-toggle="tooltip" title="{{ stock.formattedBreakEvenPrice }}">{{ stock.formattedBaseCurrencyBreakEvenPrice }}</small></td>
-                        {% if stock.unrealizedGain > 0 %}
-                        <td class="text-success">
-                        {% else %}
-                        <td class="text-danger">
-                        {% endif %}
-                            {{ stock.formattedUnrealizedGain }}<br>
-                            {% if stock.unrealizedGain > 0 %}
-                            <small class="fw-lighter bi bi-arrow-up-right">
-                            {% else %}
-                            <small class="fw-lighter bi bi-arrow-down-right">
-                            {% endif %}{{ stock.percentageGain }}</small>
-                        </td>
-                        <td>{{ stock.formattedBaseCurrencyValue }}</td>
-                        <td>{{ stock.formattedPortfolioSize }}</td>
-                    </tr>
-                    {% endif %}
-                {% endfor %}
-            </tbody>
-            {% endblock shares.table.body %}
-        </table>
+        {% include 'portfolio_table.html' with items=stocks %}
     </div>
     {% if trackers %}
     <div class="row mt-2">
         <h5 class="mb-3">Trackers (ETF)</h5>
-        <table class="table table-hover table-sm">
-            {% block trackers.table.head %}
-            <thead>
-                <tr>
-                    <th scope="col"></th>
-                    <th scope="col">Product</th>
-                    <th scope="col"></th>
-                    <th scope="col">Sector</th>
-                    <th scope="col">Shares</th>
-                    <th scope="col">Price</th>
-                    <th scope="col">Unrealized Gain</th>
-                    <th scope="col">Value</th>
-                    <th scope="col">Size</th>
-                </tr>
-            </thead>
-            {% endblock trackers.table.head %}
-            {% block trackers.table.body %}
-            <tbody>
-                {% for etf in trackers %}
-                {% if etf.isOpen %}
-                <tr>
-                    <td><img src="{{ etf.logoUrl }}" width="30" height="30" onerror="this.style.display='none'"></td>
-                    <td>{{ etf.symbol }}<br><small class="fw-lighter">{{ etf.name }}</small></td>
-                    <td>
-                        <div class="d-inline-flex gap-1">
-                            <small
-                                class="p-1 fw-lighter text-light bg-dark square-box border d-flex justify-content-center align-items-center">
-                                {{ etf.category }}
-                            </small>
-                            <small
-                                class="p-1 fw-lighter square-box border d-flex justify-content-center align-items-center"
-                                data-bs-toggle="tooltip" title="{{ etf.exchangeName }}">
-                                {{ etf.exchangeAbbr }}
-                            </small>
-                        </div>
-                    </td>
-                    <td>{{ etf.sector }}<br><small class="fw-lighter">{{ etf.industry }}</small></td>
-                    <td>{{ etf.shares }}</td>
-                    <td data-bs-toggle="tooltip" title="{{ etf.formattedPrice }}">{{ etf.formattedBaseCurrencyPrice }}<br><small class="fw-lighter" data-bs-toggle="tooltip" title="{{ etf.formattedBreakEvenPrice }}">{{ etf.formattedBaseCurrencyBreakEvenPrice }}</small></td>
-                    {% if etf.unrealizedGain > 0 %}
-                    <td class="text-success">
-                        {% else %}
-                    <td class="text-danger">
-                        {% endif %}
-                        {{ etf.formattedUnrealizedGain }}<br><small class="fw-lighter">{{ etf.percentageGain }}</small>
-                    </td>
-                    <td>{{ etf.formattedBaseCurrencyValue }}</td>
-                    <td>{{ etf.formattedPortfolioSize }}</td>
-                </tr>
-                {% endif %}
-                {% endfor %}
-            </tbody>
-            {% endblock trackers.table.body %}
-        </table>
+        {% include 'portfolio_table.html' with items=trackers %}
+    </div>
+    {% endif %}
+    {% if cash %}
+    <div class="row mt-2">
+        <h5 class="mb-3">Cash</h5>
+        {% include 'portfolio_table.html' with items=cash %}
     </div>
     {% endif %}
 </div>
