@@ -1,5 +1,5 @@
 import pathlib
-from datetime import datetime, date
+from datetime import date, datetime
 
 from degiro.config.degiro_config import DegiroConfig, DegiroCredentials
 

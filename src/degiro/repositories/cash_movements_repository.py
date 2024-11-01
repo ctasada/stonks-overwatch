@@ -67,6 +67,7 @@ class CashMovementsRepository:
                 """
                 SELECT balance_total
                 FROM degiro_cashmovements
+                WHERE type = 'FLATEX_CASH_SWEEP'
                 ORDER BY id DESC
                 LIMIT 1
                 """

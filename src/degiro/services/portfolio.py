@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
 
@@ -128,6 +129,26 @@ class PortfolioService:
                 }
             )
 
+        total_cash = CashMovementsRepository.get_total_cash()
+        portfolio_total_value += total_cash
+        my_portfolio.append(
+            {
+                "name": "Cash Balance EUR",
+                "symbol": "EUR",
+                "sector": "Others",
+                "country": "Others",
+                "productType": "CASH",
+                "productCurrency": "EUR",
+                "value": total_cash,
+                "baseCurrencyValue": total_cash,
+                "formattedBaseCurrencyValue": LocalizationUtility.format_money_value(
+                    value=total_cash, currency="EUR"),
+                "isOpen": True,
+                "portfolioSize": 0.0,  # Calculated in the next loop
+                "formattedPortfolioSize": 0.0,  # Calculated in the next loop
+            }
+        )
+
         # Calculate Stock Portfolio Size
         for entry in my_portfolio:
             size = entry["value"] / portfolio_total_value
@@ -136,9 +157,10 @@ class PortfolioService:
 
         return sorted(my_portfolio, key=lambda k: k["symbol"])
 
-    def get_portfolio_total(self):
+    def get_portfolio_total(self, portfolio: Optional[list[dict]] = None):
         # Calculate current value
-        portfolio = self.get_portfolio()
+        if not portfolio:
+            portfolio = self.get_portfolio()
 
         portfolio_total_value = 0.0
 

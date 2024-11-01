@@ -18,10 +18,12 @@ class Portfolio(View):
         portfolio = self.portfolio.get_portfolio()
         stocks = [item for item in portfolio if item.get("productType") == "STOCK"]
         trackers = [item for item in portfolio if item.get("productType") == "ETF"]
+        cash = [item for item in portfolio if item.get("productType") == "CASH"]
 
         context = {
             "stocks": stocks,
             "trackers": trackers,
+            "cash": cash,
         }
 
         return render(request, "portfolio.html", context)

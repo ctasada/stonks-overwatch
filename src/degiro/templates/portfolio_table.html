@@ -1,0 +1,64 @@
+<table class="table table-hover table-sm">
+    {% block items.table.head %}
+        <thead>
+        <tr>
+            <th scope="col"></th>
+            <th scope="col">Product</th>
+            <th scope="col"></th>
+            <th scope="col">Sector</th>
+            <th scope="col">Shares</th>
+            <th scope="col">Price</th>
+            <th scope="col">Unrealized Gain</th>
+            <th scope="col">Value</th>
+            <th scope="col">Size</th>
+        </tr>
+        </thead>
+    {% endblock items.table.head %}
+    {% block items.table.body %}
+        <tbody>
+        {% for item in items %}
+            {% if item.isOpen %}
+                <tr>
+                    <td><img src="{{ item.logoUrl }}" width="30" height="30" onerror="this.style.display='none'"></td>
+                    <td>{{ item.symbol }}<br><small class="fw-lighter">{{ item.name }}</small></td>
+                    <td>
+                        <div class="d-inline-flex gap-1">
+                            {% if item.category %}
+                            <small
+                                    class="p-1 fw-lighter text-light bg-dark square-box border d-flex justify-content-center align-items-center"
+                                    data-bs-toggle="tooltip" title="Category-{{ item.category }}">
+                                {{ item.category }}
+                            </small>
+                            {% endif %}
+                            {% if item.exchangeAbbr %}
+                            <small
+                                    class="p-1 fw-lighter square-box border d-flex justify-content-center align-items-center"
+                                    data-bs-toggle="tooltip" title="{{ item.exchangeName }}">
+                                {{ item.exchangeAbbr }}
+                            </small>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>{{ item.sector }}<br><small class="fw-lighter">{{ item.industry }}</small></td>
+                    <td>{{ item.shares }}</td>
+                    <td data-bs-toggle="tooltip" title="{{ item.formattedPrice }}">{{ item.formattedBaseCurrencyPrice }}<br><small class="fw-lighter" data-bs-toggle="tooltip" title="{{ item.formattedBreakEvenPrice }}">{{ item.formattedBaseCurrencyBreakEvenPrice }}</small></td>
+                    {% if item.unrealizedGain > 0 %}
+                        <td class="text-success">
+                            {% else %}
+                        <td class="text-danger">
+                    {% endif %}
+                    {{ item.formattedUnrealizedGain }}<br>
+                    {% if item.unrealizedGain > 0 %}
+                        <small class="fw-lighter bi bi-arrow-up-right">
+                    {% elif item.unrealizedGain < 0 %}
+                        <small class="fw-lighter bi bi-arrow-down-right">
+                    {% endif %}{{ item.percentageGain }}</small>
+                    </td>
+                    <td>{{ item.formattedBaseCurrencyValue }}</td>
+                    <td>{{ item.formattedPortfolioSize }}</td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+        </tbody>
+    {% endblock items.table.body %}
+</table>
