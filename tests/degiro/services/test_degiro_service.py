@@ -19,7 +19,6 @@ def test_credentials_manager_init(mock_degiro_config: mock_degiro_config, mock_f
     assert manager.credentials.int_account == mock_full_credentials.int_account
     assert manager.credentials.totp_secret_key == mock_full_credentials.totp_secret_key
     assert manager.credentials.one_time_password == mock_full_credentials.one_time_password
-    # assert manager.credentials.user_token == mock_credentials.user_token
 
 
 def test_degiro_service_init(mock_degiro_config: mock_degiro_config, mock_full_credentials: mock_full_credentials):
@@ -59,6 +58,21 @@ def test_degiro_service_connect_with_credential(disable_requests_cache: disable_
                 "sessionId": "abcdefg12345",
                 "status": 0,
                 "statusText": "success",
+            },
+            status_code=200,
+        )
+        m.get(
+            urls.CLIENT_DETAILS,
+            json={
+              "data": {
+                  "clientRole": "basic",
+                  "contractType": "PRIVATE",
+                  "displayLanguage": "en",
+                  "email": "user@domain.com",
+                  "id": 98765,
+                  "intAccount": 1234567,
+                  "username": "someuser"
+              }
             },
             status_code=200,
         )
