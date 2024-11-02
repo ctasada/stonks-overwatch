@@ -87,6 +87,21 @@ class TestDividendsService(TestCase):
         with patch("requests_cache.CachedSession", requests.Session):
             with requests_mock.Mocker() as m:
                 m.post(urls.LOGIN + "/totp", json={"sessionId": "abcdefg12345"}, status_code=200)
+                m.get(
+                    urls.CLIENT_DETAILS,
+                    json={
+                        "data": {
+                            "clientRole": "basic",
+                            "contractType": "PRIVATE",
+                            "displayLanguage": "en",
+                            "email": "user@domain.com",
+                            "id": 98765,
+                            "intAccount": 1234567,
+                            "username": "someuser"
+                        }
+                    },
+                    status_code=200,
+                )
                 m.register_uri(
                     "GET",
                     re.compile(re.escape(urls.UPCOMING_PAYMENTS) + r"/.*"),

@@ -16,13 +16,11 @@ class DegiroCredentials:
         int_account: Optional[int] = None,
         totp_secret_key: Optional[str] = None,
         one_time_password: Optional[int] = None,
-        user_token: Optional[str] = None,
     ):
         self.username = username
         self.password = password
         self.int_account = int_account
         self.totp_secret_key = totp_secret_key
-        self.user_token = user_token
         self.one_time_password = one_time_password
 
     def __eq__(self, value: object) -> bool:
@@ -32,7 +30,6 @@ class DegiroCredentials:
                 and self.password == value.password
                 and self.int_account == value.int_account
                 and self.totp_secret_key == value.totp_secret_key
-                and self.user_token == value.user_token
                 and self.one_time_password == value.one_time_password
             )
 
@@ -42,7 +39,6 @@ class DegiroCredentials:
             "password": self.password,
             "int_account": self.int_account,
             "totp_secret_key": self.totp_secret_key,
-            "user_token": self.user_token,
             "one_time_password": self.one_time_password,
         }
 
@@ -55,7 +51,6 @@ class DegiroCredentials:
             password=data.get("password", ""),
             int_account=data.get("int_account"),
             totp_secret_key=data.get("totp_secret_key"),
-            user_token=data.get("user_token"),
             one_time_password=data.get("one_time_password"),
         )
 
@@ -67,7 +62,6 @@ class DegiroCredentials:
             password=session_credentials.get("password", ""),
             int_account=session_credentials.get("int_account"),
             totp_secret_key=session_credentials.get("totp_secret_key"),
-            user_token=session_credentials.get("user_token"),
             one_time_password=session_credentials.get("one_time_password"),
         )
 

@@ -47,6 +47,11 @@ class DeGiroService:
         ):
             self.api_client.connect()
 
+        if self.credentials_manager.credentials.int_account is None:
+            int_account = self._get_int_account()
+            self.credentials_manager.credentials.int_account = int_account
+            self.api_client.credentials.int_account = int_account
+
     def check_connection(self) -> bool:
         """Check if the API client is connected."""
         is_connected = self.__check_connection__()
@@ -95,22 +100,7 @@ class DeGiroService:
         """
         self.check_connection()
 
-        client_details = self.get_client_details()
-        user_token = client_details["data"]["id"]
-
-        chart_fetcher = ChartFetcher(user_token=user_token)
-        chart_request = ChartRequest(
-            culture="nl-NL",
-            period=period,
-            requestid="1",
-            resolution=Interval.P1D,
-            series=[
-                f"issueid:{issue_id}",
-                f"price:issueid:{issue_id}",
-            ],
-            tz="Europe/Amsterdam",
-        )
-        chart = chart_fetcher.get_chart(chart_request=chart_request, raw=False)
+        chart = self._get_chart(issue_id, period)
 
         quotes = {}
         if not chart:
@@ -144,3 +134,32 @@ class DeGiroService:
                     last_date = current_date
 
         return quotes
+
+    def _get_chart(self, issue_id: str, period: Interval):
+        user_token = self._get_user_token()
+
+        chart_fetcher = ChartFetcher(user_token=user_token)
+        chart_request = ChartRequest(
+            culture="nl-NL",
+            period=period,
+            requestid="1",
+            resolution=Interval.P1D,
+            series=[
+                f"issueid:{issue_id}",
+                f"price:issueid:{issue_id}",
+            ],
+            tz="Europe/Amsterdam",
+        )
+        return chart_fetcher.get_chart(chart_request=chart_request, raw=False)
+
+    def _get_user_token(self) -> int:
+        client_details = self.get_client_details()
+        user_token = client_details["data"]["id"]
+
+        return user_token
+
+    def _get_int_account(self) -> int:
+        client_details = self.get_client_details()
+        int_account = client_details["data"]["intAccount"]
+
+        return int_account

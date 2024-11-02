@@ -10,7 +10,6 @@ def test_degiro_credentials_init():
     int_account = 123456
     totp_secret_key = "ABCDEFGHIJKLMNOP"
     one_time_password = 123456
-    user_token = "token123"
 
     credentials = DegiroCredentials(
         username=username,
@@ -18,7 +17,6 @@ def test_degiro_credentials_init():
         int_account=int_account,
         totp_secret_key=totp_secret_key,
         one_time_password=one_time_password,
-        user_token=user_token,
     )
 
     assert credentials.username == username
@@ -26,7 +24,6 @@ def test_degiro_credentials_init():
     assert credentials.int_account == int_account
     assert credentials.totp_secret_key == totp_secret_key
     assert credentials.one_time_password == one_time_password
-    assert credentials.user_token == user_token
 
 
 def test_degiro_credentials_to_dict():
@@ -36,7 +33,6 @@ def test_degiro_credentials_to_dict():
         int_account=123456,
         totp_secret_key="ABCDEFGHIJKLMNOP",
         one_time_password=123456,
-        user_token="token123",
     )
 
     credentials_dict = credentials.to_dict()
@@ -46,7 +42,6 @@ def test_degiro_credentials_to_dict():
     assert credentials_dict["int_account"] == 123456
     assert credentials_dict["totp_secret_key"] == "ABCDEFGHIJKLMNOP"
     assert credentials_dict["one_time_password"] == 123456
-    assert credentials_dict["user_token"] == "token123"
 
 
 def test_degiro_credentials_from_dict():
@@ -56,7 +51,6 @@ def test_degiro_credentials_from_dict():
         "int_account": "123456",
         "totp_secret_key": "ABCDEFGHIJKLMNOP",
         "one_time_password": "123456",
-        "user_token": "token123",
     }
 
     credentials = DegiroCredentials.from_dict(credentials_dict)
@@ -66,7 +60,6 @@ def test_degiro_credentials_from_dict():
     assert credentials.int_account == "123456"
     assert credentials.totp_secret_key == "ABCDEFGHIJKLMNOP"
     assert credentials.one_time_password == "123456"
-    assert credentials.user_token == "token123"
 
 
 def test_degiro_credentials_from_empty_dict():
@@ -79,7 +72,6 @@ def test_degiro_credentials_from_empty_dict():
     assert credentials.int_account is None
     assert credentials.totp_secret_key is None
     assert credentials.one_time_password is None
-    assert credentials.user_token is None
 
 
 def test_degiro_credentials_from_minimum_dict():
@@ -92,7 +84,6 @@ def test_degiro_credentials_from_minimum_dict():
     assert credentials.int_account is None
     assert credentials.totp_secret_key is None
     assert credentials.one_time_password is None
-    assert credentials.user_token is None
 
 
 def test_degiro_config_init():
@@ -101,7 +92,6 @@ def test_degiro_config_init():
     int_account = "123456"
     totp_secret_key = "ABCDEFGHIJKLMNOP"
     one_time_password = "123456"
-    user_token = "token123"
     base_currency = "EUR"
     start_date = "2023-01-01"
     start_date_as_date = datetime.fromisoformat(start_date).date()
@@ -112,7 +102,6 @@ def test_degiro_config_init():
         int_account=int_account,
         totp_secret_key=totp_secret_key,
         one_time_password=one_time_password,
-        user_token=user_token,
     )
 
     config = DegiroConfig(credentials=credentials, base_currency=base_currency, start_date=start_date_as_date)
@@ -129,7 +118,6 @@ def test_degiro_config_from_dict():
         "int_account": 123456,
         "totp_secret_key": "ABCDEFGHIJKLMNOP",
         "one_time_password": 123456,
-        "user_token": "token123",
     }
     base_currency = "EUR"
     start_date = "2023-01-01"
@@ -151,7 +139,6 @@ def test_degiro_config_from_json_file():
         "int_account": 987654,
         "totp_secret_key": "ABCDEFGHIJKLMNOP",
         "one_time_password": 123456,
-        "user_token": "token123",
     }
     base_currency = "EUR"
     start_date = "2023-01-01"
@@ -174,7 +161,6 @@ def test_degiro_config_default():
         "int_account": 987654,
         "totp_secret_key": "ABCDEFGHIJKLMNOP",
         "one_time_password": 123456,
-        "user_token": "token123",
     }
     base_currency = "EUR"
     start_date = "2023-01-01"

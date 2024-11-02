@@ -23,7 +23,6 @@ def mock_full_credentials():
         int_account=987654,
         totp_secret_key="ABCDEFGHIJKLMNOP",
         one_time_password=123456,
-        user_token="token123",
     )
 
 
