@@ -1,14 +1,12 @@
 from datetime import datetime
 
+import pytest
 from degiro.utils.localization import LocalizationUtility
 
 
-def test_get_base_currency():
-    assert LocalizationUtility.get_base_currency() == "EUR"
-
-
-def test_get_base_currency_symbol():
-    assert LocalizationUtility.get_base_currency_symbol() == "€"
+def test_get_currency_symbol():
+    assert LocalizationUtility.get_currency_symbol("EUR") == "€"
+    assert LocalizationUtility.get_currency_symbol("USD") == "$"
 
 
 def test_round_value():
@@ -19,12 +17,9 @@ def test_round_value():
     assert LocalizationUtility.round_value(1.0) == 1.0
 
 
-def test_format_money_value():
-    assert LocalizationUtility.format_money_value(1.2345) == "€ 1.23"
-    assert LocalizationUtility.format_money_value(1.2355) == "€ 1.24"
-    assert LocalizationUtility.format_money_value(1.2) == "€ 1.20"
-    assert LocalizationUtility.format_money_value(1.0) == "€ 1.00"
-
+def test_format_money_value_without_currency():
+    with pytest.raises(ValueError):
+        LocalizationUtility.format_money_value(1.0)
 
 def test_format_money_value_with_currency():
     assert LocalizationUtility.format_money_value(value=1.2345, currency="EUR") == "€ 1.23"

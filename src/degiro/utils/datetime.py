@@ -10,7 +10,7 @@ class DateTimeUtility:
     """
 
     @staticmethod
-    def calculate_interval(date_from: str) -> Optional[Interval]:
+    def calculate_interval(date_from: str) -> Optional[Interval]: # noqa: C901
         """
         Calculate the interval between the provided date and today.
 

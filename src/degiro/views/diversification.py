@@ -27,6 +27,7 @@ class Diversification(View):
         sectors = self._get_sectors(portfolio)
         currencies = self._get_currencies(portfolio)
         countries = self._get_countries(portfolio)
+        base_currency = self.degiro_service.get_base_currency()
 
         context = {
             "productTypes": product_types,
@@ -34,7 +35,7 @@ class Diversification(View):
             "sectors": sectors,
             "currencies": currencies,
             "countries": countries,
-            "currencySymbol": LocalizationUtility.get_base_currency_symbol(),
+            "currencySymbol": LocalizationUtility.get_currency_symbol(base_currency),
         }
 
         return render(request, "diversification.html", context)

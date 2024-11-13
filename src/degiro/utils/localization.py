@@ -3,8 +3,6 @@ from typing import Optional
 
 from currency_symbols import CurrencySymbols
 
-from degiro.config.degiro_config import DegiroConfig
-
 
 class LocalizationUtility:
     """
@@ -16,22 +14,21 @@ class LocalizationUtility:
     TIME_FORMAT = "%H:%M:%S"
 
     @staticmethod
-    def get_base_currency_symbol() -> str:
+    def get_currency_symbol(currency: str) -> str:
         """
         Returns the currency symbol for the user's base currency.
         """
-        base_currency = LocalizationUtility.get_base_currency()
-        base_currency_symbol = CurrencySymbols.get_symbol(base_currency)
+        base_currency_symbol = CurrencySymbols.get_symbol(currency)
 
         return base_currency_symbol
 
-    @staticmethod
-    def get_base_currency() -> str:
-        """
-        Returns the user's base currency from the DegiroConfig.
-        """
-        degiro_config = DegiroConfig.default()
-        return degiro_config.base_currency
+    # @staticmethod
+    # def get_base_currency() -> str:
+    #     """
+    #     Returns the user's base currency from the DegiroConfig.
+    #     """
+    #     degiro_config = DegiroConfig.default()
+    #     return degiro_config.base_currency
 
     @staticmethod
     def round_value(value: float) -> float:
@@ -46,10 +43,11 @@ class LocalizationUtility:
         Formats a numeric value as a currency string with the specified currency symbol.
         If no currency symbol is provided, it uses the base currency symbol.
         """
-        if currency and not currency_symbol:
+        if not currency and not currency_symbol:
+            raise ValueError("It's mandatory to provide a currency symbol or currency value.")
+
+        if not currency_symbol:
             currency_symbol = CurrencySymbols.get_symbol(currency)
-        elif not currency_symbol:
-            currency_symbol = LocalizationUtility.get_base_currency_symbol()
 
         return f"{currency_symbol} {value:,.2f}"
 

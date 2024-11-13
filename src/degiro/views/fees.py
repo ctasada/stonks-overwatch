@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.views import View
 
+from degiro.services.degiro_service import DeGiroService
 from degiro.services.fees import FeesService
 from degiro.utils.localization import LocalizationUtility
 
@@ -8,13 +9,15 @@ from degiro.utils.localization import LocalizationUtility
 class Fees(View):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-        self.fees = FeesService()
+        self.degiro_service = DeGiroService()
+        self.fees = FeesService(
+            degiro_service=self.degiro_service,
+        )
+        self.base_currency = self.degiro_service.get_base_currency()
 
     def get(self, request):
         fees = self.fees.get_fees()
-
-        base_currency_symbol = LocalizationUtility.get_base_currency_symbol()
+        base_currency_symbol = LocalizationUtility.get_currency_symbol(self.base_currency)
         transaction_fees = 0
         exchange_fees = 0
         ftt_fees = 0

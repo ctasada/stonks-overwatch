@@ -74,7 +74,7 @@ class DegiroConfig:
     def __init__(
             self,
             credentials: Optional[DegiroCredentials],
-            base_currency: str,
+            base_currency: Optional[str],
             start_date: date,
             update_frequency_minutes: int = 5
     ) -> None:

@@ -19,7 +19,9 @@ class Deposits(View):
             degiro_service=self.degiro_service,
         )
 
-        self.deposits_data = DepositsService()
+        self.deposits_data = DepositsService(
+            degiro_service=self.degiro_service,
+        )
 
     def get(self, request):
         data = self.deposits_data.cash_deposits_history()

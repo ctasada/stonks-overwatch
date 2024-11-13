@@ -3,11 +3,17 @@ from datetime import date
 import pandas as pd
 
 from degiro.repositories.cash_movements_repository import CashMovementsRepository
+from degiro.services.degiro_service import DeGiroService
 from degiro.utils.localization import LocalizationUtility
 
 
 # FIXME: If data cannot be found in the DB, the code should get it from DeGiro, updating the DB
 class DepositsService:
+    def __init__(
+            self,
+            degiro_service: DeGiroService,
+    ):
+        self.degiro_service = degiro_service
 
     def get_cash_deposits(self) -> dict:
         df = pd.DataFrame(CashMovementsRepository.get_cash_deposits_raw())
@@ -16,8 +22,8 @@ class DepositsService:
         df["date"] = pd.to_datetime(df["date"]).dt.strftime(LocalizationUtility.DATE_FORMAT)
         df = df.sort_values(by="date", ascending=False)
 
-        base_currency_symbol = LocalizationUtility.get_base_currency_symbol()
-        base_currency = LocalizationUtility.get_base_currency()
+        base_currency = self.degiro_service.get_base_currency()
+        base_currency_symbol = LocalizationUtility.get_currency_symbol(base_currency)
 
         records = []
         for _, row in df.iterrows():
@@ -44,7 +50,7 @@ class DepositsService:
         df.set_index("date", inplace=True)
         df = df.sort_values(by="date")
         df = df.groupby(df.index)["change"].sum().reset_index()
-        # Do the cummulative sum
+        # Do the cumulative sum
         df["contributed"] = df["change"].cumsum()
 
         cash_contributions = df.to_dict("records")
