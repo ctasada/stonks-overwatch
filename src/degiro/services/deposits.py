@@ -91,6 +91,6 @@ class DepositsService:
 
         # Convert the DataFrame to a dictionary with date as the key (converted to string)
         # and balance_total as the value
-        dataset = {date.strftime("%Y-%m-%d"): float(balance) for date, balance in df["balanceTotal"].items()}
+        dataset = {day.strftime("%Y-%m-%d"): float(balance) for day, balance in df["balanceTotal"].items()}
 
         return dataset

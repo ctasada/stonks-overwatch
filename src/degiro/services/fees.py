@@ -16,7 +16,7 @@ class FeesService:
 
         total_fees = account_fees + transaction_fees
 
-        return sorted(total_fees, key=lambda k: k["date"], reverse=True)
+        return sorted(total_fees, key=lambda k: (k["date"], k["time"]), reverse=True)
 
     def get_account_fees(self) -> dict:
         cash_movements = CashMovementsRepository.get_cash_movements_raw()

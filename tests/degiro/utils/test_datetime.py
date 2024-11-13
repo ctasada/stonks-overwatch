@@ -11,6 +11,7 @@ def test_calculate_interval_valid_dates():
     today = date.today()
     test_cases = [
         ((today + timedelta(days=1)).isoformat(), None),
+        (today.isoformat(), Interval.P1D),
         ((today - timedelta(days=2)).isoformat(), Interval.P1W),
         ((today - timedelta(days=6)).isoformat(), Interval.P1W),
         ((today - timedelta(days=29)).isoformat(), Interval.P1M),
