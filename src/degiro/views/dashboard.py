@@ -29,7 +29,9 @@ class Dashboard(View):
 
         self.account_overview = AccountOverviewService()
         self.currency_service = CurrencyConverterService()
-        self.deposits = DepositsService()
+        self.deposits = DepositsService(
+            degiro_service=self.degiro_service,
+        )
         self.dividends = DividendsService(
             account_overview=self.account_overview,
             degiro_service=self.degiro_service,
@@ -75,7 +77,7 @@ class Dashboard(View):
 
     def _get_dividend_deposits(self) -> list:
         dividends = []
-        base_currency = LocalizationUtility.get_base_currency()
+        base_currency = self.degiro_service.get_base_currency()
         for dividend in self.dividends.get_dividends():
             dividend_date = LocalizationUtility.convert_string_to_date(dividend["date"])
             dividends.append(
@@ -174,7 +176,7 @@ class Dashboard(View):
         data = self._create_products_quotation()
         stock_splits = self._get_stock_splits()
 
-        base_currency = LocalizationUtility.get_base_currency()
+        base_currency = self.degiro_service.get_base_currency()
         aggregate = {}
         for key in data:
             entry = data[key]

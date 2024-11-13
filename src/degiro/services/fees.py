@@ -2,13 +2,20 @@ from degiro.repositories.cash_movements_repository import CashMovementsRepositor
 from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.transactions_repository import TransactionsRepository
 from degiro.services.currency_converter_service import CurrencyConverterService
+from degiro.services.degiro_service import DeGiroService
 from degiro.utils.localization import LocalizationUtility
 
 
 class FeesService:
 
-    def __init__(self):
+    def __init__(
+            self,
+            degiro_service: DeGiroService,
+    ):
         self.currency_service = CurrencyConverterService()
+        self.degiro_service = degiro_service
+        self.base_currency = self.degiro_service.get_base_currency()
+
 
     def get_fees(self) -> list:
         transaction_fees = self.get_transaction_fees()
@@ -20,7 +27,6 @@ class FeesService:
 
     def get_account_fees(self) -> dict:
         cash_movements = CashMovementsRepository.get_cash_movements_raw()
-        base_currency = LocalizationUtility.get_base_currency()
 
         my_fees = []
         for cash_movement in cash_movements:
@@ -30,10 +36,10 @@ class FeesService:
 
             fee_value = cash_movement["change"]
             currency_value = cash_movement["currency"]
-            if currency_value != base_currency:
+            if currency_value != self.base_currency:
                 fx_date = cash_movement["date"].date()
-                fee_value = self.currency_service.convert(fee_value, currency_value, base_currency, fx_date)
-                currency_value = base_currency
+                fee_value = self.currency_service.convert(fee_value, currency_value, self.base_currency, fx_date)
+                currency_value = self.base_currency
 
             my_fees.append(
                 {
@@ -75,7 +81,7 @@ class FeesService:
         products_info = ProductInfoRepository.get_products_info_raw(products_ids)
 
         # Get user's base currency
-        base_currency_symbol = LocalizationUtility.get_base_currency_symbol()
+        base_currency_symbol = LocalizationUtility.get_currency_symbol(self.base_currency)
 
         my_fees = []
         for transaction in transactions_history:

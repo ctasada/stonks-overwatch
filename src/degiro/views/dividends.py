@@ -25,7 +25,7 @@ class Dividends(View):
             account_overview=self.account_overview,
             degiro_service=self.degiro_service,
         )
-        self.base_currency = LocalizationUtility.get_base_currency()
+        self.base_currency = self.degiro_service.get_base_currency()
 
     def get(self, request):
         dividends_overview = self.dividends.get_dividends()
@@ -41,7 +41,7 @@ class Dividends(View):
             "dividendsCalendar": dividends_calendar,
             "dividendsDiversification": dividends_diversification,
             "dividendsGrowth": dividends_growth,
-            "currencySymbol": LocalizationUtility.get_base_currency_symbol(),
+            "currencySymbol": LocalizationUtility.get_currency_symbol(self.base_currency),
         }
 
         return render(request, "dividends.html", context)
@@ -70,7 +70,7 @@ class Dividends(View):
                 "formatedTotal",
                 LocalizationUtility.format_money_value(
                     value=0,
-                    currency_symbol=LocalizationUtility.get_base_currency_symbol(),
+                    currency_symbol=LocalizationUtility.get_currency_symbol(self.base_currency),
                 ),
             )
 

@@ -1,11 +1,17 @@
 
 from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.transactions_repository import TransactionsRepository
+from degiro.services.degiro_service import DeGiroService
 from degiro.utils.constants import TransactionType
 from degiro.utils.localization import LocalizationUtility
 
 
 class TransactionsService:
+    def __init__(
+            self,
+            degiro_service: DeGiroService,
+    ):
+        self.degiro_service = degiro_service
 
     def get_transactions(self) -> dict:
         # FETCH TRANSACTIONS DATA
@@ -22,7 +28,8 @@ class TransactionsService:
         products_info = ProductInfoRepository.get_products_info_raw(products_ids)
 
         # Get user's base currency
-        base_currency_symbol = LocalizationUtility.get_base_currency_symbol()
+        base_currency = self.degiro_service.get_base_currency()
+        base_currency_symbol = LocalizationUtility.get_currency_symbol(base_currency)
 
         # DISPLAY PRODUCTS_INFO
         my_transactions = []

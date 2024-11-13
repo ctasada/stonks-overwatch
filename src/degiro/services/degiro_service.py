@@ -163,3 +163,11 @@ class DeGiroService:
         int_account = client_details["data"]["intAccount"]
 
         return int_account
+
+    def get_base_currency(self) -> str:
+        # FIXME: Read value from configuration if it's available
+        # FIXME: This call should be cache
+        account_info = self.get_account_info()
+        base_currency = account_info["data"]["baseCurrency"]
+
+        return base_currency

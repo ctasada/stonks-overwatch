@@ -30,7 +30,7 @@ class PortfolioService:
         products_info = self.__get_products_info(products_ids=products_ids)
 
         # Get user's base currency
-        base_currency = LocalizationUtility.get_base_currency()
+        base_currency = self.degiro_service.get_base_currency()
 
         products_config = self.__get_product_config()
 
@@ -170,7 +170,8 @@ class PortfolioService:
                 portfolio_total_value += entry["baseCurrencyValue"]
                 tmp_total_portfolio[entry["name"]] = entry["baseCurrencyValue"]
 
-        base_currency_symbol = LocalizationUtility.get_base_currency_symbol()
+        base_currency = self.degiro_service.get_base_currency()
+        base_currency_symbol = LocalizationUtility.get_currency_symbol(base_currency)
 
         tmp_total_portfolio["totalDepositWithdrawal"] = CashMovementsRepository.get_total_cash_deposits_raw()
         tmp_total_portfolio["totalCash"] = CashMovementsRepository.get_total_cash()
