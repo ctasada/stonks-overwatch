@@ -30,7 +30,9 @@ class DateTimeUtility:
         delta = (today - d1).days
 
         interval = None
-        if 1 <= delta < 7:
+        if delta == 0:
+            interval = Interval.P1D
+        elif 1 <= delta < 7:
             interval = Interval.P1W
         elif 7 <= delta < 30:
             interval = Interval.P1M

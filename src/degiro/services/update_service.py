@@ -24,7 +24,8 @@ from degiro.utils.localization import LocalizationUtility
 
 CACHE_KEY_UPDATE_PORTFOLIO = "portfolio_data_update_from_degiro"
 CACHE_KEY_UPDATE_COMPANIES = "company_profile_update_from_degiro"
-
+# Cache the result for 1 hour (3600 seconds)
+CACHE_TIMEOUT = 3600
 
 class UpdateService:
     logger = logging.getLogger("stocks_portfolio.update_service")
@@ -100,7 +101,7 @@ class UpdateService:
             self.__import_transactions(transactions_history)
 
     def update_portfolio(self, debug_json_files: dict = None):
-        """Updating the Portfolio is a expensive and time consuming task.
+        """Updating the Portfolio is expensive and time-consuming task.
         This method caches the result for a period of time.
         """
         self.logger.info("Updating Portfolio Data....")
@@ -113,15 +114,14 @@ class UpdateService:
             # Otherwise, call the expensive method
             result = self.__update_portfolio(debug_json_files)
 
-            # Cache the result for 1 hour (3600 seconds)
-            cache.set(CACHE_KEY_UPDATE_PORTFOLIO, result, timeout=3600)
+            cache.set(CACHE_KEY_UPDATE_PORTFOLIO, result, timeout=CACHE_TIMEOUT)
 
             return result
 
         return cached_data
 
     def update_company_profile(self, debug_json_files: dict = None):
-        """Updating the Company Profiles is a expensive and time consuming task.
+        """Updating the Company Profiles is expensive and time-consuming task.
         This method caches the result for a period of time.
         """
         self.logger.info("Updating Company Profiles Data....")
@@ -134,8 +134,7 @@ class UpdateService:
             # Otherwise, call the expensive method
             result = self.__update_company_profile(debug_json_files)
 
-            # Cache the result for 1 hour (3600 seconds)
-            cache.set(CACHE_KEY_UPDATE_COMPANIES, result, timeout=3600)
+            cache.set(CACHE_KEY_UPDATE_COMPANIES, result, timeout=CACHE_TIMEOUT)
 
             return result
 
@@ -152,12 +151,14 @@ class UpdateService:
         self.__import_products_info(products_info)
         self.__import_products_quotation()
 
-    def __update_company_profile(self, debug_json_files: dict = None):
+    def __update_company_profile(self, debug_json_files: dict = None) -> dict:
         company_profiles = self.__get_company_profiles()
         if debug_json_files and "company_profiles.json" in debug_json_files:
             save_to_json(company_profiles, debug_json_files["company_profiles.json"])
 
         self.__import_company_profiles(company_profiles)
+
+        return company_profiles
 
     def __get_cash_movements(self, from_date: date) -> dict:
         """Import Account data from DeGiro. Uses the `get_account_overview` method.
@@ -186,7 +187,7 @@ class UpdateService:
     def __conv(self, i):
         return i or None
 
-    def __import_cash_movements(self, cash_data: dict) -> None:
+    def __import_cash_movements(self, cash_data: list[dict]) -> None:
         """Store the cash movements into the DB."""
 
         if cash_data:
@@ -240,7 +241,7 @@ class UpdateService:
         else:
             return None
 
-    def __get_transaction_history(self, from_date: date) -> date:
+    def __get_transaction_history(self, from_date: date) -> dict:
         """Import Transactions data from DeGiro. Uses the `get_transactions_history` method."""
         trading_api = self.degiro_service.get_client()
 

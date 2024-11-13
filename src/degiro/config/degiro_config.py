@@ -68,6 +68,8 @@ class DegiroCredentials:
 degiro_config_logger = logging.getLogger("stocks_portfolio.degiro_config")
 class DegiroConfig:
     DEGIRO_CONFIG_PATH = os.path.join(PROJECT_PATH, "config", "config.json")
+    DEFAULT_DEGIRO_UPDATE_FREQUENCY = 5
+    DEFAULT_DEGIRO_START_DATE = "2020-01-01"
 
     def __init__(
             self,
@@ -95,10 +97,10 @@ class DegiroConfig:
         credentials_data = data.get("credentials")
         credentials = DegiroCredentials.from_dict(credentials_data) if credentials_data else None
         base_currency = data.get("base_currency", "")
-        start_date_str = data.get("start_date", "")
+        start_date_str = data.get("start_date", cls.DEFAULT_DEGIRO_START_DATE)
         # FIXME: Use Localization method
         start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date() if start_date_str else date.today()
-        update_frequency_minutes = data.get("update_frequency_minutes", 5)
+        update_frequency_minutes = data.get("update_frequency_minutes", cls.DEFAULT_DEGIRO_UPDATE_FREQUENCY)
 
         return cls(credentials, base_currency, start_date, update_frequency_minutes)
 

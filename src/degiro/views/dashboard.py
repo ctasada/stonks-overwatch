@@ -61,20 +61,19 @@ class Dashboard(View):
         result = {}
 
         for item in self.deposits.get_cash_deposits():
-            date = item["date"]
+            date_key = item["date"]
             change = item["change"]
 
-            if date in result:
-                result[date] += change
+            if date_key in result:
+                result[date_key] += change
             else:
-                result[date] = change
+                result[date_key] = change
 
         sorted_result = OrderedDict(sorted(result.items()))
 
         return sorted_result
 
     def _get_dividend_deposits(self) -> list:
-        # {'date': '2020-05-15', 'currency': 'USD', 'change': 8.2, 'formatedChange': '$ 8.20']
         dividends = []
         base_currency = LocalizationUtility.get_base_currency()
         for dividend in self.dividends.get_dividends():
@@ -182,6 +181,10 @@ class Dashboard(View):
             position_value_growth = self._calculate_position_growth(entry, stock_splits)
             convert_fx = entry["product"]["currency"] != base_currency
             for date_value in position_value_growth:
+                if self._is_weekend(date_value):
+                    # Skip weekends. Those days there's no activity
+                    continue
+
                 aggregate_value = aggregate.get(date_value, 0)
 
                 if convert_fx:
@@ -257,12 +260,12 @@ class Dashboard(View):
         grouped_data = defaultdict(lambda: {"B": None, "S": None})
         # Grouping the data by date and productId
         for entry in results:
-            date = entry["date"].strftime(LocalizationUtility.DATE_FORMAT)
+            day = entry["date"].strftime(LocalizationUtility.DATE_FORMAT)
             buysell = entry["buysell"]
-            grouped_data[date][buysell] = entry
+            grouped_data[day][buysell] = entry
 
         splitted_stocks = {}
-        for date, transactions in grouped_data.items():
+        for day, transactions in grouped_data.items():
             sell_quantity = abs(transactions["S"]["quantity"])
             buy_quantity = transactions["B"]["quantity"]
             ratio = buy_quantity / sell_quantity
@@ -280,8 +283,8 @@ class Dashboard(View):
             if buy_product_id not in splitted_stocks:
                 splitted_stocks[buy_product_id] = {}
 
-            splitted_stocks[sell_product_id][date] = product_split
-            splitted_stocks[buy_product_id][date] = product_split
+            splitted_stocks[sell_product_id][day] = product_split
+            splitted_stocks[buy_product_id][day] = product_split
 
         return splitted_stocks
 
@@ -332,3 +335,9 @@ class Dashboard(View):
             product_growth[key]["quotation"]["quotes"] = ProductQuotationsRepository.get_product_quotations(key)
 
         return product_growth
+
+    def _is_weekend(self, date_str: str):
+        # Parse the date string into a datetime object
+        day = datetime.strptime(date_str, '%Y-%m-%d')
+        # Check if the day of the week is Saturday (5) or Sunday (6)
+        return day.weekday() >= 5

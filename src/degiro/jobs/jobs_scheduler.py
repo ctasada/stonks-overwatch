@@ -27,7 +27,6 @@ class JobsScheduler:
             minutes=degiro_config.update_frequency_minutes,
             next_run_time=datetime.now()
         )
-        scheduler.start()
 
     @staticmethod
     def update_portfolio():
