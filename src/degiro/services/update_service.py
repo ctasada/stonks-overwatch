@@ -351,7 +351,7 @@ class UpdateService:
                 self.logger.error(f"Cannot import row: {row}")
                 self.logger.error("Exception: ", error)
 
-    def __import_products_quotation(self) -> None:
+    def __import_products_quotation(self) -> None: # noqa: C901
         product_growth = self.portfolio_data.calculate_product_growth()
 
         # Include Currencies in the Quotations
@@ -408,6 +408,11 @@ class UpdateService:
                 issue_id = product_growth[key]["product"].get("vwdIdSecondary")
             else:
                 issue_id = product_growth[key]["product"].get("vwdId")
+
+            if issue_id is None:
+                # FIXME: Find out how to identify the product
+                self.logger.info(f"Issue ID not found for {key}: {product_growth[key]}")
+                continue
 
             interval = product_growth[key]["quotation"]["interval"]
             quotes_dict = self.degiro_service.get_product_quotation(issue_id, interval)
