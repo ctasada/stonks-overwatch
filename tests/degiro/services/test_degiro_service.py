@@ -1,5 +1,6 @@
 import json
 import pathlib
+from datetime import date
 
 import requests_mock
 from degiro_connector.core.constants import urls
@@ -9,6 +10,7 @@ from degiro_connector.quotecast.models.chart import Interval
 import pytest
 from degiro.config.degiro_config import DegiroCredentials
 from degiro.services.degiro_service import CredentialsManager, DeGiroService
+from degiro.utils.localization import LocalizationUtility
 from tests.degiro.fixtures import disable_requests_cache, mock_degiro_config, mock_full_credentials
 
 
@@ -202,11 +204,14 @@ def test_get_product_quotation(
 
         quotes = service.get_product_quotation("350015372", Interval.P1M)
 
+    today = LocalizationUtility.format_date_from_date(date.today())
+
     assert service.check_connection() is True
-    assert len(quotes.keys()) == 30
+    assert len(quotes.keys()) == 31
     assert quotes["2024-09-05"] == 222.38
     assert quotes["2024-09-06"] == 220.80
     assert quotes["2024-09-07"] == 220.80
     assert quotes["2024-09-08"] == 220.80
     assert quotes["2024-09-09"] == 220.91
     assert quotes["2024-10-04"] == 226.8
+    assert quotes[today] == 226.8

@@ -1,5 +1,5 @@
 import logging
-from datetime import timedelta
+from datetime import timedelta, date
 from typing import Any, List, Optional
 
 import polars as pl
@@ -95,47 +95,80 @@ class DeGiroService:
         return products_info["data"]
 
     def get_product_quotation(self, issue_id: str, period: Interval) -> dict:
-        """Get the list of quotations for the provided product for the indicated interval.
+        daily_quotations = self._get_product_daily_quotation(issue_id, period)
+        last_key = next(reversed(daily_quotations))
+        last_value = daily_quotations[last_key]
+        last_quotation = self._get_product_last_quotation(issue_id, last_value)
+        return daily_quotations | last_quotation
+
+    def _get_product_daily_quotation(self, issue_id: str, period: Interval) -> dict:
+        """
+        Get the list of quotations for the provided product for the indicated interval.
         The response is a list of date-value pairs.
         """
         self.check_connection()
 
-        chart = self._get_chart(issue_id, period)
-
-        quotes = {}
+        chart = self._get_chart(issue_id, period, Interval.P1D)
         if not chart:
             self.logger.warning(f"No chart found for {issue_id} / {period}")
-            return quotes
+            return {}
 
+        quotes = {}
         for series in chart.series:
-            if series.type == "time":
-                init_date = series.times.split('/')[0]
-                last_date = LocalizationUtility.convert_string_to_date(init_date)
-                data_frame = pl.DataFrame(data=series.data, orient="row")
-                for row in data_frame.rows(named=True):
-                    delta_days = row["column_0"]
-                    current_date = LocalizationUtility.convert_string_to_date(init_date) + timedelta(days=delta_days)
+            if series.type != "time":
+                continue
 
-                    if (current_date - last_date).days > 1:
-                        last_date_str = LocalizationUtility.format_date_from_date(last_date)
-                        for missing_day in (range(1, (current_date - last_date).days)):
-                            missing_day_str = LocalizationUtility.format_date_from_date(
-                                last_date + timedelta(days=missing_day)
-                            )
-                            # Sometimes the first value is skipped, so we need to look at the current one
-                            if last_date_str in quotes:
-                                last_known_value = quotes[last_date_str]
-                            else:
-                                last_known_value = row["column_1"]
-                            quotes[missing_day_str] = last_known_value
+            init_date = LocalizationUtility.convert_string_to_date(series.times.split('/')[0])
+            last_date = init_date
 
-                    current_date_str = LocalizationUtility.format_date_from_date(current_date)
-                    quotes[current_date_str] = row["column_1"]
-                    last_date = current_date
+            data_frame = pl.DataFrame(data=series.data, orient="row")
+            for row in data_frame.rows(named=True):
+                delta_days = row["column_0"]
+                current_date = init_date + timedelta(days=delta_days)
+
+                # Fill missing days
+                missing_days = (current_date - last_date).days
+                if missing_days > 1:
+                    last_known_value = quotes.get(LocalizationUtility.format_date_from_date(last_date), row["column_1"])
+                    for day_offset in range(1, missing_days):
+                        missing_date = last_date + timedelta(days=day_offset)
+                        quotes[LocalizationUtility.format_date_from_date(missing_date)] = last_known_value
+
+                # Add the current day's quotation
+                current_date_str = LocalizationUtility.format_date_from_date(current_date)
+                quotes[current_date_str] = row["column_1"]
+                last_date = current_date
 
         return quotes
 
-    def _get_chart(self, issue_id: str, period: Interval):
+    def _get_product_last_quotation(self, issue_id: str, default_quotation: str) -> dict:
+        """
+        Get the list of quotations for the provided product for the indicated interval.
+        The response is a list of date-value pairs.
+        """
+        self.check_connection()
+
+        chart = self._get_chart(issue_id, Interval.P1D, Interval.PT15M)
+        if not chart:
+            self.logger.warning(f"No chart found for {issue_id} / {Interval.P1D}")
+            return {}
+
+        quotes = {}
+        for series in chart.series:
+            if series.type != "time":
+                continue
+
+            current_date_str = LocalizationUtility.format_date_from_date(date.today())
+            data_frame = pl.DataFrame(data=series.data, orient="row")
+            if "column_1" in data_frame.columns:
+                quotes[current_date_str] = data_frame["column_1"][-1]
+            else:
+                self.logger.warning(f"No daily quotation found for {issue_id} / {Interval.P1D}")
+                quotes[current_date_str] = default_quotation
+
+        return quotes
+
+    def _get_chart(self, issue_id: str, period: Interval, resolution: Interval):
         user_token = self._get_user_token()
 
         chart_fetcher = ChartFetcher(user_token=user_token)
@@ -143,7 +176,7 @@ class DeGiroService:
             culture="nl-NL",
             period=period,
             requestid="1",
-            resolution=Interval.P1D,
+            resolution=resolution,
             series=[
                 f"issueid:{issue_id}",
                 f"price:issueid:{issue_id}",
