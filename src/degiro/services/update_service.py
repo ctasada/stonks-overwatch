@@ -59,6 +59,10 @@ class UpdateService:
         return last_movement
 
     def update_all(self):
+        if not self.degiro_service.check_connection():
+            self.logger.warning("Skipping update since cannot connect to DeGiro")
+            return
+
         try:
             self.update_account()
             self.update_transactions()
@@ -66,7 +70,7 @@ class UpdateService:
             self.update_company_profile()
         except Exception as error:
             self.logger.error("Cannot Update Portfolio!")
-            self.logger.error(error)
+            self.logger.error("Exception: ", error)
 
     def update_account(self, debug_json_files: dict = None):
         """Update the Account DB data. Only does it if the data is older than today."""
@@ -364,6 +368,8 @@ class UpdateService:
                 product_growth[currency]["history"][start_date] = 1
 
         delete_keys = []
+        today = LocalizationUtility.format_date_from_date(date.today())
+
         for key in product_growth.keys():
             product = ProductInfoRepository.get_product_info_from_id(key)
 
@@ -388,7 +394,7 @@ class UpdateService:
             product_growth[key]["quotation"] = {}
             product_history_dates = list(product_growth[key]["history"].keys())
             start_date = product_history_dates[0]
-            final_date = LocalizationUtility.format_date_from_date(date.today())
+            final_date = today
             tmp_last = product_history_dates[-1]
             if product_growth[key]["history"][tmp_last] == 0:
                 final_date = tmp_last
@@ -404,18 +410,18 @@ class UpdateService:
 
         # We need to use the productIds to get the daily quote for each product
         for key in product_growth.keys():
+            symbol = product_growth[key]["product"]["symbol"]
             if product_growth[key]["product"].get("vwdIdSecondary") is not None:
                 issue_id = product_growth[key]["product"].get("vwdIdSecondary")
             else:
                 issue_id = product_growth[key]["product"].get("vwdId")
 
             if issue_id is None:
-                # FIXME: Find out how to identify the product
-                self.logger.info(f"Issue ID not found for {key}: {product_growth[key]}")
+                self.logger.info(f"Issue ID not found for '{symbol}'({key}): {product_growth[key]}")
                 continue
 
             interval = product_growth[key]["quotation"]["interval"]
-            quotes_dict = self.degiro_service.get_product_quotation(issue_id, interval)
+            quotes_dict = self.degiro_service.get_product_quotation(issue_id, interval, symbol)
 
             # Update the data ONLY if we get something back from DeGiro
             if quotes_dict:

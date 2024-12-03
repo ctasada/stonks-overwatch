@@ -129,7 +129,7 @@ class Dashboard(View):
         return dataset
 
     # FIXME: The TWR calculation seems off
-    def _calculate_performance_twr(self, cash_contributions: dict, portfolio_value: dict) -> dict:
+    def _calculate_performance_twr(self, cash_contributions: dict, portfolio_value: list[dict]) -> list[dict]:
         """Calculate the Time Weight Ratio (TWR).
 
         Formula to calculate TWR = [(1+RPN) x (1+ RPN) x … - 1] x 100
@@ -181,6 +181,8 @@ class Dashboard(View):
         for key in data:
             entry = data[key]
             position_value_growth = self._calculate_position_growth(entry, stock_splits)
+            if len(position_value_growth) > 0 and list(position_value_growth.keys())[-1] == '2024-12-01':
+                print(f"{key}: {entry["product"]}")
             convert_fx = entry["product"]["currency"] != base_currency
             for date_value in position_value_growth:
                 if self._is_weekend(date_value):
@@ -199,6 +201,10 @@ class Dashboard(View):
                 else:
                     aggregate_value += position_value_growth[date_value]
                 aggregate[date_value] = aggregate_value
+
+        # FIXME: There seems to be a bug showing the Portfolio value over time. I have seen happening on Mondays
+        #    The graph shows the 2 last days out of order and with a much lower value
+        # print(f"{list(aggregate.items())[-5:]}")
 
         dataset = []
         for day in aggregate:
