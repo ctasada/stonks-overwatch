@@ -202,7 +202,7 @@ def test_get_product_quotation(
         service = DeGiroService(manager)
         service.connect()
 
-        quotes = service.get_product_quotation("350015372", Interval.P1M)
+        quotes = service.get_product_quotation("350015372", Interval.P1M, "AAPL")
 
     today = LocalizationUtility.format_date_from_date(date.today())
 
