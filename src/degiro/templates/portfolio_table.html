@@ -4,11 +4,21 @@
         <tr>
             <th scope="col"></th>
             <th scope="col">Product</th>
-            <th scope="col"></th>
-            <th scope="col">Sector</th>
-            <th scope="col">Shares</th>
-            <th scope="col">Price</th>
-            <th scope="col">Unrealized Gain</th>
+            {% if show_columns.category %}
+                <th scope="col"></th>
+            {% endif %}
+            {% if show_columns.sector %}
+                <th scope="col">Sector</th>
+            {% endif %}
+            {% if show_columns.shares %}
+                <th scope="col">Shares</th>
+            {% endif %}
+            {% if show_columns.price %}
+                <th scope="col">Price</th>
+            {% endif %}
+            {% if show_columns.unrealized_gain %}
+                <th scope="col">Unrealized Gain</th>
+            {% endif %}
             <th scope="col">Value</th>
             <th scope="col">Size</th>
         </tr>
@@ -39,14 +49,21 @@
                             {% endif %}
                         </div>
                     </td>
-                    <td>{{ item.sector }}<br><small class="fw-lighter">{{ item.industry }}</small></td>
-                    <td>{{ item.shares }}</td>
-                    <td data-bs-toggle="tooltip" title="{{ item.formattedPrice }}">{{ item.formattedBaseCurrencyPrice }}<br><small class="fw-lighter" data-bs-toggle="tooltip" title="{{ item.formattedBreakEvenPrice }}">{{ item.formattedBaseCurrencyBreakEvenPrice }}</small></td>
-                    {% if item.unrealizedGain > 0 %}
-                        <td class="text-success">
-                            {% else %}
-                        <td class="text-danger">
+                    {% if show_columns.sector %}
+                        <td>{{ item.sector }}<br><small class="fw-lighter">{{ item.industry }}</small></td>
                     {% endif %}
+                    {% if show_columns.shares %}
+                        <td>{{ item.shares }}</td>
+                    {% endif %}
+                    {% if show_columns.price %}
+                        <td data-bs-toggle="tooltip" title="{{ item.formattedPrice }}">{{ item.formattedBaseCurrencyPrice }}<br><small class="fw-lighter" data-bs-toggle="tooltip" title="{{ item.formattedBreakEvenPrice }}">{{ item.formattedBaseCurrencyBreakEvenPrice }}</small></td>
+                    {% endif %}
+                    {% if show_columns.unrealized_gain %}
+                        {% if item.unrealizedGain > 0 %}
+                            <td class="text-success">
+                                {% else %}
+                            <td class="text-danger">
+                        {% endif %}
                     {{ item.formattedUnrealizedGain }}<br>
                     {% if item.unrealizedGain > 0 %}
                         <small class="fw-lighter bi bi-arrow-up-right">
@@ -54,6 +71,7 @@
                         <small class="fw-lighter bi bi-arrow-down-right">
                     {% endif %}{{ item.percentageGain }}</small>
                     </td>
+                    {% endif %}
                     <td>{{ item.formattedBaseCurrencyValue }}</td>
                     <td>{{ item.formattedPortfolioSize }}</td>
                 </tr>

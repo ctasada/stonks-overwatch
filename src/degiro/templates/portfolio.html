@@ -5,18 +5,18 @@
     <h4 class="mb-3">Portfolio</h4>
     <div class="row mt-2">
         <h5 class="mb-3">Shares</h5>
-        {% include 'portfolio_table.html' with items=stocks %}
+        {% include 'portfolio_table.html' with items=stocks show_columns=show_stocks_columns %}
     </div>
     {% if trackers %}
     <div class="row mt-2">
         <h5 class="mb-3">Trackers (ETF)</h5>
-        {% include 'portfolio_table.html' with items=trackers %}
+        {% include 'portfolio_table.html' with items=trackers show_columns=show_trackers_columns %}
     </div>
     {% endif %}
     {% if cash %}
     <div class="row mt-2">
         <h5 class="mb-3">Cash</h5>
-        {% include 'portfolio_table.html' with items=cash %}
+        {% include 'portfolio_table.html' with items=cash show_columns=show_cash_columns %}
     </div>
     {% endif %}
 </div>
