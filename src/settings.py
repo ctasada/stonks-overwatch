@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 import os
 from pathlib import Path
 
+from tzlocal import get_localzone
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -119,7 +121,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+# Dynamically determine the system's timezone
+TIME_ZONE = str(get_localzone())  # e.g., "Europe/Amsterdam" or "UTC"
 
 USE_I18N = True
 
