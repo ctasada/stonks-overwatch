@@ -22,8 +22,29 @@ class Portfolio(View):
 
         context = {
             "stocks": stocks,
+            "show_stocks_columns": {
+                "category": True,
+                "sector": True,
+                "shares": True,
+                "price": True,
+                "unrealized_gain": True,
+            },
             "trackers": trackers,
+            "show_trackers_columns": {
+                "category": True,
+                "sector": True,
+                "shares": True,
+                "price": True,
+                "unrealized_gain": True,
+            },
             "cash": cash,
+            "show_cash_columns": {
+                "category": False,
+                "sector": False,
+                "shares": False,
+                "price": False,
+                "unrealized_gain": False,
+            },
         }
 
         return render(request, "portfolio.html", context)
