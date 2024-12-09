@@ -161,9 +161,9 @@
             datasets: [{
                 label: 'Deposits',
                 data: {{ deposit_growth.value | safe }},
-            stepped: true,
-            fill: 'start',
-    }],
+                stepped: true,
+                fill: 'start',
+        }],
     };
     const minimumDate = new Date('{{ deposit_growth.value.0.x }}')
 
@@ -224,7 +224,7 @@
         };
 
         let chartStatus = Chart.getChart("deposits-chart"); // <canvas> id
-        if (chartStatus != undefined) {
+        if (chartStatus !== undefined) {
             chartStatus.destroy();
         }
 

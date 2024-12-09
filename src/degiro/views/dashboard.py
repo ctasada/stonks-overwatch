@@ -1,12 +1,11 @@
 import logging
 from collections import OrderedDict, defaultdict
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 
 import pandas as pd
 from django.shortcuts import render
 from django.views import View
 
-from degiro.repositories.cash_movements_repository import CashMovementsRepository
 from degiro.repositories.product_info_repository import ProductInfoRepository
 from degiro.repositories.product_quotations_repository import ProductQuotationsRepository
 from degiro.repositories.transactions_repository import TransactionsRepository
@@ -41,92 +40,27 @@ class Dashboard(View):
         )
 
     def get(self, request):
-        total_costs = [{"x": item["date"], "y": item["total_cost"]} for item in self._total_costs_history()]
         cash_account = self.deposits.calculate_cash_account_value()
         portfolio_value = self._calculate_value(cash_account)
-        cash_deposits_simple = self._get_simple_cash_deposits()
-        performance_twr = self._calculate_performance_twr(cash_deposits_simple, portfolio_value)
-
-        value_context = {
-            "total_costs": total_costs,
-            "portfolio_value": portfolio_value,
-        }
+        cash_deposits = self._aggregate_cash_deposits()
+        performance_twr = self._calculate_performance_twr(cash_deposits, portfolio_value)
 
         context = {
-            "portfolio": {"value": value_context, "performance": performance_twr},
+            "portfolio": {
+                "value": {"portfolio_value": portfolio_value},
+                "performance": performance_twr,
+            },
         }
 
-        # FIXME: Simplify this response
         return render(request, "dashboard.html", context)
 
-    def _get_simple_cash_deposits(self):
-        result = {}
-
-        for item in self.deposits.get_cash_deposits():
-            date_key = item["date"]
-            change = item["change"]
-
-            if date_key in result:
-                result[date_key] += change
-            else:
-                result[date_key] = change
-
-        sorted_result = OrderedDict(sorted(result.items()))
-
-        return sorted_result
-
-    def _get_dividend_deposits(self) -> list:
-        dividends = []
-        base_currency = self.degiro_service.get_base_currency()
-        for dividend in self.dividends.get_dividends():
-            dividend_date = LocalizationUtility.convert_string_to_date(dividend["date"])
-            dividends.append(
-                {
-                    "date": dividend_date,
-                    "change": self.currency_service.convert(
-                        dividend["change"], dividend["currency"], base_currency, dividend_date
-                    ),
-                }
-            )
-
-        return dividends
-
-    def _total_costs_history(self) -> dict:
-        cash_contributions = CashMovementsRepository.get_cash_deposits_raw()
-        dividends = self._get_dividend_deposits()
-
-        df = pd.DataFrame.from_dict(cash_contributions + dividends)
-        # Remove hours and keep only the day
-        df["date"] = pd.to_datetime(df["date"]).dt.date
-        # Group by day, adding the values
-        df.set_index("date", inplace=True)
-        df = df.sort_values(by="date")
-        df = df.groupby(df.index)["change"].sum().reset_index()
-        # Do the cummulative sum
-        df["contributed"] = df["change"].cumsum()
-
-        cash_contributions = df.to_dict("records")
-        for contribution in cash_contributions:
-            contribution["date"] = contribution["date"].strftime(LocalizationUtility.DATE_FORMAT)
-
-        dataset = []
-        for contribution in cash_contributions:
-            dataset.append(
-                {
-                    "date": contribution["date"],
-                    "total_cost": LocalizationUtility.round_value(contribution["contributed"]),
-                }
-            )
-
-        # Append today with the last value to draw the line properly
-        dataset.append(
-            {
-                "date": LocalizationUtility.format_date_from_date(date.today()),
-                "total_cost": LocalizationUtility.round_value(cash_contributions[-1]["contributed"]),
-            }
-        )
-
-        return dataset
+    def _aggregate_cash_deposits(self) -> dict[str, float]:
+        """Aggregate cash deposits by date."""
+        deposits = self.deposits.get_cash_deposits()
+        aggregated = defaultdict(float)
+        for item in deposits:
+            aggregated[item["date"]] += item["change"]
+        return dict(OrderedDict(sorted(aggregated.items())))
 
     # FIXME: The TWR calculation seems off
     def _calculate_performance_twr(self, cash_contributions: dict, portfolio_value: list[dict]) -> list[dict]:
@@ -202,10 +136,6 @@ class Dashboard(View):
                     aggregate_value += position_value_growth[date_value]
                 aggregate[date_value] = aggregate_value
 
-        # FIXME: There seems to be a bug showing the Portfolio value over time. I have seen happening on Mondays
-        #    The graph shows the 2 last days out of order and with a much lower value
-        # print(f"{list(aggregate.items())[-5:]}")
-
         dataset = []
         for day in aggregate:
             # Merges the portfolio value with the cash value to get the full picture
@@ -262,87 +192,74 @@ class Dashboard(View):
         return aggregate
 
     def _get_stock_splits(self) -> dict:
+        """
+        Retrieves and processes stock split transactions.
+        """
         results = TransactionsRepository.get_stock_split_transactions()
-
-        # Dictionary to hold grouped data
         grouped_data = defaultdict(lambda: {"B": None, "S": None})
-        # Grouping the data by date and productId
+
         for entry in results:
             day = entry["date"].strftime(LocalizationUtility.DATE_FORMAT)
-            buysell = entry["buysell"]
-            grouped_data[day][buysell] = entry
+            grouped_data[day][entry["buysell"]] = entry
 
-        splitted_stocks = {}
+        stock_splits = {}
         for day, transactions in grouped_data.items():
+            if not all(transactions.values()):
+                continue
+
             sell_quantity = abs(transactions["S"]["quantity"])
             buy_quantity = transactions["B"]["quantity"]
-            ratio = buy_quantity / sell_quantity
+            split_ratio = buy_quantity / sell_quantity
 
-            sell_product_id = transactions["S"]["productId"]
-            buy_product_id = transactions["B"]["productId"]
-            product_split = {
-                "productId_sell": sell_product_id,
-                "productId_buy": buy_product_id,
+            split_data = {
+                "productId_sell": transactions["S"]["productId"],
+                "productId_buy": transactions["B"]["productId"],
                 "is_renamed": transactions["S"]["productId"] != transactions["B"]["productId"],
-                "split_ratio": ratio,
+                "split_ratio": split_ratio,
             }
-            if sell_product_id not in splitted_stocks:
-                splitted_stocks[sell_product_id] = {}
-            if buy_product_id not in splitted_stocks:
-                splitted_stocks[buy_product_id] = {}
 
-            splitted_stocks[sell_product_id][day] = product_split
-            splitted_stocks[buy_product_id][day] = product_split
+            stock_splits.setdefault(transactions["S"]["productId"], {})[day] = split_data
+            stock_splits.setdefault(transactions["B"]["productId"], {})[day] = split_data
 
-        return splitted_stocks
+        return stock_splits
 
     def _create_products_quotation(self) -> dict:
+        """
+        Creates product quotations based on portfolio data and product information.
+        """
         product_growth = self.portfolio_data.calculate_product_growth()
+        tradable_products = {}
 
-        delete_keys = []
-        for key in product_growth.keys():
+        for key, data in product_growth.items():
             product = ProductInfoRepository.get_product_info_from_id(key)
 
             # If the product is NOT tradable, we shouldn't consider it for Growth
             # The 'tradable' attribute identifies old Stocks, like the ones that are
             # renamed for some reason, and it's not good enough to identify stocks
             # that are provided as dividends, for example.
-            if "Non tradeable" in product["name"]:
-                delete_keys.append(key)
+            if "Non tradeable" in product.get("name", ""):
                 continue
 
-            product_growth[key]["productId"] = key
-            product_growth[key]["product"] = {}
-            product_growth[key]["product"]["name"] = product["name"]
-            product_growth[key]["product"]["isin"] = product["isin"]
-            product_growth[key]["product"]["symbol"] = product["symbol"]
-            product_growth[key]["product"]["currency"] = product["currency"]
-            product_growth[key]["product"]["vwdId"] = product["vwdId"]
-            product_growth[key]["product"]["vwdIdSecondary"] = product["vwdIdSecondary"]
+            data["productId"] = key
+            data["product"] = {
+                "name": product["name"],
+                "isin": product["isin"],
+                "symbol": product["symbol"],
+                "currency": product["currency"],
+                "vwdId": product["vwdId"],
+                "vwdIdSecondary": product["vwdIdSecondary"],
+            }
 
-            # Calculate Quotation Range
-            product_growth[key]["quotation"] = {}
-            product_history_dates = list(product_growth[key]["history"].keys())
-            start_date = product_history_dates[0]
-            final_date = LocalizationUtility.format_date_from_date(date.today())
-            tmp_last = product_history_dates[-1]
-            if product_growth[key]["history"][tmp_last] == 0:
-                final_date = tmp_last
+            product_history_dates = list(data["history"].keys())
+            data["quotation"] = {
+                "fromDate": product_history_dates[0],
+                "toDate": LocalizationUtility.format_date_from_date(datetime.today()),
+                "interval": DateTimeUtility.calculate_interval(product_history_dates[0]),
+                "quotes": ProductQuotationsRepository.get_product_quotations(key),
+            }
+            tradable_products[key] = data
 
-            product_growth[key]["quotation"]["fromDate"] = start_date
-            product_growth[key]["quotation"]["toDate"] = final_date
-            # Interval should be from start_date, since the QuoteCast query doesn't support more granularity
-            product_growth[key]["quotation"]["interval"] = DateTimeUtility.calculate_interval(start_date)
-
-        # Delete the non-tradable products
-        for key in delete_keys:
-            del product_growth[key]
-
-        # We need to use the productIds to get the daily quote for each product
-        for key in product_growth.keys():
-            product_growth[key]["quotation"]["quotes"] = ProductQuotationsRepository.get_product_quotations(key)
-
-        return product_growth
+        return tradable_products
 
     def _is_weekend(self, date_str: str):
         # Parse the date string into a datetime object

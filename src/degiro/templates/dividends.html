@@ -99,7 +99,7 @@
 
     function getDividendsPerMonth() {
         const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-        const data = {
+        return {
             labels: months,
             datasets: [
                 {% for key, value in dividendsGrowth.items %}
@@ -111,8 +111,6 @@
                 {% endfor %}
             ]
         };
-
-        return data
     }
 
     function getDividendsPerYear() {
@@ -127,7 +125,7 @@
         }
         {% endfor %}
 
-        const data = {
+        return {
             labels: years,
             datasets: [
                 {
@@ -136,14 +134,12 @@
                 }
             ]
         };
-
-        return data
     }
 
     function drawDividends(datatype) {
         const config = {
             type: 'bar',
-            data: datatype == "Month" ? getDividendsPerMonth() : getDividendsPerYear(),
+            data: datatype === "Month" ? getDividendsPerMonth() : getDividendsPerYear(),
             plugins: [
                 autocolors
             ],
@@ -183,7 +179,7 @@
         }
 
         let chartStatus = Chart.getChart("dividends-growth"); // <canvas> id
-        if (chartStatus != undefined) {
+        if (chartStatus !== undefined) {
             chartStatus.destroy();
         }
 
