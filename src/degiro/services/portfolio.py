@@ -123,7 +123,7 @@ class PortfolioService:
                         value=unrealized_gain, currency=base_currency
                     ),
                     "percentageGain": f"{percentage_gain:.2%}",
-                    "logoUrl": f"https://logos.stockanalysis.com/{info['symbol'].lower()}.svg",
+                    "symbolUrl":  self._get_logo_url(info['symbol']),
                     "portfolioSize": 0.0,  # Calculated in the next loop
                     "formattedPortfolioSize": 0.0,  # Calculated in the next loop
                 }
@@ -144,6 +144,7 @@ class PortfolioService:
                 "formattedBaseCurrencyValue": LocalizationUtility.format_money_value(
                     value=total_cash, currency="EUR"),
                 "isOpen": True,
+                "currencySymbol": LocalizationUtility.get_currency_symbol("EUR"),
                 "portfolioSize": 0.0,  # Calculated in the next loop
                 "formattedPortfolioSize": 0.0,  # Calculated in the next loop
             }
@@ -156,6 +157,12 @@ class PortfolioService:
             entry["formattedPortfolioSize"] = f"{size:.2%}"
 
         return sorted(my_portfolio, key=lambda k: k["symbol"])
+
+    def _get_logo_url(self, symbol: str) -> str:
+        # Keep track of alternatives as NVSTly
+        # return f"https://raw.githubusercontent.com/nvstly/icons/main/ticker_icons/{symbol.upper()}.png"
+        return f"https://logos.stockanalysis.com/{symbol.lower()}.svg"
+
 
     def get_portfolio_total(self, portfolio: Optional[list[dict]] = None):
         # Calculate current value
