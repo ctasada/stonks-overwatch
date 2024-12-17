@@ -1,4 +1,5 @@
 from django import template
+from django.utils import timezone
 
 from degiro.services.degiro_service import DeGiroService
 from degiro.services.portfolio import PortfolioService
@@ -30,7 +31,9 @@ def is_connected_to_degiro() -> bool:
 def last_import() -> str:
     last_update = UpdateService().get_last_import()
 
-    return LocalizationUtility.format_date_time_from_date(last_update)
+    local_time =  timezone.localtime(last_update)
+
+    return LocalizationUtility.format_date_time_from_date(local_time)
 
 @register.simple_tag
 def get_connected_tooltip() -> str:
