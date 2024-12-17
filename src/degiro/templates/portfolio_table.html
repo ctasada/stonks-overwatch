@@ -29,7 +29,11 @@
         {% for item in items %}
             {% if item.isOpen %}
                 <tr>
-                    <td><img src="{{ item.logoUrl }}" width="30" height="30" onerror="this.style.display='none'"></td>
+                    {% if item.symbolUrl %}
+                    <td class="text-center align-middle"><img src="{{ item.symbolUrl }}" width="30" height="30" alt="{{ item.symbol }} logo" onerror="this.style.display='none'"></td>
+                    {% else %}
+                    <td class="text-center align-middle">{{ item.currencySymbol }}</td>
+                    {% endif %}
                     <td>{{ item.symbol }}<br><small class="fw-lighter">{{ item.name }}</small></td>
                     <td>
                         <div class="d-inline-flex gap-1">
