@@ -185,6 +185,11 @@ LOGGING = {
         },
     },
     "loggers": {
+        "apscheduler": {
+            "handlers": ["console", "file"],
+            "level": "WARN",
+            "propagate": True,
+        },
         "django": {
             "handlers": ["console", "file"],
             "level": "WARN",
