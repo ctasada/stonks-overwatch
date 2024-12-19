@@ -15,8 +15,10 @@ class DegiroConfig(AppConfig):
             self.logger.info("Degiro ready - RUN MAIN")
             from degiro.jobs.jobs_scheduler import JobsScheduler
 
-            # Update Portfolio when the service starts
-            JobsScheduler.update_portfolio()
-
             # Schedule automatic tasks
             JobsScheduler.start()
+
+    def __del__(self):
+        # Ensure scheduler is shut down properly
+        from degiro.jobs.jobs_scheduler import JobsScheduler
+        JobsScheduler.stop()

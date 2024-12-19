@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.interval import IntervalTrigger
 
 from degiro.config.degiro_config import DegiroConfig
 from degiro.services.update_service import UpdateService
@@ -10,23 +11,39 @@ jobs_scheduler_logger = logging.getLogger("stocks_portfolio.jobs_scheduler")
 
 class JobsScheduler:
 
-    initialised = False
+    scheduler = None
 
     @staticmethod
     def start():
-        if JobsScheduler.initialised:
+        if JobsScheduler.scheduler:
             jobs_scheduler_logger.warning("JobsScheduler already started")
             return
 
         jobs_scheduler_logger.info("Starting JobsScheduler")
-        scheduler = BackgroundScheduler()
+        JobsScheduler.scheduler = BackgroundScheduler()
         degiro_config = DegiroConfig.default()
-        scheduler.add_job(
+
+        JobsScheduler.scheduler.add_job(
             JobsScheduler.update_portfolio,
-            trigger='interval',
-            minutes=degiro_config.update_frequency_minutes,
+            id='update_portfolio',
+            trigger=IntervalTrigger(minutes=degiro_config.update_frequency_minutes),
+            max_instances=1,
+            replace_existing=True,
             next_run_time=datetime.now()
         )
+
+        JobsScheduler.scheduler.start()
+
+    @staticmethod
+    def scheduler_info():
+        for job in JobsScheduler.scheduler.get_jobs():
+            jobs_scheduler_logger.info(f"{job.name}")
+
+    @staticmethod
+    def stop():
+        if JobsScheduler.scheduler:
+            JobsScheduler.scheduler.shutdown()
+            jobs_scheduler_logger.info("JobScheduler stopped")
 
     @staticmethod
     def update_portfolio():
