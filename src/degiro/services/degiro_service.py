@@ -11,6 +11,7 @@ from degiro_connector.trading.models.credentials import Credentials
 
 from degiro.config.degiro_config import DegiroConfig
 from degiro.utils.localization import LocalizationUtility
+from degiro.utils.singleton import singleton
 
 
 class CredentialsManager:
@@ -30,11 +31,22 @@ class CredentialsManager:
             or getattr(degiro_credentials, "one_time_password", None),
         )
 
+    def are_credentials_valid(self) -> bool:
+        """Checks if credentials contains, at least, username and password."""
+        if (not self.credentials or not hasattr(self.credentials, 'username')
+                or not hasattr(self.credentials, 'password')):
+            return False
+        return bool(self.credentials.username and self.credentials.password)
 
+@singleton
 class DeGiroService:
     logger = logging.getLogger("stocks_portfolio.degiro_service")
 
     def __init__(self, credentials_manager: Optional[CredentialsManager] = None):
+        self.credentials_manager = credentials_manager or CredentialsManager()
+        self.api_client = TradingApi(credentials=self.credentials_manager.credentials)
+
+    def set_credentials(self, credentials_manager: CredentialsManager):
         self.credentials_manager = credentials_manager or CredentialsManager()
         self.api_client = TradingApi(credentials=self.credentials_manager.credentials)
 
@@ -199,6 +211,10 @@ class DeGiroService:
         int_account = client_details["data"]["intAccount"]
 
         return int_account
+
+    def get_session_id(self) -> str:
+        config_table = self.get_config()
+        return config_table['sessionId']
 
     def get_base_currency(self) -> str:
         # FIXME: Read value from configuration if it's available

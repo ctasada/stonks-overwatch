@@ -14,6 +14,11 @@ from degiro.utils.localization import LocalizationUtility
 from tests.degiro.fixtures import disable_requests_cache, mock_degiro_config, mock_full_credentials
 
 
+class TestDeGiroService(DeGiroService):
+    """Test specific DeGiroService to avoid the singleton limitations """
+    def __new__(cls, *args, **kwargs):
+        return object.__new__(cls)
+
 def test_credentials_manager_init(mock_degiro_config: mock_degiro_config, mock_full_credentials: mock_full_credentials):
     manager = CredentialsManager(mock_full_credentials)
     assert manager.credentials.username == mock_full_credentials.username
@@ -25,7 +30,7 @@ def test_credentials_manager_init(mock_degiro_config: mock_degiro_config, mock_f
 
 def test_degiro_service_init(mock_degiro_config: mock_degiro_config, mock_full_credentials: mock_full_credentials):
     manager = CredentialsManager(mock_full_credentials)
-    service = DeGiroService(manager)
+    service = TestDeGiroService(manager)
     assert service.credentials_manager == manager
 
 
@@ -36,7 +41,7 @@ def test_degiro_service_connect_with_full_credential(
 
     with requests_mock.Mocker() as m:
         m.post(urls.LOGIN + "/totp", json={"sessionId": "abcdefg12345"}, status_code=200)
-        service = DeGiroService(manager)
+        service = TestDeGiroService(manager)
         service.connect()
 
     assert service.check_connection() is True
@@ -78,7 +83,7 @@ def test_degiro_service_connect_with_credential(disable_requests_cache: disable_
             },
             status_code=200,
         )
-        service = DeGiroService(manager)
+        service = TestDeGiroService(manager)
 
         # Check we have the right credentials
         assert service.api_client.credentials.username == credential.username
@@ -98,7 +103,7 @@ def test_degiro_service_connect_with_bad_credentials(disable_requests_cache: dis
 
     with requests_mock.Mocker() as m:
         m.post(urls.LOGIN, json={"loginFailures": 1, "status": 3, "statusText": "badCredentials"}, status_code=400)
-        service = DeGiroService(manager)
+        service = TestDeGiroService(manager)
 
         # Check we have the right credentials
         assert service.api_client.credentials.username == credential.username
@@ -118,7 +123,7 @@ def test_degiro_service_connect_with_missing_totp(disable_requests_cache: disabl
     manager = CredentialsManager(credentials)
     with requests_mock.Mocker() as m:
         m.post(urls.LOGIN, json={"status": 6, "statusText": "totpNeeded"}, status_code=202)
-        service = DeGiroService(manager)
+        service = TestDeGiroService(manager)
 
         # Check we have the right credentials
         assert service.api_client.credentials.username == credentials.username
@@ -138,7 +143,7 @@ def test_degiro_service_update_credentials(disable_requests_cache: disable_reque
     manager = CredentialsManager(credentials)
     with requests_mock.Mocker() as m:
         m.post(urls.LOGIN, json={"status": 6, "statusText": "totpNeeded"}, status_code=202)
-        service = DeGiroService(manager)
+        service = TestDeGiroService(manager)
 
         # Check we have the right credentials
         assert service.api_client.credentials.username == credentials.username
@@ -199,7 +204,7 @@ def test_get_product_quotation(
         )
         m.get(urls.CHART, text=chart_data, status_code=200),
 
-        service = DeGiroService(manager)
+        service = TestDeGiroService(manager)
         service.connect()
 
         quotes = service.get_product_quotation("350015372", Interval.P1M, "AAPL")

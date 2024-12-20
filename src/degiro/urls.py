@@ -7,11 +7,13 @@ from degiro.views.deposits import Deposits
 from degiro.views.diversification import Diversification
 from degiro.views.dividends import Dividends
 from degiro.views.fees import Fees
+from degiro.views.login import Login
 from degiro.views.portfolio import Portfolio
 from degiro.views.transactions import Transactions
 
 urlpatterns = [
     path("", RedirectView.as_view(url="dashboard")),
+    path("login", Login.as_view(), name="login"),
     path("account_overview", AccountOverview.as_view(), name="account_overview"),
     path("dashboard", Dashboard.as_view(), name="dashboard"),
     path("deposits", Deposits.as_view(), name="deposits"),

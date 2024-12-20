@@ -54,6 +54,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "degiro.middleware.auth.DeGiroAuthMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.cache.UpdateCacheMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -201,7 +202,7 @@ LOGGING = {
             "propagate": True,
         },
         "degiro_connector": {
-            "handlers": ["console"],
+            "handlers": ["console", "file"],
             "level": "INFO",
             "propagate": False,
         },
