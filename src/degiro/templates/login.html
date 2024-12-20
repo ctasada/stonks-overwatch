@@ -1,0 +1,87 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>DeGiro Stocks Portfolio</title>
+
+    <link rel="icon" type="image/png" href="{%  static 'degiro-32x32.png' %}" sizes="32x32">
+
+    <!-- Bootstrap CSS CDN -->
+    <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'bootstrap-icons/font/bootstrap-icons.css' %}" rel="stylesheet">
+    <!-- JavaScript Bundle with Popper -->
+    <script src="{% static 'bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+    <!-- jQuery CDN - Slim version (=without AJAX) -->
+    <script src="{% static 'jquery/dist/jquery.slim.min.js' %}"></script>
+
+    <!-- Font Awesome JS -->
+    <script src="{% static 'fontawesomefree/js/solid.js' %}"></script>
+    <script src="{% static 'fontawesomefree/js/fontawesome.js' %}"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+  <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh">
+    <div class="card shadow p-4" style="width: 100%; max-width: 400px;">
+      {% if show_otp %}
+      <h4 class="text-center mb-4">Please enter your 2FA code</h3>
+      {% else %}
+      <h3 class="text-center mb-4">Login</h3>
+      {% endif %}
+      <form method="POST" action="{% url 'login' %}">
+        {% csrf_token %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% if show_otp %}
+        <div class="form-group mb-2">
+          <input type="text" class="form-control text-center" 
+            style="letter-spacing: 1rem; line-height: 1.75em;"
+            id="2fa_code" name="2fa_code" maxlength="6" pattern="\d{6}" 
+            placeholder="123456" aria-label="2FA code" required autofocus>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block w-100">Confirm</button>
+        {% else %}
+        <div class="form-group mb-2">
+          <label for="username">Username</label>
+          <input type="text" class="form-control" id="username" name="username" placeholder="Enter username" required autofocus>
+        </div>
+        <div class="form-group mb-2">
+          <label for="password">Password</label>
+          <div class="input-group">
+            <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
+            <i class="bi bi-eye-slash-fill" id="togglePassword"></i>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block w-100">Login</button>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+  <script>
+    const togglePassword = document.querySelector("#togglePassword");
+    const password = document.querySelector("#password");
+
+    togglePassword.addEventListener("click", function () {
+        // toggle the type attribute
+        const type = password.getAttribute("type") === "password" ? "text" : "password";
+        password.setAttribute("type", type);
+        
+        // toggle the icon
+        this.classList.toggle("bi-eye-fill");
+        this.classList.toggle("bi-eye-slash-fill");
+    });
+    </script>
+</body>
+
+</html>
