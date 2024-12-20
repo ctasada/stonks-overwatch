@@ -29,7 +29,7 @@ class CashMovementsRepository:
                 SELECT date, description, change
                 FROM degiro_cashmovements
                 WHERE currency = 'EUR'
-                    AND description IN ('iDEAL storting', 'iDEAL Deposit', 'Terugstorting')
+                    AND description IN ('iDEAL storting', 'iDEAL Deposit', 'Terugstorting', 'flatex terugstorting')
                 """
             )
             return dictfetchall(cursor)
@@ -55,7 +55,7 @@ class CashMovementsRepository:
                 SELECT SUM(change)
                 FROM degiro_cashmovements
                 WHERE currency = 'EUR'
-                    AND description IN ('iDEAL storting', 'iDEAL Deposit', 'Terugstorting')
+                    AND description IN ('iDEAL storting', 'iDEAL Deposit', 'Terugstorting', 'flatex terugstorting')
                 """
             )
             return cursor.fetchone()[0]

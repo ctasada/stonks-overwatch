@@ -42,6 +42,7 @@ CASH_TRANSACTION - >> Real transaction << That's the one we need to track!
         - "iDEAL storting" reprepresent an iDEAL payment
         - "iDEAL Deposit" reprepresent an iDEAL payment
         - "Terugstorting" Money returned to the associated Bank
+        - "flatex terugstorting" Money returned to the associated Bank
 
 FLATEX_CASH_SWEEP - Represents currency conversions. It can be ignored.
 PAYMENT - Represents a PAYMENT, but only shows data in the description. It should be related with a CASH_TRANSACTION
