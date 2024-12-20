@@ -1,4 +1,79 @@
-# Stocks Portfolio
+# Stonks Overwatch
+
+**Stonks Overwatch** is a new Open Source Stocks Dashboard.
+
+Why do we need yet another dashboard? I have been a DeGiro user for many years, and the more active I was, 
+the more frustrated I became with the lack of any decent dashboard to overview my investments.
+
+After trying different options (I will commit names) I couldn't find any that was really covering my needs, or 
+that I could trust.
+
+## What does offer **Stonks Overwatch**?
+
+**Stonks Overwatch** is born with the intention to provide a usable investment dashboard for DeGiro, but with the desire
+to keep growing to provide many more features in the future.
+
+Right now the features we offer are:
+* Realtime access to your DeGiro investments
+* Portfolio value overtime
+* Portfolio growth
+* Dividends overview
+* Fees overview
+* Deposits overview
+* Diversification overview
+* Transactions
+* Account Statements
+
+## How to use **Stonks Overwatch**
+
+I tried to make it as easy as possible to use, but some minimum technical knowledge is needed.
+
+Checkout the repository in your computer
+   `git clone ctasada/stocks-portfolio`
+
+You can execute `make start`, it will install and configure everything needed to run.
+
+Alternatively you can also use Docker
+```shell
+docker compose build
+docker compose up
+```
+
+The application is available at [http://127.0.0.1:8000](http://127.0.0.1:8000) Simply open you browser in that URL.
+
+### How to login to DeGiro?
+You can login to DeGiro in two different ways
+
+### Use the Login form
+When you open your browser at [http://127.0.0.1:8000](http://127.0.0.1:8000) you will see a login form. Simply introduce
+your credentials, including the OTP (One-Time-Password).
+
+The first time, the application will retrieve all your portfolio from DeGiro and you are good to go
+
+> Using this approach, no credentials are stored anywhere. You will need to repeat this step everytime  
+
+### Automatic login
+If you don't want to introduce your credentials everytime, it's possible to store them in a file, so login will be much
+more comfortable and transparent.
+
+Copy the file `config/config.json.template` to `config/config.json`
+
+```json
+{
+    "degiro": {
+        "credentials": {
+            "username": "USERNAME",
+            "password": "PASSWORD",
+            "totp_secret_key": "See https://github.com/Chavithra/degiro-connector#35-how-to-use-2fa-",
+        },
+        "base_currency": "EUR - Optional field. Uses DeGiro base currency by default",
+        "start_date": "PORTFOLIO CREATION DATE. Defaults to 2020-01-01"
+        "update_frequency_minutes": "How frequently the data from DeGiro should be updated. Defaults to 5 minutes"
+    }
+}
+```
+Only the `credentials` section is mandatory, put your credentials in the corresponding fields, and follow the instructions
+to obtain your `totp_secret_key`. You can also skip it, and the application will ask for you OTP everytime.
 
 ## Start Developing
 
@@ -85,6 +160,7 @@ poetry run src/manage.py runscript init_db
 - Portfolio is not updated on startup. A migration needs to be forced
 - IBERDROLA Non-Tradable Dividends: Are properly calculated? Doesn't seem to calculate quantity properly
 - When Login, connection needs to be recreated if int_account or user_token are not initially provided
+- Currency historical quotations seems to be wrongly imported when using Login form
 
 ## TODOs
 - [ ] DeGiro Client: Stop using Totp and request 2FA for each connection

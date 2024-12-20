@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "stocks-portfolio"
+name = "stonks-overwatch"
 version = "0.1.0"
-description = "DeGiro Stocks Portfolio"
+description = "Stonks Overwatch"
 authors = ["carlos.tasada <carlos.tasada@gmail.com>"]
 license = "MIT"
 readme = "README.md"
