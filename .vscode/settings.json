@@ -17,5 +17,6 @@
     ],
     "python.analysis.extraPaths": [
         "./src"
-    ]
+    ],
+    "makefile.configureOnOpen": false
 }

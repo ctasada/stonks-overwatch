@@ -1,37 +1,20 @@
 import json
 import logging
-import os
+from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from settings import PROJECT_PATH
 
 
+@dataclass
 class DegiroCredentials:
-    def __init__(
-        self,
-        username: str,
-        password: str,
-        int_account: Optional[int] = None,
-        totp_secret_key: Optional[str] = None,
-        one_time_password: Optional[int] = None,
-    ):
-        self.username = username
-        self.password = password
-        self.int_account = int_account
-        self.totp_secret_key = totp_secret_key
-        self.one_time_password = one_time_password
-
-    def __eq__(self, value: object) -> bool:
-        if isinstance(value, DegiroCredentials):
-            return (
-                self.username == value.username
-                and self.password == value.password
-                and self.int_account == value.int_account
-                and self.totp_secret_key == value.totp_secret_key
-                and self.one_time_password == value.one_time_password
-            )
+    username: str
+    password: str
+    int_account: Optional[int] = None
+    totp_secret_key: Optional[str] = None
+    one_time_password: Optional[int] = None
 
     def to_dict(self) -> dict:
         return {
@@ -43,7 +26,7 @@ class DegiroCredentials:
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> "DegiroCredentials":
+    def from_dict(cls, data: Dict[str, Any]) -> "DegiroCredentials":
         if not data:
             return cls("", "")
         return cls(
@@ -66,8 +49,10 @@ class DegiroCredentials:
         )
 
 degiro_config_logger = logging.getLogger("stocks_portfolio.degiro_config")
+
 class DegiroConfig:
-    DEGIRO_CONFIG_PATH = os.path.join(PROJECT_PATH, "config", "config.json")
+    DEGIRO_CONFIG_PATH = Path(PROJECT_PATH) / "config" / "config.json"
+    DEFAULT_BASE_CURRENCY = "EUR"
     DEFAULT_DEGIRO_UPDATE_FREQUENCY = 5
     DEFAULT_DEGIRO_START_DATE = "2020-01-01"
 
@@ -76,8 +61,12 @@ class DegiroConfig:
             credentials: Optional[DegiroCredentials],
             base_currency: Optional[str],
             start_date: date,
-            update_frequency_minutes: int = 5
+            update_frequency_minutes: int = DEFAULT_DEGIRO_UPDATE_FREQUENCY
     ) -> None:
+        if update_frequency_minutes < 1:
+            raise ValueError("Update frequency must be at least 1 minute")
+        if base_currency and not isinstance(base_currency, str):
+            raise TypeError("base_currency must be a string")
         self.credentials = credentials
         self.base_currency = base_currency
         self.start_date = start_date
@@ -91,6 +80,12 @@ class DegiroConfig:
                 and self.start_date == value.start_date
             )
         return False
+
+    def __repr__(self) -> str:
+        return (f"DegiroConfig(credentials={self.credentials}, "
+                f"base_currency={self.base_currency}, "
+                f"start_date={self.start_date}, "
+                f"update_frequency_minutes={self.update_frequency_minutes})")
 
     @classmethod
     def from_dict(cls, data: dict) -> "DegiroConfig":
@@ -120,7 +115,7 @@ class DegiroConfig:
             degiro_config_logger.warning("Cannot find configuration file. Using default values")
             return DegiroConfig(
                 credentials=None,
-                base_currency="EUR",
+                base_currency=cls.DEFAULT_BASE_CURRENCY,
                 start_date=date.today(),
-                update_frequency_minutes=5
+                update_frequency_minutes=cls.DEFAULT_DEGIRO_UPDATE_FREQUENCY
             )

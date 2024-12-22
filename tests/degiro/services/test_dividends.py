@@ -10,10 +10,12 @@ from django.test import TestCase
 from isodate import parse_datetime
 
 import pytest
+from degiro.config.degiro_config import DegiroCredentials
 from degiro.models import CashMovements, ProductInfo
 from degiro.services.account_overview import AccountOverviewService
-from degiro.services.degiro_service import DeGiroService
+from degiro.services.degiro_service import CredentialsManager
 from degiro.services.dividends import DividendsService
+from tests.degiro.fixtures import TestDeGiroService
 
 
 @pytest.mark.django_db
@@ -22,7 +24,7 @@ class TestDividendsService(TestCase):
         self.created_objects = {}
         self.fixture_cash_movements_repository()
         self.fixture_product_info_repository()
-        self.degiro_service = DeGiroService()
+        self.degiro_service = TestDeGiroService(CredentialsManager(self.fixture_credentials()))
 
         self.account_overview = AccountOverviewService()
 
@@ -56,6 +58,15 @@ class TestDividendsService(TestCase):
             # Create and save the ProductInfo object
             obj = ProductInfo.objects.create(**value)
             self.created_objects[key] = obj
+
+    def fixture_credentials(self):
+        return DegiroCredentials(
+            username="testuser",
+            password="testpassword",
+            int_account=987654,
+            totp_secret_key="ABCDEFGHIJKLMNOP",
+            one_time_password=123456,
+        )
 
     def tearDown(self):
         # Clean up the created objects

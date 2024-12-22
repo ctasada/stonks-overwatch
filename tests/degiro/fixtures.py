@@ -5,6 +5,7 @@ import requests
 
 import pytest
 from degiro.config.degiro_config import DegiroConfig, DegiroCredentials
+from degiro.services.degiro_service import DeGiroService
 
 
 @pytest.fixture
@@ -32,3 +33,9 @@ def disable_requests_cache():
     """Replace CachedSession with a regular Session for all test functions"""
     with patch("requests_cache.CachedSession", requests.Session):
         yield
+
+
+class TestDeGiroService(DeGiroService):
+    """Test specific DeGiroService to avoid the singleton limitations """
+    def __new__(cls, *args, **kwargs):
+        return object.__new__(cls)
