@@ -9,15 +9,10 @@ from degiro_connector.quotecast.models.chart import Interval
 
 import pytest
 from degiro.config.degiro_config import DegiroCredentials
-from degiro.services.degiro_service import CredentialsManager, DeGiroService
+from degiro.services.degiro_service import CredentialsManager
 from degiro.utils.localization import LocalizationUtility
-from tests.degiro.fixtures import disable_requests_cache, mock_degiro_config, mock_full_credentials
+from tests.degiro.fixtures import TestDeGiroService, disable_requests_cache, mock_degiro_config, mock_full_credentials
 
-
-class TestDeGiroService(DeGiroService):
-    """Test specific DeGiroService to avoid the singleton limitations """
-    def __new__(cls, *args, **kwargs):
-        return object.__new__(cls)
 
 def test_credentials_manager_init(mock_degiro_config: mock_degiro_config, mock_full_credentials: mock_full_credentials):
     manager = CredentialsManager(mock_full_credentials)

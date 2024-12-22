@@ -38,6 +38,29 @@ class CredentialsManager:
             return False
         return bool(self.credentials.username and self.credentials.password)
 
+    def __repr__(self) -> str:
+        """
+        Return a string representation of the CredentialsManager.
+        Sensitive data is masked for security.
+        """
+        def mask_string(value: str | None, visible_chars: int = 4) -> str:
+            if not value:
+                return "None"
+            if len(value) <= visible_chars:
+                return "*" * len(value)
+            return f"{value[:visible_chars]}{'*' * (len(value) - visible_chars)}"
+
+        credentials = self.credentials
+        return (
+            f"CredentialsManager("
+            f"username='{mask_string(credentials.username)}', "
+            f"password='{mask_string(credentials.password, 0)}', "  # Fully mask password
+            f"int_account={credentials.int_account}, "
+            f"totp_secret_key='{mask_string(credentials.totp_secret_key, 0)}', "  # Fully mask TOTP
+            f"one_time_password={mask_string(str(credentials.one_time_password), 0)}"  # Fully mask OTP
+            f")"
+        )
+
 @singleton
 class DeGiroService:
     logger = logging.getLogger("stocks_portfolio.degiro_service")
