@@ -9,7 +9,7 @@ sys.path.append(str(Path(__file__).resolve().parents[1] / 'src'))
 logging.basicConfig(level=logging.DEBUG)
 
 def connect_to_degiro():
-    from degiro.services.degiro_service import DeGiroService
+    from stonks_overwatch.services.degiro.degiro_service import DeGiroService
     degiro = DeGiroService()
 
     # CONNECT

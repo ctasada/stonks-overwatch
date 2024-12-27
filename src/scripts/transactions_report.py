@@ -8,9 +8,9 @@ Usage:
     poetry run src/manage.py runscript transactions_report
 """
 
-from degiro.utils.debug import save_to_json
-from degiro.views.dashboard import Dashboard
 from scripts.commons import IMPORT_FOLDER
+from stonks_overwatch.utils.debug import save_to_json
+from stonks_overwatch.views.dashboard import Dashboard
 
 
 def run():

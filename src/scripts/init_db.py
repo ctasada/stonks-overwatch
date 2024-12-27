@@ -15,8 +15,8 @@ Usage:
 import logging
 import os
 
-from degiro.services.update_service import UpdateService
 from scripts.commons import IMPORT_FOLDER
+from stonks_overwatch.services.degiro.update_service import UpdateService
 
 
 def init() -> None:
