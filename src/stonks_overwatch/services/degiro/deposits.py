@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Any
 
 import pandas as pd
 
@@ -15,12 +16,12 @@ class DepositsService:
     ):
         self.degiro_service = degiro_service
 
-    def get_cash_deposits(self) -> dict:
+    def get_cash_deposits(self) -> list[dict[str, str | Any]]:
         df = pd.DataFrame(CashMovementsRepository.get_cash_deposits_raw())
 
+        df = df.sort_values(by="date", ascending=False)
         # Remove hours and keep only the day
         df["date"] = pd.to_datetime(df["date"]).dt.strftime(LocalizationUtility.DATE_FORMAT)
-        df = df.sort_values(by="date", ascending=False)
 
         base_currency = self.degiro_service.get_base_currency()
         base_currency_symbol = LocalizationUtility.get_currency_symbol(base_currency)
@@ -31,7 +32,7 @@ class DepositsService:
                 {
                     "type": "Deposit" if row["change"] > 0 else "Withdrawal",
                     "date": row["date"],
-                    "description": row["description"],
+                    "description": self._capitalize_deposit_description(row["description"]),
                     "change": row["change"],
                     "changeFormatted": LocalizationUtility.format_money_value(
                         value=row["change"], currency=base_currency, currency_symbol=base_currency_symbol
@@ -41,7 +42,14 @@ class DepositsService:
 
         return records
 
-    def cash_deposits_history(self) -> dict:
+    def _capitalize_deposit_description(self, input_string: str):
+        words = input_string.split()
+        capitalized_words = [
+            word if word == "iDEAL" else word.capitalize() for word in words
+        ]
+        return " ".join(capitalized_words)
+
+    def cash_deposits_history(self) -> list[dict]:
         cash_contributions = CashMovementsRepository.get_cash_deposits_raw()
         df = pd.DataFrame.from_dict(cash_contributions)
         # Remove hours and keep only the day
