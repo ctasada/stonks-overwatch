@@ -3,7 +3,7 @@
         "credentials": {
             "username": "USERNAME",
             "password": "PASSWORD",
-            "totp_secret_key": "See https://github.com/Chavithra/degiro-connector#35-how-to-use-2fa-",
+            "totp_secret_key": "See https://github.com/Chavithra/stonks_overwatch-connector#35-how-to-use-2fa-",
         },
         "base_currency": "EUR - Optional field. Uses DeGiro base currency by default",
         "start_date": "PORTFOLIO CREATION DATE. Defaults to 2020-01-01"
