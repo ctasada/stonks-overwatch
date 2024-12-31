@@ -13,10 +13,7 @@ def dictfetchone(cursor: CursorWrapper) -> dict:
     """Returns the first row from a cursor as a dict.
     Assume the column names are unique.
     """
-    columns = [snake_to_camel(col[0]) for col in cursor.description]
-    result = [dict(zip(columns, row)) for row in cursor.fetchall()]
-    return result[0]
-
+    return dictfetchall(cursor)[0]
 
 def snake_to_camel(snake_str):
     """Converts snake_case to camelCase"""

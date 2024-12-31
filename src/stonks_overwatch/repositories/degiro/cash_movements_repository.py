@@ -22,7 +22,7 @@ class CashMovementsRepository:
 
     @staticmethod
     def get_cash_deposits_raw() -> list[dict]:
-        # FIXME: DeGiro doesn't a consistent description or type. Missing the new value for 'Refund'
+        # FIXME: DeGiro doesn't have a consistent description or type.
         with connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -30,6 +30,7 @@ class CashMovementsRepository:
                 FROM degiro_cashmovements
                 WHERE currency = 'EUR'
                     AND description IN ('iDEAL storting', 'iDEAL Deposit', 'Terugstorting', 'flatex terugstorting')
+                ORDER BY date
                 """
             )
             return dictfetchall(cursor)

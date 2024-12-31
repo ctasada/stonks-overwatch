@@ -188,7 +188,14 @@ poetry run src/manage.py runscript init_db
 # Portfolio Performance
 - https://portfolioslab.com/tools/stock-comparison/AAPL/MSFT
 - https://stonksfolio.com/portfolios/4qltYv/performance
+- https://blog.quantinsti.com/portfolio-analysis-performance-measurement-evaluation/
+
+* TWRR focuses purely on the timing of cash flows, providing an accurate measure of performance that disregards the 
+  amount of money involved.
+* XIRR, on the other hand, considers both the timing and the size of cash flows, offering a complete picture of 
+  investment returns.
 
 # Libraries
 - https://pypi.org/project/QuantStats/
 - https://github.com/wilsonfreitas/awesome-quant?tab=readme-ov-file#python
+- https://github.com/robertmartin8/PyPortfolioOpt
