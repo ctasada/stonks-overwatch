@@ -9,7 +9,7 @@ class LocalizationUtility:
     A utility class for handling localization-related tasks, such as formatting dates, times, and currency values.
     """
 
-    TIME_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
+    TIME_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
     DATE_FORMAT = "%Y-%m-%d"
     TIME_FORMAT = "%H:%M:%S"
 
@@ -21,14 +21,6 @@ class LocalizationUtility:
         base_currency_symbol = CurrencySymbols.get_symbol(currency)
 
         return base_currency_symbol
-
-    # @staticmethod
-    # def get_base_currency() -> str:
-    #     """
-    #     Returns the user's base currency from the DegiroConfig.
-    #     """
-    #     degiro_config = DegiroConfig.default()
-    #     return degiro_config.base_currency
 
     @staticmethod
     def round_value(value: float) -> float:
@@ -48,6 +40,9 @@ class LocalizationUtility:
 
         if not currency_symbol:
             currency_symbol = CurrencySymbols.get_symbol(currency)
+
+        if not isinstance(value, float):
+            value = float(value)
 
         return f"{currency_symbol} {value:,.2f}"
 

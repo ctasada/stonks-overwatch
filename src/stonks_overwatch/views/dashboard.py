@@ -1,22 +1,16 @@
 import logging
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Dict, List, Optional
 
 import pandas as pd
 from django.shortcuts import render
 from django.views import View
 
-from stonks_overwatch.repositories.degiro.product_info_repository import ProductInfoRepository
-from stonks_overwatch.repositories.degiro.product_quotations_repository import ProductQuotationsRepository
-from stonks_overwatch.repositories.degiro.transactions_repository import TransactionsRepository
-from stonks_overwatch.services.degiro.account_overview import AccountOverviewService
-from stonks_overwatch.services.degiro.currency_converter_service import CurrencyConverterService
+from stonks_overwatch.config import Config
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.deposits import DepositsService
-from stonks_overwatch.services.degiro.dividends import DividendsService
 from stonks_overwatch.services.degiro.portfolio import PortfolioService
-from stonks_overwatch.utils.datetime import DateTimeUtility
 from stonks_overwatch.utils.localization import LocalizationUtility
 
 
@@ -25,25 +19,22 @@ class Dashboard(View):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
         self.degiro_service = DeGiroService()
 
-        self.account_overview = AccountOverviewService()
-        self.currency_service = CurrencyConverterService()
-        self.deposits = DepositsService(
+        self.degiro_deposits = DepositsService(
             degiro_service=self.degiro_service,
         )
-        self.dividends = DividendsService(
-            account_overview=self.account_overview,
-            degiro_service=self.degiro_service,
-        )
-        self.portfolio_data = PortfolioService(
+        self.degiro_portfolio = PortfolioService(
             degiro_service=self.degiro_service,
         )
 
     def get(self, request):
         """Handle GET request for dashboard view."""
-        cash_account = self.deposits.calculate_cash_account_value()
-        portfolio_value = self._calculate_value(cash_account)
+        portfolio_value = []
+        if Config.default().is_degiro_enabled():
+            portfolio_value += self.degiro_portfolio.calculate_historical_value()
+
         performance_twr = self._calculate_performance_twr(portfolio_value)
 
         context = {
@@ -138,7 +129,7 @@ class Dashboard(View):
             List of dictionaries containing dates and cumulative returns
         """
         deposits = sorted(
-            self.deposits.get_cash_deposits(),
+            self.degiro_deposits.get_cash_deposits(),
             key=lambda k: k["date"]
         )
 
@@ -176,162 +167,3 @@ class Dashboard(View):
                 "y": v
             } for k, v in twr['cumulative_returns'].items()
         ]
-
-    def _calculate_value(self, cash_account: dict) -> list[dict]:
-        data = self._create_products_quotation()
-        stock_splits = self._get_stock_splits()
-
-        base_currency = self.degiro_service.get_base_currency()
-        aggregate = {}
-        for key in data:
-            entry = data[key]
-            position_value_growth = self._calculate_position_growth(entry, stock_splits)
-            convert_fx = entry["product"]["currency"] != base_currency
-            for date_value in position_value_growth:
-                if self._is_weekend(date_value):
-                    # Skip weekends. Those days there's no activity
-                    continue
-
-                aggregate_value = aggregate.get(date_value, 0)
-
-                if convert_fx:
-                    currency = entry["product"]["currency"]
-                    fx_date = LocalizationUtility.convert_string_to_date(date_value)
-                    value = self.currency_service.convert(
-                        position_value_growth[date_value], currency, base_currency, fx_date
-                    )
-                    aggregate_value += value
-                else:
-                    aggregate_value += position_value_growth[date_value]
-                aggregate[date_value] = aggregate_value
-
-        dataset = []
-        for day in aggregate:
-            # Merges the portfolio value with the cash value to get the full picture
-            cash_value = 0.0
-            if day in cash_account:
-                cash_value = cash_account[day]
-            else:
-                cash_value = list(cash_account.values())[-1]
-
-            day_value = aggregate[day] + cash_value
-            dataset.append({"x": day, "y": LocalizationUtility.round_value(day_value)})
-
-        return dataset
-
-    def _get_growth_final_date(self, date_str: str):
-        if date_str == 0:
-            return LocalizationUtility.convert_string_to_date(date_str)
-        else:
-            return datetime.today().date()
-
-    def _calculate_position_growth(self, entry: dict, stock_splits: dict) -> dict:
-        product_history_dates = list(entry["history"].keys())
-
-        start_date = LocalizationUtility.convert_string_to_date(product_history_dates[0])
-        final_date = self._get_growth_final_date(product_history_dates[-1])
-
-        # Generate a list of dates between start and final date
-        dates = [(start_date + timedelta(days=i)).strftime(LocalizationUtility.DATE_FORMAT)
-                 for i in range((final_date - start_date).days + 1)]
-
-        position_value = {}
-        for date_change in entry["history"]:
-            index = dates.index(date_change)
-            for d in dates[index:]:
-                position_value[d] = entry["history"][date_change]
-
-        if entry["productId"] in stock_splits:
-            stocks_multiplier = 1
-            for split_date in reversed(stock_splits[entry["productId"]]):
-                split_data = stock_splits[entry["productId"]][split_date]
-                stocks_multiplier = stocks_multiplier * split_data["split_ratio"]
-                for date_value in reversed(position_value):
-                    if date_value < split_date:
-                        position_value[date_value] = position_value[date_value] * stocks_multiplier
-
-        aggregate = {}
-        if entry["quotation"]["quotes"]:
-            for date_quote in entry["quotation"]["quotes"]:
-                if date_quote in position_value:
-                    aggregate[date_quote] = position_value[date_quote] * entry["quotation"]["quotes"][date_quote]
-        else:
-            self.logger.warning(f"No quotes found for '{entry['product']['symbol']}': productId {entry['productId']} ")
-
-        return aggregate
-
-    def _get_stock_splits(self) -> dict:
-        """
-        Retrieves and processes stock split transactions.
-        """
-        results = TransactionsRepository.get_stock_split_transactions()
-        grouped_data = defaultdict(lambda: {"B": None, "S": None})
-
-        for entry in results:
-            day = entry["date"].strftime(LocalizationUtility.DATE_FORMAT)
-            grouped_data[day][entry["buysell"]] = entry
-
-        stock_splits = {}
-        for day, transactions in grouped_data.items():
-            if not all(transactions.values()):
-                continue
-
-            sell_quantity = abs(transactions["S"]["quantity"])
-            buy_quantity = transactions["B"]["quantity"]
-            split_ratio = buy_quantity / sell_quantity
-
-            split_data = {
-                "productId_sell": transactions["S"]["productId"],
-                "productId_buy": transactions["B"]["productId"],
-                "is_renamed": transactions["S"]["productId"] != transactions["B"]["productId"],
-                "split_ratio": split_ratio,
-            }
-
-            stock_splits.setdefault(transactions["S"]["productId"], {})[day] = split_data
-            stock_splits.setdefault(transactions["B"]["productId"], {})[day] = split_data
-
-        return stock_splits
-
-    def _create_products_quotation(self) -> dict:
-        """
-        Creates product quotations based on portfolio data and product information.
-        """
-        product_growth = self.portfolio_data.calculate_product_growth()
-        tradable_products = {}
-
-        for key, data in product_growth.items():
-            product = ProductInfoRepository.get_product_info_from_id(key)
-
-            # If the product is NOT tradable, we shouldn't consider it for Growth
-            # The 'tradable' attribute identifies old Stocks, like the ones that are
-            # renamed for some reason, and it's not good enough to identify stocks
-            # that are provided as dividends, for example.
-            if "Non tradeable" in product.get("name", ""):
-                continue
-
-            data["productId"] = key
-            data["product"] = {
-                "name": product["name"],
-                "isin": product["isin"],
-                "symbol": product["symbol"],
-                "currency": product["currency"],
-                "vwdId": product["vwdId"],
-                "vwdIdSecondary": product["vwdIdSecondary"],
-            }
-
-            product_history_dates = list(data["history"].keys())
-            data["quotation"] = {
-                "fromDate": product_history_dates[0],
-                "toDate": LocalizationUtility.format_date_from_date(datetime.today()),
-                "interval": DateTimeUtility.calculate_interval(product_history_dates[0]),
-                "quotes": ProductQuotationsRepository.get_product_quotations(key),
-            }
-            tradable_products[key] = data
-
-        return tradable_products
-
-    def _is_weekend(self, date_str: str):
-        # Parse the date string into a datetime object
-        day = datetime.strptime(date_str, '%Y-%m-%d')
-        # Check if the day of the week is Saturday (5) or Sunday (6)
-        return day.weekday() >= 5

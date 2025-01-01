@@ -1,7 +1,7 @@
 import pathlib
 from datetime import date, datetime
 
-from stonks_overwatch.config.degiro_config import DegiroConfig, DegiroCredentials
+from stonks_overwatch.config import Config, DegiroConfig, DegiroCredentials
 
 
 def test_degiro_credentials_init():
@@ -86,13 +86,14 @@ def test_degiro_credentials_from_minimum_dict():
     assert credentials.one_time_password is None
 
 
-def test_degiro_config_init():
+def test_config_init():
+    base_currency = "EUR"
+
     username = "testuser"
     password = "testpassword"
     int_account = "123456"
     totp_secret_key = "ABCDEFGHIJKLMNOP"
     one_time_password = "123456"
-    base_currency = "EUR"
     start_date = "2023-01-01"
     start_date_as_date = datetime.fromisoformat(start_date).date()
 
@@ -104,14 +105,16 @@ def test_degiro_config_init():
         one_time_password=one_time_password,
     )
 
-    config = DegiroConfig(credentials=credentials, base_currency=base_currency, start_date=start_date_as_date)
+    degiro_config = DegiroConfig(credentials=credentials, start_date=start_date_as_date)
+    config = Config(base_currency=base_currency, degiro_configuration=degiro_config)
 
-    assert config.credentials == credentials
     assert config.base_currency == base_currency
-    assert config.start_date == start_date_as_date
+    assert config.degiro_configuration.credentials == credentials
+    assert config.degiro_configuration.start_date == start_date_as_date
 
 
-def test_degiro_config_from_dict():
+def test_config_from_dict():
+    base_currency = "EUR"
     credentials_dict = {
         "username": "testuser",
         "password": "testpassword",
@@ -119,20 +122,26 @@ def test_degiro_config_from_dict():
         "totp_secret_key": "ABCDEFGHIJKLMNOP",
         "one_time_password": 123456,
     }
-    base_currency = "EUR"
     start_date = "2023-01-01"
     start_date_as_date = datetime.fromisoformat(start_date).date()
 
-    config_dict = {"credentials": credentials_dict, "base_currency": base_currency, "start_date": start_date}
+    config_dict = {
+        "base_currency": base_currency,
+        "degiro": {
+            "credentials": credentials_dict,
+            "start_date": start_date
+        }
+    }
 
-    config = DegiroConfig.from_dict(config_dict)
+    config = Config.from_dict(config_dict)
 
-    assert config.credentials == DegiroCredentials.from_dict(credentials_dict)
     assert config.base_currency == base_currency
-    assert config.start_date == start_date_as_date
+    assert config.degiro_configuration.credentials == DegiroCredentials.from_dict(credentials_dict)
+    assert config.degiro_configuration.start_date == start_date_as_date
 
 
-def test_degiro_config_from_json_file():
+def test_config_from_json_file():
+    base_currency = "EUR"
     credentials_dict = {
         "username": "testuser",
         "password": "testpassword",
@@ -140,21 +149,21 @@ def test_degiro_config_from_json_file():
         "totp_secret_key": "ABCDEFGHIJKLMNOP",
         "one_time_password": 123456,
     }
-    base_currency = "EUR"
     start_date = "2023-01-01"
     start_date_as_date = datetime.fromisoformat(start_date).date()
     update_frequency_minutes = 5
 
     file = pathlib.Path("tests/resources/stonks_overwatch/config/sample-config.json")
-    config = DegiroConfig.from_json_file(file)
+    config = Config.from_json_file(file)
 
-    assert config.credentials == DegiroCredentials.from_dict(credentials_dict)
     assert config.base_currency == base_currency
-    assert config.start_date == start_date_as_date
-    assert config.update_frequency_minutes == update_frequency_minutes
+    assert config.degiro_configuration.credentials == DegiroCredentials.from_dict(credentials_dict)
+    assert config.degiro_configuration.start_date == start_date_as_date
+    assert config.degiro_configuration.update_frequency_minutes == update_frequency_minutes
 
-def test_degiro_config_default():
-    DegiroConfig.DEGIRO_CONFIG_PATH = "tests/resources/stonks_overwatch/config/sample-config.json"
+def test_config_default():
+    Config.CONFIG_PATH = "tests/resources/stonks_overwatch/config/sample-config.json"
+    base_currency = "EUR"
     credentials_dict = {
         "username": "testuser",
         "password": "testpassword",
@@ -162,25 +171,24 @@ def test_degiro_config_default():
         "totp_secret_key": "ABCDEFGHIJKLMNOP",
         "one_time_password": 123456,
     }
-    base_currency = "EUR"
     start_date = "2023-01-01"
     start_date_as_date = datetime.fromisoformat(start_date).date()
     update_frequency_minutes = 5
 
-    config = DegiroConfig.default()
+    config = Config.default()
 
-    assert config.credentials == DegiroCredentials.from_dict(credentials_dict)
     assert config.base_currency == base_currency
-    assert config.start_date == start_date_as_date
-    assert config.update_frequency_minutes == update_frequency_minutes
+    assert config.degiro_configuration.credentials == DegiroCredentials.from_dict(credentials_dict)
+    assert config.degiro_configuration.start_date == start_date_as_date
+    assert config.degiro_configuration.update_frequency_minutes == update_frequency_minutes
 
 
-def test_degiro_config_default_without_config_file():
-    DegiroConfig.DEGIRO_CONFIG_PATH = "tests/resources/stonks_overwatch/config/unexisting-config.json"
+def test_config_default_without_config_file():
+    Config.CONFIG_PATH = "tests/resources/stonks_overwatch/config/unexisting-config.json"
 
-    config = DegiroConfig.default()
+    config = Config.default()
 
-    assert config.credentials is None
     assert config.base_currency == "EUR"
-    assert config.start_date == date.today()
-    assert config.update_frequency_minutes == 5
+    assert config.degiro_configuration.credentials is None
+    assert config.degiro_configuration.start_date == date.today()
+    assert config.degiro_configuration.update_frequency_minutes == 5

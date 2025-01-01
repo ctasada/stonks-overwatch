@@ -9,7 +9,7 @@ from degiro_connector.quotecast.tools.chart_fetcher import ChartFetcher
 from degiro_connector.trading.api import API as TradingApi  # noqa: N811
 from degiro_connector.trading.models.credentials import Credentials
 
-from stonks_overwatch.config.degiro_config import DegiroConfig
+from stonks_overwatch.config import DegiroConfig
 from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.singleton import singleton
 
@@ -64,10 +64,11 @@ class CredentialsManager:
 @singleton
 class DeGiroService:
     logger = logging.getLogger("stocks_portfolio.degiro_service")
+    api_client: TradingApi = None
+    credentials_manager: Optional[CredentialsManager] = None
 
     def __init__(self, credentials_manager: Optional[CredentialsManager] = None):
-        self.credentials_manager = credentials_manager or CredentialsManager()
-        self.api_client = TradingApi(credentials=self.credentials_manager.credentials)
+        self.set_credentials(credentials_manager)
 
     def set_credentials(self, credentials_manager: CredentialsManager):
         self.credentials_manager = credentials_manager or CredentialsManager()
@@ -238,11 +239,3 @@ class DeGiroService:
     def get_session_id(self) -> str:
         config_table = self.get_config()
         return config_table['sessionId']
-
-    def get_base_currency(self) -> str:
-        # FIXME: Read value from configuration if it's available
-        # FIXME: This call should be cache
-        account_info = self.get_account_info()
-        base_currency = account_info["data"]["baseCurrency"]
-
-        return base_currency

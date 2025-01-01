@@ -8,7 +8,7 @@ from degiro_connector.core.exceptions import DeGiroConnectionError
 from degiro_connector.quotecast.models.chart import Interval
 
 import pytest
-from stonks_overwatch.config.degiro_config import DegiroCredentials
+from stonks_overwatch.config import DegiroCredentials
 from stonks_overwatch.services.degiro.degiro_service import CredentialsManager
 from stonks_overwatch.utils.localization import LocalizationUtility
 from tests.stonks_overwatch.fixtures import (

@@ -8,8 +8,8 @@
             "one_time_password": 123456,
             "user_token": "token123"
         },
-        "base_currency": "EUR",
         "start_date": "2023-01-01",
         "update_frequency_minutes": 5
-    }
+    },
+    "base_currency": "EUR"
 }

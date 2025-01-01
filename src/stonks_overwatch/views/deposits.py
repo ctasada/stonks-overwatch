@@ -3,9 +3,8 @@ import logging
 from django.shortcuts import render
 from django.views import View
 
-from stonks_overwatch.services.degiro.degiro_service import DeGiroService
-from stonks_overwatch.services.degiro.deposits import DepositsService
-from stonks_overwatch.services.degiro.portfolio import PortfolioService
+from stonks_overwatch.services.deposits_aggregator import DepositsAggregatorService
+from stonks_overwatch.services.portfolio_aggregator import PortfolioAggregatorService
 
 
 class Deposits(View):
@@ -13,25 +12,18 @@ class Deposits(View):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.degiro_service = DeGiroService()
-
-        self.portfolio = PortfolioService(
-            degiro_service=self.degiro_service,
-        )
-
-        self.deposits_data = DepositsService(
-            degiro_service=self.degiro_service,
-        )
+        self.deposits_aggregator = DepositsAggregatorService()
+        self.portfolio_aggregator = PortfolioAggregatorService()
 
     def get(self, request):
-        data = self.deposits_data.cash_deposits_history()
+        data = self.deposits_aggregator.cash_deposits_history()
         cash_contributions = [{"x": item["date"], "y": item["total_deposit"]} for item in data]
 
-        deposits = self.deposits_data.get_cash_deposits()
-        total_portfolio = self.portfolio.get_portfolio_total()
+        deposits = self.deposits_aggregator.get_cash_deposits()
+        total_portfolio = self.portfolio_aggregator.get_portfolio_total()
 
         context = {
-            "total_deposits": total_portfolio["totalDepositWithdrawal"],
+            "total_deposits": total_portfolio["totalDepositWithdrawal_formatted"],
             "deposits": deposits,
             "deposit_growth": {"value": cash_contributions},
         }

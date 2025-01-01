@@ -8,7 +8,7 @@ from degiro_connector.trading.models.transaction import HistoryRequest
 from django.core.cache import cache
 from django.db import connection
 
-from stonks_overwatch.config.degiro_config import DegiroConfig
+from stonks_overwatch.config import DegiroConfig
 from stonks_overwatch.models import (
     DeGiroCashMovements,
     DeGiroCompanyProfile,

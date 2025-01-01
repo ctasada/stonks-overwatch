@@ -1,19 +1,15 @@
 from django.shortcuts import render
 from django.views import View
 
-from stonks_overwatch.services.degiro.degiro_service import DeGiroService
-from stonks_overwatch.services.degiro.fees import FeesService
+from stonks_overwatch.services.fees_aggregator import FeesAggregatorService
 from stonks_overwatch.utils.localization import LocalizationUtility
 
 
 class Fees(View):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.degiro_service = DeGiroService()
-        self.fees = FeesService(
-            degiro_service=self.degiro_service,
-        )
-        self.base_currency = self.degiro_service.get_base_currency()
+        self.fees = FeesAggregatorService()
+        self.base_currency = "EUR"
 
     def get(self, request):
         fees = self.fees.get_fees()

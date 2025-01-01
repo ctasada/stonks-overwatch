@@ -5,6 +5,7 @@ import pandas as pd
 from django.shortcuts import render
 from django.views import View
 
+from stonks_overwatch.config import Config
 from stonks_overwatch.services.degiro.account_overview import AccountOverviewService
 from stonks_overwatch.services.degiro.currency_converter_service import CurrencyConverterService
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
@@ -25,7 +26,7 @@ class Dividends(View):
             account_overview=self.account_overview,
             degiro_service=self.degiro_service,
         )
-        self.base_currency = self.degiro_service.get_base_currency()
+        self.base_currency = Config.default().base_currency
 
     def get(self, request):
         dividends_overview = self.dividends.get_dividends()

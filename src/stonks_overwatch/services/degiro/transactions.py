@@ -1,4 +1,4 @@
-
+from stonks_overwatch.config import Config
 from stonks_overwatch.repositories.degiro.product_info_repository import ProductInfoRepository
 from stonks_overwatch.repositories.degiro.transactions_repository import TransactionsRepository
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
@@ -12,8 +12,9 @@ class TransactionsService:
             degiro_service: DeGiroService,
     ):
         self.degiro_service = degiro_service
+        self.base_currency = Config.default().base_currency
 
-    def get_transactions(self) -> dict:
+    def get_transactions(self) -> list[dict]:
         # FETCH TRANSACTIONS DATA
         transactions_history = TransactionsRepository.get_transactions_raw()
 
@@ -26,10 +27,6 @@ class TransactionsService:
         # Remove duplicates from list
         products_ids = list(set(products_ids))
         products_info = ProductInfoRepository.get_products_info_raw(products_ids)
-
-        # Get user's base currency
-        base_currency = self.degiro_service.get_base_currency()
-        base_currency_symbol = LocalizationUtility.get_currency_symbol(base_currency)
 
         # DISPLAY PRODUCTS_INFO
         my_transactions = []
@@ -53,9 +50,9 @@ class TransactionsService:
                     ),
                     "totalInBaseCurrency": LocalizationUtility.format_money_value(
                         value=transaction["totalInBaseCurrency"],
-                        currency_symbol=base_currency_symbol,
+                        currency=self.base_currency,
                     ),
-                    "fees": LocalizationUtility.format_money_value(value=fees, currency_symbol=base_currency_symbol),
+                    "fees": LocalizationUtility.format_money_value(value=fees, currency=self.base_currency),
                 }
             )
 

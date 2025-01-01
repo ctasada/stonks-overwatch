@@ -1,4 +1,4 @@
-.PHONY: install update migrate runserver
+.PHONY: install update lint-check lint-fix migrate runserver
 
 install:
 	poetry install
@@ -7,6 +7,12 @@ install:
 update:
 	npm update
 	poetry update
+
+lint-check:
+	poetry run ruff check
+
+lint-fix:
+	poetry run ruff check --fix
 
 migrate:
 	poetry run src/manage.py makemigrations
