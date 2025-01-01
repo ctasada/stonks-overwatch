@@ -5,8 +5,8 @@
             "password": "PASSWORD",
             "totp_secret_key": "See https://github.com/Chavithra/stonks_overwatch-connector#35-how-to-use-2fa-",
         },
-        "base_currency": "EUR - Optional field. Uses DeGiro base currency by default",
         "start_date": "PORTFOLIO CREATION DATE. Defaults to 2020-01-01"
         "update_frequency_minutes": "How frequently the data from DeGiro should be updated. Defaults to 5 minutes"
-    }
+    },
+    "base_currency": "EUR By default",
 }

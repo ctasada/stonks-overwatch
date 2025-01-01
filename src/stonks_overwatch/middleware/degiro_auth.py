@@ -6,7 +6,7 @@ from django.http import HttpRequest
 from django.shortcuts import redirect
 from django.urls import resolve
 
-from stonks_overwatch.config.degiro_config import DegiroConfig
+from stonks_overwatch.config import DegiroConfig
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 
 

@@ -1,3 +1,4 @@
+from stonks_overwatch.config import Config
 from stonks_overwatch.repositories.degiro.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.repositories.degiro.product_info_repository import ProductInfoRepository
 from stonks_overwatch.repositories.degiro.transactions_repository import TransactionsRepository
@@ -14,10 +15,9 @@ class FeesService:
     ):
         self.currency_service = CurrencyConverterService()
         self.degiro_service = degiro_service
-        self.base_currency = self.degiro_service.get_base_currency()
+        self.base_currency = Config.default().base_currency
 
-
-    def get_fees(self) -> list:
+    def get_fees(self) -> list[dict]:
         transaction_fees = self.get_transaction_fees()
         account_fees = self.get_account_fees()
 
@@ -25,7 +25,7 @@ class FeesService:
 
         return sorted(total_fees, key=lambda k: (k["date"], k["time"]), reverse=True)
 
-    def get_account_fees(self) -> dict:
+    def get_account_fees(self) -> list[dict]:
         cash_movements = CashMovementsRepository.get_cash_movements_raw()
 
         my_fees = []
@@ -67,7 +67,7 @@ class FeesService:
         else:
             return None
 
-    def get_transaction_fees(self) -> dict:
+    def get_transaction_fees(self) -> list[dict]:
         transactions_history = TransactionsRepository.get_transactions_raw()
 
         products_ids = []

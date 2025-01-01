@@ -2,8 +2,8 @@ from django import template
 from django.utils import timezone
 
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
-from stonks_overwatch.services.degiro.portfolio import PortfolioService
 from stonks_overwatch.services.degiro.update_service import UpdateService
+from stonks_overwatch.services.portfolio_aggregator import PortfolioAggregatorService
 from stonks_overwatch.utils.localization import LocalizationUtility
 
 register = template.Library()
@@ -16,9 +16,7 @@ def index(sequence, position):
 
 @register.inclusion_tag("total_overview.html")
 def show_total_portfolio() -> dict:
-    portfolio = PortfolioService(
-        degiro_service=DeGiroService(),
-    )
+    portfolio = PortfolioAggregatorService()
     total_portfolio = portfolio.get_portfolio_total()
 
     return {"total_portfolio": total_portfolio}

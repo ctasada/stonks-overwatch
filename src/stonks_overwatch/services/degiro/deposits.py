@@ -1,8 +1,8 @@
-from datetime import date
 from typing import Any
 
 import pandas as pd
 
+from stonks_overwatch.config import Config
 from stonks_overwatch.repositories.degiro.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.utils.localization import LocalizationUtility
@@ -15,6 +15,7 @@ class DepositsService:
             degiro_service: DeGiroService,
     ):
         self.degiro_service = degiro_service
+        self.base_currency = Config.default().base_currency
 
     def get_cash_deposits(self) -> list[dict[str, str | Any]]:
         df = pd.DataFrame(CashMovementsRepository.get_cash_deposits_raw())
@@ -23,8 +24,6 @@ class DepositsService:
         # Remove hours and keep only the day
         df["date"] = pd.to_datetime(df["date"]).dt.strftime(LocalizationUtility.DATE_FORMAT)
 
-        base_currency = self.degiro_service.get_base_currency()
-        base_currency_symbol = LocalizationUtility.get_currency_symbol(base_currency)
 
         records = []
         for _, row in df.iterrows():
@@ -35,7 +34,7 @@ class DepositsService:
                     "description": self._capitalize_deposit_description(row["description"]),
                     "change": row["change"],
                     "changeFormatted": LocalizationUtility.format_money_value(
-                        value=row["change"], currency=base_currency, currency_symbol=base_currency_symbol
+                        value=row["change"], currency=self.base_currency
                     ),
                 }
             )
@@ -48,41 +47,6 @@ class DepositsService:
             word if word == "iDEAL" else word.capitalize() for word in words
         ]
         return " ".join(capitalized_words)
-
-    def cash_deposits_history(self) -> list[dict]:
-        cash_contributions = CashMovementsRepository.get_cash_deposits_raw()
-        df = pd.DataFrame.from_dict(cash_contributions)
-        # Remove hours and keep only the day
-        df["date"] = pd.to_datetime(df["date"]).dt.date
-        # Group by day, adding the values
-        df.set_index("date", inplace=True)
-        df = df.sort_values(by="date")
-        df = df.groupby(df.index)["change"].sum().reset_index()
-        # Do the cumulative sum
-        df["contributed"] = df["change"].cumsum()
-
-        cash_contributions = df.to_dict("records")
-        for contribution in cash_contributions:
-            contribution["date"] = contribution["date"].strftime(LocalizationUtility.DATE_FORMAT)
-
-        dataset = []
-        for contribution in cash_contributions:
-            dataset.append(
-                {
-                    "date": contribution["date"],
-                    "total_deposit": LocalizationUtility.round_value(contribution["contributed"]),
-                }
-            )
-
-        # Append today with the last value to draw the line properly
-        dataset.append(
-            {
-                "date": LocalizationUtility.format_date_from_date(date.today()),
-                "total_deposit": cash_contributions[-1]["contributed"],
-            }
-        )
-
-        return dataset
 
     def calculate_cash_account_value(self) -> dict:
         cash_balance = CashMovementsRepository.get_cash_balance_by_date()

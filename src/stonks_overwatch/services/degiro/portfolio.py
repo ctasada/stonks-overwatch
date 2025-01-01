@@ -1,8 +1,11 @@
 import logging
+from collections import defaultdict
+from datetime import datetime, timedelta
 from typing import Optional
 
 from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
 
+from stonks_overwatch.config import Config
 from stonks_overwatch.repositories.degiro.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.repositories.degiro.company_profile_repository import CompanyProfileRepository
 from stonks_overwatch.repositories.degiro.product_info_repository import ProductInfoRepository
@@ -10,6 +13,8 @@ from stonks_overwatch.repositories.degiro.product_quotations_repository import P
 from stonks_overwatch.repositories.degiro.transactions_repository import TransactionsRepository
 from stonks_overwatch.services.degiro.currency_converter_service import CurrencyConverterService
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
+from stonks_overwatch.services.degiro.deposits import DepositsService
+from stonks_overwatch.utils.datetime import DateTimeUtility
 from stonks_overwatch.utils.localization import LocalizationUtility
 
 
@@ -22,15 +27,16 @@ class PortfolioService:
     ):
         self.degiro_service = degiro_service
         self.currency_service = CurrencyConverterService()
+        self.base_currency = Config.default().base_currency
+        self.deposits = DepositsService(
+            degiro_service=self.degiro_service,
+        )
 
     def get_portfolio(self) -> list[dict]:
         portfolio_transactions = self.__get_porfolio_products()
 
         products_ids = [row["productId"] for row in portfolio_transactions]
         products_info = self.__get_products_info(products_ids=products_ids)
-
-        # Get user's base currency
-        base_currency = self.degiro_service.get_base_currency()
 
         products_config = self.__get_product_config()
 
@@ -60,11 +66,11 @@ class PortfolioService:
             is_open = tmp["size"] != 0.0 and tmp["value"] != 0.0
             unrealized_gain = (price - break_even_price) * tmp["size"]
 
-            if currency != base_currency:
-                base_currency_price = self.currency_service.convert(price, currency, base_currency)
-                base_currency_value = self.currency_service.convert(value, currency, base_currency)
+            if currency != self.base_currency:
+                base_currency_price = self.currency_service.convert(price, currency, self.base_currency)
+                base_currency_value = self.currency_service.convert(value, currency, self.base_currency)
                 base_currency_break_even_price = self.currency_service.convert(
-                    break_even_price, currency, base_currency
+                    break_even_price, currency, self.base_currency
                 )
                 unrealized_gain = (base_currency_price - base_currency_break_even_price) * tmp["size"]
             else:
@@ -72,7 +78,8 @@ class PortfolioService:
                 base_currency_value = value
                 base_currency_break_even_price = break_even_price
 
-            percentage_gain = unrealized_gain / (value - unrealized_gain) if value > 0 else 0.0
+            percentage_gain = unrealized_gain / (value - unrealized_gain) \
+                if value > 0 and value != unrealized_gain else 0.0
 
             portfolio_total_value += value
 
@@ -102,25 +109,25 @@ class PortfolioService:
                     "price": price,
                     "formattedPrice": LocalizationUtility.format_money_value(value=price, currency=currency),
                     **({"formattedBaseCurrencyPrice": LocalizationUtility.format_money_value(
-                        value=base_currency_price, currency=base_currency
+                        value=base_currency_price, currency=self.base_currency
                     )} if base_currency_price is not None else {}),
                     "breakEvenPrice": break_even_price,
                     "formattedBreakEvenPrice": LocalizationUtility.format_money_value(
                         value=break_even_price, currency=currency
                     ),  # GAK: Average Purchase Price
                     **({"formattedBaseCurrencyBreakEvenPrice": LocalizationUtility.format_money_value(
-                        value=base_currency_break_even_price, currency=base_currency
+                        value=base_currency_break_even_price, currency=self.base_currency
                     )} if base_currency_break_even_price is not None else {}),
                     "value": value,
                     "formattedValue": LocalizationUtility.format_money_value(value=value, currency_symbol=currency),
                     "baseCurrencyValue": base_currency_value,
                     **({"formattedBaseCurrencyValue": LocalizationUtility.format_money_value(
-                        value=base_currency_value, currency=base_currency
+                        value=base_currency_value, currency=self.base_currency
                     )} if base_currency_value is not None else {}),
                     "isOpen": is_open,
                     "unrealizedGain": unrealized_gain,
                     "formattedUnrealizedGain": LocalizationUtility.format_money_value(
-                        value=unrealized_gain, currency=base_currency
+                        value=unrealized_gain, currency=self.base_currency
                     ),
                     "percentageGain": f"{percentage_gain:.2%}",
                     "symbolUrl":  self._get_logo_url(info['symbol']),
@@ -177,9 +184,6 @@ class PortfolioService:
                 portfolio_total_value += entry["baseCurrencyValue"]
                 tmp_total_portfolio[entry["name"]] = entry["baseCurrencyValue"]
 
-        base_currency = self.degiro_service.get_base_currency()
-        base_currency_symbol = LocalizationUtility.get_currency_symbol(base_currency)
-
         tmp_total_portfolio["totalDepositWithdrawal"] = CashMovementsRepository.get_total_cash_deposits_raw()
         tmp_total_portfolio["totalCash"] = CashMovementsRepository.get_total_cash()
 
@@ -195,22 +199,23 @@ class PortfolioService:
             "total_pl": total_profit_loss,
             "total_pl_formatted": LocalizationUtility.format_money_value(
                 value=total_profit_loss,
-                currency_symbol=base_currency_symbol,
+                currency=self.base_currency,
             ),
             "totalCash": tmp_total_portfolio["totalCash"],
             "totalCash_formatted": LocalizationUtility.format_money_value(
                 value=tmp_total_portfolio["totalCash"],
-                currency_symbol=base_currency_symbol,
+                currency=self.base_currency,
             ),
             "currentValue": portfolio_total_value,
             "currentValue_formatted": LocalizationUtility.format_money_value(
-                value=portfolio_total_value, currency_symbol=base_currency_symbol
+                value=portfolio_total_value, currency=self.base_currency,
             ),
             "totalROI": roi,
             "totalROI_formatted": "{:,.2f}%".format(roi),
-            "totalDepositWithdrawal": LocalizationUtility.format_money_value(
+            "totalDepositWithdrawal": tmp_total_portfolio["totalDepositWithdrawal"],
+            "totalDepositWithdrawal_formatted": LocalizationUtility.format_money_value(
                 value=tmp_total_portfolio["totalDepositWithdrawal"],
-                currency_symbol=base_currency_symbol,
+                currency=self.base_currency,
             ),
         }
 
@@ -303,3 +308,165 @@ class PortfolioService:
             del product_growth[key]["carryTotal"]
 
         return product_growth
+
+
+    def calculate_historical_value(self) -> list[dict]:
+        cash_account = self.deposits.calculate_cash_account_value()
+        data = self._create_products_quotation()
+        stock_splits = self._get_stock_splits()
+
+        aggregate = {}
+        for key in data:
+            entry = data[key]
+            position_value_growth = self._calculate_position_growth(entry, stock_splits)
+            convert_fx = entry["product"]["currency"] != self.base_currency
+            for date_value in position_value_growth:
+                if self._is_weekend(date_value):
+                    # Skip weekends. Those days there's no activity
+                    continue
+
+                aggregate_value = aggregate.get(date_value, 0)
+
+                if convert_fx:
+                    currency = entry["product"]["currency"]
+                    fx_date = LocalizationUtility.convert_string_to_date(date_value)
+                    value = self.currency_service.convert(
+                        position_value_growth[date_value], currency, self.base_currency, fx_date
+                    )
+                    aggregate_value += value
+                else:
+                    aggregate_value += position_value_growth[date_value]
+                aggregate[date_value] = aggregate_value
+
+        dataset = []
+        for day in aggregate:
+            # Merges the portfolio value with the cash value to get the full picture
+            cash_value = 0.0
+            if day in cash_account:
+                cash_value = cash_account[day]
+            else:
+                cash_value = list(cash_account.values())[-1]
+
+            day_value = aggregate[day] + cash_value
+            dataset.append({"x": day, "y": LocalizationUtility.round_value(day_value)})
+
+        return dataset
+
+    def _get_growth_final_date(self, date_str: str):
+        if date_str == 0:
+            return LocalizationUtility.convert_string_to_date(date_str)
+        else:
+            return datetime.today().date()
+
+    def _calculate_position_growth(self, entry: dict, stock_splits: dict) -> dict:
+        product_history_dates = list(entry["history"].keys())
+
+        start_date = LocalizationUtility.convert_string_to_date(product_history_dates[0])
+        final_date = self._get_growth_final_date(product_history_dates[-1])
+
+        # Generate a list of dates between start and final date
+        dates = [(start_date + timedelta(days=i)).strftime(LocalizationUtility.DATE_FORMAT)
+                 for i in range((final_date - start_date).days + 1)]
+
+        position_value = {}
+        for date_change in entry["history"]:
+            index = dates.index(date_change)
+            for d in dates[index:]:
+                position_value[d] = entry["history"][date_change]
+
+        if entry["productId"] in stock_splits:
+            stocks_multiplier = 1
+            for split_date in reversed(stock_splits[entry["productId"]]):
+                split_data = stock_splits[entry["productId"]][split_date]
+                stocks_multiplier = stocks_multiplier * split_data["split_ratio"]
+                for date_value in reversed(position_value):
+                    if date_value < split_date:
+                        position_value[date_value] = position_value[date_value] * stocks_multiplier
+
+        aggregate = {}
+        if entry["quotation"]["quotes"]:
+            for date_quote in entry["quotation"]["quotes"]:
+                if date_quote in position_value:
+                    aggregate[date_quote] = position_value[date_quote] * entry["quotation"]["quotes"][date_quote]
+        else:
+            self.logger.warning(f"No quotes found for '{entry['product']['symbol']}': productId {entry['productId']} ")
+
+        return aggregate
+
+    def _get_stock_splits(self) -> dict:
+        """
+        Retrieves and processes stock split transactions.
+        """
+        results = TransactionsRepository.get_stock_split_transactions()
+        grouped_data = defaultdict(lambda: {"B": None, "S": None})
+
+        for entry in results:
+            day = entry["date"].strftime(LocalizationUtility.DATE_FORMAT)
+            grouped_data[day][entry["buysell"]] = entry
+
+        stock_splits = {}
+        for day, transactions in grouped_data.items():
+            if not all(transactions.values()):
+                continue
+
+            sell_quantity = abs(transactions["S"]["quantity"])
+            buy_quantity = transactions["B"]["quantity"]
+            split_ratio = buy_quantity / sell_quantity
+
+            split_data = {
+                "productId_sell": transactions["S"]["productId"],
+                "productId_buy": transactions["B"]["productId"],
+                "is_renamed": transactions["S"]["productId"] != transactions["B"]["productId"],
+                "split_ratio": split_ratio,
+            }
+
+            stock_splits.setdefault(transactions["S"]["productId"], {})[day] = split_data
+            stock_splits.setdefault(transactions["B"]["productId"], {})[day] = split_data
+
+        return stock_splits
+
+    def _create_products_quotation(self) -> dict:
+        """
+        Creates product quotations based on portfolio data and product information.
+        """
+        product_growth = self.calculate_product_growth()
+        tradable_products = {}
+
+        for key, data in product_growth.items():
+            product = ProductInfoRepository.get_product_info_from_id(key)
+
+            # If the product is NOT tradable, we shouldn't consider it for Growth
+            # The 'tradable' attribute identifies old Stocks, like the ones that are
+            # renamed for some reason, and it's not good enough to identify stocks
+            # that are provided as dividends, for example.
+            if "Non tradeable" in product.get("name", ""):
+                continue
+
+            data["productId"] = key
+            data["product"] = {
+                "name": product["name"],
+                "isin": product["isin"],
+                "symbol": product["symbol"],
+                "currency": product["currency"],
+                "vwdId": product["vwdId"],
+                "vwdIdSecondary": product["vwdIdSecondary"],
+            }
+
+            product_history_dates = list(data["history"].keys())
+            data["quotation"] = {
+                "fromDate": product_history_dates[0],
+                # FIXME: This should be the last date of the product history
+                "toDate": LocalizationUtility.format_date_from_date(datetime.today()),
+                "interval": DateTimeUtility.calculate_interval(product_history_dates[0]),
+                "quotes": ProductQuotationsRepository.get_product_quotations(key),
+            }
+            tradable_products[key] = data
+
+        return tradable_products
+
+    @staticmethod
+    def _is_weekend(date_str: str):
+        # Parse the date string into a datetime object
+        day = datetime.strptime(date_str, '%Y-%m-%d')
+        # Check if the day of the week is Saturday (5) or Sunday (6)
+        return day.weekday() >= 5

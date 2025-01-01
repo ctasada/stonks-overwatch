@@ -1,17 +1,13 @@
 from django.shortcuts import render
 from django.views import View
 
-from stonks_overwatch.services.degiro.degiro_service import DeGiroService
-from stonks_overwatch.services.degiro.transactions import TransactionsService
+from stonks_overwatch.services.transactions_aggregator import TransactionsAggregatorService
 
 
 class Transactions(View):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.degiro_service = DeGiroService()
-        self.transactions = TransactionsService(
-            degiro_service=self.degiro_service,
-        )
+        self.transactions = TransactionsAggregatorService()
 
     def get(self, request):
         transactions = self.transactions.get_transactions()
