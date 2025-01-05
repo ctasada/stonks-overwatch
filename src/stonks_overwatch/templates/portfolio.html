@@ -13,6 +13,12 @@
         {% include 'portfolio_table.html' with items=trackers show_columns=show_trackers_columns %}
     </div>
     {% endif %}
+    {% if crypto %}
+        <div class="row mt-2">
+            <h5 class="mb-3">Crypto</h5>
+            {% include 'portfolio_table.html' with items=crypto show_columns=show_crypto_columns %}
+        </div>
+    {% endif %}
     {% if cash %}
     <div class="row mt-2">
         <h5 class="mb-3">Cash</h5>
