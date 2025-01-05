@@ -110,46 +110,121 @@ class DegiroConfig:
                 update_frequency_minutes=cls.DEFAULT_DEGIRO_UPDATE_FREQUENCY
             )
 
+
+@dataclass
+class BitvavoCredentials:
+    apikey: str
+    apisecret: str
+
+    def to_dict(self) -> dict:
+        return {
+            "apiKey": self.apikey,
+            "apiSecret": self.apisecret,
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "BitvavoCredentials":
+        if not data:
+            return cls("", "")
+        return cls(
+            apikey=data.get("apiKey", ""),
+            apisecret=data.get("apiSecret", ""),
+        )
+
+class BitvavoConfig:
+    BITVAVO_CONFIG_PATH = Path(PROJECT_PATH) / "config" / "config.json"
+
+    def __init__(
+            self,
+            credentials: Optional[BitvavoCredentials],
+    ) -> None:
+        self.credentials = credentials
+
+    def __eq__(self, value: object) -> bool:
+        if isinstance(value, BitvavoConfig):
+            return (
+                    self.credentials == value.credentials
+            )
+        return False
+
+    def __repr__(self) -> str:
+        return (f"BitvavoConfig(credentials={self.credentials}, "
+                ")")
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "BitvavoConfig":
+        credentials_data = data.get("credentials")
+        credentials = BitvavoCredentials.from_dict(credentials_data) if credentials_data else None
+
+        return cls(credentials)
+
+    @classmethod
+    def from_json_file(cls, file_path: str | Path) -> "BitvavoConfig":
+        """Loads the configuration from a JSON file."""
+        data = {}
+        with open(file_path, "r") as f:
+            data = json.load(f)
+        return cls.from_dict(data.get("bitvavo", {}))
+
+    @classmethod
+    def default(cls) -> "BitvavoConfig":
+        try:
+            return cls.from_json_file(cls.BITVAVO_CONFIG_PATH)
+        except Exception:
+            config_logger.warning("Cannot find configuration file. Using default values")
+            return BitvavoConfig(
+                credentials=None,
+            )
+
 class Config:
     CONFIG_PATH = Path(PROJECT_PATH) / "config" / "config.json"
     DEFAULT_BASE_CURRENCY: str = "EUR"
 
     base_currency = DEFAULT_BASE_CURRENCY
     degiro_configuration: Optional[DegiroConfig] = None
+    bitvavo_configuration: Optional[BitvavoConfig] = None
 
     def __init__(
             self,
             base_currency: Optional[str] = DEFAULT_BASE_CURRENCY,
             degiro_configuration: Optional[DegiroConfig] = None,
+            bitvavo_configuration: Optional[BitvavoConfig] = None,
     ) -> None:
         if base_currency and not isinstance(base_currency, str):
             raise TypeError("base_currency must be a string")
         self.base_currency = base_currency
 
         self.degiro_configuration = degiro_configuration
+        self.bitvavo_configuration = bitvavo_configuration
 
     def is_degiro_enabled(self) -> bool:
         return self.degiro_configuration is not None and self.degiro_configuration.credentials is not None
+
+    def is_bitvavo_enabled(self) -> bool:
+        return self.bitvavo_configuration is not None and self.bitvavo_configuration.credentials is not None
 
     def __eq__(self, value: object) -> bool:
         if isinstance(value, Config):
             return (
                     self.base_currency == value.base_currency and
-                    self.degiro_configuration == value.degiro_configuration
+                    self.degiro_configuration == value.degiro_configuration and
+                    self.bitvavo_configuration == value.bitvavo_configuration
             )
         return False
 
     def __repr__(self) -> str:
         return (f"Config(base_currency={self.base_currency}, "
                 f"degiro={self.degiro_configuration}, "
+                f"bitvavo={self.bitvavo_configuration}, "
                 ")")
 
     @classmethod
     def from_dict(cls, data: dict) -> "Config":
         base_currency = data.get("base_currency", Config.DEFAULT_BASE_CURRENCY)
         degiro_configuration = DegiroConfig.from_dict(data.get("degiro", {}))
+        bitvavo_configuration = BitvavoConfig.from_dict(data.get("bitvavo", {}))
 
-        return cls(base_currency, degiro_configuration)
+        return cls(base_currency, degiro_configuration, bitvavo_configuration)
 
     @classmethod
     def from_json_file(cls, file_path: str | Path) -> "Config":
@@ -168,4 +243,5 @@ class Config:
             return Config(
                 base_currency=Config.DEFAULT_BASE_CURRENCY,
                 degiro_configuration=DegiroConfig.default(),
+                bitvavo_configuration=BitvavoConfig.default(),
             )

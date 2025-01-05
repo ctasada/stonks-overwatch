@@ -1,6 +1,7 @@
 import logging
 
 from stonks_overwatch.config import Config
+from stonks_overwatch.services.bitvavo.portfolio import PortfolioService as BitvavoPortfolioService
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.portfolio import PortfolioService as DeGiroPortfolioService
 from stonks_overwatch.utils.localization import LocalizationUtility
@@ -14,11 +15,15 @@ class PortfolioAggregatorService:
         self.degiro_portfolio = DeGiroPortfolioService(
             degiro_service=self.degiro_service,
         )
+        self.bitvavo_portfolio = BitvavoPortfolioService()
 
     def get_portfolio(self) -> list[dict]:
         portfolio = []
         if Config.default().is_degiro_enabled():
             portfolio += self.degiro_portfolio.get_portfolio()
+
+        if Config.default().is_bitvavo_enabled():
+            portfolio += self.bitvavo_portfolio.get_portfolio()
 
         portfolio_total_value = sum([entry["value"] for entry in portfolio])
 
@@ -45,6 +50,13 @@ class PortfolioAggregatorService:
             total_cash += degiro["totalCash"]
             portfolio_total_value += degiro["currentValue"]
             total_deposit_withdrawal += degiro["totalDepositWithdrawal"]
+
+        if Config.default().is_bitvavo_enabled():
+            bitvavo = self.bitvavo_portfolio.get_portfolio_total()
+            total_profit_loss += bitvavo["total_pl"]
+            total_cash += bitvavo["totalCash"]
+            portfolio_total_value += bitvavo["currentValue"]
+            total_deposit_withdrawal += bitvavo["totalDepositWithdrawal"]
 
         roi = (portfolio_total_value / total_deposit_withdrawal - 1) * 100
 
@@ -93,5 +105,8 @@ class PortfolioAggregatorService:
         historical_value = []
         if Config.default().is_degiro_enabled():
             historical_value += self.degiro_portfolio.calculate_historical_value()
+
+        if Config.default().is_bitvavo_enabled():
+            historical_value += self.bitvavo_portfolio.calculate_historical_value()
 
         return self.__merge_historical_values(historical_value)
