@@ -73,3 +73,25 @@ class PortfolioAggregatorService:
         }
 
         return total_portfolio
+
+    @staticmethod
+    def __merge_historical_values(historical_values: list[dict]) -> list[dict]:
+        merged = {}
+        for entry in historical_values:
+            date = entry["x"]
+            value = entry["y"]
+            if date not in merged:
+                merged[date] = 0.0
+            merged[date] += float(value)
+
+        # FIXME: We can avoid this double conversion by modifying the integration results
+        merged = [{"x": date, "y": value} for date, value in sorted(merged.items())]
+
+        return merged
+
+    def calculate_historical_value(self) -> list[dict]:
+        historical_value = []
+        if Config.default().is_degiro_enabled():
+            historical_value += self.degiro_portfolio.calculate_historical_value()
+
+        return self.__merge_historical_values(historical_value)
