@@ -54,8 +54,8 @@
                     <input type="radio" class="btn-check" name="portfolioTime" id="5YButton" autocomplete="off">
                     <label class="btn btn-outline-primary" for="5YButton">5Y</label>
 
-                    <input type="radio" class="btn-check" name="portfolioTime" id="maxButton" autocomplete="off" checked>
-                    <label class="btn btn-outline-primary" for="maxButton">MAX</label>
+                    <input type="radio" class="btn-check" name="portfolioTime" id="allButton" autocomplete="off" checked>
+                    <label class="btn btn-outline-primary" for="allButton">ALL</label>
                 </div>
             </div>
         </div>
@@ -67,9 +67,12 @@
 
 <script>
     const PortfolioTypes = {
-        VALUE: "Value",
-        PERFORMANCE: "Performance",
+        VALUE: "value",
+        PERFORMANCE: "performance",
     }
+
+    const URL = "{% url 'dashboard' %}"
+    const HOST = window.location.protocol + "//" + window.location.host
 
     const TimeRanges = {
         YTD: "YTD",
@@ -82,7 +85,7 @@
         Y1: "1Y",
         Y3: "3Y",
         Y5: "5Y",
-        MAX: "MAX",
+        ALL: "ALL",
     }
 
     function getSelectedPortfolioType() {
@@ -117,9 +120,9 @@
                 return TimeRanges.Y3
             case "5YButton":
                 return TimeRanges.Y5
-            case "maxButton":
+            case "allButton":
             default:
-                return TimeRanges.MAX
+                return TimeRanges.ALL
         }
     }
 
@@ -161,8 +164,8 @@
     $('#5YButton').on('click', function () {
         drawPortfolio(getSelectedPortfolioType(), TimeRanges.Y5)
     })
-    $('#maxButton').on('click', function () {
-        drawPortfolio(getSelectedPortfolioType(), TimeRanges.MAX)
+    $('#allButton').on('click', function () {
+        drawPortfolio(getSelectedPortfolioType(), TimeRanges.ALL)
     })
     // Customize colors with https://www.npmjs.com/package/@seahsky/chartjs-plugin-autocolors#customize
     const autocolors = window['@seahsky/chartjs-plugin-autocolors'];
@@ -232,7 +235,7 @@
                 config.minDate = Math.max.apply(null, [minimumDate, fiveYearsAgo])
                 config.timeUnit = 'month'
                 break
-            case TimeRanges.MAX:
+            case TimeRanges.ALL:
                 config.minDate = minimumDate
                 config.timeUnit = 'month'
                 break
@@ -240,79 +243,56 @@
         return config
     }
 
-    function drawPortfolio(portfolioType, timeRange) {
-        console.log("Drawing Portfolio Graph: " + portfolioType + " / " + timeRange);
-
+    function getTooltipLabel(portfolioType) {
         if (portfolioType === PortfolioTypes.PERFORMANCE) {
-            drawPortfolioPerformance(timeRange)
+            return function (context) {
+                let label = context.dataset.label || '';
+
+                if (label) {
+                    label += ': ';
+                }
+                if (context.parsed.y !== null) {
+                    label += (context.parsed.y * 100).toFixed(2) + "%";
+                }
+                return label;
+            }
         } else {
-            drawPortfolioValue(timeRange)
+            return function (context) {
+                let label = context.dataset.label || '';
+
+                if (label) {
+                    label += ': ';
+                }
+                if (context.parsed.y !== null) {
+                    label += new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(context.parsed.y);
+                }
+                return label;
+            }
         }
     }
 
-    function drawPortfolioValue(timeRange) {
-        const dataValue = {
-            datasets: [{
-                label: 'Portfolio Value',
-                    data: {{ portfolio.value.portfolio_value | safe }},
-                stepped: false,
-                    lineTension: 0.5
-            }],
-      };
-    const minimumDate = new Date('{{ portfolio.value.portfolio_value.0.x }}')
-
-    let currencyTooltipLabel = function (context) {
-        let label = context.dataset.label || '';
-
-        if (label) {
-            label += ': ';
+    function getTicksCallback(portfolioType) {
+        if (portfolioType === PortfolioTypes.PERFORMANCE) {
+            return function (value, index, ticks) {
+                return (value * 100).toFixed(2) + "%";
+            }
+        } else {
+            return function (value, index, ticks) {
+                return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(value);
+            }
         }
-        if (context.parsed.y !== null) {
-            label += new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(context.parsed.y);
-        }
-        return label;
     }
 
-    let ticksCallback = function (value, index, ticks) {
-        return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(value);
-    }
-
-    redrawPortfolioGraph(dataValue, ticksCallback, currencyTooltipLabel, timeRange, minimumDate)
-    }
-
-    function drawPortfolioPerformance(timeRange) {
-        const dataPerformance = {
+    function drawPortfolio(portfolioType, timeRange) {
+        const datasets = {
             datasets: [
                 {
-                    label: 'Portfolio Performance',
-                    data: {{ portfolio.performance | safe }},
+                    data: [],
                     stepped: false,
-                    lineTension: 0.5
-            }],
+                    lineTension: 0.1
+                }
+            ],
         };
-        const minimumDate = new Date('{{ portfolio.performance.0.x }}')
-
-        let percentageTooltipLabel = function (context) {
-            let label = context.dataset.label || '';
-
-            if (label) {
-                label += ': ';
-            }
-            if (context.parsed.y !== null) {
-                label += (context.parsed.y * 100).toFixed(2) + "%";
-            }
-            return label;
-        }
-
-        let ticksCallback = function (value, index, ticks) {
-            return (value * 100).toFixed(2) + "%";
-        }
-
-        redrawPortfolioGraph(dataPerformance, ticksCallback, percentageTooltipLabel, timeRange, minimumDate)
-    }
-
-    function redrawPortfolioGraph(datasets, ticksCallback, tooltipLabelCallback, timeRange, minimumDate) {
-        const timeRangeConfig = getTimeRangeConfig(timeRange, minimumDate)
 
         const configPortfolio = {
             type: 'line',
@@ -321,21 +301,10 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    x: {
-                        type: 'time',
-                        min: timeRangeConfig.minDate,
-                        max: timeRangeConfig.maxDate,
-                        time: {
-                            // Luxon format string
-                            tooltipFormat: 'DD',
-                            unit: timeRangeConfig.timeUnit,
-                            round: timeRangeConfig.timeRound,
-                        },
-                    },
                     y: {
                         beginAtZero: false,
                         ticks: {
-                            callback: ticksCallback,
+                            callback: getTicksCallback(portfolioType),
                         }
                     }
                 },
@@ -350,21 +319,58 @@
                     },
                     tooltip: {
                         callbacks: {
-                            label: tooltipLabelCallback,
+                            label: getTooltipLabel(portfolioType),
                         }
                     }
                 }
             },
         };
 
-        let chartStatus = Chart.getChart("portofolio-chart"); // <canvas> id
-        if (chartStatus !== undefined) {
-            chartStatus.destroy();
+        let chart = Chart.getChart("portofolio-chart"); // <canvas> id
+        if (chart === undefined) {
+            chart = new Chart(document.getElementById("portofolio-chart").getContext("2d"), configPortfolio);
+        } else {
+            chart.data = configPortfolio.data
+            chart.options = configPortfolio.options
         }
 
-        let portofolioChart = new Chart(document.getElementById("portofolio-chart").getContext("2d"), configPortfolio);
+        let url = HOST + URL + "?format=json&type=" + portfolioType + "&interval=" + timeRange
+        // Fetch JSON data from a URL and update the chart
+        fetch(url) // Replace with your JSON URL
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(json => {
+                if (portfolioType === PortfolioTypes.PERFORMANCE) {
+                    data = json.portfolio.performance
+                } else {
+                    data = json.portfolio.value.portfolio_value
+                }
+
+                const timeRangeConfig = getTimeRangeConfig(timeRange, data[0].x)
+                chart.data.datasets[0].data = data;
+                chart.options.scales.x = {
+                    type: 'time',
+                    min: timeRangeConfig.minDate,
+                    max: timeRangeConfig.maxDate,
+                    time: {
+                        // Luxon format string
+                        tooltipFormat: 'DD',
+                        unit: timeRangeConfig.timeUnit,
+                        round: timeRangeConfig.timeRound,
+                    },
+                }
+
+                chart.update();
+            })
+            .catch(error => {
+                console.error('Error fetching the data:', error);
+            });
     }
 
-    drawPortfolio(PortfolioTypes.VALUE, TimeRanges.MAX)
+    drawPortfolio(PortfolioTypes.VALUE, TimeRanges.ALL)
 </script>
 {% endblock %}

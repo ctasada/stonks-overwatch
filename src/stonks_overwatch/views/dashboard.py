@@ -1,52 +1,140 @@
 import logging
 from collections import defaultdict
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, TypedDict
 
 import pandas as pd
+from django.core.cache import cache
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views import View
 
-from stonks_overwatch.config import Config
-from stonks_overwatch.services.degiro.degiro_service import DeGiroService
-from stonks_overwatch.services.degiro.deposits import DepositsService
-from stonks_overwatch.services.degiro.portfolio import PortfolioService
+from stonks_overwatch.services.deposits_aggregator import DepositsAggregatorService
+from stonks_overwatch.services.portfolio_aggregator import PortfolioAggregatorService
 from stonks_overwatch.utils.localization import LocalizationUtility
 
 
+@dataclass
+class PortfolioMetrics:
+    total_return: float
+    annualized_return: float
+    cumulative_returns: dict[datetime, float]
+    total_days: int
+    total_cashflows: float
+
+class PortfolioData(TypedDict):
+    x: str  # date
+    y: float  # value
+
 class Dashboard(View):
+    """Dashboard view handling portfolio performance and value visualization.
+    This view provides both HTML and JSON endpoints for accessing portfolio data,
+    with configurable time intervals and view types. Data is cached to optimize
+    performance.
+    """
+
     logger = logging.getLogger("stocks_portfolio.dashboard.views")
+    CACHE_KEY_PORTFOLIO = "portfolio_value"
+    CACHE_TIMEOUT = 60 * 5  # 5 minutes
+
+    VALID_INTERVALS = frozenset({"YTD", "MTD", "1D", "1W", "1M", "3M", "6M", "1Y", "3Y", "5Y", "ALL"})
+    VALID_VIEWS = frozenset({"performance", "value"})
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.deposits = DepositsAggregatorService()
+        self.portfolio = PortfolioAggregatorService()
 
-        self.degiro_service = DeGiroService()
-
-        self.degiro_deposits = DepositsService(
-            degiro_service=self.degiro_service,
-        )
-        self.degiro_portfolio = PortfolioService(
-            degiro_service=self.degiro_service,
-        )
-
-    def get(self, request):
+    def get(self, request) -> JsonResponse | HttpResponse:
         """Handle GET request for dashboard view."""
-        portfolio_value = []
-        if Config.default().is_degiro_enabled():
-            portfolio_value += self.degiro_portfolio.calculate_historical_value()
+        if request.GET.get("format") == "json":
+            return self._handle_json_request(request)
 
-        performance_twr = self._calculate_performance_twr(portfolio_value)
+        return render(request, "dashboard.html", {})
 
-        context = {
+    def _handle_json_request(self, request) -> JsonResponse:
+        """Process JSON format request and return portfolio data."""
+        interval = self._parse_request_interval(request)
+        view = self._parse_request_view(request)
+
+        self.logger.debug(f"Rendering dashboard view with interval: {interval} and view type: {view}")
+
+        portfolio_value = self._get_portfolio_value()
+
+        start_date = self._get_interval_start_date(interval)
+        if start_date:
+            portfolio_value = [item for item in portfolio_value if item['x'] >= start_date]
+        else:
+            start_date = portfolio_value[0]['x']
+
+        performance_twr = self._calculate_performance_twr(portfolio_value, start_date)
+        return JsonResponse({
             "portfolio": {
                 "value": {"portfolio_value": portfolio_value},
                 "performance": performance_twr,
-            },
-        }
+            }
+        })
 
-        return render(request, "dashboard.html", context)
+    @staticmethod
+    def _get_interval_start_date(interval: str) -> str|None:  # noqa: C901
+        """Get start date for the given interval."""
+        today = datetime.today()
+        match interval:
+            case "YTD":
+                return today.replace(month=1, day=1).strftime(LocalizationUtility.DATE_FORMAT)
+            case "MTD":
+                return today.replace(day=1).strftime(LocalizationUtility.DATE_FORMAT)
+            case "1D":
+                return (today - pd.DateOffset(days=1)).strftime(LocalizationUtility.DATE_FORMAT)
+            case "1W":
+                return (today - pd.DateOffset(weeks=1)).strftime(LocalizationUtility.DATE_FORMAT)
+            case "1M":
+                return (today - pd.DateOffset(months=1)).strftime(LocalizationUtility.DATE_FORMAT)
+            case "3M":
+                return (today - pd.DateOffset(months=3)).strftime(LocalizationUtility.DATE_FORMAT)
+            case "6M":
+                return (today - pd.DateOffset(months=6)).strftime(LocalizationUtility.DATE_FORMAT)
+            case "1Y":
+                return (today - pd.DateOffset(years=1)).strftime(LocalizationUtility.DATE_FORMAT)
+            case "3Y":
+                return (today - pd.DateOffset(years=3)).strftime(LocalizationUtility.DATE_FORMAT)
+            case "5Y":
+                return (today - pd.DateOffset(years=5)).strftime(LocalizationUtility.DATE_FORMAT)
+            case _:
+                return None
 
-    def _calculate_twr(self, dates: List[str], values: List[float], cashflows: List[float]) -> dict:
+    def _parse_request_interval(self, request) -> str:
+        """Parse interval from request query parameters."""
+        interval = request.GET.get("interval", "YTD")
+        if interval not in Dashboard.VALID_INTERVALS:
+            self.logger.warning(f"Invalid time range provided: {interval}. Defaulting to 'YTD'.")
+            interval = "YTD"
+
+        return interval
+
+    def _parse_request_view(self, request) -> str:
+        """Parse view type from request query parameters."""
+        view = request.GET.get("type", "value")
+        if view not in Dashboard.VALID_VIEWS:
+            self.logger.warning(f"Invalid view type provided: {view}. Defaulting to 'value'.")
+            view = "value"
+
+        return view
+
+    def _get_portfolio_value(self) -> List[Dict[str, float]]:
+        """Get historical portfolio value."""
+        portfolio_value = cache.get(Dashboard.CACHE_KEY_PORTFOLIO)
+
+        if portfolio_value is None:
+            portfolio_value = self.portfolio.calculate_historical_value()
+
+            cache.set(Dashboard.CACHE_KEY_PORTFOLIO, portfolio_value, timeout=Dashboard.CACHE_TIMEOUT)
+
+        return portfolio_value
+
+    @staticmethod
+    def _calculate_twr(dates: List[str], values: List[float], cashflows: List[float]) -> PortfolioMetrics:
         """
         Calculate Time-Weighted Return (TWR) for an investment portfolio.
 
@@ -105,13 +193,13 @@ class Dashboard(View):
         annualized_return = (1 + total_return) ** (365.25 / total_days) - 1
 
         # Prepare results
-        return {
-            'total_return': total_return,
-            'annualized_return': annualized_return,
-            'cumulative_returns': cumulative_returns,
-            'total_days': total_days,
-            'total_cashflows': sum(cashflows)
-        }
+        return PortfolioMetrics(
+            total_return=total_return,
+            annualized_return=annualized_return,
+            cumulative_returns=cumulative_returns,
+            total_days=total_days,
+            total_cashflows=sum(cashflows)
+        )
 
     def _calculate_performance_twr(
             self,
@@ -129,7 +217,7 @@ class Dashboard(View):
             List of dictionaries containing dates and cumulative returns
         """
         deposits = sorted(
-            self.degiro_deposits.get_cash_deposits(),
+            self.deposits.get_cash_deposits(),
             key=lambda k: k["date"]
         )
 
@@ -162,8 +250,6 @@ class Dashboard(View):
         twr = self._calculate_twr(dates, market_values, daily_cash_flows)
 
         return [
-            {
-                "x": LocalizationUtility.format_date_from_date(k),
-                "y": v
-            } for k, v in twr['cumulative_returns'].items()
+            PortfolioData(x=LocalizationUtility.format_date_from_date(k), y=v)
+                for k, v in twr.cumulative_returns.items()
         ]
