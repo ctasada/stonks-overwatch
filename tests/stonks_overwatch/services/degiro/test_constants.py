@@ -1,5 +1,5 @@
 import pytest
-from stonks_overwatch.utils.constants import CurrencyFX, ProductType, TransactionType
+from stonks_overwatch.services.degiro.constants import CurrencyFX, ProductType, TransactionType
 
 
 def test_transaction_type_from_int():

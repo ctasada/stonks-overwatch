@@ -1,14 +1,16 @@
 import logging
+from typing import List
 
 from stonks_overwatch.repositories.degiro.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.repositories.degiro.product_info_repository import ProductInfoRepository
+from stonks_overwatch.services.models import AccountOverview
 from stonks_overwatch.utils.localization import LocalizationUtility
 
 
 class AccountOverviewService:
     logger = logging.getLogger("stocks_portfolio.account_overview_data")
 
-    def get_account_overview(self) -> list:
+    def get_account_overview(self) -> List[AccountOverview]:
         # FETCH DATA
         account_overview = CashMovementsRepository.get_cash_movements_raw()
 
@@ -51,25 +53,24 @@ class AccountOverviewService:
                 )
 
             overview.append(
-                {
-                    "date": LocalizationUtility.format_date_from_date(cash_movement["date"]),
-                    "time": LocalizationUtility.format_time_from_date(cash_movement["date"]),
-                    "valueDate": LocalizationUtility.format_date_from_date(cash_movement["valueDate"]),
-                    "valueTime": LocalizationUtility.format_time_from_date(cash_movement["valueDate"]),
-                    "stockName": stock_name,
-                    "stockSymbol": stock_symbol,
-                    "description": cash_movement["description"],
-                    "type": cash_movement["type"],
-                    "typeStr": cash_movement["type"].replace("_", " ").title(),
-                    "currency": cash_movement["currency"],
-                    "change": cash_movement.get("change", ""),
-                    "formatedChange": formated_change,
-                    "totalBalance": total_balance,
-                    "formatedTotalBalance": formated_total_balance,
-                    # Seems that this value is the proper one for Dividends. Checking ...
-                    "unsettledCash": unsettled_cash,
-                    "formatedUnsettledCash": formated_unsettled_cash,
-                }
+                AccountOverview(
+                    date=LocalizationUtility.format_date_from_date(cash_movement["date"]),
+                    time=LocalizationUtility.format_time_from_date(cash_movement["date"]),
+                    value_date=LocalizationUtility.format_date_from_date(cash_movement["valueDate"]),
+                    value_time=LocalizationUtility.format_time_from_date(cash_movement["valueDate"]),
+                    stock_name=stock_name,
+                    stock_symbol=stock_symbol,
+                    description=cash_movement["description"],
+                    type=cash_movement["type"],
+                    type_str=cash_movement["type"].replace("_", " ").title(),
+                    currency=cash_movement["currency"],
+                    change=cash_movement.get("change", 0.0),
+                    formated_change=formated_change,
+                    total_balance=total_balance,
+                    formated_total_balance=formated_total_balance,
+                    unsettled_cash=unsettled_cash,
+                    formated_unsettled_cash=formated_unsettled_cash,
+                )
             )
 
         return overview

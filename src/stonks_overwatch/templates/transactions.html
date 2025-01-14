@@ -24,19 +24,19 @@
             <tr>
                 <td>{{ transaction.date }}<br><small class="fw-lighter">{{ transaction.time }}</small></td>
                 <td>
-                    {% if transaction.buysell == "Buy" %}
-                    <span class="green-pill">{{ transaction.buysell }}</span>
+                    {% if transaction.buy_sell == "Buy" %}
+                    <span class="green-pill">{{ transaction.buy_sell }}</span>
                     {% else %}
-                    <span class="red-pill">{{ transaction.buysell }}</span>
+                    <span class="red-pill">{{ transaction.buy_sell }}</span>
                     {% endif %}
                     <br>
-                    <small class="fw-lighter">{{ transaction.transactionType }}</small>
+                    <small class="fw-lighter">{{ transaction.transaction_type }}</small>
                 </td>
                 <td>{{ transaction.symbol }}<br><small class="fw-lighter">{{ transaction.name }}</small></td>
                 <td>{{ transaction.price }}</td>
                 <td>{{ transaction.quantity }}</td>
                 <td>{{ transaction.total }}</td>
-                <td>{{ transaction.totalInBaseCurrency }}</td>
+                <td>{{ transaction.total_in_base_currency }}</td>
                 <td>{{ transaction.fees }}</td>
             </tr>
             {% endfor %}

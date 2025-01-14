@@ -23,7 +23,7 @@ class Deposits(View):
         total_portfolio = self.portfolio_aggregator.get_portfolio_total()
 
         context = {
-            "total_deposits": total_portfolio["totalDepositWithdrawal_formatted"],
+            "total_deposits": total_portfolio.total_deposit_withdrawal_formatted,
             "deposits": deposits,
             "deposit_growth": {"value": cash_contributions},
         }

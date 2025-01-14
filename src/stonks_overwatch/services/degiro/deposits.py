@@ -1,10 +1,11 @@
-from typing import Any
+from typing import List
 
 import pandas as pd
 
 from stonks_overwatch.config import Config
 from stonks_overwatch.repositories.degiro.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
+from stonks_overwatch.services.models import Deposit
 from stonks_overwatch.utils.localization import LocalizationUtility
 
 
@@ -17,7 +18,7 @@ class DepositsService:
         self.degiro_service = degiro_service
         self.base_currency = Config.default().base_currency
 
-    def get_cash_deposits(self) -> list[dict[str, str | Any]]:
+    def get_cash_deposits(self) -> List[Deposit]:
         df = pd.DataFrame(CashMovementsRepository.get_cash_deposits_raw())
 
         df = df.sort_values(by="date", ascending=False)
@@ -28,20 +29,21 @@ class DepositsService:
         records = []
         for _, row in df.iterrows():
             records.append(
-                {
-                    "type": "Deposit" if row["change"] > 0 else "Withdrawal",
-                    "date": row["date"],
-                    "description": self._capitalize_deposit_description(row["description"]),
-                    "change": row["change"],
-                    "changeFormatted": LocalizationUtility.format_money_value(
+                Deposit(
+                    type="Deposit" if row["change"] > 0 else "Withdrawal",
+                    date=row["date"],
+                    description=self._capitalize_deposit_description(row["description"]),
+                    change=row["change"],
+                    change_formatted=LocalizationUtility.format_money_value(
                         value=row["change"], currency=self.base_currency
                     ),
-                }
+                )
             )
 
         return records
 
-    def _capitalize_deposit_description(self, input_string: str):
+    @staticmethod
+    def _capitalize_deposit_description(input_string: str):
         words = input_string.split()
         capitalized_words = [
             word if word == "iDEAL" else word.capitalize() for word in words

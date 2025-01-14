@@ -1,9 +1,10 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Any
+from typing import List
 
 from stonks_overwatch.services.bitvavo.bitvavo_service import BitvavoService
 from stonks_overwatch.services.bitvavo.transactions import TransactionsService
+from stonks_overwatch.services.models import Deposit
 from stonks_overwatch.utils.localization import LocalizationUtility
 
 
@@ -15,7 +16,7 @@ class DepositsService:
     ):
         self.bitvavo_service = BitvavoService()
 
-    def get_cash_deposits(self) -> list[dict[str, str | Any]]:
+    def get_cash_deposits(self) -> List[Deposit]:
         history = []
 
         deposits = self.bitvavo_service.deposit_history()
@@ -24,28 +25,32 @@ class DepositsService:
         for entry in deposits:
             date = datetime.fromtimestamp(entry["timestamp"] / 1000)
             amount = float(entry["amount"])
-            history.append({
-                "date": LocalizationUtility.format_date_from_date(date),
-                "type": "Deposit",
-                "change": amount,
-                "changeFormatted": LocalizationUtility.format_money_value(
-                    value=amount, currency=entry["symbol"]
-                ),
-                "description": "Bitvavo Deposit",
-            })
+            history.append(
+                Deposit(
+                    date=LocalizationUtility.format_date_from_date(date),
+                    type="Deposit",
+                    change=amount,
+                    change_formatted=LocalizationUtility.format_money_value(
+                        value=amount, currency=entry["symbol"]
+                    ),
+                    description="Bitvavo Deposit",
+                )
+            )
 
         for entry in withdrawal:
             date = datetime.fromtimestamp(entry["timestamp"] / 1000)
             amount = float(entry["amount"])
-            history.append({
-                "date": LocalizationUtility.format_date_from_date(date),
-                "type": "Withdrawal",
-                "change": amount,
-                "changeFormatted": LocalizationUtility.format_money_value(
-                    value=amount, currency=entry["symbol"]
-                ),
-                "description": "Bitvavo Withdrawal",
-            })
+            history.append(
+                Deposit(
+                    date=LocalizationUtility.format_date_from_date(date),
+                    type="Withdrawal",
+                    change=amount,
+                    change_formatted=LocalizationUtility.format_money_value(
+                        value=amount, currency=entry["symbol"]
+                    ),
+                    description="Bitvavo Withdrawal",
+                )
+            )
         return history
 
     @staticmethod

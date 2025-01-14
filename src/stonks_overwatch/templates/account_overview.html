@@ -18,14 +18,14 @@
         {% endblock table.thead %}
         {% block table.tbody %}
         <tbody>
-            {% for statement in accountOverview %}
+            {% for statement in account_overview %}
             <tr>
                 <td class="text-nowrap">{{ statement.date }}<br><small class="fw-lighter">{{ statement.time }}</small></td>
-                <td>{{ statement.typeStr }}</td>
-                <td>{{ statement.stockSymbol }}<br><small class="fw-lighter">{{ statement.stockName }}</small></td>
+                <td>{{ statement.type_str }}</td>
+                <td>{{ statement.stock_symbol }}<br><small class="fw-lighter">{{ statement.stock_name }}</small></td>
                 <td>{{ statement.description }}</td>
-                <td class="text-nowrap">{{ statement.formatedChange }}</td>
-                <td class="text-nowrap">{{ statement.valueDate }}<br><small class="fw-lighter">{{ statement.valueTime }}</small></td>
+                <td class="text-nowrap">{{ statement.formated_change }}</td>
+                <td class="text-nowrap">{{ statement.value_date }}<br><small class="fw-lighter">{{ statement.value_time }}</small></td>
             </tr>
             {% endfor %}
         </tbody>

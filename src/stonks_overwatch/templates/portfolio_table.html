@@ -27,15 +27,15 @@
     {% block items.table.body %}
         <tbody>
         {% for item in items %}
-            {% if item.isOpen %}
+            {% if item.is_open %}
                 <tr>
-                    {% if item.symbolUrl %}
-                    <td class="text-center align-middle"><img src="{{ item.symbolUrl }}" width="30" height="30" alt="{{ item.symbol }} logo" onerror="this.style.display='none'"></td>
+                    {% if item.symbol_url %}
+                    <td class="text-center align-middle"><img src="{{ item.symbol_url }}" width="30" height="30" alt="{{ item.symbol }} logo" onerror="this.style.display='none'"></td>
                     {% else %}
-                    <td class="text-center align-middle">{{ item.currencySymbol }}</td>
+                    <td class="text-center align-middle">{{ item.currency_symbol }}</td>
                     {% endif %}
                     <td>{{ item.symbol }}<br><small class="fw-lighter">{{ item.name }}</small></td>
-                    {% if item.category or item.exchangeAbbr %}
+                    {% if item.category or item.exchange_abbr %}
                     <td>
                         <div class="d-inline-flex gap-1">
                             {% if item.category %}
@@ -48,8 +48,8 @@
                             {% if item.exchangeAbbr %}
                             <small
                                     class="p-1 fw-lighter square-box border d-flex justify-content-center align-items-center"
-                                    data-bs-toggle="tooltip" title="{{ item.exchangeName }}">
-                                {{ item.exchangeAbbr }}
+                                    data-bs-toggle="tooltip" title="{{ item.exchange_name }}">
+                                {{ item.exchange_abbr }}
                             </small>
                             {% endif %}
                         </div>
@@ -62,24 +62,24 @@
                         <td>{{ item.shares }}</td>
                     {% endif %}
                     {% if show_columns.price %}
-                        <td data-bs-toggle="tooltip" title="{{ item.formattedPrice }}">{{ item.formattedBaseCurrencyPrice }}<br><small class="fw-lighter" data-bs-toggle="tooltip" title="{{ item.formattedBreakEvenPrice }}">{{ item.formattedBaseCurrencyBreakEvenPrice }}</small></td>
+                        <td data-bs-toggle="tooltip" title="{{ item.formatted_price }}">{{ item.formatted_base_currency_price }}<br><small class="fw-lighter" data-bs-toggle="tooltip" title="{{ item.formattedBreakEvenPrice }}">{{ item.formattedBaseCurrencyBreakEvenPrice }}</small></td>
                     {% endif %}
                     {% if show_columns.unrealized_gain %}
-                        {% if item.unrealizedGain > 0 %}
+                        {% if item.unrealized_gain > 0 %}
                             <td class="text-success">
                                 {% else %}
                             <td class="text-danger">
                         {% endif %}
-                    {{ item.formattedUnrealizedGain }}<br>
-                    {% if item.unrealizedGain > 0 %}
+                    {{ item.formatted_unrealized_gain }}<br>
+                    {% if item.unrealized_gain > 0 %}
                         <small class="fw-lighter bi bi-arrow-up-right">
-                    {% elif item.unrealizedGain < 0 %}
+                    {% elif item.unrealized_gain < 0 %}
                         <small class="fw-lighter bi bi-arrow-down-right">
-                    {% endif %}{{ item.percentageGain }}</small>
+                    {% endif %}{{ item.percentage_gain }}</small>
                     </td>
                     {% endif %}
-                    <td>{{ item.formattedBaseCurrencyValue }}</td>
-                    <td>{{ item.formattedPortfolioSize }}</td>
+                    <td>{{ item.formatted_base_currency_value }}</td>
+                    <td>{{ item.formatted_portfolio_size }}</td>
                 </tr>
             {% endif %}
         {% endfor %}

@@ -1,6 +1,6 @@
 import logging
 from datetime import date
-from typing import Any
+from typing import List
 
 import pandas as pd
 
@@ -8,6 +8,7 @@ from stonks_overwatch.config import Config
 from stonks_overwatch.services.bitvavo.deposits import DepositsService as BitvavoDepositsService
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.deposits import DepositsService as DeGiroDepositsService
+from stonks_overwatch.services.models import Deposit
 from stonks_overwatch.utils.localization import LocalizationUtility
 
 
@@ -57,7 +58,7 @@ class DepositsAggregatorService:
 
         return dataset
 
-    def get_cash_deposits(self) -> list[dict[str, str | Any]]:
+    def get_cash_deposits(self) -> List[Deposit]:
         deposits = []
         if Config.default().is_degiro_enabled():
             deposits += self.degiro_deposits.get_cash_deposits()
@@ -65,6 +66,6 @@ class DepositsAggregatorService:
         if Config.default().is_bitvavo_enabled():
             deposits += self.bitvavo_deposits.get_cash_deposits()
 
-        deposits = sorted(deposits, key=lambda x: x["date"], reverse=True)
+        deposits = sorted(deposits, key=lambda x: x.date, reverse=True)
 
         return deposits

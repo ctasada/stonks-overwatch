@@ -6,10 +6,10 @@
 {% block content %}
 <div class="row">
     <div class="col-5">
-        <label for="currentValue" class="col-form-label-p-0">Current Value: {{ total_portfolio.currentValue_formatted }}</label>
+        <label for="currentValue" class="col-form-label-p-0">Current Value: {{ total_portfolio.current_value_formatted }}</label>
     </div>
     <div class="col-5">
-        <label for="totalCash" class="col-form-label-p-0">Total Cash: {{ total_portfolio.totalCash_formatted }}</label>
+        <label for="totalCash" class="col-form-label-p-0">Total Cash: {{ total_portfolio.total_cash_formatted }}</label>
     </div>
     <div class="col-5">
         <label for="totalPL" class="col-form-label-p-0">Total P/L:
@@ -23,12 +23,12 @@
     </div>
     <div class="col-5">
         <label for="totalROI" class="col-form-label-p-0">ROI:
-            {% if total_portfolio.totalROI > 0 %}
+            {% if total_portfolio.total_roi > 0 %}
             <span class="fw-semibold text-success">
                 {% else %}
                 <span class="fw-semibold text-danger">
                     {% endif %}
-                    {{ total_portfolio.totalROI_formatted }}</span>
+                    {{ total_portfolio.total_roi_formatted }}</span>
         </label>
     </div>
 </div>

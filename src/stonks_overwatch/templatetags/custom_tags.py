@@ -1,3 +1,5 @@
+import dataclasses
+
 from django import template
 from django.utils import timezone
 
@@ -19,7 +21,7 @@ def show_total_portfolio() -> dict:
     portfolio = PortfolioAggregatorService()
     total_portfolio = portfolio.get_portfolio_total()
 
-    return {"total_portfolio": total_portfolio}
+    return {"total_portfolio": dataclasses.asdict(total_portfolio)}
 
 @register.simple_tag
 def is_connected_to_degiro() -> bool:

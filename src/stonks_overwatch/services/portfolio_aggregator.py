@@ -1,9 +1,11 @@
 import logging
+from typing import List
 
 from stonks_overwatch.config import Config
 from stonks_overwatch.services.bitvavo.portfolio import PortfolioService as BitvavoPortfolioService
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.portfolio import PortfolioService as DeGiroPortfolioService
+from stonks_overwatch.services.models import PortfolioEntry, TotalPortfolio
 from stonks_overwatch.utils.localization import LocalizationUtility
 
 
@@ -17,7 +19,7 @@ class PortfolioAggregatorService:
         )
         self.bitvavo_portfolio = BitvavoPortfolioService()
 
-    def get_portfolio(self) -> list[dict]:
+    def get_portfolio(self) -> List[PortfolioEntry]:
         portfolio = []
         if Config.default().is_degiro_enabled():
             portfolio += self.degiro_portfolio.get_portfolio()
@@ -25,18 +27,18 @@ class PortfolioAggregatorService:
         if Config.default().is_bitvavo_enabled():
             portfolio += self.bitvavo_portfolio.get_portfolio()
 
-        portfolio_total_value = sum([entry["value"] for entry in portfolio])
+        portfolio_total_value = sum([entry.value for entry in portfolio])
 
         # Calculate Stock Portfolio Size
         for entry in portfolio:
-            size = entry["value"] / portfolio_total_value
-            entry["portfolioSize"] = size
-            entry["formattedPortfolioSize"] = f"{size:.2%}"
+            size = entry.value / portfolio_total_value
+            entry.portfolio_Size = size
+            entry.formatted_portfolio_size = f"{size:.2%}"
 
         # FIXME: We need to merge the Cash balances. Concatenating is not enough
         return portfolio
 
-    def get_portfolio_total(self):
+    def get_portfolio_total(self) -> TotalPortfolio:
         base_currency = Config.default().base_currency
 
         total_profit_loss = 0.0
@@ -46,45 +48,43 @@ class PortfolioAggregatorService:
 
         if Config.default().is_degiro_enabled():
             degiro = self.degiro_portfolio.get_portfolio_total()
-            total_profit_loss += degiro["total_pl"]
-            total_cash += degiro["totalCash"]
-            portfolio_total_value += degiro["currentValue"]
-            total_deposit_withdrawal += degiro["totalDepositWithdrawal"]
+            total_profit_loss += degiro.total_pl
+            total_cash += degiro.total_cash
+            portfolio_total_value += degiro.current_value
+            total_deposit_withdrawal += degiro.total_deposit_withdrawal
 
         if Config.default().is_bitvavo_enabled():
             bitvavo = self.bitvavo_portfolio.get_portfolio_total()
-            total_profit_loss += bitvavo["total_pl"]
-            total_cash += bitvavo["totalCash"]
-            portfolio_total_value += bitvavo["currentValue"]
-            total_deposit_withdrawal += bitvavo["totalDepositWithdrawal"]
+            total_profit_loss += bitvavo.total_pl
+            total_cash += bitvavo.total_cash
+            portfolio_total_value += bitvavo.current_value
+            total_deposit_withdrawal += bitvavo.total_deposit_withdrawal
 
         roi = (portfolio_total_value / total_deposit_withdrawal - 1) * 100
 
-        total_portfolio = {
-            "total_pl": total_profit_loss,
-            "total_pl_formatted": LocalizationUtility.format_money_value(
+        return TotalPortfolio(
+            total_pl=total_profit_loss,
+            total_pl_formatted=LocalizationUtility.format_money_value(
                 value=total_profit_loss,
                 currency=base_currency,
             ),
-            "totalCash": total_cash,
-            "totalCash_formatted": LocalizationUtility.format_money_value(
+            total_cash=total_cash,
+            total_cash_formatted=LocalizationUtility.format_money_value(
                 value=total_cash,
                 currency=base_currency,
             ),
-            "currentValue": portfolio_total_value,
-            "currentValue_formatted": LocalizationUtility.format_money_value(
+            current_value=portfolio_total_value,
+            current_value_formatted=LocalizationUtility.format_money_value(
                 value=portfolio_total_value, currency=base_currency
             ),
-            "totalROI": roi,
-            "totalROI_formatted": "{:,.2f}%".format(roi),
-            "totalDepositWithdrawal": total_deposit_withdrawal,
-            "totalDepositWithdrawal_formatted": LocalizationUtility.format_money_value(
+            total_roi=roi,
+            total_roi_formatted="{:,.2f}%".format(roi),
+            total_deposit_withdrawal=total_deposit_withdrawal,
+            total_deposit_withdrawal_formatted=LocalizationUtility.format_money_value(
                 value=total_deposit_withdrawal,
                 currency=base_currency,
             ),
-        }
-
-        return total_portfolio
+        )
 
     @staticmethod
     def __merge_historical_values(historical_values: list[dict]) -> list[dict]:
