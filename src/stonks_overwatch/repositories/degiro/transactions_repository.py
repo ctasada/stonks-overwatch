@@ -3,7 +3,7 @@ from datetime import datetime
 from django.db import connection
 
 from stonks_overwatch.models import DeGiroTransactions
-from stonks_overwatch.utils.constants import TransactionType
+from stonks_overwatch.services.degiro.constants import TransactionType
 from stonks_overwatch.utils.db_utils import dictfetchall
 
 

@@ -1,7 +1,8 @@
 import logging
+from typing import List
 
 from stonks_overwatch.repositories.degiro.product_info_repository import ProductInfoRepository
-from stonks_overwatch.services.degiro.account_overview import AccountOverviewService
+from stonks_overwatch.services.degiro.account_overview import AccountOverview, AccountOverviewService
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.utils.localization import LocalizationUtility
 
@@ -17,13 +18,13 @@ class DividendsService:
         self.account_overview = account_overview
         self.degiro_service = degiro_service
 
-    def get_dividends(self):
+    def get_dividends(self) -> List[AccountOverview]:
         overview = self.account_overview.get_account_overview()
 
         dividends = []
         for transaction in overview:
             # We don't include 'Dividendbelasting' because the 'value' seems to already include the taxes
-            if transaction["description"] in [
+            if transaction.description in [
                 "Dividend",
                 "Dividendbelasting",
                 "Vermogenswinst",
@@ -32,7 +33,7 @@ class DividendsService:
 
         return dividends
 
-    def get_upcoming_dividends(self):
+    def get_upcoming_dividends(self) -> List[AccountOverview]:
         result = []
         try:
             upcoming_payments = self.degiro_service.get_client().get_upcoming_payments(raw=True)
@@ -45,14 +46,14 @@ class DividendsService:
                     amount = float(payment["amount"])
                     currency = payment["currency"]
                     result.append(
-                        {
-                            "date": payment["payDate"],
-                            "stockName": stock_name,
-                            "stockSymbol": stock_symbol,
-                            "currency": currency,
-                            "change": amount,
-                            "formatedChange": LocalizationUtility.format_money_value(value=amount, currency=currency),
-                        }
+                        AccountOverview(
+                            date=payment["payDate"],
+                            stock_name=stock_name,
+                            stock_symbol=stock_symbol,
+                            currency=currency,
+                            change=amount,
+                            formated_change=LocalizationUtility.format_money_value(value=amount, currency=currency),
+                        )
                     )
 
             return result

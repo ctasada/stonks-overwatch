@@ -1,0 +1,98 @@
+from dataclasses import asdict, dataclass
+from typing import Any, Dict
+
+from stonks_overwatch.utils.constants import ProductType
+
+
+@dataclass
+class AccountOverview:
+    date: str = ""
+    time: str = ""
+    value_date: str = ""
+    value_time: str = ""
+    stock_name: str = ""
+    stock_symbol: str = ""
+    description: str = ""
+    type: str = ""
+    type_str: str = ""
+    currency: str = ""
+    change: float = 0.0
+    formated_change: str = ""
+    total_balance: str = ""
+    formated_total_balance: str = ""
+    unsettled_cash: str = ""
+    formated_unsettled_cash: str = ""
+
+@dataclass
+class Deposit:
+    date: str
+    type: str
+    change: float
+    change_formatted: str
+    description: str
+
+
+@dataclass
+class PortfolioEntry:
+    name: str = ""
+    symbol: str = ""
+    sector: str = ""
+    industry: str = ""
+    category: str = ""
+    exchange_id: str = ""
+    exchange_abbr: str = ""
+    exchange_name: str = ""
+    country: str = ""
+    product_type: ProductType = None
+    shares: str = ""
+    product_currency: str = ""
+    price: float = 0.0
+    formatted_price: str = ""
+    formatted_base_currency_price: str = ""
+    break_even_price: float = 0.0
+    formatted_break_even_price: str = ""
+    formatted_base_currency_break_even_price: str = ""
+    value: float = 0.0
+    formatted_value: str = ""
+    base_currency_value: float = 0.0
+    formatted_base_currency_value: str = ""
+    is_open: bool = False
+    unrealized_gain: float = 0.0
+    formatted_unrealized_gain: str = ""
+    percentage_gain: str = ""
+    symbol_url: str = ""
+    portfolio_size: float = 0.0
+    formatted_portfolio_size: str = ""
+
+    def to_dict(self) -> Dict[str, Any]:
+        # Convert to dict and handle enum specifically
+        result = asdict(self)
+        result['product_type'] = self.product_type.value
+        return result
+
+@dataclass
+class TotalPortfolio:
+    total_pl: float
+    total_pl_formatted: str
+    total_cash: float
+    total_cash_formatted: str
+    current_value: float
+    current_value_formatted: str
+    total_roi: float
+    total_roi_formatted: str
+    total_deposit_withdrawal: float
+    total_deposit_withdrawal_formatted: str
+
+@dataclass
+class Transaction:
+    name: str
+    symbol: str
+    date: str
+    time: str
+    buy_sell: str
+    transaction_type: str
+    price: str
+    quantity: float
+    total: str
+    total_in_base_currency: str
+    fees: str

@@ -52,36 +52,36 @@ class TestAccountOverviewService(TestCase):
         overview = self.account_overview.get_account_overview()
 
         assert len(overview) == 8
-        assert overview[0]["date"] == "2024-09-16"
-        assert overview[0]["time"] == "18:46:52"
-        assert overview[0]["valueDate"] == "2024-09-16"
-        assert overview[0]["valueTime"] == "18:46:52"
-        assert overview[0]["stockName"] == ""
-        assert overview[0]["stockSymbol"] == ""
-        assert overview[0]["description"] == "Degiro Cash Sweep Transfer"
-        assert overview[0]["type"] == "FLATEX_CASH_SWEEP"
-        assert overview[0]["typeStr"] == "Flatex Cash Sweep"
-        assert overview[0]["currency"] == "EUR"
-        assert overview[0]["change"] == -14.36
-        assert overview[0]["formatedChange"] == "€ -14.36"
-        assert overview[0]["totalBalance"] == 0
-        assert overview[0]["formatedTotalBalance"] == ""
-        assert overview[0]["unsettledCash"] == 0
-        assert overview[0]["formatedUnsettledCash"] == ""
+        assert overview[0].date == "2024-09-16"
+        assert overview[0].time == "18:46:52"
+        assert overview[0].value_date == "2024-09-16"
+        assert overview[0].value_time == "18:46:52"
+        assert overview[0].stock_name == ""
+        assert overview[0].stock_symbol == ""
+        assert overview[0].description == "Degiro Cash Sweep Transfer"
+        assert overview[0].type == "FLATEX_CASH_SWEEP"
+        assert overview[0].type_str == "Flatex Cash Sweep"
+        assert overview[0].currency == "EUR"
+        assert overview[0].change == -14.36
+        assert overview[0].formated_change == "€ -14.36"
+        assert overview[0].total_balance == 0
+        assert overview[0].formated_total_balance == ""
+        assert overview[0].unsettled_cash == 0
+        assert overview[0].formated_unsettled_cash == ""
 
-        assert overview[1]["date"] == "2024-08-29"
-        assert overview[1]["time"] == "14:33:41"
-        assert overview[1]["valueDate"] == "2024-08-29"
-        assert overview[1]["valueTime"] == "14:33:41"
-        assert overview[1]["stockName"] == "Apple Inc"
-        assert overview[1]["stockSymbol"] == "AAPL"
-        assert overview[1]["description"] == "Koop 2 @ 100,000 EUR"
-        assert overview[1]["type"] == "TRANSACTION"
-        assert overview[1]["typeStr"] == "Transaction"
-        assert overview[1]["currency"] == "EUR"
-        assert overview[1]["change"] == -200.0
-        assert overview[1]["formatedChange"] == "€ -200.00"
-        assert overview[1]["totalBalance"] == 0
-        assert overview[1]["formatedTotalBalance"] == ""
-        assert overview[1]["unsettledCash"] == 0
-        assert overview[1]["formatedUnsettledCash"] == ""
+        assert overview[1].date == "2024-08-29"
+        assert overview[1].time == "14:33:41"
+        assert overview[1].value_date == "2024-08-29"
+        assert overview[1].value_time == "14:33:41"
+        assert overview[1].stock_name == "Apple Inc"
+        assert overview[1].stock_symbol == "AAPL"
+        assert overview[1].description == "Koop 2 @ 100,000 EUR"
+        assert overview[1].type == "TRANSACTION"
+        assert overview[1].type_str == "Transaction"
+        assert overview[1].currency == "EUR"
+        assert overview[1].change == -200.0
+        assert overview[1].formated_change == "€ -200.00"
+        assert overview[1].total_balance == 0
+        assert overview[1].formated_total_balance == ""
+        assert overview[1].unsettled_cash == 0
+        assert overview[1].formated_unsettled_cash == ""

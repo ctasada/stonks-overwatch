@@ -1,7 +1,9 @@
+
 from django.shortcuts import render
 from django.views import View
 
 from stonks_overwatch.services.portfolio_aggregator import PortfolioAggregatorService
+from stonks_overwatch.utils.constants import ProductType
 
 
 class Portfolio(View):
@@ -11,13 +13,14 @@ class Portfolio(View):
 
     def get(self, request):
         portfolio = self.portfolio_aggregator.get_portfolio()
-        stocks = [item for item in portfolio if item.get("productType") == "STOCK"]
-        trackers = [item for item in portfolio if item.get("productType") == "ETF"]
-        cash = [item for item in portfolio if item.get("productType") == "CASH"]
-        crypto = [item for item in portfolio if item.get("productType") == "CRYPTO"]
+
+        stocks = [item for item in portfolio if item.product_type == ProductType.STOCK]
+        trackers = [item for item in portfolio if item.product_type == ProductType.ETF]
+        cash = [item for item in portfolio if item.product_type == ProductType.CASH]
+        cryptos = [item for item in portfolio if item.product_type == ProductType.CRYPTO]
 
         context = {
-            "stocks": stocks,
+            "stocks": [stock.to_dict() for stock in stocks],
             "show_stocks_columns": {
                 "category": True,
                 "sector": True,
@@ -25,7 +28,7 @@ class Portfolio(View):
                 "price": True,
                 "unrealized_gain": True,
             },
-            "trackers": trackers,
+            "trackers": [tracker.to_dict() for tracker in trackers],
             "show_trackers_columns": {
                 "category": True,
                 "sector": True,
@@ -33,7 +36,7 @@ class Portfolio(View):
                 "price": True,
                 "unrealized_gain": True,
             },
-            "crypto": crypto,
+            "crypto": [crypto.to_dict() for crypto in cryptos],
             "show_crypto_columns": {
                 "category": False,
                 "sector": False,
@@ -41,7 +44,7 @@ class Portfolio(View):
                 "price": True,
                 "unrealized_gain": True,
             },
-            "cash": cash,
+            "cash": [currency.to_dict() for currency in cash],
             "show_cash_columns": {
                 "category": False,
                 "sector": False,

@@ -14,7 +14,7 @@ class AccountOverview(View):
         overview = self.account_overview.get_account_overview()
 
         context = {
-            "accountOverview": overview,
+            "account_overview": overview,
         }
 
         return render(request, "account_overview.html", context)

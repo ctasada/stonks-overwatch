@@ -5,8 +5,8 @@ from django.test import TestCase
 
 import pytest
 from stonks_overwatch.models import DeGiroProductQuotation
+from stonks_overwatch.services.degiro.constants import CurrencyFX
 from stonks_overwatch.services.degiro.currency_converter_service import CurrencyConverterService
-from stonks_overwatch.utils.constants import CurrencyFX
 from stonks_overwatch.utils.localization import LocalizationUtility
 
 

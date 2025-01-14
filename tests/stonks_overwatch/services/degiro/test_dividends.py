@@ -77,22 +77,22 @@ class TestDividendsService(TestCase):
         dividends = self.dividends_service.get_dividends()
         assert len(dividends) == 1
 
-        assert dividends[0]["date"] == "2021-03-12"
-        assert dividends[0]["time"] == "08:16:38"
-        assert dividends[0]["valueDate"] == "2021-03-11"
-        assert dividends[0]["valueTime"] == "23:59:59"
-        assert dividends[0]["stockName"] == "Microsoft Corp"
-        assert dividends[0]["stockSymbol"] == "MSFT"
-        assert dividends[0]["description"] == "Dividend"
-        assert dividends[0]["type"] == "CASH_TRANSACTION"
-        assert dividends[0]["typeStr"] == "Cash Transaction"
-        assert dividends[0]["currency"] == "USD"
-        assert dividends[0]["change"] == 8.4
-        assert dividends[0]["formatedChange"] == "$ 8.40"
-        assert dividends[0]["totalBalance"] == 0
-        assert dividends[0]["formatedTotalBalance"] == ""
-        assert dividends[0]["unsettledCash"] == 0
-        assert dividends[0]["formatedUnsettledCash"] == ""
+        assert dividends[0].date == "2021-03-12"
+        assert dividends[0].time == "08:16:38"
+        assert dividends[0].value_date == "2021-03-11"
+        assert dividends[0].value_time == "23:59:59"
+        assert dividends[0].stock_name == "Microsoft Corp"
+        assert dividends[0].stock_symbol == "MSFT"
+        assert dividends[0].description == "Dividend"
+        assert dividends[0].type == "CASH_TRANSACTION"
+        assert dividends[0].type_str == "Cash Transaction"
+        assert dividends[0].currency == "USD"
+        assert dividends[0].change == 8.4
+        assert dividends[0].formated_change == "$ 8.40"
+        assert dividends[0].total_balance == 0
+        assert dividends[0].formated_total_balance == ""
+        assert dividends[0].unsettled_cash == 0
+        assert dividends[0].formated_unsettled_cash == ""
 
     def test_get_upcoming_dividends(self):
         with patch("requests_cache.CachedSession", requests.Session):

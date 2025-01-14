@@ -1,12 +1,13 @@
 import logging
 from datetime import datetime
+from typing import List
 
 import pandas as pd
 from django.shortcuts import render
 from django.views import View
 
 from stonks_overwatch.config import Config
-from stonks_overwatch.services.degiro.account_overview import AccountOverviewService
+from stonks_overwatch.services.degiro.account_overview import AccountOverview, AccountOverviewService
 from stonks_overwatch.services.degiro.currency_converter_service import CurrencyConverterService
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.dividends import DividendsService
@@ -47,11 +48,15 @@ class Dividends(View):
 
         return render(request, "dividends.html", context)
 
-    def _get_dividends_calendar(self, dividends_overview: list, upcoming_dividends: list):
+    def _get_dividends_calendar(
+            self,
+            dividends_overview: List[AccountOverview],
+            upcoming_dividends: List[AccountOverview]
+    ) -> dict:
         dividends_calendar = {}
         joined_dividends = dividends_overview + upcoming_dividends
         # After merging dividends and upcoming dividends, we need to sort the result
-        joined_dividends = sorted(joined_dividends, key=lambda x: x["date"], reverse=True)
+        joined_dividends = sorted(joined_dividends, key=lambda x: x.date, reverse=True)
 
         df = pd.DataFrame(joined_dividends)
         period_start = min(df["date"])
@@ -77,25 +82,25 @@ class Dividends(View):
 
         for transaction in joined_dividends:
             # Group dividends by month. We may only need the dividend name and amount
-            month_year = LocalizationUtility.format_date_to_month_year(transaction["date"])
-            day = LocalizationUtility.get_date_day(transaction["date"])
-            stock = transaction["stockSymbol"]
+            month_year = LocalizationUtility.format_date_to_month_year(transaction.date)
+            day = LocalizationUtility.get_date_day(transaction.date)
+            stock = transaction.stock_symbol
 
             month_entry = dividends_calendar.setdefault(month_year, {})
             days = month_entry.setdefault("days", {})
             day_entry = days.setdefault(day, {})
             stock_entry = day_entry.setdefault(stock, {})
-            transaction_change = transaction["change"]
+            transaction_change = transaction.change
 
-            currency = transaction["currency"]
-            payment_date = LocalizationUtility.convert_string_to_date(transaction["date"])
+            currency = transaction.currency
+            payment_date = LocalizationUtility.convert_string_to_date(transaction.date)
             if currency != self.base_currency:
                 transaction_change = self.currency_service.convert(
                     transaction_change, currency, self.base_currency, payment_date
                 )
                 currency = self.base_currency
 
-            stock_entry["stockName"] = transaction["stockName"]
+            stock_entry["stockName"] = transaction.stock_name
             stock_entry["isUpcoming"] = payment_date > today.date()
             stock_entry["change"] = stock_entry.setdefault("change", 0) + transaction_change
             stock_entry["currency"] = currency
@@ -105,16 +110,16 @@ class Dividends(View):
 
             month_entry.setdefault("dividends", []).append(
                 {
-                    "day": LocalizationUtility.get_date_day(transaction["date"]),
-                    "stockName": transaction["stockName"],
-                    "stockSymbol": transaction["stockSymbol"],
-                    "formatedChange": transaction["formatedChange"],
+                    "day": LocalizationUtility.get_date_day(transaction.date),
+                    "stockName": transaction.stock_name,
+                    "stockSymbol": transaction.stock_symbol,
+                    "formatedChange": transaction.formated_change,
                 }
             )
 
             # Number of Payouts in the month
             payouts = month_entry.setdefault("payouts", 0)
-            if transaction["change"] > 0:
+            if transaction.change > 0:
                 month_entry["payouts"] = payouts + 1
             # Total payout in the month
             total = month_entry.setdefault("total", 0)
@@ -151,7 +156,7 @@ class Dividends(View):
 
         return LocalizationUtility.format_money_value(value=total_dividends, currency=self.base_currency)
 
-    def _get_diversification(self, dividends_overview: dict) -> dict:
+    def _get_diversification(self, dividends_overview: List[AccountOverview]) -> dict:
         dividends_table = []
         dividends = {}
 
@@ -159,15 +164,15 @@ class Dividends(View):
         max_percentage = 0.0
 
         for entry in dividends_overview:
-            dividend_name = entry["stockName"]
+            dividend_name = entry.stock_name
             dividend_value = 0.0
             if dividend_name in dividends:
                 dividend_value = dividends[dividend_name]["value"]
 
-            dividend_currency = entry["currency"]
-            dividend_change = entry["change"]
+            dividend_currency = entry.currency
+            dividend_change = entry.change
             if dividend_currency != self.base_currency:
-                date = LocalizationUtility.convert_string_to_date(entry["date"])
+                date = LocalizationUtility.convert_string_to_date(entry.date)
                 dividend_change = self.currency_service.convert(
                     dividend_change, dividend_currency, self.base_currency, date
                 )

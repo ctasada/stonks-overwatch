@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import List, Optional
 
 from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
 
@@ -14,6 +14,8 @@ from stonks_overwatch.repositories.degiro.transactions_repository import Transac
 from stonks_overwatch.services.degiro.currency_converter_service import CurrencyConverterService
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.deposits import DepositsService
+from stonks_overwatch.services.models import PortfolioEntry, TotalPortfolio
+from stonks_overwatch.utils.constants import ProductType
 from stonks_overwatch.utils.datetime import DateTimeUtility
 from stonks_overwatch.utils.localization import LocalizationUtility
 
@@ -32,7 +34,7 @@ class PortfolioService:
             degiro_service=self.degiro_service,
         )
 
-    def get_portfolio(self) -> list[dict]:
+    def get_portfolio(self) -> List[PortfolioEntry]:
         portfolio_transactions = self.__get_porfolio_products()
 
         products_ids = [row["productId"] for row in portfolio_transactions]
@@ -93,85 +95,83 @@ class PortfolioService:
                     exchange_name = exchange["name"]
 
             my_portfolio.append(
-                {
-                    "name": info["name"],
-                    "symbol": info["symbol"],
-                    "sector": sector,
-                    "industry": industry,
-                    "category": info["category"],
-                    "exchangeId": exchange_id,
-                    **({"exchangeAbbr": exchange_abbr} if exchange_abbr is not None else {}),
-                    "exchangeName": exchange_name,
-                    "country": country,
-                    "productType": info["productType"],
-                    "shares": tmp["size"],
-                    "productCurrency": currency,
-                    "price": price,
-                    "formattedPrice": LocalizationUtility.format_money_value(value=price, currency=currency),
-                    **({"formattedBaseCurrencyPrice": LocalizationUtility.format_money_value(
+                PortfolioEntry(
+                    name=info["name"],
+                    symbol=info["symbol"],
+                    sector=sector,
+                    industry=industry,
+                    category=info["category"],
+                    exchange_id=exchange_id,
+                    exchange_abbr=exchange_abbr,
+                    exchange_name=exchange_name,
+                    country=country,
+                    product_type=ProductType.from_str(info["productType"]),
+                    shares=tmp["size"],
+                    product_currency=currency,
+                    price=price,
+                    formatted_price=LocalizationUtility.format_money_value(value=price, currency=currency),
+                    formatted_base_currency_price=LocalizationUtility.format_money_value(
                         value=base_currency_price, currency=self.base_currency
-                    )} if base_currency_price is not None else {}),
-                    "breakEvenPrice": break_even_price,
-                    "formattedBreakEvenPrice": LocalizationUtility.format_money_value(
+                    ),
+                    break_even_price=break_even_price,
+                    formatted_break_even_price=LocalizationUtility.format_money_value(
                         value=break_even_price, currency=currency
                     ),  # GAK: Average Purchase Price
-                    **({"formattedBaseCurrencyBreakEvenPrice": LocalizationUtility.format_money_value(
+                    formatted_base_currency_break_even_price=LocalizationUtility.format_money_value(
                         value=base_currency_break_even_price, currency=self.base_currency
-                    )} if base_currency_break_even_price is not None else {}),
-                    "value": value,
-                    "formattedValue": LocalizationUtility.format_money_value(value=value, currency_symbol=currency),
-                    "baseCurrencyValue": base_currency_value,
-                    **({"formattedBaseCurrencyValue": LocalizationUtility.format_money_value(
+                    ),
+                    value=value,
+                    formatted_value=LocalizationUtility.format_money_value(value=value, currency_symbol=currency),
+                    base_currency_value=base_currency_value,
+                    formatted_base_currency_value=LocalizationUtility.format_money_value(
                         value=base_currency_value, currency=self.base_currency
-                    )} if base_currency_value is not None else {}),
-                    "isOpen": is_open,
-                    "unrealizedGain": unrealized_gain,
-                    "formattedUnrealizedGain": LocalizationUtility.format_money_value(
+                    ),
+                    is_open=is_open,
+                    unrealized_gain=unrealized_gain,
+                    formatted_unrealized_gain=LocalizationUtility.format_money_value(
                         value=unrealized_gain, currency=self.base_currency
                     ),
-                    "percentageGain": f"{percentage_gain:.2%}",
-                    "symbolUrl":  self._get_logo_url(info['symbol']),
-                    "portfolioSize": 0.0,  # Calculated in the next loop
-                    "formattedPortfolioSize": 0.0,  # Calculated in the next loop
-                }
+                    percentage_gain=f"{percentage_gain:.2%}",
+                    symbol_url=self._get_logo_url(info['symbol']),
+                    portfolio_size=0.0,  # Calculated in the next loop
+                )
             )
 
         total_cash = CashMovementsRepository.get_total_cash()
         portfolio_total_value += total_cash
         my_portfolio.append(
-            {
-                "name": "Cash Balance EUR",
-                "symbol": "EUR",
-                "sector": "Others",
-                "country": "Others",
-                "productType": "CASH",
-                "productCurrency": "EUR",
-                "value": total_cash,
-                "baseCurrencyValue": total_cash,
-                "formattedBaseCurrencyValue": LocalizationUtility.format_money_value(
+            PortfolioEntry(
+                name="Cash Balance EUR",
+                symbol="EUR",
+                sector="Others",
+                country="Others",
+                product_type=ProductType.CASH,
+                product_currency="EUR",
+                value=total_cash,
+                base_currency_value=total_cash,
+                formatted_base_currency_value=LocalizationUtility.format_money_value(
                     value=total_cash, currency="EUR"),
-                "isOpen": True,
-                "currencySymbol": LocalizationUtility.get_currency_symbol("EUR"),
-                "portfolioSize": 0.0,  # Calculated in the next loop
-                "formattedPortfolioSize": 0.0,  # Calculated in the next loop
-            }
+                is_open=True,
+                portfolio_size=0.0,  # Calculated in the next loop
+            )
         )
 
         # Calculate Stock Portfolio Size
         for entry in my_portfolio:
-            size = entry["value"] / portfolio_total_value
-            entry["portfolioSize"] = size
-            entry["formattedPortfolioSize"] = f"{size:.2%}"
+            size = entry.value / portfolio_total_value
+            entry.portfolio_size = size
+            entry.formatted_portfolio_size = f"{size:.2%}"
 
-        return sorted(my_portfolio, key=lambda k: k["symbol"])
+        return sorted(my_portfolio, key=lambda k: k.symbol)
 
-    def _get_logo_url(self, symbol: str) -> str:
+    @staticmethod
+    def _get_logo_url(symbol: str) -> str:
         # Keep track of alternatives as NVSTly
         # return f"https://raw.githubusercontent.com/nvstly/icons/main/ticker_icons/{symbol.upper()}.png"
         return f"https://logos.stockanalysis.com/{symbol.lower()}.svg"
 
 
-    def get_portfolio_total(self, portfolio: Optional[list[dict]] = None):
+    def get_portfolio_total(self, portfolio: Optional[list[dict]] = None) -> TotalPortfolio:
         # Calculate current value
         if not portfolio:
             portfolio = self.get_portfolio()
@@ -180,9 +180,9 @@ class PortfolioService:
 
         tmp_total_portfolio = {}
         for entry in portfolio:
-            if entry["isOpen"]:
-                portfolio_total_value += entry["baseCurrencyValue"]
-                tmp_total_portfolio[entry["name"]] = entry["baseCurrencyValue"]
+            if entry.is_open:
+                portfolio_total_value += entry.base_currency_value
+                tmp_total_portfolio[entry.name] = entry.base_currency_value
 
         tmp_total_portfolio["totalDepositWithdrawal"] = CashMovementsRepository.get_total_cash_deposits_raw()
         tmp_total_portfolio["totalCash"] = CashMovementsRepository.get_total_cash()
@@ -195,31 +195,29 @@ class PortfolioService:
         roi = (portfolio_total_value / tmp_total_portfolio["totalDepositWithdrawal"] - 1) * 100
         total_profit_loss = portfolio_total_value - tmp_total_portfolio["totalDepositWithdrawal"]
 
-        total_portfolio = {
-            "total_pl": total_profit_loss,
-            "total_pl_formatted": LocalizationUtility.format_money_value(
+        return TotalPortfolio(
+            total_pl=total_profit_loss,
+            total_pl_formatted=LocalizationUtility.format_money_value(
                 value=total_profit_loss,
                 currency=self.base_currency,
             ),
-            "totalCash": tmp_total_portfolio["totalCash"],
-            "totalCash_formatted": LocalizationUtility.format_money_value(
+            total_cash=tmp_total_portfolio["totalCash"],
+            total_cash_formatted=LocalizationUtility.format_money_value(
                 value=tmp_total_portfolio["totalCash"],
                 currency=self.base_currency,
             ),
-            "currentValue": portfolio_total_value,
-            "currentValue_formatted": LocalizationUtility.format_money_value(
+            current_value=portfolio_total_value,
+            current_value_formatted=LocalizationUtility.format_money_value(
                 value=portfolio_total_value, currency=self.base_currency,
             ),
-            "totalROI": roi,
-            "totalROI_formatted": "{:,.2f}%".format(roi),
-            "totalDepositWithdrawal": tmp_total_portfolio["totalDepositWithdrawal"],
-            "totalDepositWithdrawal_formatted": LocalizationUtility.format_money_value(
+            total_roi=roi,
+            total_roi_formatted="{:,.2f}%".format(roi),
+            total_deposit_withdrawal=tmp_total_portfolio["totalDepositWithdrawal"],
+            total_deposit_withdrawal_formatted=LocalizationUtility.format_money_value(
                 value=tmp_total_portfolio["totalDepositWithdrawal"],
                 currency=self.base_currency,
             ),
-        }
-
-        return total_portfolio
+        )
 
     def __get_realtime_portfolio_total(self) -> dict | None:
         try:
@@ -352,7 +350,8 @@ class PortfolioService:
 
         return dataset
 
-    def _get_growth_final_date(self, date_str: str):
+    @staticmethod
+    def _get_growth_final_date(date_str: str):
         if date_str == 0:
             return LocalizationUtility.convert_string_to_date(date_str)
         else:

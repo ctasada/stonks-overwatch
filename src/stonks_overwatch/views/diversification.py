@@ -1,11 +1,11 @@
 import logging
+from typing import List
 
 from django.shortcuts import render
 from django.views import View
 
 from stonks_overwatch.config import Config
-from stonks_overwatch.services.degiro.currency_converter_service import CurrencyConverterService
-from stonks_overwatch.services.degiro.degiro_service import DeGiroService
+from stonks_overwatch.services.models import PortfolioEntry
 from stonks_overwatch.services.portfolio_aggregator import PortfolioAggregatorService
 from stonks_overwatch.utils.localization import LocalizationUtility
 
@@ -16,8 +16,6 @@ class Diversification(View):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.base_currency = Config.default().base_currency
-        self.degiro_service = DeGiroService()
-        self.currency_service = CurrencyConverterService()
         self.portfolio = PortfolioAggregatorService()
 
     def get(self, request):
@@ -39,24 +37,25 @@ class Diversification(View):
 
         return render(request, "diversification.html", context)
 
-    def _get_holdings(self, portfolio: list[dict]) -> dict:
+    @staticmethod
+    def _get_holdings(portfolio: List[PortfolioEntry]) -> dict:
         stock_labels = []
         stock_values = []
         stocks_table = []
-        portfolio = sorted(portfolio, key=lambda k: k["value"], reverse=True)
+        portfolio = sorted(portfolio, key=lambda k: k.value, reverse=True)
 
-        max_percentage = portfolio[0]["portfolioSize"]
+        max_percentage = portfolio[0].portfolio_size
 
         for stock in portfolio:
-            if stock["isOpen"]:
-                stock_labels.append(stock["name"])
-                stock_values.append(stock["baseCurrencyValue"])
+            if stock.is_open:
+                stock_labels.append(stock.name)
+                stock_values.append(stock.base_currency_value)
                 stocks_table.append(
                     {
-                        "name": stock["name"],
-                        "size": stock["portfolioSize"],
-                        "formattedSize": stock["formattedPortfolioSize"],
-                        "weight": (stock["portfolioSize"] / max_percentage) * 100,
+                        "name": stock.name,
+                        "size": stock.portfolio_size,
+                        "formattedSize": stock.formatted_portfolio_size,
+                        "weight": (stock.portfolio_size / max_percentage) * 100,
                     }
                 )
 
@@ -68,35 +67,39 @@ class Diversification(View):
             "table": stocks_table,
         }
 
-    def _get_product_types(self, portfolio: list[dict]) -> dict:
-        return self._get_data("productType", portfolio)
+    def _get_product_types(self, portfolio: List[PortfolioEntry]) -> dict:
+        return self._get_data("product_type", portfolio)
 
-    def _get_sectors(self, portfolio: list[dict]) -> dict:
+    def _get_sectors(self, portfolio: List[PortfolioEntry]) -> dict:
         return self._get_data("sector", portfolio)
 
-    def _get_currencies(self, portfolio: list[dict]) -> dict:
-        return self._get_data("productCurrency", portfolio)
+    def _get_currencies(self, portfolio: List[PortfolioEntry]) -> dict:
+        return self._get_data("product_currency", portfolio)
 
-    def _get_countries(self, portfolio: list[dict]) -> dict:
+    def _get_countries(self, portfolio: List[PortfolioEntry]) -> dict:
         return self._get_data("country", portfolio)
 
-    def _get_data(self, field_name: str, portfolio: list[dict]) -> dict:
+    @staticmethod
+    def _get_data(field_name: str, portfolio: List[PortfolioEntry]) -> dict:
         data_table = []
         data = {}
 
         max_percentage = 0.0
 
         for stock in portfolio:
-            if stock["isOpen"]:
-                name = stock[field_name]
+            if stock.is_open:
+                if field_name == "product_type":
+                    name = stock.product_type.value
+                else:
+                    name =  getattr(stock, field_name)
                 value = 0.0
                 portfolio_size = 0.0
                 if name in data:
                     value = data[name]["value"]
                     portfolio_size = data[name]["portfolioSize"]
                 data[name] = {
-                    "value": value + stock["baseCurrencyValue"],
-                    "portfolioSize": portfolio_size + stock["portfolioSize"],
+                    "value": value + stock.base_currency_value,
+                    "portfolioSize": portfolio_size + stock.portfolio_size,
                 }
                 max_percentage = max(max_percentage, data[name]["portfolioSize"])
 

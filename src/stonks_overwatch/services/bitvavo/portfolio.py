@@ -1,11 +1,13 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import List, Optional
 
 from stonks_overwatch.config import Config
 from stonks_overwatch.services.bitvavo.bitvavo_service import BitvavoService
 from stonks_overwatch.services.bitvavo.deposits import DepositsService
 from stonks_overwatch.services.bitvavo.transactions import TransactionsService
+from stonks_overwatch.services.models import PortfolioEntry, TotalPortfolio
+from stonks_overwatch.utils.constants import ProductType
 from stonks_overwatch.utils.datetime import DateTimeUtility
 from stonks_overwatch.utils.localization import LocalizationUtility
 
@@ -20,7 +22,7 @@ class PortfolioService:
         self.deposits = DepositsService()
         self.base_currency = Config.default().base_currency
 
-    def get_portfolio(self) -> list[dict]:
+    def get_portfolio(self) -> List[PortfolioEntry]:
         bitvavo_portfolio = []
 
         balance = self.bitvavo_service.balance()
@@ -38,9 +40,9 @@ class PortfolioService:
             industry = "Unknown"
             country = "Unknown"
 
-            product_type = "CRYPTO"
+            product_type = ProductType.CRYPTO
             if item["symbol"] == self.base_currency:
-                product_type = "CASH"
+                product_type = ProductType.CASH
 
             # FIXME
             break_even_price = self._get_break_even_price(item["symbol"])
@@ -49,46 +51,46 @@ class PortfolioService:
                 if value > 0 and value != unrealized_gain else 0.0
 
             bitvavo_portfolio.append(
-                {
-                    "symbol": item["symbol"],
-                    "name": asset["name"],
-                    "sector": sector,
-                    "industry": industry,
-                    "country": country,
-                    "shares": item["available"],
-                    "productType": product_type,
-                    "productCurrency": self.base_currency,
-                    "isOpen": True,
-                    "price": price,
-                    "formattedPrice": LocalizationUtility.format_money_value(value=price, currency=self.base_currency),
-                    "formattedBaseCurrencyPrice": LocalizationUtility.format_money_value(
+                PortfolioEntry(
+                    symbol=item["symbol"],
+                    name=asset["name"],
+                    sector=sector,
+                    industry=industry,
+                    country=country,
+                    shares=item["available"],
+                    product_type=product_type,
+                    product_currency=self.base_currency,
+                    is_open=True,
+                    price=price,
+                    formatted_price=LocalizationUtility.format_money_value(value=price, currency=self.base_currency),
+                    formatted_base_currency_price=LocalizationUtility.format_money_value(
                         value=price, currency=self.base_currency
                     ),
-                    "value": value,
-                    "formattedValue": LocalizationUtility.format_money_value(value=value, currency=self.base_currency),
-                    "baseCurrencyValue": value,
-                    "formattedBaseCurrencyValue": LocalizationUtility.format_money_value(
+                    value=value,
+                    formatted_value=LocalizationUtility.format_money_value(value=value, currency=self.base_currency),
+                    base_currency_value=value,
+                    formatted_base_currency_value=LocalizationUtility.format_money_value(
                         value=value, currency=self.base_currency
                     ),
-                    "symbolUrl":  self._get_logo_url(item['symbol']),
-                    "formattedBreakEvenPrice": LocalizationUtility.format_money_value(
+                    symbol_url=self._get_logo_url(item['symbol']),
+                    formatted_break_even_price=LocalizationUtility.format_money_value(
                         value=break_even_price, currency=self.base_currency
                     ),
-                    "formattedBaseCurrencyBreakEvenPrice": LocalizationUtility.format_money_value(
+                    formatted_base_currency_break_even_price=LocalizationUtility.format_money_value(
                         value=break_even_price, currency=self.base_currency
                     ),
-                    "unrealizedGain": unrealized_gain,
-                    "formattedUnrealizedGain": LocalizationUtility.format_money_value(
+                    unrealized_gain=unrealized_gain,
+                    formatted_unrealized_gain=LocalizationUtility.format_money_value(
                         value=unrealized_gain, currency=self.base_currency
                     ),
-                    "percentageGain": f"{percentage_gain:.2%}",
-                }
+                    percentage_gain=f"{percentage_gain:.2%}",
+                )
             )
 
         return bitvavo_portfolio
 
 
-    def get_portfolio_total(self, portfolio: Optional[list[dict]] = None):
+    def get_portfolio_total(self, portfolio: Optional[list[dict]] = None) -> TotalPortfolio:
         # Calculate current value
         if not portfolio:
             portfolio = self.get_portfolio()
@@ -97,9 +99,9 @@ class PortfolioService:
 
         tmp_total_portfolio = {}
         for entry in portfolio:
-            if entry["isOpen"]:
-                portfolio_total_value += entry["baseCurrencyValue"]
-                tmp_total_portfolio[entry["name"]] = entry["baseCurrencyValue"]
+            if entry.is_open:
+                portfolio_total_value += entry.base_currency_value
+                tmp_total_portfolio[entry.name] = entry.base_currency_value
 
         tmp_total_portfolio["totalDepositWithdrawal"] = (
             sum(float(entry["amount"]) for entry in self.bitvavo_service.deposit_history()))
@@ -114,33 +116,32 @@ class PortfolioService:
         roi = (portfolio_total_value / tmp_total_portfolio["totalDepositWithdrawal"] - 1) * 100
         total_profit_loss = portfolio_total_value - tmp_total_portfolio["totalDepositWithdrawal"]
 
-        total_portfolio = {
-            "total_pl": total_profit_loss,
-            "total_pl_formatted": LocalizationUtility.format_money_value(
+        return TotalPortfolio(
+            total_pl=total_profit_loss,
+            total_pl_formatted=LocalizationUtility.format_money_value(
                 value=total_profit_loss,
                 currency=self.base_currency,
             ),
-            "totalCash": tmp_total_portfolio["totalCash"],
-            "totalCash_formatted": LocalizationUtility.format_money_value(
+            total_cash=tmp_total_portfolio["totalCash"],
+            total_cash_formatted=LocalizationUtility.format_money_value(
                 value=tmp_total_portfolio["totalCash"],
                 currency=self.base_currency,
             ),
-            "currentValue": portfolio_total_value,
-            "currentValue_formatted": LocalizationUtility.format_money_value(
+            current_value=portfolio_total_value,
+            current_value_formatted=LocalizationUtility.format_money_value(
                 value=portfolio_total_value, currency=self.base_currency,
             ),
-            "totalROI": roi,
-            "totalROI_formatted": "{:,.2f}%".format(roi),
-            "totalDepositWithdrawal": tmp_total_portfolio["totalDepositWithdrawal"],
-            "totalDepositWithdrawal_formatted": LocalizationUtility.format_money_value(
+            total_roi=roi,
+            total_roi_formatted="{:,.2f}%".format(roi),
+            total_deposit_withdrawal=tmp_total_portfolio["totalDepositWithdrawal"],
+            total_deposit_withdrawal_formatted=LocalizationUtility.format_money_value(
                 value=tmp_total_portfolio["totalDepositWithdrawal"],
                 currency=self.base_currency,
             ),
-        }
+        )
 
-        return total_portfolio
-
-    def _get_logo_url(self, symbol: str) -> str:
+    @staticmethod
+    def _get_logo_url(symbol: str) -> str:
         return f"https://raw.githubusercontent.com/Cryptofonts/cryptoicons/master/SVG/{symbol.lower()}.svg"
 
     def _get_break_even_price(self, symbol: str) -> float:
@@ -161,7 +162,8 @@ class PortfolioService:
 
         return total_cost / total_quantity if total_quantity > 0 else 0.0
 
-    def _get_growth_final_date(self, date_str: str):
+    @staticmethod
+    def _get_growth_final_date(date_str: str):
         if date_str == 0:
             return LocalizationUtility.convert_string_to_date(date_str)
         else:

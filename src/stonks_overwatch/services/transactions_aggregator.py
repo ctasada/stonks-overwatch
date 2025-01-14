@@ -1,7 +1,10 @@
+from typing import List
+
 from stonks_overwatch.config import Config
 from stonks_overwatch.services.bitvavo.transactions import TransactionsService as BitvavoTransactionsService
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.transactions import TransactionsService as DeGiroTransactionsService
+from stonks_overwatch.services.models import Transaction
 
 
 class TransactionsAggregatorService:
@@ -13,7 +16,7 @@ class TransactionsAggregatorService:
         )
         self.bitvavo_transactions = BitvavoTransactionsService()
 
-    def get_transactions(self) -> list[dict]:
+    def get_transactions(self) -> List[Transaction]:
         transactions = []
         if Config.default().is_degiro_enabled():
             transactions += self.degiro_transactions.get_transactions()
@@ -21,4 +24,4 @@ class TransactionsAggregatorService:
         if Config.default().is_bitvavo_enabled():
             transactions += self.bitvavo_transactions.get_transactions()
 
-        return sorted(transactions, key=lambda k: (k["date"], k["time"]), reverse=True)
+        return sorted(transactions, key=lambda k: (k.date, k.time), reverse=True)

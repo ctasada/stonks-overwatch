@@ -20,9 +20,9 @@ from stonks_overwatch.repositories.degiro.cash_movements_repository import CashM
 from stonks_overwatch.repositories.degiro.product_info_repository import ProductInfoRepository
 from stonks_overwatch.repositories.degiro.product_quotations_repository import ProductQuotationsRepository
 from stonks_overwatch.repositories.degiro.transactions_repository import TransactionsRepository
+from stonks_overwatch.services.degiro.constants import CurrencyFX
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.portfolio import PortfolioService
-from stonks_overwatch.utils.constants import CurrencyFX
 from stonks_overwatch.utils.datetime import DateTimeUtility
 from stonks_overwatch.utils.db_utils import dictfetchall
 from stonks_overwatch.utils.debug import save_to_json

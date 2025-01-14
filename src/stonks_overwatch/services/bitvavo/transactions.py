@@ -1,7 +1,9 @@
 from datetime import datetime
+from typing import List
 
 from stonks_overwatch.config import Config
 from stonks_overwatch.services.bitvavo.bitvavo_service import BitvavoService
+from stonks_overwatch.services.models import Transaction
 from stonks_overwatch.utils.localization import LocalizationUtility
 
 
@@ -13,7 +15,7 @@ class TransactionsService:
         self.bitvavo_service = BitvavoService()
         self.base_currency = Config.default().base_currency
 
-    def get_transactions(self) -> list[dict]:
+    def get_transactions(self) -> List[Transaction]:
         # FETCH TRANSACTIONS DATA
         transactions_history = self.bitvavo_service.account_history()
 
@@ -26,34 +28,34 @@ class TransactionsService:
             asset = self.bitvavo_service.assets(transaction["receivedCurrency"])
 
             my_transactions.append(
-                {
-                    "name": asset["name"],
-                    "symbol": transaction["receivedCurrency"],
-                    "date": TransactionsService.format_date(transaction["executedAt"]),
-                    "time": TransactionsService.format_time(transaction["executedAt"]),
-                    "buysell": self.__convert_buy_sell(transaction["type"]),
-                    "transactionType": self.__transaction_type(transaction["type"]),
-                    "price": LocalizationUtility.format_money_value(
+                Transaction(
+                    name=asset["name"],
+                    symbol=transaction["receivedCurrency"],
+                    date=TransactionsService.format_date(transaction["executedAt"]),
+                    time=TransactionsService.format_time(transaction["executedAt"]),
+                    buy_sell=self.__convert_buy_sell(transaction["type"]),
+                    transaction_type=self.__transaction_type(transaction["type"]),
+                    price=LocalizationUtility.format_money_value(
                         transaction.get("priceAmount", 0.0),
                         currency=transaction.get("priceCurrency", self.base_currency)
                     ),
-                    "quantity": transaction["receivedAmount"],
-                    "total": LocalizationUtility.format_money_value(
+                    quantity=transaction["receivedAmount"],
+                    total=LocalizationUtility.format_money_value(
                         value=transaction.get("sentAmount", 0.0),
                         currency=transaction.get("sentCurrency", self.base_currency)
                     ),
-                    "totalInBaseCurrency": LocalizationUtility.format_money_value(
+                    total_in_base_currency=LocalizationUtility.format_money_value(
                         value=transaction.get("sentAmount", 0.0),
                         currency=transaction.get("sentCurrency", self.base_currency)
                     ),
-                    "fees": LocalizationUtility.format_money_value(
+                    fees=LocalizationUtility.format_money_value(
                         value=transaction.get("feesAmount", 0.0),
                         currency=transaction.get("feesCurrency", self.base_currency)
                     ),
-                }
+                )
             )
 
-        return sorted(my_transactions, key=lambda k: (k["date"], k["time"]), reverse=True)
+        return sorted(my_transactions, key=lambda k: (k.date, k.time), reverse=True)
 
     @staticmethod
     def __transaction_type(type: str) -> str:

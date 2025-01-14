@@ -1,3 +1,5 @@
+import dataclasses
+
 from django.shortcuts import render
 from django.views import View
 
@@ -13,7 +15,7 @@ class Transactions(View):
         transactions = self.transactions.get_transactions()
 
         context = {
-            "transactions": transactions,
+            "transactions": [dataclasses.asdict(transaction) for transaction in transactions],
         }
 
         return render(request, "transactions.html", context)

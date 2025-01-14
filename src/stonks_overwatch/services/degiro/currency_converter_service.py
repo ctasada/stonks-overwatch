@@ -4,7 +4,7 @@ from datetime import datetime
 from currency_converter import CurrencyConverter
 
 from stonks_overwatch.repositories.degiro.product_quotations_repository import ProductQuotationsRepository
-from stonks_overwatch.utils.constants import CurrencyFX
+from stonks_overwatch.services.degiro.constants import CurrencyFX
 from stonks_overwatch.utils.localization import LocalizationUtility
 
 
