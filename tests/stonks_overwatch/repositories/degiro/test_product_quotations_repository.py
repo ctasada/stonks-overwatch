@@ -4,7 +4,7 @@ import pathlib
 from django.test import TestCase
 
 import pytest
-from stonks_overwatch.models import DeGiroProductQuotation
+from stonks_overwatch.repositories.degiro.models import DeGiroProductQuotation
 from stonks_overwatch.repositories.degiro.product_quotations_repository import ProductQuotationsRepository
 from stonks_overwatch.utils.localization import LocalizationUtility
 

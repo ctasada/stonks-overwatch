@@ -3,7 +3,7 @@ from datetime import datetime
 
 from django.db import connection
 
-from stonks_overwatch.models import DeGiroProductQuotation
+from stonks_overwatch.repositories.degiro.models import DeGiroProductQuotation
 from stonks_overwatch.utils.db_utils import dictfetchall
 
 

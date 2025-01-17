@@ -9,14 +9,14 @@ from django.core.cache import cache
 from django.db import connection
 
 from stonks_overwatch.config import DegiroConfig
-from stonks_overwatch.models import (
+from stonks_overwatch.repositories.degiro.cash_movements_repository import CashMovementsRepository
+from stonks_overwatch.repositories.degiro.models import (
     DeGiroCashMovements,
     DeGiroCompanyProfile,
     DeGiroProductInfo,
     DeGiroProductQuotation,
     DeGiroTransactions,
 )
-from stonks_overwatch.repositories.degiro.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.repositories.degiro.product_info_repository import ProductInfoRepository
 from stonks_overwatch.repositories.degiro.product_quotations_repository import ProductQuotationsRepository
 from stonks_overwatch.repositories.degiro.transactions_repository import TransactionsRepository
