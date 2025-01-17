@@ -4,8 +4,8 @@ import pathlib
 from django.test import TestCase
 
 import pytest
-from stonks_overwatch.models import DeGiroCompanyProfile
 from stonks_overwatch.repositories.degiro.company_profile_repository import CompanyProfileRepository
+from stonks_overwatch.repositories.degiro.models import DeGiroCompanyProfile
 
 
 @pytest.mark.django_db
