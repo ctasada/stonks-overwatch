@@ -33,13 +33,13 @@
             <div class="col-1 px-0 sticky-top" id="sidebar">
                 <!-- Sidebar  -->
                 <div class="d-flex flex-sm-column flex-row flex-nowrap align-items-center sticky-top min-vh-100">
-                    <div class="d-block p-3 text-decoration-none text-white text-center border-bottom ">
+                    <div class="d-block p-3 text-decoration-none text-white text-center">
                         <p class="fw-semibold d-inline text-white fs-5">Stonks Overwatch</p>
                     </div>
                     <ul class="nav flex-column mb-auto text-center w-100">
                         {% url 'dashboard' as url %}
                         <li class="nav-item">
-                            <a href="{{ url }}" class="nav-link active py-3 px-2 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-title="Dashboard">
+                            <a href="{{ url }}" class="nav-link active py-3 px-2 border-top border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-title="Dashboard">
                                 <i class="fas fa-tachometer-alt"></i>
                             </a>
                         </li>
@@ -48,6 +48,13 @@
                         <li class="nav-item">
                             <a href="{{ url }}" class="nav-link active py-3 px-2 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-title="Portfolio">
                                 <i class="fas fa-briefcase"></i>
+                            </a>
+                        </li>
+
+                        {% url 'diversification' as url %}
+                        <li class="nav-item">
+                            <a href="{{ url }}" class="nav-link active py-3 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-original-title="Diversification">
+                                <i class="fas fa-chart-pie"></i>
                             </a>
                         </li>
 
@@ -69,13 +76,6 @@
                         <li class="nav-item">
                             <a href="{{ url }}" class="nav-link active py-3 px-2 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-original-title="Deposits">
                                 <i class="fas fa-piggy-bank"></i>
-                            </a>
-                        </li>
-
-                        {% url 'diversification' as url %}
-                        <li class="nav-item">
-                            <a href="{{ url }}" class="nav-link active py-3 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-original-title="Diversification">
-                                <i class="fas fa-chart-pie"></i>
                             </a>
                         </li>
 

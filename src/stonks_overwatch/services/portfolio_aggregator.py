@@ -5,7 +5,7 @@ from stonks_overwatch.config import Config
 from stonks_overwatch.services.bitvavo.portfolio import PortfolioService as BitvavoPortfolioService
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.portfolio import PortfolioService as DeGiroPortfolioService
-from stonks_overwatch.services.models import PortfolioEntry, TotalPortfolio
+from stonks_overwatch.services.models import DailyValue, PortfolioEntry, TotalPortfolio
 from stonks_overwatch.utils.localization import LocalizationUtility
 
 
@@ -87,7 +87,7 @@ class PortfolioAggregatorService:
         )
 
     @staticmethod
-    def __merge_historical_values(historical_values: list[dict]) -> list[dict]:
+    def __merge_historical_values(historical_values: List[DailyValue]) -> List[DailyValue]:
         merged = {}
         for entry in historical_values:
             date = entry["x"]
@@ -101,7 +101,7 @@ class PortfolioAggregatorService:
 
         return merged
 
-    def calculate_historical_value(self) -> list[dict]:
+    def calculate_historical_value(self) -> List[DailyValue]:
         historical_value = []
         if Config.default().is_degiro_enabled():
             historical_value += self.degiro_portfolio.calculate_historical_value()
