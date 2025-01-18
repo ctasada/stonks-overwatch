@@ -2,7 +2,7 @@ import logging
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, List, Optional, TypedDict
+from typing import Dict, List, Optional
 
 import pandas as pd
 from django.core.cache import cache
@@ -11,6 +11,7 @@ from django.shortcuts import render
 from django.views import View
 
 from stonks_overwatch.services.deposits_aggregator import DepositsAggregatorService
+from stonks_overwatch.services.models import DailyValue
 from stonks_overwatch.services.portfolio_aggregator import PortfolioAggregatorService
 from stonks_overwatch.utils.localization import LocalizationUtility
 
@@ -23,9 +24,6 @@ class PortfolioMetrics:
     total_days: int
     total_cashflows: float
 
-class PortfolioData(TypedDict):
-    x: str  # date
-    y: float  # value
 
 class Dashboard(View):
     """Dashboard view handling portfolio performance and value visualization.
@@ -122,7 +120,7 @@ class Dashboard(View):
 
         return view
 
-    def _get_portfolio_value(self) -> List[Dict[str, float]]:
+    def _get_portfolio_value(self) -> List[DailyValue]:
         """Get historical portfolio value."""
         portfolio_value = cache.get(Dashboard.CACHE_KEY_PORTFOLIO)
 
@@ -250,6 +248,6 @@ class Dashboard(View):
         twr = self._calculate_twr(dates, market_values, daily_cash_flows)
 
         return [
-            PortfolioData(x=LocalizationUtility.format_date_from_date(k), y=v)
-                for k, v in twr.cumulative_returns.items()
+            DailyValue(x=LocalizationUtility.format_date_from_date(k), y=v)
+            for k, v in twr.cumulative_returns.items()
         ]

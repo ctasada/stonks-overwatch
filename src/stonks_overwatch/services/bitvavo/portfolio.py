@@ -6,7 +6,7 @@ from stonks_overwatch.config import Config
 from stonks_overwatch.services.bitvavo.bitvavo_service import BitvavoService
 from stonks_overwatch.services.bitvavo.deposits import DepositsService
 from stonks_overwatch.services.bitvavo.transactions import TransactionsService
-from stonks_overwatch.services.models import PortfolioEntry, TotalPortfolio
+from stonks_overwatch.services.models import DailyValue, PortfolioEntry, TotalPortfolio
 from stonks_overwatch.utils.constants import ProductType
 from stonks_overwatch.utils.datetime import DateTimeUtility
 from stonks_overwatch.utils.localization import LocalizationUtility
@@ -195,7 +195,7 @@ class PortfolioService:
 
         return aggregate
 
-    def calculate_historical_value(self) -> list[dict]:
+    def calculate_historical_value(self) -> List[DailyValue]:
         cash_account = self.deposits.calculate_cash_account_value()
         data = self._create_products_quotation()
 
@@ -223,7 +223,7 @@ class PortfolioService:
                 cash_value = list(cash_account.values())[-1]
 
             day_value = aggregate[day] + cash_value
-            dataset.append({"x": day, "y": LocalizationUtility.round_value(day_value)})
+            dataset.append(DailyValue(x=day, y=LocalizationUtility.round_value(day_value)))
 
         return dataset
 

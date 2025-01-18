@@ -14,7 +14,7 @@ from stonks_overwatch.repositories.degiro.transactions_repository import Transac
 from stonks_overwatch.services.degiro.currency_converter_service import CurrencyConverterService
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.deposits import DepositsService
-from stonks_overwatch.services.models import PortfolioEntry, TotalPortfolio
+from stonks_overwatch.services.models import DailyValue, PortfolioEntry, TotalPortfolio
 from stonks_overwatch.utils.constants import ProductType
 from stonks_overwatch.utils.datetime import DateTimeUtility
 from stonks_overwatch.utils.localization import LocalizationUtility
@@ -308,7 +308,7 @@ class PortfolioService:
         return product_growth
 
 
-    def calculate_historical_value(self) -> list[dict]:
+    def calculate_historical_value(self) -> List[DailyValue]:
         cash_account = self.deposits.calculate_cash_account_value()
         data = self._create_products_quotation()
         stock_splits = self._get_stock_splits()
@@ -346,7 +346,7 @@ class PortfolioService:
                 cash_value = list(cash_account.values())[-1]
 
             day_value = aggregate[day] + cash_value
-            dataset.append({"x": day, "y": LocalizationUtility.round_value(day_value)})
+            dataset.append(DailyValue(x=day, y=LocalizationUtility.round_value(day_value)))
 
         return dataset
 

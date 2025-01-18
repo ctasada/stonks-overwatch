@@ -1,5 +1,5 @@
 from dataclasses import asdict, dataclass
-from typing import Any, Dict
+from typing import Any, Dict, TypedDict
 
 from stonks_overwatch.utils.constants import ProductType
 
@@ -23,6 +23,10 @@ class AccountOverview:
     unsettled_cash: str = ""
     formated_unsettled_cash: str = ""
 
+class DailyValue(TypedDict):
+    x: str  # date
+    y: float  # value
+
 @dataclass
 class Deposit:
     date: str
@@ -30,7 +34,6 @@ class Deposit:
     change: float
     change_formatted: str
     description: str
-
 
 @dataclass
 class PortfolioEntry:
