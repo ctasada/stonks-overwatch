@@ -34,7 +34,7 @@ function drawDoughnutChart(chartId, pieTitle, chartLabels, chartValues) {
                 tooltip: {
                     callbacks: {
                         label: function (context) {
-                            var value = valuesDict[context.datasetIndex][context.dataIndex].value;
+                            let value = valuesDict[context.datasetIndex][context.dataIndex].value;
                             value = Intl.NumberFormat().format(value);
                             return currencySymbol + ' ' + value;
                         }

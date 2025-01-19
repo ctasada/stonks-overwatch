@@ -97,7 +97,7 @@ class PortfolioAggregatorService:
             merged[date] += float(value)
 
         # FIXME: We can avoid this double conversion by modifying the integration results
-        merged = [{"x": date, "y": value} for date, value in sorted(merged.items())]
+        merged = [DailyValue(x=date, y=value) for date, value in sorted(merged.items())]
 
         return merged
 
