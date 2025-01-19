@@ -138,5 +138,9 @@ class LocalizationUtility:
         return datetime.fromisoformat(value)
 
     @staticmethod
+    def month_name(month_number: str|int) -> str:
+        return datetime(datetime.now().year, int(month_number), 1).strftime("%B")
+
+    @staticmethod
     def now() -> datetime:
         return datetime.now(timezone.utc)

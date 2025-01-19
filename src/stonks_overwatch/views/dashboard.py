@@ -24,6 +24,11 @@ class PortfolioMetrics:
     total_days: int
     total_cashflows: float
 
+@dataclass
+class PortfolioPerformance:
+    twr: List[Dict[str, float]]
+    annual_twr: Dict[str, float]
+    monthly_twr: Dict[str, Dict[str, float]]
 
 class Dashboard(View):
     """Dashboard view handling portfolio performance and value visualization.
@@ -46,12 +51,15 @@ class Dashboard(View):
 
     def get(self, request) -> JsonResponse | HttpResponse:
         """Handle GET request for dashboard view."""
+
+        data = self.__calculate_dashboard_data(request)
+
         if request.GET.get("format") == "json":
-            return self._handle_json_request(request)
+            return JsonResponse(data)
 
-        return render(request, "dashboard.html", {})
+        return render(request, "dashboard.html", data)
 
-    def _handle_json_request(self, request) -> JsonResponse:
+    def __calculate_dashboard_data(self, request) -> dict:
         """Process JSON format request and return portfolio data."""
         interval = self._parse_request_interval(request)
         view = self._parse_request_view(request)
@@ -66,13 +74,15 @@ class Dashboard(View):
         else:
             start_date = portfolio_value[0]['x']
 
-        performance_twr = self._calculate_performance_twr(portfolio_value, start_date)
-        return JsonResponse({
+        performance_twr = self._calculate_portfolio_performance(portfolio_value, start_date)
+        return {
             "portfolio": {
-                "value": {"portfolio_value": portfolio_value},
-                "performance": performance_twr,
+                "portfolio_value": portfolio_value,
+                "performance": performance_twr.twr,
+                "annual_twr": performance_twr.annual_twr,
+                "monthly_twr": performance_twr.monthly_twr
             }
-        })
+        }
 
     @staticmethod
     def _get_interval_start_date(interval: str) -> str|None:  # noqa: C901
@@ -104,10 +114,10 @@ class Dashboard(View):
 
     def _parse_request_interval(self, request) -> str:
         """Parse interval from request query parameters."""
-        interval = request.GET.get("interval", "YTD")
+        interval = request.GET.get("interval", "ALL")
         if interval not in Dashboard.VALID_INTERVALS:
-            self.logger.warning(f"Invalid time range provided: {interval}. Defaulting to 'YTD'.")
-            interval = "YTD"
+            self.logger.warning(f"Invalid time range provided: {interval}. Defaulting to 'ALL'.")
+            interval = "ALL"
 
         return interval
 
@@ -199,11 +209,19 @@ class Dashboard(View):
             total_cashflows=sum(cashflows)
         )
 
-    def _calculate_performance_twr(
+    @staticmethod
+    def __default_monthly_values():
+        months = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ]
+        return {month: 0.0 for month in months}
+
+    def _calculate_portfolio_performance(
             self,
-            portfolio_value: List[Dict[str, float]],
+            portfolio_value: List[DailyValue],
             start_date: Optional[str]=None
-    ) -> List[Dict[str, float]]:
+    ) -> PortfolioPerformance:
         """
         Calculate portfolio performance using TWR method.
 
@@ -229,21 +247,41 @@ class Dashboard(View):
             start_date = list(market_value_per_day.keys())[0]
         end_date = max(list(cash_flows.keys())[-1], list(market_value_per_day.keys())[-1])
 
-        date_range = pd.date_range(
-            start=start_date,
-            end=end_date,
-            freq="B"  # Business days (excludes weekends)
+        all_times_date_range, years_dict, month_years_dict = self.__group_date_range(start_date, end_date)
+
+        annual_twr = {}
+        monthly_twr = defaultdict(self.__default_monthly_values)
+        all_times_twr = self.__get_date_range_performance_twr(all_times_date_range, market_value_per_day, cash_flows)
+        for year in years_dict:
+            annual_twr[year] = self.__get_total_performance_twr(years_dict[year], market_value_per_day, cash_flows)
+        for year_month in month_years_dict:
+            year, month = year_month.split("-")
+            month_name = LocalizationUtility.month_name(month)
+            monthly_twr[year][month_name] = self.__get_total_performance_twr(
+                date_range=month_years_dict[year_month],
+                market_value_per_day=market_value_per_day,
+                cash_flows=cash_flows
+            )
+
+        annual_twr = dict(sorted(annual_twr.items(), key=lambda entry: entry[0], reverse=True))
+        monthly_twr = dict(sorted(monthly_twr.items(), key=lambda entry: entry[0], reverse=True))
+        return PortfolioPerformance(
+            twr=all_times_twr,
+            annual_twr=annual_twr,
+            monthly_twr={year: dict(months) for year, months in monthly_twr.items()}
         )
 
+    def __get_date_range_performance_twr(
+            self, date_range: list[str], market_value_per_day: dict[str, float], cash_flows: dict[str, float]
+    ) -> List[Dict[str, float]]:
         dates = []
         daily_cash_flows = []
         market_values = []
 
         for day in date_range:
-            day_str = day.strftime("%Y-%m-%d")
-            dates.append(day_str)
-            daily_cash_flows.append(cash_flows.get(day_str, 0.0))
-            market_values.append(market_value_per_day.get(day_str, 0.0))
+            dates.append(day)
+            daily_cash_flows.append(cash_flows.get(day, 0.0))
+            market_values.append(market_value_per_day.get(day, 0.0))
 
         twr = self._calculate_twr(dates, market_values, daily_cash_flows)
 
@@ -251,3 +289,63 @@ class Dashboard(View):
             DailyValue(x=LocalizationUtility.format_date_from_date(k), y=v)
             for k, v in twr.cumulative_returns.items()
         ]
+
+    def __get_total_performance_twr(
+            self, date_range: list[str], market_value_per_day: dict[str, float], cash_flows: dict[str, float]
+    ) -> float:
+        dates = []
+        daily_cash_flows = []
+        market_values = []
+
+        for day in date_range:
+            dates.append(day)
+            daily_cash_flows.append(cash_flows.get(day, 0.0))
+            market_values.append(market_value_per_day.get(day, 0.0))
+
+        twr = self._calculate_twr(dates, market_values, daily_cash_flows)
+
+        return twr.total_return
+
+    @staticmethod
+    def __group_date_range(start_date: str, end_date: str):
+        """
+        Groups dates in a range by year and month-year using Pandas.
+
+        Args:
+            start_date (date/datetime): Start date of the range
+            end_date (date/datetime): End date of the range
+
+        Returns:
+            tuple: (all_dates_list, years_dict, month_years_dict) where:
+                - all_dates_list: List of all the dates as values
+                - years_dict: Dictionary with years as keys and lists of dates as values
+                - month_years_dict: Dictionary with month-years as keys and lists of dates as values
+        """
+        # Create a date range using pandas
+        date_range = pd.date_range(
+            start=start_date,
+            end=end_date,
+            freq="B"  # Business days (excludes weekends)
+        )
+
+        # Convert to DataFrame for easier manipulation
+        df = pd.DataFrame({'date': date_range})
+
+        # Add year and month-year columns
+        df['year'] = df['date'].dt.year
+        df['month_year'] = df['date'].dt.strftime('%Y-%m')
+
+        # All dates
+        all_dates_list = df['date'].dt.strftime('%Y-%m-%d').tolist()
+
+        # Group by year
+        years_dict = (df.groupby('year')['date']
+                      .apply(lambda dates: [date.strftime('%Y-%m-%d') for date in dates])
+                      .to_dict())
+
+        # Group by month-year
+        month_years_dict = (df.groupby('month_year')['date']
+                            .apply(lambda dates: [date.strftime('%Y-%m-%d') for date in dates])
+                            .to_dict())
+
+        return all_dates_list, years_dict, month_years_dict
