@@ -22,7 +22,7 @@ class PortfolioAggregatorService:
     def get_portfolio(self) -> List[PortfolioEntry]:
         portfolio = []
         if Config.default().is_degiro_enabled():
-            portfolio += self.degiro_portfolio.get_portfolio()
+            portfolio += self.degiro_portfolio.get_portfolio
 
         if Config.default().is_bitvavo_enabled():
             portfolio += self.bitvavo_portfolio.get_portfolio()

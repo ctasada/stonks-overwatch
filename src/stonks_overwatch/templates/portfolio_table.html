@@ -19,6 +19,9 @@
             {% if show_columns.unrealized_gain %}
                 <th scope="col">Unrealized Gain</th>
             {% endif %}
+            {% if show_columns.realized_gain %}
+                <th scope="col">Realized Gain</th>
+            {% endif %}
             <th scope="col">Value</th>
             <th scope="col">Size</th>
         </tr>
@@ -27,61 +30,73 @@
     {% block items.table.body %}
         <tbody>
         {% for item in items %}
-            {% if item.is_open %}
-                <tr>
-                    {% if item.symbol_url %}
-                    <td class="text-center align-middle"><img src="{{ item.symbol_url }}" width="30" height="30" alt="{{ item.symbol }} logo" onerror="this.style.display='none'"></td>
-                    {% else %}
-                    <td class="text-center align-middle">{{ item.currency_symbol }}</td>
-                    {% endif %}
-                    <td>{{ item.symbol }}<br><small class="fw-lighter">{{ item.name }}</small></td>
-                    {% if item.category or item.exchange_abbr %}
-                    <td>
-                        <div class="d-inline-flex gap-1">
-                            {% if item.category %}
-                            <small
-                                    class="p-1 fw-lighter text-light bg-dark square-box border d-flex justify-content-center align-items-center"
-                                    data-bs-toggle="tooltip" title="Category-{{ item.category }}">
-                                {{ item.category }}
-                            </small>
-                            {% endif %}
-                            {% if item.exchangeAbbr %}
-                            <small
-                                    class="p-1 fw-lighter square-box border d-flex justify-content-center align-items-center"
-                                    data-bs-toggle="tooltip" title="{{ item.exchange_name }}">
-                                {{ item.exchange_abbr }}
-                            </small>
-                            {% endif %}
-                        </div>
-                    </td>
-                    {% endif %}
-                    {% if show_columns.sector %}
-                        <td>{{ item.sector }}<br><small class="fw-lighter">{{ item.industry }}</small></td>
-                    {% endif %}
-                    {% if show_columns.shares %}
-                        <td>{{ item.shares }}</td>
-                    {% endif %}
-                    {% if show_columns.price %}
-                        <td data-bs-toggle="tooltip" title="{{ item.formatted_price }}">{{ item.formatted_base_currency_price }}<br><small class="fw-lighter" data-bs-toggle="tooltip" title="{{ item.formattedBreakEvenPrice }}">{{ item.formattedBaseCurrencyBreakEvenPrice }}</small></td>
-                    {% endif %}
-                    {% if show_columns.unrealized_gain %}
-                        {% if item.unrealized_gain > 0 %}
-                            <td class="text-success">
-                                {% else %}
-                            <td class="text-danger">
+            <tr>
+                {% if item.symbol_url %}
+                <td class="text-center align-middle"><img src="{{ item.symbol_url }}" width="30" height="30" alt="{{ item.symbol }} logo" onerror="this.style.display='none'"></td>
+                {% else %}
+                <td class="text-center align-middle">{{ item.currency_symbol }}</td>
+                {% endif %}
+                <td>{{ item.symbol }}<br><small class="fw-lighter">{{ item.name }}</small></td>
+                {% if item.category or item.exchange_abbr %}
+                <td>
+                    <div class="d-inline-flex gap-1">
+                        {% if item.category %}
+                        <small
+                                class="p-1 fw-lighter text-light bg-dark square-box border d-flex justify-content-center align-items-center"
+                                data-bs-toggle="tooltip" title="Category-{{ item.category }}">
+                            {{ item.category }}
+                        </small>
                         {% endif %}
-                    {{ item.formatted_unrealized_gain }}<br>
+                        {% if item.exchangeAbbr %}
+                        <small
+                                class="p-1 fw-lighter square-box border d-flex justify-content-center align-items-center"
+                                data-bs-toggle="tooltip" title="{{ item.exchange_name }}">
+                            {{ item.exchange_abbr }}
+                        </small>
+                        {% endif %}
+                    </div>
+                </td>
+                {% endif %}
+                {% if show_columns.sector %}
+                    <td>{{ item.sector }}<br><small class="fw-lighter">{{ item.industry }}</small></td>
+                {% endif %}
+                {% if show_columns.shares %}
+                    <td>{{ item.shares }}</td>
+                {% endif %}
+                {% if show_columns.price %}
+                    <td data-bs-toggle="tooltip" title="{{ item.formatted_price }}">{{ item.formatted_base_currency_price }}<br><small class="fw-lighter" data-bs-toggle="tooltip" title="{{ item.formattedBreakEvenPrice }}">{{ item.formattedBaseCurrencyBreakEvenPrice }}</small></td>
+                {% endif %}
+                {% if show_columns.unrealized_gain %}
                     {% if item.unrealized_gain > 0 %}
-                        <small class="fw-lighter bi bi-arrow-up-right">
-                    {% elif item.unrealized_gain < 0 %}
-                        <small class="fw-lighter bi bi-arrow-down-right">
-                    {% endif %}{{ item.percentage_gain }}</small>
-                    </td>
+                        <td class="text-success">
+                    {% else %}
+                        <td class="text-danger">
                     {% endif %}
-                    <td>{{ item.formatted_base_currency_value }}</td>
-                    <td>{{ item.formatted_portfolio_size }}</td>
-                </tr>
-            {% endif %}
+                {{ item.formatted_unrealized_gain }}<br>
+                {% if item.unrealized_gain > 0 %}
+                    <small class="fw-lighter bi bi-arrow-up-right">
+                {% elif item.unrealized_gain < 0 %}
+                    <small class="fw-lighter bi bi-arrow-down-right">
+                {% endif %}{{ item.percentage_unrealized_gain }}</small>
+                </td>
+                {% endif %}
+                {% if show_columns.realized_gain %}
+                    {% if item.realized_gain > 0 %}
+                        <td class="text-success">
+                    {% else %}
+                        <td class="text-danger">
+                    {% endif %}
+                {{ item.formatted_realized_gain }}<br>
+                {% if item.realized_gain > 0 %}
+                    <small class="fw-lighter bi bi-arrow-up-right">
+                {% elif item.realized_gain < 0 %}
+                    <small class="fw-lighter bi bi-arrow-down-right">
+                {% endif %}{{ item.percentage_realized_gain }}</small>
+                </td>
+                {% endif %}
+                <td>{{ item.formatted_base_currency_value }}</td>
+                <td>{{ item.formatted_portfolio_size }}</td>
+            </tr>
         {% endfor %}
         </tbody>
     {% endblock items.table.body %}

@@ -2,7 +2,18 @@
 
 {% block content %}
 <div class="container-fluid row-gap-5">
-    <h4 class="mb-3">Portfolio</h4>
+    <div class="row align-items-center mt-2">
+        <div class="col-1">
+            <h4>Portfolio</h4>
+        </div>
+        <div class="col-2">
+            <select class="form-select" id="visible-positions-selector" aria-label="Visible Portfolio Positions">
+                <option value="OPEN" {% if selected_positions == "OPEN" %}selected{% endif %}>Open Positions</option>
+                <option value="CLOSED" {% if selected_positions == "CLOSED" %}selected{% endif %}>Closed Positions</option>
+                <option value="ALL" {% if selected_positions == "ALL" %}selected{% endif %}>All Positions</option>
+            </select>
+        </div>
+    </div>
     <div class="row mt-2">
         <h5 class="mb-3">Shares</h5>
         {% include 'portfolio_table.html' with items=stocks show_columns=show_stocks_columns %}
@@ -26,4 +37,11 @@
     </div>
     {% endif %}
 </div>
+
+<script>
+    document.getElementById('visible-positions-selector').addEventListener('change', async function () {
+        const selectedValue = this.value;
+        window.location.href = `?positions=${selectedValue}`;
+    });
+</script>
 {% endblock %}

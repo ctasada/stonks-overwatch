@@ -30,6 +30,17 @@ class TransactionsRepository:
             return dictfetchall(cursor)
 
     @staticmethod
+    def get_product_transactions(product_ids: list[str]) -> list[dict]:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"""
+                SELECT * FROM degiro_transactions
+                WHERE product_id IN ({", ".join(map(str, product_ids))})
+                """
+            )
+            return dictfetchall(cursor)
+
+    @staticmethod
     def get_portfolio_products() -> list[dict]:
         with connection.cursor() as cursor:
             cursor.execute(
