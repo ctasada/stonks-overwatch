@@ -83,7 +83,7 @@ class PortfolioService:
                     formatted_unrealized_gain=LocalizationUtility.format_money_value(
                         value=unrealized_gain, currency=self.base_currency
                     ),
-                    percentage_gain=f"{percentage_gain:.2%}",
+                    percentage_unrealized_gain=f"{percentage_gain:.2%}",
                 )
             )
 

@@ -35,6 +35,12 @@ class TransactionType(Enum):
     # DEPOSIT = 114 # Seems also related with stock dividends
     # """Represents Deposits into the trading account (transactionTypeId 114)."""
 
+    # 108
+    # 110
+    # 112
+    # 114
+    # 204
+
     UNKNOWN = -1
     """Represents an unknown transaction type."""
 

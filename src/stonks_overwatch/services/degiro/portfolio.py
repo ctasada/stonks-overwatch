@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 
 from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
+from django.utils.functional import cached_property
 
 from stonks_overwatch.config import Config
 from stonks_overwatch.repositories.degiro.cash_movements_repository import CashMovementsRepository
@@ -33,11 +34,14 @@ class PortfolioService:
         self.deposits = DepositsService(
             degiro_service=self.degiro_service,
         )
+        self.transactions = TransactionsRepository()
+        self.product_info = ProductInfoRepository()
 
+    @cached_property
     def get_portfolio(self) -> List[PortfolioEntry]:
-        portfolio_transactions = self.__get_porfolio_products()
+        portfolio_products = self.__get_porfolio_products()
 
-        products_ids = [row["productId"] for row in portfolio_transactions]
+        products_ids = [row["productId"] for row in portfolio_products]
         products_info = self.__get_products_info(products_ids=products_ids)
 
         products_config = self.__get_product_config()
@@ -45,8 +49,21 @@ class PortfolioService:
         my_portfolio = []
         portfolio_total_value = 0.0
 
-        for tmp in portfolio_transactions:
+        tmp_processed_symbols = []
+
+        for tmp in portfolio_products:
             info = products_info[tmp["productId"]]
+            # Products may be closed and reopened with a different productId. We need to keep track of the symbols
+            # Find other products for the same symbol. Use data from the 'active' product (should be only one) and
+            #   update only the values that are "Unknown" (ideally none)
+            if info["symbol"] not in tmp_processed_symbols:
+                tmp_products = self.product_info.get_products_info_raw_by_symbol([info["symbol"]])
+                correlated_products = [p["id"] for p in tmp_products.values()]
+            else:
+                continue
+
+            tmp_processed_symbols.append(info["symbol"])
+
             company_profile = CompanyProfileRepository.get_company_profile_raw(info["isin"])
             sector = "Unknown"
             industry = "Unknown"
@@ -55,6 +72,8 @@ class PortfolioService:
                 sector = company_profile["data"]["sector"]
                 industry = company_profile["data"]["industry"]
                 country = company_profile["data"]["contacts"]["COUNTRY"]
+
+            total_realized_gains, total_costs = self.__get_product_realized_gains(correlated_products)
 
             currency = info["currency"]
             price = ProductQuotationsRepository.get_product_price(tmp["productId"])
@@ -80,8 +99,11 @@ class PortfolioService:
                 base_currency_value = value
                 base_currency_break_even_price = break_even_price
 
-            percentage_gain = unrealized_gain / (value - unrealized_gain) \
+            percentage_unrealized_gain = unrealized_gain / (value - unrealized_gain) \
                 if value > 0 and value != unrealized_gain else 0.0
+
+            percentage_realized_gain = total_realized_gains / total_costs \
+                if total_realized_gains != 0.0 and total_costs != 0.0 else 0.0
 
             portfolio_total_value += value
 
@@ -131,7 +153,12 @@ class PortfolioService:
                     formatted_unrealized_gain=LocalizationUtility.format_money_value(
                         value=unrealized_gain, currency=self.base_currency
                     ),
-                    percentage_gain=f"{percentage_gain:.2%}",
+                    percentage_unrealized_gain=f"{percentage_unrealized_gain:.2%}",
+                    realized_gain=total_realized_gains,
+                    formatted_realized_gain=LocalizationUtility.format_money_value(
+                        value=total_realized_gains, currency=self.base_currency
+                    ),
+                    percentage_realized_gain=f"{percentage_realized_gain:.2%}",
                     symbol_url=self._get_logo_url(info['symbol']),
                     portfolio_size=0.0,  # Calculated in the next loop
                 )
@@ -170,11 +197,53 @@ class PortfolioService:
         # return f"https://raw.githubusercontent.com/nvstly/icons/main/ticker_icons/{symbol.upper()}.png"
         return f"https://logos.stockanalysis.com/{symbol.lower()}.svg"
 
+    def __get_product_realized_gains(self, product_ids: list[str]) -> tuple[float, float]:
+        data = self.transactions.get_product_transactions(product_ids)
+
+        buys = [t for t in data if t['buysell'] == 'B']
+        sells = [t for t in data if t['buysell'] == 'S']
+
+        # Sort transactions by stock_id and transaction_date
+        buys.sort(key=lambda x: x['date'])
+        sells.sort(key=lambda x: x['date'])
+
+        # FIFO matching logic
+        realized_gains = []
+        total_costs = sum([abs(b['quantity']) * b['price'] for b in buys])
+        total_realized_gains = 0.0
+        for sell in sells:
+            sell_qty = abs(sell['quantity'])
+            sell_price = sell['price']
+            gains = 0.0
+
+            # Match sells with existing buys using FIFO
+            for buy in buys:
+                if sell_qty <= 0:
+                    break
+
+                match_qty = min(sell_qty, buy['quantity'])
+                gains += match_qty * (sell_price - buy['price'])
+
+                # Update quantities
+                buy['quantity'] -= match_qty
+                sell_qty -= match_qty
+
+                # Remove fully used buys
+                if buy['quantity'] == 0:
+                    buys.remove(buy)
+
+            realized_gains.append({
+                'sell_date': sell['date'],
+                'realized_gain': gains
+            })
+            total_realized_gains += gains
+
+        return total_realized_gains, total_costs
 
     def get_portfolio_total(self, portfolio: Optional[list[dict]] = None) -> TotalPortfolio:
         # Calculate current value
         if not portfolio:
-            portfolio = self.get_portfolio()
+            portfolio = self.get_portfolio
 
         portfolio_total_value = 0.0
 

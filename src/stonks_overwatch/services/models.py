@@ -62,7 +62,10 @@ class PortfolioEntry:
     is_open: bool = False
     unrealized_gain: float = 0.0
     formatted_unrealized_gain: str = ""
-    percentage_gain: str = ""
+    percentage_unrealized_gain: str = ""
+    realized_gain: float = 0.0
+    formatted_realized_gain: str = ""
+    percentage_realized_gain: str = ""
     symbol_url: str = ""
     portfolio_size: float = 0.0
     formatted_portfolio_size: str = ""
@@ -71,6 +74,9 @@ class PortfolioEntry:
         # Convert to dict and handle enum specifically
         result = asdict(self)
         result['product_type'] = self.product_type.value
+        if self.product_type == ProductType.CASH:
+            result['category'] = ""
+            result['exchange_abbr'] = ""
         return result
 
 @dataclass

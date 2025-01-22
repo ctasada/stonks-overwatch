@@ -5,7 +5,7 @@ from stonks_overwatch.utils.db_utils import dictfetchall, dictfetchone
 
 class ProductInfoRepository:
     @staticmethod
-    def get_products_info_raw(ids) -> dict:
+    def get_products_info_raw(ids: list[int]) -> dict:
         """Gets product information from the given product id. The information is retrieved from the DB.
         ### Parameters
             * productIds: list of ints
@@ -19,6 +19,29 @@ class ProductInfoRepository:
                 SELECT *
                 FROM degiro_productinfo
                 WHERE id IN ({", ".join(map(str, ids))})
+                """
+            )
+            rows = dictfetchall(cursor)
+
+        # Convert the list of dictionaries into a dictionary indexed by 'productId'
+        result_map = {row["id"]: row for row in rows}
+        return result_map
+
+    @staticmethod
+    def get_products_info_raw_by_symbol(symbols: list[str]) -> dict:
+        """Gets product information from the given symbol. The information is retrieved from the DB.
+        ### Parameters
+            * symbols: list of str
+                - The product symbols to query
+        ### Returns
+            list: list of product infos. For a single symbol, the list may contain multiple products.
+        """
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"""
+                SELECT *
+                FROM degiro_productinfo
+                WHERE symbol IN ({", ".join(f"'{item}'" for item in symbols)})
                 """
             )
             rows = dictfetchall(cursor)

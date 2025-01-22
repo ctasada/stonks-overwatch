@@ -157,16 +157,23 @@ poetry run src/manage.py runscript init_db
 
 ## BUGS
 - Dashboard: JNJ & JPM are associated with the wrong sector
-- Portfolio is not updated on startup. A migration needs to be forced
 - IBERDROLA Non-Tradable Dividends: Are properly calculated? Doesn't seem to calculate quantity properly
 - When Login, connection needs to be recreated if int_account or user_token are not initially provided
 - Currency historical quotations seems to be wrongly imported when using Login form
+- Some stocks are no longer available in DeGiro. Need to find a way to handle them
+    - 'ATVI'(350113856)
+    - 'TYME'(600028575)
+    - 'DPZ'(330187819): The symbol is available, but maybe the productId is not?
+    - 'PLTR'(600121287): The symbol is available, but maybe the productId is not?
+    - 'WEBR'(600179738): The symbol is available, but maybe the productId is not?
+    - 'TEF.D'(280180545)
+    - 'FRZA'(600236745)
+    - 600179738: No chart found
+- "Portfolio data not found in cache. Calling DeGiro" Executed 2 consecutive times during startup
+- Stock splits may imply a change in the productId
 
 ## TODOs
 - [ ] DeGiro Client: Stop using Totp and request 2FA for each connection
-- [ ] Portfolio: Show filter to see Open/Close/All stocks
-- [ ] Improve side-bar behaviour
-- [ ] Replace dicts by properly designed models
 - [ ] Provide support for both Unrealized and Realized Gain/Loss
         Onger. W/V € - Gain/Loss Unrealized - unrealizedPl
         Totale W/V € - Gain/Loss Total (Realized + unrealized) - totalPl
@@ -177,6 +184,7 @@ poetry run src/manage.py runscript init_db
 - [ ] Review Portfolio growth. Indicates negative growth, which never really happened.
 - [ ] Some stocks (mainly Spanish) don't have Sector or other data. Find workaround
 - [ ] Fontawesome is replaceable by https://icons.getbootstrap.com
+- [ ] Provide more information in the Dashboard performance overview
 
 ## Logos
 - https://eodhd.com/financial-apis-blog/40000-company-logos (requires API Key)
@@ -199,3 +207,5 @@ poetry run src/manage.py runscript init_db
 - https://pypi.org/project/QuantStats/
 - https://github.com/wilsonfreitas/awesome-quant?tab=readme-ov-file#python
 - https://github.com/robertmartin8/PyPortfolioOpt
+- https://github.com/nsirons/ibkr_web_client?tab=readme-ov-file#setup <<<<<!!!!!>>>>>
+  - https://github.com/Voyz/ibind/pull/34 (maybe more complete)
