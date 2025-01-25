@@ -4,7 +4,7 @@ from typing import List
 
 from stonks_overwatch.services.bitvavo.bitvavo_service import BitvavoService
 from stonks_overwatch.services.bitvavo.transactions import TransactionsService
-from stonks_overwatch.services.models import Deposit
+from stonks_overwatch.services.models import Deposit, DepositType
 from stonks_overwatch.utils.localization import LocalizationUtility
 
 
@@ -23,31 +23,25 @@ class DepositsService:
         withdrawal = self.bitvavo_service.withdrawal_history()
 
         for entry in deposits:
-            date = datetime.fromtimestamp(entry["timestamp"] / 1000)
             amount = float(entry["amount"])
             history.append(
                 Deposit(
-                    date=LocalizationUtility.format_date_from_date(date),
-                    type="Deposit",
+                    datetime=datetime.fromtimestamp(entry["timestamp"] / 1000),
+                    type=DepositType.DEPOSIT,
                     change=amount,
-                    change_formatted=LocalizationUtility.format_money_value(
-                        value=amount, currency=entry["symbol"]
-                    ),
+                    currency=entry["symbol"],
                     description="Bitvavo Deposit",
                 )
             )
 
         for entry in withdrawal:
-            date = datetime.fromtimestamp(entry["timestamp"] / 1000)
             amount = float(entry["amount"])
             history.append(
                 Deposit(
-                    date=LocalizationUtility.format_date_from_date(date),
-                    type="Withdrawal",
+                    datetime=datetime.fromtimestamp(entry["timestamp"] / 1000),
+                    type=DepositType.WITHDRAWAL,
                     change=amount,
-                    change_formatted=LocalizationUtility.format_money_value(
-                        value=amount, currency=entry["symbol"]
-                    ),
+                    currency=entry["symbol"],
                     description="Bitvavo Withdrawal",
                 )
             )

@@ -1,7 +1,10 @@
+import datetime
 from dataclasses import asdict, dataclass
+from enum import Enum
 from typing import Any, Dict, TypedDict
 
 from stonks_overwatch.utils.constants import ProductType
+from stonks_overwatch.utils.localization import LocalizationUtility
 
 
 @dataclass
@@ -27,13 +30,23 @@ class DailyValue(TypedDict):
     x: str  # date
     y: float  # value
 
+class DepositType(Enum):
+    DEPOSIT = "Deposit"
+    WITHDRAWAL = "Withdrawal"
+
 @dataclass
 class Deposit:
-    date: str
-    type: str
+    datetime: datetime
+    type: DepositType
     change: float
-    change_formatted: str
+    currency: str
     description: str
+
+    def datetime_as_date(self) -> str:
+        return self.datetime.strftime("%Y-%m-%d")
+
+    def change_formatted(self) -> str:
+        return LocalizationUtility.format_money_value(value=self.change, currency=self.currency)
 
 @dataclass
 class PortfolioEntry:

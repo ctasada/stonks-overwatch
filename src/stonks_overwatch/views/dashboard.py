@@ -234,12 +234,12 @@ class Dashboard(View):
         """
         deposits = sorted(
             self.deposits.get_cash_deposits(),
-            key=lambda k: k.date
+            key=lambda k: k.datetime
         )
 
         cash_flows = defaultdict(float)
         for item in deposits:
-            cash_flows[item.date] += item.change
+            cash_flows[item.datetime_as_date()] += item.change
 
         market_value_per_day = { item['x']: item['y'] for item in portfolio_value }
 

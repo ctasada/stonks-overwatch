@@ -26,24 +26,23 @@ class DepositsAggregatorService:
     def cash_deposits_history(self) -> list[dict]:
         cash_contributions = self.get_cash_deposits()
         df = pd.DataFrame.from_dict(cash_contributions)
-        # Remove hours and keep only the day
-        df["date"] = pd.to_datetime(df["date"]).dt.date
+
         # Group by day, adding the values
-        df.set_index("date", inplace=True)
-        df = df.sort_values(by="date")
+        df.set_index("datetime", inplace=True)
+        df = df.sort_values(by="datetime")
         df = df.groupby(df.index)["change"].sum().reset_index()
         # Do the cumulative sum
         df["contributed"] = df["change"].cumsum()
 
         cash_contributions = df.to_dict("records")
         for contribution in cash_contributions:
-            contribution["date"] = contribution["date"].strftime(LocalizationUtility.DATE_FORMAT)
+            contribution["datetime"] = contribution["datetime"].strftime(LocalizationUtility.DATE_FORMAT)
 
         dataset = []
         for contribution in cash_contributions:
             dataset.append(
                 {
-                    "date": contribution["date"],
+                    "date": contribution["datetime"],
                     "total_deposit": LocalizationUtility.round_value(contribution["contributed"]),
                 }
             )
@@ -66,6 +65,6 @@ class DepositsAggregatorService:
         if Config.default().is_bitvavo_enabled():
             deposits += self.bitvavo_deposits.get_cash_deposits()
 
-        deposits = sorted(deposits, key=lambda x: x.date, reverse=True)
+        deposits = sorted(deposits, key=lambda x: x.datetime, reverse=True)
 
         return deposits
