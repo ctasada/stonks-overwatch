@@ -4,7 +4,6 @@ from typing import List
 from stonks_overwatch.repositories.degiro.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.repositories.degiro.product_info_repository import ProductInfoRepository
 from stonks_overwatch.services.models import AccountOverview
-from stonks_overwatch.utils.localization import LocalizationUtility
 
 
 class AccountOverviewService:
@@ -32,32 +31,16 @@ class AccountOverviewService:
                 stock_name = info["name"]
                 stock_symbol = info["symbol"]
 
-            formated_change = ""
-            if cash_movement["change"] is not None:
-                formated_change = LocalizationUtility.format_money_value(
-                    value=cash_movement["change"], currency=cash_movement["currency"]
-                )
-
-            unsettled_cash = 0
-            formated_unsettled_cash = ""
-            formated_total_balance = ""
-            total_balance = 0
+            unsettled_cash = 0.0
+            total_balance = 0.0
             if "balance" in cash_movement:
                 total_balance = cash_movement.get("balance").get("total")
-                formated_total_balance = LocalizationUtility.format_money_value(
-                    value=total_balance, currency=cash_movement["currency"]
-                )
                 unsettled_cash = cash_movement.get("balance").get("unsettledCash")
-                formated_unsettled_cash = LocalizationUtility.format_money_value(
-                    value=unsettled_cash, currency=cash_movement["currency"]
-                )
 
             overview.append(
                 AccountOverview(
-                    date=LocalizationUtility.format_date_from_date(cash_movement["date"]),
-                    time=LocalizationUtility.format_time_from_date(cash_movement["date"]),
-                    value_date=LocalizationUtility.format_date_from_date(cash_movement["valueDate"]),
-                    value_time=LocalizationUtility.format_time_from_date(cash_movement["valueDate"]),
+                    datetime=cash_movement["date"],
+                    value_datetime=cash_movement["valueDate"],
                     stock_name=stock_name,
                     stock_symbol=stock_symbol,
                     description=cash_movement["description"],
@@ -65,11 +48,8 @@ class AccountOverviewService:
                     type_str=cash_movement["type"].replace("_", " ").title(),
                     currency=cash_movement["currency"],
                     change=cash_movement.get("change", 0.0),
-                    formated_change=formated_change,
                     total_balance=total_balance,
-                    formated_total_balance=formated_total_balance,
                     unsettled_cash=unsettled_cash,
-                    formated_unsettled_cash=formated_unsettled_cash,
                 )
             )
 

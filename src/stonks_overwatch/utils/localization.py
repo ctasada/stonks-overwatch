@@ -92,35 +92,59 @@ class LocalizationUtility:
         return value.strftime(LocalizationUtility.TIME_FORMAT)
 
     @staticmethod
-    def format_date_to_month_year(value: str) -> str:
+    def format_date_to_month_year(value: str|datetime) -> str:
         """
         Formats a date string to a month and year string.
         """
-        time = datetime.strptime(value, LocalizationUtility.DATE_FORMAT)
+        if isinstance(value, str):
+            time = datetime.strptime(value, LocalizationUtility.DATE_FORMAT)
+        elif isinstance(value, datetime):
+            time = value
+        else:
+            raise TypeError(f"Unsupported type: {type(value)}. Expected str or datetime.")
+
         return time.strftime("%B %Y")
 
     @staticmethod
-    def get_date_day(value: str) -> str:
+    def get_date_day(value: str|datetime) -> str:
         """
         Returns the day of the month from a date string.
         """
-        time = datetime.strptime(value, LocalizationUtility.DATE_FORMAT)
+        if isinstance(value, str):
+            time = datetime.strptime(value, LocalizationUtility.DATE_FORMAT)
+        elif isinstance(value, datetime):
+            time = value
+        else:
+            raise TypeError(f"Unsupported type: {type(value)}. Expected str or datetime.")
+
         return time.strftime("%d")
 
     @staticmethod
-    def format_date_to_month_number(value: str) -> str:
+    def format_date_to_month_number(value: str|datetime) -> str:
         """
         Formats a date string to a month number string.
         """
-        time = datetime.strptime(value, LocalizationUtility.DATE_FORMAT)
+        if isinstance(value, str):
+            time = datetime.strptime(value, LocalizationUtility.DATE_FORMAT)
+        elif isinstance(value, datetime):
+            time = value
+        else:
+            raise TypeError(f"Unsupported type: {type(value)}. Expected str or datetime.")
+
         return time.strftime("%m")
 
     @staticmethod
-    def format_date_to_year(value: str) -> str:
+    def format_date_to_year(value: str|datetime) -> str:
         """
         Formats a date string to a year string.
         """
-        time = datetime.strptime(value, LocalizationUtility.DATE_FORMAT)
+        if isinstance(value, str):
+            time = datetime.strptime(value, LocalizationUtility.DATE_FORMAT)
+        elif isinstance(value, datetime):
+            time = value
+        else:
+            raise TypeError(f"Unsupported type: {type(value)}. Expected str or datetime.")
+
         return time.strftime("%Y")
 
     @staticmethod

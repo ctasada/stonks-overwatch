@@ -62,27 +62,12 @@ class PortfolioService:
                     product_currency=self.base_currency,
                     is_open=True,
                     price=price,
-                    formatted_price=LocalizationUtility.format_money_value(value=price, currency=self.base_currency),
-                    formatted_base_currency_price=LocalizationUtility.format_money_value(
-                        value=price, currency=self.base_currency
-                    ),
                     value=value,
-                    formatted_value=LocalizationUtility.format_money_value(value=value, currency=self.base_currency),
+                    base_currency_price=price,
+                    base_currency=self.base_currency,
                     base_currency_value=value,
-                    formatted_base_currency_value=LocalizationUtility.format_money_value(
-                        value=value, currency=self.base_currency
-                    ),
                     symbol_url=self._get_logo_url(item['symbol']),
-                    formatted_break_even_price=LocalizationUtility.format_money_value(
-                        value=break_even_price, currency=self.base_currency
-                    ),
-                    formatted_base_currency_break_even_price=LocalizationUtility.format_money_value(
-                        value=break_even_price, currency=self.base_currency
-                    ),
                     unrealized_gain=unrealized_gain,
-                    formatted_unrealized_gain=LocalizationUtility.format_money_value(
-                        value=unrealized_gain, currency=self.base_currency
-                    ),
                     percentage_unrealized_gain=f"{percentage_gain:.2%}",
                 )
             )

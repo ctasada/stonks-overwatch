@@ -47,7 +47,6 @@ class PortfolioService:
         products_config = self.__get_product_config()
 
         my_portfolio = []
-        portfolio_total_value = 0.0
 
         tmp_processed_symbols = []
 
@@ -105,8 +104,6 @@ class PortfolioService:
             percentage_realized_gain = total_realized_gains / total_costs \
                 if total_realized_gains != 0.0 and total_costs != 0.0 else 0.0
 
-            portfolio_total_value += value
-
             exchange_id = info["exchangeId"]
             exchange_abbr = exchange_name = None
 
@@ -131,33 +128,16 @@ class PortfolioService:
                     shares=tmp["size"],
                     product_currency=currency,
                     price=price,
-                    formatted_price=LocalizationUtility.format_money_value(value=price, currency=currency),
-                    formatted_base_currency_price=LocalizationUtility.format_money_value(
-                        value=base_currency_price, currency=self.base_currency
-                    ),
+                    base_currency_price=base_currency_price,
+                    base_currency=self.base_currency,
                     break_even_price=break_even_price,
-                    formatted_break_even_price=LocalizationUtility.format_money_value(
-                        value=break_even_price, currency=currency
-                    ),  # GAK: Average Purchase Price
-                    formatted_base_currency_break_even_price=LocalizationUtility.format_money_value(
-                        value=base_currency_break_even_price, currency=self.base_currency
-                    ),
+                    base_currency_break_even_price=base_currency_break_even_price,
                     value=value,
-                    formatted_value=LocalizationUtility.format_money_value(value=value, currency_symbol=currency),
                     base_currency_value=base_currency_value,
-                    formatted_base_currency_value=LocalizationUtility.format_money_value(
-                        value=base_currency_value, currency=self.base_currency
-                    ),
                     is_open=is_open,
                     unrealized_gain=unrealized_gain,
-                    formatted_unrealized_gain=LocalizationUtility.format_money_value(
-                        value=unrealized_gain, currency=self.base_currency
-                    ),
                     percentage_unrealized_gain=f"{percentage_unrealized_gain:.2%}",
                     realized_gain=total_realized_gains,
-                    formatted_realized_gain=LocalizationUtility.format_money_value(
-                        value=total_realized_gains, currency=self.base_currency
-                    ),
                     percentage_realized_gain=f"{percentage_realized_gain:.2%}",
                     symbol_url=self._get_logo_url(info['symbol']),
                     portfolio_size=0.0,  # Calculated in the next loop
@@ -165,7 +145,6 @@ class PortfolioService:
             )
 
         total_cash = CashMovementsRepository.get_total_cash()
-        portfolio_total_value += total_cash
         my_portfolio.append(
             PortfolioEntry(
                 name="Cash Balance EUR",
@@ -176,18 +155,11 @@ class PortfolioService:
                 product_currency="EUR",
                 value=total_cash,
                 base_currency_value=total_cash,
-                formatted_base_currency_value=LocalizationUtility.format_money_value(
-                    value=total_cash, currency="EUR"),
+                base_currency="EUR",
                 is_open=True,
                 portfolio_size=0.0,  # Calculated in the next loop
             )
         )
-
-        # Calculate Stock Portfolio Size
-        for entry in my_portfolio:
-            size = entry.value / portfolio_total_value
-            entry.portfolio_size = size
-            entry.formatted_portfolio_size = f"{size:.2%}"
 
         return sorted(my_portfolio, key=lambda k: k.symbol)
 

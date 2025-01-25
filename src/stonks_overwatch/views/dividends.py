@@ -56,13 +56,13 @@ class Dividends(View):
         dividends_calendar = {}
         joined_dividends = dividends_overview + upcoming_dividends
         # After merging dividends and upcoming dividends, we need to sort the result
-        joined_dividends = sorted(joined_dividends, key=lambda x: x.date, reverse=True)
+        joined_dividends = sorted(joined_dividends, key=lambda x: x.date(), reverse=True)
 
         df = pd.DataFrame(joined_dividends)
-        period_start = min(df["date"])
         # Find the maximum date. Since we have upcoming payments, it can be today or some point
         # in the future
-        date_as_datetime = pd.to_datetime(df["date"], format="%Y-%m-%d")
+        date_as_datetime = pd.to_datetime(df["datetime"], format="%Y-%m-%d")
+        period_start = date_as_datetime.min()
         today = pd.Timestamp("today").normalize()
         period_end = max(date_as_datetime.max(), today)
         period = pd.period_range(start=period_start, end=period_end, freq="M")[::-1]
@@ -82,8 +82,8 @@ class Dividends(View):
 
         for transaction in joined_dividends:
             # Group dividends by month. We may only need the dividend name and amount
-            month_year = LocalizationUtility.format_date_to_month_year(transaction.date)
-            day = LocalizationUtility.get_date_day(transaction.date)
+            month_year = LocalizationUtility.format_date_to_month_year(transaction.datetime)
+            day = LocalizationUtility.get_date_day(transaction.datetime)
             stock = transaction.stock_symbol
 
             month_entry = dividends_calendar.setdefault(month_year, {})
@@ -93,7 +93,7 @@ class Dividends(View):
             transaction_change = transaction.change
 
             currency = transaction.currency
-            payment_date = LocalizationUtility.convert_string_to_date(transaction.date)
+            payment_date = transaction.datetime.date()
             if currency != self.base_currency:
                 transaction_change = self.currency_service.convert(
                     transaction_change, currency, self.base_currency, payment_date
@@ -110,7 +110,7 @@ class Dividends(View):
 
             month_entry.setdefault("dividends", []).append(
                 {
-                    "day": LocalizationUtility.get_date_day(transaction.date),
+                    "day": LocalizationUtility.get_date_day(transaction.datetime),
                     "stockName": transaction.stock_name,
                     "stockSymbol": transaction.stock_symbol,
                     "formatedChange": transaction.formated_change,
@@ -172,7 +172,7 @@ class Dividends(View):
             dividend_currency = entry.currency
             dividend_change = entry.change
             if dividend_currency != self.base_currency:
-                date = LocalizationUtility.convert_string_to_date(entry.date)
+                date = entry.datetime.date()
                 dividend_change = self.currency_service.convert(
                     dividend_change, dividend_currency, self.base_currency, date
                 )

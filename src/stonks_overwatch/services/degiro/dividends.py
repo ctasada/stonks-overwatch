@@ -47,12 +47,11 @@ class DividendsService:
                     currency = payment["currency"]
                     result.append(
                         AccountOverview(
-                            date=payment["payDate"],
+                            datetime=LocalizationUtility.convert_string_to_datetime(payment["payDate"]),
                             stock_name=stock_name,
                             stock_symbol=stock_symbol,
                             currency=currency,
                             change=amount,
-                            formated_change=LocalizationUtility.format_money_value(value=amount, currency=currency),
                         )
                     )
 
