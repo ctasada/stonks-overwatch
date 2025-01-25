@@ -5,8 +5,7 @@ import pandas as pd
 from stonks_overwatch.config import Config
 from stonks_overwatch.repositories.degiro.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
-from stonks_overwatch.services.models import Deposit
-from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.services.models import Deposit, DepositType
 
 
 # FIXME: If data cannot be found in the DB, the code should get it from DeGiro, updating the DB
@@ -22,21 +21,16 @@ class DepositsService:
         df = pd.DataFrame(CashMovementsRepository.get_cash_deposits_raw())
 
         df = df.sort_values(by="date", ascending=False)
-        # Remove hours and keep only the day
-        df["date"] = pd.to_datetime(df["date"]).dt.strftime(LocalizationUtility.DATE_FORMAT)
-
 
         records = []
         for _, row in df.iterrows():
             records.append(
                 Deposit(
-                    type="Deposit" if row["change"] > 0 else "Withdrawal",
-                    date=row["date"],
+                    type=DepositType.DEPOSIT if row["change"] > 0 else DepositType.WITHDRAWAL,
+                    datetime=row["date"],
                     description=self._capitalize_deposit_description(row["description"]),
                     change=row["change"],
-                    change_formatted=LocalizationUtility.format_money_value(
-                        value=row["change"], currency=self.base_currency
-                    ),
+                    currency=self.base_currency,
                 )
             )
 

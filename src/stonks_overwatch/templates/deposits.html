@@ -64,11 +64,11 @@
             <tbody>
                 {% for entry in deposits %}
                 <tr>
-                    <td>{{ entry.date }}</td>
-                    {% if entry.type == "Deposit" %}
-                    <td><span class="green-pill">{{ entry.type }}</span></td>
+                    <td>{{ entry.datetime_as_date }}</td>
+                    {% if entry.type.value == "Deposit" %}
+                    <td><span class="green-pill">{{ entry.type.value }}</span></td>
                     {% else %}
-                    <td><span class="red-pill">{{ entry.type }}</span></td>
+                    <td><span class="red-pill">{{ entry.type.value }}</span></td>
                     {% endif %}
                     <td>{{ entry.description }}</td>
                     <td>{{ entry.change_formatted }}</td>
