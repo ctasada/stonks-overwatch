@@ -32,8 +32,7 @@ class PortfolioAggregatorService:
         # Calculate Stock Portfolio Size
         for entry in portfolio:
             size = entry.value / portfolio_total_value
-            entry.portfolio_Size = size
-            entry.formatted_portfolio_size = f"{size:.2%}"
+            entry.portfolio_size = size
 
         # FIXME: We need to merge the Cash balances. Concatenating is not enough
         return portfolio

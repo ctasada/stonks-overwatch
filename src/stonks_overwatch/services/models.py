@@ -9,10 +9,8 @@ from stonks_overwatch.utils.localization import LocalizationUtility
 
 @dataclass
 class AccountOverview:
-    date: str = ""
-    time: str = ""
-    value_date: str = ""
-    value_time: str = ""
+    datetime: datetime = None
+    value_datetime: datetime = None
     stock_name: str = ""
     stock_symbol: str = ""
     description: str = ""
@@ -20,11 +18,41 @@ class AccountOverview:
     type_str: str = ""
     currency: str = ""
     change: float = 0.0
-    formated_change: str = ""
-    total_balance: str = ""
-    formated_total_balance: str = ""
-    unsettled_cash: str = ""
-    formated_unsettled_cash: str = ""
+    total_balance: float = 0.0
+    unsettled_cash: float = 0.0
+
+    def date(self) -> str:
+        return LocalizationUtility.format_date_from_date(self.datetime)
+
+    def time(self) -> str:
+        return LocalizationUtility.format_time_from_date(self.datetime)
+
+    def value_date(self) -> str:
+        return LocalizationUtility.format_date_from_date(self.value_datetime)
+
+    def value_time(self) -> str:
+        return LocalizationUtility.format_time_from_date(self.value_datetime)
+
+    def formated_change(self) -> str:
+        if self.change and self.change != 0.0:
+            return LocalizationUtility.format_money_value(
+                value=self.change, currency=self.currency
+            )
+        return ""
+
+    def formated_total_balance(self) -> str:
+        if self.total_balance != 0.0:
+            return LocalizationUtility.format_money_value(
+                value=self.total_balance, currency=self.currency
+            )
+        return ""
+
+    def formated_unsettled_cash(self) -> str:
+        if self.unsettled_cash  != 0.0:
+            return LocalizationUtility.format_money_value(
+                value=self.unsettled_cash, currency=self.currency
+            )
+        return ""
 
 class DailyValue(TypedDict):
     x: str  # date
@@ -63,34 +91,77 @@ class PortfolioEntry:
     shares: str = ""
     product_currency: str = ""
     price: float = 0.0
-    formatted_price: str = ""
-    formatted_base_currency_price: str = ""
+    base_currency_price: float = 0.0
+    base_currency: str = ""
     break_even_price: float = 0.0
-    formatted_break_even_price: str = ""
-    formatted_base_currency_break_even_price: str = ""
     value: float = 0.0
-    formatted_value: str = ""
     base_currency_value: float = 0.0
-    formatted_base_currency_value: str = ""
+    base_currency_break_even_price: float = 0.0
     is_open: bool = False
     unrealized_gain: float = 0.0
-    formatted_unrealized_gain: str = ""
     percentage_unrealized_gain: str = ""
     realized_gain: float = 0.0
-    formatted_realized_gain: str = ""
     percentage_realized_gain: str = ""
     symbol_url: str = ""
     portfolio_size: float = 0.0
-    formatted_portfolio_size: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
         # Convert to dict and handle enum specifically
         result = asdict(self)
         result['product_type'] = self.product_type.value
+        result['formatted_portfolio_size'] = self.formatted_portfolio_size
+        result['formatted_break_even_price'] = self.formatted_break_even_price
+        result['formatted_base_currency_break_even_price'] = self.formatted_base_currency_break_even_price
+        result['formatted_price'] = self.formatted_price
+        result['formatted_base_currency_price'] = self.formatted_base_currency_price
+        result['formatted_value'] = self.formatted_value
+        result['formatted_base_currency_value'] = self.formatted_base_currency_value
+        result['formatted_unrealized_gain'] = self.formatted_unrealized_gain
+        result['formatted_realized_gain'] = self.formatted_realized_gain
+
         if self.product_type == ProductType.CASH:
             result['category'] = ""
             result['exchange_abbr'] = ""
         return result
+
+    def formatted_portfolio_size(self) -> str :
+        return f"{self.portfolio_size:.2%}"
+
+    def formatted_break_even_price(self) -> str:
+        return LocalizationUtility.format_money_value(
+            value=self.break_even_price, currency=self.product_currency
+        )
+
+    def formatted_base_currency_break_even_price(self) -> str:
+        return LocalizationUtility.format_money_value(
+            value=self.base_currency_break_even_price, currency=self.base_currency
+        )
+
+    def formatted_price(self) -> str:
+        return LocalizationUtility.format_money_value(value=self.price, currency=self.product_currency)
+
+    def formatted_base_currency_price(self) -> str:
+        return LocalizationUtility.format_money_value(
+            value=self.base_currency_price, currency=self.base_currency
+        )
+
+    def formatted_value(self) -> str:
+        return LocalizationUtility.format_money_value(value=self.value, currency=self.product_currency)
+
+    def formatted_base_currency_value(self) -> str:
+        return LocalizationUtility.format_money_value(
+            value=self.base_currency_value, currency=self.base_currency
+        )
+
+    def formatted_unrealized_gain(self) -> str:
+        return LocalizationUtility.format_money_value(
+            value=self.unrealized_gain, currency=self.base_currency
+        )
+
+    def formatted_realized_gain(self) -> str:
+        return LocalizationUtility.format_money_value(
+            value=self.realized_gain, currency=self.base_currency
+        )
 
 @dataclass
 class TotalPortfolio:
