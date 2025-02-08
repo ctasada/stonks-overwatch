@@ -6,7 +6,7 @@ def dictfetchall(cursor: CursorWrapper) -> list[dict]:
     Assume the column names are unique.
     """
     columns = [snake_to_camel(col[0]) for col in cursor.description]
-    return [dict(zip(columns, row)) for row in cursor.fetchall()]
+    return [dict(zip(columns, row, strict=True)) for row in cursor.fetchall()]
 
 
 def dictfetchone(cursor: CursorWrapper) -> dict:

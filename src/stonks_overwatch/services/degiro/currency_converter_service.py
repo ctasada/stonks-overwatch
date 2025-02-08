@@ -47,7 +47,8 @@ class CurrencyConverterService:
 
         return amount * fx_rate
 
-    def __calculate_maps(self) -> dict:
+    @staticmethod
+    def __calculate_maps() -> dict:
         calculated_map = {}
         for pair in CurrencyFX:
             # Extract the currencies from the enum name
