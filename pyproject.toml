@@ -9,7 +9,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.12"
 degiro-connector = "^3.0.23"
-django = "^5.1.4"
+django = "^5.1.6"
 pycountry = "^24.6.1"
 currency-symbols = "^2.0.3"
 pandas = "^2.2.3"
