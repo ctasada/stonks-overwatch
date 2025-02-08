@@ -22,13 +22,17 @@ class PortfolioService:
         self.deposits = DepositsService()
         self.base_currency = Config.default().base_currency
 
+    @staticmethod
+    def __is_currency(symbol: str) -> bool:
+        return symbol == "EUR"
+
     def get_portfolio(self) -> List[PortfolioEntry]:
         bitvavo_portfolio = []
 
         balance = self.bitvavo_service.balance()
 
         for item in balance:
-            if item["available"] == "0":
+            if item["available"] == "0" or self.__is_currency(item["symbol"]):
                 continue
 
             ticker_json = self.bitvavo_service.ticker_price(item["symbol"] + "-" + self.base_currency)
@@ -72,7 +76,7 @@ class PortfolioService:
                 )
             )
 
-        return bitvavo_portfolio
+        return sorted(bitvavo_portfolio, key=lambda k: k.symbol)
 
 
     def get_portfolio_total(self, portfolio: Optional[list[dict]] = None) -> TotalPortfolio:
@@ -90,7 +94,7 @@ class PortfolioService:
 
         tmp_total_portfolio["totalDepositWithdrawal"] = (
             sum(float(entry["amount"]) for entry in self.bitvavo_service.deposit_history()))
-        # FIXME: Is this the proper way of retrieving the cash?
+
         total_cash = 0.0
         balance = self.bitvavo_service.balance(self.base_currency)
         if balance:

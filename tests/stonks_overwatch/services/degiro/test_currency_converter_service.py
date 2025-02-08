@@ -42,7 +42,7 @@ class TestCurrencyConverterService(TestCase):
         expected = ["EUR", "USD"]
         pairs = CurrencyFX.known_currencies()
         assert len(pairs) == 2
-        assert all(a == b for a, b in zip(pairs, expected))
+        assert all(a == b for a, b in zip(pairs, expected, strict=True))
 
     def test_calculate_maps(self):
         calculated_map = self.currency_service._CurrencyConverterService__calculate_maps()
