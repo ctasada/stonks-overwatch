@@ -170,7 +170,7 @@ poetry run src/manage.py runscript init_db
     - 'FRZA'(600236745)
     - 600179738: No chart found
 - "Portfolio data not found in cache. Calling DeGiro" Executed 2 consecutive times during startup
-- Stock splits may imply a change in the productId
+- CreateProduct Quotation do not respect the proper timeframes
 
 ## TODOs
 - [ ] DeGiro Client: Stop using Totp and request 2FA for each connection

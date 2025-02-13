@@ -63,6 +63,12 @@ def format_time_from_date():
     assert LocalizationUtility.format_time_from_date(datetime.fromisoformat("2020-01-01 10:10:30")) == "10:10:30"
     assert LocalizationUtility.format_time_from_date(datetime.fromisoformat("2020-01-01T10:10:30Z")) == "10:10:30"
 
+def format_date_time_from_date():
+    assert LocalizationUtility.format_date_time_from_date(datetime.fromisoformat("2020-01-01")) == "2020-01-01 00:00:00"
+    assert (LocalizationUtility.format_date_time_from_date(datetime.fromisoformat("2020-01-01 10:10:30"))
+            == "2020-01-01 10:10:30")
+    assert (LocalizationUtility.format_date_time_from_date(datetime.fromisoformat("2020-01-01T10:10:30Z"))
+            == "2020-01-01 10:10:30")
 
 def test_format_date_to_month_year():
     assert LocalizationUtility.format_date_to_month_year("2020-01-01") == "January 2020"

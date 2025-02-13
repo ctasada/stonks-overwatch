@@ -3,7 +3,6 @@ from datetime import datetime
 from django.db import connection
 
 from stonks_overwatch.repositories.degiro.models import DeGiroTransactions
-from stonks_overwatch.services.degiro.constants import TransactionType
 from stonks_overwatch.utils.db_utils import dictfetchall
 
 
@@ -71,15 +70,3 @@ class TransactionsRepository:
             """Ignore. The Database doesn't contain anything"""
 
         return None
-
-    @staticmethod
-    def get_stock_split_transactions() -> list[dict]:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT date, product_id, buysell, quantity FROM degiro_transactions
-                    WHERE transaction_type_id = %s
-                """,
-                [TransactionType.STOCK_SPLIT.value]
-            )
-            return dictfetchall(cursor)
