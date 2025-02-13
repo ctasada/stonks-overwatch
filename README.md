@@ -185,6 +185,7 @@ poetry run src/manage.py runscript init_db
 - [ ] Some stocks (mainly Spanish) don't have Sector or other data. Find workaround
 - [ ] Fontawesome is replaceable by https://icons.getbootstrap.com
 - [ ] Provide more information in the Dashboard performance overview
+- [ ] Show currency symbol in the portfolio: https://icons.getbootstrap.com/?q=currency or https://fontawesome.com/search?q=currency&o=r&ic=free
 
 ## Logos
 - https://eodhd.com/financial-apis-blog/40000-company-logos (requires API Key)
