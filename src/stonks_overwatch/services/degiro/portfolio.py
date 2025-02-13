@@ -1,5 +1,4 @@
 import logging
-from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import List, Optional
 
@@ -19,6 +18,7 @@ from stonks_overwatch.services.models import DailyValue, PortfolioEntry, TotalPo
 from stonks_overwatch.utils.constants import ProductType
 from stonks_overwatch.utils.datetime import DateTimeUtility
 from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.utils.y_finance import get_stock_splits
 
 
 class PortfolioService:
@@ -167,6 +167,7 @@ class PortfolioService:
     def _get_logo_url(symbol: str) -> str:
         # Keep track of alternatives as NVSTly
         # return f"https://raw.githubusercontent.com/nvstly/icons/main/ticker_icons/{symbol.upper()}.png"
+        # https://img.stockanalysis.com/logos1/MC/IBE.png
         return f"https://logos.stockanalysis.com/{symbol.lower()}.svg"
 
     def __get_product_realized_gains(self, product_ids: list[str]) -> tuple[float, float]:
@@ -352,12 +353,11 @@ class PortfolioService:
     def calculate_historical_value(self) -> List[DailyValue]:
         cash_account = self.deposits.calculate_cash_account_value()
         data = self._create_products_quotation()
-        stock_splits = self._get_stock_splits()
 
         aggregate = {}
         for key in data:
             entry = data[key]
-            position_value_growth = self._calculate_position_growth(entry, stock_splits)
+            position_value_growth = self._calculate_position_growth(entry)
             convert_fx = entry["product"]["currency"] != self.base_currency
             for date_value in position_value_growth:
                 if self._is_weekend(date_value):
@@ -398,7 +398,7 @@ class PortfolioService:
         else:
             return datetime.today().date()
 
-    def _calculate_position_growth(self, entry: dict, stock_splits: dict) -> dict:
+    def _calculate_position_growth(self, entry: dict) -> dict:
         product_history_dates = list(entry["history"].keys())
 
         start_date = LocalizationUtility.convert_string_to_date(product_history_dates[0])
@@ -414,13 +414,13 @@ class PortfolioService:
             for d in dates[index:]:
                 position_value[d] = entry["history"][date_change]
 
-        if entry["productId"] in stock_splits:
+        stock_splits = get_stock_splits(entry["product"]["symbol"])
+        if len(stock_splits) > 0:
             stocks_multiplier = 1
-            for split_date in reversed(stock_splits[entry["productId"]]):
-                split_data = stock_splits[entry["productId"]][split_date]
-                stocks_multiplier = stocks_multiplier * split_data["split_ratio"]
+            for split_data in reversed(stock_splits):
+                stocks_multiplier = stocks_multiplier * split_data.split_ratio
                 for date_value in reversed(position_value):
-                    if date_value < split_date:
+                    if date_value < LocalizationUtility.format_date_from_date(split_data.date):
                         position_value[date_value] = position_value[date_value] * stocks_multiplier
 
         aggregate = {}
@@ -432,38 +432,6 @@ class PortfolioService:
             self.logger.warning(f"No quotes found for '{entry['product']['symbol']}': productId {entry['productId']} ")
 
         return aggregate
-
-    def _get_stock_splits(self) -> dict:
-        """
-        Retrieves and processes stock split transactions.
-        """
-        results = TransactionsRepository.get_stock_split_transactions()
-        grouped_data = defaultdict(lambda: {"B": None, "S": None})
-
-        for entry in results:
-            day = entry["date"].strftime(LocalizationUtility.DATE_FORMAT)
-            grouped_data[day][entry["buysell"]] = entry
-
-        stock_splits = {}
-        for day, transactions in grouped_data.items():
-            if not all(transactions.values()):
-                continue
-
-            sell_quantity = abs(transactions["S"]["quantity"])
-            buy_quantity = transactions["B"]["quantity"]
-            split_ratio = buy_quantity / sell_quantity
-
-            split_data = {
-                "productId_sell": transactions["S"]["productId"],
-                "productId_buy": transactions["B"]["productId"],
-                "is_renamed": transactions["S"]["productId"] != transactions["B"]["productId"],
-                "split_ratio": split_ratio,
-            }
-
-            stock_splits.setdefault(transactions["S"]["productId"], {})[day] = split_data
-            stock_splits.setdefault(transactions["B"]["productId"], {})[day] = split_data
-
-        return stock_splits
 
     def _create_products_quotation(self) -> dict:
         """
@@ -495,8 +463,7 @@ class PortfolioService:
             product_history_dates = list(data["history"].keys())
             data["quotation"] = {
                 "fromDate": product_history_dates[0],
-                # FIXME: This should be the last date of the product history
-                "toDate": LocalizationUtility.format_date_from_date(datetime.today()),
+                "toDate": product_history_dates[-1],
                 "interval": DateTimeUtility.calculate_interval(product_history_dates[0]),
                 "quotes": ProductQuotationsRepository.get_product_quotations(key),
             }
