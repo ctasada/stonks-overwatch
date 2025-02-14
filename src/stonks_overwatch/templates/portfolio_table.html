@@ -31,10 +31,12 @@
         <tbody>
         {% for item in items %}
             <tr>
-                {% if item.symbol_url %}
-                <td class="text-center align-middle"><img src="{{ item.symbol_url }}" width="30" height="30" alt="{{ item.symbol }} logo" onerror="this.style.display='none'"></td>
+                {% if item.product_type == 'Cash' %}
+                    <td class="text-center align-middle"><i class="fa-solid fa-euro-sign fa-xl"></i></td>
+                {% elif item.symbol_url %}
+                    <td class="text-center align-middle"><img src="{{ item.symbol_url }}" width="30" height="30" alt="{{ item.symbol }} logo" onerror="this.style.display='none'"></td>
                 {% else %}
-                <td class="text-center align-middle">{{ item.currency_symbol }}</td>
+                    <td class="text-center align-middle"></td>
                 {% endif %}
                 <td>{{ item.symbol }}<br><small class="fw-lighter">{{ item.name }}</small></td>
                 {% if item.category or item.exchange_abbr %}
