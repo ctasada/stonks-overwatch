@@ -142,20 +142,33 @@ class Dashboard(View):
         return portfolio_value
 
     @staticmethod
-    def _calculate_twr(dates: List[str], values: List[float], cashflows: List[float]) -> PortfolioMetrics:
+    def _calculate_twr(
+            date_range: list[str], market_value_per_day: dict[str, float], daily_cash_flows: dict[str, float]
+    ) -> PortfolioMetrics:
         """
         Calculate Time-Weighted Return (TWR) for an investment portfolio.
 
         Parameters:
-        dates (list): List of datetime objects representing dates of values/cashflows
-        values (list): List of portfolio values at each date
-        cashflows (list): List of cashflows (positive for inflows, negative for outflows)
+        date_range (list): List of datetime objects representing dates of values/cashflows
+        market_value_per_day (dict[day, value]): List of portfolio values at each date
+        daily_cash_flows (dict[day, value]): List of cashflows (positive for inflows, negative for outflows)
                          Same length as dates and values, 0 if no cashflow on that date
 
         Returns:
         float: Time-weighted return as a decimal (e.g., 0.05 for 5% return)
         dict: Additional metrics including sub-period returns
         """
+
+        # Initialize lists for dates, values, and cashflows
+        dates = []
+        cashflows = []
+        values = []
+
+        for day in date_range:
+            dates.append(day)
+            cashflows.append(daily_cash_flows.get(day, 0.0))
+            values.append(market_value_per_day.get(day, 0.0))
+
         if len(dates) != len(values) or len(dates) != len(cashflows):
             raise ValueError("All input lists must have the same length")
 
@@ -274,16 +287,7 @@ class Dashboard(View):
     def __get_date_range_performance_twr(
             self, date_range: list[str], market_value_per_day: dict[str, float], cash_flows: dict[str, float]
     ) -> List[Dict[str, float]]:
-        dates = []
-        daily_cash_flows = []
-        market_values = []
-
-        for day in date_range:
-            dates.append(day)
-            daily_cash_flows.append(cash_flows.get(day, 0.0))
-            market_values.append(market_value_per_day.get(day, 0.0))
-
-        twr = self._calculate_twr(dates, market_values, daily_cash_flows)
+        twr = self._calculate_twr(date_range, market_value_per_day, cash_flows)
 
         return [
             DailyValue(x=LocalizationUtility.format_date_from_date(k), y=v)
@@ -293,16 +297,7 @@ class Dashboard(View):
     def __get_total_performance_twr(
             self, date_range: list[str], market_value_per_day: dict[str, float], cash_flows: dict[str, float]
     ) -> float:
-        dates = []
-        daily_cash_flows = []
-        market_values = []
-
-        for day in date_range:
-            dates.append(day)
-            daily_cash_flows.append(cash_flows.get(day, 0.0))
-            market_values.append(market_value_per_day.get(day, 0.0))
-
-        twr = self._calculate_twr(dates, market_values, daily_cash_flows)
+        twr = self._calculate_twr(date_range, market_value_per_day, cash_flows)
 
         return twr.total_return
 
