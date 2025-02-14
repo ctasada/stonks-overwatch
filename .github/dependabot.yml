@@ -1,12 +1,12 @@
 version: 2
 updates:
-  - package-ecosystem: "poetry"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    commit-message:
-      prefix: "deps"
-    open-pull-requests-limit: 10
+#  - package-ecosystem: "poetry"
+#    directory: "/"
+#    schedule:
+#      interval: "daily"
+#    commit-message:
+#      prefix: "deps"
+#    open-pull-requests-limit: 10
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
