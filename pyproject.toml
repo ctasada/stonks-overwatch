@@ -20,7 +20,7 @@ CurrencyConverter = "^0.18.3"
 django-node-assets = "^0.9.14"
 fontawesomefree = "^6.6.0"
 apscheduler = "^3.11.0"
-tzlocal = "^5.2"
+tzlocal = "^5.3"
 python-bitvavo-api = "^1.4.2"
 yfinance = "^0.2.52"
 
