@@ -3,7 +3,14 @@ updates:
   - package-ecosystem: "poetry"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+    commit-message:
+      prefix: "deps"
+    open-pull-requests-limit: 10
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
     commit-message:
       prefix: "deps"
     open-pull-requests-limit: 10
