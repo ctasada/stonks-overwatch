@@ -1,28 +1,32 @@
-[tool.poetry]
+[project]
 name = "stonks-overwatch"
 version = "0.1.0"
 description = "Stonks Overwatch"
-authors = ["carlos.tasada <carlos.tasada@gmail.com>"]
+authors = [{name = "Carlos Tasada", email = "carlos.tasada@gmail.com"}]
 license = "MIT"
 readme = "README.md"
+requires-python = ">=3.12,<4.0"
+dependencies = [
+    "degiro-connector >= 3.0.23",
+    "django >= 5.1.6",
+    "pycountry >= 24.6.1",
+    "currency-symbols >= 2.0.3",
+    "pandas >= 2.2.3",
+    "requests-cache >= 1.2.1",
+    "django-extensions >= 3.2.3",
+    "python-dateutil >= 2.8.2",
+    "CurrencyConverter >= 0.18.3",
+    "django-node-assets >= 0.9.14",
+    "fontawesomefree >= 6.6.0",
+    "apscheduler >= 3.11.0",
+    "tzlocal >= 5.3",
+    "python-bitvavo-api >= 1.4.2",
+    "yfinance >= 0.2.52",
+]
 
-[tool.poetry.dependencies]
-python = "^3.12"
-degiro-connector = "^3.0.23"
-django = "^5.1.6"
-pycountry = "^24.6.1"
-currency-symbols = "^2.0.3"
-pandas = "^2.2.3"
-requests-cache = "^1.2.1"
-django-extensions = "^3.2.3"
-python-dateutil = "^2.8.2"
-CurrencyConverter = "^0.18.3"
-django-node-assets = "^0.9.14"
-fontawesomefree = "^6.6.0"
-apscheduler = "^3.11.0"
-tzlocal = "^5.3"
-python-bitvavo-api = "^1.4.2"
-yfinance = "^0.2.52"
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.6.9"
@@ -30,10 +34,6 @@ pytest = "^8.3.4"
 pytest-cov = "^5.0.0"
 requests-mock = "^1.12.1"
 pytest-django = "^4.10.0"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
