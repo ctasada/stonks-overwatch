@@ -171,6 +171,7 @@ poetry run src/manage.py runscript init_db
     - 600179738: No chart found
 - "Portfolio data not found in cache. Calling DeGiro" Executed 2 consecutive times during startup
 - CreateProduct Quotation do not respect the proper timeframes
+- Django Cache is disabled so that the portfolio selection works, otherwise the page is not properly reload
 
 ## TODOs
 - [ ] DeGiro Client: Stop using Totp and request 2FA for each connection

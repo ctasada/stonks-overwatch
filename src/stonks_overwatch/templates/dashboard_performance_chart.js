@@ -98,7 +98,6 @@ function drawPerformance(performanceGroup, timeRange) {
             } else {
                 data = json.portfolio.monthly_twr[performanceGroup]
             }
-            console.log(data)
             chart.data.datasets[0].data = data
 
             chart.update();

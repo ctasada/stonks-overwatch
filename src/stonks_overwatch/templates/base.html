@@ -33,8 +33,16 @@
             <div class="col-1 px-0 sticky-top" id="sidebar">
                 <!-- Sidebar  -->
                 <div class="d-flex flex-sm-column flex-row flex-nowrap align-items-center sticky-top min-vh-100">
-                    <div class="d-block p-3 text-decoration-none text-white text-center">
+                    <div class="d-block p-3 text-decoration-none text-white text-center border-bottom">
                         <p class="fw-semibold d-inline text-white fs-5">Stonks Overwatch</p>
+                    </div>
+                    <div class="dropdown pb-2 pt-2"  id="sidebar-portfolio-selector">
+                        <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="selectPortfolio" data-bs-toggle="dropdown" aria-expanded="false">
+                            <!-- The selected portfolio is injected by the JScript block via a GET Request -->
+                        </a>
+                        <ul class="dropdown-menu text-small shadow" id="sidebar-portfolio-menu">
+                            <!-- The list of portfolios is injected by the JScript block via a GET Request -->
+                        </ul>
                     </div>
                     <ul class="nav flex-column mb-auto text-center w-100">
                         {% url 'dashboard' as url %}
@@ -128,6 +136,49 @@
         let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
+
+        // Fetch configuration data
+        fetch("{% url 'configuration' %}", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                const selectedPortfolio = document.getElementById("selectPortfolio");
+                selectedPortfolio.innerHTML = `<img src="${data.selected_portfolio.logo}" alt="${data.selected_portfolio.id}" width="25" height="25" class="rounded-circle m-2">${data.selected_portfolio.name}`;
+
+                const portfolioMenu = document.getElementById("sidebar-portfolio-menu");
+                portfolioMenu.innerHTML = ""; // Clear existing menu items
+
+                data.available_portfolios.forEach(portfolio => {
+                    const menuItem = document.createElement("li");
+                    menuItem.innerHTML = `<li><a class="dropdown-item portfolio-link-filter" href="#" data-value="${portfolio.id}"><img src="${portfolio.logo}" alt="${portfolio.id}" width="30" height="30" class="rounded-circle m-1">${portfolio.name}</a></li>`;
+
+                    // Add click event listener to menuItem
+                    menuItem.querySelector("a").addEventListener("click", function(event) {
+                        event.preventDefault();  // Prevent default link behavior
+
+                        let selectedPortfolio = this.getAttribute("data-value");
+
+                        fetch("{% url 'configuration' %}", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRFToken": "{{ csrf_token }}"
+                            },
+                            body: JSON.stringify({ selected_portfolio: selectedPortfolio })
+                        }).then(response => {
+                            if (response.ok) {
+                                window.location.reload();
+                            }
+                        });
+                    });
+
+                    portfolioMenu.appendChild(menuItem);
+                });
+            });
     </script>
 </body>
 

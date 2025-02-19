@@ -6,6 +6,7 @@ from django.views import View
 
 from stonks_overwatch.services.models import PortfolioEntry
 from stonks_overwatch.services.portfolio_aggregator import PortfolioAggregatorService
+from stonks_overwatch.services.session_manager import SessionManager
 from stonks_overwatch.utils.constants import ProductType
 
 
@@ -34,7 +35,8 @@ class Portfolio(View):
         self.portfolio_aggregator = PortfolioAggregatorService()
 
     def get(self, request):
-        portfolio = self.portfolio_aggregator.get_portfolio()
+        selected_portfolio = SessionManager.get_selected_portfolio(request)
+        portfolio = self.portfolio_aggregator.get_portfolio(selected_portfolio)
 
         status = self.__parse_request_interval(request)
 
