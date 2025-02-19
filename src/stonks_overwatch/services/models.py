@@ -15,11 +15,8 @@ class AccountOverview:
     stock_symbol: str = ""
     description: str = ""
     type: str = ""
-    type_str: str = ""
     currency: str = ""
     change: float = 0.0
-    total_balance: float = 0.0
-    unsettled_cash: float = 0.0
 
     def date(self) -> str:
         return LocalizationUtility.format_date_from_date(self.datetime)
@@ -33,24 +30,13 @@ class AccountOverview:
     def value_time(self) -> str:
         return LocalizationUtility.format_time_from_date(self.value_datetime)
 
+    def type_str(self) -> str:
+        return self.type.replace("_", " ").title()
+
     def formated_change(self) -> str:
         if self.change and self.change != 0.0:
             return LocalizationUtility.format_money_value(
                 value=self.change, currency=self.currency
-            )
-        return ""
-
-    def formated_total_balance(self) -> str:
-        if self.total_balance != 0.0:
-            return LocalizationUtility.format_money_value(
-                value=self.total_balance, currency=self.currency
-            )
-        return ""
-
-    def formated_unsettled_cash(self) -> str:
-        if self.unsettled_cash  != 0.0:
-            return LocalizationUtility.format_money_value(
-                value=self.unsettled_cash, currency=self.currency
             )
         return ""
 

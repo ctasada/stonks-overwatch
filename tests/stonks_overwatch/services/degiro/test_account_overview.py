@@ -60,14 +60,12 @@ class TestAccountOverviewService(TestCase):
         assert overview[0].stock_symbol == ""
         assert overview[0].description == "Degiro Cash Sweep Transfer"
         assert overview[0].type == "FLATEX_CASH_SWEEP"
-        assert overview[0].type_str == "Flatex Cash Sweep"
+        assert overview[0].type_str() == "Flatex Cash Sweep"
         assert overview[0].currency == "EUR"
         assert overview[0].change == -14.36
         assert overview[0].formated_change() == "€ -14.36"
         assert overview[0].total_balance == 0
-        assert overview[0].formated_total_balance() == ""
         assert overview[0].unsettled_cash == 0
-        assert overview[0].formated_unsettled_cash() == ""
 
         assert overview[1].date() == "2024-08-29"
         assert overview[1].time() == "14:33:41"
@@ -77,11 +75,9 @@ class TestAccountOverviewService(TestCase):
         assert overview[1].stock_symbol == "AAPL"
         assert overview[1].description == "Koop 2 @ 100,000 EUR"
         assert overview[1].type == "TRANSACTION"
-        assert overview[1].type_str == "Transaction"
+        assert overview[1].type_str() == "Transaction"
         assert overview[1].currency == "EUR"
         assert overview[1].change == -200.0
         assert overview[1].formated_change() == "€ -200.00"
         assert overview[1].total_balance == 0
-        assert overview[1].formated_total_balance() == ""
         assert overview[1].unsettled_cash == 0
-        assert overview[1].formated_unsettled_cash() == ""
