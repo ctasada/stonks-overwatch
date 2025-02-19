@@ -11,8 +11,9 @@ from django.shortcuts import render
 from django.views import View
 
 from stonks_overwatch.services.deposits_aggregator import DepositsAggregatorService
-from stonks_overwatch.services.models import DailyValue
+from stonks_overwatch.services.models import DailyValue, PortfolioId
 from stonks_overwatch.services.portfolio_aggregator import PortfolioAggregatorService
+from stonks_overwatch.services.session_manager import SessionManager
 from stonks_overwatch.utils.localization import LocalizationUtility
 
 
@@ -63,10 +64,11 @@ class Dashboard(View):
         """Process JSON format request and return portfolio data."""
         interval = self._parse_request_interval(request)
         view = self._parse_request_view(request)
+        selected_portfolio = SessionManager.get_selected_portfolio(request)
 
         self.logger.debug(f"Rendering dashboard view with interval: {interval} and view type: {view}")
 
-        portfolio_value = self._get_portfolio_value()
+        portfolio_value = self._get_portfolio_value(selected_portfolio)
 
         start_date = self._get_interval_start_date(interval)
         if start_date:
@@ -74,7 +76,7 @@ class Dashboard(View):
         else:
             start_date = portfolio_value[0]['x']
 
-        performance_twr = self._calculate_portfolio_performance(portfolio_value, start_date)
+        performance_twr = self._calculate_portfolio_performance(selected_portfolio, portfolio_value, start_date)
         return {
             "portfolio": {
                 "portfolio_value": portfolio_value,
@@ -130,12 +132,12 @@ class Dashboard(View):
 
         return view
 
-    def _get_portfolio_value(self) -> List[DailyValue]:
+    def _get_portfolio_value(self, selected_portfolio: PortfolioId) -> List[DailyValue]:
         """Get historical portfolio value."""
         portfolio_value = cache.get(Dashboard.CACHE_KEY_PORTFOLIO)
 
         if portfolio_value is None:
-            portfolio_value = self.portfolio.calculate_historical_value()
+            portfolio_value = self.portfolio.calculate_historical_value(selected_portfolio)
 
             cache.set(Dashboard.CACHE_KEY_PORTFOLIO, portfolio_value, timeout=Dashboard.CACHE_TIMEOUT)
 
@@ -232,6 +234,7 @@ class Dashboard(View):
 
     def _calculate_portfolio_performance(
             self,
+            selected_portfolio: PortfolioId,
             portfolio_value: List[DailyValue],
             start_date: Optional[str]=None
     ) -> PortfolioPerformance:
@@ -246,7 +249,7 @@ class Dashboard(View):
             List of dictionaries containing dates and cumulative returns
         """
         deposits = sorted(
-            self.deposits.get_cash_deposits(),
+            self.deposits.get_cash_deposits(selected_portfolio),
             key=lambda k: k.datetime
         )
 

@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 from settings import PROJECT_PATH
+from stonks_overwatch.services.models import PortfolioId
 
 config_logger = logging.getLogger("stocks_portfolio.config")
 
@@ -197,11 +198,15 @@ class Config:
         self.degiro_configuration = degiro_configuration
         self.bitvavo_configuration = bitvavo_configuration
 
-    def is_degiro_enabled(self) -> bool:
-        return self.degiro_configuration is not None and self.degiro_configuration.credentials is not None
+    def is_degiro_enabled(self, selected_portfolio: PortfolioId = PortfolioId.ALL) -> bool:
+        return (self.degiro_configuration is not None
+                and self.degiro_configuration.credentials is not None
+                and selected_portfolio in [PortfolioId.ALL, PortfolioId.DEGIRO])
 
-    def is_bitvavo_enabled(self) -> bool:
-        return self.bitvavo_configuration is not None and self.bitvavo_configuration.credentials is not None
+    def is_bitvavo_enabled(self, selected_portfolio: PortfolioId = PortfolioId.ALL) -> bool:
+        return (self.bitvavo_configuration is not None
+                and self.bitvavo_configuration.credentials is not None
+                and selected_portfolio in [PortfolioId.ALL, PortfolioId.BITVAVO])
 
     def __eq__(self, value: object) -> bool:
         if isinstance(value, Config):
