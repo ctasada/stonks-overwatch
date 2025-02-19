@@ -1,0 +1,35 @@
+import json
+import logging
+
+from django.http import JsonResponse
+from django.views import View
+
+from stonks_overwatch.services.models import PortfolioId
+from stonks_overwatch.services.session_manager import SessionManager
+
+
+class ConfigurationView(View):
+    logger = logging.getLogger("stocks_portfolio.dashboard.views")
+
+    def get(self, request) -> JsonResponse:
+        selected_portfolio = SessionManager.get_selected_portfolio(request)
+        data = {
+            "selected_portfolio": selected_portfolio.to_dict(),
+            "available_portfolios": self.__get_portfolios(),
+        }
+        return JsonResponse(data)
+
+    @staticmethod
+    def __get_portfolios():
+        return [value.to_dict() for value in PortfolioId.values()]
+
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            selected_portfolio = data.get("selected_portfolio")
+            if selected_portfolio:
+                SessionManager.set_selected_portfolio(request, PortfolioId.from_id(selected_portfolio))
+        except json.JSONDecodeError:
+            self.logger.error("Failed to parse JSON data with the UI Configuration", exc_info=True)
+
+        return JsonResponse({}, status=204)

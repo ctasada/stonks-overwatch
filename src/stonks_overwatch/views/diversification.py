@@ -7,6 +7,7 @@ from django.views import View
 from stonks_overwatch.config import Config
 from stonks_overwatch.services.models import PortfolioEntry
 from stonks_overwatch.services.portfolio_aggregator import PortfolioAggregatorService
+from stonks_overwatch.services.session_manager import SessionManager
 from stonks_overwatch.utils.localization import LocalizationUtility
 
 
@@ -19,7 +20,8 @@ class Diversification(View):
         self.portfolio = PortfolioAggregatorService()
 
     def get(self, request):
-        portfolio = self.portfolio.get_portfolio()
+        selected_portfolio = SessionManager.get_selected_portfolio(request)
+        portfolio = self.portfolio.get_portfolio(selected_portfolio)
         product_types = self._get_product_types(portfolio)
         holdings = self._get_holdings(portfolio)
         sectors = self._get_sectors(portfolio)

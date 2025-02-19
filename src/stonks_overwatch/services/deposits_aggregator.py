@@ -8,7 +8,7 @@ from stonks_overwatch.config import Config
 from stonks_overwatch.services.bitvavo.deposits import DepositsService as BitvavoDepositsService
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.deposits import DepositsService as DeGiroDepositsService
-from stonks_overwatch.services.models import Deposit
+from stonks_overwatch.services.models import Deposit, PortfolioId
 from stonks_overwatch.utils.localization import LocalizationUtility
 
 
@@ -23,8 +23,8 @@ class DepositsAggregatorService:
         )
         self.bitvavo_deposits = BitvavoDepositsService()
 
-    def cash_deposits_history(self) -> list[dict]:
-        cash_contributions = self.get_cash_deposits()
+    def cash_deposits_history(self, selected_portfolio: PortfolioId) -> list[dict]:
+        cash_contributions = self.get_cash_deposits(selected_portfolio)
         df = pd.DataFrame.from_dict(cash_contributions)
 
         # Group by day, adding the values
@@ -57,12 +57,12 @@ class DepositsAggregatorService:
 
         return dataset
 
-    def get_cash_deposits(self) -> List[Deposit]:
+    def get_cash_deposits(self, selected_portfolio: PortfolioId) -> List[Deposit]:
         deposits = []
-        if Config.default().is_degiro_enabled():
+        if Config.default().is_degiro_enabled(selected_portfolio):
             deposits += self.degiro_deposits.get_cash_deposits()
 
-        if Config.default().is_bitvavo_enabled():
+        if Config.default().is_bitvavo_enabled(selected_portfolio):
             deposits += self.bitvavo_deposits.get_cash_deposits()
 
         deposits = sorted(deposits, key=lambda x: x.datetime, reverse=True)

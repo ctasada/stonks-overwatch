@@ -65,7 +65,7 @@ span {
 }
 
 .sidebar-tooltip {
-    --bs-tooltip-bg: #7386D5;
+    --bs-tooltip-bg: #6d7fcc;
 }
 
 .nav-pills .nav-link.active, .nav-pills .show>.nav-link {
@@ -124,6 +124,18 @@ a.article,
 a.article:hover {
     background: #6d7fcc !important;
     color: #fff !important;
+}
+
+#sidebar-portfolio-selector a img {
+    background: white
+}
+
+#sidebar-portfolio-menu {
+    background: #6d7fcc;
+}
+
+#sidebar-portfolio-menu li a img {
+    background: white;
 }
 
 /* ---------------------------------------------------
@@ -202,7 +214,7 @@ a.article:hover {
 }
 
 .scrollable-area {
-    max-height: "100%"; /* Adjust this height as needed */
+    max-height: 100%; /* Adjust this height as needed */
     overflow-y: auto;
 }
 
@@ -225,11 +237,11 @@ a.article:hover {
 
 .upcoming-dividends {
     background: repeating-linear-gradient(
-        135deg,                /* Angle of the stripes */
-        #A6B9FF,              /* Color of the stripes */
-        #A6B9FF 2px,         /* End color of the stripe */
-        #D0E0FF 2px,         /* Background color between stripes */
-        #D0E0FF 4px          /* End color of the stripe */
+        135deg,         /* Angle of the stripes */
+        #A6B9FF,        /* Color of the stripes */
+        #A6B9FF 2px,    /* End color of the stripe */
+        #D0E0FF 2px,    /* Background color between stripes */
+        #D0E0FF 4px     /* End color of the stripe */
     );
 }
 

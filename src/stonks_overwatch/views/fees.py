@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.views import View
 
 from stonks_overwatch.services.fees_aggregator import FeesAggregatorService
+from stonks_overwatch.services.session_manager import SessionManager
 from stonks_overwatch.utils.localization import LocalizationUtility
 
 
@@ -12,7 +13,8 @@ class Fees(View):
         self.base_currency = "EUR"
 
     def get(self, request):
-        fees = self.fees.get_fees()
+        selected_portfolio = SessionManager.get_selected_portfolio(request)
+        fees = self.fees.get_fees(selected_portfolio)
         base_currency_symbol = LocalizationUtility.get_currency_symbol(self.base_currency)
         transaction_fees = 0
         exchange_fees = 0

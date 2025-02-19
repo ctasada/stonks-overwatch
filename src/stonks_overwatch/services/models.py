@@ -149,6 +149,35 @@ class PortfolioEntry:
             value=self.realized_gain, currency=self.base_currency
         )
 
+
+class PortfolioId(Enum):
+    ALL = ("all", "Portfolios", "/static/logos/all-portfolio.svg")
+    DEGIRO = ("degiro", "DeGiro", "/static/logos/degiro.svg")
+    BITVAVO = ("bitvavo", "Bitvavo", "/static/logos/bitvavo.svg")
+
+    def __init__(self, id: str, long_name: str, logo: str):
+        self.id = id
+        self.long_name = long_name
+        self.logo = logo
+
+    @classmethod
+    def values(cls) -> list:
+        return list(cls)
+
+    @classmethod
+    def from_id(cls, id: str):
+        for portfolio in cls:
+            if portfolio.id == id:
+                return portfolio
+        return cls.ALL
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.long_name,
+            "logo": self.logo
+        }
+
 @dataclass
 class TotalPortfolio:
     total_pl: float

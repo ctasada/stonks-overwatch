@@ -154,8 +154,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "LOCATION": "unique-snowflake",
+        # FIXME: Disable caching for now so that we can see changes in the UI immediately. "Fixes" the Portfolio filter
+        "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+        # "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        # "LOCATION": "unique-snowflake",
     }
 }
 

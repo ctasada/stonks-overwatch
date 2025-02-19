@@ -2,6 +2,7 @@ from django.urls import path
 from django.views.generic import RedirectView
 
 from stonks_overwatch.views.account_overview import AccountOverview
+from stonks_overwatch.views.configuration import ConfigurationView
 from stonks_overwatch.views.dashboard import Dashboard
 from stonks_overwatch.views.deposits import Deposits
 from stonks_overwatch.views.diversification import Diversification
@@ -22,4 +23,5 @@ urlpatterns = [
     path("fees", Fees.as_view(), name="fees"),
     path("portfolio", Portfolio.as_view(), name="portfolio"),
     path("transactions", Transactions.as_view(), name="transactions"),
+    path("configuration", ConfigurationView.as_view(), name="configuration"),
 ]
