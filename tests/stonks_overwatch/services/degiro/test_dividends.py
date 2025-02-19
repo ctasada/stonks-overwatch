@@ -11,10 +11,12 @@ from isodate import parse_datetime
 
 import pytest
 from stonks_overwatch.config import DegiroCredentials
-from stonks_overwatch.repositories.degiro.models import DeGiroCashMovements, DeGiroProductInfo
+from stonks_overwatch.repositories.degiro.models import DeGiroCashMovements, DeGiroProductInfo, DeGiroProductQuotation
 from stonks_overwatch.services.degiro.account_overview import AccountOverviewService
+from stonks_overwatch.services.degiro.currency_converter_service import CurrencyConverterService
 from stonks_overwatch.services.degiro.degiro_service import CredentialsManager
 from stonks_overwatch.services.degiro.dividends import DividendsService
+from stonks_overwatch.utils.localization import LocalizationUtility
 from tests.stonks_overwatch.fixtures import TestDeGiroService
 
 
@@ -24,12 +26,15 @@ class TestDividendsService(TestCase):
         self.created_objects = {}
         self.fixture_cash_movements_repository()
         self.fixture_product_info_repository()
+        self.fixture_product_quotation_repository()
         self.degiro_service = TestDeGiroService(CredentialsManager(self.fixture_credentials()))
 
         self.account_overview = AccountOverviewService()
+        self.currency_service = CurrencyConverterService()
 
         self.dividends_service = DividendsService(
             account_overview=self.account_overview,
+            currency_service=self.currency_service,
             degiro_service=self.degiro_service,
         )
 
@@ -59,6 +64,23 @@ class TestDividendsService(TestCase):
             obj = DeGiroProductInfo.objects.create(**value)
             self.created_objects[key] = obj
 
+    def fixture_product_quotation_repository(self):
+        data_file = pathlib.Path("tests/resources/stonks_overwatch/repositories/product_quotations_data.json")
+
+        with open(data_file, "r") as file:
+            data = json.load(file)
+
+        self.created_objects = {}
+        for key, value in data.items():
+            # Create and save the ProductQuotation object
+            obj = DeGiroProductQuotation.objects.create(
+                id=key,
+                interval="P1D",
+                last_import=LocalizationUtility.now(),
+                quotations=value
+            )
+            self.created_objects[key] = obj
+
     def fixture_credentials(self):
         return DegiroCredentials(
             username="testuser",
@@ -86,9 +108,9 @@ class TestDividendsService(TestCase):
         assert dividends[0].description == "Dividend"
         assert dividends[0].type == "CASH_TRANSACTION"
         assert dividends[0].type_str() == "Cash Transaction"
-        assert dividends[0].currency == "USD"
-        assert dividends[0].change == 8.4
-        assert dividends[0].formated_change() == "$ 8.40"
+        assert dividends[0].currency == "EUR"
+        assert dividends[0].change == 7.526881720430107
+        assert dividends[0].formated_change() == "€ 7.53"
 
     def test_get_upcoming_dividends(self):
         with patch("requests_cache.CachedSession", requests.Session):

@@ -1,8 +1,10 @@
 import logging
 from typing import List
 
+from stonks_overwatch.config import Config
 from stonks_overwatch.repositories.degiro.product_info_repository import ProductInfoRepository
 from stonks_overwatch.services.degiro.account_overview import AccountOverview, AccountOverviewService
+from stonks_overwatch.services.degiro.currency_converter_service import CurrencyConverterService
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.utils.localization import LocalizationUtility
 
@@ -13,10 +15,13 @@ class DividendsService:
     def __init__(
         self,
         account_overview: AccountOverviewService,
+        currency_service: CurrencyConverterService,
         degiro_service: DeGiroService,
     ):
         self.account_overview = account_overview
+        self.currency_service = currency_service
         self.degiro_service = degiro_service
+        self.base_currency = Config.default().base_currency
 
     def get_dividends(self) -> List[AccountOverview]:
         overview = self.account_overview.get_account_overview()
@@ -29,6 +34,18 @@ class DividendsService:
                 "Dividendbelasting",
                 "Vermogenswinst",
             ]:
+                transaction_change = transaction.change
+                currency = transaction.currency
+                payment_date = transaction.datetime.date()
+                if currency != self.base_currency:
+                    transaction_change = self.currency_service.convert(
+                        transaction_change, currency, self.base_currency, payment_date
+                    )
+                    currency = self.base_currency
+
+                transaction.change = transaction_change
+                transaction.currency = currency
+
                 dividends.append(transaction)
 
         return dividends

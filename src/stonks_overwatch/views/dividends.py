@@ -7,10 +7,9 @@ from django.shortcuts import render
 from django.views import View
 
 from stonks_overwatch.config import Config
-from stonks_overwatch.services.degiro.account_overview import AccountOverview, AccountOverviewService
-from stonks_overwatch.services.degiro.currency_converter_service import CurrencyConverterService
-from stonks_overwatch.services.degiro.degiro_service import DeGiroService
-from stonks_overwatch.services.degiro.dividends import DividendsService
+from stonks_overwatch.services.degiro.account_overview import AccountOverview
+from stonks_overwatch.services.dividends_aggregator import DividendsAggregatorService
+from stonks_overwatch.services.session_manager import SessionManager
 from stonks_overwatch.utils.localization import LocalizationUtility
 
 
@@ -19,19 +18,13 @@ class Dividends(View):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.degiro_service = DeGiroService()
-
-        self.account_overview = AccountOverviewService()
-        self.currency_service = CurrencyConverterService()
-        self.dividends = DividendsService(
-            account_overview=self.account_overview,
-            degiro_service=self.degiro_service,
-        )
+        self.dividends = DividendsAggregatorService()
         self.base_currency = Config.default().base_currency
 
     def get(self, request):
-        dividends_overview = self.dividends.get_dividends()
-        upcoming_dividends = self.dividends.get_upcoming_dividends()
+        selected_portfolio = SessionManager.get_selected_portfolio(request)
+        dividends_overview = self.dividends.get_dividends(selected_portfolio)
+        upcoming_dividends = self.dividends.get_upcoming_dividends(selected_portfolio)
 
         dividends_calendar = self._get_dividends_calendar(dividends_overview, upcoming_dividends)
         dividends_growth = self._get_dividends_growth(dividends_calendar)
@@ -57,6 +50,9 @@ class Dividends(View):
         joined_dividends = dividends_overview + upcoming_dividends
         # After merging dividends and upcoming dividends, we need to sort the result
         joined_dividends = sorted(joined_dividends, key=lambda x: x.date(), reverse=True)
+
+        if not joined_dividends:
+            return {}
 
         df = pd.DataFrame(joined_dividends)
         # Find the maximum date. Since we have upcoming payments, it can be today or some point
@@ -91,14 +87,8 @@ class Dividends(View):
             day_entry = days.setdefault(day, {})
             stock_entry = day_entry.setdefault(stock, {})
             transaction_change = transaction.change
-
             currency = transaction.currency
             payment_date = transaction.datetime.date()
-            if currency != self.base_currency:
-                transaction_change = self.currency_service.convert(
-                    transaction_change, currency, self.base_currency, payment_date
-                )
-                currency = self.base_currency
 
             stock_entry["stockName"] = transaction.stock_name
             stock_entry["isUpcoming"] = payment_date > today.date()
