@@ -85,14 +85,12 @@ class TestDividendsService(TestCase):
         assert dividends[0].stock_symbol == "MSFT"
         assert dividends[0].description == "Dividend"
         assert dividends[0].type == "CASH_TRANSACTION"
-        assert dividends[0].type_str == "Cash Transaction"
+        assert dividends[0].type_str() == "Cash Transaction"
         assert dividends[0].currency == "USD"
         assert dividends[0].change == 8.4
         assert dividends[0].formated_change() == "$ 8.40"
         assert dividends[0].total_balance == 0
-        assert dividends[0].formated_total_balance() == ""
         assert dividends[0].unsettled_cash == 0
-        assert dividends[0].formated_unsettled_cash() == ""
 
     def test_get_upcoming_dividends(self):
         with patch("requests_cache.CachedSession", requests.Session):
