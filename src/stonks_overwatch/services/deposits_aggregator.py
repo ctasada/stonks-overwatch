@@ -4,7 +4,7 @@ from typing import List
 
 import pandas as pd
 
-from stonks_overwatch.config import Config
+from stonks_overwatch.config.config import Config
 from stonks_overwatch.services.bitvavo.deposits import DepositsService as BitvavoDepositsService
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.deposits import DepositsService as DeGiroDepositsService

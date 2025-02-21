@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from typing import List
 
-from stonks_overwatch.config import Config
+from stonks_overwatch.config.config import Config
 from stonks_overwatch.services.bitvavo.bitvavo_service import BitvavoService
 from stonks_overwatch.services.models import AccountOverview
 

@@ -1,7 +1,7 @@
 import logging
 from typing import List
 
-from stonks_overwatch.config import Config
+from stonks_overwatch.config.config import Config
 from stonks_overwatch.services.bitvavo.portfolio import PortfolioService as BitvavoPortfolioService
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.portfolio import PortfolioService as DeGiroPortfolioService

@@ -4,7 +4,7 @@ from typing import List
 from django.shortcuts import render
 from django.views import View
 
-from stonks_overwatch.config import Config
+from stonks_overwatch.config.config import Config
 from stonks_overwatch.services.models import PortfolioEntry
 from stonks_overwatch.services.portfolio_aggregator import PortfolioAggregatorService
 from stonks_overwatch.services.session_manager import SessionManager

@@ -1,6 +1,6 @@
 from typing import List
 
-from stonks_overwatch.config import Config
+from stonks_overwatch.config.config import Config
 from stonks_overwatch.services.bitvavo.account_overview import AccountOverviewService as BitvavoAccountOverviewService
 from stonks_overwatch.services.degiro.account_overview import AccountOverviewService as DeGiroAccountOverviewService
 from stonks_overwatch.services.models import AccountOverview, PortfolioId

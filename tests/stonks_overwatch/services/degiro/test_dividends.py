@@ -10,7 +10,7 @@ from django.test import TestCase
 from isodate import parse_datetime
 
 import pytest
-from stonks_overwatch.config import DegiroCredentials
+from stonks_overwatch.config.degiro_credentials import DegiroCredentials
 from stonks_overwatch.repositories.degiro.models import DeGiroCashMovements, DeGiroProductInfo, DeGiroProductQuotation
 from stonks_overwatch.services.degiro.account_overview import AccountOverviewService
 from stonks_overwatch.services.degiro.currency_converter_service import CurrencyConverterService

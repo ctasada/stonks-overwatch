@@ -9,7 +9,7 @@ from degiro_connector.quotecast.tools.chart_fetcher import ChartFetcher
 from degiro_connector.trading.api import API as TradingApi  # noqa: N811
 from degiro_connector.trading.models.credentials import Credentials
 
-from stonks_overwatch.config import DegiroConfig
+from stonks_overwatch.config.degiro_config import DegiroConfig
 from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.singleton import singleton
 
