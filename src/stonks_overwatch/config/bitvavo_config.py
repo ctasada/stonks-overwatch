@@ -13,6 +13,10 @@ class BitvavoConfig(BaseConfig):
     ) -> None:
         super().__init__(credentials)
 
+    @property
+    def get_credentials(self) -> BitvavoCredentials:
+        return self.credentials
+
     @classmethod
     def from_dict(cls, data: dict) -> "BitvavoConfig":
         credentials_data = data.get("credentials")
