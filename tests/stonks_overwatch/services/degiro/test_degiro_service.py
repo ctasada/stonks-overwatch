@@ -6,9 +6,9 @@ import requests_mock
 from degiro_connector.core.constants import urls
 from degiro_connector.core.exceptions import DeGiroConnectionError
 from degiro_connector.quotecast.models.chart import Interval
+from degiro_connector.trading.models.credentials import Credentials
 
 import pytest
-from stonks_overwatch.config import DegiroCredentials
 from stonks_overwatch.services.degiro.degiro_service import CredentialsManager
 from stonks_overwatch.utils.localization import LocalizationUtility
 from tests.stonks_overwatch.fixtures import (
@@ -48,7 +48,7 @@ def test_degiro_service_connect_with_full_credential(
 
 
 def test_degiro_service_connect_with_credential(disable_requests_cache: disable_requests_cache):
-    credential = DegiroCredentials(
+    credential = Credentials(
         username="testuser",
         password="testpassword",
         totp_secret_key="ABCDEFGHIJKLMNOP",
@@ -98,7 +98,7 @@ def test_degiro_service_connect_with_credential(disable_requests_cache: disable_
 
 
 def test_degiro_service_connect_with_bad_credentials(disable_requests_cache: disable_requests_cache):
-    credential = DegiroCredentials(username="testuser", password="testpassword")
+    credential = Credentials(username="testuser", password="testpassword")
     manager = CredentialsManager(credential)
 
     with requests_mock.Mocker() as m:
@@ -119,7 +119,7 @@ def test_degiro_service_connect_with_bad_credentials(disable_requests_cache: dis
 
 
 def test_degiro_service_connect_with_missing_totp(disable_requests_cache: disable_requests_cache):
-    credentials = DegiroCredentials(username="testuser", password="testpassword")
+    credentials = Credentials(username="testuser", password="testpassword")
     manager = CredentialsManager(credentials)
     with requests_mock.Mocker() as m:
         m.post(urls.LOGIN, json={"status": 6, "statusText": "totpNeeded"}, status_code=202)
@@ -139,7 +139,7 @@ def test_degiro_service_connect_with_missing_totp(disable_requests_cache: disabl
 
 
 def test_degiro_service_update_credentials(disable_requests_cache: disable_requests_cache):
-    credentials = DegiroCredentials(username="testuser", password="testpassword")
+    credentials = Credentials(username="testuser", password="testpassword")
     manager = CredentialsManager(credentials)
     with requests_mock.Mocker() as m:
         m.post(urls.LOGIN, json={"status": 6, "statusText": "totpNeeded"}, status_code=202)

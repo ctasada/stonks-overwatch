@@ -1,7 +1,10 @@
 import pathlib
 from datetime import date, datetime
 
-from stonks_overwatch.config import Config, DegiroConfig, DegiroCredentials
+from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.config.config import Config
+from stonks_overwatch.config.degiro_config import DegiroConfig
+from stonks_overwatch.config.degiro_credentials import DegiroCredentials
 
 
 def test_degiro_credentials_init():
@@ -162,7 +165,7 @@ def test_config_from_json_file():
     assert config.degiro_configuration.update_frequency_minutes == update_frequency_minutes
 
 def test_config_default():
-    Config.CONFIG_PATH = "tests/resources/stonks_overwatch/config/sample-config.json"
+    BaseConfig.CONFIG_PATH = "tests/resources/stonks_overwatch/config/sample-config.json"
     base_currency = "EUR"
     credentials_dict = {
         "username": "testuser",
@@ -184,7 +187,7 @@ def test_config_default():
 
 
 def test_config_default_without_config_file():
-    Config.CONFIG_PATH = "tests/resources/stonks_overwatch/config/unexisting-config.json"
+    BaseConfig.CONFIG_PATH = "tests/resources/stonks_overwatch/config/unexisting-config.json"
 
     config = Config.default()
 

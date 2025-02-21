@@ -2,7 +2,7 @@ from typing import List
 
 import pandas as pd
 
-from stonks_overwatch.config import Config
+from stonks_overwatch.config.config import Config
 from stonks_overwatch.repositories.degiro.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.models import Deposit, DepositType

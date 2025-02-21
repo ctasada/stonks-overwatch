@@ -6,7 +6,7 @@ import pandas as pd
 from django.shortcuts import render
 from django.views import View
 
-from stonks_overwatch.config import Config
+from stonks_overwatch.config.config import Config
 from stonks_overwatch.services.degiro.account_overview import AccountOverview
 from stonks_overwatch.services.dividends_aggregator import DividendsAggregatorService
 from stonks_overwatch.services.session_manager import SessionManager

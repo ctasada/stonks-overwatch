@@ -10,8 +10,8 @@
     },
     "bitvavo": {
         "credentials": {
-            "apiKey": "BITVAVO API KEY",
-            "apiSecret": "BITVAVO API SECRET"
+            "apikey": "BITVAVO API KEY",
+            "apisecret": "BITVAVO API SECRET"
         },
     },
     "base_currency": "EUR By default",
