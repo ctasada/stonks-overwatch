@@ -36,6 +36,10 @@ class DegiroConfig(BaseConfig):
                 f"start_date={self.start_date}, "
                 f"update_frequency_minutes={self.update_frequency_minutes})")
 
+    @property
+    def get_credentials(self) -> DegiroCredentials:
+        return self.credentials
+
     @classmethod
     def from_dict(cls, data: dict) -> "DegiroConfig":
         credentials_data = data.get("credentials")
