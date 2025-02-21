@@ -1,5 +1,6 @@
 import json
 import logging
+from abc import abstractmethod
 from pathlib import Path
 from typing import Optional
 
@@ -21,6 +22,11 @@ class BaseConfig:
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(credentials={self.credentials})"
+
+    @property
+    @abstractmethod
+    def get_credentials(self):
+        pass
 
     @classmethod
     def from_json_file(cls, file_path: str | Path) -> "BaseConfig":
