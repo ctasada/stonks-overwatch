@@ -4,7 +4,7 @@ from datetime import datetime
 
 from python_bitvavo_api.bitvavo import Bitvavo, createPostfix
 
-from stonks_overwatch.config import BitvavoConfig
+from stonks_overwatch.config.bitvavo_config import BitvavoConfig
 from stonks_overwatch.utils.singleton import singleton
 
 

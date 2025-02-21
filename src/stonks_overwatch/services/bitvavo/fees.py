@@ -1,4 +1,4 @@
-from stonks_overwatch.config import Config
+from stonks_overwatch.config.config import Config
 from stonks_overwatch.services.bitvavo.bitvavo_service import BitvavoService
 from stonks_overwatch.services.bitvavo.transactions import TransactionsService
 from stonks_overwatch.utils.localization import LocalizationUtility

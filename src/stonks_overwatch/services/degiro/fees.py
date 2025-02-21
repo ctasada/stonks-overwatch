@@ -1,4 +1,4 @@
-from stonks_overwatch.config import Config
+from stonks_overwatch.config.config import Config
 from stonks_overwatch.repositories.degiro.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.repositories.degiro.product_info_repository import ProductInfoRepository
 from stonks_overwatch.repositories.degiro.transactions_repository import TransactionsRepository

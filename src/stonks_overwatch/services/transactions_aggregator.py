@@ -1,6 +1,6 @@
 from typing import List
 
-from stonks_overwatch.config import Config
+from stonks_overwatch.config.config import Config
 from stonks_overwatch.services.bitvavo.transactions import TransactionsService as BitvavoTransactionsService
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.transactions import TransactionsService as DeGiroTransactionsService

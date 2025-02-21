@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.views import View
 
-from stonks_overwatch.config import DegiroCredentials
+from stonks_overwatch.config.degiro_credentials import DegiroCredentials
 from stonks_overwatch.services.degiro.degiro_service import CredentialsManager, DeGiroService
 
 

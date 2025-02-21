@@ -5,7 +5,7 @@ from typing import List, Optional
 from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
 from django.utils.functional import cached_property
 
-from stonks_overwatch.config import Config
+from stonks_overwatch.config.config import Config
 from stonks_overwatch.repositories.degiro.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.repositories.degiro.company_profile_repository import CompanyProfileRepository
 from stonks_overwatch.repositories.degiro.product_info_repository import ProductInfoRepository
