@@ -32,7 +32,11 @@
         {% for item in items %}
             <tr>
                 {% if item.product_type == 'Cash' %}
-                    <td class="text-center align-middle"><i class="fa-solid fa-euro-sign fa-xl"></i></td>
+                    {% if item.product_currency == 'USD' %}
+                        <td class="text-center align-middle"><i class="fa-solid fa-dollar-sign fa-xl"></i></td>
+                    {% else %}
+                        <td class="text-center align-middle"><i class="fa-solid fa-euro-sign fa-xl"></i></td>
+                    {% endif %}
                 {% elif item.symbol_url %}
                     <td class="text-center align-middle"><img src="{{ item.symbol_url }}" width="30" height="30" alt="{{ item.symbol }} logo" onerror="this.style.display='none'"></td>
                 {% else %}
@@ -96,7 +100,15 @@
                 {% endif %}{{ item.percentage_realized_gain }}</small>
                 </td>
                 {% endif %}
-                <td>{{ item.formatted_base_currency_value }}</td>
+                {% if item.product_type == 'Cash' %}
+                    {% if item.product_currency == 'USD' %}
+                        <td>{{ item.formatted_value }}<br><small class="fw-lighter">{{ item.formatted_base_currency_value }}</small></td>
+                    {% else %}
+                        <td>{{ item.formatted_value }}</td>
+                    {% endif %}
+                {% else %}
+                    <td>{{ item.formatted_base_currency_value }}</td>
+                {% endif %}
                 <td>{{ item.formatted_portfolio_size }}</td>
             </tr>
         {% endfor %}
