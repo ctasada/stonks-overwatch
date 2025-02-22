@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "stonks_overwatch.apps.DegiroConfig",
+    "stonks_overwatch.apps.StonksOverwatchConfig",
     "django_extensions",
     "django_node_assets",
     "fontawesomefree",
