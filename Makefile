@@ -8,10 +8,10 @@ update:
 	npm update
 	poetry update
 
-lint-check:
+lintcheck:
 	poetry run ruff check
 
-lint-fix:
+lintfix:
 	poetry run ruff check --fix
 
 migrate:
