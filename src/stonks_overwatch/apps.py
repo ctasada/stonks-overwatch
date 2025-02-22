@@ -1,24 +1,37 @@
 import logging
 import os
+import signal
+import sys
 
 from django.apps import AppConfig
 
 
-class DegiroConfig(AppConfig):
-    logger = logging.getLogger("stocks_portfolio.degiro_config")
+class StonksOverwatchConfig(AppConfig):
+    logger = logging.getLogger("stocks_portfolio.config")
     default_auto_field = "django.db.models.BigAutoField"
     name = "stonks_overwatch"
 
     def ready(self):
         # Guarantee that the Jobs are initialized only once
         if os.environ.get('RUN_MAIN'):
-            self.logger.info("Degiro ready - RUN MAIN")
+            self.logger.info("Stonks Overwatch ready - RUN MAIN")
             from stonks_overwatch.jobs.jobs_scheduler import JobsScheduler
+
+            signal.signal(signal.SIGINT, self.handle_shutdown)
+            signal.signal(signal.SIGTERM, self.handle_shutdown)
 
             # Schedule automatic tasks
             JobsScheduler.start()
 
-    def __del__(self):
+    def handle_shutdown(self, signum, frame):
+        try:
+            # Close your connections here
+            self.close_connections()
+        finally:
+            sys.exit(0)
+
+    def close_connections(self):
         # Ensure scheduler is shut down properly
         from stonks_overwatch.jobs.jobs_scheduler import JobsScheduler
+        self.logger.info("Stonks Overwatch - Stopping JobsScheduler")
         JobsScheduler.stop()
