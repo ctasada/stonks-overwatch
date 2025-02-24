@@ -4,6 +4,7 @@ import logging
 from django.http import JsonResponse
 from django.views import View
 
+from stonks_overwatch.config.config import Config
 from stonks_overwatch.services.models import PortfolioId
 from stonks_overwatch.services.session_manager import SessionManager
 
@@ -20,10 +21,20 @@ class ConfigurationView(View):
         return JsonResponse(data)
 
     @staticmethod
-    def __get_portfolios():
-        return [value.to_dict() for value in PortfolioId.values()]
+    def __get_portfolios() -> list[dict]:
+        portfolios = []
+        for value in PortfolioId:
+            # Add only the enabled portfolios
+            if Config().default().is_enabled(value):
+                portfolios.append(value.to_dict())
 
-    def post(self, request):
+        # If there are more than one portfolio, add the "All" option
+        if len(portfolios) > 1:
+            portfolios.insert(0, PortfolioId.ALL.to_dict())
+
+        return portfolios
+
+    def post(self, request) -> JsonResponse:
         try:
             data = json.loads(request.body)
             selected_portfolio = data.get("selected_portfolio")

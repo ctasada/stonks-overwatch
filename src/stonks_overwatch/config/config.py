@@ -31,6 +31,14 @@ class Config:
         self.degiro_configuration = degiro_configuration
         self.bitvavo_configuration = bitvavo_configuration
 
+    def is_enabled(self, selected_portfolio: PortfolioId) -> bool:
+        if selected_portfolio == PortfolioId.DEGIRO:
+            return self.is_degiro_enabled(selected_portfolio)
+        if selected_portfolio == PortfolioId.BITVAVO:
+            return self.is_bitvavo_enabled(selected_portfolio)
+
+        return False
+
     def is_degiro_enabled(self, selected_portfolio: PortfolioId = PortfolioId.ALL) -> bool:
         return (self.degiro_configuration is not None
                 and self.degiro_configuration.credentials is not None
