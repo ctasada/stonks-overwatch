@@ -152,32 +152,39 @@
                 const portfolioMenu = document.getElementById("sidebar-portfolio-menu");
                 portfolioMenu.innerHTML = ""; // Clear existing menu items
 
-                data.available_portfolios.forEach(portfolio => {
-                    const menuItem = document.createElement("li");
-                    menuItem.innerHTML = `<li><a class="dropdown-item portfolio-link-filter" href="#" data-value="${portfolio.id}"><img src="${portfolio.logo}" alt="${portfolio.id}" width="30" height="30" class="rounded-circle m-1">${portfolio.name}</a></li>`;
+                if (data.available_portfolios.length === 1) {
+                    // Remove the dropdown toggle if there is only one portfolio
+                    selectedPortfolio.removeAttribute("data-bs-toggle");
+                    selectedPortfolio.classList.remove("dropdown-toggle");
+                } else {
+                    // Show the portfolio selector dropdown only when there are multiple portfolios
+                    data.available_portfolios.forEach(portfolio => {
+                        const menuItem = document.createElement("li");
+                        menuItem.innerHTML = `<li><a class="dropdown-item portfolio-link-filter" href="#" data-value="${portfolio.id}"><img src="${portfolio.logo}" alt="${portfolio.id}" width="30" height="30" class="rounded-circle m-1">${portfolio.name}</a></li>`;
 
-                    // Add click event listener to menuItem
-                    menuItem.querySelector("a").addEventListener("click", function(event) {
-                        event.preventDefault();  // Prevent default link behavior
+                        // Add click event listener to menuItem
+                        menuItem.querySelector("a").addEventListener("click", function(event) {
+                            event.preventDefault();  // Prevent default link behavior
 
-                        let selectedPortfolio = this.getAttribute("data-value");
+                            let selectedPortfolio = this.getAttribute("data-value");
 
-                        fetch("{% url 'configuration' %}", {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                                "X-CSRFToken": "{{ csrf_token }}"
-                            },
-                            body: JSON.stringify({ selected_portfolio: selectedPortfolio })
-                        }).then(response => {
-                            if (response.ok) {
-                                window.location.reload();
-                            }
+                            fetch("{% url 'configuration' %}", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "X-CSRFToken": "{{ csrf_token }}"
+                                },
+                                body: JSON.stringify({ selected_portfolio: selectedPortfolio })
+                            }).then(response => {
+                                if (response.ok) {
+                                    window.location.reload();
+                                }
+                            });
                         });
-                    });
 
-                    portfolioMenu.appendChild(menuItem);
-                });
+                        portfolioMenu.appendChild(menuItem);
+                    });
+                }
             });
     </script>
 </body>
