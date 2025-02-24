@@ -10,6 +10,7 @@ from typing import Dict, Optional, Type
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.bitvavo import BitvavoConfig
 from stonks_overwatch.config.degiro import DegiroConfig
+from stonks_overwatch.config.ibkr import IbkrConfig
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.singleton import singleton
 
@@ -37,6 +38,7 @@ class ConfigFactory:
         """Register the default broker configurations."""
         self.register_broker_config("degiro", DegiroConfig)
         self.register_broker_config("bitvavo", BitvavoConfig)
+        self.register_broker_config("ibkr", IbkrConfig)
 
     def register_broker_config(self, broker_name: str, config_class: Type[BaseConfig]) -> None:
         """

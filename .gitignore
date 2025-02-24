@@ -154,3 +154,6 @@ portfolio-performance/*.pdf
 
 /src/stonks_overwatch/static/
 /src/stonks_overwatch.dist-info
+
+# Ignore IBKR certificates
+*.pem

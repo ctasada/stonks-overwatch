@@ -29,6 +29,18 @@ from stonks_overwatch.services.brokers.degiro.services.portfolio_service import 
 from stonks_overwatch.services.brokers.degiro.services.transaction_service import (
     TransactionsService as DeGiroTransactionService,
 )
+from stonks_overwatch.services.brokers.ibkr.services.account_overview import (
+    AccountOverviewService as IbkrAccountOverviewService,
+)
+from stonks_overwatch.services.brokers.ibkr.services.dividends import (
+    DividendsService as IbkrDividendsService,
+)
+from stonks_overwatch.services.brokers.ibkr.services.portfolio import (
+    PortfolioService as IbkrPortfolioService,
+)
+from stonks_overwatch.services.brokers.ibkr.services.transactions import (
+    TransactionsService as IbkrTransactionService,
+)
 
 
 def register_broker_services() -> None:
@@ -60,4 +72,15 @@ def register_broker_services() -> None:
         dividend_service=None,  # Bitvavo doesn't support dividends
         fee_service=BitvavoFeeService,
         account_service=BitvavoAccountService,
+    )
+
+    # Register IBKR services (Interactive Brokers)
+    registry.register_broker(
+        broker_name="ibkr",
+        portfolio_service=IbkrPortfolioService,
+        transaction_service=IbkrTransactionService,
+        deposit_service=None,
+        dividend_service=IbkrDividendsService,
+        fee_service=None,
+        account_service=IbkrAccountOverviewService,
     )

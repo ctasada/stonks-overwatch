@@ -110,6 +110,9 @@ class Dividend:
     taxes: float = 0.0
     ex_dividend_date: datetime = None
 
+    def formatted_name(self) -> str:
+        return format_stock_name(self.stock_name)
+
     def payment_date_as_string(self) -> str:
         return LocalizationUtility.format_date_from_date(self.payment_date)
 
@@ -203,6 +206,8 @@ class PortfolioEntry:
         del result["exchange"]
         result["exchange_acronym"] = self.get_exchange_acronym()
         result["exchange_name"] = self.get_exchange_name()
+        result["name"] = self.formatted_name()
+        result["shares"] = self.formatted_shares()
         result["product_type"] = self.product_type.value
         result["formatted_portfolio_size"] = self.formatted_portfolio_size
         result["formatted_break_even_price"] = self.formatted_break_even_price
@@ -234,6 +239,18 @@ class PortfolioEntry:
         name = self.exchange.market_name if self.exchange else ""
 
         return name.title()
+
+    def formatted_name(self) -> str:
+        if self.product_type != ProductType.STOCK:
+            return self.name
+        return format_stock_name(self.name)
+
+    def formatted_shares(self) -> str:
+        if self.product_type == ProductType.CRYPTO:
+            return f"{self.shares}"
+        elif self.shares.is_integer():
+            return f"{int(self.shares)}"
+        return f"{self.shares:.2f}"
 
     def formatted_portfolio_size(self) -> str:
         return f"{self.portfolio_size:.2%}"
@@ -275,6 +292,7 @@ class PortfolioId(Enum):
     ALL = ("all", "Portfolios", "/static/stonks_overwatch.svg")
     DEGIRO = ("degiro", "DeGiro", "/static/logos/degiro.svg")
     BITVAVO = ("bitvavo", "Bitvavo", "/static/logos/bitvavo.svg")
+    IBKR = ("ibkr", "IBKR", "/static/logos/ibkr.svg")
 
     def __init__(self, id: str, long_name: str, logo: str):
         self.id = id
@@ -355,3 +373,24 @@ def dataclass_to_dict(obj) -> dict:
         if isinstance(getattr(type(obj), attr, None), property):
             result[attr] = getattr(obj, attr)
     return result
+
+
+def format_stock_name(name: str) -> str:
+    words = name.split()
+    special_cases = {"jpmorgan": "JPMorgan", "ishares": "iShares"}
+    preserve = {"SA", "SA.", "SA-B", "UCITS", "ETF", "USD", "EUR"}
+    preserve_lower_to_original = {p.lower(): p for p in preserve}
+    capitalized_words = []
+
+    for word in words:
+        if word.lower() in preserve_lower_to_original:
+            # Use the original case from preserve set
+            capitalized_words.append(preserve_lower_to_original[word.lower()])
+        elif word.lower() in special_cases:
+            # Use special case formatting
+            capitalized_words.append(special_cases[word.lower()])
+        else:
+            # Regular title case
+            capitalized_words.append(word.title())
+
+    return " ".join(capitalized_words)

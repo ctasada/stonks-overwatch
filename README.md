@@ -35,6 +35,10 @@ See [Wiki - DEGIRO](./docs/DEGIRO)
 
 See [Wiki - Bitvavo](./docs/Bitvavo)
 
+### How to login to IBKR (Interactive Brokers)
+
+See [Wiki - IBKR](https://github.com/ctasada/stonks-overwatch/wiki/IBKR)
+
 ## Start Developing
 
 See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
@@ -113,6 +117,25 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
 * [ ] `make check-dependencies` needs some extra work
   * [ ] Review the usage of `polars` and `pandas` in the codebase and try to use only one of them
   * [ ] `toga` is only used for the `app`. Probably it should be moved as a full dependency
+* [ ] IBKR
+  * [ ] Obtain Deposits & Withdrawals (Based on ticket only possible with a FlexQuery up to 365 days old)
+  *[ ] Show closed positions
+  *[ ] Realized % Gain/Loss is not showed when merging positions
+  *[ ] Stock Category
+  *[ ] Stock Exchanges. Check "https://github.com/tanrbobanr/iso10383" to unify Exchange names
+  *[ ] Add support for Portfolio Growth
+  *[ ] Diversification: Fix sectors to be properly grouped
+  *[ ] Diversification: Remove Cash and Crypto from Holdings
+  *[ ] Fees: Add support for Fees
+  *[ ] Transactions:
+    * [ ] Add fees/taxes
+    *[ ] Review provided values: Should Dividends be included in the transactions?
+    *[ ] Web:
+      * Performance & Reports / Transaction History: Shows transactions for the last 2 years
+      *Flex Query: Allows to create custom reports.
+  * [ ] Dividends: Implement Announced and Forecasted dividends
+  *[ ] Deposits: Implement Deposits and Withdrawals
+  *[ ] Portfolio Growth: Implement Portfolio Growth
 
 ## Logos
 
