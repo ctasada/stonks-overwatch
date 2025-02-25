@@ -51,8 +51,6 @@ class PortfolioService:
             # FIXME
             break_even_price = self._get_break_even_price(item["symbol"])
             unrealized_gain = (price - break_even_price) * float(item["available"])
-            percentage_gain = unrealized_gain / (value - unrealized_gain) \
-                if value > 0 and value != unrealized_gain else 0.0
 
             bitvavo_portfolio.append(
                 PortfolioEntry(
@@ -70,9 +68,7 @@ class PortfolioService:
                     base_currency_price=price,
                     base_currency=self.base_currency,
                     base_currency_value=value,
-                    symbol_url=self._get_logo_url(item['symbol']),
                     unrealized_gain=unrealized_gain,
-                    percentage_unrealized_gain=f"{percentage_gain:.2%}",
                 )
             )
 
@@ -90,7 +86,6 @@ class PortfolioService:
         for entry in portfolio:
             if entry.is_open:
                 portfolio_total_value += entry.base_currency_value
-                tmp_total_portfolio[entry.name] = entry.base_currency_value
 
         tmp_total_portfolio["totalDepositWithdrawal"] = (
             sum(float(entry["amount"]) for entry in self.bitvavo_service.deposit_history()))
