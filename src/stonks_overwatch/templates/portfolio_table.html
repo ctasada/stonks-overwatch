@@ -83,7 +83,7 @@
                     <small class="fw-lighter bi bi-arrow-up-right">
                 {% elif item.unrealized_gain < 0 %}
                     <small class="fw-lighter bi bi-arrow-down-right">
-                {% endif %}{{ item.percentage_unrealized_gain }}</small>
+                {% endif %}{{ item.formatted_percentage_unrealized_gain }}</small>
                 </td>
                 {% endif %}
                 {% if show_columns.realized_gain %}
@@ -97,7 +97,7 @@
                     <small class="fw-lighter bi bi-arrow-up-right">
                 {% elif item.realized_gain < 0 %}
                     <small class="fw-lighter bi bi-arrow-down-right">
-                {% endif %}{{ item.percentage_realized_gain }}</small>
+                {% endif %}{{ item.formatted_percentage_realized_gain }}</small>
                 </td>
                 {% endif %}
                 {% if item.product_type == 'Cash' %}

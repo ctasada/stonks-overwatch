@@ -74,7 +74,7 @@ class PortfolioEntry:
     exchange_name: str = ""
     country: str = ""
     product_type: ProductType = None
-    shares: str = ""
+    shares: float = 0.0
     product_currency: str = ""
     price: float = 0.0
     base_currency_price: float = 0.0
@@ -85,15 +85,34 @@ class PortfolioEntry:
     base_currency_break_even_price: float = 0.0
     is_open: bool = False
     unrealized_gain: float = 0.0
-    percentage_unrealized_gain: str = ""
     realized_gain: float = 0.0
-    percentage_realized_gain: str = ""
-    symbol_url: str = ""
+    total_costs: float = 0.0
     portfolio_size: float = 0.0
+
+    @property
+    def percentage_unrealized_gain(self) -> float:
+        return self.unrealized_gain / (self.value - self.unrealized_gain) \
+            if self.value > 0 and self.value != self.unrealized_gain else 0.0
+
+    @property
+    def percentage_realized_gain(self) -> float:
+        return self.realized_gain / self.total_costs \
+            if self.realized_gain != 0.0 and self.total_costs != 0.0 else 0.0
+
+    @property
+    def symbol_url(self) -> str:
+        if self.product_type == ProductType.CRYPTO:
+            return f"https://raw.githubusercontent.com/Cryptofonts/cryptoicons/master/SVG/{self.symbol.lower()}.svg"
+        else:
+            # Keep track of alternatives as NVSTly
+            # return f"https://raw.githubusercontent.com/nvstly/icons/main/ticker_icons/{symbol.upper()}.png"
+            # https://img.stockanalysis.com/logos1/MC/IBE.png
+            return f"https://logos.stockanalysis.com/{self.symbol.lower()}.svg"
 
     def to_dict(self) -> Dict[str, Any]:
         # Convert to dict and handle enum specifically
         result = asdict(self)
+        result['symbol_url'] = self.symbol_url
         result['product_type'] = self.product_type.value
         result['formatted_portfolio_size'] = self.formatted_portfolio_size
         result['formatted_break_even_price'] = self.formatted_break_even_price
@@ -104,6 +123,8 @@ class PortfolioEntry:
         result['formatted_base_currency_value'] = self.formatted_base_currency_value
         result['formatted_unrealized_gain'] = self.formatted_unrealized_gain
         result['formatted_realized_gain'] = self.formatted_realized_gain
+        result['formatted_percentage_unrealized_gain'] = self.formatted_percentage_unrealized_gain
+        result['formatted_percentage_realized_gain'] = self.formatted_percentage_realized_gain
 
         if self.product_type == ProductType.CASH:
             result['category'] = ""
@@ -148,6 +169,12 @@ class PortfolioEntry:
         return LocalizationUtility.format_money_value(
             value=self.realized_gain, currency=self.base_currency
         )
+
+    def formatted_percentage_unrealized_gain(self) -> str:
+        return f"{self.percentage_unrealized_gain:.2%}"
+
+    def formatted_percentage_realized_gain(self) -> str:
+        return f"{self.percentage_realized_gain:.2%}"
 
 
 class PortfolioId(Enum):

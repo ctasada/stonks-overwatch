@@ -98,12 +98,6 @@ class PortfolioService:
                 base_currency_value = value
                 base_currency_break_even_price = break_even_price
 
-            percentage_unrealized_gain = unrealized_gain / (value - unrealized_gain) \
-                if value > 0 and value != unrealized_gain else 0.0
-
-            percentage_realized_gain = total_realized_gains / total_costs \
-                if total_realized_gains != 0.0 and total_costs != 0.0 else 0.0
-
             exchange_id = info["exchangeId"]
             exchange_abbr = exchange_name = None
 
@@ -136,10 +130,8 @@ class PortfolioService:
                     base_currency_value=base_currency_value,
                     is_open=is_open,
                     unrealized_gain=unrealized_gain,
-                    percentage_unrealized_gain=f"{percentage_unrealized_gain:.2%}",
                     realized_gain=total_realized_gains,
-                    percentage_realized_gain=f"{percentage_realized_gain:.2%}",
-                    symbol_url=self._get_logo_url(info['symbol']),
+                    total_costs=total_costs,
                     portfolio_size=0.0,  # Calculated in the next loop
                 )
             )
@@ -162,13 +154,6 @@ class PortfolioService:
         )
 
         return sorted(my_portfolio, key=lambda k: k.symbol)
-
-    @staticmethod
-    def _get_logo_url(symbol: str) -> str:
-        # Keep track of alternatives as NVSTly
-        # return f"https://raw.githubusercontent.com/nvstly/icons/main/ticker_icons/{symbol.upper()}.png"
-        # https://img.stockanalysis.com/logos1/MC/IBE.png
-        return f"https://logos.stockanalysis.com/{symbol.lower()}.svg"
 
     def __get_product_realized_gains(self, product_ids: list[str]) -> tuple[float, float]:
         data = self.transactions.get_product_transactions(product_ids)
@@ -224,7 +209,6 @@ class PortfolioService:
         for entry in portfolio:
             if entry.is_open:
                 portfolio_total_value += entry.base_currency_value
-                tmp_total_portfolio[entry.name] = entry.base_currency_value
 
         tmp_total_portfolio["totalDepositWithdrawal"] = CashMovementsRepository.get_total_cash_deposits_raw()
         tmp_total_portfolio["totalCash"] = CashMovementsRepository.get_total_cash()
