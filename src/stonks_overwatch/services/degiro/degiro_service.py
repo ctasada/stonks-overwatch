@@ -1,4 +1,5 @@
 import logging
+import os
 from datetime import date, timedelta
 from typing import Any, List, Optional
 
@@ -9,6 +10,7 @@ from degiro_connector.quotecast.tools.chart_fetcher import ChartFetcher
 from degiro_connector.trading.api import API as TradingApi  # noqa: N811
 from degiro_connector.trading.models.credentials import Credentials
 
+import settings
 from stonks_overwatch.config.degiro_config import DegiroConfig
 from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.singleton import singleton
@@ -67,6 +69,8 @@ class DeGiroService:
     api_client: TradingApi = None
     credentials_manager: Optional[CredentialsManager] = None
 
+    __cache_path = os.path.join(settings.TEMP_DIR, 'http_request.cache')
+
     def __init__(self, credentials_manager: Optional[CredentialsManager] = None):
         self.set_credentials(credentials_manager)
 
@@ -77,6 +81,7 @@ class DeGiroService:
     def connect(self):
         """Connect to the DeGiro API."""
         with requests_cache.enabled(
+            cache_name=self.__cache_path,
             expire_after=timedelta(minutes=15),
             allowable_methods=["GET", "HEAD", "POST"],
             ignored_parameters=["oneTimePassword"],
