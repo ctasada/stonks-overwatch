@@ -1,9 +1,12 @@
 import datetime
+import re
 from dataclasses import asdict, dataclass
 from enum import Enum
 from typing import Any, Dict, TypedDict
 
-from stonks_overwatch.utils.constants import ProductType
+import pycountry
+
+from stonks_overwatch.utils.constants import ProductType, Sector
 from stonks_overwatch.utils.localization import LocalizationUtility
 
 
@@ -40,6 +43,27 @@ class AccountOverview:
             )
         return ""
 
+class Country:
+    def __init__(self, iso_code: str):
+        if len(iso_code) == 2:
+            self.iso_code = iso_code.upper()
+            self.country = pycountry.countries.get(alpha_2=self.iso_code)
+        else:
+            # FIXME: Retrieving the first match. How do we handle if the match is not correct?
+            self.country = pycountry.countries.search_fuzzy(Country.__clean_string(iso_code))[0]
+
+    @staticmethod
+    def __clean_string(input_string: str) -> str:
+        # Remove anything between parentheses
+        cleaned_string = re.sub(r'\(.*?\)', '', input_string)
+        # Strip the string
+        return cleaned_string.strip()
+
+    def get_name(self) -> str:
+        if self.country:
+            return f"{self.country.flag} {self.country.name}"
+        return "Unknown Country"
+
 class DailyValue(TypedDict):
     x: str  # date
     y: float  # value
@@ -66,13 +90,13 @@ class Deposit:
 class PortfolioEntry:
     name: str = ""
     symbol: str = ""
-    sector: str = ""
+    sector: Sector = None
     industry: str = ""
     category: str = ""
     exchange_id: str = ""
     exchange_abbr: str = ""
     exchange_name: str = ""
-    country: str = ""
+    country: Country = None
     product_type: ProductType = None
     shares: float = 0.0
     product_currency: str = ""
@@ -110,8 +134,13 @@ class PortfolioEntry:
             return f"https://logos.stockanalysis.com/{self.symbol.lower()}.svg"
 
     def to_dict(self) -> Dict[str, Any]:
+        # FIXME: The asdict does infinite recursion. Need to handle the country separately
+        country_name = self.country.get_name() if self.country else "Unknown Country"
+        self.country = None
         # Convert to dict and handle enum specifically
         result = asdict(self)
+        result['country'] = country_name
+        result['sector'] = self.sector.value if self.sector else ""
         result['symbol_url'] = self.symbol_url
         result['product_type'] = self.product_type.value
         result['formatted_portfolio_size'] = self.formatted_portfolio_size
