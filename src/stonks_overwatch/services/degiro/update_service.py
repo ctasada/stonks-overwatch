@@ -1,4 +1,5 @@
 import logging
+import os
 from datetime import date, datetime, time, timezone
 
 import pandas as pd
@@ -8,6 +9,7 @@ from degiro_connector.trading.models.transaction import HistoryRequest
 from django.core.cache import cache
 from django.db import connection
 
+from settings import DATA_DIR
 from stonks_overwatch.config.degiro_config import DegiroConfig
 from stonks_overwatch.repositories.degiro.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.repositories.degiro.models import (
@@ -36,7 +38,12 @@ CACHE_TIMEOUT = 3600
 class UpdateService:
     logger = logging.getLogger("stocks_portfolio.update_service")
 
+    IMPORT_FOLDER = os.path.join(DATA_DIR, "import")
+
     def __init__(self):
+        if not os.path.exists(self.IMPORT_FOLDER):
+            os.makedirs(self.IMPORT_FOLDER)
+
         self.degiro_service = DeGiroService()
 
         self.portfolio_data = PortfolioService(
@@ -69,6 +76,8 @@ class UpdateService:
             self.logger.warning("Skipping update since cannot connect to DeGiro")
             return
 
+        self.logger.warning("Storing JSON file at %s", self.IMPORT_FOLDER)
+
         try:
             self.update_account()
             self.update_transactions()
@@ -78,39 +87,42 @@ class UpdateService:
             self.logger.error("Cannot Update Portfolio!")
             self.logger.error("Exception: ", error)
 
-    def update_account(self, debug_json_files: dict = None):
+    def update_account(self, debug_json_files: bool = True):
         """Update the Account DB data. Only does it if the data is older than today."""
-        self.logger.info("Updating Account Data....")
+        self.logger.info(f"[Debug={debug_json_files}] Updating Account Data....")
 
         now = LocalizationUtility.now()
         last_movement = self._get_last_cash_movement_import().replace(tzinfo=timezone.utc)
 
         if last_movement < now:
             account_overview = self.__get_cash_movements(last_movement.date())
-            if debug_json_files and "account.json" in debug_json_files:
-                save_to_json(account_overview, debug_json_files["account.json"])
+            if debug_json_files:
+                account_file = self.IMPORT_FOLDER + "/account.json"
+                save_to_json(account_overview, account_file)
 
             transformed_data = self.__transform_json(account_overview)
-            if debug_json_files and "account_transform.json" in debug_json_files:
-                save_to_json(transformed_data, debug_json_files["account_transform.json"])
+            if debug_json_files:
+                account_transform_file = self.IMPORT_FOLDER + "/account_transform.json"
+                save_to_json(transformed_data, account_transform_file)
 
             self.__import_cash_movements(transformed_data)
 
     def update_transactions(self, debug_json_files: dict = None):
         """Update the Account DB data. Only does it if the data is older than today."""
-        self.logger.info("Updating Transactions Data....")
+        self.logger.info(f"[Debug={debug_json_files}] Updating Transactions Data....")
 
         now = LocalizationUtility.now()
         last_movement = self._get_last_transactions_import().replace(tzinfo=timezone.utc)
 
         if last_movement < now:
             transactions_history = self.__get_transaction_history(last_movement.date())
-            if debug_json_files and "transactions.json" in debug_json_files:
-                save_to_json(transactions_history, debug_json_files["transactions.json"])
+            if debug_json_files:
+                transactions_file = self.IMPORT_FOLDER + "/transactions.json"
+                save_to_json(transactions_history, transactions_file)
 
             self.__import_transactions(transactions_history)
 
-    def update_portfolio(self, debug_json_files: dict = None):
+    def update_portfolio(self, debug_json_files: bool = True):
         """Updating the Portfolio is expensive and time-consuming task.
         This method caches the result for a period of time.
         """
@@ -120,7 +132,7 @@ class UpdateService:
 
         # If result is already cached, return it
         if cached_data is None:
-            self.logger.info("Portfolio data not found in cache. Calling DeGiro")
+            self.logger.info(f"[Debug={debug_json_files}] Portfolio data not found in cache. Calling DeGiro")
             # Otherwise, call the expensive method
             result = self.__update_portfolio(debug_json_files)
 
@@ -130,7 +142,7 @@ class UpdateService:
 
         return cached_data
 
-    def update_company_profile(self, debug_json_files: dict = None):
+    def update_company_profile(self, debug_json_files: bool = True):
         """Updating the Company Profiles is expensive and time-consuming task.
         This method caches the result for a period of time.
         """
@@ -150,21 +162,23 @@ class UpdateService:
 
         return cached_data
 
-    def __update_portfolio(self, debug_json_files: dict = None):
+    def __update_portfolio(self, debug_json_files: bool = True):
         """Update the Portfolio DB data."""
         product_ids = self.__get_product_ids()
 
         products_info = self.__get_products_info(product_ids)
-        if debug_json_files and "products_info.json" in debug_json_files:
-            save_to_json(products_info, debug_json_files["products_info.json"])
+        if debug_json_files:
+            products_info_file = self.IMPORT_FOLDER + "/products_info.json"
+            save_to_json(products_info, products_info_file)
 
         self.__import_products_info(products_info)
         self.__import_products_quotation()
 
-    def __update_company_profile(self, debug_json_files: dict = None) -> dict:
+    def __update_company_profile(self, debug_json_files: bool = True) -> dict:
         company_profiles = self.__get_company_profiles()
-        if debug_json_files and "company_profiles.json" in debug_json_files:
-            save_to_json(company_profiles, debug_json_files["company_profiles.json"])
+        if debug_json_files:
+            company_profiles_file = self.IMPORT_FOLDER + "/company_profiles.json"
+            save_to_json(company_profiles, company_profiles_file)
 
         self.__import_company_profiles(company_profiles)
 

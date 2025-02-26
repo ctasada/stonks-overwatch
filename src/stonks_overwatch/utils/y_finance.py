@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 from datetime import datetime
 from typing import List
@@ -6,6 +7,8 @@ import requests_cache
 import yfinance as yf
 from requests_cache import CachedSession
 
+import settings
+
 
 @dataclass
 class StockSplit:
@@ -13,7 +16,8 @@ class StockSplit:
     split_ratio: float
 
 def __yfinance_cache() -> CachedSession:
-    return requests_cache.CachedSession('yfinance.cache')
+    cache_path = os.path.join(settings.TEMP_DIR, 'yfinance.cache')
+    return requests_cache.CachedSession(cache_path)
 
 
 def get_stock_splits(ticker: str) -> List[StockSplit]:

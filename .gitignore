@@ -130,9 +130,8 @@ dmypy.json
 config/config.json
 poetry.lock
 
-# Local caches
-http_cache.sqlite
-yfinance.cache
+# Local data
+/data/
 
 # Ignore NPM modules
 node_modules

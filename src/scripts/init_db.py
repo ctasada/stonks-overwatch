@@ -49,12 +49,7 @@ def init() -> None:
 def account_import(update_service: UpdateService) -> None:
     """Import DeGiro Account information."""
     logging.info("Importing DeGiro Account Information...")
-    update_service.update_account(
-        {
-            "account.json": f"{IMPORT_FOLDER}/account.json",
-            "account_transform.json": f"{IMPORT_FOLDER}/account_transform.json",
-        }
-    )
+    update_service.update_account()
 
 
 def transactions_import(update_service: UpdateService) -> None:
@@ -65,16 +60,12 @@ def transactions_import(update_service: UpdateService) -> None:
 def products_info_import(update_service: UpdateService) -> None:
     """Import Product Information from DeGiro."""
     logging.info("Importing DeGiro Products Information...")
-    update_service.update_portfolio(
-        {
-            "products_info.json": f"{IMPORT_FOLDER}/products_info.json",
-        }
-    )
+    update_service.update_portfolio()
 
 
 def company_profile_import(update_service: UpdateService) -> None:
     logging.info("Importing DeGiro Company Profiles...")
-    update_service.update_company_profile({"company_profiles.json": f"{IMPORT_FOLDER}/company_profiles.json"})
+    update_service.update_company_profile()
 
 
 def run(*args):

@@ -187,8 +187,6 @@ poetry run src/manage.py runscript init_db
 - [ ] Fontawesome is replaceable by https://icons.getbootstrap.com
 - [ ] Provide more information in the Dashboard performance overview
 - [ ] Migrate UI to https://github.com/coreui/coreui
-- [ ] Put tmp files in a TMP folder
-- [ ] Put DB in the root folder or the TMP folder
 
 ## Logos
 - https://eodhd.com/financial-apis-blog/40000-company-logos (requires API Key)

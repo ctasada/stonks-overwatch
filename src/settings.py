@@ -20,6 +20,18 @@ BASE_DIR = Path(__file__).resolve().parent
 # This is the Project Root
 PROJECT_PATH = BASE_DIR.parent
 
+# Define the data directory
+DATA_DIR = os.path.join(PROJECT_PATH, "data")
+# Ensure the directory exists
+if not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR)
+
+# Define the temp directory
+TEMP_DIR = os.path.join(DATA_DIR, "temp")
+# Ensure the directory exists
+if not os.path.exists(TEMP_DIR):
+    os.makedirs(TEMP_DIR)
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -89,9 +101,9 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": Path(DATA_DIR).resolve() / "db.sqlite3",
         "TEST": {
-            "NAME": BASE_DIR / "test_db.sqlite3",
+            "NAME": Path(TEMP_DIR).resolve() / "test_db.sqlite3",
         },
     },
 }
@@ -183,7 +195,7 @@ LOGGING = {
         "file": {
             "level": "DEBUG",
             "class": "logging.FileHandler",
-            "filename": "stocks-portfolio.log",
+            "filename": os.path.join(TEMP_DIR, "stocks-portfolio.log"),
             "formatter": "verbose",
         },
     },
