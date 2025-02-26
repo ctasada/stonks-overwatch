@@ -8,6 +8,7 @@ from stonks_overwatch.config.config import Config
 from stonks_overwatch.services.models import PortfolioEntry
 from stonks_overwatch.services.portfolio_aggregator import PortfolioAggregatorService
 from stonks_overwatch.services.session_manager import SessionManager
+from stonks_overwatch.utils.constants import Sector
 from stonks_overwatch.utils.localization import LocalizationUtility
 
 
@@ -23,14 +24,14 @@ class Diversification(View):
         selected_portfolio = SessionManager.get_selected_portfolio(request)
         portfolio = self.portfolio.get_portfolio(selected_portfolio)
         product_types = self._get_product_types(portfolio)
-        holdings = self._get_holdings(portfolio)
+        positions = self._get_positions(portfolio)
         sectors = self._get_sectors(portfolio)
         currencies = self._get_currencies(portfolio)
         countries = self._get_countries(portfolio)
 
         context = {
             "productTypes": product_types,
-            "holdings": holdings,
+            "positions": positions,
             "sectors": sectors,
             "currencies": currencies,
             "countries": countries,
@@ -40,7 +41,7 @@ class Diversification(View):
         return render(request, "diversification.html", context)
 
     @staticmethod
-    def _get_holdings(portfolio: List[PortfolioEntry]) -> dict:
+    def _get_positions(portfolio: List[PortfolioEntry]) -> dict:
         stock_labels = []
         stock_values = []
         stocks_table = []
@@ -56,8 +57,9 @@ class Diversification(View):
                     {
                         "name": stock.name,
                         "size": stock.portfolio_size,
-                        "formattedSize": stock.formatted_portfolio_size,
+                        "formatted_size": stock.formatted_portfolio_size,
                         "weight": (stock.portfolio_size / max_percentage) * 100,
+                        "logo": stock.symbol_url,
                     }
                 )
 
@@ -92,28 +94,35 @@ class Diversification(View):
             if stock.is_open:
                 if field_name == "product_type":
                     name = stock.product_type.value
+                elif field_name == "country":
+                    name = stock.country.get_name() if stock.country else "Unknown Country"
+                elif field_name == "product_currency":
+                    symbol = LocalizationUtility.get_currency_symbol(stock.product_currency)
+                    name = f"{symbol} {stock.product_currency}"
+                elif field_name == "sector":
+                    name = stock.sector.value if stock.sector else Sector.UNKNOWN.value
                 else:
                     name =  getattr(stock, field_name)
                 value = 0.0
                 portfolio_size = 0.0
                 if name in data:
                     value = data[name]["value"]
-                    portfolio_size = data[name]["portfolioSize"]
+                    portfolio_size = data[name]["portfolio_size"]
                 data[name] = {
                     "value": value + stock.base_currency_value,
-                    "portfolioSize": portfolio_size + stock.portfolio_size,
+                    "portfolio_size": portfolio_size + stock.portfolio_size,
                 }
-                max_percentage = max(max_percentage, data[name]["portfolioSize"])
+                max_percentage = max(max_percentage, data[name]["portfolio_size"])
 
         for key in data:
-            portfolio_size = data[key]["portfolioSize"]
+            portfolio_size = data[key]["portfolio_size"]
             data_table.append(
                 {
                     "name": key,
                     "value": data[key]["value"],
                     "size": portfolio_size,
-                    "formattedSize": f"{portfolio_size:.2%}",
-                    "weight": (data[key]["portfolioSize"] / max_percentage) * 100,
+                    "formatted_size": f"{portfolio_size:.2%}",
+                    "weight": (data[key]["portfolio_size"] / max_percentage) * 100,
                 }
             )
         data_table = sorted(data_table, key=lambda k: k["value"], reverse=True)

@@ -40,9 +40,6 @@ class PortfolioService:
             price = float(ticker_json["price"])
             value = float(item["available"]) * price
             asset = self.bitvavo_service.assets(item["symbol"])
-            sector = "Unknown"
-            industry = "Unknown"
-            country = "Unknown"
 
             product_type = ProductType.CRYPTO
             if item["symbol"] == self.base_currency:
@@ -56,9 +53,6 @@ class PortfolioService:
                 PortfolioEntry(
                     symbol=item["symbol"],
                     name=asset["name"],
-                    sector=sector,
-                    industry=industry,
-                    country=country,
                     shares=item["available"],
                     product_type=product_type,
                     product_currency=self.base_currency,
