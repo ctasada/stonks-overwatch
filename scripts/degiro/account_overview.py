@@ -1,4 +1,4 @@
-"""poetry run python ./scripts/account_overview.py"""
+"""poetry run python ./scripts/degiro//account_overview.py"""
 
 # IMPORTATIONS
 import json
