@@ -5,6 +5,7 @@ from typing import Optional
 
 from stonks_overwatch.config.bitvavo_config import BitvavoConfig
 from stonks_overwatch.config.degiro_config import DegiroConfig
+from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.models import PortfolioId
 
 
@@ -40,8 +41,9 @@ class Config:
         return False
 
     def is_degiro_enabled(self, selected_portfolio: PortfolioId = PortfolioId.ALL) -> bool:
-        return (self.degiro_configuration is not None
-                and self.degiro_configuration.credentials is not None
+        return ((DeGiroService().check_connection()
+                or (self.degiro_configuration is not None
+                and self.degiro_configuration.credentials is not None))
                 and selected_portfolio in [PortfolioId.ALL, PortfolioId.DEGIRO])
 
     def is_bitvavo_enabled(self, selected_portfolio: PortfolioId = PortfolioId.ALL) -> bool:
