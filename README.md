@@ -188,6 +188,8 @@ poetry run src/manage.py runscript init_db
 - [ ] Fontawesome is replaceable by https://icons.getbootstrap.com
 - [ ] Provide more information in the Dashboard performance overview
 - [ ] Migrate UI to https://github.com/coreui/coreui
+- [ ] Add Github Dependabot support for Poetry: Track https://github.com/dependabot/dependabot-core/issues/11237
+- [ ] Login Dialog: Add a progress bar to show the progress loading DEGIRO data
 
 ## Logos
 - https://eodhd.com/financial-apis-blog/40000-company-logos (requires API Key)

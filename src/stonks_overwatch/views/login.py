@@ -7,6 +7,7 @@ from django.shortcuts import redirect, render
 from django.views import View
 
 from stonks_overwatch.config.degiro_credentials import DegiroCredentials
+from stonks_overwatch.jobs.jobs_scheduler import JobsScheduler
 from stonks_overwatch.services.degiro.degiro_service import CredentialsManager, DeGiroService
 
 
@@ -44,6 +45,11 @@ class Login(View):
 
         if request.session.get('is_authenticated'):
             request.session['session_id'] = self.degiro_service.get_session_id()
+
+            # Update portfolio data before loading the dashboard
+            # FIXME: Add a waiting or progress indicator
+            JobsScheduler.update_portfolio()
+
             return redirect('dashboard')
 
         return render(request, "login.html", context={"show_otp": show_otp}, status=200)

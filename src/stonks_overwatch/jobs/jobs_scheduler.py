@@ -5,7 +5,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
 from stonks_overwatch.config.degiro_config import DegiroConfig
-from stonks_overwatch.services.degiro.update_service import UpdateService
+from stonks_overwatch.services.degiro.update_service import UpdateService as DegiroUpdateService
 
 jobs_scheduler_logger = logging.getLogger("stocks_portfolio.jobs_scheduler")
 
@@ -49,7 +49,7 @@ class JobsScheduler:
     def update_portfolio():
         jobs_scheduler_logger.info("Updating Portfolio")
         try:
-            update_service = UpdateService()
-            update_service.update_all()
+            degiro_update_service = DegiroUpdateService()
+            degiro_update_service.update_all()
         except Exception as error:
             jobs_scheduler_logger.error(f"Update failed with {error}")

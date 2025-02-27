@@ -8,7 +8,10 @@ from stonks_overwatch.config.degiro_credentials import DegiroCredentials
 class DegiroConfig(BaseConfig):
     config_key = "degiro"
     DEFAULT_DEGIRO_UPDATE_FREQUENCY = 5
-    DEFAULT_DEGIRO_START_DATE = "2020-01-01"
+    DEFAULT_DEGIRO_START_DATE_STR = "2020-01-01"
+
+    # FIXME: Use Localization method
+    DEFAULT_DEGIRO_START_DATE = datetime.strptime(DEFAULT_DEGIRO_START_DATE_STR, "%Y-%m-%d").date()
 
     def __init__(
             self,
@@ -44,9 +47,7 @@ class DegiroConfig(BaseConfig):
     def from_dict(cls, data: dict) -> "DegiroConfig":
         credentials_data = data.get("credentials")
         credentials = DegiroCredentials.from_dict(credentials_data) if credentials_data else None
-        start_date_str = data.get("start_date", cls.DEFAULT_DEGIRO_START_DATE)
-        # FIXME: Use Localization method
-        start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date() if start_date_str else date.today()
+        start_date = data.get("start_date", cls.DEFAULT_DEGIRO_START_DATE)
         update_frequency_minutes = data.get("update_frequency_minutes", cls.DEFAULT_DEGIRO_UPDATE_FREQUENCY)
 
         return cls(credentials, start_date, update_frequency_minutes)
@@ -59,6 +60,6 @@ class DegiroConfig(BaseConfig):
             cls.logger.warning("Cannot find DeGiro configuration file. Using default values")
             return DegiroConfig(
                 credentials=None,
-                start_date=date.today(),
+                start_date=cls.DEFAULT_DEGIRO_START_DATE,
                 update_frequency_minutes=cls.DEFAULT_DEGIRO_UPDATE_FREQUENCY
             )
