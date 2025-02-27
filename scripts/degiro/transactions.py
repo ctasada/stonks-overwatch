@@ -1,4 +1,4 @@
-"""poetry run python ./scripts/transactions.py"""
+"""poetry run python ./scripts/degiro/transactions.py"""
 
 # IMPORTATIONS
 import json

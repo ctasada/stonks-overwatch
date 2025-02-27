@@ -1,4 +1,4 @@
-"""poetry run python ./scripts/quotecast.py"""
+"""poetry run python ./scripts/degiro/quotecast.py"""
 
 # IMPORTATIONS
 import logging

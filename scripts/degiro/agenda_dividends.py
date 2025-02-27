@@ -1,4 +1,4 @@
-"""poetry run python ./scripts/agenda_dividends.py"""
+"""poetry run python ./scripts/degiro//agenda_dividends.py"""
 
 # IMPORTATIONS
 import json
