@@ -6,6 +6,7 @@ install:
 
 update:
 	npm update
+	poetry self update
 	poetry update
 
 lintcheck:
