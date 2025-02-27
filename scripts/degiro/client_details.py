@@ -1,4 +1,4 @@
-"""poetry run python ./scripts/client_details.py"""
+"""poetry run python ./scripts/degiro/client_details.py"""
 
 # IMPORTATIONS
 import json
