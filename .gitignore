@@ -127,7 +127,12 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-config/config.json
+
+# Ignore all files in config/ folder, except the template
+config/*
+!config/config.json.template
+
+# Poetry
 poetry.lock
 
 # Local data

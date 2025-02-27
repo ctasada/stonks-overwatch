@@ -87,6 +87,7 @@ docker compose up
 
 Update Dependencies
 ```shell
+poetry self update
 poetry update
 npm update
 ```
