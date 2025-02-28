@@ -10,6 +10,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        run:  |
+          cat ./.github/actions/install-env.yml
       - name: Install Environment
         uses: ./.github/actions/install-env.yml
 
