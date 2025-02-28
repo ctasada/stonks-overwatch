@@ -5,7 +5,7 @@ description = "Stonks Overwatch"
 authors = [{name = "Carlos Tasada", email = "carlos.tasada@gmail.com"}]
 license = "MIT"
 readme = "README.md"
-requires-python = ">=3.12,<4.0"
+requires-python = ">=3.12,<3.14"
 dependencies = [
     "degiro-connector >= 3.0.23",
     "django >= 5.1.6",
@@ -34,6 +34,17 @@ pytest = "^8.3.4"
 pytest-cov = "^5.0.0"
 requests-mock = "^1.12.1"
 pytest-django = "^4.10.0"
+
+[tool.poetry]
+include = [
+    { path = "Makefile", format = ["sdist", "wheel"] },
+    { path = "package.json", format = ["sdist", "wheel"] },
+    { path = "Dockerfile", format = ["sdist", "wheel"] },
+    { path = "docker-compose.yml", format = ["sdist", "wheel"] },
+    { path = "src/static/**/*.*", format = ["sdist", "wheel"] },
+    { path = "src/*.py", format = ["sdist", "wheel"] },
+    { path = "src/*.sh", format = ["sdist", "wheel"] },
+]
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
