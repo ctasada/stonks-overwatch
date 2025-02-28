@@ -1,8 +1,9 @@
-from datetime import date, datetime
+from datetime import date
 from typing import Optional
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.degiro_credentials import DegiroCredentials
+from stonks_overwatch.utils.localization import LocalizationUtility
 
 
 class DegiroConfig(BaseConfig):
@@ -11,7 +12,7 @@ class DegiroConfig(BaseConfig):
     DEFAULT_DEGIRO_START_DATE_STR = "2020-01-01"
 
     # FIXME: Use Localization method
-    DEFAULT_DEGIRO_START_DATE = datetime.strptime(DEFAULT_DEGIRO_START_DATE_STR, "%Y-%m-%d").date()
+    DEFAULT_DEGIRO_START_DATE = LocalizationUtility.convert_string_to_date(DEFAULT_DEGIRO_START_DATE_STR)
 
     def __init__(
             self,
@@ -48,6 +49,8 @@ class DegiroConfig(BaseConfig):
         credentials_data = data.get("credentials")
         credentials = DegiroCredentials.from_dict(credentials_data) if credentials_data else None
         start_date = data.get("start_date", cls.DEFAULT_DEGIRO_START_DATE)
+        if isinstance(start_date, str):
+            start_date = LocalizationUtility.convert_string_to_date(start_date)
         update_frequency_minutes = data.get("update_frequency_minutes", cls.DEFAULT_DEGIRO_UPDATE_FREQUENCY)
 
         return cls(credentials, start_date, update_frequency_minutes)

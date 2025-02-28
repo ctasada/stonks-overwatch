@@ -1,5 +1,5 @@
 import pathlib
-from datetime import date, datetime
+from datetime import datetime
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.config import Config
@@ -193,5 +193,5 @@ def test_config_default_without_config_file():
 
     assert config.base_currency == "EUR"
     assert config.degiro_configuration.credentials is None
-    assert config.degiro_configuration.start_date == date.today()
+    assert config.degiro_configuration.start_date == DegiroConfig.DEFAULT_DEGIRO_START_DATE
     assert config.degiro_configuration.update_frequency_minutes == 5
