@@ -5,7 +5,7 @@ description = "Stonks Overwatch"
 authors = [{name = "Carlos Tasada", email = "carlos.tasada@gmail.com"}]
 license = "MIT"
 readme = "README.md"
-requires-python = ">=3.12,<3.14"
+requires-python = ">=3.13,<3.14"
 dependencies = [
     "degiro-connector >= 3.0.23",
     "django >= 5.1.6",
@@ -80,7 +80,7 @@ exclude = [
 # Same as Black.
 line-length = 120
 indent-width = 4
-target-version = "py312"
+target-version = "py313"
 
 [tool.ruff.lint]
 select = [
