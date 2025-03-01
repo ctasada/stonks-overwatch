@@ -3,13 +3,13 @@ import pathlib
 import re
 from unittest.mock import patch
 
+import pytest
 import requests
 import requests_mock
 from degiro_connector.core.constants import urls
 from django.test import TestCase
 from isodate import parse_datetime
 
-import pytest
 from stonks_overwatch.config.degiro_credentials import DegiroCredentials
 from stonks_overwatch.repositories.degiro.models import DeGiroCashMovements, DeGiroProductInfo, DeGiroProductQuotation
 from stonks_overwatch.services.degiro.account_overview import AccountOverviewService

@@ -1,9 +1,9 @@
 import json
 import pathlib
 
+import pytest
 from django.test import TestCase
 
-import pytest
 from stonks_overwatch.repositories.degiro.company_profile_repository import CompanyProfileRepository
 from stonks_overwatch.repositories.degiro.models import DeGiroCompanyProfile
 
