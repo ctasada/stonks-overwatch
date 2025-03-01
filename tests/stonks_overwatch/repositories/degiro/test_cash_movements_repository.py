@@ -1,10 +1,10 @@
 import json
 import pathlib
 
+import pytest
 from django.test import TestCase
 from django.utils.dateparse import parse_datetime
 
-import pytest
 from stonks_overwatch.repositories.degiro.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.repositories.degiro.models import DeGiroCashMovements
 from tests.stonks_overwatch.assertions import assert_dates_descending
