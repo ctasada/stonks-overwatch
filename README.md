@@ -29,7 +29,7 @@ Right now the features we offer are:
 I tried to make it as easy as possible to use, but some minimum technical knowledge is needed.
 
 Checkout the repository in your computer
-   `git clone ctasada/stocks-portfolio`
+   `git clone ctasada/stonks-overwatch`
 
 You can execute `make start`, it will install and configure everything needed to run.
 
