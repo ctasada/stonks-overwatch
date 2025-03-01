@@ -195,7 +195,7 @@ LOGGING = {
         "file": {
             "level": "DEBUG",
             "class": "logging.FileHandler",
-            "filename": os.path.join(TEMP_DIR, "stocks-portfolio.log"),
+            "filename": os.path.join(TEMP_DIR, "stonks-overwatch.log"),
             "formatter": "verbose",
         },
     },
