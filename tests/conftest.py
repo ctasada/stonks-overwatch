@@ -2,9 +2,8 @@ import os
 import tempfile
 from functools import wraps
 
-import requests_cache
-
 import pytest
+import requests_cache
 
 
 @pytest.fixture(scope='session')
