@@ -174,18 +174,18 @@ class Dividends(View):
 
         # Calculate dividend ratios
         for key in dividends:
-            dividends[key]["dividendsSize"] = dividends[key]["value"] / total_dividends
-            max_percentage = max(max_percentage, dividends[key]["dividendsSize"])
+            dividends[key]["dividends_size"] = dividends[key]["value"] / total_dividends
+            max_percentage = max(max_percentage, dividends[key]["dividends_size"])
 
         for key in dividends:
-            dividends_size = dividends[key]["dividendsSize"]
+            dividends_size = dividends[key]["dividends_size"]
             dividends_table.append(
                 {
                     "name": key,
                     "value": dividends[key]["value"],
                     "size": dividends_size,
-                    "formattedSize": f"{dividends_size:.2%}",
-                    "weight": (dividends[key]["dividendsSize"] / max_percentage) * 100,
+                    "formatted_size": f"{dividends_size:.2%}",
+                    "weight": (dividends[key]["dividends_size"] / max_percentage) * 100,
                 }
             )
         dividends_table = sorted(dividends_table, key=lambda k: k["value"], reverse=True)

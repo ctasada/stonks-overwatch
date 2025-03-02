@@ -14,8 +14,8 @@ from stonks_overwatch.repositories.degiro.transactions_repository import Transac
 from stonks_overwatch.services.degiro.currency_converter_service import CurrencyConverterService
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.deposits import DepositsService
-from stonks_overwatch.services.models import DailyValue, PortfolioEntry, TotalPortfolio
-from stonks_overwatch.utils.constants import ProductType
+from stonks_overwatch.services.models import Country, DailyValue, PortfolioEntry, TotalPortfolio
+from stonks_overwatch.utils.constants import ProductType, Sector
 from stonks_overwatch.utils.datetime import DateTimeUtility
 from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.y_finance import get_stock_splits
@@ -64,7 +64,7 @@ class PortfolioService:
             tmp_processed_symbols.append(info["symbol"])
 
             company_profile = CompanyProfileRepository.get_company_profile_raw(info["isin"])
-            sector = "Unknown"
+            sector = None
             industry = "Unknown"
             country = "Unknown"
             if company_profile.get("data"):
@@ -111,13 +111,13 @@ class PortfolioService:
                 PortfolioEntry(
                     name=info["name"],
                     symbol=info["symbol"],
-                    sector=sector,
+                    sector=Sector.from_str(sector),
                     industry=industry,
                     category=info["category"],
                     exchange_id=exchange_id,
                     exchange_abbr=exchange_abbr,
                     exchange_name=exchange_name,
-                    country=country,
+                    country=Country(country) if country != "Unknown" else None,
                     product_type=ProductType.from_str(info["productType"]),
                     shares=tmp["size"],
                     product_currency=currency,
@@ -132,7 +132,6 @@ class PortfolioService:
                     unrealized_gain=unrealized_gain,
                     realized_gain=total_realized_gains,
                     total_costs=total_costs,
-                    portfolio_size=0.0,  # Calculated in the next loop
                 )
             )
 
@@ -141,15 +140,12 @@ class PortfolioService:
             PortfolioEntry(
                 name="Cash Balance EUR",
                 symbol="EUR",
-                sector="Others",
-                country="Others",
                 product_type=ProductType.CASH,
                 product_currency="EUR",
                 value=total_cash,
                 base_currency_value=total_cash,
                 base_currency="EUR",
                 is_open=True,
-                portfolio_size=0.0,  # Calculated in the next loop
             )
         )
 
