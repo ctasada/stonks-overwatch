@@ -2,8 +2,10 @@ name: "Stonks Overwatch"
 services:
   web:
     build: .
-    command: ["sh", "/usr/src/app/init.sh"]
+    image: stonks-overwatch
+    command: ["sh", "/app/init.sh"]
     volumes:
-      - ./src/:/usr/src/app/
+      - ./src/:/app/src/
+      - ./data/:/app/data/
     ports:
       - "8000:8000"
