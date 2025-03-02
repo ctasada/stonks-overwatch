@@ -4,7 +4,7 @@
 {% block content %}
 <div class="container-fluid row-gap-5">
     {% include 'distribution_with_list.html' with chart_id="type-chart" items=productTypes.table %}
-    {% include 'distribution_with_list.html' with chart_id="holdings-chart" items=holdings.table %}
+    {% include 'distribution_with_list.html' with chart_id="positions-chart" items=positions.table %}
     {% include 'distribution_with_list.html' with chart_id="sectors-chart" items=sectors.table %}
     {% include 'distribution_with_list.html' with chart_id="currencies-chart" items=currencies.table %}
     {% include 'distribution_with_list.html' with chart_id="countries-chart" items=countries.table %}
@@ -26,10 +26,10 @@
     );
 
     drawDoughnutChart(
-        "holdings-chart",
-        "Holdings",
-        {{ holdings.chart.labels|safe }},
-        {{ holdings.chart.values|safe }}
+        "positions-chart",
+        "Positions",
+        {{ positions.chart.labels|safe }},
+        {{ positions.chart.values|safe }}
     );
 
     drawDoughnutChart(

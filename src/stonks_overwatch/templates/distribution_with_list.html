@@ -7,8 +7,12 @@
             <div class="list-group-item rounded m-1">
                 <div class="progress-bar-background" style="width: {{ item.weight }}%;"></div>
                 <div class="diversification-weight">
-                    <div>{{ item.name }}</div>
-                    <div>{{ item.formattedSize }}</div>
+                    <div>
+                    {% if item.logo %}
+                    <img class="rounded-circle bg-white" src="{{ item.logo }}" width="30" height="30" alt="{{ item.symbol }} logo" onerror="this.style.display='none'">
+                    {% endif %}
+                    {{ item.name }}</div>
+                    <div>{{ item.formatted_size }}</div>
                 </div>
             </div>
         {% endfor %}
