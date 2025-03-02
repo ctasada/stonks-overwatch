@@ -6,7 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE 1 \
 
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install sqlite3 npm -y && \
+    apt-get install sqlite3 nodejs npm -y && \
     apt-get autoremove && \
     apt-get clean -y
 
@@ -20,12 +20,22 @@ RUN pip install poetry
 WORKDIR /app
 
 # install dependencies
-COPY pyproject.toml poetry.lock package.json ./
+COPY pyproject.toml package.json ./
 RUN npm install && \
     poetry install --without dev --no-root && rm -rf "$POETRY_CACHE_DIR"
 
 # The runtime image, used to just run the code provided its virtual environment
 FROM python:3-slim AS runtime
+
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1 \
+    PYTHONUNBUFFERED 1
+
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install sqlite3 nodejs npm -y && \
+    apt-get autoremove && \
+    apt-get clean -y
 
 WORKDIR /app
 
@@ -33,8 +43,12 @@ ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH"
 
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+COPY --from=builder /app/node_modules /app/node_modules
 
-COPY ./src /app
+COPY ./package.json /app/package.json
+COPY ./src /app/src
+COPY ./src/init.sh /app/init.sh
 # FIXME: Secrets must be provided in a more secure way
-COPY ./config /config
+COPY ./config /app/config
+
 # FIXME: Database should be created if doesn't exist
