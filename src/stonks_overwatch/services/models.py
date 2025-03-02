@@ -61,8 +61,13 @@ class Country:
 
     def get_name(self) -> str:
         if self.country:
-            return f"{self.country.flag} {self.country.name}"
+            return self.country.name
         return "Unknown Country"
+
+    def get_flag(self) -> str|None:
+        if self.country:
+            return self.country.flag
+        return None
 
 class DailyValue(TypedDict):
     x: str  # date
