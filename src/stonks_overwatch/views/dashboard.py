@@ -273,8 +273,12 @@ class Dashboard(View):
         for year_month in month_years_dict:
             year, month = year_month.split("-")
             month_name = LocalizationUtility.month_name(month)
+            date_range = month_years_dict[year_month]
+            if len(date_range) == 1:
+                # FIXME: The first day of the month this logic breaks
+                continue
             monthly_twr[year][month_name] = self.__get_total_performance_twr(
-                date_range=month_years_dict[year_month],
+                date_range=date_range,
                 market_value_per_day=market_value_per_day,
                 cash_flows=cash_flows
             )
