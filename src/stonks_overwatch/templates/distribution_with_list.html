@@ -10,6 +10,8 @@
                     <div>
                     {% if item.logo %}
                     <img class="rounded-circle bg-white" src="{{ item.logo }}" width="30" height="30" alt="{{ item.symbol }} logo" onerror="this.style.display='none'">
+                    {% elif item.symbol %}
+                    <div class="rounded-circle bg-white" style="width: 30px; height: 30px; display: inline-block; text-align: center; line-height: 30px;">{{ item.symbol }}</div>
                     {% endif %}
                     {{ item.name }}</div>
                     <div>{{ item.formatted_size }}</div>
