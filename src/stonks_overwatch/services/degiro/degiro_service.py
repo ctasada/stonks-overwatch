@@ -5,7 +5,7 @@ from typing import Any, List, Optional
 
 import polars as pl
 import requests_cache
-from degiro_connector.quotecast.models.chart import ChartRequest, Interval
+from degiro_connector.quotecast.models.chart import Chart, ChartRequest, Interval
 from degiro_connector.quotecast.tools.chart_fetcher import ChartFetcher
 from degiro_connector.trading.api import API as TradingApi  # noqa: N811
 from degiro_connector.trading.models.credentials import Credentials
@@ -212,7 +212,11 @@ class DeGiroService:
 
         return quotes
 
-    def _get_chart(self, issue_id: str, period: Interval, resolution: Interval):
+    @staticmethod
+    def __is_chart_error_type(chart: dict) -> bool:
+        return chart.get('series', [{}])[0].get('type') == 'error'
+
+    def _get_chart(self, issue_id: str, period: Interval, resolution: Interval) -> Chart | None:
         user_token = self._get_user_token()
 
         chart_fetcher = ChartFetcher(user_token=user_token)
@@ -227,7 +231,10 @@ class DeGiroService:
             ],
             tz="Europe/Amsterdam",
         )
-        return chart_fetcher.get_chart(chart_request=chart_request, raw=False)
+        response = chart_fetcher.get_chart(chart_request=chart_request, raw=True)
+        if not response or self.__is_chart_error_type(response):
+            return None
+        return Chart.model_validate(response)
 
     def _get_user_token(self) -> int:
         client_details = self.get_client_details()
