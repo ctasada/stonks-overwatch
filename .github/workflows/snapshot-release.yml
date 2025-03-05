@@ -4,13 +4,8 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
-#    branches:
-#      - master  # Auto-trigger on master push
-#
-#  workflow_dispatch:  # Allows manual trigger for any branch
+
+  workflow_dispatch:  # Allows manual trigger for any branch
 
 jobs:
   build:
@@ -32,7 +27,7 @@ jobs:
             BRANCH_NAME=$(echo "${{ github.ref_name }}" | tr '/' '-')
             echo "SNAPSHOT_VERSION=${BRANCH_NAME}" >> $GITHUB_ENV
           else
-            echo "SNAPSHOT_VERSION=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+            echo "SNAPSHOT_VERSION=main-$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
           fi
 
       - name: Delete Previous SNAPSHOT Releases
@@ -42,7 +37,7 @@ jobs:
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             TARGET_SNAPSHOT="snapshot-${{ github.ref_name }}"
           else
-            TARGET_SNAPSHOT="snapshot-"
+            TARGET_SNAPSHOT="snapshot-main-"
           fi
 
           gh release list --json name -q '.[].name' | grep "^$TARGET_SNAPSHOT" | while read -r release; do
