@@ -8,6 +8,7 @@ import pycountry
 
 from stonks_overwatch.utils.constants import ProductType, Sector
 from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.utils.logos import symbol_url
 
 
 @dataclass
@@ -42,6 +43,10 @@ class AccountOverview:
                 value=self.change, currency=self.currency
             )
         return ""
+
+    @property
+    def symbol_url(self) -> str:
+        return symbol_url(self.stock_symbol, ProductType.STOCK)
 
 class Country:
     def __init__(self, iso_code: str):
@@ -130,13 +135,7 @@ class PortfolioEntry:
 
     @property
     def symbol_url(self) -> str:
-        if self.product_type == ProductType.CRYPTO:
-            return f"https://raw.githubusercontent.com/Cryptofonts/cryptoicons/master/SVG/{self.symbol.lower()}.svg"
-        else:
-            # Keep track of alternatives as NVSTly
-            # return f"https://raw.githubusercontent.com/nvstly/icons/main/ticker_icons/{symbol.upper()}.png"
-            # https://img.stockanalysis.com/logos1/MC/IBE.png
-            return f"https://logos.stockanalysis.com/{self.symbol.lower()}.svg"
+        return symbol_url(self.symbol, self.product_type)
 
     def to_dict(self) -> Dict[str, Any]:
         # FIXME: The asdict does infinite recursion. Need to handle the country separately
