@@ -8,7 +8,7 @@ from stonks_overwatch.config.config import Config
 from stonks_overwatch.services.models import PortfolioEntry
 from stonks_overwatch.services.portfolio_aggregator import PortfolioAggregatorService
 from stonks_overwatch.services.session_manager import SessionManager
-from stonks_overwatch.utils.constants import Sector
+from stonks_overwatch.utils.constants import ProductType, Sector
 from stonks_overwatch.utils.localization import LocalizationUtility
 
 
@@ -96,6 +96,9 @@ class Diversification(View):
                 if field_name == "product_type":
                     name = stock.product_type.value
                 elif field_name == "country":
+                    if stock.product_type in [ProductType.CASH, ProductType.CRYPTO]:
+                        # Neither cash nor crypto have a country
+                        continue
                     name = stock.country.get_name() if stock.country else "Unknown Country"
                     symbol = stock.country.get_flag() if stock.country else None
                 elif field_name == "product_currency":
