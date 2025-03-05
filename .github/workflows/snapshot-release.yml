@@ -2,10 +2,11 @@ name: Build and Release SNAPSHOT
 
 on:
   push:
-    branches:
-      - master  # Auto-trigger on master push
-
-  workflow_dispatch:  # Allows manual trigger for any branch
+  pull_request:
+#    branches:
+#      - master  # Auto-trigger on master push
+#
+#  workflow_dispatch:  # Allows manual trigger for any branch
 
 jobs:
   build:
@@ -14,6 +15,7 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
       - name: Run common actions
         uses: ./.github/actions/common-action
 
