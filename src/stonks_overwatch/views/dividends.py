@@ -170,6 +170,7 @@ class Dividends(View):
             total_dividends += dividend_change
             dividends[dividend_name] = {
                 "value": dividend_value + dividend_change,
+                "logo": entry.symbol_url,
             }
 
         # Calculate dividend ratios
@@ -186,6 +187,7 @@ class Dividends(View):
                     "size": dividends_size,
                     "formatted_size": f"{dividends_size:.2%}",
                     "weight": (dividends[key]["dividends_size"] / max_percentage) * 100,
+                    "logo": dividends[key]["logo"],
                 }
             )
         dividends_table = sorted(dividends_table, key=lambda k: k["value"], reverse=True)
