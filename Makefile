@@ -43,6 +43,8 @@ test: ## Run tests with coverage report
 	poetry run pytest --cov --cov-report html
 
 docker-build: ## Build Docker images
+	AVX2_ENABLED=$$(if [[ "$$(uname)" == "Linux" ]]; then grep -q 'avx2' /proc/cpuinfo && echo true || echo false; else arch | grep -q 'arm64' && echo true || echo false; fi); \
+	export AVX2_ENABLED
 	docker compose build
 
 docker-run: docker-build ## Build and run Docker containers

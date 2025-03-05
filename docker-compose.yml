@@ -1,7 +1,10 @@
 name: "Stonks Overwatch"
 services:
   web:
-    build: .
+    build:
+      context: .
+      args:
+        AVX2_ENABLED: ${AVX2_ENABLED:-"true"}
     image: stonks-overwatch
     command: ["sh", "/app/init.sh"]
     volumes:

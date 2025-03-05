@@ -24,6 +24,11 @@ COPY pyproject.toml package.json ./
 RUN npm install && \
     poetry install --without dev --no-root && rm -rf "$POETRY_CACHE_DIR"
 
+ARG AVX2_ENABLED=true
+RUN if [ "$AVX2_ENABLED" = "false" ]; then  \
+    python -m pip install polars-lts-cpu; \
+fi
+
 # The runtime image, used to just run the code provided its virtual environment
 FROM python:3-slim AS runtime
 
