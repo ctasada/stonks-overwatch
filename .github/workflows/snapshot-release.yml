@@ -40,8 +40,9 @@ jobs:
             TARGET_SNAPSHOT="snapshot-main-"
           fi
 
-          gh release list --json name -q '.[].name' | grep "^$TARGET_SNAPSHOT" | while read -r release; do
+          gh release list --json tagName -q '.[].tagName' | grep "^$TARGET_SNAPSHOT" | while read -r release; do
             gh release delete "$release" --yes
+            gh api -X DELETE /repos/ctasada/stonks-overwatch/git/refs/tags/$release
           done
 
       - name: Create New SNAPSHOT Release
