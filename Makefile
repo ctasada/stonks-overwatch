@@ -25,3 +25,9 @@ runserver:
 start: install migrate runserver
 
 run: start
+
+docker-build:
+	docker compose build
+
+docker-run: docker-build
+	docker compose up
