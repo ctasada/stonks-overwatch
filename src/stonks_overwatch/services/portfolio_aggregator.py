@@ -6,7 +6,9 @@ from stonks_overwatch.services.bitvavo.portfolio import PortfolioService as Bitv
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.portfolio import PortfolioService as DeGiroPortfolioService
 from stonks_overwatch.services.models import DailyValue, PortfolioEntry, PortfolioId, TotalPortfolio
+from stonks_overwatch.utils.constants import ProductType, Sector
 from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.utils.y_finance import get_country, get_sector_industry
 
 
 class PortfolioAggregatorService:
@@ -27,15 +29,27 @@ class PortfolioAggregatorService:
         if Config.default().is_bitvavo_enabled(selected_portfolio):
             portfolio += self.bitvavo_portfolio.get_portfolio()
 
+        portfolio = self.__merge_portfolios(portfolio)
+
         portfolio_total_value = sum([entry.value for entry in portfolio])
 
-        # Calculate Stock Portfolio Size
+        # Calculate Stock Portfolio Size & add missing information
         for entry in portfolio:
             size = entry.value / portfolio_total_value
             entry.portfolio_size = size
+            # If some of the data is missing, we try to get it from yfinance
+            if not entry.country and entry.product_type in [ProductType.STOCK, ProductType.ETF]:
+                entry.country = get_country(entry.symbol)
 
-        # FIXME: We need to merge the Cash balances. Concatenating is not enough
-        return portfolio
+            if ((entry.sector == Sector.UNKNOWN or entry.industry == 'Unknown')
+                    and entry.product_type in [ProductType.STOCK]):
+                sector, industry = get_sector_industry(entry.symbol)
+                if entry.sector == Sector.UNKNOWN:
+                    entry.sector = sector
+                if entry.industry == 'Unknown':
+                    entry.industry = industry
+
+        return sorted(portfolio, key=lambda k: k.symbol)
 
     def get_portfolio_total(self, selected_portfolio: PortfolioId) -> TotalPortfolio:
         base_currency = Config.default().base_currency
@@ -109,3 +123,59 @@ class PortfolioAggregatorService:
             historical_value += self.bitvavo_portfolio.calculate_historical_value()
 
         return self.__merge_historical_values(historical_value)
+
+
+    @staticmethod
+    def __merge_portfolios(portfolio_entries: List[PortfolioEntry]) -> List[PortfolioEntry]:
+        merged = {}
+        for entry in portfolio_entries:
+            symbol = entry.symbol
+            if symbol not in merged:
+                merged[symbol] = entry
+            else:
+                if entry.product_type == ProductType.CASH:
+                    merged[symbol].value += entry.value
+                    merged[symbol].base_currency_value += entry.base_currency_value
+                else:
+                    merged[symbol] = PortfolioAggregatorService.__merge_portfolio_entries(merged[symbol], entry)
+
+        return list(merged.values())
+
+    @staticmethod
+    def __merge_portfolio_entries(entry1: PortfolioEntry, entry2: PortfolioEntry) -> PortfolioEntry:
+        if entry1.symbol != entry2.symbol:
+            raise ValueError("Cannot merge entries with different symbols")
+
+        merged_entry = PortfolioEntry(
+            name=entry1.name,
+            symbol=entry1.symbol,
+            sector=entry1.sector if entry1.sector else entry2.sector,
+            industry=entry1.industry if entry1.industry else entry2.industry,
+            category=entry1.category if entry1.category else entry2.category,
+            exchange_id=entry1.exchange_id,
+            exchange_name=entry1.exchange_name,
+            exchange_abbr=entry1.exchange_abbr,
+            country=entry1.country,
+            product_type=entry1.product_type,
+            shares=entry1.shares + entry2.shares,
+            product_currency=entry1.product_currency,
+            price=entry1.price,
+            base_currency_price=entry1.base_currency_price,
+            base_currency=entry1.base_currency,
+            value=entry1.value + entry2.value,
+            base_currency_value=entry1.base_currency_value + entry2.base_currency_value,
+            is_open=entry1.is_open,
+            unrealized_gain=entry1.unrealized_gain + entry2.unrealized_gain,
+            realized_gain=entry1.realized_gain + entry2.realized_gain,
+        )
+
+        if entry1.is_open and not entry2.is_open:
+            merged_entry.is_open = True
+            merged_entry.break_even_price = entry1.break_even_price
+            merged_entry.base_currency_break_even_price = entry1.base_currency_break_even_price
+        elif not entry1.is_open and entry2.is_open:
+            merged_entry.is_open = True
+            merged_entry.break_even_price = entry2.break_even_price
+            merged_entry.base_currency_break_even_price = entry2.base_currency_break_even_price
+
+        return merged_entry

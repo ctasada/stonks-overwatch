@@ -1,4 +1,4 @@
-"""poetry run python ./scripts/yfinance.py"""
+"""poetry run python ./scripts/y_finance.py"""
 
 import yfinance as yf
 
