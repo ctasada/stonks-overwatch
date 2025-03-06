@@ -194,9 +194,12 @@ LOGGING = {
         },
         "file": {
             "level": "DEBUG",
-            "class": "logging.FileHandler",
+            "class": "logging.handlers.RotatingFileHandler",
             "filename": os.path.join(TEMP_DIR, "stonks-overwatch.log"),
             "formatter": "verbose",
+            "maxBytes": 5 * 1024 * 1024,  # 5MB per file
+            "backupCount": 5,  # Keep last 5 logs
+            "encoding": "utf-8",
         },
     },
     "loggers": {
