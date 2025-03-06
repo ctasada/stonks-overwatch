@@ -9,6 +9,7 @@ from stonks_overwatch.services.models import dataclass_to_dict
 from stonks_overwatch.services.portfolio_aggregator import PortfolioAggregatorService
 from stonks_overwatch.services.session_manager import SessionManager
 from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.utils.version import get_version
 
 register = template.Library()
 
@@ -17,6 +18,9 @@ register = template.Library()
 def index(sequence, position):
     return sequence[position]
 
+@register.simple_tag
+def stonks_overwatch_version() -> str:
+    return get_version()
 
 @register.inclusion_tag("total_overview.html", takes_context=True)
 def show_total_portfolio(context: RequestContext) -> dict:

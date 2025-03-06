@@ -19,9 +19,10 @@ dependencies = [
     "django-node-assets >= 0.9.14",
     "fontawesomefree >= 6.6.0",
     "apscheduler >= 3.11.0",
-    "tzlocal >= 5.3",
+    "tzlocal >= 5.3.1",
     "python-bitvavo-api >= 1.4.2",
     "yfinance[nospam] >= 0.2.54",
+    "toml (>=0.10.2,<0.11.0)",
 ]
 
 [build-system]

@@ -16,7 +16,7 @@ from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.deposits import DepositsService
 from stonks_overwatch.services.models import Country, DailyValue, PortfolioEntry, TotalPortfolio
 from stonks_overwatch.utils.constants import ProductType, Sector
-from stonks_overwatch.utils.datetime import DateTimeUtility
+from stonks_overwatch.utils.datetime_utility import DateTimeUtility
 from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.logger import StonksLogger
 from stonks_overwatch.utils.y_finance import get_stock_splits

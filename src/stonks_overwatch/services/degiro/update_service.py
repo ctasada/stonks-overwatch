@@ -24,7 +24,7 @@ from stonks_overwatch.repositories.degiro.transactions_repository import Transac
 from stonks_overwatch.services.degiro.constants import CurrencyFX
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.portfolio import PortfolioService
-from stonks_overwatch.utils.datetime import DateTimeUtility
+from stonks_overwatch.utils.datetime_utility import DateTimeUtility
 from stonks_overwatch.utils.db_utils import dictfetchall
 from stonks_overwatch.utils.debug import save_to_json
 from stonks_overwatch.utils.localization import LocalizationUtility

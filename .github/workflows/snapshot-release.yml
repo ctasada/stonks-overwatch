@@ -18,17 +18,22 @@ jobs:
       - name: Run common actions
         uses: ./.github/actions/common-action
 
-      - name: Build Package
-        run: poetry build
-
       - name: Determine SNAPSHOT Version
         run: |
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             BRANCH_NAME=$(echo "${{ github.ref_name }}" | tr '/' '-')
-            echo "SNAPSHOT_VERSION=${BRANCH_NAME}" >> $GITHUB_ENV
+            SNAPSHOT_VERSION="${BRANCH_NAME}"
           else
-            echo "SNAPSHOT_VERSION=main-$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+            SNAPSHOT_VERSION="main-$(date +'%Y%m%d%H%M%S')"
           fi
+          echo "RELEASE_VERSION=${SNAPSHOT_VERSION}" >> $GITHUB_ENV
+
+      - name: Update pyproject.toml Version
+        run: |
+          sed -i '' "s/\(version = \"[0-9]*\.[0-9]*\.[0-9]*\)[0-9]*/\1${RELEASE_VERSION}/" pyproject.toml
+
+      - name: Build Package
+        run: poetry build
 
       - name: Delete Previous SNAPSHOT Releases
         env:

@@ -100,7 +100,7 @@
                             </a>
                         </li>
                     </ul>
-                    <div class="pb-2">
+                    <div class="pb-1">
                         {% is_connected_to_degiro as is_degiro_connected %}
                         {% get_connected_tooltip as get_connected_tooltip %}
                         <a class="d-flex align-items-center text-white text-decoration-none w-100 text-center fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-html="true" data-bs-original-title="{{ get_connected_tooltip }}">
@@ -110,6 +110,10 @@
                                 <i class="bi-cloud-slash-fill"></i>
                             {% endif %}
                         </a>
+                    </div>
+                    <div>
+                        {% stonks_overwatch_version as version %}
+                        <p class="small text-white fw-lighter">{{ version }}</p>
                     </div>
                 </div>
             </div>

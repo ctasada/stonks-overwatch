@@ -8,7 +8,7 @@ from stonks_overwatch.services.bitvavo.deposits import DepositsService
 from stonks_overwatch.services.bitvavo.transactions import TransactionsService
 from stonks_overwatch.services.models import DailyValue, PortfolioEntry, TotalPortfolio
 from stonks_overwatch.utils.constants import ProductType
-from stonks_overwatch.utils.datetime import DateTimeUtility
+from stonks_overwatch.utils.datetime_utility import DateTimeUtility
 from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.logger import StonksLogger
 
