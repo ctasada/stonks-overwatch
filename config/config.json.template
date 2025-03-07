@@ -1,5 +1,6 @@
 {
     "degiro": {
+        "enabled": true,
         "credentials": {
             "username": "USERNAME",
             "password": "PASSWORD",
@@ -9,6 +10,7 @@
         "update_frequency_minutes": "How frequently the data from DeGiro should be updated. Defaults to 5 minutes"
     },
     "bitvavo": {
+        "enabled": true,
         "credentials": {
             "apikey": "BITVAVO API KEY",
             "apisecret": "BITVAVO API SECRET"

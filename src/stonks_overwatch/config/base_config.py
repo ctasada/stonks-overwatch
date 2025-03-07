@@ -12,7 +12,12 @@ class BaseConfig:
     logger = logging.getLogger("stocks_portfolio.config")
     CONFIG_PATH = Path(PROJECT_PATH) / "config" / "config.json"
 
-    def __init__(self, credentials: Optional[BaseCredentials]) -> None:
+    def __init__(
+            self,
+            credentials: Optional[BaseCredentials],
+            enabled: bool = True,
+    ) -> None:
+        self.enabled = enabled
         self.credentials = credentials
 
     def __eq__(self, value: object) -> bool:
@@ -21,7 +26,10 @@ class BaseConfig:
         return False
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(credentials={self.credentials})"
+        return f"{self.__class__.__name__}(enabled={self.enabled}, credentials={self.credentials})"
+
+    def is_enabled(self) -> bool:
+        return self.enabled
 
     @property
     @abstractmethod
