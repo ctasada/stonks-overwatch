@@ -193,7 +193,7 @@ function getTooltipLabel(portfolioType) {
                 label += ': ';
             }
             if (context.parsed.y !== null) {
-                label += new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(context.parsed.y);
+                label += new Intl.NumberFormat('nl-NL', {style: 'currency', currency: 'EUR'}).format(context.parsed.y);
             }
             return label;
         }
@@ -207,25 +207,24 @@ function getTicksCallback(portfolioType) {
         }
     } else {
         return function (value, index, ticks) {
-            return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(value);
+            return new Intl.NumberFormat('nl-NL', {style: 'currency', currency: 'EUR'}).format(value);
         }
     }
 }
 
-function drawPortfolio(portfolioType, timeRange) {
-    const datasets = {
-        datasets: [
-            {
-                data: [],
-                stepped: false,
-                lineTension: 0.1
-            }
-        ],
-    };
-
-    const configPortfolio = {
+function getPortfolioConfiguration(portfolioType) {
+    return {
         type: 'line',
-        data: datasets,
+        data: {
+            datasets: [
+                {
+                    data: [],
+                    stepped: false,
+                    lineTension: 0.1
+                },
+                ...(portfolioType === PortfolioTypes.VALUE ? [{data: [], stepped: true}] : [])
+            ],
+        },
         options: {
             responsive: true,
             maintainAspectRatio: false,
@@ -245,6 +244,39 @@ function drawPortfolio(portfolioType, timeRange) {
             plugins: {
                 legend: {
                     display: false,
+                    labels: {
+                        font: {
+                            family: "'Poppins', 'sans-serif'",
+                            size: 14,
+                        },
+                        onClick: function (click, legendItem, legend) {
+                            const datasets = legend.legendItems.map((dataset, index) => {
+                                return dataset.text;
+                            })
+                            const index = datasets.indexOf(legendItem.text)
+                            if (legend.chart.isDatasetVisible(index) === true) {
+                                legend.chart.hide(index);
+                            } else {
+                                legend.chart.show(index);
+                            }
+                        },
+                        generateLabels: function (chart) {
+                            let visibility = [];
+                            for (let i = 0; i < chart.data.datasets.length; i++) {
+                                if (chart.isDatasetVisible(i) === true) {
+                                    visibility.push('rgba(102, 102, 102, 1)');
+                                } else {
+                                    visibility.push('rgba(102, 102, 102, 0.5)');
+                                }
+                            }
+                            const items = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+                            for (let i = 0; i < items.length; i++) {
+                                items[i].fontColor = visibility[i];
+                                items[i].hidden = false;
+                            }
+                            return items
+                        }
+                    }
                 },
                 tooltip: {
                     callbacks: {
@@ -254,14 +286,16 @@ function drawPortfolio(portfolioType, timeRange) {
             }
         },
     };
+}
+
+function drawPortfolio(portfolioType, timeRange) {
+    const configPortfolio = getPortfolioConfiguration(portfolioType);
 
     let chart = Chart.getChart("portofolio-chart"); // <canvas> id
-    if (chart === undefined) {
-        chart = new Chart(document.getElementById("portofolio-chart").getContext("2d"), configPortfolio);
-    } else {
-        chart.data = configPortfolio.data
-        chart.options = configPortfolio.options
+    if (chart !== undefined) {
+        chart.destroy();
     }
+    chart = new Chart(document.getElementById("portofolio-chart").getContext("2d"), configPortfolio);
 
     let url = HOST + URL + "?format=json&type=" + portfolioType + "&interval=" + timeRange
     // Fetch JSON data from a URL and update the chart
@@ -275,12 +309,25 @@ function drawPortfolio(portfolioType, timeRange) {
         .then(json => {
             if (portfolioType === PortfolioTypes.PERFORMANCE) {
                 data = json.portfolio.performance
+                chart.data.datasets[0].data = data;
+                chart.data.datasets[0].data.labels = 'Performance'
+                chart.data.datasets[1] = {}
+                chart.options.plugins.legend.display = false
             } else {
                 data = json.portfolio.portfolio_value
+                chart.data.datasets[0].data = data;
+                chart.data.datasets[0].label = 'Portfolio Value'
+                chart.data.datasets[0].borderColor = GREEN
+                chart.data.datasets[0].backgroundColor = GREEN
+                chart.data.datasets[1].data = json.portfolio.cash_contributions;
+                chart.data.datasets[1].label = 'Cash Contributions'
+                chart.data.datasets[1].borderColor = BLUE
+                chart.data.datasets[1].backgroundColor = BLUE
+                chart.options.plugins.legend.display = true
+                chart.options.scales.y.suggestedMin = Math.min.apply(null, data.map(d => d.y))
             }
 
             const timeRangeConfig = getTimeRangeConfig(timeRange, data[0].x)
-            chart.data.datasets[0].data = data;
             chart.options.scales.x = {
                 type: 'time',
                 min: timeRangeConfig.minDate,

@@ -1,7 +1,4 @@
 
-const RED = 'rgba(239, 83, 67, 0.75)'
-const GREEN = 'rgba(38, 169, 79, 0.75)'
-
 const ALL_TIME_PERFORMANCE_GROUP = "ALLTIME"
 
 function getSelectedPerformanceGroup() {

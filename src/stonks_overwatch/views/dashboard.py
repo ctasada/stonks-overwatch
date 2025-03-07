@@ -68,11 +68,15 @@ class Dashboard(View):
 
         self.logger.debug(f"Rendering dashboard view with interval: {interval} and view type: {view}")
 
+        data = self.deposits.cash_deposits_history(selected_portfolio)
+        cash_contributions = [{"x": item["date"], "y": item["total_deposit"]} for item in data]
+
         portfolio_value = self._get_portfolio_value(selected_portfolio)
 
         start_date = self._get_interval_start_date(interval)
         if start_date:
-            portfolio_value = [item for item in portfolio_value if item['x'] >= start_date]
+            portfolio_value = self.__filter_dashboard_values(portfolio_value, start_date)
+            cash_contributions = self.__filter_dashboard_values(cash_contributions, start_date)
         else:
             start_date = portfolio_value[0]['x']
 
@@ -80,11 +84,31 @@ class Dashboard(View):
         return {
             "portfolio": {
                 "portfolio_value": portfolio_value,
+                "cash_contributions": cash_contributions,
                 "performance": performance_twr.twr,
                 "annual_twr": performance_twr.annual_twr,
                 "monthly_twr": performance_twr.monthly_twr
             }
         }
+
+    @staticmethod
+    def __filter_dashboard_values(data_values: list[dict], start_date: str) -> list[dict]:
+        # Ensure the list is sorted by date
+        data_values.sort(key=lambda item: item['x'])
+
+        # Find the index of the first element where 'x' is greater than or equal to start_date
+        index = next((i for i, item in enumerate(data_values) if item['x'] >= start_date), None)
+
+        # If start_date is between values, include the previous element
+        if index is not None and index > 0:
+            previous_value = data_values[index - 1]['y']
+            data_values.insert(index, {'x': start_date, 'y': previous_value})
+        elif index is None:
+            return []
+
+        # Return the filtered list
+        return data_values[index:] if index is not None else []
+
 
     @staticmethod
     def _get_interval_start_date(interval: str) -> str|None:  # noqa: C901
@@ -248,6 +272,7 @@ class Dashboard(View):
         Returns:
             List of dictionaries containing dates and cumulative returns
         """
+        #FIXME: Can we avoid retrieving the deposits twice?
         deposits = sorted(
             self.deposits.get_cash_deposits(selected_portfolio),
             key=lambda k: k.datetime
