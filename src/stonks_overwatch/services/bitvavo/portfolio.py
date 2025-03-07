@@ -243,20 +243,11 @@ class PortfolioService:
         Creates product quotations based on portfolio data and product information.
         """
         product_growth = self.calculate_product_growth()
-        tradable_products = {}
+        tradeable_products = {}
 
         for key, data in product_growth.items():
-            # product = ProductInfoRepository.get_product_info_from_id(key)
 
             data["productId"] = key
-    #         data["product"] = {
-    #             "name": product["name"],
-    #             "isin": product["isin"],
-    #             "symbol": product["symbol"],
-    #             "currency": product["currency"],
-    #             "vwdId": product["vwdId"],
-    #             "vwdIdSecondary": product["vwdIdSecondary"],
-    #         }
 
             product_history_dates = list(data["history"].keys())
 
@@ -274,14 +265,13 @@ class PortfolioService:
 
             data["quotation"] = {
                 "fromDate": product_history_dates[0],
-                # FIXME: This should be the last date of the product history
-                "toDate": LocalizationUtility.format_date_from_date(datetime.today()),
+                "toDate": product_history_dates[-1],
                 "interval": DateTimeUtility.calculate_interval(product_history_dates[0]),
                 "quotes": quotes,
             }
-            tradable_products[key] = data
+            tradeable_products[key] = data
 
-        return tradable_products
+        return tradeable_products
 
     @staticmethod
     def _is_weekend(date_str: str):

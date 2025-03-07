@@ -18,9 +18,10 @@ class DegiroConfig(BaseConfig):
             self,
             credentials: Optional[DegiroCredentials],
             start_date: date,
-            update_frequency_minutes: int = DEFAULT_DEGIRO_UPDATE_FREQUENCY
+            update_frequency_minutes: int = DEFAULT_DEGIRO_UPDATE_FREQUENCY,
+            enabled: bool = True,
     ) -> None:
-        super().__init__(credentials)
+        super().__init__(credentials, enabled)
         if update_frequency_minutes < 1:
             raise ValueError("Update frequency must be at least 1 minute")
         self.start_date = start_date
@@ -36,7 +37,8 @@ class DegiroConfig(BaseConfig):
         return False
 
     def __repr__(self) -> str:
-        return (f"DegiroConfig(credentials={self.credentials}, "
+        return (f"DegiroConfig(enabled={self.enabled}, "
+                f"credentials={self.credentials}, "
                 f"start_date={self.start_date}, "
                 f"update_frequency_minutes={self.update_frequency_minutes})")
 
@@ -46,6 +48,7 @@ class DegiroConfig(BaseConfig):
 
     @classmethod
     def from_dict(cls, data: dict) -> "DegiroConfig":
+        enabled = data.get("enabled", True)
         credentials_data = data.get("credentials")
         credentials = DegiroCredentials.from_dict(credentials_data) if credentials_data else None
         start_date = data.get("start_date", cls.DEFAULT_DEGIRO_START_DATE)
@@ -53,7 +56,7 @@ class DegiroConfig(BaseConfig):
             start_date = LocalizationUtility.convert_string_to_date(start_date)
         update_frequency_minutes = data.get("update_frequency_minutes", cls.DEFAULT_DEGIRO_UPDATE_FREQUENCY)
 
-        return cls(credentials, start_date, update_frequency_minutes)
+        return cls(credentials, start_date, update_frequency_minutes, enabled)
 
     @classmethod
     def default(cls) -> "DegiroConfig":

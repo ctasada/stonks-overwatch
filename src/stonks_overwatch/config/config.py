@@ -41,13 +41,16 @@ class Config:
         return False
 
     def is_degiro_enabled(self, selected_portfolio: PortfolioId = PortfolioId.ALL) -> bool:
-        return ((DeGiroService().check_connection()
-                or (self.degiro_configuration is not None
-                and self.degiro_configuration.credentials is not None))
+        return (self.degiro_configuration.is_enabled()
+                and (DeGiroService().check_connection()
+                    or (self.degiro_configuration is not None
+                    and self.degiro_configuration.credentials is not None)
+                )
                 and selected_portfolio in [PortfolioId.ALL, PortfolioId.DEGIRO])
 
     def is_bitvavo_enabled(self, selected_portfolio: PortfolioId = PortfolioId.ALL) -> bool:
-        return (self.bitvavo_configuration is not None
+        return (self.bitvavo_configuration.is_enabled()
+                and self.bitvavo_configuration is not None
                 and self.bitvavo_configuration.credentials is not None
                 and selected_portfolio in [PortfolioId.ALL, PortfolioId.BITVAVO])
 
