@@ -96,11 +96,8 @@ class Dashboard(View):
         # Ensure the list is sorted by date
         data_values.sort(key=lambda item: item['x'])
 
-        # Convert start_date to datetime for comparison
-        start_date_dt = datetime.strptime(start_date, '%Y-%m-%d')
-
         # Find the index of the first element where 'x' is greater than or equal to start_date
-        index = next((i for i, item in enumerate(data_values) if datetime.strptime(item['x'], '%Y-%m-%d') >= start_date_dt), None)
+        index = next((i for i, item in enumerate(data_values) if item['x'] >= start_date), None)
 
         # If start_date is between values, include the previous element
         if index is not None and index > 0:
