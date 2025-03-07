@@ -10,8 +10,9 @@ class BitvavoConfig(BaseConfig):
     def __init__(
             self,
             credentials: Optional[BitvavoCredentials],
+            enabled: bool = True,
     ) -> None:
-        super().__init__(credentials)
+        super().__init__(credentials, enabled)
 
     @property
     def get_credentials(self) -> BitvavoCredentials:
@@ -19,10 +20,11 @@ class BitvavoConfig(BaseConfig):
 
     @classmethod
     def from_dict(cls, data: dict) -> "BitvavoConfig":
+        enabled = data.get("enabled", True)
         credentials_data = data.get("credentials")
         credentials = BitvavoCredentials.from_dict(credentials_data) if credentials_data else None
 
-        return cls(credentials)
+        return cls(credentials, enabled)
 
     @classmethod
     def default(cls) -> "BitvavoConfig":
