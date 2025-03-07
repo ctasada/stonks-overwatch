@@ -92,7 +92,7 @@ class Dashboard(View):
         }
 
     @staticmethod
-    def __filter_dashboard_values(data_values: list[dict], start_date: str) -> list[dict]:
+    def __filter_dashboard_values(data_values: List[DailyValue], start_date: str) -> List[DailyValue]:
         # Ensure the list is sorted by date
         data_values.sort(key=lambda item: item['x'])
 
