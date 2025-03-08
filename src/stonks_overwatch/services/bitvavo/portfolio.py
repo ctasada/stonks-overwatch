@@ -175,18 +175,18 @@ class PortfolioService:
 
     def calculate_historical_value(self) -> List[DailyValue]:
         cash_account = self.deposits.calculate_cash_account_value()
-        data = self._create_products_quotation()
+        quotations_per_product = self._create_products_quotation()
 
         aggregate = {}
-        for key in data:
-            entry = data[key]
+        for key in quotations_per_product:
+            entry = quotations_per_product[key]
             position_value_growth = self._calculate_position_growth(entry)
             for date_value in position_value_growth:
                 if self._is_weekend(date_value):
                     # Skip weekends. There's no trading activity on weekends, even when Crypto works 24x7
                     continue
 
-                aggregate_value = aggregate.get(date_value, 0)
+                aggregate_value = aggregate.get(date_value, 0.0)
                 aggregate_value += position_value_growth[date_value]
 
                 aggregate[date_value] = aggregate_value
@@ -211,6 +211,7 @@ class PortfolioService:
         transactions = [item for item in transactions if item["type"] in ["buy", "sell", "staking"]]
 
         product_growth = {}
+        tmp_carry_total = {}
         for entry in transactions:
             if entry["type"] in ["buy", "staking"]:
                 key = entry["receivedCurrency"]
@@ -218,7 +219,7 @@ class PortfolioService:
                 key = entry["sentCurrency"]
 
             product = product_growth.get(key, {})
-            carry_total = product.get("carryTotal", 0)
+            carry_total = tmp_carry_total.get(key, 0)
 
             stock_date = TransactionsService.format_date(entry["executedAt"])
             if entry["type"] in ["buy", "staking"]:
@@ -226,15 +227,11 @@ class PortfolioService:
             else:
                 carry_total -= float(entry["sentAmount"])
 
-            product["carryTotal"] = carry_total
+            tmp_carry_total[key] = carry_total
             if "history" not in product:
                 product["history"] = {}
             product["history"][stock_date] = carry_total
             product_growth[key] = product
-
-        # Cleanup 'carry_total' from result
-        for key in product_growth.keys():
-            del product_growth[key]["carryTotal"]
 
         return product_growth
 
@@ -252,12 +249,12 @@ class PortfolioService:
             product_history_dates = list(data["history"].keys())
 
             start_date = LocalizationUtility.convert_string_to_datetime(product_history_dates[0])
-            end_date = datetime.today()
             candles = self.bitvavo_service.candles(f"{key}-{self.base_currency}", "1d", start_date)
-
-            # Creates the dictionary with the date as key and the value as the open price
+            # Creates the dictionary with the date as key and the value as the close price
             date_to_value = {
-                start_date + timedelta(days=i): candles[i]["open"] for i in range((end_date - start_date).days + 1)
+                start_date + timedelta(days=i): candle['close']
+                for i, candle in enumerate(candles)
+                if candle['timestamp'] >= start_date
             }
             quotes = {
                 LocalizationUtility.format_date_from_date(date): float(value) for date, value in date_to_value.items()
@@ -274,7 +271,7 @@ class PortfolioService:
         return tradeable_products
 
     @staticmethod
-    def _is_weekend(date_str: str):
+    def _is_weekend(date_str: str) -> bool:
         # Parse the date string into a datetime object
         day = datetime.strptime(date_str, '%Y-%m-%d')
         # Check if the day of the week is Saturday (5) or Sunday (6)

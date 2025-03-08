@@ -8,14 +8,14 @@ readme = "README.md"
 requires-python = ">=3.13,<3.14"
 dependencies = [
     "degiro-connector @ git+https://github.com/ctasada/degiro-connector@3.0.24-rc1",
-    "django >= 5.1.6",
+    "django >= 5.1.7",
     "pycountry >= 24.6.1",
     "currency-symbols >= 2.0.3",
     "pandas >= 2.2.3",
     "requests-cache >= 1.2.1",
     "django-extensions >= 3.2.3",
     "python-dateutil >= 2.8.2",
-    "CurrencyConverter >= 0.18.3",
+    "CurrencyConverter >= 0.18.4",
     "django-node-assets >= 0.9.14",
     "fontawesomefree >= 6.6.0",
     "apscheduler >= 3.11.0",
@@ -29,7 +29,7 @@ requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.9.9"
+ruff = "^0.9.10"
 pytest = "^8.3.5"
 pytest-cov = "^5.0.0"
 requests-mock = "^1.12.1"

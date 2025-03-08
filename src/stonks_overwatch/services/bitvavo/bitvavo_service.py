@@ -61,10 +61,12 @@ class BitvavoService:
         """
         Retrieve the Open, High, Low, Close, Volume (OHLCV) data you use to create candlestick charts for market with
         interval time between each candlestick.
-        Candlestick data is always returned in chronological data from newest to oldest. Data is returned when trades
+        Candlestick data is always returned in chronological data from oldest to newest. Data is returned when trades
         are made in the interval represented by that candlestick. When no trades occur you see a gap in data flow,
         zero trades are represented by zero candlesticks.
         """
+        # FIXME: Return a maximum of limit candlesticks for trades made from start.
+        #  If interval is longer we need to split the request in multiple requests.
         response = self.client.candles(market, interval, {}, start=start, end=end)
         result = []
         for candle in response:
@@ -76,7 +78,7 @@ class BitvavoService:
                 "close": candle[4],
                 "volume": candle[5],
             })
-        return result
+        return sorted(result, key=lambda k: k['timestamp'])
 
     def deposit_history(self) -> json:
         """Returns the deposit history of the account."""

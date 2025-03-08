@@ -176,6 +176,7 @@ poetry run src/manage.py runscript init_db
 - Error loading Docker Image in MacOS Intel: 
   - "CPU features not detected: avx2"
   - use 'polars-lts-cpu' instead of 'polars' in Dockerfile
+- Dashboard: Drawing the dashboard is slow. Seems that the code is executed three times
 
 ## TODOs
 - [ ] DeGiro Client: Stop using Totp and request 2FA for each connection
