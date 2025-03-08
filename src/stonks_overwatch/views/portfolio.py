@@ -1,4 +1,3 @@
-import logging
 from enum import Enum
 
 from django.shortcuts import render
@@ -8,6 +7,7 @@ from stonks_overwatch.services.models import PortfolioEntry
 from stonks_overwatch.services.portfolio_aggregator import PortfolioAggregatorService
 from stonks_overwatch.services.session_manager import SessionManager
 from stonks_overwatch.utils.constants import ProductType
+from stonks_overwatch.utils.logger import StonksLogger
 
 
 class PositionStatus(Enum):
@@ -28,7 +28,7 @@ class PositionStatus(Enum):
         return None
 
 class Portfolio(View):
-    logger = logging.getLogger("stocks_portfolio.dashboard.views")
+    logger = StonksLogger.get_logger("stocks_portfolio.dashboard.views", "[VIEW|PORTFOLIO]")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -36,6 +36,8 @@ class Portfolio(View):
 
     def get(self, request):
         selected_portfolio = SessionManager.get_selected_portfolio(request)
+        self.logger.debug(f"Selected Portfolio: {selected_portfolio}")
+
         portfolio = self.portfolio_aggregator.get_portfolio(selected_portfolio)
 
         status = self.__parse_request_interval(request)

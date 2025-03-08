@@ -1,4 +1,3 @@
-import logging
 
 from degiro_connector.core.exceptions import DeGiroConnectionError
 from degiro_connector.trading.models.credentials import Credentials
@@ -9,10 +8,11 @@ from django.views import View
 from stonks_overwatch.config.degiro_credentials import DegiroCredentials
 from stonks_overwatch.jobs.jobs_scheduler import JobsScheduler
 from stonks_overwatch.services.degiro.degiro_service import CredentialsManager, DeGiroService
+from stonks_overwatch.utils.logger import StonksLogger
 
 
 class Login(View):
-    logger = logging.getLogger("stocks_portfolio.login")
+    logger = StonksLogger.get_logger("stocks_portfolio.login", "VIEW|LOGIN")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

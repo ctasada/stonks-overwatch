@@ -1,15 +1,15 @@
 import json
-import logging
 from abc import abstractmethod
 from pathlib import Path
 from typing import Optional
 
 from settings import PROJECT_PATH
 from stonks_overwatch.config.base_credentials import BaseCredentials
+from stonks_overwatch.utils.logger import StonksLogger
 
 
 class BaseConfig:
-    logger = logging.getLogger("stocks_portfolio.config")
+    logger = StonksLogger.get_logger("stocks_portfolio.config", "[BASE_CONFIG]")
     CONFIG_PATH = Path(PROJECT_PATH) / "config" / "config.json"
 
     def __init__(

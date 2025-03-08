@@ -1,4 +1,3 @@
-import logging
 from typing import List
 
 from stonks_overwatch.config.config import Config
@@ -8,11 +7,12 @@ from stonks_overwatch.services.degiro.portfolio import PortfolioService as DeGir
 from stonks_overwatch.services.models import DailyValue, PortfolioEntry, PortfolioId, TotalPortfolio
 from stonks_overwatch.utils.constants import ProductType, Sector
 from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.utils.logger import StonksLogger
 from stonks_overwatch.utils.y_finance import get_country, get_sector_industry
 
 
 class PortfolioAggregatorService:
-    logger = logging.getLogger("stocks_portfolio.portfolio_data")
+    logger = StonksLogger.get_logger("stocks_portfolio.portfolio_data", "[AGGREGATOR]")
 
     def __init__(self):
         self.degiro_service = DeGiroService()
@@ -22,6 +22,8 @@ class PortfolioAggregatorService:
         self.bitvavo_portfolio = BitvavoPortfolioService()
 
     def get_portfolio(self, selected_portfolio: PortfolioId) -> List[PortfolioEntry]:
+        self.logger.debug("Get Portfolio")
+
         portfolio = []
         if Config.default().is_degiro_enabled(selected_portfolio):
             portfolio += self.degiro_portfolio.get_portfolio
@@ -52,6 +54,8 @@ class PortfolioAggregatorService:
         return sorted(portfolio, key=lambda k: k.symbol)
 
     def get_portfolio_total(self, selected_portfolio: PortfolioId) -> TotalPortfolio:
+        self.logger.debug("Get Portfolio Total")
+
         base_currency = Config.default().base_currency
 
         total_profit_loss = 0.0
@@ -115,6 +119,7 @@ class PortfolioAggregatorService:
         return merged
 
     def calculate_historical_value(self, selected_portfolio: PortfolioId) -> List[DailyValue]:
+        self.logger.debug(f"Calculating historical value for {selected_portfolio}")
         historical_value = []
         if Config.default().is_degiro_enabled(selected_portfolio):
             historical_value += self.degiro_portfolio.calculate_historical_value()

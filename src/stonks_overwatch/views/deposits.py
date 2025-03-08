@@ -1,4 +1,3 @@
-import logging
 
 from django.shortcuts import render
 from django.views import View
@@ -6,10 +5,11 @@ from django.views import View
 from stonks_overwatch.services.deposits_aggregator import DepositsAggregatorService
 from stonks_overwatch.services.portfolio_aggregator import PortfolioAggregatorService
 from stonks_overwatch.services.session_manager import SessionManager
+from stonks_overwatch.utils.logger import StonksLogger
 
 
 class Deposits(View):
-    logger = logging.getLogger("stocks_portfolio.deposits.views")
+    logger = StonksLogger.get_logger("stocks_portfolio.deposits.views", "VIEW|DEPOSITS")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -18,6 +18,7 @@ class Deposits(View):
 
     def get(self, request):
         selected_portfolio = SessionManager.get_selected_portfolio(request)
+        self.logger.debug(f"Selected Portfolio: {selected_portfolio}")
 
         data = self.deposits_aggregator.cash_deposits_history(selected_portfolio)
         cash_contributions = [{"x": item["date"], "y": item["total_deposit"]} for item in data]

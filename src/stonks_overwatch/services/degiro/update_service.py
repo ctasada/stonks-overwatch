@@ -1,4 +1,3 @@
-import logging
 import os
 from datetime import date, datetime, time, timezone
 
@@ -29,6 +28,7 @@ from stonks_overwatch.utils.datetime import DateTimeUtility
 from stonks_overwatch.utils.db_utils import dictfetchall
 from stonks_overwatch.utils.debug import save_to_json
 from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.utils.logger import StonksLogger
 
 CACHE_KEY_UPDATE_PORTFOLIO = "portfolio_data_update_from_degiro"
 CACHE_KEY_UPDATE_COMPANIES = "company_profile_update_from_degiro"
@@ -36,7 +36,7 @@ CACHE_KEY_UPDATE_COMPANIES = "company_profile_update_from_degiro"
 CACHE_TIMEOUT = 3600
 
 class UpdateService:
-    logger = logging.getLogger("stocks_portfolio.update_service")
+    logger = StonksLogger.get_logger("stocks_portfolio.update_service", "[DEGIRO|UPDATE]")
 
     IMPORT_FOLDER = os.path.join(DATA_DIR, "import")
 

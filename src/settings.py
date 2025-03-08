@@ -173,6 +173,8 @@ CACHES = {
     }
 }
 
+STONKS_LOG_LEVEL = os.getenv("STONKS_LOG_LEVEL", "INFO").upper()
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -225,7 +227,7 @@ LOGGING = {
         },
         "stocks_portfolio": {
             "handlers": ["console", "file"],
-            "level": "INFO",
+            "level": STONKS_LOG_LEVEL,
             "propagate": False,
         },
     },

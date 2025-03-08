@@ -1,14 +1,14 @@
-import logging
 from datetime import datetime
 from typing import List
 
 from stonks_overwatch.config.config import Config
 from stonks_overwatch.services.bitvavo.bitvavo_service import BitvavoService
 from stonks_overwatch.services.models import AccountOverview
+from stonks_overwatch.utils.logger import StonksLogger
 
 
 class AccountOverviewService:
-    logger = logging.getLogger("stocks_portfolio.account_overview_data")
+    logger = StonksLogger.get_logger("stocks_portfolio.account_overview_data", "BITVAVO|ACCOUNT_OVERVIEW")
     TIME_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
     def __init__(self):
@@ -16,6 +16,7 @@ class AccountOverviewService:
         self.base_currency = Config.default().base_currency
 
     def get_account_overview(self) -> List[AccountOverview]:
+        self.logger.debug("Get Account Overview")
         # FETCH DATA
         account_history = self.bitvavo_service.account_history()
 

@@ -1,4 +1,3 @@
-import logging
 from typing import List
 
 from stonks_overwatch.config.config import Config
@@ -7,10 +6,11 @@ from stonks_overwatch.services.degiro.account_overview import AccountOverview, A
 from stonks_overwatch.services.degiro.currency_converter_service import CurrencyConverterService
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.utils.logger import StonksLogger
 
 
 class DividendsService:
-    logger = logging.getLogger("stocks_portfolio.dividends_service")
+    logger = StonksLogger.get_logger("stocks_portfolio.dividends_service", "[DEGIRO|DIVIDENDS]")
 
     def __init__(
         self,
