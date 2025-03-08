@@ -1,10 +1,10 @@
 import json
-import logging
 from datetime import datetime
 
 from python_bitvavo_api.bitvavo import Bitvavo, createPostfix
 
 from stonks_overwatch.config.bitvavo_config import BitvavoConfig
+from stonks_overwatch.utils.logger import StonksLogger
 from stonks_overwatch.utils.singleton import singleton
 
 
@@ -12,7 +12,7 @@ from stonks_overwatch.utils.singleton import singleton
 class BitvavoService:
     START_TIMESTAMP = 0
 
-    logger = logging.getLogger("stocks_portfolio.bitvavo_service")
+    logger = StonksLogger.get_logger("stocks_portfolio.bitvavo_service", "[BITVAVO|CLIENT]")
     client: Bitvavo = None
 
     def __init__(
@@ -35,16 +35,19 @@ class BitvavoService:
 
     def account(self) -> json:
         """Returns the current fees for this account."""
+        self.logger.debug("Retrieving account")
         return self.client.account()
 
     def account_history(self) -> json:
         """Returns the transaction history for this account."""
+        self.logger.debug("Retrieving account history")
         options = {"fromDate": self.START_TIMESTAMP}
         postfix = createPostfix(options)
         return self.client.privateRequest('/account/history', postfix, {}, 'GET')
 
     def assets(self, symbol: str=None) -> json:
         """Returns information on the supported assets."""
+        self.logger.debug(f"Retrieving assets for symbol {symbol}")
         options = {}
         if symbol:
             options["symbol"] = symbol
@@ -52,6 +55,7 @@ class BitvavoService:
 
     def balance(self, symbol: str=None) -> json:
         """Returns the current balance for this account."""
+        self.logger.debug(f"Retrieving balance for symbol {symbol}")
         options = {}
         if symbol:
             options["symbol"] = symbol
@@ -65,6 +69,7 @@ class BitvavoService:
         are made in the interval represented by that candlestick. When no trades occur you see a gap in data flow,
         zero trades are represented by zero candlesticks.
         """
+        self.logger.debug(f"Retrieving candles for market {market} with interval {interval} from {start} to {end}")
         # FIXME: Return a maximum of limit candlesticks for trades made from start.
         #  If interval is longer we need to split the request in multiple requests.
         response = self.client.candles(market, interval, {}, start=start, end=end)
@@ -82,10 +87,12 @@ class BitvavoService:
 
     def deposit_history(self) -> json:
         """Returns the deposit history of the account."""
+        self.logger.debug("Retrieving deposit history")
         return self.client.depositHistory()
 
     def ticker_price(self, market: str=None) -> json:
         """Retrieve the price of the latest trades on Bitvavo for all markets or a single market."""
+        self.logger.debug(f"Retrieving ticker price for market {market}")
         options = {}
         if market:
             options["market"] = market
@@ -93,4 +100,5 @@ class BitvavoService:
 
     def withdrawal_history(self) -> json:
         """Returns the withdrawal history."""
+        self.logger.debug("Retrieving withdrawal history")
         return self.client.withdrawalHistory()

@@ -1,5 +1,4 @@
 import json
-import logging
 from pathlib import Path
 from typing import Optional
 
@@ -7,11 +6,12 @@ from stonks_overwatch.config.bitvavo_config import BitvavoConfig
 from stonks_overwatch.config.degiro_config import DegiroConfig
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.models import PortfolioId
+from stonks_overwatch.utils.logger import StonksLogger
 
 
 class Config:
 
-    logger = logging.getLogger("stocks_portfolio.config")
+    logger = StonksLogger.get_logger("stocks_portfolio.config", "[CONFIG]")
 
     DEFAULT_BASE_CURRENCY: str = "EUR"
 

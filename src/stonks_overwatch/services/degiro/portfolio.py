@@ -18,11 +18,12 @@ from stonks_overwatch.services.models import Country, DailyValue, PortfolioEntry
 from stonks_overwatch.utils.constants import ProductType, Sector
 from stonks_overwatch.utils.datetime import DateTimeUtility
 from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.utils.logger import StonksLogger
 from stonks_overwatch.utils.y_finance import get_stock_splits
 
 
 class PortfolioService:
-    logger = logging.getLogger("stocks_portfolio.portfolio_data")
+    logger = StonksLogger.get_logger("stocks_portfolio.portfolio_data.degiro", "[DEGIRO|PORTFOLIO]")
 
     def __init__(
         self,
@@ -39,6 +40,8 @@ class PortfolioService:
 
     @cached_property
     def get_portfolio(self) -> List[PortfolioEntry]:
+        self.logger.debug("Get Portfolio")
+
         portfolio_products = self.__get_porfolio_products()
 
         products_ids = [row["productId"] for row in portfolio_products]
@@ -195,6 +198,8 @@ class PortfolioService:
         return total_realized_gains, total_costs
 
     def get_portfolio_total(self, portfolio: Optional[list[dict]] = None) -> TotalPortfolio:
+        self.logger.debug("Get Portfolio Total")
+
         # Calculate current value
         if not portfolio:
             portfolio = self.get_portfolio
@@ -306,6 +311,8 @@ class PortfolioService:
             return {}
 
     def calculate_product_growth(self) -> dict:
+        self.logger.debug("Calculating Product growth")
+
         results = TransactionsRepository.get_products_transactions()
 
         product_growth = {}
@@ -331,6 +338,8 @@ class PortfolioService:
 
 
     def calculate_historical_value(self) -> List[DailyValue]:
+        self.logger.debug("Calculating historical value")
+
         cash_account = self.deposits.calculate_cash_account_value()
         data = self._create_products_quotation()
 

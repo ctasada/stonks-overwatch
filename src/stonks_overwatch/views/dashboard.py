@@ -1,4 +1,3 @@
-import logging
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
@@ -15,6 +14,7 @@ from stonks_overwatch.services.models import DailyValue, PortfolioId
 from stonks_overwatch.services.portfolio_aggregator import PortfolioAggregatorService
 from stonks_overwatch.services.session_manager import SessionManager
 from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.utils.logger import StonksLogger
 
 
 @dataclass
@@ -38,7 +38,7 @@ class Dashboard(View):
     performance.
     """
 
-    logger = logging.getLogger("stocks_portfolio.dashboard.views")
+    logger = StonksLogger.get_logger("stocks_portfolio.dashboard.views", "[VIEW|DASHBOARD]")
     CACHE_KEY_PORTFOLIO = "portfolio_value"
     CACHE_TIMEOUT = 60 * 5  # 5 minutes
 

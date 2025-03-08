@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime
 
 from currency_converter import CurrencyConverter
@@ -6,10 +5,11 @@ from currency_converter import CurrencyConverter
 from stonks_overwatch.repositories.degiro.product_quotations_repository import ProductQuotationsRepository
 from stonks_overwatch.services.degiro.constants import CurrencyFX
 from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.utils.logger import StonksLogger
 
 
 class CurrencyConverterService:
-    logger = logging.getLogger("stocks_portfolio.currency_converter")
+    logger = StonksLogger.get_logger("stocks_portfolio.currency_converter", "DEGIRO|CURRENCY_CONVERTER")
 
     def __init__(self):
         self.currency_converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)

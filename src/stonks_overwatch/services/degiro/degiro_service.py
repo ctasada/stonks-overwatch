@@ -1,4 +1,3 @@
-import logging
 import os
 from datetime import date, timedelta
 from typing import Any, List, Optional
@@ -13,6 +12,7 @@ from degiro_connector.trading.models.credentials import Credentials
 import settings
 from stonks_overwatch.config.degiro_config import DegiroConfig
 from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.utils.logger import StonksLogger
 from stonks_overwatch.utils.singleton import singleton
 
 
@@ -65,7 +65,7 @@ class CredentialsManager:
 
 @singleton
 class DeGiroService:
-    logger = logging.getLogger("stocks_portfolio.degiro_service")
+    logger = StonksLogger.get_logger("stocks_portfolio.degiro_service", "[DEGIRO|CLIENT]")
     api_client: TradingApi = None
     credentials_manager: Optional[CredentialsManager] = None
 

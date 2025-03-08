@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime
 from typing import List
 
@@ -11,10 +10,11 @@ from stonks_overwatch.services.degiro.account_overview import AccountOverview
 from stonks_overwatch.services.dividends_aggregator import DividendsAggregatorService
 from stonks_overwatch.services.session_manager import SessionManager
 from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.utils.logger import StonksLogger
 
 
 class Dividends(View):
-    logger = logging.getLogger("stocks_portfolio.dividends.views")
+    logger = StonksLogger.get_logger("stocks_portfolio.dividends.views", "[VIEW|DIVIDENDS]")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -23,6 +23,8 @@ class Dividends(View):
 
     def get(self, request):
         selected_portfolio = SessionManager.get_selected_portfolio(request)
+        self.logger.debug(f"Selected Portfolio: {selected_portfolio}")
+
         dividends_overview = self.dividends.get_dividends(selected_portfolio)
         upcoming_dividends = self.dividends.get_upcoming_dividends(selected_portfolio)
 
