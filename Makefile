@@ -1,5 +1,14 @@
 .PHONY: install update lint-check lint-fix migrate runserver
 
+ifneq ($(debug),)
+    DEBUG_MODE = true
+else
+    DEBUG_MODE = false
+endif
+
+# Export the variable for child processes
+export DEBUG_MODE
+
 install:
 	poetry install
 	poetry run src/manage.py npminstall
@@ -20,7 +29,11 @@ migrate:
 	poetry run src/manage.py migrate
 
 runserver:
-	poetry run src/manage.py runserver
+	@if [ "$(DEBUG_MODE)" = "true" ]; then \
+		STONKS_LOG_LEVEL=DEBUG poetry run src/manage.py runserver; \
+	else \
+  		poetry run src/manage.py runserver; \
+	fi
 
 start: install migrate runserver
 

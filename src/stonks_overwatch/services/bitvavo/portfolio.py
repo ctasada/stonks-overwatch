@@ -1,4 +1,4 @@
-import logging
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import List, Optional
 
@@ -10,10 +10,24 @@ from stonks_overwatch.services.models import DailyValue, PortfolioEntry, TotalPo
 from stonks_overwatch.utils.constants import ProductType
 from stonks_overwatch.utils.datetime import DateTimeUtility
 from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.utils.logger import StonksLogger
 
 
 class PortfolioService:
-    logger = logging.getLogger("stocks_portfolio.portfolio_data.bitvavo")
+    @dataclass
+    class Quotation:
+        from_date: Optional[str]
+        to_date: Optional[str]
+        interval: Optional[str]
+        quotes: Optional[dict]
+
+    @dataclass
+    class Product:
+        product_id: Optional[str]
+        history: Optional[dict]
+        quotation: Optional['PortfolioService.Quotation']
+
+    logger = StonksLogger.get_logger("stocks_portfolio.portfolio_data.bitvavo", "[BITVAVO|PORTFOLIO]")
 
     def __init__(
             self,
@@ -27,6 +41,8 @@ class PortfolioService:
         return symbol == "EUR"
 
     def get_portfolio(self) -> List[PortfolioEntry]:
+        self.logger.debug("Get Portfolio")
+
         bitvavo_portfolio = []
 
         balance = self.bitvavo_service.balance()
@@ -70,6 +86,8 @@ class PortfolioService:
 
 
     def get_portfolio_total(self, portfolio: Optional[list[dict]] = None) -> TotalPortfolio:
+        self.logger.debug("Get Portfolio Total")
+
         # Calculate current value
         if not portfolio:
             portfolio = self.get_portfolio()
@@ -174,6 +192,8 @@ class PortfolioService:
         return aggregate
 
     def calculate_historical_value(self) -> List[DailyValue]:
+        self.logger.debug("Calculating historical value")
+
         cash_account = self.deposits.calculate_cash_account_value()
         quotations_per_product = self._create_products_quotation()
 
@@ -206,6 +226,8 @@ class PortfolioService:
         return dataset
 
     def calculate_product_growth(self) -> dict:
+        self.logger.debug("Calculating Product growth")
+
         transactions = self.bitvavo_service.account_history()
         transactions = sorted(transactions["items"], key=lambda k: k["executedAt"], reverse=False)
         transactions = [item for item in transactions if item["type"] in ["buy", "sell", "staking"]]

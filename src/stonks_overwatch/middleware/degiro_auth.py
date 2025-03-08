@@ -1,5 +1,4 @@
 
-import logging
 from typing import Optional
 
 from django.http import HttpRequest
@@ -8,12 +7,13 @@ from django.urls import resolve
 
 from stonks_overwatch.config.degiro_config import DegiroConfig
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
+from stonks_overwatch.utils.logger import StonksLogger
 
 
 class DeGiroAuthMiddleware:
     PUBLIC_URLS = {'login'}
 
-    logger = logging.getLogger("stocks_portfolio.degiro_auth")
+    logger = StonksLogger.get_logger("stocks_portfolio.degiro_auth", "DEGIRO|AUTH_MIDDLEWARE")
 
     def __init__(self, get_response):
         self.get_response = get_response
