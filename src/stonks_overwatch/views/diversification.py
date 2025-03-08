@@ -1,4 +1,3 @@
-import logging
 from typing import List
 
 from django.shortcuts import render
@@ -10,10 +9,11 @@ from stonks_overwatch.services.portfolio_aggregator import PortfolioAggregatorSe
 from stonks_overwatch.services.session_manager import SessionManager
 from stonks_overwatch.utils.constants import ProductType, Sector
 from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.utils.logger import StonksLogger
 
 
 class Diversification(View):
-    logger = logging.getLogger("stocks_portfolio.dashboard.views")
+    logger = StonksLogger.get_logger("stocks_portfolio.dashboard.views", "VIEW|DIVERSIFICATION")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

@@ -1,15 +1,16 @@
-import logging
 from typing import List
 
 from stonks_overwatch.repositories.degiro.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.repositories.degiro.product_info_repository import ProductInfoRepository
 from stonks_overwatch.services.models import AccountOverview
+from stonks_overwatch.utils.logger import StonksLogger
 
 
 class AccountOverviewService:
-    logger = logging.getLogger("stocks_portfolio.account_overview_data")
+    logger = StonksLogger.get_logger("stocks_portfolio.account_overview_data", "DEGIRO|ACCOUNT_OVERVIEW")
 
     def get_account_overview(self) -> List[AccountOverview]:
+        self.logger.debug("Get Account Overview")
         # FETCH DATA
         account_overview = CashMovementsRepository.get_cash_movements_raw()
 

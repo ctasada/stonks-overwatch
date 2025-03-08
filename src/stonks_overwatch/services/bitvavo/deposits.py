@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime, timedelta
 from typing import List
 
@@ -6,10 +5,11 @@ from stonks_overwatch.services.bitvavo.bitvavo_service import BitvavoService
 from stonks_overwatch.services.bitvavo.transactions import TransactionsService
 from stonks_overwatch.services.models import Deposit, DepositType
 from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.utils.logger import StonksLogger
 
 
 class DepositsService:
-    logger = logging.getLogger("stocks_portfolio.deposits.bitvavo")
+    logger = StonksLogger.get_logger("stocks_portfolio.deposits.bitvavo", "[BITVAVO|DEPOSITS]")
 
     def __init__(
             self,

@@ -1,5 +1,4 @@
 import json
-import logging
 
 from django.http import JsonResponse
 from django.views import View
@@ -7,10 +6,11 @@ from django.views import View
 from stonks_overwatch.config.config import Config
 from stonks_overwatch.services.models import PortfolioId
 from stonks_overwatch.services.session_manager import SessionManager
+from stonks_overwatch.utils.logger import StonksLogger
 
 
 class ConfigurationView(View):
-    logger = logging.getLogger("stocks_portfolio.dashboard.views")
+    logger = StonksLogger.get_logger("stocks_portfolio.dashboard.views", "VIEW|CONFIGURATION")
 
     def get(self, request) -> JsonResponse:
         selected_portfolio = SessionManager.get_selected_portfolio(request)

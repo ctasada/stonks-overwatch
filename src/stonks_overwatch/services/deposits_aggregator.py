@@ -1,4 +1,3 @@
-import logging
 from datetime import date
 from typing import List
 
@@ -10,10 +9,11 @@ from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.deposits import DepositsService as DeGiroDepositsService
 from stonks_overwatch.services.models import Deposit, PortfolioId
 from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.utils.logger import StonksLogger
 
 
 class DepositsAggregatorService:
-    logger = logging.getLogger("stocks_portfolio.portfolio_data")
+    logger = StonksLogger.get_logger("stocks_portfolio.portfolio_data", "[AGGREGATOR|DEPOSITS]")
 
     def __init__(self):
         self.degiro_service = DeGiroService()
