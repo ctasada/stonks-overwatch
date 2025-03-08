@@ -2,6 +2,8 @@
 
 import json
 import time
+from datetime import datetime
+from pprint import pprint
 
 from stonks_overwatch.services.bitvavo.bitvavo_service import BitvavoService
 
@@ -55,6 +57,11 @@ class BitvavoImplementation:
         response = self.bitvavo.ticker_price('SOL-EUR')
         print("Ticker Price:", json.dumps(response, indent=2))
 
+    def candles(self):
+        start = datetime.fromisoformat('2025-02-08')
+        response = self.bitvavo.candles('BTC-EUR', '1d', start)
+        pprint(response)
+
     # Sockets are fast, but asynchronous. Keep the socket open while you are
     # trading.
     def wait_and_close(self):
@@ -80,10 +87,11 @@ if __name__ == '__main__':
     # bvavo.account()
     # bvavo.assets()
     # bvavo.balance()
-    bvavo.orders()
-    bvavo.account_history()
+    # bvavo.orders()
+    # bvavo.account_history()
     # bvavo.deposit_history()
     # bvavo.withdrawal_history()
     # bvavo.ticker_price()
+    bvavo.candles()
 
     # bvavo.wait_and_close()
