@@ -7,7 +7,7 @@ license = "MIT"
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
 dependencies = [
-    "degiro-connector @ git+https://github.com/ctasada/degiro-connector@3.0.24-rc1",
+    "degiro-connector >= 3.0.25",
     "django >= 5.1.7",
     "pycountry >= 24.6.1",
     "currency-symbols >= 2.0.3",
