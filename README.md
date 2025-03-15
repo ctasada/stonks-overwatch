@@ -35,8 +35,7 @@ You can execute `make start`, it will install and configure everything needed to
 
 Alternatively you can also use Docker
 ```shell
-docker compose build
-docker compose up
+make docker-run
 ```
 
 The application is available at [http://127.0.0.1:8000](http://127.0.0.1:8000) Simply open you browser in that URL.
@@ -170,13 +169,14 @@ poetry run src/manage.py runscript init_db
     - 'TEF.D'(280180545)
     - 'FRZA'(600236745)
     - 600179738: No chart found
-- "Portfolio data not found in cache. Calling DeGiro" Executed 2 consecutive times during startup
 - CreateProduct Quotation do not respect the proper timeframes
 - Django Cache is disabled so that the portfolio selection works, otherwise the page is not properly reload
 - Error loading Docker Image in MacOS Intel: 
   - "CPU features not detected: avx2"
   - use 'polars-lts-cpu' instead of 'polars' in Dockerfile
 - Dashboard: Drawing the dashboard is slow. Seems that the code is executed three times
+- Review Closed/All positions in Portfolio Overview. Some entries contain unexpected/inconsistent values
+- TEAM: Growth values seem to be too low for what I remember, should be ~80%
 
 ## TODOs
 - [ ] DeGiro Client: Stop using Totp and request 2FA for each connection
@@ -192,8 +192,11 @@ poetry run src/manage.py runscript init_db
 - [ ] Fontawesome is replaceable by https://icons.getbootstrap.com
 - [ ] Provide more information in the Dashboard performance overview
 - [ ] Migrate UI to https://github.com/coreui/coreui
-- [ ] Add Github Dependabot support for Poetry: Track https://github.com/dependabot/dependabot-core/issues/11237
+- [ ] Add GitHub Dependabot support for Poetry: Track https://github.com/dependabot/dependabot-core/issues/11237
 - [ ] Login Dialog: Add a progress bar to show the progress loading DEGIRO data
+- [ ] Add a progress bar to show the progress loading DEGIRO data when using the Login Dialog
+- [ ] Should include Dividends in the Deposit Overview?
+- [ ] Disable Django Admin page by default
 
 ## Logos
 - https://eodhd.com/financial-apis-blog/40000-company-logos (requires API Key)
@@ -216,5 +219,4 @@ poetry run src/manage.py runscript init_db
 - https://pypi.org/project/QuantStats/
 - https://github.com/wilsonfreitas/awesome-quant?tab=readme-ov-file#python
 - https://github.com/robertmartin8/PyPortfolioOpt
-- https://github.com/nsirons/ibkr_web_client?tab=readme-ov-file#setup <<<<<!!!!!>>>>>
-  - https://github.com/Voyz/ibind/pull/34 (maybe more complete)
+- https://pypi.org/project/pyxirr/

@@ -15,11 +15,11 @@ update = trading_api.get_update(
         UpdateRequest(option=UpdateOption.PORTFOLIO, last_updated=0),
         UpdateRequest(option=UpdateOption.TOTAL_PORTFOLIO, last_updated=0),
     ],
-    raw=False,
+    raw=True,
 )
 
 # print(update)
-# print(json.dumps(update, indent = 4))
+print(json.dumps(update, indent = 4))
 
 # update_dict['portfolio']['values] =>
 # {

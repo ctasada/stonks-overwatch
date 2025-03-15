@@ -57,8 +57,6 @@ class PortfolioService:
             asset = self.bitvavo_service.assets(item["symbol"])
 
             product_type = ProductType.CRYPTO
-            if item["symbol"] == self.base_currency:
-                product_type = ProductType.CASH
 
             # FIXME
             break_even_price = self._get_break_even_price(item["symbol"])
@@ -81,10 +79,28 @@ class PortfolioService:
                 )
             )
 
+        for item in balance:
+            if not self.__is_currency(item["symbol"]):
+                continue
+
+            bitvavo_portfolio.append(
+                PortfolioEntry(
+                    symbol=item["symbol"],
+                    name="Cash Balance EUR",
+                    shares=item["available"],
+                    product_type=ProductType.CASH,
+                    product_currency=item["symbol"],
+                    is_open=True,
+                    value=float(item["available"]),
+                    base_currency=self.base_currency,
+                    base_currency_value=float(item["available"]),
+                )
+            )
+
         return sorted(bitvavo_portfolio, key=lambda k: k.symbol)
 
 
-    def get_portfolio_total(self, portfolio: Optional[list[dict]] = None) -> TotalPortfolio:
+    def get_portfolio_total(self, portfolio: Optional[List[PortfolioEntry]] = None) -> TotalPortfolio:
         self.logger.debug("Get Portfolio Total")
 
         # Calculate current value
@@ -93,51 +109,31 @@ class PortfolioService:
 
         portfolio_total_value = 0.0
 
-        tmp_total_portfolio = {}
         for entry in portfolio:
             if entry.is_open:
                 portfolio_total_value += entry.base_currency_value
 
-        tmp_total_portfolio["totalDepositWithdrawal"] = (
-            sum(float(entry["amount"]) for entry in self.bitvavo_service.deposit_history()))
+        total_deposit_withdrawal = (
+            sum(float(deposit["amount"]) for deposit in self.bitvavo_service.deposit_history()))
 
         total_cash = 0.0
         balance = self.bitvavo_service.balance(self.base_currency)
         if balance:
             total_cash = balance[0]["available"]
 
-        tmp_total_portfolio["totalCash"] = float(total_cash)
+        total_cash = float(total_cash)
 
-        roi = (portfolio_total_value / tmp_total_portfolio["totalDepositWithdrawal"] - 1) * 100
-        total_profit_loss = portfolio_total_value - tmp_total_portfolio["totalDepositWithdrawal"]
+        roi = (portfolio_total_value / total_deposit_withdrawal - 1) * 100
+        total_profit_loss = portfolio_total_value - total_deposit_withdrawal
 
         return TotalPortfolio(
+            base_currency=self.base_currency,
             total_pl=total_profit_loss,
-            total_pl_formatted=LocalizationUtility.format_money_value(
-                value=total_profit_loss,
-                currency=self.base_currency,
-            ),
-            total_cash=tmp_total_portfolio["totalCash"],
-            total_cash_formatted=LocalizationUtility.format_money_value(
-                value=tmp_total_portfolio["totalCash"],
-                currency=self.base_currency,
-            ),
+            total_cash=total_cash,
             current_value=portfolio_total_value,
-            current_value_formatted=LocalizationUtility.format_money_value(
-                value=portfolio_total_value, currency=self.base_currency,
-            ),
             total_roi=roi,
-            total_roi_formatted="{:,.2f}%".format(roi),
-            total_deposit_withdrawal=tmp_total_portfolio["totalDepositWithdrawal"],
-            total_deposit_withdrawal_formatted=LocalizationUtility.format_money_value(
-                value=tmp_total_portfolio["totalDepositWithdrawal"],
-                currency=self.base_currency,
-            ),
+            total_deposit_withdrawal=total_deposit_withdrawal,
         )
-
-    @staticmethod
-    def _get_logo_url(symbol: str) -> str:
-        return f"https://raw.githubusercontent.com/Cryptofonts/cryptoicons/master/SVG/{symbol.lower()}.svg"
 
     def _get_break_even_price(self, symbol: str) -> float:
         transactions_history = self.bitvavo_service.account_history()

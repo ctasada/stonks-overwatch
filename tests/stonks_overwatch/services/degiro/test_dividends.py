@@ -1,12 +1,14 @@
 import json
 import pathlib
+from unittest.mock import patch
 import re
 
+import pook
 import requests
-import requests_mock
 from degiro_connector.core.constants import urls
 from isodate import parse_datetime
 
+import pytest
 from stonks_overwatch.config.degiro_credentials import DegiroCredentials
 from stonks_overwatch.repositories.degiro.models import DeGiroCashMovements, DeGiroProductInfo, DeGiroProductQuotation
 from stonks_overwatch.services.degiro.account_overview import AccountOverviewService
@@ -112,44 +114,35 @@ class TestDividendsService(TestCase):
         assert dividends[0].change == 7.526881720430107
         assert dividends[0].formated_change() == "€ 7.53"
 
+    @pook.on
     def test_get_upcoming_dividends(self):
         with patch("requests_cache.CachedSession", requests.Session):
-            with requests_mock.Mocker() as m:
-                m.post(urls.LOGIN + "/totp", json={"sessionId": "abcdefg12345"}, status_code=200)
-                m.get(
-                    urls.CLIENT_DETAILS,
-                    json={
-                        "data": {
-                            "clientRole": "basic",
-                            "contractType": "PRIVATE",
-                            "displayLanguage": "en",
-                            "email": "user@domain.com",
-                            "id": 98765,
-                            "intAccount": 1234567,
-                            "username": "someuser"
+            pook.post(urls.LOGIN + "/totp").reply(200).json({"sessionId": "abcdefg12345"})
+            pook.get(urls.CLIENT_DETAILS).reply(200).json({
+                    "data": {
+                        "clientRole": "basic",
+                        "contractType": "PRIVATE",
+                        "displayLanguage": "en",
+                        "email": "user@domain.com",
+                        "id": 98765,
+                        "intAccount": 1234567,
+                        "username": "someuser"
+                    }
+                })
+            pook.get(urls.UPCOMING_PAYMENTS + "/987654").reply(200).json({
+                    "data": [
+                        {
+                            "ca_id": "str",
+                            "product": "Microsoft Corp",
+                            "description": "Dividend 0.555 * 10.00 aandelen",
+                            "currency": "USD",
+                            "amount": "5.55",
+                            "amountInBaseCurr": "7.79",
+                            "payDate": "2024-10-03",
                         }
-                    },
-                    status_code=200,
-                )
-                m.register_uri(
-                    "GET",
-                    re.compile(re.escape(urls.UPCOMING_PAYMENTS) + r"/.*"),
-                    json={
-                        "data": [
-                            {
-                                "ca_id": "str",
-                                "product": "Microsoft Corp",
-                                "description": "Dividend 0.555 * 10.00 aandelen",
-                                "currency": "USD",
-                                "amount": "5.55",
-                                "amountInBaseCurr": "7.79",
-                                "payDate": "2024-10-03",
-                            }
-                        ]
-                    },
-                    status_code=200,
-                )
+                    ]
+                })
 
-                upcoming_dividends = self.dividends_service.get_upcoming_dividends()
+            upcoming_dividends = self.dividends_service.get_upcoming_dividends()
 
-                assert len(upcoming_dividends) == 1
+            assert len(upcoming_dividends) == 1

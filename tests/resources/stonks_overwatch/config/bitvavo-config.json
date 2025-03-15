@@ -1,0 +1,10 @@
+{
+    "base_currency": "EUR",
+    "bitvavo": {
+        "enabled": true,
+        "credentials": {
+            "apikey": "API_KEY",
+            "apisecret": "API_SECRET"
+        }
+    }
+}

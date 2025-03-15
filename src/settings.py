@@ -174,6 +174,9 @@ CACHES = {
 }
 
 STONKS_LOG_LEVEL = os.getenv("STONKS_LOG_LEVEL", "INFO").upper()
+DEBUG_MODE = os.getenv("DEBUG_MODE", False) in [True, "true", "True", "1"]
+if DEBUG_MODE:
+    STONKS_LOG_LEVEL = "DEBUG"
 
 LOGGING = {
     "version": 1,

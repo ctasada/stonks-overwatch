@@ -39,6 +39,8 @@ class UpdateService:
     logger = StonksLogger.get_logger("stocks_portfolio.update_service", "[DEGIRO|UPDATE]")
 
     IMPORT_FOLDER = os.path.join(DATA_DIR, "import")
+    DEBUG_MODE = os.getenv("DEBUG_MODE", False) in [True, "true", "True", "1"]
+
 
     def __init__(self):
         if not os.path.exists(self.IMPORT_FOLDER):
@@ -76,13 +78,14 @@ class UpdateService:
             self.logger.warning("Skipping update since cannot connect to DeGiro")
             return
 
-        self.logger.warning("Storing JSON file at %s", self.IMPORT_FOLDER)
+        if self.DEBUG_MODE:
+            self.logger.warning("Storing JSON files at %s", self.IMPORT_FOLDER)
 
         try:
-            self.update_account()
-            self.update_transactions()
-            self.update_portfolio()
-            self.update_company_profile()
+            self.update_account(self.DEBUG_MODE)
+            self.update_transactions(self.DEBUG_MODE)
+            self.update_portfolio(self.DEBUG_MODE)
+            self.update_company_profile(self.DEBUG_MODE)
         except Exception as error:
             self.logger.error("Cannot Update Portfolio!")
             self.logger.error("Exception: ", error)
@@ -107,7 +110,7 @@ class UpdateService:
 
             self.__import_cash_movements(transformed_data)
 
-    def update_transactions(self, debug_json_files: dict = None):
+    def update_transactions(self, debug_json_files: bool = True):
         """Update the Account DB data. Only does it if the data is older than today."""
         self.logger.info(f"[Debug={debug_json_files}] Updating Transactions Data....")
 
@@ -126,7 +129,7 @@ class UpdateService:
         """Updating the Portfolio is expensive and time-consuming task.
         This method caches the result for a period of time.
         """
-        self.logger.info("Updating Portfolio Data....")
+        self.logger.info(f"[Debug={debug_json_files}] Updating Portfolio Data....")
 
         cached_data = cache.get(CACHE_KEY_UPDATE_PORTFOLIO)
 
@@ -146,13 +149,13 @@ class UpdateService:
         """Updating the Company Profiles is expensive and time-consuming task.
         This method caches the result for a period of time.
         """
-        self.logger.info("Updating Company Profiles Data....")
+        self.logger.info(f"[Debug={debug_json_files}] Updating Company Profiles Data....")
 
         cached_data = cache.get(CACHE_KEY_UPDATE_COMPANIES)
 
         # If result is already cached, return it
         if cached_data is None:
-            self.logger.info("Companies Profile data not found in cache. Calling DeGiro")
+            self.logger.info(f"[Debug={debug_json_files}] Companies Profile data not found in cache. Calling DeGiro")
             # Otherwise, call the expensive method
             result = self.__update_company_profile(debug_json_files)
 

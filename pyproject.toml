@@ -32,8 +32,8 @@ build-backend = "poetry.core.masonry.api"
 ruff = "^0.11.0"
 pytest = "^8.3.5"
 pytest-cov = "^6.0.0"
-requests-mock = "^1.12.1"
 pytest-django = "^4.10.0"
+pook = "^2.1.3"
 
 [tool.poetry]
 include = [

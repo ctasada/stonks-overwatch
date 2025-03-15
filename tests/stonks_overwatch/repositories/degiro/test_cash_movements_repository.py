@@ -3,6 +3,7 @@ import pathlib
 
 from django.utils.dateparse import parse_datetime
 
+import pytest
 from stonks_overwatch.repositories.degiro.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.repositories.degiro.models import DeGiroCashMovements
 from tests.stonks_overwatch.assertions import assert_dates_descending
@@ -63,3 +64,9 @@ class TestCashMovementsRepository(TestCase):
         DeGiroCashMovements.objects.all().delete()
         last_movement = CashMovementsRepository.get_last_movement()
         assert last_movement is None
+
+    def test_get_cash_balance_by_date(self):
+        cash_deposits = CashMovementsRepository.get_cash_balance_by_date()
+        assert len(cash_deposits) == 2
+        assert cash_deposits[0]["balanceTotal"] == '100.0'
+        assert cash_deposits[1]["balanceTotal"] == '300.0'

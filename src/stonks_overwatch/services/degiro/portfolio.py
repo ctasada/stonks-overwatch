@@ -196,7 +196,7 @@ class PortfolioService:
 
         return total_realized_gains, total_costs
 
-    def get_portfolio_total(self, portfolio: Optional[list[dict]] = None) -> TotalPortfolio:
+    def get_portfolio_total(self, portfolio: Optional[List[PortfolioEntry]] = None) -> TotalPortfolio:
         self.logger.debug("Get Portfolio Total")
 
         # Calculate current value
@@ -205,44 +205,29 @@ class PortfolioService:
 
         portfolio_total_value = 0.0
 
-        tmp_total_portfolio = {}
         for entry in portfolio:
             if entry.is_open:
                 portfolio_total_value += entry.base_currency_value
 
-        tmp_total_portfolio["totalDepositWithdrawal"] = CashMovementsRepository.get_total_cash_deposits_raw()
-        tmp_total_portfolio["totalCash"] = CashMovementsRepository.get_total_cash()
+        total_deposit_withdrawal = CashMovementsRepository.get_total_cash_deposits_raw()
+        total_cash = CashMovementsRepository.get_total_cash()
 
         # Try to get the data directly from DeGiro, so we get up-to-date values
         realtime_total_portfolio = self.__get_realtime_portfolio_total()
         if realtime_total_portfolio:
-            tmp_total_portfolio = realtime_total_portfolio
+            total_deposit_withdrawal = realtime_total_portfolio["totalDepositWithdrawal"]
+            total_cash = realtime_total_portfolio["totalCash"]
 
-        roi = (portfolio_total_value / tmp_total_portfolio["totalDepositWithdrawal"] - 1) * 100
-        total_profit_loss = portfolio_total_value - tmp_total_portfolio["totalDepositWithdrawal"]
+        roi = (portfolio_total_value / total_deposit_withdrawal - 1) * 100
+        total_profit_loss = portfolio_total_value - total_deposit_withdrawal
 
         return TotalPortfolio(
+            base_currency=self.base_currency,
             total_pl=total_profit_loss,
-            total_pl_formatted=LocalizationUtility.format_money_value(
-                value=total_profit_loss,
-                currency=self.base_currency,
-            ),
-            total_cash=tmp_total_portfolio["totalCash"],
-            total_cash_formatted=LocalizationUtility.format_money_value(
-                value=tmp_total_portfolio["totalCash"],
-                currency=self.base_currency,
-            ),
+            total_cash=total_cash,
             current_value=portfolio_total_value,
-            current_value_formatted=LocalizationUtility.format_money_value(
-                value=portfolio_total_value, currency=self.base_currency,
-            ),
             total_roi=roi,
-            total_roi_formatted="{:,.2f}%".format(roi),
-            total_deposit_withdrawal=tmp_total_portfolio["totalDepositWithdrawal"],
-            total_deposit_withdrawal_formatted=LocalizationUtility.format_money_value(
-                value=tmp_total_portfolio["totalDepositWithdrawal"],
-                currency=self.base_currency,
-            ),
+            total_deposit_withdrawal=total_deposit_withdrawal,
         )
 
     def __get_realtime_portfolio_total(self) -> dict | None:
