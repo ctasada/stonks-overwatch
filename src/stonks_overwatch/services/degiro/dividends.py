@@ -53,7 +53,7 @@ class DividendsService:
         result = []
         try:
             upcoming_payments = self.degiro_service.get_client().get_upcoming_payments(raw=True)
-            if "data" in upcoming_payments and upcoming_payments["data"]:
+            if upcoming_payments and "data" in upcoming_payments and upcoming_payments["data"]:
                 for payment in upcoming_payments["data"]:
                     stock_name = payment["product"]
                     stock = ProductInfoRepository.get_product_info_from_name(stock_name)

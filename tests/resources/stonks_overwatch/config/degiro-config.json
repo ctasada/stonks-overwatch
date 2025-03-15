@@ -1,5 +1,4 @@
 {
-    "base_currency": "EUR",
     "degiro": {
         "enabled": true,
         "credentials": {
@@ -12,11 +11,5 @@
         "start_date": "2023-01-01",
         "update_frequency_minutes": 5
     },
-    "bitvavo": {
-        "enabled": true,
-        "credentials": {
-            "apikey": "API_KEY",
-            "apisecret": "API_SECRET"
-        }
-    }
+    "base_currency": "EUR"
 }
