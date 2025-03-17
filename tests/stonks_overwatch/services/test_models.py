@@ -1,6 +1,5 @@
 from datetime import datetime
 
-import pytest
 from stonks_overwatch.services.models import (
     AccountOverview,
     Country,
@@ -13,6 +12,7 @@ from stonks_overwatch.services.models import (
 )
 from stonks_overwatch.utils.constants import ProductType, Sector
 
+import pytest
 
 def test_portfolio_ids():
     assert PortfolioId.values() == [PortfolioId.ALL, PortfolioId.DEGIRO, PortfolioId.BITVAVO]

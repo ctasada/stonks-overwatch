@@ -3,7 +3,6 @@ import pathlib
 
 from django.utils.dateparse import parse_datetime
 
-import pytest
 from stonks_overwatch.repositories.degiro.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.repositories.degiro.models import DeGiroCashMovements
 from tests.stonks_overwatch.assertions import assert_dates_descending
@@ -15,7 +14,6 @@ from django.test import TestCase
 class TestCashMovementsRepository(TestCase):
     def setUp(self):
         self.fixture_cash_movements_repository()
-
 
     def fixture_cash_movements_repository(self):
         data_file = pathlib.Path("tests/resources/stonks_overwatch/repositories/cash_movements_data.json")

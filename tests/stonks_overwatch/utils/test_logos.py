@@ -2,7 +2,6 @@
 from stonks_overwatch.utils.constants import ProductType
 from stonks_overwatch.utils.logos import symbol_url
 
-
 def test_crypto_symbol():
     assert symbol_url("BTC", ProductType.CRYPTO) == "https://raw.githubusercontent.com/Cryptofonts/cryptoicons/master/SVG/btc.svg"
     assert symbol_url("btc", ProductType.CRYPTO) == "https://raw.githubusercontent.com/Cryptofonts/cryptoicons/master/SVG/btc.svg"

@@ -1,10 +1,9 @@
-import pook
-
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.services.bitvavo.portfolio import PortfolioService
 from stonks_overwatch.services.models import PortfolioEntry
 from stonks_overwatch.utils.constants import ProductType
 
+import pook
 
 @pook.on
 def test_get_portfolio():
