@@ -13,6 +13,16 @@ runs:
       with:
         python-version: "3.13"
     #----------------------------------------------
+    #       cache Poetry installation
+    #----------------------------------------------
+    - name: Load cached Poetry installation
+      id: cached-poetry
+      uses: actions/cache@v4
+      with:
+        path: ~/.local
+        key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+        restore-keys: ${{ runner.os }}-poetry-
+    #----------------------------------------------
     #  -----  install & configure poetry  -----
     #----------------------------------------------
     - name: Install Python poetry
