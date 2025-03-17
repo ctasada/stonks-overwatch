@@ -2,9 +2,6 @@ import json
 import pathlib
 from datetime import datetime
 
-from django.test import TestCase
-
-import pytest
 from stonks_overwatch.repositories.degiro.models import DeGiroTransactions
 from stonks_overwatch.repositories.degiro.transactions_repository import TransactionsRepository
 

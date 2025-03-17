@@ -2,13 +2,11 @@ import json
 import pathlib
 from datetime import date
 
-import pook
 from degiro_connector.core.constants import urls
 from degiro_connector.core.exceptions import DeGiroConnectionError
 from degiro_connector.quotecast.models.chart import Interval
 from degiro_connector.trading.models.credentials import Credentials
 
-import pytest
 from stonks_overwatch.services.degiro.degiro_service import CredentialsManager
 from stonks_overwatch.utils.localization import LocalizationUtility
 from tests.stonks_overwatch.fixtures import (
@@ -18,6 +16,7 @@ from tests.stonks_overwatch.fixtures import (
     mock_full_credentials,
 )
 
+import pook
 import pytest
 
 def test_credentials_manager_init(mock_degiro_config: mock_degiro_config, mock_full_credentials: mock_full_credentials):

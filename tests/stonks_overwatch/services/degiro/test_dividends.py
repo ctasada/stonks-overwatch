@@ -1,14 +1,10 @@
 import json
 import pathlib
-from unittest.mock import patch
-import re
 
-import pook
 import requests
 from degiro_connector.core.constants import urls
 from isodate import parse_datetime
 
-import pytest
 from stonks_overwatch.config.degiro_credentials import DegiroCredentials
 from stonks_overwatch.repositories.degiro.models import DeGiroCashMovements, DeGiroProductInfo, DeGiroProductQuotation
 from stonks_overwatch.services.degiro.account_overview import AccountOverviewService
@@ -18,6 +14,7 @@ from stonks_overwatch.services.degiro.dividends import DividendsService
 from stonks_overwatch.utils.localization import LocalizationUtility
 from tests.stonks_overwatch.fixtures import TestDeGiroService
 
+import pook
 import pytest
 from django.test import TestCase
 from unittest.mock import patch

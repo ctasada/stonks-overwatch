@@ -1,12 +1,11 @@
-from unittest.mock import patch
-
-import pytest
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.services.account_overview_aggregator import AccountOverviewAggregatorService
 from stonks_overwatch.services.bitvavo.account_overview import AccountOverviewService as BitvavoAccountOverviewService
 from stonks_overwatch.services.degiro.account_overview import AccountOverviewService as DeGiroAccountOverviewService
 from stonks_overwatch.services.models import AccountOverview, PortfolioId
 
+import pytest
+from unittest.mock import patch
 
 @pytest.fixture(scope="function", autouse=True)
 def mock_degiro_get_account_overview():
