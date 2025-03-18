@@ -6,7 +6,6 @@ from stonks_overwatch.config.config import Config
 from stonks_overwatch.config.degiro_config import DegiroConfig
 from stonks_overwatch.config.degiro_credentials import DegiroCredentials
 
-
 def test_degiro_credentials_init():
     username = "testuser"
     password = "testpassword"

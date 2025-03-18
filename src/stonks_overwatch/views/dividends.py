@@ -12,7 +12,6 @@ from stonks_overwatch.services.session_manager import SessionManager
 from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.logger import StonksLogger
 
-
 class Dividends(View):
     logger = StonksLogger.get_logger("stocks_portfolio.dividends.views", "[VIEW|DIVIDENDS]")
 

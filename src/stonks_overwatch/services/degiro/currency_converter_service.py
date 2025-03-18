@@ -7,7 +7,6 @@ from stonks_overwatch.services.degiro.constants import CurrencyFX
 from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.logger import StonksLogger
 
-
 class CurrencyConverterService:
     logger = StonksLogger.get_logger("stocks_portfolio.currency_converter", "DEGIRO|CURRENCY_CONVERTER")
 

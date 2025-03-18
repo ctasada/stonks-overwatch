@@ -15,7 +15,6 @@ from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.logger import StonksLogger
 from stonks_overwatch.utils.singleton import singleton
 
-
 class CredentialsManager:
     """Manages the credentials for the DeGiro API."""
 

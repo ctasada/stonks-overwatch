@@ -3,7 +3,6 @@ from typing import Optional
 
 from degiro_connector.quotecast.models.chart import Interval
 
-
 class DateTimeUtility:
     """
     A utility class for handling date and time-related operations.

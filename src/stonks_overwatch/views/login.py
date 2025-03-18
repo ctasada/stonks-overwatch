@@ -10,7 +10,6 @@ from stonks_overwatch.jobs.jobs_scheduler import JobsScheduler
 from stonks_overwatch.services.degiro.degiro_service import CredentialsManager, DeGiroService
 from stonks_overwatch.utils.logger import StonksLogger
 
-
 class Login(View):
     logger = StonksLogger.get_logger("stocks_portfolio.login", "VIEW|LOGIN")
 

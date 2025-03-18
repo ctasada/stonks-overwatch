@@ -5,7 +5,6 @@ from django.db import connection
 from stonks_overwatch.repositories.degiro.models import DeGiroCashMovements
 from stonks_overwatch.utils.db_utils import dictfetchall
 
-
 class CashMovementsRepository:
     @staticmethod
     def get_cash_movements_raw() -> list[dict]:

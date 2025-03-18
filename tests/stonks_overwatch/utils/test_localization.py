@@ -1,9 +1,8 @@
 from datetime import datetime
 
-import pytest
-
 from stonks_overwatch.utils.localization import LocalizationUtility
 
+import pytest
 
 def test_get_currency_symbol():
     assert LocalizationUtility.get_currency_symbol("EUR") == "€"

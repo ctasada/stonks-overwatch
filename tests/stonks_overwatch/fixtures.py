@@ -1,13 +1,13 @@
 import pathlib
-from unittest.mock import patch
 
-import pytest
 import requests
 
 from stonks_overwatch.config.degiro_config import DegiroConfig
 from stonks_overwatch.config.degiro_credentials import DegiroCredentials
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 
+import pytest
+from unittest.mock import patch
 
 @pytest.fixture
 def mock_degiro_config():

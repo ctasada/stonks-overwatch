@@ -1,13 +1,10 @@
 import json
 import pathlib
 import re
-from unittest.mock import patch
 
-import pytest
 import requests
 import requests_mock
 from degiro_connector.core.constants import urls
-from django.test import TestCase
 from isodate import parse_datetime
 
 from stonks_overwatch.config.degiro_credentials import DegiroCredentials
@@ -19,6 +16,9 @@ from stonks_overwatch.services.degiro.dividends import DividendsService
 from stonks_overwatch.utils.localization import LocalizationUtility
 from tests.stonks_overwatch.fixtures import TestDeGiroService
 
+import pytest
+from django.test import TestCase
+from unittest.mock import patch
 
 @pytest.mark.django_db
 class TestDividendsService(TestCase):

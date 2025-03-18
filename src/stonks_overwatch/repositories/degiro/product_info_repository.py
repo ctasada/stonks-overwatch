@@ -2,7 +2,6 @@ from django.db import connection
 
 from stonks_overwatch.utils.db_utils import dictfetchall, dictfetchone
 
-
 class ProductInfoRepository:
     @staticmethod
     def get_products_info_raw(ids: list[int]) -> dict:

@@ -12,7 +12,6 @@ from stonks_overwatch.utils.datetime import DateTimeUtility
 from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.logger import StonksLogger
 
-
 class PortfolioService:
     @dataclass
     class Quotation:

@@ -6,7 +6,6 @@ from stonks_overwatch.services.bitvavo.bitvavo_service import BitvavoService
 from stonks_overwatch.services.models import Transaction
 from stonks_overwatch.utils.localization import LocalizationUtility
 
-
 class TransactionsService:
     TIME_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
     TIME_FORMAT = "%H:%M:%S"
