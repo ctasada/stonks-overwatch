@@ -73,16 +73,28 @@ def format_date_time_from_date():
 def test_format_date_to_month_year():
     assert LocalizationUtility.format_date_to_month_year("2020-01-01") == "January 2020"
 
+    assert LocalizationUtility.format_date_to_month_year(datetime.fromisoformat("2020-01-01")) == "January 2020"
 
 def test_get_date_day():
     assert LocalizationUtility.get_date_day("2020-01-01") == "01"
+
+    assert LocalizationUtility.get_date_day(datetime.fromisoformat("2020-01-10")) == "10"
 
 
 def test_format_date_to_month_number():
     assert LocalizationUtility.format_date_to_month_number("2020-01-01") == "01"
     assert LocalizationUtility.format_date_to_month_number("2020-12-01") == "12"
 
+    assert LocalizationUtility.format_date_to_month_number(datetime.fromisoformat("2020-01-01")) == "01"
+
 
 def test_format_date_to_year():
     assert LocalizationUtility.format_date_to_year("2020-01-01") == "2020"
     assert LocalizationUtility.format_date_to_year("2020-12-31") == "2020"
+
+    assert LocalizationUtility.format_date_to_year(datetime.fromisoformat("2020-01-01")) == "2020"
+
+def test_month_name():
+    assert LocalizationUtility.month_name(1) == "January"
+    assert LocalizationUtility.month_name('1') == "January"
+    assert LocalizationUtility.month_name(12) == "December"
