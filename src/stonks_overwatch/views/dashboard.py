@@ -253,7 +253,7 @@ class Dashboard(View):
             "January", "February", "March", "April", "May", "June",
             "July", "August", "September", "October", "November", "December"
         ]
-        return {month: 0.0 for month in months}
+        return dict.fromkeys(months, 0.0)
 
     def _calculate_portfolio_performance(
             self,
