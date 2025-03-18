@@ -4,19 +4,26 @@ description: A common action for setup
 runs:
   using: "composite"
   steps:
+    #----------------------------------------------
+    #       check-out repo and set-up python
+    #----------------------------------------------
     - name: Set up python 3.13
       id: setup-python
       uses: actions/setup-python@v5
       with:
         python-version: "3.13"
-
+    #----------------------------------------------
+    #       cache Poetry installation
+    #----------------------------------------------
     - name: Load cached Poetry installation
       id: cached-poetry
       uses: actions/cache@v4
       with:
-        path: ~/.local
-        key: poetry-0
-
+        path: ~/.cache/pypoetry
+        key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+    #----------------------------------------------
+    #  -----  install & configure poetry  -----
+    #----------------------------------------------
     - name: Install Python poetry
       if: steps.cached-poetry.outputs.cache-hit != 'true'
       uses: snok/install-poetry@v1
@@ -25,14 +32,18 @@ runs:
         virtualenvs-in-project: true
         installer-parallel: true
         virtualenvs-path: .venv
-
+    #----------------------------------------------
+    #       load cached venv if cache exists
+    #----------------------------------------------
     - name: Load cached venv
       id: cached-poetry-dependencies
       uses: actions/cache@v4
       with:
         path: .venv
         key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-
+    #----------------------------------------------
+    # install dependencies if cache does not exist
+    #----------------------------------------------
     - name: Install dependencies
       if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       run: poetry install --no-interaction --no-root

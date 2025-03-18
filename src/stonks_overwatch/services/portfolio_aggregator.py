@@ -6,7 +6,6 @@ from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.portfolio import PortfolioService as DeGiroPortfolioService
 from stonks_overwatch.services.models import DailyValue, PortfolioEntry, PortfolioId, TotalPortfolio
 from stonks_overwatch.utils.constants import ProductType, Sector
-from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.logger import StonksLogger
 from stonks_overwatch.utils.y_finance import get_country, get_sector_industry
 
@@ -79,27 +78,12 @@ class PortfolioAggregatorService:
         roi = (portfolio_total_value / total_deposit_withdrawal - 1) * 100
 
         return TotalPortfolio(
+            base_currency=base_currency,
             total_pl=total_profit_loss,
-            total_pl_formatted=LocalizationUtility.format_money_value(
-                value=total_profit_loss,
-                currency=base_currency,
-            ),
             total_cash=total_cash,
-            total_cash_formatted=LocalizationUtility.format_money_value(
-                value=total_cash,
-                currency=base_currency,
-            ),
             current_value=portfolio_total_value,
-            current_value_formatted=LocalizationUtility.format_money_value(
-                value=portfolio_total_value, currency=base_currency
-            ),
             total_roi=roi,
-            total_roi_formatted="{:,.2f}%".format(roi),
             total_deposit_withdrawal=total_deposit_withdrawal,
-            total_deposit_withdrawal_formatted=LocalizationUtility.format_money_value(
-                value=total_deposit_withdrawal,
-                currency=base_currency,
-            ),
         )
 
     @staticmethod

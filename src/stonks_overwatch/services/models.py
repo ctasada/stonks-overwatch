@@ -1,3 +1,4 @@
+import dataclasses
 import datetime
 import re
 from dataclasses import asdict, dataclass
@@ -55,6 +56,7 @@ class Country:
         else:
             # FIXME: Retrieving the first match. How do we handle if the match is not correct?
             self.country = pycountry.countries.search_fuzzy(Country.__clean_string(iso_code))[0]
+            self.iso_code = self.country.alpha_2
 
     @staticmethod
     def __clean_string(input_string: str) -> str:
@@ -64,14 +66,10 @@ class Country:
         return cleaned_string.strip()
 
     def get_name(self) -> str:
-        if self.country:
-            return self.country.name
-        return "Unknown Country"
+        return self.country.name
 
-    def get_flag(self) -> str|None:
-        if self.country:
-            return self.country.flag
-        return None
+    def get_flag(self) -> str:
+        return self.country.flag
 
 class DailyValue(TypedDict):
     x: str  # date
@@ -220,7 +218,7 @@ class PortfolioId(Enum):
         self.logo = logo
 
     @classmethod
-    def values(cls) -> list:
+    def values(cls) -> list['PortfolioId']:
         return list(cls)
 
     @classmethod
@@ -239,16 +237,32 @@ class PortfolioId(Enum):
 
 @dataclass
 class TotalPortfolio:
+    base_currency: str
     total_pl: float
-    total_pl_formatted: str
     total_cash: float
-    total_cash_formatted: str
     current_value: float
-    current_value_formatted: str
     total_roi: float
-    total_roi_formatted: str
     total_deposit_withdrawal: float
-    total_deposit_withdrawal_formatted: str
+
+    @property
+    def total_pl_formatted(self) -> str:
+        return LocalizationUtility.format_money_value(value=self.total_pl, currency=self.base_currency)
+
+    @property
+    def total_cash_formatted(self) -> str:
+        return LocalizationUtility.format_money_value(value=self.total_cash, currency=self.base_currency)
+
+    @property
+    def current_value_formatted(self) -> str:
+        return LocalizationUtility.format_money_value(value=self.current_value, currency=self.base_currency)
+
+    @property
+    def total_roi_formatted(self) -> str:
+        return "{:,.2f}%".format(self.total_roi)
+
+    @property
+    def total_deposit_withdrawal_formatted(self) -> str:
+        return LocalizationUtility.format_money_value(value=self.total_deposit_withdrawal, currency=self.base_currency)
 
 @dataclass
 class Transaction:
@@ -263,3 +277,18 @@ class Transaction:
     total: str
     total_in_base_currency: str
     fees: str
+
+def dataclass_to_dict(obj) -> dict:
+    """
+    Convert a dataclass instance to a dictionary, including support for '@property' attributes
+    :param obj:
+    :return: dictionary representation of the dataclass instance
+    """
+    if not dataclasses.is_dataclass(obj):
+        raise ValueError("Provided object is not a dataclass instance")
+
+    result = dataclasses.asdict(obj)
+    for attr in dir(obj):
+        if isinstance(getattr(type(obj), attr, None), property):
+            result[attr] = getattr(obj, attr)
+    return result

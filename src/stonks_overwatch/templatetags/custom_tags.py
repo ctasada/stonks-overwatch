@@ -1,4 +1,3 @@
-import dataclasses
 
 from django import template
 from django.template import RequestContext
@@ -6,6 +5,7 @@ from django.utils import timezone
 
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.update_service import UpdateService
+from stonks_overwatch.services.models import dataclass_to_dict
 from stonks_overwatch.services.portfolio_aggregator import PortfolioAggregatorService
 from stonks_overwatch.services.session_manager import SessionManager
 from stonks_overwatch.utils.localization import LocalizationUtility
@@ -24,7 +24,7 @@ def show_total_portfolio(context: RequestContext) -> dict:
     selected_portfolio = SessionManager.get_selected_portfolio(context.request)
     total_portfolio = portfolio.get_portfolio_total(selected_portfolio)
 
-    return {"total_portfolio": dataclasses.asdict(total_portfolio)}
+    return {"total_portfolio": dataclass_to_dict(total_portfolio)}
 
 @register.simple_tag
 def is_connected_to_degiro() -> bool:

@@ -69,3 +69,18 @@ class TestProductInfoRepository(TestCase):
 
         print(products)
         assert sorted(products) == sorted(["US5949181045", "US0378331005"])
+
+    def test_get_products_info_raw_by_symbol(self):
+        products = ProductInfoRepository.get_products_info_raw_by_symbol(["MSFT", "AAPL"])
+
+        assert len(products) == 2
+
+        assert products[332111]["name"] == "Microsoft Corp"
+        assert products[332111]["symbol"] == "MSFT"
+        assert products[332111]["currency"] == "USD"
+        assert products[332111]["isin"] == "US5949181045"
+
+        assert products[331868]["name"] == "Apple Inc"
+        assert products[331868]["symbol"] == "AAPL"
+        assert products[331868]["currency"] == "USD"
+        assert products[331868]["isin"] == "US0378331005"
