@@ -8,7 +8,6 @@ from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.models import PortfolioId
 from stonks_overwatch.utils.logger import StonksLogger
 
-
 class Config:
 
     logger = StonksLogger.get_logger("stocks_portfolio.config", "[CONFIG]")

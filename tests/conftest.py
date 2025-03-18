@@ -2,9 +2,9 @@ import os
 import tempfile
 from functools import wraps
 
-import pytest
 import requests_cache
 
+import pytest
 
 @pytest.fixture(scope='session')
 def temp_cache_path():

@@ -1,6 +1,5 @@
 from stonks_overwatch.utils.constants import ProductType
 
-
 def symbol_url(symbol: str, product_type: ProductType) -> str:
     if product_type == ProductType.CRYPTO:
         return f"https://raw.githubusercontent.com/Cryptofonts/cryptoicons/master/SVG/{symbol.lower()}.svg"

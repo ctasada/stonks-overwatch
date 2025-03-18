@@ -1,13 +1,13 @@
 import json
 import pathlib
 
-import pytest
-from django.test import TestCase
 from isodate import parse_datetime
 
 from stonks_overwatch.repositories.degiro.models import DeGiroCashMovements, DeGiroProductInfo
 from stonks_overwatch.services.degiro.account_overview import AccountOverviewService
 
+import pytest
+from django.test import TestCase
 
 @pytest.mark.django_db
 class TestAccountOverviewService(TestCase):

@@ -18,7 +18,6 @@ import os
 from scripts.commons import IMPORT_FOLDER
 from stonks_overwatch.services.degiro.update_service import UpdateService
 
-
 def init() -> None:
     """Execute needed initializations for the scripts.
 

@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 class ProductType(Enum):
     STOCK = "Stock"
     ETF = "ETF"

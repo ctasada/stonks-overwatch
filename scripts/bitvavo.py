@@ -7,7 +7,6 @@ from pprint import pprint
 
 from stonks_overwatch.services.bitvavo.bitvavo_service import BitvavoService
 
-
 # Use this class to connect to Bitvavo and make your first calls.
 # Add trading strategies to implement your business logic.
 class BitvavoImplementation:

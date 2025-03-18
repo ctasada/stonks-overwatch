@@ -6,7 +6,6 @@ from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.transactions import TransactionsService as DeGiroTransactionsService
 from stonks_overwatch.services.models import PortfolioId, Transaction
 
-
 class TransactionsAggregatorService:
 
     def __init__(self):

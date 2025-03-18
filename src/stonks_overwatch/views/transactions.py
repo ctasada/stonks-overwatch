@@ -6,7 +6,6 @@ from django.views import View
 from stonks_overwatch.services.session_manager import SessionManager
 from stonks_overwatch.services.transactions_aggregator import TransactionsAggregatorService
 
-
 class Transactions(View):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

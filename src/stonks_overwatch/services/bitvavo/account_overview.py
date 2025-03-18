@@ -6,7 +6,6 @@ from stonks_overwatch.services.bitvavo.bitvavo_service import BitvavoService
 from stonks_overwatch.services.models import AccountOverview
 from stonks_overwatch.utils.logger import StonksLogger
 
-
 class AccountOverviewService:
     logger = StonksLogger.get_logger("stocks_portfolio.account_overview_data", "BITVAVO|ACCOUNT_OVERVIEW")
     TIME_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"

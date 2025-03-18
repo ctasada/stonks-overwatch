@@ -5,7 +5,6 @@ from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.degiro_credentials import DegiroCredentials
 from stonks_overwatch.utils.localization import LocalizationUtility
 
-
 class DegiroConfig(BaseConfig):
     config_key = "degiro"
     DEFAULT_DEGIRO_UPDATE_FREQUENCY = 5
