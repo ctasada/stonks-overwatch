@@ -136,9 +136,6 @@ config/*
 # IntellliJ IDEA
 *.iml
 
-# Poetry
-poetry.lock
-
 # Local data
 /data/
 
