@@ -7,7 +7,6 @@ from stonks_overwatch.repositories.degiro.cash_movements_repository import CashM
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.models import Deposit, DepositType
 
-
 # FIXME: If data cannot be found in the DB, the code should get it from DeGiro, updating the DB
 class DepositsService:
     def __init__(

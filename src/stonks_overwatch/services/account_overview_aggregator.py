@@ -5,7 +5,6 @@ from stonks_overwatch.services.bitvavo.account_overview import AccountOverviewSe
 from stonks_overwatch.services.degiro.account_overview import AccountOverviewService as DeGiroAccountOverviewService
 from stonks_overwatch.services.models import AccountOverview, PortfolioId
 
-
 class AccountOverviewAggregatorService:
 
     def __init__(self):

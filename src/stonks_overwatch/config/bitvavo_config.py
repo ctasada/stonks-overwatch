@@ -3,7 +3,6 @@ from typing import Optional
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.bitvavo_credentials import BitvavoCredentials
 
-
 class BitvavoConfig(BaseConfig):
     config_key = "bitvavo"
 

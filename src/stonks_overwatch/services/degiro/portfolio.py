@@ -21,7 +21,6 @@ from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.logger import StonksLogger
 from stonks_overwatch.utils.y_finance import get_stock_splits
 
-
 class PortfolioService:
     logger = StonksLogger.get_logger("stocks_portfolio.portfolio_data.degiro", "[DEGIRO|PORTFOLIO]")
 

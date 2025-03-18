@@ -9,7 +9,6 @@ from stonks_overwatch.services.session_manager import SessionManager
 from stonks_overwatch.utils.constants import ProductType
 from stonks_overwatch.utils.logger import StonksLogger
 
-
 class PositionStatus(Enum):
     OPEN = "OPEN"
     CLOSED = "CLOSED"

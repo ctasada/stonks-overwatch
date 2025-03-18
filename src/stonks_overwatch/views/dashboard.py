@@ -16,7 +16,6 @@ from stonks_overwatch.services.session_manager import SessionManager
 from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.logger import StonksLogger
 
-
 @dataclass
 class PortfolioMetrics:
     total_return: float

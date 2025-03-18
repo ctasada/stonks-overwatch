@@ -8,7 +8,6 @@ from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.models import Transaction
 from stonks_overwatch.utils.localization import LocalizationUtility
 
-
 class TransactionsService:
     def __init__(
             self,

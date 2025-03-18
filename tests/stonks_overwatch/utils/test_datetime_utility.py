@@ -1,10 +1,10 @@
 from datetime import date, datetime, timedelta
 
-import pytest
 from degiro_connector.quotecast.models.chart import Interval
 
 from stonks_overwatch.utils.datetime import DateTimeUtility
 
+import pytest
 
 def test_calculate_interval_valid_dates():
     # Test cases for valid date ranges

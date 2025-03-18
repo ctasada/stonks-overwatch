@@ -6,7 +6,6 @@ from stonks_overwatch.services.degiro.currency_converter_service import Currency
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.utils.localization import LocalizationUtility
 
-
 class FeesService:
 
     def __init__(

@@ -9,7 +9,6 @@ from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.dividends import DividendsService as DeGiroDividendsService
 from stonks_overwatch.services.models import AccountOverview, PortfolioId
 
-
 class DividendsAggregatorService:
 
     def __init__(self):

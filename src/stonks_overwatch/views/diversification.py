@@ -11,7 +11,6 @@ from stonks_overwatch.utils.constants import ProductType, Sector
 from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.logger import StonksLogger
 
-
 class Diversification(View):
     logger = StonksLogger.get_logger("stocks_portfolio.dashboard.views", "VIEW|DIVERSIFICATION")
 

@@ -1,12 +1,11 @@
 import json
 import pathlib
 
-import pytest
-from django.test import TestCase
-
 from stonks_overwatch.repositories.degiro.company_profile_repository import CompanyProfileRepository
 from stonks_overwatch.repositories.degiro.models import DeGiroCompanyProfile
 
+import pytest
+from django.test import TestCase
 
 @pytest.mark.django_db
 class TestCompanyProfileRepository(TestCase):

@@ -7,7 +7,6 @@ from stonks_overwatch.config.bitvavo_config import BitvavoConfig
 from stonks_overwatch.utils.logger import StonksLogger
 from stonks_overwatch.utils.singleton import singleton
 
-
 @singleton
 class BitvavoService:
     START_TIMESTAMP = 0

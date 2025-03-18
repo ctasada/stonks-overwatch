@@ -1,13 +1,12 @@
 import json
 import pathlib
 
-import pytest
-from django.test import TestCase
-
 from stonks_overwatch.repositories.degiro.models import DeGiroProductQuotation
 from stonks_overwatch.repositories.degiro.product_quotations_repository import ProductQuotationsRepository
 from stonks_overwatch.utils.localization import LocalizationUtility
 
+import pytest
+from django.test import TestCase
 
 @pytest.mark.django_db
 class TestProductQuotationsRepository(TestCase):

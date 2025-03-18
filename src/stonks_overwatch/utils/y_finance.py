@@ -12,7 +12,6 @@ import settings
 from stonks_overwatch.services.models import Country
 from stonks_overwatch.utils.constants import Sector
 
-
 @dataclass
 class StockSplit:
     date: datetime

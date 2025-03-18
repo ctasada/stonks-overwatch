@@ -9,7 +9,6 @@ from stonks_overwatch.config.degiro_config import DegiroConfig
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.utils.logger import StonksLogger
 
-
 class DeGiroAuthMiddleware:
     PUBLIC_URLS = {'login'}
 

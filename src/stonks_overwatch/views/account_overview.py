@@ -4,7 +4,6 @@ from django.views import View
 from stonks_overwatch.services.account_overview_aggregator import AccountOverviewAggregatorService
 from stonks_overwatch.services.session_manager import SessionManager
 
-
 class AccountOverview(View):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

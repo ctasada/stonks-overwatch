@@ -5,7 +5,6 @@ from stonks_overwatch.services.fees_aggregator import FeesAggregatorService
 from stonks_overwatch.services.session_manager import SessionManager
 from stonks_overwatch.utils.localization import LocalizationUtility
 
-
 class Fees(View):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
