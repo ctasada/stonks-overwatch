@@ -4,7 +4,6 @@ from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.fees import FeesService as DeGiroFeesService
 from stonks_overwatch.services.models import PortfolioId
 
-
 class FeesAggregatorService:
 
     def __init__(self):

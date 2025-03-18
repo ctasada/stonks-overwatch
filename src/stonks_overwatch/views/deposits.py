@@ -7,7 +7,6 @@ from stonks_overwatch.services.portfolio_aggregator import PortfolioAggregatorSe
 from stonks_overwatch.services.session_manager import SessionManager
 from stonks_overwatch.utils.logger import StonksLogger
 
-
 class Deposits(View):
     logger = StonksLogger.get_logger("stocks_portfolio.deposits.views", "VIEW|DEPOSITS")
 

@@ -2,7 +2,6 @@ import json
 import pathlib
 from datetime import date
 
-import pytest
 import requests_mock
 from degiro_connector.core.constants import urls
 from degiro_connector.core.exceptions import DeGiroConnectionError
@@ -18,6 +17,7 @@ from tests.stonks_overwatch.fixtures import (
     mock_full_credentials,
 )
 
+import pytest
 
 def test_credentials_manager_init(mock_degiro_config: mock_degiro_config, mock_full_credentials: mock_full_credentials):
     manager = CredentialsManager(mock_full_credentials)

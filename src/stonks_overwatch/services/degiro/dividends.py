@@ -8,7 +8,6 @@ from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.logger import StonksLogger
 
-
 class DividendsService:
     logger = StonksLogger.get_logger("stocks_portfolio.dividends_service", "[DEGIRO|DIVIDENDS]")
 

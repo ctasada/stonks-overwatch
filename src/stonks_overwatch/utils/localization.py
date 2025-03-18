@@ -3,7 +3,6 @@ from typing import Optional
 
 from currency_symbols import CurrencySymbols
 
-
 class LocalizationUtility:
     """
     A utility class for handling localization-related tasks, such as formatting dates, times, and currency values.

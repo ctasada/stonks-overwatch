@@ -104,6 +104,17 @@ unfixable = []
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
+[tool.ruff.lint.isort]
+order-by-type = true
+relative-imports-order = "closest-to-furthest"
+extra-standard-library = ["typing"]
+lines-after-imports = 1
+lines-between-types = 0
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder", "testing"]
+
+[tool.ruff.lint.isort.sections]
+testing = ["django.test", "pytest", "pook", "unittest"]
+
 [tool.ruff.format]
 # Like Black, use double quotes for strings.
 quote-style = "double"

@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import Any, Dict
 
-
 @dataclass
 class BaseCredentials:
     def to_dict(self) -> dict:

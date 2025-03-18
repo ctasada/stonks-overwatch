@@ -6,7 +6,6 @@ from django.db import connection
 from stonks_overwatch.repositories.degiro.models import DeGiroProductQuotation
 from stonks_overwatch.utils.db_utils import dictfetchall
 
-
 class ProductQuotationsRepository:
     @staticmethod
     def get_product_quotations(product_id: int) -> dict | None:

@@ -11,7 +11,6 @@ from stonks_overwatch.services.models import Deposit, PortfolioId
 from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.logger import StonksLogger
 
-
 class DepositsAggregatorService:
     logger = StonksLogger.get_logger("stocks_portfolio.portfolio_data", "[AGGREGATOR|DEPOSITS]")
 

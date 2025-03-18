@@ -10,7 +10,6 @@ from stonks_overwatch.utils.constants import ProductType, Sector
 from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.logos import symbol_url
 
-
 @dataclass
 class AccountOverview:
     datetime: datetime = None

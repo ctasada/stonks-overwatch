@@ -2,12 +2,11 @@ import json
 import pathlib
 from datetime import datetime
 
-import pytest
-from django.test import TestCase
-
 from stonks_overwatch.repositories.degiro.models import DeGiroTransactions
 from stonks_overwatch.repositories.degiro.transactions_repository import TransactionsRepository
 
+import pytest
+from django.test import TestCase
 
 @pytest.mark.django_db
 class TestTransactionsRepository(TestCase):

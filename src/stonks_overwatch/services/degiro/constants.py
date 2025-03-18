@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 class TransactionType(Enum):
     """
     Enum representing various transaction types in DeGiro's API.
