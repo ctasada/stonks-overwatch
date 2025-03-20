@@ -193,8 +193,7 @@ poetry run src/manage.py runscript init_db
 - [ ] Provide more information in the Dashboard performance overview
 - [ ] Migrate UI to https://github.com/coreui/coreui
 - [ ] Add GitHub Dependabot support for Poetry: Track https://github.com/dependabot/dependabot-core/issues/11237
-- [ ] Login Dialog: Add a progress bar to show the progress loading DEGIRO data
-- [ ] Add a progress bar to show the progress loading DEGIRO data when using the Login Dialog
+- [ ] Provide more details about Dividends per year
 - [ ] Should include Dividends in the Deposit Overview?
 - [ ] Disable Django Admin page by default
 

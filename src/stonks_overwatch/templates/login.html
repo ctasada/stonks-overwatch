@@ -35,7 +35,7 @@
         {% else %}
             <h3 class="text-center mb-4">Login - DEGIRO</h3>
         {% endif %}
-        <form method="POST" action="{% url 'login' %}">
+        <form id="login-form" method="POST" action="{% url 'login' %}">
             {% csrf_token %}
             {% if messages %}
                 <ul>
@@ -52,6 +52,21 @@
                            placeholder="123456" aria-label="2FA code" required autofocus>
                 </div>
                 <button type="submit" class="btn btn-primary btn-block w-100">Confirm</button>
+            {% elif show_loading %}
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                <p class="text-center mt-3">Updating Portfolio, please wait...</p>
+                <!-- Submit form indicating that should update the portfolio -->
+                <input type="hidden" name="update_portfolio" id="update_portfolio" value="true">
+                <script>
+                    $(document).ready(function() {
+                        <!-- In this scenario we want to submit the form automatically -->
+                        document.getElementById("login-form").submit();
+                    });
+                </script>
             {% else %}
                 <div class="form-group mb-2">
                     <label for="username">Username</label>
@@ -75,15 +90,17 @@
     const togglePassword = document.querySelector("#togglePassword");
     const password = document.querySelector("#password");
 
-    togglePassword.addEventListener("click", function () {
-        // toggle the type attribute
-        const type = password.getAttribute("type") === "password" ? "text" : "password";
-        password.setAttribute("type", type);
+    if (togglePassword) {
+        togglePassword.addEventListener("click", function () {
+            // toggle the type attribute
+            const type = password.getAttribute("type") === "password" ? "text" : "password";
+            password.setAttribute("type", type);
 
-        // toggle the icon
-        this.classList.toggle("bi-eye-fill");
-        this.classList.toggle("bi-eye-slash-fill");
-    });
+            // toggle the icon
+            this.classList.toggle("bi-eye-fill");
+            this.classList.toggle("bi-eye-slash-fill");
+        });
+    }
 </script>
 </body>
 
