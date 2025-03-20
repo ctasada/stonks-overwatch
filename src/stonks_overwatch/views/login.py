@@ -11,6 +11,15 @@ from stonks_overwatch.services.degiro.degiro_service import CredentialsManager, 
 from stonks_overwatch.utils.logger import StonksLogger
 
 class Login(View):
+    """
+    View for the login page.
+    Handles user authentication and connection to DeGiro.
+
+    The view has 3 states:
+    * Initial state: The user is prompted to enter their username and password.
+    * TOTP required: The user is prompted to enter their 2FA code.
+    * Loading: The user is shown a loading indicator while the portfolio is updated.
+    """
     logger = StonksLogger.get_logger("stocks_portfolio.login", "VIEW|LOGIN")
 
     def __init__(self, **kwargs):
@@ -18,14 +27,33 @@ class Login(View):
         self.degiro_service = None
 
     def get(self, request):
-        return render(request, 'login.html')
+        show_otp = False
+        show_loading = False
+
+        if request.session.get('is_authenticated'):
+            self.logger.info("User is already authenticated. Redirecting to dashboard.")
+            show_loading = True
+
+        context = {
+            "show_otp": show_otp,
+            "show_loading": show_loading
+        }
+        return render(request, "login.html", context=context, status=200)
 
     def post(self, request):
+        update_portfolio = request.POST.get('update_portfolio') or False
+        if update_portfolio:
+            # Update portfolio data before loading the dashboard
+            JobsScheduler.update_portfolio()
+
+            return redirect('dashboard')
+
         credentials = DegiroCredentials.from_request(request)
         username = request.POST.get('username') or credentials.username
         password = request.POST.get('password') or credentials.password
         one_time_password = request.POST.get('2fa_code') or credentials.one_time_password
         show_otp = False
+        show_loading = False
 
         if not username or not password:
             messages.error(request, "Username and password are required.")
@@ -44,14 +72,14 @@ class Login(View):
 
         if request.session.get('is_authenticated'):
             request.session['session_id'] = self.degiro_service.get_session_id()
+            show_loading = True
 
-            # Update portfolio data before loading the dashboard
-            # FIXME: Add a waiting or progress indicator
-            JobsScheduler.update_portfolio()
+        context = {
+            "show_otp": show_otp,
+            "show_loading": show_loading
+        }
 
-            return redirect('dashboard')
-
-        return render(request, "login.html", context={"show_otp": show_otp}, status=200)
+        return render(request, "login.html", context=context, status=200)
 
     def _authenticate_and_connect(self, request, username, password, one_time_password):
         self._store_credentials_in_session(request, username, password)
