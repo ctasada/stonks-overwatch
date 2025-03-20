@@ -196,6 +196,13 @@ poetry run src/manage.py runscript init_db
 - [ ] Provide more details about Dividends per year
 - [ ] Should include Dividends in the Deposit Overview?
 - [ ] Disable Django Admin page by default
+- [ ] Track delisted stocks
+  - EODHD: https://eodhd.medium.com/leveraging-delisted-stocks-for-backtesting-a-3-ema-strategy-using-python-d67221e774f5
+    - https://eodhd.com/pricing
+  - Polygon.io: https://polygon.io/pricing (2 years free, rest paying)
+  - Tiingo: https://www.tiingo.com/products/end-of-day-stock-price-data
+    - https://www.tiingo.com/documentation/end-of-day
+  - Alpaca: https://alpaca.markets
 
 ## Logos
 - https://eodhd.com/financial-apis-blog/40000-company-logos (requires API Key)
