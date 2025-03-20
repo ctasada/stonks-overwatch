@@ -35,8 +35,8 @@ class DeGiroAuthMiddleware:
 
     def _should_check_connection(self, request) -> bool:
         has_default_credentials = (DegiroConfig.default().credentials is not None
-                and DegiroConfig.default().credentials.username is not None
-                and DegiroConfig.default().credentials.password is not None)
+                and DegiroConfig.default().get_credentials.username is not None
+                and DegiroConfig.default().get_credentials.password is not None)
 
         return has_default_credentials or 'session_id' in request.session
 

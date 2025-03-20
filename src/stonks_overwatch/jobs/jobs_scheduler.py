@@ -46,6 +46,11 @@ class JobsScheduler:
             JobsScheduler.logger.info("JobScheduler stopped")
 
     @staticmethod
+    def update_portfolio():
+        JobsScheduler.logger.info("Updating Portfolio")
+        JobsScheduler.update_degiro_portfolio()
+
+    @staticmethod
     def update_degiro_portfolio():
         JobsScheduler.logger.info("Updating DEGIRO Portfolio")
         try:
