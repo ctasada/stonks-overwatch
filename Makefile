@@ -6,8 +6,16 @@ else
     DEBUG_MODE = false
 endif
 
+ifneq ($(profile),)
+    PROFILE_MODE = true
+else
+    PROFILE_MODE = false
+endif
+
+
 # Export the variable for child processes
 export DEBUG_MODE
+export PROFILE_MODE
 
 install: ## Install dependencies
 	poetry install
@@ -28,12 +36,8 @@ migrate: ## Apply database migrations
 	poetry run src/manage.py makemigrations
 	poetry run src/manage.py migrate
 
-runserver: ## Run the Django development server. Use `make runserver debug=true` to run in debug mode
-	@if [ "$(DEBUG_MODE)" = "true" ]; then \
-		DEBUG_MODE=true poetry run src/manage.py runserver; \
-	else \
-		poetry run src/manage.py runserver; \
-	fi
+runserver: ## Run the Django development server. Supports `make runserver debug=true profile=true` to run in debug or profile mode
+	DEBUG_MODE="$(DEBUG_MODE)" PROFILE_MODE="$(PROFILE_MODE)" poetry run src/manage.py runserver
 
 start: install migrate runserver ## Install dependencies, apply migrations, and run the server
 

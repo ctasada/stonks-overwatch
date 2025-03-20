@@ -72,6 +72,10 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.cache.FetchFromCacheMiddleware",
 ]
+# Enable the profiler middleware if the PROFILE_MODE environment variable is set
+PROFILE_MODE = os.getenv("PROFILE_MODE", False) in [True, "true", "True", "1"]
+if PROFILE_MODE:
+    MIDDLEWARE += ["pyinstrument.middleware.ProfilerMiddleware"]
 
 ROOT_URLCONF = "urls"
 
@@ -173,6 +177,7 @@ CACHES = {
     }
 }
 
+# Enable DEBUG logging only if DEBUG_MODE is set
 STONKS_LOG_LEVEL = os.getenv("STONKS_LOG_LEVEL", "INFO").upper()
 DEBUG_MODE = os.getenv("DEBUG_MODE", False) in [True, "true", "True", "1"]
 if DEBUG_MODE:
