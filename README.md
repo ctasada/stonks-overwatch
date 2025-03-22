@@ -125,6 +125,12 @@ poetry run src/manage.py migrate
 poetry run src/manage.py runscript init_db
 ```
 
+Debugging & Profiling
+```shell
+make run profile=true debug=true
+```
+Passing the parameter `profile=true` will enable profiling, and `debug=true` will log in debugging mode
+
 ## Documentation
 
 * [DeGiro Connector](https://github.com/Chavithra/degiro-connector)
@@ -158,8 +164,6 @@ poetry run src/manage.py runscript init_db
 ## BUGS
 - Dashboard: JNJ & JPM are associated with the wrong sector
 - IBERDROLA Non-Tradable Dividends: Are properly calculated? Doesn't seem to calculate quantity properly
-- When Login, connection needs to be recreated if int_account or user_token are not initially provided
-- Currency historical quotations seems to be wrongly imported when using Login form
 - Some stocks are no longer available in DeGiro. Need to find a way to handle them
     - 'ATVI'(350113856)
     - 'TYME'(600028575)
