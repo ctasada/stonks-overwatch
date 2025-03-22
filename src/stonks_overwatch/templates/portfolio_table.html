@@ -43,7 +43,6 @@
                     <td class="text-center align-middle"></td>
                 {% endif %}
                 <td>{{ item.symbol }}<br><small class="fw-lighter">{{ item.name }}</small></td>
-                {% if item.category or item.exchange_acronym %}
                 <td>
                     <div class="d-inline-flex gap-1">
                         {% if item.category %}
@@ -62,7 +61,6 @@
                         {% endif %}
                     </div>
                 </td>
-                {% endif %}
                 {% if show_columns.sector %}
                     <td>{{ item.sector }}<br><small class="fw-lighter">{{ item.industry }}</small></td>
                 {% endif %}
