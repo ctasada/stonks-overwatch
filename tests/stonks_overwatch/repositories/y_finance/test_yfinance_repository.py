@@ -1,12 +1,11 @@
 import json
 import pathlib
 
-import pytest
-from django.test import TestCase
-
-from stonks_overwatch.repositories import YFinanceTickerInfo, YFinanceStockSplits
+from stonks_overwatch.repositories import YFinanceStockSplits, YFinanceTickerInfo
 from stonks_overwatch.repositories.yfinance.yfinance_repository import YFinanceRepository
 
+import pytest
+from django.test import TestCase
 
 @pytest.mark.django_db
 class TestYFinanceRepository(TestCase):
