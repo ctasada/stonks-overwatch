@@ -4,7 +4,7 @@ from datetime import datetime
 from django.db import connection
 
 from stonks_overwatch.repositories.degiro.models import DeGiroProductQuotation
-from stonks_overwatch.utils.db_utils import dictfetchall
+from stonks_overwatch.utils.db_utils import dictfetchone
 
 class ProductQuotationsRepository:
     @staticmethod
@@ -21,10 +21,10 @@ class ProductQuotationsRepository:
                 """,
                 [product_id],
             )
-            results = dictfetchall(cursor)
+            results = dictfetchone(cursor)
 
         if results:
-            return json.loads(results[0]["quotations"])
+            return json.loads(results["quotations"])
 
         return None
 

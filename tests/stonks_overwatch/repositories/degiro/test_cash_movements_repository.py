@@ -16,7 +16,7 @@ class TestCashMovementsRepository(TestCase):
         self.fixture_cash_movements_repository()
 
     def fixture_cash_movements_repository(self):
-        data_file = pathlib.Path("tests/resources/stonks_overwatch/repositories/cash_movements_data.json")
+        data_file = pathlib.Path("tests/resources/stonks_overwatch/repositories/degiro/cash_movements_data.json")
 
         with open(data_file, "r") as file:
             data = json.load(file)
