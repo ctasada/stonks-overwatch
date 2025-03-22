@@ -526,6 +526,18 @@ files = [
 ]
 
 [[package]]
+name = "iso10383"
+version = "2025.2.10"
+description = "A Python wrapper around the data provided by the ISO 10383 specification."
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "iso10383-2025.2.10-py3-none-any.whl", hash = "sha256:0f3465e10f35481e28ad24dcb29491a5995335337622f86ed12bc1ac65e99cb4"},
+    {file = "iso10383-2025.2.10.tar.gz", hash = "sha256:ba87ca7d7a73faa3b03b30019af620a10afc298c63645d35e256dd425c963179"},
+]
+
+[[package]]
 name = "isodate"
 version = "0.6.1"
 description = "An ISO 8601 date/time/duration parser and formatter"
@@ -1826,4 +1838,4 @@ repair = ["scipy (>=1.6.3)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "b008f627afe32ce36cb3dc0c6df793d666ebc539def4105fce2f722894b581b6"
+content-hash = "29ddc67879237cd7bf176171ca1889220cebac6d723a2c0acd66d35a4ae1ca0b"
