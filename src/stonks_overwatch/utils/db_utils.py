@@ -8,11 +8,14 @@ def dictfetchall(cursor: CursorWrapper) -> list[dict]:
     return [dict(zip(columns, row, strict=True)) for row in cursor.fetchall()]
 
 
-def dictfetchone(cursor: CursorWrapper) -> dict:
+def dictfetchone(cursor: CursorWrapper) -> dict|None:
     """Returns the first row from a cursor as a dict.
     Assume the column names are unique.
     """
-    return dictfetchall(cursor)[0]
+    results = dictfetchall(cursor)
+    if not results:
+        return None
+    return results[0]
 
 def snake_to_camel(snake_str):
     """Converts snake_case to camelCase"""

@@ -1,5 +1,6 @@
 import os
 from datetime import date, datetime, time, timezone
+from typing import Dict, List
 
 import pandas as pd
 from degiro_connector.quotecast.models.chart import Interval
@@ -10,6 +11,7 @@ from django.db import connection
 
 from settings import DATA_DIR
 from stonks_overwatch.config.degiro_config import DegiroConfig
+from stonks_overwatch.repositories import YFinanceStockSplits, YFinanceTickerInfo
 from stonks_overwatch.repositories.degiro.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.repositories.degiro.models import (
     DeGiroCashMovements,
@@ -24,6 +26,7 @@ from stonks_overwatch.repositories.degiro.transactions_repository import Transac
 from stonks_overwatch.services.degiro.constants import CurrencyFX
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.portfolio import PortfolioService
+from stonks_overwatch.services.yfinance.y_finance import YFinanceClient
 from stonks_overwatch.utils.datetime import DateTimeUtility
 from stonks_overwatch.utils.db_utils import dictfetchall
 from stonks_overwatch.utils.debug import save_to_json
@@ -32,6 +35,7 @@ from stonks_overwatch.utils.logger import StonksLogger
 
 CACHE_KEY_UPDATE_PORTFOLIO = "portfolio_data_update_from_degiro"
 CACHE_KEY_UPDATE_COMPANIES = "company_profile_update_from_degiro"
+CACHE_KEY_UPDATE_YFINANCE = "yfinance_update"
 # Cache the result for 1 hour (3600 seconds)
 CACHE_TIMEOUT = 3600
 
@@ -51,6 +55,7 @@ class UpdateService:
         self.portfolio_data = PortfolioService(
             degiro_service=self.degiro_service,
         )
+        self.yfinance_client = YFinanceClient()
 
     def get_last_import(self) -> datetime:
         last_cash_movement = self._get_last_cash_movement_import()
@@ -86,6 +91,7 @@ class UpdateService:
             self.update_transactions(self.DEBUG_MODE)
             self.update_portfolio(self.DEBUG_MODE)
             self.update_company_profile(self.DEBUG_MODE)
+            self.update_yfinance(self.DEBUG_MODE)
         except Exception as error:
             self.logger.error("Cannot Update Portfolio!")
             self.logger.error("Exception: ", error)
@@ -484,4 +490,88 @@ class UpdateService:
                 DeGiroCompanyProfile.objects.update_or_create(isin=key, defaults={"data": company_profiles[key]})
             except Exception as error:
                 self.logger.error(f"Cannot import ISIN: {key}")
+                self.logger.error("Exception: ", error)
+
+    def update_yfinance(self, debug_json_files: bool = True):
+        """Updating the Yahoo Finance Data."""
+        self.logger.info(f"[Debug={debug_json_files}] Updating Yahoo Finance Data....")
+
+        cached_data = cache.get(CACHE_KEY_UPDATE_YFINANCE)
+
+        # If result is already cached, return it
+        if cached_data is None:
+            self.logger.info(f"[Debug={debug_json_files}] Yahoo Finance data not found in cache. Calling YFinance")
+            # Otherwise, call the expensive method
+            result = self.__update_yfinance(debug_json_files)
+
+            cache.set(CACHE_KEY_UPDATE_YFINANCE, result, timeout=CACHE_TIMEOUT)
+
+            return result
+
+        return cached_data
+
+    def __update_yfinance(self, debug_json_files: bool = True) -> Dict[str, dict]:
+        # Get the list of DeGiro Products
+        symbols = self.__get_symbols()
+
+        tickers : Dict[str, dict] = {}
+        splits = {}
+        for symbol in symbols:
+            try:
+                yfinance_ticker = self.yfinance_client.get_ticker(symbol)
+                splits_data = self.yfinance_client.get_stock_splits(yfinance_ticker)
+
+                tickers[symbol] = yfinance_ticker.info
+                splits[symbol] = [split.to_dict() for split in splits_data]
+            except Exception:
+                tickers[symbol] = {}
+                splits[symbol] = []
+
+        if debug_json_files:
+            yfinance_tickers_file = self.IMPORT_FOLDER + "/yfinance_tickers.json"
+            save_to_json(tickers, yfinance_tickers_file)
+
+            yfinance_splits_file = self.IMPORT_FOLDER + "/yfinance_splits.json"
+            save_to_json(splits, yfinance_splits_file)
+
+        self.__import_yfinance_tickers(tickers)
+        self.__import_yfinance_splits(splits)
+
+        return tickers
+
+    def __get_symbols(self) -> list[str]:
+        """Get the list of tickets to query with YFinance.
+
+        ### Returns
+            list: list of ticket symbols
+        """
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT DISTINCT symbol FROM degiro_productinfo WHERE product_type IN ('STOCK', 'ETF');
+                """
+            )
+            result = dictfetchall(cursor)
+
+            symbol_list = [row["symbol"] for row in result]
+            return list(set(symbol_list))
+
+    def __import_yfinance_tickers(self, tickers: Dict[str, dict]) -> None:
+        """Store the Yahoo Finance Tickers into the DB."""
+
+        for key in tickers:
+            try:
+                YFinanceTickerInfo.objects.update_or_create(symbol=key, defaults={"data": tickers[key]})
+            except Exception as error:
+                self.logger.error(f"Cannot import Ticker: {key}")
+                self.logger.error("Exception: ", error)
+
+    def __import_yfinance_splits(self, splits: Dict[str, List[dict]]) -> None:
+        """Store the Yahoo Finance Stock Splits into the DB."""
+
+        for key in splits:
+            try:
+                YFinanceStockSplits.objects.update_or_create(symbol=key, defaults={"data": splits[key]})
+            except Exception as error:
+                self.logger.error(f"Cannot import Splits: {key}")
                 self.logger.error("Exception: ", error)
