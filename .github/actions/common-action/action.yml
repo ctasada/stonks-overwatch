@@ -19,13 +19,13 @@ runs:
       id: cached-poetry
       uses: actions/cache@v4
       with:
-        path: ~/.cache/pypoetry
+        path: ~/.local
         key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
     #----------------------------------------------
     #  -----  install & configure poetry  -----
     #----------------------------------------------
     - name: Install Python poetry
-      #if: steps.cached-poetry.outputs.cache-hit != 'true'
+      if: steps.cached-poetry.outputs.cache-hit != 'true'
       uses: snok/install-poetry@v1
       with:
         virtualenvs-create: true
