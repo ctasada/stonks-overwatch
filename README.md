@@ -125,6 +125,12 @@ poetry run src/manage.py migrate
 poetry run src/manage.py runscript init_db
 ```
 
+Debugging & Profiling
+```shell
+make run profile=true debug=true
+```
+Passing the parameter `profile=true` will enable profiling, and `debug=true` will log in debugging mode
+
 ## Documentation
 
 * [DeGiro Connector](https://github.com/Chavithra/degiro-connector)
@@ -158,8 +164,6 @@ poetry run src/manage.py runscript init_db
 ## BUGS
 - Dashboard: JNJ & JPM are associated with the wrong sector
 - IBERDROLA Non-Tradable Dividends: Are properly calculated? Doesn't seem to calculate quantity properly
-- When Login, connection needs to be recreated if int_account or user_token are not initially provided
-- Currency historical quotations seems to be wrongly imported when using Login form
 - Some stocks are no longer available in DeGiro. Need to find a way to handle them
     - 'ATVI'(350113856)
     - 'TYME'(600028575)
@@ -188,7 +192,6 @@ poetry run src/manage.py runscript init_db
 - [ ] Check migration from ChartJS to https://plotly.com/javascript/ or https://recharts.org/ or https://d3js.org
 - [ ] Track https://github.com/chartjs/Chart.js/issues/11005
 - [ ] Review Portfolio growth. Indicates negative growth, which never really happened.
-- [ ] Some stocks (mainly Spanish) don't have Sector or other data. Find workaround
 - [ ] Fontawesome is replaceable by https://icons.getbootstrap.com
 - [ ] Provide more information in the Dashboard performance overview
 - [ ] Migrate UI to https://github.com/coreui/coreui
@@ -196,6 +199,15 @@ poetry run src/manage.py runscript init_db
 - [ ] Provide more details about Dividends per year
 - [ ] Should include Dividends in the Deposit Overview?
 - [ ] Disable Django Admin page by default
+- [ ] Track delisted stocks
+  - EODHD: https://eodhd.medium.com/leveraging-delisted-stocks-for-backtesting-a-3-ema-strategy-using-python-d67221e774f5
+    - https://eodhd.com/pricing
+  - Polygon.io: https://polygon.io/pricing (2 years free, rest paying)
+  - Tiingo: https://www.tiingo.com/products/end-of-day-stock-price-data
+    - https://www.tiingo.com/documentation/end-of-day
+  - Alpaca: https://alpaca.markets
+- [ ] Create assets endpoint to centralize the logos logic and support alternatives and caching
+- [ ] DEGIRO Risk Category is a local term: https://www.degiro.ie/helpdesk/trading-platform/what-are-risk-categories
 
 ## Logos
 - https://eodhd.com/financial-apis-blog/40000-company-logos (requires API Key)

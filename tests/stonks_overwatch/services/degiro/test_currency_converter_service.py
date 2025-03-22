@@ -3,7 +3,7 @@ import pathlib
 
 from stonks_overwatch.repositories.degiro.models import DeGiroProductQuotation
 from stonks_overwatch.services.degiro.constants import CurrencyFX
-from stonks_overwatch.services.degiro.currency_converter_service import CurrencyConverterService
+from stonks_overwatch.services.degiro.currency_converter_service import CurrencyConverterService, CurrencyMapEntry
 from stonks_overwatch.utils.localization import LocalizationUtility
 
 import pytest
@@ -16,7 +16,7 @@ class TestCurrencyConverterService(TestCase):
         self.currency_service = CurrencyConverterService()
 
     def fixture_product_quotation_repository(self):
-        data_file = pathlib.Path("tests/resources/stonks_overwatch/repositories/product_quotations_data.json")
+        data_file = pathlib.Path("tests/resources/stonks_overwatch/repositories/degiro/product_quotations_data.json")
 
         with open(data_file, "r") as file:
             data = json.load(file)
@@ -48,16 +48,10 @@ class TestCurrencyConverterService(TestCase):
 
         assert calculated_map == {
             'EUR': {
-                'USD': {
-                    'productId': CurrencyFX.EUR_USD.value,
-                    'inverse': False
-                }
+                'USD': CurrencyMapEntry(product_id=705366, inverse=False)
             },
             'USD': {
-                'EUR': {
-                    'productId': CurrencyFX.EUR_USD.value,
-                    'inverse': True
-                }
+                'EUR': CurrencyMapEntry(product_id=705366, inverse=True)
             }
         }
 

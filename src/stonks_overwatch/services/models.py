@@ -3,9 +3,10 @@ import datetime
 import re
 from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import Any, Dict, TypedDict
+from typing import Any, Dict, Optional, TypedDict
 
 import pycountry
+from iso10383 import MICEntry
 
 from stonks_overwatch.utils.constants import ProductType, Sector
 from stonks_overwatch.utils.localization import LocalizationUtility
@@ -100,10 +101,8 @@ class PortfolioEntry:
     sector: Sector = None
     industry: str = ""
     category: str = ""
-    exchange_id: str = ""
-    exchange_abbr: str = ""
-    exchange_name: str = ""
-    country: Country = None
+    exchange: Optional[MICEntry] = None
+    country: Optional[Country] = None
     product_type: ProductType = None
     shares: float = 0.0
     product_currency: str = ""
@@ -142,6 +141,9 @@ class PortfolioEntry:
         result = asdict(self)
         result['country'] = country_name
         result['sector'] = self.sector.value if self.sector else ""
+        del result['exchange']
+        result['exchange_acronym'] = self.get_exchange_acronym()
+        result['exchange_name'] = self.get_exchange_name()
         result['symbol_url'] = self.symbol_url
         result['product_type'] = self.product_type.value
         result['formatted_portfolio_size'] = self.formatted_portfolio_size
@@ -158,8 +160,22 @@ class PortfolioEntry:
 
         if self.product_type == ProductType.CASH:
             result['category'] = ""
-            result['exchange_abbr'] = ""
         return result
+
+    def get_exchange_acronym(self) -> str:
+        acronym = self.exchange.acronym if self.exchange else ""
+        if acronym is None:
+            acronym = self.exchange.operating_mic.acronym if self.exchange.operating_mic else ""
+        # If no acronym is found, use the MIC
+        if acronym is None:
+            acronym = self.exchange.mic if self.exchange else ""
+
+        return acronym
+
+    def get_exchange_name(self) -> str:
+        name = self.exchange.market_name if self.exchange else ""
+
+        return name.title()
 
     def formatted_portfolio_size(self) -> str :
         return f"{self.portfolio_size:.2%}"

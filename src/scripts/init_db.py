@@ -10,6 +10,7 @@ Usage:
     poetry run src/manage.py runscript init_db --script-args transactions
     poetry run src/manage.py runscript init_db --script-args products
     poetry run src/manage.py runscript init_db --script-args companies
+    poetry run src/manage.py runscript init_db --script-args yfinance
 """
 
 import logging
@@ -66,6 +67,9 @@ def company_profile_import(update_service: UpdateService) -> None:
     logging.info("Importing DeGiro Company Profiles...")
     update_service.update_company_profile()
 
+def yfinance(update_service: UpdateService) -> None:
+    logging.info("Importing YFinance Data...")
+    update_service.update_yfinance()
 
 def run(*args):
     init()
@@ -80,11 +84,14 @@ def run(*args):
         products_info_import(update_service)
     elif "companies" in args:
         company_profile_import(update_service)
+    elif "yfinance" in args:
+        yfinance(update_service)
     else:
         account_import(update_service)
         transactions_import(update_service)
         products_info_import(update_service)
         company_profile_import(update_service)
+        yfinance(update_service)
 
 
 if __name__ == "__main__":

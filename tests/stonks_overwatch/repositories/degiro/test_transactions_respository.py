@@ -11,7 +11,7 @@ from django.test import TestCase
 @pytest.mark.django_db
 class TestTransactionsRepository(TestCase):
     def setUp(self):
-        data_file = pathlib.Path("tests/resources/stonks_overwatch/repositories/transactions_data.json")
+        data_file = pathlib.Path("tests/resources/stonks_overwatch/repositories/degiro/transactions_data.json")
 
         with open(data_file, "r") as file:
             data = json.load(file)
