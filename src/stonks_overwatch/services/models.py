@@ -166,6 +166,9 @@ class PortfolioEntry:
         acronym = self.exchange.acronym if self.exchange else ""
         if acronym is None:
             acronym = self.exchange.operating_mic.acronym if self.exchange.operating_mic else ""
+        # If no acronym is found, use the MIC
+        if acronym is None:
+            acronym = self.exchange.mic if self.exchange else ""
 
         return acronym
 
