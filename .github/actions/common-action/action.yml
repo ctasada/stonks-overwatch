@@ -25,7 +25,7 @@ runs:
     #  -----  install & configure poetry  -----
     #----------------------------------------------
     - name: Install Python poetry
-      if: steps.cached-poetry.outputs.cache-hit != 'true'
+      #if: steps.cached-poetry.outputs.cache-hit != 'true'
       uses: snok/install-poetry@v1
       with:
         virtualenvs-create: true
@@ -45,6 +45,6 @@ runs:
     # install dependencies if cache does not exist
     #----------------------------------------------
     - name: Install dependencies
-      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      #if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       run: poetry install --no-interaction --no-root
       shell: "bash"
