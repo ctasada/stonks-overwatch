@@ -38,7 +38,7 @@ class TestDividendsService(TestCase):
         )
 
     def fixture_cash_movements_repository(self):
-        data_file = pathlib.Path("tests/resources/stonks_overwatch/repositories/cash_movements_data.json")
+        data_file = pathlib.Path("tests/resources/stonks_overwatch/repositories/degiro/cash_movements_data.json")
 
         with open(data_file, "r") as file:
             data = json.load(file)
@@ -53,7 +53,7 @@ class TestDividendsService(TestCase):
 
 
     def fixture_product_info_repository(self):
-        data_file = pathlib.Path("tests/resources/stonks_overwatch/repositories/product_info_data.json")
+        data_file = pathlib.Path("tests/resources/stonks_overwatch/repositories/degiro/product_info_data.json")
 
         with open(data_file, "r") as file:
             data = json.load(file)
@@ -64,7 +64,7 @@ class TestDividendsService(TestCase):
             self.created_objects[key] = obj
 
     def fixture_product_quotation_repository(self):
-        data_file = pathlib.Path("tests/resources/stonks_overwatch/repositories/product_quotations_data.json")
+        data_file = pathlib.Path("tests/resources/stonks_overwatch/repositories/degiro/product_quotations_data.json")
 
         with open(data_file, "r") as file:
             data = json.load(file)

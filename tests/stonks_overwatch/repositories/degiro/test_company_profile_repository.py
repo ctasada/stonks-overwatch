@@ -10,7 +10,7 @@ from django.test import TestCase
 @pytest.mark.django_db
 class TestCompanyProfileRepository(TestCase):
     def setUp(self):
-        data_file = pathlib.Path("tests/resources/stonks_overwatch/repositories/company_profile_data.json")
+        data_file = pathlib.Path("tests/resources/stonks_overwatch/repositories/degiro/company_profile_data.json")
 
         with open(data_file, "r") as file:
             data = json.load(file)

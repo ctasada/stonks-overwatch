@@ -11,7 +11,7 @@ from django.test import TestCase
 @pytest.mark.django_db
 class TestProductQuotationsRepository(TestCase):
     def setUp(self):
-        data_file = pathlib.Path("tests/resources/stonks_overwatch/repositories/product_quotations_data.json")
+        data_file = pathlib.Path("tests/resources/stonks_overwatch/repositories/degiro/product_quotations_data.json")
 
         with open(data_file, "r") as file:
             data = json.load(file)

@@ -15,11 +15,11 @@ from stonks_overwatch.services.degiro.currency_converter_service import Currency
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.deposits import DepositsService
 from stonks_overwatch.services.models import Country, DailyValue, PortfolioEntry, TotalPortfolio
+from stonks_overwatch.services.yfinance.y_finance import YFinance
 from stonks_overwatch.utils.constants import ProductType, Sector
 from stonks_overwatch.utils.datetime import DateTimeUtility
 from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.logger import StonksLogger
-from stonks_overwatch.utils.y_finance import get_stock_splits
 
 class PortfolioService:
     logger = StonksLogger.get_logger("stocks_portfolio.portfolio_data.degiro", "[DEGIRO|PORTFOLIO]")
@@ -36,6 +36,7 @@ class PortfolioService:
         )
         self.transactions = TransactionsRepository()
         self.product_info = ProductInfoRepository()
+        self.yfinance = YFinance()
 
     @cached_property
     def get_portfolio(self) -> List[PortfolioEntry]:
@@ -387,7 +388,7 @@ class PortfolioService:
             for d in dates[index:]:
                 position_value[d] = entry["history"][date_change]
 
-        stock_splits = get_stock_splits(entry["product"]["symbol"])
+        stock_splits = self.yfinance.get_stock_splits(entry["product"]["symbol"])
         if len(stock_splits) > 0:
             stocks_multiplier = 1
             for split_data in reversed(stock_splits):
