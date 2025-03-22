@@ -42,11 +42,9 @@ class YFinance:
 
         try:
             if ticker_info.get('country'):
-                print(f"Country for {symbol}: {ticker_info['country']}")
                 return Country(ticker_info['country'])
 
             if ticker_info.get('region'):
-                print(f"Region for {symbol}: {ticker_info['region']}")
                 return Country(ticker_info['region'])
         except AttributeError:
             pass

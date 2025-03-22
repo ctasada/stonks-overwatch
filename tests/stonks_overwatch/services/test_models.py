@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from iso10383 import MIC
+
 from stonks_overwatch.services.models import (
     AccountOverview,
     Country,
@@ -116,9 +118,7 @@ def test_portfolio_entry():
         sector=Sector.TECHNOLOGY,
         industry="Tech",
         category="A",
-        exchange_id="NASDAQ",
-        exchange_abbr="NASDAQ",
-        exchange_name="NASDAQ",
+        exchange=MIC.xnas.value,
         country=Country("US"),
         product_type=ProductType.STOCK,
         shares=100,
@@ -158,7 +158,8 @@ def test_portfolio_entry():
     assert as_dict["sector"] == "Technology"
     assert as_dict["industry"] == "Tech"
     assert as_dict["category"] == "A"
-    assert as_dict["exchange_id"] == "NASDAQ"
+    assert as_dict["exchange_acronym"] == "NASDAQ"
+    assert as_dict["exchange_name"] == "Nasdaq"
     assert as_dict["symbol_url"] == "https://logos.stockanalysis.com/aapl.svg"
 
 
@@ -180,7 +181,6 @@ def test_cash_portfolio_entry():
     assert as_dict["sector"] == ""
     assert as_dict["industry"] == ""
     assert as_dict["category"] == ""
-    assert as_dict["exchange_abbr"] == ""
 
 def test_deposit():
     model = Deposit(
