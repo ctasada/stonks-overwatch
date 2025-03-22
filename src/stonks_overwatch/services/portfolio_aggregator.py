@@ -5,9 +5,9 @@ from stonks_overwatch.services.bitvavo.portfolio import PortfolioService as Bitv
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.portfolio import PortfolioService as DeGiroPortfolioService
 from stonks_overwatch.services.models import DailyValue, PortfolioEntry, PortfolioId, TotalPortfolio
+from stonks_overwatch.services.yfinance.y_finance import YFinance
 from stonks_overwatch.utils.constants import ProductType, Sector
 from stonks_overwatch.utils.logger import StonksLogger
-from stonks_overwatch.utils.y_finance import get_country, get_sector_industry
 
 class PortfolioAggregatorService:
     logger = StonksLogger.get_logger("stocks_portfolio.portfolio_data", "[AGGREGATOR]")
@@ -18,6 +18,7 @@ class PortfolioAggregatorService:
             degiro_service=self.degiro_service,
         )
         self.bitvavo_portfolio = BitvavoPortfolioService()
+        self.yfinance = YFinance()
 
     def get_portfolio(self, selected_portfolio: PortfolioId) -> List[PortfolioEntry]:
         self.logger.debug("Get Portfolio")
@@ -39,11 +40,11 @@ class PortfolioAggregatorService:
             entry.portfolio_size = size
             # If some of the data is missing, we try to get it from yfinance
             if not entry.country and entry.product_type in [ProductType.STOCK, ProductType.ETF]:
-                entry.country = get_country(entry.symbol)
+                entry.country = self.yfinance.get_country(entry.symbol)
 
             if ((entry.sector == Sector.UNKNOWN or entry.industry == 'Unknown')
                     and entry.product_type in [ProductType.STOCK]):
-                sector, industry = get_sector_industry(entry.symbol)
+                sector, industry = self.yfinance.get_sector_industry(entry.symbol)
                 if entry.sector == Sector.UNKNOWN:
                     entry.sector = sector
                 if entry.industry == 'Unknown':

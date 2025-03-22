@@ -192,7 +192,6 @@ Passing the parameter `profile=true` will enable profiling, and `debug=true` wil
 - [ ] Check migration from ChartJS to https://plotly.com/javascript/ or https://recharts.org/ or https://d3js.org
 - [ ] Track https://github.com/chartjs/Chart.js/issues/11005
 - [ ] Review Portfolio growth. Indicates negative growth, which never really happened.
-- [ ] Some stocks (mainly Spanish) don't have Sector or other data. Find workaround
 - [ ] Fontawesome is replaceable by https://icons.getbootstrap.com
 - [ ] Provide more information in the Dashboard performance overview
 - [ ] Migrate UI to https://github.com/coreui/coreui
@@ -207,6 +206,7 @@ Passing the parameter `profile=true` will enable profiling, and `debug=true` wil
   - Tiingo: https://www.tiingo.com/products/end-of-day-stock-price-data
     - https://www.tiingo.com/documentation/end-of-day
   - Alpaca: https://alpaca.markets
+- [ ] Create assets endpoint to centralize the logos logic and support alternatives and caching
 
 ## Logos
 - https://eodhd.com/financial-apis-blog/40000-company-logos (requires API Key)
