@@ -4,6 +4,7 @@ from typing import List, Optional
 
 from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
 from django.utils.functional import cached_property
+from iso10383 import MIC
 
 from stonks_overwatch.config.config import Config
 from stonks_overwatch.repositories.degiro.cash_movements_repository import CashMovementsRepository
@@ -101,14 +102,12 @@ class PortfolioService:
                 base_currency_value = value
                 base_currency_break_even_price = break_even_price
 
-            exchange_id = info["exchangeId"]
-            exchange_abbr = exchange_name = None
-
             if exchanges := products_config.get("exchanges"):
-                exchange = next((ex for ex in exchanges if ex["id"] == int(exchange_id)), None)
-                if exchange:
-                    exchange_abbr = exchange["hiqAbbr"]
-                    exchange_name = exchange["name"]
+                exchange_id = info["exchangeId"]
+                degiro_exchange = next((ex for ex in exchanges if ex["id"] == int(exchange_id)), None)
+                if degiro_exchange and 'micCode' in degiro_exchange:
+                    miccode = degiro_exchange["micCode"].lower()
+                    exchange = MIC[miccode].value
 
             my_portfolio.append(
                 PortfolioEntry(
@@ -117,9 +116,7 @@ class PortfolioService:
                     sector=Sector.from_str(sector),
                     industry=industry,
                     category=info["category"],
-                    exchange_id=exchange_id,
-                    exchange_abbr=exchange_abbr,
-                    exchange_name=exchange_name,
+                    exchange=exchange,
                     country=Country(country) if country != "Unknown" else None,
                     product_type=ProductType.from_str(info["productType"]),
                     shares=tmp["size"],
