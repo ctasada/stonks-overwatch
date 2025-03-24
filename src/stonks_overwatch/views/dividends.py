@@ -7,6 +7,7 @@ from django.views import View
 
 from stonks_overwatch.config.config import Config
 from stonks_overwatch.services.degiro.account_overview import AccountOverview
+from stonks_overwatch.services.degiro.constants import ProductType
 from stonks_overwatch.services.dividends_aggregator import DividendsAggregatorService
 from stonks_overwatch.services.session_manager import SessionManager
 from stonks_overwatch.utils.localization import LocalizationUtility
@@ -171,7 +172,8 @@ class Dividends(View):
             total_dividends += dividend_change
             dividends[dividend_name] = {
                 "value": dividend_value + dividend_change,
-                "logo": entry.symbol_url,
+                "symbol": entry.stock_symbol,
+                "product_type": ProductType.STOCK.name,
             }
 
         # Calculate dividend ratios
@@ -188,7 +190,8 @@ class Dividends(View):
                     "size": dividends_size,
                     "formatted_size": f"{dividends_size:.2%}",
                     "weight": (dividends[key]["dividends_size"] / max_percentage) * 100,
-                    "logo": dividends[key]["logo"],
+                    "symbol": dividends[key]["symbol"],
+                    "product_type": dividends[key]["product_type"],
                 }
             )
         dividends_table = sorted(dividends_table, key=lambda k: k["value"], reverse=True)

@@ -55,10 +55,11 @@ class Diversification(View):
                 stocks_table.append(
                     {
                         "name": stock.name,
+                        "product_type": stock.product_type.name,
+                        "symbol": stock.symbol,
                         "size": stock.portfolio_size,
                         "formatted_size": stock.formatted_portfolio_size,
                         "weight": (stock.portfolio_size / max_percentage) * 100,
-                        "logo": stock.symbol_url,
                     }
                 )
 

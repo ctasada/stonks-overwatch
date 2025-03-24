@@ -10,7 +10,6 @@ from iso10383 import MICEntry
 
 from stonks_overwatch.utils.constants import ProductType, Sector
 from stonks_overwatch.utils.localization import LocalizationUtility
-from stonks_overwatch.utils.logos import symbol_url
 
 @dataclass
 class AccountOverview:
@@ -44,10 +43,6 @@ class AccountOverview:
                 value=self.change, currency=self.currency
             )
         return ""
-
-    @property
-    def symbol_url(self) -> str:
-        return symbol_url(self.stock_symbol, ProductType.STOCK)
 
 class Country:
     def __init__(self, iso_code: str):
@@ -129,10 +124,6 @@ class PortfolioEntry:
         return self.realized_gain / self.total_costs \
             if self.realized_gain != 0.0 and self.total_costs != 0.0 else 0.0
 
-    @property
-    def symbol_url(self) -> str:
-        return symbol_url(self.symbol, self.product_type)
-
     def to_dict(self) -> Dict[str, Any]:
         # FIXME: The asdict does infinite recursion. Need to handle the country separately
         country_name = self.country.get_name() if self.country else "Unknown Country"
@@ -144,7 +135,6 @@ class PortfolioEntry:
         del result['exchange']
         result['exchange_acronym'] = self.get_exchange_acronym()
         result['exchange_name'] = self.get_exchange_name()
-        result['symbol_url'] = self.symbol_url
         result['product_type'] = self.product_type.value
         result['formatted_portfolio_size'] = self.formatted_portfolio_size
         result['formatted_break_even_price'] = self.formatted_break_even_price

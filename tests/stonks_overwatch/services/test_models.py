@@ -39,8 +39,6 @@ def test_default_account_overview():
         model.value_date()
     with pytest.raises(AttributeError):
         model.value_time()
-    with pytest.raises(TypeError):
-        model.symbol_url()
 
     assert model.type_str() == ""
     assert model.formated_change() == ""
@@ -64,7 +62,6 @@ def test_account_overview():
     assert model.value_time() == now.strftime("%H:%M:%S")
     assert model.type_str() == "Buy Transaction"
     assert model.formated_change() == "€ -14.36"
-    assert model.symbol_url == "https://logos.stockanalysis.com/aapl.svg"
 
     model.change = 0
     assert model.formated_change() == ""
@@ -86,8 +83,6 @@ def test_default_portfolio_entry():
 
     assert model.percentage_unrealized_gain == 0.0
     assert model.percentage_realized_gain == 0.0
-    with pytest.raises(TypeError):
-        model.symbol_url()
     assert model.formatted_portfolio_size() == "0.00%"
     with pytest.raises(ValueError):
         model.formatted_break_even_price()
@@ -139,7 +134,6 @@ def test_portfolio_entry():
 
     assert model.percentage_unrealized_gain == 0.08333333333333333
     assert model.percentage_realized_gain == 0.0
-    assert model.symbol_url == "https://logos.stockanalysis.com/aapl.svg"
     assert model.formatted_portfolio_size() == "1.00%"
     assert model.formatted_break_even_price() == "$ 120.00"
     assert model.formatted_base_currency_break_even_price() == "€ 100.00"
@@ -160,7 +154,6 @@ def test_portfolio_entry():
     assert as_dict["category"] == "A"
     assert as_dict["exchange_acronym"] == "NASDAQ"
     assert as_dict["exchange_name"] == "Nasdaq"
-    assert as_dict["symbol_url"] == "https://logos.stockanalysis.com/aapl.svg"
 
 
 def test_cash_portfolio_entry():
