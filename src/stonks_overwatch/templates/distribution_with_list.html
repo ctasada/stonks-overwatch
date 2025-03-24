@@ -8,11 +8,9 @@
                 <div class="progress-bar-background" style="width: {{ item.weight }}%;"></div>
                 <div class="diversification-weight">
                     <div>
-                    {% if item.logo %}
-                    <img class="rounded-circle bg-white" src="{{ item.logo }}" width="30" height="30" alt="{{ item.symbol }} logo" onerror="this.style.display='none'">
-                    {% elif item.symbol %}
-                    <div class="rounded-circle bg-white" style="width: 30px; height: 30px; display: inline-block; text-align: center; line-height: 30px;">{{ item.symbol }}</div>
-                    {% endif %}
+                        {% if item.product_type %}
+                            <img class="rounded-circle bg-white" src="{% url 'asset_logo' product_type=item.product_type|lower symbol=item.symbol|lower %}" width="30" height="30" alt="{{ item.symbol }} logo" onerror="this.style.display='none'">
+                        {% endif %}
                     {{ item.name }}</div>
                     <div>{{ item.formatted_size }}</div>
                 </div>

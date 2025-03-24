@@ -215,6 +215,7 @@ Passing the parameter `profile=true` will enable profiling, and `debug=true` wil
 - https://github.com/ahmeterenodaci/Nasdaq-Stock-Exchange-including-Symbols-and-Logos?tab=readme-ov-file (misses many icons)
 - https://data.nasdaq.com/databases/LOGO (requires Token)
 - https://logos.stockanalysis.com/aapl.svg (misses some stocks)
+- https://docs.logo.dev/logo-images/ticker (requires Token) [review]
 
 # Portfolio Performance
 - https://portfolioslab.com/tools/stock-comparison/AAPL/MSFT
