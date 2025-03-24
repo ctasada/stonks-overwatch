@@ -91,6 +91,7 @@ class Diversification(View):
         max_percentage = 0.0
 
         for stock in portfolio:
+            product_type = None
             if stock.is_open:
                 symbol = None
                 if field_name == "product_type":
@@ -101,9 +102,11 @@ class Diversification(View):
                         continue
                     name = stock.country.get_name() if stock.country else "Unknown Country"
                     symbol = stock.country.get_flag() if stock.country else None
+                    product_type = "country"
                 elif field_name == "product_currency":
-                    symbol = LocalizationUtility.get_currency_symbol(stock.product_currency)
+                    symbol = stock.product_currency
                     name = stock.product_currency
+                    product_type = ProductType.CASH.name
                 elif field_name == "sector":
                     name = stock.sector.value if stock.sector else Sector.UNKNOWN.value
                 else:
@@ -117,6 +120,7 @@ class Diversification(View):
                     "value": value + stock.base_currency_value,
                     "portfolio_size": portfolio_size + stock.portfolio_size,
                     "symbol": symbol,
+                    "product_type": product_type,
                 }
                 max_percentage = max(max_percentage, data[name]["portfolio_size"])
 
@@ -130,6 +134,7 @@ class Diversification(View):
                     "formatted_size": f"{portfolio_size:.2%}",
                     "weight": (data[key]["portfolio_size"] / max_percentage) * 100,
                     "symbol": data[key]["symbol"],
+                    "product_type": data[key]["product_type"],
                 }
             )
         data_table = sorted(data_table, key=lambda k: k["value"], reverse=True)
