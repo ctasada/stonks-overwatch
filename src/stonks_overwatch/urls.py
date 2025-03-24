@@ -2,6 +2,7 @@ from django.urls import path
 from django.views.generic import RedirectView
 
 from stonks_overwatch.views.account_overview import AccountOverview
+from stonks_overwatch.views.asset_logos import AssetLogoView
 from stonks_overwatch.views.configuration import ConfigurationView
 from stonks_overwatch.views.dashboard import Dashboard
 from stonks_overwatch.views.deposits import Deposits
@@ -24,4 +25,5 @@ urlpatterns = [
     path("portfolio", Portfolio.as_view(), name="portfolio"),
     path("transactions", Transactions.as_view(), name="transactions"),
     path("configuration", ConfigurationView.as_view(), name="configuration"),
+    path('assets/<str:product_type>/<str:symbol>', AssetLogoView.as_view(), name='asset_logo'),
 ]
