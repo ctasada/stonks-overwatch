@@ -352,14 +352,14 @@ files = [
 
 [[package]]
 name = "degiro-connector"
-version = "3.0.26"
+version = "3.0.27"
 description = "This is yet another library to access Degiro's API."
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "degiro_connector-3.0.26-py3-none-any.whl", hash = "sha256:57bcc3d9515a2ba0f6aa3a976ba7a37d5e4024d51000e1f924cfe05c3f0fb278"},
-    {file = "degiro_connector-3.0.26.tar.gz", hash = "sha256:1b78299ad0e2f41d521059736002fdabe75297539d7ab51fb16ead41d24b61f4"},
+    {file = "degiro_connector-3.0.27-py3-none-any.whl", hash = "sha256:c7e06419daeb821de9266ab878c07b9b714ed49a546023268c3cea3f2b25e715"},
+    {file = "degiro_connector-3.0.27.tar.gz", hash = "sha256:348734da3a52c9fcfa256269768a2a00626f698710998e15c53489fb2f64568e"},
 ]
 
 [package.dependencies]
@@ -1554,14 +1554,14 @@ files = [
 
 [[package]]
 name = "setuptools"
-version = "77.0.3"
+version = "78.0.1"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "setuptools-77.0.3-py3-none-any.whl", hash = "sha256:67122e78221da5cf550ddd04cf8742c8fe12094483749a792d56cd669d6cf58c"},
-    {file = "setuptools-77.0.3.tar.gz", hash = "sha256:583b361c8da8de57403743e756609670de6fb2345920e36dc5c2d914c319c945"},
+    {file = "setuptools-78.0.1-py3-none-any.whl", hash = "sha256:1cc9b32ee94f93224d6c80193cbb768004667aa2f2732a473d6949b0236c1d4e"},
+    {file = "setuptools-78.0.1.tar.gz", hash = "sha256:4321d2dc2157b976dee03e1037c9f2bc5fea503c0c47d3c9458e0e8e49e659ce"},
 ]
 
 [package.extras]
@@ -1627,14 +1627,14 @@ files = [
 
 [[package]]
 name = "tzdata"
-version = "2025.1"
+version = "2025.2"
 description = "Provider of IANA time zone data"
 optional = false
 python-versions = ">=2"
 groups = ["main"]
 files = [
-    {file = "tzdata-2025.1-py2.py3-none-any.whl", hash = "sha256:7e127113816800496f027041c570f50bcd464a020098a3b6b199517772303639"},
-    {file = "tzdata-2025.1.tar.gz", hash = "sha256:24894909e88cdb28bd1636c6887801df64cb485bd593f2fd83ef29075a81d694"},
+    {file = "tzdata-2025.2-py2.py3-none-any.whl", hash = "sha256:1a403fada01ff9221ca8044d701868fa132215d84beb92242d9acd2147f667a8"},
+    {file = "tzdata-2025.2.tar.gz", hash = "sha256:b60a638fcc0daffadf82fe0f57e53d06bdec2f36c4df66280ae79bce6bd6f2b9"},
 ]
 
 [[package]]
@@ -1838,4 +1838,4 @@ repair = ["scipy (>=1.6.3)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "29ddc67879237cd7bf176171ca1889220cebac6d723a2c0acd66d35a4ae1ca0b"
+content-hash = "7de60219516f867b55bf54036885beed9e25fd77f9db4311c5dc888725c3e9ed"

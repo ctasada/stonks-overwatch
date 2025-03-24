@@ -31,17 +31,7 @@
         <tbody>
         {% for item in items %}
             <tr>
-                {% if item.product_type == 'Cash' %}
-                    {% if item.product_currency == 'USD' %}
-                        <td class="text-center align-middle"><i class="fa-solid fa-dollar-sign fa-xl"></i></td>
-                    {% else %}
-                        <td class="text-center align-middle"><i class="fa-solid fa-euro-sign fa-xl"></i></td>
-                    {% endif %}
-                {% elif item.symbol_url %}
-                    <td class="text-center align-middle"><img src="{{ item.symbol_url }}" width="30" height="30" alt="{{ item.symbol }} logo" onerror="this.style.display='none'"></td>
-                {% else %}
-                    <td class="text-center align-middle"></td>
-                {% endif %}
+                <td class="text-center align-middle"><img src="{% url 'asset_logo' product_type=item.product_type|lower symbol=item.symbol|lower %}" width="30" height="30" alt="{{ item.symbol }} logo" onerror="this.style.display='none'"></td>
                 <td>{{ item.symbol }}<br><small class="fw-lighter">{{ item.name }}</small></td>
                 <td>
                     <div class="d-inline-flex gap-1">

@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1
 FROM python:3-slim AS builder
 # set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1 \
-    PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
 RUN apt-get update && \
     apt-get upgrade -y && \
@@ -50,5 +50,3 @@ COPY ./src /app/src
 COPY ./src/init.sh /app/init.sh
 # FIXME: Secrets must be provided in a more secure way
 COPY ./config /app/config
-
-# FIXME: Database should be created if doesn't exist
