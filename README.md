@@ -164,6 +164,7 @@ Passing the parameter `profile=true` will enable profiling, and `debug=true` wil
 ## BUGS
 - Dashboard: JNJ & JPM are associated with the wrong sector
 - IBERDROLA Non-Tradable Dividends: Are properly calculated? Doesn't seem to calculate quantity properly
+- Dividends show IBE.D as a dividend, when should show IBE
 - Some stocks are no longer available in DeGiro. Need to find a way to handle them
     - 'ATVI'(350113856)
     - 'TYME'(600028575)
@@ -206,7 +207,6 @@ Passing the parameter `profile=true` will enable profiling, and `debug=true` wil
   - Tiingo: https://www.tiingo.com/products/end-of-day-stock-price-data
     - https://www.tiingo.com/documentation/end-of-day
   - Alpaca: https://alpaca.markets
-- [ ] Create assets endpoint to centralize the logos logic and support alternatives and caching
 - [ ] DEGIRO Risk Category is a local term: https://www.degiro.ie/helpdesk/trading-platform/what-are-risk-categories
 
 ## Logos

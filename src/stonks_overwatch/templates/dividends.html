@@ -4,6 +4,11 @@
 {% block content %}
 
 <div class="container-fluid row-gap-5">
+    {% if total_dividends == None%}
+    <div class="row mt-2 column-gap-3">
+        <h4 class="mb-1">No dividends found</h4>
+    </div>
+    {% else %}
     <div class="row mt-2 column-gap-3">
         <div class="col-md-auto border border-primary-subtle bg-light rounded mb-3">
             <label class="col-form-label-p-0 text-secondary">Total Dividends</label>
@@ -14,7 +19,7 @@
     <div class="row border border-primary-subtle bg-light rounded mb-3">
         <div class="row mt-2">
             <div class="col">
-                <h5 class="mb-1">Divident Cash Flow</h5>
+                <h5 class="mb-1">Dividend Cash Flow</h5>
             </div>
             <div class="col float-end text-end">
                 <div class="btn-group btn-group-sm" role="group">
@@ -81,6 +86,7 @@
         {% endfor %}
         </div>
     </div>
+    {% endif %}
 </div>
 <!-- ChartJS -->
 <script src="{% static 'chart.js/dist/chart.umd.js' %}"></script>
