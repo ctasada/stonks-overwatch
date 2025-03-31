@@ -33,13 +33,18 @@ class Dividends(View):
         dividends_diversification = self._get_diversification(dividends_overview)
         total_dividends = self._get_total_dividends(dividends_calendar)
 
-        context = {
-            "total_dividends": total_dividends,
-            "dividendsCalendar": dividends_calendar,
-            "dividendsDiversification": dividends_diversification,
-            "dividendsGrowth": dividends_growth,
-            "currencySymbol": LocalizationUtility.get_currency_symbol(self.base_currency),
-        }
+        if total_dividends > 0.0:
+            context = {
+                "total_dividends": LocalizationUtility.format_money_value(
+                    value=total_dividends, currency=self.base_currency
+                ),
+                "dividendsCalendar": dividends_calendar,
+                "dividendsDiversification": dividends_diversification,
+                "dividendsGrowth": dividends_growth,
+                "currencySymbol": LocalizationUtility.get_currency_symbol(self.base_currency),
+            }
+        else:
+            context = {}
 
         return render(request, "dividends.html", context)
 
@@ -140,13 +145,13 @@ class Dividends(View):
         dividends_growth = dict(sorted(dividends_growth.items(), key=lambda item: item[0]))
         return dividends_growth
 
-    def _get_total_dividends(self, dividends_calendar: dict) -> str:
+    def _get_total_dividends(self, dividends_calendar: dict) -> float:
         total_dividends = 0
         for month_year in dividends_calendar.keys():
             month_entry = dividends_calendar.setdefault(month_year, {})
             total_dividends += month_entry["total"]
 
-        return LocalizationUtility.format_money_value(value=total_dividends, currency=self.base_currency)
+        return total_dividends
 
     def _get_diversification(self, dividends_overview: List[AccountOverview]) -> dict:
         dividends_table = []
