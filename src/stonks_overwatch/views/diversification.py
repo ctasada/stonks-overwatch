@@ -109,6 +109,8 @@ class Diversification(View):
                     product_type = ProductType.CASH.name
                 elif field_name == "sector":
                     name = stock.sector.value if stock.sector else Sector.UNKNOWN.value
+                    symbol = stock.sector.to_logo() if stock.sector else Sector.UNKNOWN.to_logo()
+                    product_type = "sector"
                 else:
                     name =  getattr(stock, field_name)
                 value = 0.0

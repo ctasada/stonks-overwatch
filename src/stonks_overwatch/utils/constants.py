@@ -66,3 +66,29 @@ class Sector(Enum):
             return Sector.ENERGY
 
         raise ValueError(f"Unknown sector: {label}")
+
+    def to_logo(self) -> str: # noqa: C901
+        if self == Sector.TECHNOLOGY:
+            return "🖥️"
+        elif self == Sector.FINANCIAL_SERVICES:
+            return "🏦"
+        elif self == Sector.HEALTHCARE:
+            return "🏥"
+        elif self == Sector.CONSUMER_CYCLICAL:
+            return "🛒"
+        elif self == Sector.COMMUNICATION_SERVICES:
+            return "💬"
+        elif self == Sector.BASIC_MATERIALS:
+            return "🧱"
+        elif self == Sector.INDUSTRIALS:
+            return "🏭"
+        elif self == Sector.REAL_ESTATE:
+            return "🏠"
+        elif self == Sector.CONSUMER_DEFENSIVE:
+            return "📦"
+        elif self == Sector.UTILITIES:
+            return "🔨"
+        elif self == Sector.ENERGY:
+            return "⚡️"
+        else:
+            return "?"

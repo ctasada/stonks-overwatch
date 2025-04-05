@@ -1,76 +1,85 @@
 {
-    "cash_transaction_1": {
-      "date": "2020-03-10T08:28:14Z",
-      "value_date": "2020-03-10T08:28:14Z",
-      "description": "iDEAL storting",
-      "change": 100.0,
-      "currency": "EUR",
-      "balance_total": 100.0,
-      "type": "CASH_TRANSACTION"
-    },
-    "cash_transaction_2": {
-      "date": "2020-03-10T08:28:14Z",
-      "value_date": "2020-03-10T08:28:14Z",
-      "description": "iDEAL Deposit",
-      "change": 200.0,
-      "currency": "EUR",
-      "balance_total": 300.0,
-      "type": "CASH_TRANSACTION"
-    },
-    "cash_fund_transaction": {
-      "date": "2020-03-11T16:06:05Z",
-      "value_date": "2020-03-11T23:59:59Z",
-      "description": "Conversie geldmarktfonds: Koop 0,000001 @ 9.951,3411 EUR",
-      "change": null,
-      "currency": "EUR",
-      "balance_total": 300.0,
-      "type": "CASH_FUND_TRANSACTION"
-    },
-    "cash_fund_nav_change": {
-      "date": "2020-03-12T00:00:00Z",
-      "value_date": "2020-03-12T00:00:00Z",
-      "description": "Koersverandering geldmarktfonds (EUR)",
-      "change": -0.01,
-      "currency": "EUR",
-      "balance_total": 299.99,
-      "type": "CASH_FUND_NAV_CHANGE"
-    },
-    "dividend": {
-        "date": "2021-03-12T08:16:38Z",
-        "value_date": "2021-03-11T23:59:59Z",
-        "description": "Dividend",
-        "change": 8.4,
-        "currency": "USD",
-        "balance_total": 300.0,
-        "product_id": 332111,
-        "type": "CASH_TRANSACTION"
-    },
-    "payment": {
-      "date": "2024-02-22T10:32:00Z",
-      "value_date": "2024-02-22T10:32:00Z",
-      "description": "Storting mislukt; IDEAL@5.000 EUR",
-      "change": null,
-      "currency": "EUR",
-      "balance_total": null,
-      "type": "PAYMENT"
-    },
-    "transaction": {
-      "date": "2024-08-29T14:33:41Z",
-      "value_date": "2024-08-29T14:33:41Z",
-      "description": "Koop 2 @ 100,000 EUR",
-      "change": -200.0,
-      "currency": "EUR",
-      "balance_total": 300.0,
-      "product_id": 331868,
-      "type": "TRANSACTION"
-    },
-    "flatex_cash_sweep": {
-      "date": "2024-09-16T18:46:52Z",
-      "value_date": "2024-09-16T18:46:52Z",
-      "description": "Degiro Cash Sweep Transfer",
-      "change": -14.36,
-      "currency": "EUR",
-      "balance_total": 300.0,
-      "type": "FLATEX_CASH_SWEEP"
-    }
+  "cash_transaction_1": {
+    "date": "2020-03-10T08:28:14Z",
+    "value_date": "2020-03-10T08:28:14Z",
+    "description": "iDEAL storting",
+    "change": 100.0,
+    "currency": "EUR",
+    "balance_total": 100.0,
+    "type": "CASH_TRANSACTION"
+  },
+  "cash_transaction_2": {
+    "date": "2020-03-10T08:28:14Z",
+    "value_date": "2020-03-10T08:28:14Z",
+    "description": "iDEAL Deposit",
+    "change": 200.0,
+    "currency": "EUR",
+    "balance_total": 300.0,
+    "type": "CASH_TRANSACTION"
+  },
+  "cash_fund_transaction": {
+    "date": "2020-03-11T16:06:05Z",
+    "value_date": "2020-03-11T23:59:59Z",
+    "description": "Conversie geldmarktfonds: Koop 0,000001 @ 9.951,3411 EUR",
+    "change": null,
+    "currency": "EUR",
+    "balance_total": 300.0,
+    "type": "CASH_FUND_TRANSACTION"
+  },
+  "cash_fund_nav_change": {
+    "date": "2020-03-12T00:00:00Z",
+    "value_date": "2020-03-12T00:00:00Z",
+    "description": "Koersverandering geldmarktfonds (EUR)",
+    "change": -0.01,
+    "currency": "EUR",
+    "balance_total": 299.99,
+    "type": "CASH_FUND_NAV_CHANGE"
+  },
+  "dividend": {
+    "date": "2021-03-12T08:16:38Z",
+    "value_date": "2021-03-11T23:59:59Z",
+    "description": "Dividend",
+    "change": 8.4,
+    "currency": "USD",
+    "balance_total": 300.0,
+    "product_id": 332111,
+    "type": "CASH_TRANSACTION"
+  },
+  "payment": {
+    "date": "2024-02-22T10:32:00Z",
+    "value_date": "2024-02-22T10:32:00Z",
+    "description": "Storting mislukt; IDEAL@5.000 EUR",
+    "change": null,
+    "currency": "EUR",
+    "balance_total": null,
+    "type": "PAYMENT"
+  },
+  "transaction": {
+    "date": "2024-08-29T14:33:41Z",
+    "value_date": "2024-08-29T14:33:41Z",
+    "description": "Koop 2 @ 100,000 EUR",
+    "change": -200.0,
+    "currency": "EUR",
+    "balance_total": 300.0,
+    "product_id": 331868,
+    "type": "TRANSACTION"
+  },
+  "refund": {
+    "date": "2024-09-15T10:22:24Z",
+    "value_date": "2024-09-15T10:22:24Z",
+    "description": "Terugstorting",
+    "change": -50.00,
+    "currency": "EUR",
+    "balance_total": 250.0,
+    "type": "CASH_TRANSACTION"
+  },
+  "flatex_cash_sweep": {
+    "date": "2024-09-16T18:46:52Z",
+    "value_date": "2024-09-16T18:46:52Z",
+    "description": "Degiro Cash Sweep Transfer",
+    "change": -14.36,
+    "currency": "EUR",
+    "balance_total": 300.0,
+    "type": "FLATEX_CASH_SWEEP"
   }
+}

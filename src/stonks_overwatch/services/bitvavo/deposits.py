@@ -39,7 +39,7 @@ class DepositsService:
                 Deposit(
                     datetime=datetime.fromtimestamp(entry["timestamp"] / 1000),
                     type=DepositType.WITHDRAWAL,
-                    change=amount,
+                    change=-amount,
                     currency=entry["symbol"],
                     description="Bitvavo Withdrawal",
                 )

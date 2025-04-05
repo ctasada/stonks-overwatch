@@ -17,6 +17,7 @@ class LogoType(Enum):
     CASH = "Cash"
     CRYPTO = "Crypto"
     COUNTRY = "Country"
+    SECTOR = "Sector"
 
     UNKNOWN = "Unknown"
 
@@ -33,6 +34,8 @@ class LogoType(Enum):
             return LogoType.CRYPTO
         elif value == "country":
             return LogoType.COUNTRY
+        elif value == "sector":
+            return LogoType.SECTOR
 
         return LogoType.UNKNOWN
 
@@ -63,7 +66,7 @@ class AssetLogoView(View):
                     content_type="image/svg+xml",
                     status=200
                 )
-            elif product_type == LogoType.COUNTRY:
+            elif product_type in [LogoType.COUNTRY, LogoType.SECTOR]:
                 url = self.__emoji_to_svg(symbol)
             else:
                 url = self.base_urls[product_type].format(symbol.lower())
