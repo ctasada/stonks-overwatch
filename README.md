@@ -208,6 +208,7 @@ Passing the parameter `profile=true` will enable profiling, and `debug=true` wil
     - https://www.tiingo.com/documentation/end-of-day
   - Alpaca: https://alpaca.markets
 - [ ] DEGIRO Risk Category is a local term: https://www.degiro.ie/helpdesk/trading-platform/what-are-risk-categories
+- [ ] Improve code quality. Check https://pyre-check.org/docs/pysa-quickstart/
 
 ## Logos
 - https://eodhd.com/financial-apis-blog/40000-company-logos (requires API Key)

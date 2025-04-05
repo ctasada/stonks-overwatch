@@ -37,18 +37,19 @@ class TestCashMovementsRepository(TestCase):
 
     def test_get_cash_movements_raw(self):
         cash_movements = CashMovementsRepository.get_cash_movements_raw()
-        assert len(cash_movements) == 8
+        assert len(cash_movements) == 9
         assert_dates_descending(cash_movements)
 
     def test_get_cash_deposits_raw(self):
         cash_deposits = CashMovementsRepository.get_cash_deposits_raw()
-        assert len(cash_deposits) == 2
+        assert len(cash_deposits) == 3
         assert cash_deposits[0]["description"] == "iDEAL storting"
         assert cash_deposits[1]["description"] == "iDEAL Deposit"
+        assert cash_deposits[2]["description"] == "Terugstorting"
 
     def test_get_total_cash_deposits_raw(self):
         total_cash_deposits = CashMovementsRepository.get_total_cash_deposits_raw()
-        assert total_cash_deposits == 300.0
+        assert total_cash_deposits == 250.0
 
     def test_get_total_cash(self):
         total_cash = CashMovementsRepository.get_total_cash()
@@ -65,6 +66,7 @@ class TestCashMovementsRepository(TestCase):
 
     def test_get_cash_balance_by_date(self):
         cash_deposits = CashMovementsRepository.get_cash_balance_by_date()
-        assert len(cash_deposits) == 2
+        assert len(cash_deposits) == 3
         assert cash_deposits[0]["balanceTotal"] == '100.0'
         assert cash_deposits[1]["balanceTotal"] == '300.0'
+        assert cash_deposits[2]["balanceTotal"] == '250.0'
