@@ -51,7 +51,7 @@ class TestAccountOverviewService(TestCase):
     def test_get_account_overview(self):
         overview = self.account_overview.get_account_overview()
 
-        assert len(overview) == 8
+        assert len(overview) == 9
         assert overview[0].date() == "2024-09-16"
         assert overview[0].time() == "18:46:52"
         assert overview[0].value_date() == "2024-09-16"
@@ -65,15 +65,15 @@ class TestAccountOverviewService(TestCase):
         assert overview[0].change == -14.36
         assert overview[0].formated_change() == "€ -14.36"
 
-        assert overview[1].date() == "2024-08-29"
-        assert overview[1].time() == "14:33:41"
-        assert overview[1].value_date() == "2024-08-29"
-        assert overview[1].value_time() == "14:33:41"
-        assert overview[1].stock_name == "Apple Inc"
-        assert overview[1].stock_symbol == "AAPL"
-        assert overview[1].description == "Koop 2 @ 100,000 EUR"
-        assert overview[1].type == "TRANSACTION"
-        assert overview[1].type_str() == "Transaction"
-        assert overview[1].currency == "EUR"
-        assert overview[1].change == -200.0
-        assert overview[1].formated_change() == "€ -200.00"
+        assert overview[2].date() == "2024-08-29"
+        assert overview[2].time() == "14:33:41"
+        assert overview[2].value_date() == "2024-08-29"
+        assert overview[2].value_time() == "14:33:41"
+        assert overview[2].stock_name == "Apple Inc"
+        assert overview[2].stock_symbol == "AAPL"
+        assert overview[2].description == "Koop 2 @ 100,000 EUR"
+        assert overview[2].type == "TRANSACTION"
+        assert overview[2].type_str() == "Transaction"
+        assert overview[2].currency == "EUR"
+        assert overview[2].change == -200.0
+        assert overview[2].formated_change() == "€ -200.00"
