@@ -64,15 +64,15 @@ class Config:
 
     def __repr__(self) -> str:
         return (f"Config(base_currency={self.base_currency}, "
-                f"degiro={self.degiro_configuration}, "
-                f"bitvavo={self.bitvavo_configuration}, "
+                f"{DegiroConfig.config_key}={self.degiro_configuration}, "
+                f"{BitvavoConfig.config_key}={self.bitvavo_configuration}, "
                 ")")
 
     @classmethod
     def from_dict(cls, data: dict) -> "Config":
         base_currency = data.get("base_currency", Config.DEFAULT_BASE_CURRENCY)
-        degiro_configuration = DegiroConfig.from_dict(data.get("degiro", {}))
-        bitvavo_configuration = BitvavoConfig.from_dict(data.get("bitvavo", {}))
+        degiro_configuration = DegiroConfig.from_dict(data.get(DegiroConfig.config_key, {}))
+        bitvavo_configuration = BitvavoConfig.from_dict(data.get(BitvavoConfig.config_key, {}))
 
         return cls(base_currency, degiro_configuration, bitvavo_configuration)
 

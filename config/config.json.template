@@ -1,4 +1,5 @@
 {
+    "base_currency": "EUR By default",
     "degiro": {
         "enabled": true,
         "credentials": {
@@ -6,7 +7,7 @@
             "password": "PASSWORD",
             "totp_secret_key": "See https://github.com/Chavithra/stonks_overwatch-connector#35-how-to-use-2fa-",
         },
-        "start_date": "PORTFOLIO CREATION DATE. Defaults to 2020-01-01"
+        "start_date": "PORTFOLIO CREATION DATE. Defaults to 2020-01-01",
         "update_frequency_minutes": "How frequently the data from DeGiro should be updated. Defaults to 5 minutes"
     },
     "bitvavo": {
@@ -14,7 +15,6 @@
         "credentials": {
             "apikey": "BITVAVO API KEY",
             "apisecret": "BITVAVO API SECRET"
-        },
+        }
     },
-    "base_currency": "EUR By default",
 }

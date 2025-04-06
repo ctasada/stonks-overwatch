@@ -77,7 +77,7 @@ class Sector(Enum):
         elif self == Sector.CONSUMER_CYCLICAL:
             return "🛒"
         elif self == Sector.COMMUNICATION_SERVICES:
-            return "💬"
+            return "📞"
         elif self == Sector.BASIC_MATERIALS:
             return "🧱"
         elif self == Sector.INDUSTRIALS:
@@ -91,4 +91,4 @@ class Sector(Enum):
         elif self == Sector.ENERGY:
             return "⚡️"
         else:
-            return "?"
+            return "❔"
