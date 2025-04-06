@@ -43,7 +43,7 @@ The application is available at [http://127.0.0.1:8000](http://127.0.0.1:8000) S
 ### How to login to DeGiro?
 You can login to DeGiro in two different ways
 
-### Use the Login form
+#### Use the Login form
 When you open your browser at [http://127.0.0.1:8000](http://127.0.0.1:8000) you will see a login form. Simply introduce
 your credentials, including the OTP (One-Time-Password).
 
@@ -51,7 +51,7 @@ The first time, the application will retrieve all your portfolio from DeGiro and
 
 > Using this approach, no credentials are stored anywhere. You will need to repeat this step everytime  
 
-### Automatic login
+#### Automatic login
 If you don't want to introduce your credentials everytime, it's possible to store them in a file, so login will be much
 more comfortable and transparent.
 
@@ -73,6 +73,9 @@ Copy the file `config/config.json.template` to `config/config.json`
 ```
 Only the `credentials` section is mandatory, put your credentials in the corresponding fields, and follow the instructions
 to obtain your `totp_secret_key`. You can also skip it, and the application will ask for you OTP everytime.
+
+### How to login to Bitvavo
+[TODO]
 
 ## Start Developing
 
@@ -134,24 +137,8 @@ Passing the parameter `profile=true` will enable profiling, and `debug=true` wil
 ## Documentation
 
 * [DeGiro Connector](https://github.com/Chavithra/degiro-connector)
+* [IBKR Client](https://github.com/Voyz/ibind)
 * [Bootstrap](https://getbootstrap.com)
-
-## Dependencies
-
-* https://www.npmjs.com/package/chroma-js
-
-## Ideas
-
-* [Django Jazzmin](https://github.com/farridav/django-jazzmin)
-* [Django Bootstrap Tutorial](https://github.com/thalesbruno/django_bootstrap)
-* [Django Bootstrap-4](https://github.com/zostera/django-bootstrap4)
-* [Django Soft-UI Dashboard](https://appseed.us/product/django-soft-ui-dashboard)
-
-## HowTos
-* [Bootstrap Sidebar](https://bootstrapious.com/p/bootstrap-sidebar)
-* [Mastering Multi-hued Color Scales with Chroma.js](https://www.vis4.net/blog/2013/09/mastering-multi-hued-color-scales/)
-
-**Should we replace Django by Flask?**
 
 ## Other interesting projects
 * https://github.com/leo-pfeiffer/portfolio_dashboard
@@ -217,6 +204,7 @@ Passing the parameter `profile=true` will enable profiling, and `debug=true` wil
 - https://data.nasdaq.com/databases/LOGO (requires Token)
 - https://logos.stockanalysis.com/aapl.svg (misses some stocks)
 - https://docs.logo.dev/logo-images/ticker (requires Token) [review]
+- https://developers.parqet.com/blog/parqet-logo-api-guide (misses some stocks)
 
 # Portfolio Performance
 - https://portfolioslab.com/tools/stock-comparison/AAPL/MSFT
