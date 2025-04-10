@@ -42,15 +42,19 @@ pook = "^2.1.3"
 pyinstrument = "^5.0.1"
 licensecheck = "^2025.1.0"
 pip-licenses = "^5.0.0"
+briefcase = "^0.3.23"
 
 [tool.poetry]
 include = [
     { path = "Makefile", format = ["sdist", "wheel"] },
     { path = "package.json", format = ["sdist", "wheel"] },
+    { path = "package-lock.json", format = ["sdist", "wheel"] },
     { path = "Dockerfile", format = ["sdist", "wheel"] },
     { path = "docker-compose.yml", format = ["sdist", "wheel"] },
     { path = "config/config.json.template", format = ["sdist", "wheel"] },
-    { path = "src/stonks_overwatch/static/**/*.*", format = ["sdist", "wheel"] },
+    { path = "src/stonks_overwatch/**/*.*", format = ["sdist", "wheel"] },
+    { path = "src/icons/**/*.*", format = ["sdist", "wheel"] },
+    { path = "src/scripts/**/*.*", format = ["sdist", "wheel"] },
     { path = "src/*.py", format = ["sdist", "wheel"] },
     { path = "src/*.sh", format = ["sdist", "wheel"] },
 ]
@@ -151,11 +155,11 @@ docstring-code-format = false
 docstring-code-line-length = "dynamic"
 
 [tool.coverage.run]
-source = ['src']
+source = ['src/stonks_overwatch']
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "src.settings"
-pythonpath = [".", "src"]
+DJANGO_SETTINGS_MODULE = "src.stonks_overwatch.settings"
+pythonpath = [".", "src/stonks_overwatch", "src"]
 testpaths = ["tests"]
 python_files = [
     "test_*.py"
@@ -164,3 +168,50 @@ addopts = [
     '--import-mode=importlib',
     '--cov-report=html:pytest'
 ]
+
+[tool.briefcase]
+project_name = "Stonks Overwatch"
+bundle = "com.caribay.investments"
+version = "0.1.0"
+url = "https://github.com/ctasada/stonks-overwatch"
+license.file = "LICENSE"
+author = "Carlos Tasada"
+author_email = "ctasada@gmail.com"
+
+[tool.briefcase.app.stonks-overwatch]
+formal_name = "Stonks Overwatch"
+description = "Stocks Porfolio Tracker"
+long_description = """Stonks Overwatch is a new Stocks Dashboard.
+
+Why do we need yet another dashboard? I have been a DeGiro user for many years, and the more active I was,
+the more frustrated I became with the lack of any decent dashboard to overview my investments.
+
+After trying different options (I will omit names), I couldn't find any that was really covering my needs, or
+that I could trust.
+
+Stonks Overwatch runs locally and doesn't share your data with anyone. Your data is yours
+"""
+icon = "src/icons/stonks_overwatch"
+sources = [
+    "src/stonks_overwatch",
+    "config/config.json.template"
+]
+test_sources = [
+    "tests",
+]
+requires = [
+    "toga (>=0.5.1,<0.6.0)",
+    "std-nslog (>=1.0.3,<2.0.0)",
+]
+test_requires = [ ]
+requirement_installer_args = ["--find-links", "./wheels"]
+
+[tool.briefcase.app.stonks-overwatch.macOS]
+universal_build = false
+
+[tool.briefcase.app.stonks-overwatch.linux.flatpak]
+flatpak_runtime = "org.freedesktop.Platform"
+flatpak_runtime_version = "24.08"
+flatpak_sdk = "org.freedesktop.Sdk"
+
+

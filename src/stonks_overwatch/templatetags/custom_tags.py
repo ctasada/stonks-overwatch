@@ -13,7 +13,6 @@ from stonks_overwatch.utils.localization import LocalizationUtility
 
 register = template.Library()
 
-
 @register.filter
 def index(sequence, position):
     return sequence[position]

@@ -6,7 +6,11 @@ from degiro_connector.core.constants import urls
 from isodate import parse_datetime
 
 from stonks_overwatch.config.degiro_credentials import DegiroCredentials
-from stonks_overwatch.repositories.degiro.models import DeGiroCashMovements, DeGiroProductInfo, DeGiroProductQuotation
+from stonks_overwatch.repositories.degiro.models import (
+    DeGiroCashMovements,
+    DeGiroProductInfo,
+    DeGiroProductQuotation,
+)
 from stonks_overwatch.services.degiro.account_overview import AccountOverviewService
 from stonks_overwatch.services.degiro.currency_converter_service import CurrencyConverterService
 from stonks_overwatch.services.degiro.degiro_service import CredentialsManager

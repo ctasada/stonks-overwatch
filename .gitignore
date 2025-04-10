@@ -138,6 +138,9 @@ config/*
 
 # Local data
 /data/
+/logs/
+/pytest/
+/wheels/
 
 # Ignore NPM modules
 node_modules
@@ -151,3 +154,4 @@ portfolio-performance/*.csv
 portfolio-performance/*.pdf
 
 /src/stonks_overwatch/static/
+/src/stonks_overwatch.dist-info

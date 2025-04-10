@@ -43,7 +43,8 @@ RUN apt-get update && \
 WORKDIR /app
 
 ENV VIRTUAL_ENV=/app/.venv \
-    PATH="/app/.venv/bin:$PATH"
+    PATH="/app/.venv/bin:$PATH" \
+    FORCE_COLOR="1"
 
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 COPY --from=builder /app/src/node_modules /app/src/node_modules
