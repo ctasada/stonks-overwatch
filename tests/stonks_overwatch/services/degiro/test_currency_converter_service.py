@@ -3,7 +3,10 @@ import pathlib
 
 from stonks_overwatch.repositories.degiro.models import DeGiroProductQuotation
 from stonks_overwatch.services.degiro.constants import CurrencyFX
-from stonks_overwatch.services.degiro.currency_converter_service import CurrencyConverterService, CurrencyMapEntry
+from stonks_overwatch.services.degiro.currency_converter_service import (
+    CurrencyConverterService,
+    CurrencyMapEntry,
+)
 from stonks_overwatch.utils.localization import LocalizationUtility
 
 import pytest

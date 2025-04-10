@@ -1,7 +1,7 @@
 import json
 import pathlib
 
-from stonks_overwatch.repositories import YFinanceStockSplits, YFinanceTickerInfo
+from stonks_overwatch.repositories.yfinance.models import YFinanceStockSplits, YFinanceTickerInfo
 from stonks_overwatch.repositories.yfinance.yfinance_repository import YFinanceRepository
 
 import pytest

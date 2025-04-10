@@ -12,6 +12,7 @@ else
     PROFILE_MODE = false
 endif
 
+WHEEL_DIR := ./wheels
 
 # Export the variable for child processes
 export DEBUG_MODE
@@ -65,14 +66,43 @@ docker-run: docker-build ## Build and run Docker containers
 docker-shell: docker-build
 	docker run -it --rm stonks-overwatch sh
 
-update-package-images: ## Update package images used by Briefcase
+_create-wheels:
+	rm -rdf ./wheels
+	poetry run pip wheel onetimepass --wheel-dir $(WHEEL_DIR)
+	poetry run pip wheel peewee --wheel-dir $(WHEEL_DIR)
+	# This is a hack to rename the wheel so Briefcase doesn't complain
+	@for f in $(WHEEL_DIR)/peewee-*-cp*-*.whl; do \
+		version=$$(echo $$f | sed -E 's|.*peewee-([0-9.]+)-cp[0-9]+.*\.whl|\1|'); \
+		new_name="peewee-$${version}-py3-none-any.whl"; \
+		echo "Renaming $$f to $(WHEEL_DIR)/$$new_name"; \
+		mv "$$f" "$(WHEEL_DIR)/$$new_name"; \
+	done
+
+briefcase-create: install collectstatic _create-wheels ## Create a new Briefcase project
+	rm -rdf build
+	poetry run briefcase create
+	poetry run briefcase build
+
+briefcase-update: install collectstatic _create-wheels ## Update the Briefcase project
+	poetry run briefcase update
+	poetry run briefcase build
+
+briefcase-run: ## Run the Briefcase project
+	poetry run briefcase run
+
+briefcase-package: briefcase-create ## Packages the Briefcase project
+	poetry run briefcase package --update --adhoc-sign --no-input
+
+generate-images: ## Generates images to be used by the browsers and Briefcase
 	src/scripts/generate-icons.sh
 
-cicd: ## Run CI/CD pipeline. Indicate the job you want to run with `make cicd job=<job_name>`. If no job is specified, it will list all available jobs.
-	@if [ -z "$(job)" ]; then \
-		act --list; \
+cicd: ## Run CI/CD pipeline. Indicate the job you want to run with `make cicd job=<job_name>` or `make cicd workflow=<workflow_name>. If no job is specified, it will list all available jobs.
+	@if [ -n "$(workflow)" ]; then \
+    	act -W ".github/workflows/$(workflow).yml" --container-architecture linux/arm64 -P macos-latest=self-hosted; \
+    elif [ -n "$(job)" ]; then \
+	  	act --job $(job) --container-architecture linux/arm64 -P macos-latest=self-hosted; \
 	else \
-		act --job $(job) --container-architecture linux/arm64; \
+		act --list; \
 	fi
 
 help: ## Show this help message

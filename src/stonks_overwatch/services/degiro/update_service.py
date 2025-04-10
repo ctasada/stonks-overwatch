@@ -9,9 +9,7 @@ from degiro_connector.trading.models.transaction import HistoryRequest
 from django.core.cache import cache
 from django.db import connection
 
-from settings import DATA_DIR
 from stonks_overwatch.config.degiro_config import DegiroConfig
-from stonks_overwatch.repositories import YFinanceStockSplits, YFinanceTickerInfo
 from stonks_overwatch.repositories.degiro.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.repositories.degiro.models import (
     DeGiroCashMovements,
@@ -23,10 +21,12 @@ from stonks_overwatch.repositories.degiro.models import (
 from stonks_overwatch.repositories.degiro.product_info_repository import ProductInfoRepository
 from stonks_overwatch.repositories.degiro.product_quotations_repository import ProductQuotationsRepository
 from stonks_overwatch.repositories.degiro.transactions_repository import TransactionsRepository
+from stonks_overwatch.repositories.yfinance.models import YFinanceStockSplits, YFinanceTickerInfo
 from stonks_overwatch.services.degiro.constants import CurrencyFX
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.portfolio import PortfolioService
 from stonks_overwatch.services.yfinance.y_finance import YFinanceClient
+from stonks_overwatch.settings import STONKS_OVERWATCH_DATA_DIR
 from stonks_overwatch.utils.datetime import DateTimeUtility
 from stonks_overwatch.utils.db_utils import dictfetchall
 from stonks_overwatch.utils.debug import save_to_json
@@ -42,7 +42,7 @@ CACHE_TIMEOUT = 3600
 class UpdateService:
     logger = StonksLogger.get_logger("stonks_overwatch.update_service", "[DEGIRO|UPDATE]")
 
-    IMPORT_FOLDER = os.path.join(DATA_DIR, "import")
+    IMPORT_FOLDER = os.path.join(STONKS_OVERWATCH_DATA_DIR, "import")
     DEBUG_MODE = os.getenv("DEBUG_MODE", False) in [True, "true", "True", "1"]
 
     def __init__(self):
