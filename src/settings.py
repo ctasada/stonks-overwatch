@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "stonks_overwatch.apps.StonksOverwatchConfig",
+    "stonks_overwatch.app_config.StonksOverwatchConfig",
     "django_extensions",
     "django_node_assets",
     "fontawesomefree",
@@ -105,12 +105,13 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": Path(DATA_DIR).resolve() / "db.sqlite3",
+        "NAME": Path(DATA_DIR).resolve().joinpath("db.sqlite3"),
         "TEST": {
-            "NAME": Path(TEMP_DIR).resolve() / "test_db.sqlite3",
+            "NAME": Path(TEMP_DIR).resolve().joinpath("test_db.sqlite3"),
         },
     },
 }
+
 TEST_RUNNER = "django.test.runner.DiscoverRunner"
 
 
@@ -150,8 +151,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / STATIC_URL
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+STATIC_ROOT = os.path.join(BASE_DIR, "stonks_overwatch", STATIC_URL)
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "stonks_overwatch", "static")]
 
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
@@ -160,8 +161,8 @@ STATICFILES_FINDERS = [
     "django_node_assets.finders.ManifestNodeModulesFinder",
 ]
 
-NODE_PACKAGE_JSON = PROJECT_PATH / "package.json"
-NODE_MODULES_ROOT = PROJECT_PATH / "node_modules"
+NODE_PACKAGE_JSON = os.path.join(PROJECT_PATH, "package.json")
+NODE_MODULES_ROOT = os.path.join(PROJECT_PATH, "node_modules")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
