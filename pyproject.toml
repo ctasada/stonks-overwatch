@@ -5,15 +5,15 @@ description = "Stonks Overwatch"
 authors = [{name = "Carlos Tasada", email = "carlos.tasada@gmail.com"}]
 license = "MIT"
 readme = "README.md"
-requires-python = ">=3.13,<3.14"
+requires-python = ">=3.13"
 dependencies = [
     "degiro-connector >= 3.0.27",
-    "django (>= 5.1.8,<5.2.0)",
+    "django >= 5.2.0",
     "pycountry >= 24.6.1",
     "currency-symbols >= 2.0.3",
     "pandas >= 2.2.3",
     "requests-cache >= 1.2.1",
-    "django-extensions >= 3.2.3",
+    "django-extensions >= 4.1.0",
     "python-dateutil >= 2.8.2",
     "CurrencyConverter >= 0.18.5",
     "django-node-assets >= 0.9.14",
@@ -25,12 +25,15 @@ dependencies = [
     "iso10383 (>=2025.2.10,<2026.0.0)",
 ]
 
+[tool.poetry.dependencies]
+python = ">=3.13,<3.14"
+
 [build-system]
 requires = ["poetry-core>=2.1.2,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.11.4"
+ruff = "^0.11.5"
 pytest = "^8.3.5"
 pytest-cov = "^6.1.1"
 pytest-django = "^4.11.1"
@@ -44,7 +47,7 @@ include = [
     { path = "Dockerfile", format = ["sdist", "wheel"] },
     { path = "docker-compose.yml", format = ["sdist", "wheel"] },
     { path = "config/config.json.template", format = ["sdist", "wheel"] },
-    { path = "src/static/**/*.*", format = ["sdist", "wheel"] },
+    { path = "src/stonks_overwatch/static/**/*.*", format = ["sdist", "wheel"] },
     { path = "src/*.py", format = ["sdist", "wheel"] },
     { path = "src/*.sh", format = ["sdist", "wheel"] },
 ]
