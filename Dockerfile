@@ -17,12 +17,15 @@ ENV POETRY_NO_INTERACTION=1 \
 
 RUN pip install poetry
 
+# install Poetry dependencies
 WORKDIR /app
+COPY pyproject.toml ./
+RUN poetry install --without dev --no-root && rm -rf "$POETRY_CACHE_DIR"
 
-# install dependencies
-COPY pyproject.toml package.json ./
-RUN npm install && \
-    poetry install --without dev --no-root && rm -rf "$POETRY_CACHE_DIR"
+# install Node dependencies
+WORKDIR /app/src
+COPY src/package.json ./
+RUN npm install
 
 # The runtime image, used to just run the code provided its virtual environment
 FROM python:3-slim AS runtime
@@ -43,9 +46,8 @@ ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH"
 
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
-COPY --from=builder /app/node_modules /app/node_modules
+COPY --from=builder /app/src/node_modules /app/src/node_modules
 
-COPY ./package.json /app/package.json
 COPY ./src /app/src
 COPY ./src/init.sh /app/init.sh
 # FIXME: Secrets must be provided in a more secure way

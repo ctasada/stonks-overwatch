@@ -161,8 +161,8 @@ STATICFILES_FINDERS = [
     "django_node_assets.finders.ManifestNodeModulesFinder",
 ]
 
-NODE_PACKAGE_JSON = os.path.join(PROJECT_PATH, "package.json")
-NODE_MODULES_ROOT = os.path.join(PROJECT_PATH, "node_modules")
+NODE_PACKAGE_JSON = os.path.join(PROJECT_PATH, "src", "package.json")
+NODE_MODULES_ROOT = os.path.join(PROJECT_PATH, "src", "node_modules")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
