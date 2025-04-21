@@ -22,7 +22,7 @@ install: ## Install dependencies
 	poetry run src/manage.py npminstall
 
 update: ## Update dependencies
-	npm update
+	cd src && npm update
 	poetry self update
 	poetry update
 
@@ -51,6 +51,9 @@ docker-build: ## Build Docker images
 
 docker-run: docker-build ## Build and run Docker containers
 	docker compose up
+
+docker-shell: docker-build
+	docker run -it --rm stonks-overwatch sh
 
 help: ## Show this help message
 	@echo "Available targets:"
