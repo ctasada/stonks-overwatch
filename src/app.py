@@ -8,7 +8,9 @@ from pathlib import Path
 
 BASE_PATH = Path(__file__).parent.parent
 DEFAULT_SERVER_PORT = 8000
-DEFAULT_SERVER_HOST = '127.0.0.1'
+DEFAULT_SERVER_HOST = '0.0.0.0'
+
+DJANGO_MANAGE_PATH = os.path.join(BASE_PATH, 'src', 'manage.py')
 
 def run_command(command):
     """Run a command and print its output."""
@@ -22,16 +24,20 @@ def run_command(command):
         print(e.stderr, file=sys.stderr)
         sys.exit(1)
 
+def npm_install():
+    print("Installing NodeJs dependencies...")
+    run_command(['python', DJANGO_MANAGE_PATH, 'npminstall'])
+
 def run_migrations():
     print("Running migrations...")
-    run_command(['python', os.path.join(BASE_PATH, 'src', 'manage.py'), 'makemigrations'])
-    run_command(['python', os.path.join(BASE_PATH, 'src', 'manage.py'), 'migrate'])
+    run_command(['python', DJANGO_MANAGE_PATH, 'makemigrations'])
+    run_command(['python', DJANGO_MANAGE_PATH, 'migrate'])
 
 def start_server(host, port):
     print(f"Starting development server on {host}:{port}...")
     run_command([
         'python',
-        os.path.join(BASE_PATH, 'src', 'manage.py'),
+        DJANGO_MANAGE_PATH,
         'runserver',
         f'{host}:{port}',
         '--noreload',  # Disable autoreload to avoid issues with subprocesses
@@ -43,6 +49,9 @@ def main():
     parser.add_argument('--profile', action='store_true',  help='Enables profiling mode')
 
     subparsers = parser.add_subparsers(dest='command', help='Command to run')
+
+    # npminstall command
+    subparsers.add_parser('npminstall', help='Install NodeJs dependencies')
 
     # Migrate command
     subparsers.add_parser('migrate', help='Run database migrations')
@@ -72,11 +81,14 @@ def main():
 
     # If no command is provided, run both migrate and runserver
     if not args.command:
+        npm_install()
         run_migrations()
         start_server(DEFAULT_SERVER_HOST, DEFAULT_SERVER_PORT)
         return
 
-    if args.command == 'migrate':
+    if args.command == 'npminstall':
+        npm_install()
+    elif args.command == 'migrate':
         run_migrations()
     elif args.command == 'runserver':
         start_server(args.host, args.port)
