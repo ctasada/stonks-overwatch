@@ -24,6 +24,10 @@ def run_command(command):
         print(e.stderr, file=sys.stderr)
         sys.exit(1)
 
+def collect_static():
+    print("Collecting static files...")
+    run_command(['python', DJANGO_MANAGE_PATH, 'collectstatic', '--clear', '--noinput'])
+
 def npm_install():
     print("Installing NodeJs dependencies...")
     run_command(['python', DJANGO_MANAGE_PATH, 'npminstall'])
@@ -52,6 +56,9 @@ def main():
 
     # npminstall command
     subparsers.add_parser('npminstall', help='Install NodeJs dependencies')
+
+    # collectstatic command
+    subparsers.add_parser('collectstatic', help='Collect static files')
 
     # Migrate command
     subparsers.add_parser('migrate', help='Run database migrations')
@@ -83,11 +90,14 @@ def main():
     if not args.command:
         npm_install()
         run_migrations()
+        collect_static()
         start_server(DEFAULT_SERVER_HOST, DEFAULT_SERVER_PORT)
         return
 
     if args.command == 'npminstall':
         npm_install()
+    elif args.command == 'collectstatic':
+        collect_static()
     elif args.command == 'migrate':
         run_migrations()
     elif args.command == 'runserver':

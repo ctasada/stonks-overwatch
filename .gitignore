@@ -147,3 +147,4 @@ node_modules
 portfolio-performance/*.csv
 portfolio-performance/*.pdf
 
+/src/stonks_overwatch/static/

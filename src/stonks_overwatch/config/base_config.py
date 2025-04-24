@@ -1,4 +1,5 @@
 import json
+import os
 from abc import abstractmethod
 from pathlib import Path
 from typing import Optional
@@ -9,7 +10,7 @@ from stonks_overwatch.utils.logger import StonksLogger
 
 class BaseConfig:
     logger = StonksLogger.get_logger("stocks_portfolio.config", "[BASE_CONFIG]")
-    CONFIG_PATH = Path(PROJECT_PATH) / "config" / "config.json"
+    CONFIG_PATH = os.path.join(PROJECT_PATH, "config", "config.json")
 
     def __init__(
             self,
