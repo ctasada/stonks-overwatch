@@ -18,6 +18,19 @@ jobs:
       - name: Run common actions
         uses: ./.github/actions/common-action
 
+      - name: Install GitHub CLI
+        shell: bash
+        if: ${{ env.ACT && runner.os == 'Linux' }}
+        run: |
+          (type -p wget >/dev/null || (sudo apt update && sudo apt-get install wget -y)) \
+          && sudo mkdir -p -m 755 /etc/apt/keyrings \
+          && out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+          && cat $out | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+          && sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+          && sudo apt update \
+          && sudo apt install gh -y
+
       - name: Build Package
         run: poetry build
 
@@ -31,6 +44,7 @@ jobs:
           fi
 
       - name: Delete Previous SNAPSHOT Releases
+        if: ${{ !env.ACT }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -46,6 +60,7 @@ jobs:
           done
 
       - name: Create New SNAPSHOT Release
+        if: ${{ !env.ACT }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
