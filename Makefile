@@ -55,6 +55,13 @@ docker-run: docker-build ## Build and run Docker containers
 docker-shell: docker-build
 	docker run -it --rm stonks-overwatch sh
 
+cicd: ## Run CI/CD pipeline. Indicate the job you want to run with `make cicd job=<job_name>`. If no job is specified, it will list all available jobs.
+	@if [ -z "$(job)" ]; then \
+		act --list; \
+	else \
+		act --job $(job) --container-architecture linux/arm64; \
+	fi
+
 help: ## Show this help message
 	@echo "Available targets:"
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n\nTargets:\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
