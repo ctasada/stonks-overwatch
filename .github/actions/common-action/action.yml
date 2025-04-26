@@ -16,6 +16,7 @@ runs:
     #       cache Poetry installation
     #----------------------------------------------
     - name: Load cached Poetry installation
+      if: ${{ !env.ACT }}
       id: cached-poetry
       uses: actions/cache@v4
       with:
@@ -36,6 +37,7 @@ runs:
     #       load cached venv if cache exists
     #----------------------------------------------
     - name: Load cached venv
+      if: ${{ !env.ACT }}
       id: cached-poetry-dependencies
       uses: actions/cache@v4
       with:
