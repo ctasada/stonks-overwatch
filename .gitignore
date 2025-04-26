@@ -142,6 +142,9 @@ config/*
 # Ignore NPM modules
 node_modules
 
+# nektos/act file
+.actrc
+
 # Ignore folder with imported files
 /import/
 portfolio-performance/*.csv
