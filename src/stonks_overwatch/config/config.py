@@ -10,7 +10,7 @@ from stonks_overwatch.utils.logger import StonksLogger
 
 class Config:
 
-    logger = StonksLogger.get_logger("stocks_portfolio.config", "[CONFIG]")
+    logger = StonksLogger.get_logger("stonks_overwatch.config", "[CONFIG]")
 
     DEFAULT_BASE_CURRENCY: str = "EUR"
 

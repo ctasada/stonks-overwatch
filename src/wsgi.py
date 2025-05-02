@@ -1,4 +1,4 @@
-"""WSGI config for stocks_portfolio project.
+"""WSGI config for the stonks_overwatch project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

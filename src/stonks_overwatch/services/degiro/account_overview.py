@@ -6,7 +6,7 @@ from stonks_overwatch.services.models import AccountOverview
 from stonks_overwatch.utils.logger import StonksLogger
 
 class AccountOverviewService:
-    logger = StonksLogger.get_logger("stocks_portfolio.account_overview_data", "DEGIRO|ACCOUNT_OVERVIEW")
+    logger = StonksLogger.get_logger("stonks_overwatch.account_overview_data", "DEGIRO|ACCOUNT_OVERVIEW")
 
     def get_account_overview(self) -> List[AccountOverview]:
         self.logger.debug("Get Account Overview")

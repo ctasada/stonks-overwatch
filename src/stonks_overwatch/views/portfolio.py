@@ -27,7 +27,7 @@ class PositionStatus(Enum):
         return None
 
 class Portfolio(View):
-    logger = StonksLogger.get_logger("stocks_portfolio.dashboard.views", "[VIEW|PORTFOLIO]")
+    logger = StonksLogger.get_logger("stonks_overwatch.dashboard.views", "[VIEW|PORTFOLIO]")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

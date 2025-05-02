@@ -11,7 +11,7 @@ from stonks_overwatch.utils.singleton import singleton
 class BitvavoService:
     START_TIMESTAMP = 0
 
-    logger = StonksLogger.get_logger("stocks_portfolio.bitvavo_service", "[BITVAVO|CLIENT]")
+    logger = StonksLogger.get_logger("stonks_overwatch.bitvavo_service", "[BITVAVO|CLIENT]")
     client: Bitvavo = None
 
     def __init__(

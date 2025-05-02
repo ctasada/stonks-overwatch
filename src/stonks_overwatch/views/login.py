@@ -20,7 +20,7 @@ class Login(View):
     * TOTP required: The user is prompted to enter their 2FA code.
     * Loading: The user is shown a loading indicator while the portfolio is updated.
     """
-    logger = StonksLogger.get_logger("stocks_portfolio.login", "VIEW|LOGIN")
+    logger = StonksLogger.get_logger("stonks_overwatch.login", "VIEW|LOGIN")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

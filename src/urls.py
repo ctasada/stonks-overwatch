@@ -1,4 +1,4 @@
-"""URL configuration for stocks_portfolio project.
+"""URL configuration for the stonks_overwatch project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.0/topics/http/urls/
