@@ -8,7 +8,7 @@ from stonks_overwatch.services.session_manager import SessionManager
 from stonks_overwatch.utils.logger import StonksLogger
 
 class Deposits(View):
-    logger = StonksLogger.get_logger("stocks_portfolio.deposits.views", "VIEW|DEPOSITS")
+    logger = StonksLogger.get_logger("stonks_overwatch.deposits.views", "VIEW|DEPOSITS")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

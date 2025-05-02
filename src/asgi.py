@@ -1,4 +1,4 @@
-"""ASGI config for stocks_portfolio project.
+"""ASGI config for the stonks_overwatch project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 

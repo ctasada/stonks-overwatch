@@ -37,7 +37,7 @@ class Dashboard(View):
     performance.
     """
 
-    logger = StonksLogger.get_logger("stocks_portfolio.dashboard.views", "[VIEW|DASHBOARD]")
+    logger = StonksLogger.get_logger("stonks_overwatch.dashboard.views", "[VIEW|DASHBOARD]")
     CACHE_KEY_PORTFOLIO = "portfolio_value"
     CACHE_TIMEOUT = 60 * 5  # 5 minutes
 

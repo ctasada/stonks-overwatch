@@ -32,7 +32,7 @@ class StockSplit:
 
 @singleton
 class YFinanceClient:
-    logger = StonksLogger.get_logger("stocks_portfolio.yfinance_client", "[YFINANCE|CLIENT]")
+    logger = StonksLogger.get_logger("stonks_overwatch.yfinance_client", "[YFINANCE|CLIENT]")
 
     cache_path = os.path.join(settings.TEMP_DIR, 'yfinance.cache')
 

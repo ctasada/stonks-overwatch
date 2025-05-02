@@ -64,7 +64,7 @@ class CredentialsManager:
 
 @singleton
 class DeGiroService:
-    logger = StonksLogger.get_logger("stocks_portfolio.degiro_service", "[DEGIRO|CLIENT]")
+    logger = StonksLogger.get_logger("stonks_overwatch.degiro_service", "[DEGIRO|CLIENT]")
     api_client: TradingApi = None
     credentials_manager: Optional[CredentialsManager] = None
 
