@@ -26,7 +26,7 @@ class PortfolioService:
         history: Optional[dict]
         quotation: Optional['PortfolioService.Quotation']
 
-    logger = StonksLogger.get_logger("stocks_portfolio.portfolio_data.bitvavo", "[BITVAVO|PORTFOLIO]")
+    logger = StonksLogger.get_logger("stonks_overwatch.portfolio_data.bitvavo", "[BITVAVO|PORTFOLIO]")
 
     def __init__(
             self,

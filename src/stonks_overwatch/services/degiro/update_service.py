@@ -40,7 +40,7 @@ CACHE_KEY_UPDATE_YFINANCE = "yfinance_update"
 CACHE_TIMEOUT = 3600
 
 class UpdateService:
-    logger = StonksLogger.get_logger("stocks_portfolio.update_service", "[DEGIRO|UPDATE]")
+    logger = StonksLogger.get_logger("stonks_overwatch.update_service", "[DEGIRO|UPDATE]")
 
     IMPORT_FOLDER = os.path.join(DATA_DIR, "import")
     DEBUG_MODE = os.getenv("DEBUG_MODE", False) in [True, "true", "True", "1"]

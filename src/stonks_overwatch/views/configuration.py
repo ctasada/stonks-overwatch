@@ -9,7 +9,7 @@ from stonks_overwatch.services.session_manager import SessionManager
 from stonks_overwatch.utils.logger import StonksLogger
 
 class ConfigurationView(View):
-    logger = StonksLogger.get_logger("stocks_portfolio.dashboard.views", "VIEW|CONFIGURATION")
+    logger = StonksLogger.get_logger("stonks_overwatch.dashboard.views", "VIEW|CONFIGURATION")
 
     def get(self, request) -> JsonResponse:
         selected_portfolio = SessionManager.get_selected_portfolio(request)

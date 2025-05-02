@@ -10,7 +10,7 @@ from stonks_overwatch.utils.constants import ProductType, Sector
 from stonks_overwatch.utils.logger import StonksLogger
 
 class PortfolioAggregatorService:
-    logger = StonksLogger.get_logger("stocks_portfolio.portfolio_data", "[AGGREGATOR]")
+    logger = StonksLogger.get_logger("stonks_overwatch.portfolio_data", "[AGGREGATOR]")
 
     def __init__(self):
         self.degiro_service = DeGiroService()

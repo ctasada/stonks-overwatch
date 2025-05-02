@@ -12,7 +12,7 @@ from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.logger import StonksLogger
 
 class DepositsAggregatorService:
-    logger = StonksLogger.get_logger("stocks_portfolio.portfolio_data", "[AGGREGATOR|DEPOSITS]")
+    logger = StonksLogger.get_logger("stonks_overwatch.portfolio_data", "[AGGREGATOR|DEPOSITS]")
 
     def __init__(self):
         self.degiro_service = DeGiroService()

@@ -41,7 +41,7 @@ class LogoType(Enum):
 
 @method_decorator(cache_page(60 * 60), name='get')  # Cache for 1 hour
 class AssetLogoView(View):
-    logger = StonksLogger.get_logger("stocks_portfolio.dashboard.views", "[VIEW|ASSET_LOGO]")
+    logger = StonksLogger.get_logger("stonks_overwatch.dashboard.views", "[VIEW|ASSET_LOGO]")
 
     # Keep track of alternatives as NVSTly
     # return f"https://raw.githubusercontent.com/nvstly/icons/main/ticker_icons/{symbol.upper()}.png"

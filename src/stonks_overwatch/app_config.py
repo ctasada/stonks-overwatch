@@ -7,7 +7,7 @@ from django.apps import AppConfig
 from stonks_overwatch.utils.logger import StonksLogger
 
 class StonksOverwatchConfig(AppConfig):
-    logger = StonksLogger.get_logger("stocks_portfolio.config", "[MAIN]")
+    logger = StonksLogger.get_logger("stonks_overwatch.config", "[MAIN]")
     default_auto_field = "django.db.models.BigAutoField"
     name = "stonks_overwatch"
 

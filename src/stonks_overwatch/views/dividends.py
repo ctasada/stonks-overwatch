@@ -14,7 +14,7 @@ from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.logger import StonksLogger
 
 class Dividends(View):
-    logger = StonksLogger.get_logger("stocks_portfolio.dividends.views", "[VIEW|DIVIDENDS]")
+    logger = StonksLogger.get_logger("stonks_overwatch.dividends.views", "[VIEW|DIVIDENDS]")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
