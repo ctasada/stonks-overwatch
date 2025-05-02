@@ -16,7 +16,7 @@ class CurrencyMapEntry:
     quotations: Optional[Dict[date, float]] = None
 
 class CurrencyConverterService:
-    logger = StonksLogger.get_logger("stocks_portfolio.currency_converter", "DEGIRO|CURRENCY_CONVERTER")
+    logger = StonksLogger.get_logger("stonks_overwatch.currency_converter", "DEGIRO|CURRENCY_CONVERTER")
 
     def __init__(self):
         self.currency_converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)

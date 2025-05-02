@@ -8,7 +8,7 @@ from stonks_overwatch.services.degiro.update_service import UpdateService as Deg
 from stonks_overwatch.utils.logger import StonksLogger
 
 class JobsScheduler:
-    logger = StonksLogger.get_logger("stocks_portfolio.jobs_scheduler", "[JOB_SCHEDULER]")
+    logger = StonksLogger.get_logger("stonks_overwatch.jobs_scheduler", "[JOB_SCHEDULER]")
 
     scheduler = None
 

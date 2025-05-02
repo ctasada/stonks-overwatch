@@ -29,9 +29,9 @@ def init() -> None:
     if not os.path.exists(IMPORT_FOLDER):
         os.makedirs(IMPORT_FOLDER)
 
-    # Configure logging for the stocks_portfolio module
-    stocks_portfolio_logger = logging.getLogger("stocks_portfolio")
-    stocks_portfolio_logger.setLevel(logging.INFO)
+    # Configure logging for the stonks_overwatch module
+    stonks_overwatch_logger = logging.getLogger("stonks_overwatch")
+    stonks_overwatch_logger.setLevel(logging.INFO)
 
     # Create a console handler
     console_handler = logging.StreamHandler()

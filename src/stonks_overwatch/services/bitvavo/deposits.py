@@ -8,7 +8,7 @@ from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.logger import StonksLogger
 
 class DepositsService:
-    logger = StonksLogger.get_logger("stocks_portfolio.deposits.bitvavo", "[BITVAVO|DEPOSITS]")
+    logger = StonksLogger.get_logger("stonks_overwatch.deposits.bitvavo", "[BITVAVO|DEPOSITS]")
 
     def __init__(
             self,

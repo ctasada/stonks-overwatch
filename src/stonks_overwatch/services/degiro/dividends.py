@@ -9,7 +9,7 @@ from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.logger import StonksLogger
 
 class DividendsService:
-    logger = StonksLogger.get_logger("stocks_portfolio.dividends_service", "[DEGIRO|DIVIDENDS]")
+    logger = StonksLogger.get_logger("stonks_overwatch.dividends_service", "[DEGIRO|DIVIDENDS]")
 
     def __init__(
         self,

@@ -7,7 +7,7 @@ from stonks_overwatch.utils.constants import Sector
 from stonks_overwatch.utils.logger import StonksLogger
 
 class YFinance:
-    logger = StonksLogger.get_logger("stocks_portfolio.yfinance", "[YFINANCE|SERVICE]")
+    logger = StonksLogger.get_logger("stonks_overwatch.yfinance", "[YFINANCE|SERVICE]")
 
     def __init__(self):
         self.client = YFinanceClient()

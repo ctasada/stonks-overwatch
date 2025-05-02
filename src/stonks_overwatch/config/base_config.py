@@ -9,7 +9,7 @@ from stonks_overwatch.config.base_credentials import BaseCredentials
 from stonks_overwatch.utils.logger import StonksLogger
 
 class BaseConfig:
-    logger = StonksLogger.get_logger("stocks_portfolio.config", "[BASE_CONFIG]")
+    logger = StonksLogger.get_logger("stonks_overwatch.config", "[BASE_CONFIG]")
     CONFIG_PATH = os.path.join(PROJECT_PATH, "config", "config.json")
 
     def __init__(
