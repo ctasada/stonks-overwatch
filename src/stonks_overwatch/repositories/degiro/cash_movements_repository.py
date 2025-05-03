@@ -61,16 +61,18 @@ class CashMovementsRepository:
             return cursor.fetchone()[0]
 
     @staticmethod
-    def get_total_cash() -> float:
+    def get_total_cash(currency: str) -> float:
         with connection.cursor() as cursor:
             cursor.execute(
                 """
                 SELECT balance_total
                 FROM degiro_cashmovements
                 WHERE type = 'FLATEX_CASH_SWEEP'
+                    AND currency = %s
                 ORDER BY id DESC
                 LIMIT 1
-                """
+                """,
+                [currency],
             )
             balance_total = dictfetchall(cursor)[0]["balanceTotal"]
             return float(balance_total)
