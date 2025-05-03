@@ -52,7 +52,7 @@ class TestCashMovementsRepository(TestCase):
         assert total_cash_deposits == 250.0
 
     def test_get_total_cash(self):
-        total_cash = CashMovementsRepository.get_total_cash()
+        total_cash = CashMovementsRepository.get_total_cash('EUR')
         assert total_cash == 300.0
 
     def test_get_last_movement(self):
