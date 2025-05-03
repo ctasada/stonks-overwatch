@@ -135,18 +135,22 @@ class PortfolioService:
                 )
             )
 
-        total_cash = CashMovementsRepository.get_total_cash()
-        my_portfolio.append(
-            PortfolioEntry(
-                name="Cash Balance EUR",
-                symbol="EUR",
-                product_type=ProductType.CASH,
-                product_currency="EUR",
-                value=total_cash,
-                base_currency_value=total_cash,
-                base_currency="EUR",
-                is_open=True,
-            )
+        for currency in ['EUR', 'USD']:
+            total_cash = CashMovementsRepository.get_total_cash(currency)
+            base_currency_price = total_cash
+            if currency != self.base_currency:
+                base_currency_price = self.currency_service.convert(total_cash, currency, self.base_currency)
+            my_portfolio.append(
+                PortfolioEntry(
+                    name=f"Cash Balance ${currency}",
+                    symbol=currency,
+                    product_type=ProductType.CASH,
+                    product_currency=currency,
+                    value=total_cash,
+                    base_currency_value=base_currency_price,
+                    base_currency=self.base_currency,
+                    is_open=True,
+                )
         )
 
         return sorted(my_portfolio, key=lambda k: k.symbol)
@@ -208,13 +212,12 @@ class PortfolioService:
                 portfolio_total_value += entry.base_currency_value
 
         total_deposit_withdrawal = CashMovementsRepository.get_total_cash_deposits_raw()
-        total_cash = CashMovementsRepository.get_total_cash()
+        total_cash = self.__get_total_cash()
 
         # Try to get the data directly from DeGiro, so we get up-to-date values
         realtime_total_portfolio = self.__get_realtime_portfolio_total()
         if realtime_total_portfolio:
             total_deposit_withdrawal = realtime_total_portfolio["totalDepositWithdrawal"]
-            total_cash = realtime_total_portfolio["totalCash"]
 
         roi = (portfolio_total_value / total_deposit_withdrawal - 1) * 100
         total_profit_loss = portfolio_total_value - total_deposit_withdrawal
@@ -227,6 +230,28 @@ class PortfolioService:
             total_roi=roi,
             total_deposit_withdrawal=total_deposit_withdrawal,
         )
+
+    def __get_total_cash(self) -> float:
+        total_cash = 0.0
+        for currency in ['EUR', 'USD']:
+            cash = CashMovementsRepository.get_total_cash(currency)
+            if currency != self.base_currency:
+                cash = self.currency_service.convert(cash, currency, self.base_currency)
+            total_cash += cash
+
+        # Try to get the data directly from DeGiro, so we get up-to-date values
+        realtime_total_portfolio = self.__get_realtime_portfolio_total()
+        if realtime_total_portfolio:
+            if "freeSpaceNew" in realtime_total_portfolio:
+                total_cash = 0.0
+                for currency, amount in realtime_total_portfolio["freeSpaceNew"].items():
+                    if currency != self.base_currency:
+                        amount = self.currency_service.convert(amount, currency, self.base_currency)
+                    total_cash += amount
+            else:
+                total_cash = realtime_total_portfolio["totalCash"]
+
+        return total_cash
 
     def __get_realtime_portfolio_total(self) -> dict | None:
         try:
