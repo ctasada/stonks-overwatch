@@ -36,10 +36,14 @@ migrate: ## Apply database migrations
 	poetry run src/manage.py makemigrations
 	poetry run src/manage.py migrate
 
+collectstatic:
+	rm -rdf src/stonks_overwatch/static
+	poetry run src/manage.py collectstatic
+
 runserver: ## Run the Django development server. Supports `make runserver debug=true profile=true` to run in debug or profile mode
 	DEBUG_MODE="$(DEBUG_MODE)" PROFILE_MODE="$(PROFILE_MODE)" poetry run src/manage.py runserver
 
-start: install migrate runserver ## Install dependencies, apply migrations, and run the server
+start: install collectstatic migrate runserver ## Install dependencies, apply migrations, and run the server
 
 run: start ## Alias for start
 
@@ -54,6 +58,9 @@ docker-run: docker-build ## Build and run Docker containers
 
 docker-shell: docker-build
 	docker run -it --rm stonks-overwatch sh
+
+update-package-images: ## Update package images used by Briefcase
+	src/scripts/generate-icons.sh
 
 cicd: ## Run CI/CD pipeline. Indicate the job you want to run with `make cicd job=<job_name>`. If no job is specified, it will list all available jobs.
 	@if [ -z "$(job)" ]; then \
