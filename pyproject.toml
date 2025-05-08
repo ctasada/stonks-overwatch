@@ -7,9 +7,9 @@ license = "MIT"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "degiro-connector >= 3.0.27",
+    "degiro-connector >= 3.0.28",
     # Upgrading to Django 5.2.0 breaks django-extensions and NPM
-    "django (>= 5.1.8,<5.2.0)",
+    "django (>= 5.1.9,<5.2.0)",
     "pycountry >= 24.6.1",
     "currency-symbols >= 2.0.3",
     "pandas >= 2.2.3",
@@ -22,7 +22,7 @@ dependencies = [
     "apscheduler >= 3.11.0",
     "tzlocal >= 5.3.1",
     "python-bitvavo-api >= 1.4.2",
-    "yfinance[nospam] >= 0.2.58",
+    "yfinance[nospam] >= 0.2.59",
     "iso10383 (>=2025.2.10,<2026.0.0)",
 ]
 
