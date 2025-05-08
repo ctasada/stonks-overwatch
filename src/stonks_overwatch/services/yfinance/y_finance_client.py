@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import List
 
-import requests_cache
 import yfinance as yf
 from yfinance import Ticker
 
@@ -36,8 +35,9 @@ class YFinanceClient:
 
     cache_path = os.path.join(settings.TEMP_DIR, 'yfinance.cache')
 
-    def __init__(self):
-        self.__session = requests_cache.CachedSession(self.cache_path)
+    def __init__(self, enable_debug: bool = False):
+        if enable_debug:
+            yf.enable_debug_mode()
 
     def __convert_to_ticker(self, ticker: Ticker | str) -> Ticker:
         if isinstance(ticker, str):
@@ -47,7 +47,7 @@ class YFinanceClient:
 
     def get_ticker(self, ticker: str) -> Ticker:
         self.logger.debug(f"Get Ticker for {ticker}")
-        return yf.Ticker(ticker, session=self.__session)
+        return yf.Ticker(ticker)
 
     def get_stock_splits(self, ticker: Ticker|str) -> List[StockSplit]:
         """Get stock splits for a given ticker
@@ -61,6 +61,8 @@ class YFinanceClient:
         self.logger.debug(f"Get Stock Splits for {ticker.ticker if isinstance(ticker, Ticker) else ticker}")
 
         ticker_info = self.__convert_to_ticker(ticker)
+        if ticker_info is None:
+            return []
 
         splits = ticker_info.splits
         splits_list = [StockSplit(date.to_pydatetime().astimezone(), ratio)
