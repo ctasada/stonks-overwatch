@@ -151,7 +151,10 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "stonks_overwatch", "static")
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "stonks_overwatch", "staticfiles")]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "stonks_overwatch", "staticfiles"),
+    os.path.join(BASE_DIR, "icons")
+]
 
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
