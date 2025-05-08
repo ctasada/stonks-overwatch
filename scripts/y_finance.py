@@ -1,13 +1,13 @@
 """poetry run python ./scripts/y_finance.py"""
 
-import yfinance as yf
+from stonks_overwatch.services.yfinance.y_finance_client import YFinanceClient
+
+client = YFinanceClient(enable_debug = True)
 
 # Can use the Symbol or the ISIN
-ticker = yf.Ticker('NVDA')
+ticker = client.get_ticker('TNXP')
 # print(ticker.info) # Returns information like country, sector and others
 
 # Fetch stock split data
-splits = ticker.splits
-splits_list = [{"date": date.to_pydatetime().astimezone(), "split_ratio": ratio}
-               for date, ratio in splits.to_dict().items()]
-print(splits_list)
+splits = client.get_stock_splits('TNXP')
+print(splits)
