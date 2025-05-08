@@ -1,4 +1,5 @@
-from django.urls import path
+
+from django.urls import path, re_path
 from django.views.generic import RedirectView
 
 from stonks_overwatch.views.account_overview import AccountOverview
@@ -11,6 +12,7 @@ from stonks_overwatch.views.dividends import Dividends
 from stonks_overwatch.views.fees import Fees
 from stonks_overwatch.views.login import Login
 from stonks_overwatch.views.portfolio import Portfolio
+from stonks_overwatch.views.static import RootStaticFileView
 from stonks_overwatch.views.transactions import Transactions
 
 urlpatterns = [
@@ -26,4 +28,6 @@ urlpatterns = [
     path("transactions", Transactions.as_view(), name="transactions"),
     path("configuration", ConfigurationView.as_view(), name="configuration"),
     path('assets/<str:product_type>/<str:symbol>', AssetLogoView.as_view(), name='asset_logo'),
+
+    re_path(r'^(favicon\.ico|apple-touch-icon\.png|apple-touch-icon-precomposed\.png)$', RootStaticFileView.as_view()),
 ]
