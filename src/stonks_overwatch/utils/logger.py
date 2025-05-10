@@ -23,6 +23,9 @@ class StonksLogger:
     def error(self, msg: str, *args, **kwargs):
         self.logger.error(f"{self.prefix} {msg}", *args, **kwargs)
 
+    def exception(self, msg: str, *args, **kwargs):
+        self.logger.exception(f"{self.prefix} {msg}", *args, **kwargs)
+
     def critical(self, msg: str, *args, **kwargs):
         self.logger.critical(f"{self.prefix} {msg}", *args, **kwargs)
 
