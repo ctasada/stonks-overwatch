@@ -3,6 +3,7 @@ from django import template
 from django.template import RequestContext
 from django.utils import timezone
 
+from stonks_overwatch.config.config import Config
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.update_service import UpdateService
 from stonks_overwatch.services.models import dataclass_to_dict
@@ -28,7 +29,10 @@ def show_total_portfolio(context: RequestContext) -> dict:
 
 @register.simple_tag
 def is_connected_to_degiro() -> bool:
-    return DeGiroService().check_connection()
+    if Config.default().is_degiro_enabled():
+        return DeGiroService().check_connection()
+    else:
+        return False
 
 @register.simple_tag
 def last_import() -> str:

@@ -5,6 +5,7 @@ from django.http import HttpRequest
 from django.shortcuts import redirect
 from django.urls import resolve
 
+from stonks_overwatch.config.config import Config
 from stonks_overwatch.config.degiro_config import DegiroConfig
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.utils.logger import StonksLogger
@@ -21,15 +22,16 @@ class DeGiroAuthMiddleware:
     def __call__(self, request):
         current_url = resolve(request.path_info).url_name
 
-        if self._should_check_connection(request):
-            try:
-                self._authenticate_user(request)
-            except ConnectionError:
-                pass
+        if Config.default().is_degiro_enabled():
+            if self._should_check_connection(request):
+                try:
+                    self._authenticate_user(request)
+                except ConnectionError:
+                    pass
 
-        if not self._is_authenticated(request) and not self._is_public_url(current_url):
-            self.logger.warning("User not authenticated, redirecting to Login page...")
-            return redirect('login')
+            if not self._is_authenticated(request) and not self._is_public_url(current_url):
+                self.logger.warning("User not authenticated, redirecting to Login page...")
+                return redirect('login')
 
         return self.get_response(request)
 
