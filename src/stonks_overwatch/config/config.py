@@ -31,25 +31,37 @@ class Config:
         self.degiro_configuration = degiro_configuration
         self.bitvavo_configuration = bitvavo_configuration
 
-    def is_enabled(self, selected_portfolio: PortfolioId) -> bool:
+    def is_enabled_and_connected(self, selected_portfolio: PortfolioId) -> bool:
         if selected_portfolio == PortfolioId.DEGIRO:
-            return self.is_degiro_enabled(selected_portfolio)
+            return self.is_degiro_enabled_and_connected(selected_portfolio)
         if selected_portfolio == PortfolioId.BITVAVO:
-            return self.is_bitvavo_enabled(selected_portfolio)
+            return self.is_bitvavo_enabled_and_connected(selected_portfolio)
 
         return False
 
     def is_degiro_enabled(self, selected_portfolio: PortfolioId = PortfolioId.ALL) -> bool:
         return (self.degiro_configuration.is_enabled()
-                and (DeGiroService().check_connection()
-                    or (self.degiro_configuration is not None
-                    and self.degiro_configuration.credentials is not None)
-                )
                 and selected_portfolio in [PortfolioId.ALL, PortfolioId.DEGIRO])
+
+    def is_degiro_connected(self, selected_portfolio: PortfolioId = PortfolioId.ALL) -> bool:
+        return ((DeGiroService().check_connection()
+                     or (self.degiro_configuration is not None
+                         and self.degiro_configuration.credentials is not None)
+                     )
+                and selected_portfolio in [PortfolioId.ALL, PortfolioId.DEGIRO])
+
+    def is_degiro_enabled_and_connected(self, selected_portfolio: PortfolioId = PortfolioId.ALL) -> bool:
+        return self.is_degiro_enabled(selected_portfolio) and self.is_degiro_connected(selected_portfolio)
+
+    def is_bitvavo_enabled_and_connected(self, selected_portfolio: PortfolioId = PortfolioId.ALL) -> bool:
+        return self.is_bitvavo_enabled(selected_portfolio) and self.is_bitvavo_connected(selected_portfolio)
 
     def is_bitvavo_enabled(self, selected_portfolio: PortfolioId = PortfolioId.ALL) -> bool:
         return (self.bitvavo_configuration.is_enabled()
-                and self.bitvavo_configuration is not None
+                and selected_portfolio in [PortfolioId.ALL, PortfolioId.BITVAVO])
+
+    def is_bitvavo_connected(self, selected_portfolio: PortfolioId = PortfolioId.ALL) -> bool:
+        return (self.bitvavo_configuration is not None
                 and self.bitvavo_configuration.credentials is not None
                 and selected_portfolio in [PortfolioId.ALL, PortfolioId.BITVAVO])
 
