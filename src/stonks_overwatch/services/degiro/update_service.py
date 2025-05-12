@@ -45,7 +45,6 @@ class UpdateService:
     IMPORT_FOLDER = os.path.join(DATA_DIR, "import")
     DEBUG_MODE = os.getenv("DEBUG_MODE", False) in [True, "true", "True", "1"]
 
-
     def __init__(self):
         if not os.path.exists(self.IMPORT_FOLDER):
             os.makedirs(self.IMPORT_FOLDER)
@@ -521,9 +520,14 @@ class UpdateService:
                 yfinance_ticker = self.yfinance_client.get_ticker(symbol)
                 splits_data = self.yfinance_client.get_stock_splits(yfinance_ticker)
 
-                tickers[symbol] = yfinance_ticker.info
-                splits[symbol] = [split.to_dict() for split in splits_data]
-            except Exception:
+                if yfinance_ticker is not None:
+                    tickers[symbol] = yfinance_ticker.info
+                    splits[symbol] = [split.to_dict() for split in splits_data]
+                else:
+                    tickers[symbol] = {}
+                    splits[symbol] = []
+            except Exception as error:
+                self.logger.error(f"Cannot import symbol {symbol}: {error}")
                 tickers[symbol] = {}
                 splits[symbol] = []
 
