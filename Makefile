@@ -32,6 +32,12 @@ lintcheck: ## Check code style
 lintfix: ## Fix code style issues
 	poetry run ruff check --fix
 
+licensecheck: ## Checks the licenses are compatible
+	poetry run licensecheck
+
+generate-third-party: ## Generate third-party licenses file
+	poetry run pip-licenses --format=plain-vertical --with-license-file --no-license-path --output-file=THIRD_PARTY_LICENSES.txt
+
 migrate: ## Apply database migrations
 	poetry run src/manage.py makemigrations
 	poetry run src/manage.py migrate
