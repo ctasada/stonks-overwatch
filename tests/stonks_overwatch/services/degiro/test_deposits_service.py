@@ -4,7 +4,7 @@ import pathlib
 from isodate import parse_datetime
 
 from stonks_overwatch.config.degiro_credentials import DegiroCredentials
-from stonks_overwatch.repositories import DeGiroCashMovements
+from stonks_overwatch.repositories.degiro.models import DeGiroCashMovements
 from stonks_overwatch.services.degiro.degiro_service import CredentialsManager
 from stonks_overwatch.services.degiro.deposits import DepositsService
 from stonks_overwatch.services.models import DepositType

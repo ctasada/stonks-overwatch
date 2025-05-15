@@ -1,0 +1,129 @@
+name: Package Release
+
+on:
+  workflow_dispatch:  # Allows manual trigger for any branch
+
+# Cancel active CI runs for a PR before starting another run
+concurrency:
+  group: ${{ github.workflow}}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  FORCE_COLOR: "1"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  package:
+    name: Package
+    runs-on: ${{ matrix.runs-on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [ "Windows", "macOS", "Flatpak"]
+        include:
+          - target: "Windows"
+            output-format: "app"
+            runs-on: "windows-latest"
+
+          - target: "macOS"
+            output-format: "app"
+            runs-on: "macos-latest"
+            pre-command: "make _create-wheels"
+            run-target: True
+
+          - target: "Flatpak"
+            platform: "Linux"
+            output-format: "Flatpak"
+            runs-on: "ubuntu-latest"
+            pre-command: "sudo apt update && sudo apt -y install flatpak flatpak-builder"
+            briefcase-run-prefix: "xvfb-run"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run common actions
+        uses: ./.github/actions/common-action
+
+      - name: Install Briefcase
+        run: |
+          python -m pip install -U pip setuptools wheel
+          python -m pip install briefcase
+
+      - name: Setup Environment
+        run: |
+          ${{ matrix.pre-command }}
+
+      - name: Build App for ${{ matrix.target }}
+        run: |
+          ${{ matrix.briefcase-build-prefix }} \
+          briefcase build \
+            ${{ matrix.platform || matrix.target }} \
+            ${{ matrix.output-format }} \
+            --test --no-input --log \
+            ${{ matrix.briefcase-args }} \
+            ${{ matrix.briefcase-build-args }}
+#
+#      - name: Test App
+#        run: |
+#          ${{ matrix.briefcase-run-prefix }} \
+#          briefcase run \
+#            ${{ matrix.platform || matrix.target }} \
+#            ${{ matrix.output-format }} \
+#            --test --no-input --log \
+#            ${{ matrix.briefcase-args }} \
+#            ${{ matrix.briefcase-run-args }}
+
+      - name: Package App for ${{ matrix.target }}
+        run: |
+          ${{ matrix.briefcase-package-prefix }} \
+          briefcase package \
+            ${{ matrix.platform || matrix.target }} \
+            ${{ matrix.output-format }} \
+            --update --adhoc-sign --no-input --log \
+            ${{ matrix.briefcase-args }} \
+            ${{ matrix.briefcase-package-args }}
+
+      - name: Upload App
+        if: ${{ !env.ACT }}
+        # Briefcase cannot create iOS artifacts; instead, apps
+        # must be packaged and published for iOS through Xcode.
+        uses: actions/upload-artifact@v4
+        with:
+          name: Stonks-Overwatch-${{ matrix.target }}
+          path: dist
+          if-no-files-found: error
+
+  release:
+    name: Create Release
+    needs: package
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Display contents
+        run: ls -R artifacts
+
+      - name: Run common actions
+        uses: ./.github/actions/common-action
+
+      - name: Get version from Poetry
+        id: get_version
+        run: |
+          version=$(poetry version -s)
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        if: ${{ !env.ACT }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.get_version.outputs.version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

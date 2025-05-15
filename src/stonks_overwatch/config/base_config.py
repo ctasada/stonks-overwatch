@@ -4,8 +4,8 @@ from abc import abstractmethod
 from pathlib import Path
 from typing import Optional
 
-from settings import PROJECT_PATH
 from stonks_overwatch.config.base_credentials import BaseCredentials
+from stonks_overwatch.settings import PROJECT_PATH
 from stonks_overwatch.utils.logger import StonksLogger
 
 class BaseConfig:

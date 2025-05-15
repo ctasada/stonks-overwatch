@@ -18,19 +18,27 @@ from tzlocal import get_localzone
 BASE_DIR = Path(__file__).resolve().parent
 
 # This is the Project Root
-PROJECT_PATH = BASE_DIR.parent
+PROJECT_PATH = BASE_DIR.parent.parent
 
+DEFAULT_DATA_DIR = os.path.join(PROJECT_PATH, "data")
 # Define the data directory
-DATA_DIR = os.path.join(PROJECT_PATH, "data")
+STONKS_OVERWATCH_DATA_DIR = os.environ.get("STONKS_OVERWATCH_DATA_DIR", DEFAULT_DATA_DIR)
 # Ensure the directory exists
-if not os.path.exists(DATA_DIR):
-    os.makedirs(DATA_DIR)
+if not os.path.exists(STONKS_OVERWATCH_DATA_DIR):
+    os.makedirs(STONKS_OVERWATCH_DATA_DIR)
 
-# Define the temp directory
-TEMP_DIR = os.path.join(DATA_DIR, "temp")
+# Define the cache directory
+DEFAULT_CACHE_DIR = os.path.join(STONKS_OVERWATCH_DATA_DIR, "cache")
+STONKS_OVERWATCH_CACHE_DIR = os.environ.get("STONKS_OVERWATCH_CACHE_DIR", DEFAULT_CACHE_DIR)
 # Ensure the directory exists
-if not os.path.exists(TEMP_DIR):
-    os.makedirs(TEMP_DIR)
+if not os.path.exists(STONKS_OVERWATCH_CACHE_DIR):
+    os.makedirs(STONKS_OVERWATCH_CACHE_DIR)
+
+DEFAULT_LOGS_DIR = os.path.join(STONKS_OVERWATCH_DATA_DIR, "logs")
+STONKS_OVERWATCH_LOGS_DIR = os.environ.get("STONKS_OVERWATCH_LOGS_DIR", DEFAULT_LOGS_DIR)
+# Ensure the directory exists
+if not os.path.exists(STONKS_OVERWATCH_LOGS_DIR):
+    os.makedirs(STONKS_OVERWATCH_LOGS_DIR)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -77,12 +85,14 @@ PROFILE_MODE = os.getenv("PROFILE_MODE", False) in [True, "true", "True", "1"]
 if PROFILE_MODE:
     MIDDLEWARE += ["pyinstrument.middleware.ProfilerMiddleware"]
 
-ROOT_URLCONF = "urls"
+ROOT_URLCONF = "stonks_overwatch.urls"
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [
+            os.path.join(BASE_DIR, 'templates'),
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -91,11 +101,15 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
+            # With the flattening of the prj structure, the auto register doesn't seem to work anymore.
+            "libraries": {
+                "custom_tags": "stonks_overwatch.templatetags.custom_tags",
+            }
         },
     },
 ]
 
-WSGI_APPLICATION = "wsgi.application"
+WSGI_APPLICATION = "stonks_overwatch.wsgi.application"
 
 SESSION_COOKIE_AGE = 180 * 60 # 180 minutes in seconds
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
@@ -105,11 +119,15 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": Path(DATA_DIR).resolve().joinpath("db.sqlite3"),
+        "NAME": Path(STONKS_OVERWATCH_DATA_DIR).resolve().joinpath("db.sqlite3"),
         "TEST": {
-            "NAME": Path(TEMP_DIR).resolve().joinpath("test_db.sqlite3"),
+            "NAME": Path(STONKS_OVERWATCH_CACHE_DIR).resolve().joinpath("test_db.sqlite3"),
         },
     },
+}
+# With the flattening of the prj structure, the auto register doesn't seem to work anymore.
+MIGRATION_MODULES = {
+    'stonks_overwatch': 'stonks_overwatch.migrations',
 }
 
 TEST_RUNNER = "django.test.runner.DiscoverRunner"
@@ -150,11 +168,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = "static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "stonks_overwatch", "static")
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "stonks_overwatch", "staticfiles"),
-    os.path.join(BASE_DIR, "icons")
+    os.path.join(BASE_DIR, "staticfiles"),
+    os.path.join(PROJECT_PATH, "src", "icons")
 ]
+
+file_path = os.path.abspath(__file__)
 
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
@@ -208,10 +228,10 @@ LOGGING = {
         "file": {
             "level": "DEBUG",
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": os.path.join(TEMP_DIR, "stonks-overwatch.log"),
+            "filename": os.path.join(STONKS_OVERWATCH_LOGS_DIR, "stonks-overwatch.log"),
             "formatter": "verbose",
             "maxBytes": 5 * 1024 * 1024,  # 5MB per file
-            "backupCount": 5,  # Keep last 5 logs
+            "backupCount": 5,  # Keeps the last 5 logs
             "encoding": "utf-8",
         },
     },

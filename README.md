@@ -5,8 +5,10 @@
 Why do we need yet another dashboard? I have been a DeGiro user for many years, and the more active I was, 
 the more frustrated I became with the lack of any decent dashboard to overview my investments.
 
-After trying different options (I will commit names) I couldn't find any that was really covering my needs, or 
+After trying different options (I will omit names), I couldn't find any that was really covering my needs, or 
 that I could trust.
+
+Stonks Overwatch runs locally and doesn't share your data with anyone. Your data is yours.
 
 ## What does offer **Stonks Overwatch**?
 
@@ -134,6 +136,14 @@ make run profile=true debug=true
 ```
 Passing the parameter `profile=true` will enable profiling, and `debug=true` will log in debugging mode
 
+## Build Installers
+```shell
+briefcase create
+briefcase build
+briefcase package --adhoc-sign
+briefcase run
+```
+
 ## Documentation
 
 * [DeGiro Connector](https://github.com/Chavithra/degiro-connector)
@@ -196,6 +206,11 @@ Passing the parameter `profile=true` will enable profiling, and `debug=true` wil
   - Alpaca: https://alpaca.markets
 - [ ] DEGIRO Risk Category is a local term: https://www.degiro.ie/helpdesk/trading-platform/what-are-risk-categories
 - [ ] Improve code quality. Check https://pyre-check.org/docs/pysa-quickstart/
+- [ ] Briefcase:
+  - Support proper icon
+  - "No Python NSLog handler found. stdout/stderr will not be captured"
+  - Define 'data' path to a place that is not deleted when the app is updated
+  - Provide a Toga Browser window: https://toga.readthedocs.io/en/stable/tutorial/tutorial-3.html
 
 ## Logos
 - https://eodhd.com/financial-apis-blog/40000-company-logos (requires API Key)
