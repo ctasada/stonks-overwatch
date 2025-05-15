@@ -6,7 +6,7 @@ from typing import List
 import yfinance as yf
 from yfinance import Ticker
 
-import settings
+import stonks_overwatch.settings
 from stonks_overwatch.utils.logger import StonksLogger
 from stonks_overwatch.utils.singleton import singleton
 
@@ -33,7 +33,7 @@ class StockSplit:
 class YFinanceClient:
     logger = StonksLogger.get_logger("stonks_overwatch.yfinance_client", "[YFINANCE|CLIENT]")
 
-    cache_path = os.path.join(settings.TEMP_DIR, 'yfinance.cache')
+    cache_path = os.path.join(stonks_overwatch.settings.STONKS_OVERWATCH_CACHE_DIR, 'yfinance.cache')
 
     def __init__(self, enable_debug: bool = False):
         if enable_debug:

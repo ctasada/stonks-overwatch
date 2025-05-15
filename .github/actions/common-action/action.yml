@@ -25,8 +25,9 @@ runs:
     #----------------------------------------------
     #  -----  install & configure poetry  -----
     #----------------------------------------------
+    # Always install Poetry to ensure it's available,
+    # regardless of cache hit/miss
     - name: Install Python poetry
-      if: steps.cached-poetry.outputs.cache-hit != 'true'
       uses: snok/install-poetry@v1
       with:
         virtualenvs-create: true

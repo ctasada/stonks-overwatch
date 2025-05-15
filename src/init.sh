@@ -1,5 +1,5 @@
 #!/bin/sh
 
-python src/app.py npminstall
-python src/app.py migrate
-python src/app.py runserver
+python src/manage.py npminstall
+python src/manage.py migrate
+python src/manage.py runserver 0.0.0.0:8000 --noreload

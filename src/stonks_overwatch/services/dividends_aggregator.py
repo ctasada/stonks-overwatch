@@ -1,7 +1,9 @@
 from typing import List
 
 from stonks_overwatch.config.config import Config
-from stonks_overwatch.services.degiro.account_overview import AccountOverviewService as DeGiroAccountOverviewService
+from stonks_overwatch.services.degiro.account_overview import (
+    AccountOverviewService as DeGiroAccountOverviewService,
+)
 from stonks_overwatch.services.degiro.currency_converter_service import (
     CurrencyConverterService as DeGiroCurrencyConverterService,
 )
