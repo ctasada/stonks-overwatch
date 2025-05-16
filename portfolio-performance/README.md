@@ -1,8 +1,8 @@
 # Portfolio Performance
 
-This folder contains some scripts to help exporting the data to Portfolio Performance
+This folder contains some scripts to help export the data to Portfolio Performance
 
-> Stil WIP
+> Still WIP
 
 * `deGiroAnalysis.py`: Using the `Transactions.csv` file, calculates the total costs of the Portfolio
 * `deGiroConverterAccount.py`: Converts the `Accounts.csv` file to a format that can be directly imported by Portfolio Performance

@@ -30,26 +30,26 @@ Right now the features we offer are:
 
 I tried to make it as easy as possible to use, but some minimum technical knowledge is needed.
 
-Checkout the repository in your computer
+Check out the repository in your computer
    `git clone ctasada/stonks-overwatch`
 
 You can execute `make start`, it will install and configure everything needed to run.
 
-Alternatively you can also use Docker
+Alternatively, you can also use Docker
 ```shell
 make docker-run
 ```
 
-The application is available at [http://127.0.0.1:8000](http://127.0.0.1:8000) Simply open you browser in that URL.
+The application is available at [http://127.0.0.1:8000](http://127.0.0.1:8000) Open your browser in that URL.
 
 ### How to login to DeGiro?
-You can login to DeGiro in two different ways
+You can log in to DeGiro in two different ways
 
 #### Use the Login form
-When you open your browser at [http://127.0.0.1:8000](http://127.0.0.1:8000) you will see a login form. Simply introduce
+When you open your browser at [http://127.0.0.1:8000](http://127.0.0.1:8000) you will see a login form. Introduce
 your credentials, including the OTP (One-Time-Password).
 
-The first time, the application will retrieve all your portfolio from DeGiro and you are good to go
+The first time, the application will retrieve all your portfolio from DeGiro, and you are good to go
 
 > Using this approach, no credentials are stored anywhere. You will need to repeat this step everytime  
 
@@ -65,16 +65,16 @@ Copy the file `config/config.json.template` to `config/config.json`
         "credentials": {
             "username": "USERNAME",
             "password": "PASSWORD",
-            "totp_secret_key": "See https://github.com/Chavithra/stonks_overwatch-connector#35-how-to-use-2fa-",
+            "totp_secret_key": "See https://github.com/Chavithra/stonks_overwatch-connector#35-how-to-use-2fa-"
         },
         "base_currency": "EUR - Optional field. Uses DeGiro base currency by default",
-        "start_date": "PORTFOLIO CREATION DATE. Defaults to 2020-01-01"
+        "start_date": "PORTFOLIO CREATION DATE. Defaults to 2020-01-01",
         "update_frequency_minutes": "How frequently the data from DeGiro should be updated. Defaults to 5 minutes"
     }
 }
 ```
 Only the `credentials` section is mandatory, put your credentials in the corresponding fields, and follow the instructions
-to obtain your `totp_secret_key`. You can also skip it, and the application will ask for you OTP everytime.
+to obtain your `totp_secret_key`. You can also skip it, and the application will ask for your OTP everytime.
 
 ### How to login to Bitvavo
 [TODO]
@@ -156,7 +156,7 @@ briefcase run
 * https://github.com/CNugteren/DGPC
 * https://app.portfoliodividendtracker.com/p/jongbeleggen?locale=en (Has some interesting diagrams and data)
 * https://divvydiary.com/en/p/24094?tab=depot
-* https://capitalyse.app/app/degiro/ -> Seems to have some errors, but data and graphs are interesting
+* https://capitalyse.app/app/degiro/ → Seems to have some errors, but data and graphs are interesting
 
 ## BUGS
 - Dashboard: JNJ & JPM are associated with the wrong sector
@@ -171,22 +171,22 @@ briefcase run
     - 'TEF.D'(280180545)
     - 'FRZA'(600236745)
     - 600179738: No chart found
-- CreateProduct Quotation do not respect the proper timeframes
+- CreateProduct Quotation does not respect the proper timeframes
 - Django Cache is disabled so that the portfolio selection works, otherwise the page is not properly reload
 - Error loading Docker Image in MacOS Intel: 
   - "CPU features not detected: avx2"
   - use 'polars-lts-cpu' instead of 'polars' in Dockerfile
-- Dashboard: Drawing the dashboard is slow. Seems that the code is executed three times
+- Dashboard: Drawing the dashboard is slow. It seems that the code is executed three times
 - Review Closed/All positions in Portfolio Overview. Some entries contain unexpected/inconsistent values
-- TEAM: Growth values seem to be too low for what I remember, should be ~80%
+- TEAM: Growth values seem too low for what I remember, should be ~80%
 
 ## TODOs
 - [ ] DeGiro Client: Stop using Totp and request 2FA for each connection
 - [ ] Provide support for both Unrealized and Realized Gain/Loss
         Onger. W/V € - Gain/Loss Unrealized - unrealizedPl
         Totale W/V € - Gain/Loss Total (Realized + unrealized) - totalPl
-- [ ] Would be interesting to add filters to the Account Overview page and aggregate
-- [ ] Add graph with Portfolio Cumulative P&L / Cumulative Net Contributions / Portfolio NAV (https://www.investopedia.com/terms/n/nav.asp)
+- [ ] It would be interesting to add filters to the Account Overview page and aggregate
+- [ ] Add the graph with Portfolio Cumulative P&L / Cumulative Net Contributions / Portfolio NAV (https://www.investopedia.com/terms/n/nav.asp)
 - [ ] Check migration from ChartJS to https://plotly.com/javascript/ or https://recharts.org/ or https://d3js.org
 - [ ] Track https://github.com/chartjs/Chart.js/issues/11005
 - [ ] Review Portfolio growth. Indicates negative growth, which never really happened.
@@ -206,11 +206,6 @@ briefcase run
   - Alpaca: https://alpaca.markets
 - [ ] DEGIRO Risk Category is a local term: https://www.degiro.ie/helpdesk/trading-platform/what-are-risk-categories
 - [ ] Improve code quality. Check https://pyre-check.org/docs/pysa-quickstart/
-- [ ] Briefcase:
-  - Support proper icon
-  - "No Python NSLog handler found. stdout/stderr will not be captured"
-  - Define 'data' path to a place that is not deleted when the app is updated
-  - Provide a Toga Browser window: https://toga.readthedocs.io/en/stable/tutorial/tutorial-3.html
 
 ## Logos
 - https://eodhd.com/financial-apis-blog/40000-company-logos (requires API Key)
