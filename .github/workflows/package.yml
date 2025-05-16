@@ -1,4 +1,4 @@
-name: Package Release
+name: Release
 
 on:
   workflow_dispatch:  # Allows manual trigger for any branch
@@ -17,7 +17,7 @@ defaults:
 
 jobs:
   package:
-    name: Package
+    name: Create Installers
     runs-on: ${{ matrix.runs-on }}
     strategy:
       fail-fast: false
@@ -98,7 +98,7 @@ jobs:
           if-no-files-found: error
 
   release:
-    name: Create Release
+    name: Release Packages
     needs: package
     runs-on: ubuntu-latest
 
