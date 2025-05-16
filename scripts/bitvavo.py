@@ -15,9 +15,12 @@ class BitvavoImplementation:
 
     # Connect securely to Bitvavo, create the WebSocket and error callbacks.
     def __init__(self):
-        self.bitvavo = BitvavoService()
+        self.bitvavo = BitvavoService(debugging=True)
         # self.bitvavo_socket = self.bitvavo.newWebsocket()
         # self.bitvavo_socket.setErrorCallback(self.error_callback)
+
+    def client(self):
+        return self.bitvavo.get_client()
 
     # Handle errors.
     def error_callback(self, error):

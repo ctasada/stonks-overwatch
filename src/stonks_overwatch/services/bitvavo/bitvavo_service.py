@@ -16,6 +16,7 @@ class BitvavoService:
 
     def __init__(
             self,
+            debugging: bool = False,
     ):
         self.bitvavo_config = BitvavoConfig.default()
         bitvavo_credentials = self.bitvavo_config.credentials
@@ -23,7 +24,8 @@ class BitvavoService:
         if bitvavo_credentials and bitvavo_credentials.apikey and bitvavo_credentials.apisecret:
             self.client = Bitvavo({
                 'APIKEY': bitvavo_credentials.apikey,
-                'APISECRET': bitvavo_credentials.apisecret
+                'APISECRET': bitvavo_credentials.apisecret,
+                'debugging': debugging,
             })
 
     def get_client(self) -> Bitvavo:
