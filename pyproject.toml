@@ -11,7 +11,7 @@ dependencies = [
     # Upgrading to Django 5.2.0 breaks django-extensions and NPM
     "django (>= 5.1.9,<5.2.0)",
     "pycountry >= 24.6.1",
-    "currency-symbols >= 2.0.3",
+    "currency-symbols >= 2.0.4",
     "pandas >= 2.2.3",
     "requests-cache >= 1.2.1",
     "django-extensions >= 4.1.0",
