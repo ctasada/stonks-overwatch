@@ -54,7 +54,7 @@ class TestRootStaticFileView(TestCase):
 
         self.assertIsInstance(response, FileResponse)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response['Content-Type'], 'image/x-icon')
+        self.assertIn(response['Content-Type'], ['image/x-icon', 'image/vnd.microsoft.icon'])
 
     def test_get_nonexistent_file(self):
         """Test getting a non-existent static file."""
