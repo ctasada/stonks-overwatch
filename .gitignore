@@ -139,7 +139,6 @@ config/*
 # Local data
 /data/
 /logs/
-/pytest/
 /wheels/
 
 # Ignore NPM modules

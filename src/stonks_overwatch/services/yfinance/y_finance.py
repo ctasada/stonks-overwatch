@@ -61,5 +61,5 @@ class YFinance:
             sector = Sector(ticker_info.get('sector')) if ticker_info.get('sector') else Sector.UNKNOWN
             industry = ticker_info.get('industry')
             return sector, industry
-        except AttributeError:
+        except (AttributeError, ValueError):
             return Sector.UNKNOWN, None

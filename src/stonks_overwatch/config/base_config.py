@@ -22,7 +22,7 @@ class BaseConfig:
 
     def __eq__(self, value: object) -> bool:
         if isinstance(value, self.__class__):
-            return self.credentials == value.credentials
+            return self.is_enabled() == value.is_enabled() and self.credentials == value.credentials
         return False
 
     def __repr__(self) -> str:

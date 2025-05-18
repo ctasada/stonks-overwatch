@@ -1,86 +1,100 @@
-import json
-import pathlib
-
 from stonks_overwatch.repositories.degiro.models import DeGiroProductInfo
 from stonks_overwatch.repositories.degiro.product_info_repository import ProductInfoRepository
+from tests.stonks_overwatch.repositories.base_repository_test import BaseRepositoryTest
 
 import pytest
-from django.test import TestCase
 
 @pytest.mark.django_db
-class TestProductInfoRepository(TestCase):
-    def setUp(self):
-        data_file = pathlib.Path("tests/resources/stonks_overwatch/repositories/degiro/product_info_data.json")
+class TestProductInfoRepository(BaseRepositoryTest):
+    """Tests for the ProductInfoRepository class.
 
-        with open(data_file, "r") as file:
-            data = json.load(file)
-
-        self.created_objects = {}
-        for key, value in data.items():
-            # Create and save the ProductInfo object
-            obj = DeGiroProductInfo.objects.create(**value)
-            self.created_objects[key] = obj
-
-    def tearDown(self):
-        # Clean up the created objects
-        for obj in self.created_objects.values():
-            obj.delete()
+    Test data includes:
+    - Microsoft Corp (MSFT) with ID 332111
+    - Apple Inc (AAPL) with ID 331868
+    """
+    model_class = DeGiroProductInfo
+    data_file = "tests/resources/stonks_overwatch/repositories/degiro/product_info_data.json"
 
     def test_get_products_info_raw(self):
+        """Test retrieving raw product info for multiple products."""
         products = ProductInfoRepository.get_products_info_raw(["332111", "331868"])
+        self.assert_list_length(products, 2)
 
-        assert len(products) > 0
+        # Test Microsoft product info
+        self.assert_dict_contains(
+            products[332111],
+            name="Microsoft Corp",
+            symbol="MSFT",
+            currency="USD",
+            isin="US5949181045"
+        )
 
-        assert products[332111]["name"] == "Microsoft Corp"
-        assert products[332111]["symbol"] == "MSFT"
-        assert products[332111]["currency"] == "USD"
-        assert products[332111]["isin"] == "US5949181045"
-
-        assert products[331868]["name"] == "Apple Inc"
-        assert products[331868]["symbol"] == "AAPL"
-        assert products[331868]["currency"] == "USD"
-        assert products[331868]["isin"] == "US0378331005"
+        # Test Apple product info
+        self.assert_dict_contains(
+            products[331868],
+            name="Apple Inc",
+            symbol="AAPL",
+            currency="USD",
+            isin="US0378331005"
+        )
 
     def test_get_product_by_id(self):
+        """Test retrieving product info by ID."""
+        # Test Microsoft product
         product = ProductInfoRepository.get_product_info_from_id(332111)
+        self.assert_dict_contains(
+            product,
+            name="Microsoft Corp",
+            symbol="MSFT",
+            currency="USD",
+            isin="US5949181045"
+        )
 
-        assert product["name"] == "Microsoft Corp"
-        assert product["symbol"] == "MSFT"
-        assert product["currency"] == "USD"
-        assert product["isin"] == "US5949181045"
-
+        # Test Apple product
         product = ProductInfoRepository.get_product_info_from_id(331868)
-
-        assert product["name"] == "Apple Inc"
-        assert product["symbol"] == "AAPL"
-        assert product["currency"] == "USD"
-        assert product["isin"] == "US0378331005"
+        self.assert_dict_contains(
+            product,
+            name="Apple Inc",
+            symbol="AAPL",
+            currency="USD",
+            isin="US0378331005"
+        )
 
     def test_get_product_info_from_name(self):
+        """Test retrieving product info by company name."""
         product = ProductInfoRepository.get_product_info_from_name("Microsoft Corp")
-
-        assert product["name"] == "Microsoft Corp"
-        assert product["symbol"] == "MSFT"
-        assert product["currency"] == "USD"
-        assert product["isin"] == "US5949181045"
+        self.assert_dict_contains(
+            product,
+            name="Microsoft Corp",
+            symbol="MSFT",
+            currency="USD",
+            isin="US5949181045"
+        )
 
     def test_get_product_info_from_isin(self):
+        """Test retrieving product ISINs."""
         products = ProductInfoRepository.get_products_isin()
-
-        print(products)
-        assert sorted(products) == sorted(["US5949181045", "US0378331005"])
+        self.assertEqual(sorted(products), sorted(["US5949181045", "US0378331005"]))
 
     def test_get_products_info_raw_by_symbol(self):
+        """Test retrieving raw product info by stock symbols."""
         products = ProductInfoRepository.get_products_info_raw_by_symbol(["MSFT", "AAPL"])
+        self.assert_list_length(products, 2)
 
-        assert len(products) == 2
+        # Test Microsoft product info
+        self.assert_dict_contains(
+            products[332111],
+            name="Microsoft Corp",
+            symbol="MSFT",
+            currency="USD",
+            isin="US5949181045"
+        )
 
-        assert products[332111]["name"] == "Microsoft Corp"
-        assert products[332111]["symbol"] == "MSFT"
-        assert products[332111]["currency"] == "USD"
-        assert products[332111]["isin"] == "US5949181045"
-
-        assert products[331868]["name"] == "Apple Inc"
-        assert products[331868]["symbol"] == "AAPL"
-        assert products[331868]["currency"] == "USD"
-        assert products[331868]["isin"] == "US0378331005"
+        # Test Apple product info
+        self.assert_dict_contains(
+            products[331868],
+            name="Apple Inc",
+            symbol="AAPL",
+            currency="USD",
+            isin="US0378331005"
+        )

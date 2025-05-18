@@ -6,17 +6,18 @@ from django.utils.dateparse import parse_datetime
 from stonks_overwatch.repositories.degiro.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.repositories.degiro.models import DeGiroCashMovements
 from tests.stonks_overwatch.assertions import assert_dates_descending
+from tests.stonks_overwatch.repositories.base_repository_test import BaseRepositoryTest
 
 import pytest
-from django.test import TestCase
 
 @pytest.mark.django_db
-class TestCashMovementsRepository(TestCase):
-    def setUp(self):
-        self.fixture_cash_movements_repository()
+class TestCashMovementsRepository(BaseRepositoryTest):
+    model_class = DeGiroCashMovements
+    data_file = "tests/resources/stonks_overwatch/repositories/degiro/cash_movements_data.json"
 
-    def fixture_cash_movements_repository(self):
-        data_file = pathlib.Path("tests/resources/stonks_overwatch/repositories/degiro/cash_movements_data.json")
+    def load_test_data(self):
+        """Override to handle date parsing for cash movements."""
+        data_file = pathlib.Path(self.data_file)
 
         with open(data_file, "r") as file:
             data = json.load(file)
@@ -25,15 +26,8 @@ class TestCashMovementsRepository(TestCase):
         for key, value in data.items():
             value["date"] = parse_datetime(value["date"])
             value["value_date"] = parse_datetime(value["value_date"])
-
-            # Create and save the CashMovements object
-            obj = DeGiroCashMovements.objects.create(**value)
+            obj = self.model_class.objects.create(**value)
             self.created_objects[key] = obj
-
-    def tearDown(self):
-        # Clean up the created objects
-        for obj in self.created_objects.values():
-            obj.delete()
 
     def test_get_cash_movements_raw(self):
         cash_movements = CashMovementsRepository.get_cash_movements_raw()
@@ -57,10 +51,10 @@ class TestCashMovementsRepository(TestCase):
 
     def test_get_last_movement(self):
         last_movement = CashMovementsRepository.get_last_movement()
-        assert last_movement == self.created_objects["flatex_cash_sweep"].date
+        assert last_movement == self.get_test_object("flatex_cash_sweep").date
 
     def test_get_last_movement_with_empty_db(self):
-        DeGiroCashMovements.objects.all().delete()
+        self.model_class.objects.all().delete()
         last_movement = CashMovementsRepository.get_last_movement()
         assert last_movement is None
 
