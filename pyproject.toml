@@ -166,7 +166,9 @@ python_files = [
 ]
 addopts = [
     '--import-mode=importlib',
-    '--cov-report=html:pytest'
+    '--cov',
+    '--cov-report=term',
+    '--cov-report=html:htmlcov'
 ]
 
 [tool.briefcase]

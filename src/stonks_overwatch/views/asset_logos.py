@@ -101,5 +101,5 @@ class AssetLogoView(View):
         # Convert emoji to its Unicode codepoint
         codepoint = '-'.join(f"{ord(c):x}" for c in emoji_char)
 
-        # Twemoji URL for the SVG
-        return f"https://cdnjs.cloudflare.com/ajax/libs/twemoji/15.1.0/svg/{codepoint}.svg"
+        # Twemoji URL for the SVG. See https://github.com/jdecked/twemoji
+        return f"https://cdnjs.cloudflare.com/ajax/libs/twemoji/16.0.1/svg/{codepoint}.svg"

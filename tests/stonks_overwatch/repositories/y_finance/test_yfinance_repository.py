@@ -9,76 +9,78 @@ from django.test import TestCase
 
 @pytest.mark.django_db
 class TestYFinanceRepository(TestCase):
+    """Tests for the YFinanceRepository class.
+
+    Test data includes:
+    - Apple Inc (AAPL) ticker info and stock splits
+    - Palantir (PLTR) ticker info without splits
+    """
     def setUp(self):
-        self.fixture_ticker_info_repository()
-        self.fixture_stock_split_repository()
-
-    def fixture_ticker_info_repository(self):
+        """Set up test data for both ticker info and stock splits."""
+        # Load ticker info data
         data_file = pathlib.Path("tests/resources/stonks_overwatch/repositories/y_finance/tickers_info_data.json")
-
         with open(data_file, "r") as file:
             data = json.load(file)
 
-        self.created_objects = {}
+        self.ticker_info = {}
         for key, value in data.items():
-            # Create and save the Ticker Info objects
             obj = YFinanceTickerInfo.objects.create(
                 symbol=key,
                 data=value
             )
-            self.created_objects[key] = obj
+            self.ticker_info[key] = obj
 
-
-    def fixture_stock_split_repository(self):
+        # Load stock splits data
         data_file = pathlib.Path("tests/resources/stonks_overwatch/repositories/y_finance/stocks_split_data.json")
-
         with open(data_file, "r") as file:
             data = json.load(file)
 
-        self.created_objects = {}
+        self.stock_splits = {}
         for key, value in data.items():
-            # Create and save the Ticker Info objects
             obj = YFinanceStockSplits.objects.create(
                 symbol=key,
                 data=value
             )
-            self.created_objects[key] = obj
+            self.stock_splits[key] = obj
 
     def tearDown(self):
-        # Clean up the created objects
-        for obj in self.created_objects.values():
+        """Clean up all test data."""
+        # Clean up ticker info
+        for obj in self.ticker_info.values():
+            obj.delete()
+        # Clean up stock splits
+        for obj in self.stock_splits.values():
             obj.delete()
 
     def test_get_known_symbol(self):
+        """Test retrieving ticker info for a known symbol."""
         info = YFinanceRepository.get_ticker_info("AAPL")
-
-        assert info is not None
-        print(info)
-        assert info['industry'] == "Consumer Electronics"
-        assert info['currency'] == "USD"
-        assert info['symbol'] == "AAPL"
-        assert info['country'] == "United States"
+        self.assertIsNotNone(info)
+        self.assertEqual(info['industry'], "Consumer Electronics")
+        self.assertEqual(info['currency'], "USD")
+        self.assertEqual(info['symbol'], "AAPL")
+        self.assertEqual(info['country'], "United States")
 
     def test_get_unknown_symbol(self):
+        """Test retrieving ticker info for an unknown symbol."""
         info = YFinanceRepository.get_ticker_info("XXX")
-
-        assert info is None
+        self.assertIsNone(info)
 
     def test_unknown_stock_split(self):
+        """Test retrieving stock splits for an unknown symbol."""
         splits = YFinanceRepository.get_stock_splits("XXX")
-
-        assert splits is None
+        self.assertIsNone(splits)
 
     def test_symbol_without_splits(self):
+        """Test retrieving stock splits for a symbol without splits."""
         splits = YFinanceRepository.get_stock_splits("PLTR")
-
-        assert splits is not None
-        assert splits == []
+        self.assertIsNotNone(splits)
+        self.assertEqual(len(splits), 0)
 
     def test_symbol_with_splits(self):
-
+        """Test retrieving stock splits for a symbol with splits."""
         splits = YFinanceRepository.get_stock_splits("AAPL")
-        assert splits is not None
-        assert len(splits) == 5
-        assert splits[3]['split_ratio'] == 7.0
-        assert splits[4]['split_ratio'] == 4.0
+        self.assertIsNotNone(splits)
+        self.assertEqual(len(splits), 5)
+        self.assertEqual(splits[3]['split_ratio'], 7.0)
+        self.assertEqual(splits[4]['split_ratio'], 4.0)
