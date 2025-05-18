@@ -103,6 +103,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run common actions
+        uses: ./.github/actions/common-action
+
       - name: Download all build artifacts
         uses: actions/download-artifact@v4
         with:
@@ -110,9 +116,6 @@ jobs:
 
       - name: Display contents
         run: ls -R artifacts
-
-      - name: Run common actions
-        uses: ./.github/actions/common-action
 
       - name: Get version from Poetry
         id: get_version

@@ -173,9 +173,6 @@ briefcase run
     - 600179738: No chart found
 - CreateProduct Quotation does not respect the proper timeframes
 - Django Cache is disabled so that the portfolio selection works, otherwise the page is not properly reload
-- Error loading Docker Image in MacOS Intel: 
-  - "CPU features not detected: avx2"
-  - use 'polars-lts-cpu' instead of 'polars' in Dockerfile
 - Dashboard: Drawing the dashboard is slow. It seems that the code is executed three times
 - Review Closed/All positions in Portfolio Overview. Some entries contain unexpected/inconsistent values
 - TEAM: Growth values seem too low for what I remember, should be ~80%
