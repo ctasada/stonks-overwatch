@@ -123,10 +123,32 @@ jobs:
           version=$(poetry version -s)
           echo "version=$version" >> $GITHUB_OUTPUT
 
+      - name: Extract changelog entry
+        id: changelog
+        run: |
+          version=${{ steps.get_version.outputs.version }}
+          echo "Debug: Version is '$version'"
+          echo "Debug: CHANGELOG.md contents:"
+          cat CHANGELOG.md
+          echo "Debug: Running awk command..."
+          # First try to match the exact version in brackets
+          awk "/^##\\s\\[$version\\]/{flag=1;next}/^##\\s/{flag=0}flag" CHANGELOG.md > release_notes.md
+          # If no match found, try without brackets
+          if [ ! -s release_notes.md ]; then
+            awk "/^##\\s$version/{flag=1;next}/^##\\s/{flag=0}flag" CHANGELOG.md > release_notes.md
+          fi
+          echo "Debug: Release notes contents:"
+          cat release_notes.md
+          echo "RELEASE_BODY<<EOF" >> $GITHUB_ENV
+          cat release_notes.md >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
       - name: Create GitHub Release
         if: ${{ !env.ACT }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.get_version.outputs.version }}
+          body: ${{ env.RELEASE_BODY }}
+          files: artifacts/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
