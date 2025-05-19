@@ -1,6 +1,6 @@
 [project]
 name = "stonks-overwatch"
-version = "0.1.0"
+version = "0.1.1.dev0"
 description = "Stonks Overwatch"
 authors = [{name = "Carlos Tasada", email = "carlos.tasada@gmail.com"}]
 license = "MIT"
@@ -174,7 +174,6 @@ addopts = [
 [tool.briefcase]
 project_name = "Stonks Overwatch"
 bundle = "com.caribay.investments"
-version = "0.1.0"
 url = "https://github.com/ctasada/stonks-overwatch"
 license.file = "LICENSE"
 author = "Carlos Tasada"
