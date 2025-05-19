@@ -1,4 +1,4 @@
-"""poetry run python ./scripts/bitvavo.py"""
+"""poetry run python ./scripts/bitvavo/bitvavo.py"""
 
 import json
 import time

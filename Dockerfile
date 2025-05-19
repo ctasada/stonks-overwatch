@@ -50,6 +50,6 @@ COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 COPY --from=builder /app/src/node_modules /app/src/node_modules
 
 COPY ./src /app/src
-COPY ./src/init.sh /app/init.sh
+COPY ./scripts/init.sh /app/init.sh
 # FIXME: Secrets must be provided in a more secure way
 COPY ./config /app/config
