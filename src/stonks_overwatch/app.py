@@ -83,10 +83,17 @@ class StonksOverwatchApp(toga.App):
         self.loop.call_soon_threadsafe(self.server_exists.set_result, "ready")
         self._httpd.serve_forever()
 
-    def cleanup(self, app, **kwargs):
-        print("Shutting down...")
-        self._httpd.shutdown()
-        return True
+    async def exit_handler(self, app):
+        # Return True if app should close, and False if it should remain open
+        if await self.dialog(
+                toga.ConfirmDialog("Confirm Exit", "Are you sure you want to exit?")
+        ):
+            print("Shutting down...")
+            self._httpd.shutdown()
+
+            return True
+        else:
+            return False
 
     def startup(self):
         self.server_exists = asyncio.Future()
@@ -96,11 +103,16 @@ class StonksOverwatchApp(toga.App):
         self.server_thread = Thread(target=self.web_server)
         self.server_thread.start()
 
-        self.on_exit = self.cleanup
+        self.on_exit = self.exit_handler
 
         self.main_window = toga.MainWindow()
         self.main_window.size = (1024, 768)
         self.main_window.content = self.web_view
+
+        # Remove default menu items that are not needed
+        for command in self.commands:
+            if command.group.text == "File" and command.text == "Close All":
+                self.commands.remove(command)
 
     async def on_running(self):
         await self.server_exists
