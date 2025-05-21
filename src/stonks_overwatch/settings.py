@@ -64,7 +64,6 @@ INSTALLED_APPS = [
     "stonks_overwatch.app_config.StonksOverwatchConfig",
     "django_extensions",
     "django_node_assets",
-    "fontawesomefree",
 ]
 
 MIDDLEWARE = [
