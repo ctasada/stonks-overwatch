@@ -19,10 +19,6 @@
     <!-- jQuery CDN - Slim version (=without AJAX) -->
     <script src="{% static 'jquery/dist/jquery.slim.min.js' %}"></script>
 
-    <!-- Font Awesome JS -->
-    <script src="{% static 'fontawesomefree/js/solid.js' %}"></script>
-    <script src="{% static 'fontawesomefree/js/fontawesome.js' %}"></script>
-
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/static/style.css">
 </head>
@@ -48,55 +44,55 @@
                         {% url 'dashboard' as url %}
                         <li class="nav-item">
                             <a href="{{ url }}" class="nav-link active py-3 px-2 border-top border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-title="Dashboard">
-                                <i class="fas fa-tachometer-alt"></i>
+                                <i class="bi bi-graph-up"></i>
                             </a>
                         </li>
 
                         {% url 'portfolio' as url %}
                         <li class="nav-item">
                             <a href="{{ url }}" class="nav-link active py-3 px-2 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-title="Portfolio">
-                                <i class="fas fa-briefcase"></i>
+                                <i class="bi bi-briefcase-fill"></i>
                             </a>
                         </li>
 
                         {% url 'diversification' as url %}
                         <li class="nav-item">
                             <a href="{{ url }}" class="nav-link active py-3 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-original-title="Diversification">
-                                <i class="fas fa-chart-pie"></i>
+                                <i class="bi bi-pie-chart-fill"></i>
                             </a>
                         </li>
 
                         {% url 'dividends' as url %}
                         <li class="nav-item">
                             <a href="{{ url }}" class="nav-link active py-3 px-2 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-title="Dividends">
-                                <i class="fas fa-coins"></i>
+                                <i class="bi bi-cash-coin"></i>
                             </a>
                         </li>
 
                         {% url 'fees' as url %}
                         <li class="nav-item">
                             <a href="{{ url }}" class="nav-link active py-3 px-2 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-title="Fees">
-                                <i class="fas fa-dollar-sign"></i>
+                                <i class="bi bi-receipt"></i>
                             </a>
                         </li>
 
                         {% url 'deposits' as url %}
                         <li class="nav-item">
                             <a href="{{ url }}" class="nav-link active py-3 px-2 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-original-title="Deposits">
-                                <i class="fas fa-piggy-bank"></i>
+                                <i class="bi bi-piggy-bank-fill"></i>
                             </a>
                         </li>
 
                         {% url 'transactions' as url %}
                         <li class="nav-item">
                             <a href="{{ url }}" class="nav-link active py-3 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-original-title="Transactions">
-                                <i class="fas fa-receipt"></i>
+                                <i class="bi bi-arrow-left-right"></i>
                             </a>
                         </li>
                         {% url 'account_overview' as url %}
                         <li class="nav-item">
                             <a href="{{ url }}" class="nav-link active py-3 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-original-title="Account Statement">
-                                <i class="fas fa-file-invoice-dollar"></i>
+                                <i class="bi bi-bank"></i>
                             </a>
                         </li>
                     </ul>

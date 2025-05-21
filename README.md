@@ -157,6 +157,7 @@ briefcase run
 * https://app.portfoliodividendtracker.com/p/jongbeleggen?locale=en (Has some interesting diagrams and data)
 * https://divvydiary.com/en/p/24094?tab=depot
 * https://capitalyse.app/app/degiro/ → Seems to have some errors, but data and graphs are interesting
+* https://giroscope.io → Seems to have some errors, but data and graphs are interesting
 
 ## BUGS
 - Dashboard: JNJ & JPM are associated with the wrong sector
@@ -186,8 +187,7 @@ briefcase run
 - [ ] Add the graph with Portfolio Cumulative P&L / Cumulative Net Contributions / Portfolio NAV (https://www.investopedia.com/terms/n/nav.asp)
 - [ ] Check migration from ChartJS to https://plotly.com/javascript/ or https://recharts.org/ or https://d3js.org
 - [ ] Track https://github.com/chartjs/Chart.js/issues/11005
-- [ ] Review Portfolio growth. Indicates negative growth, which never really happened.
-- [ ] Fontawesome is replaceable by https://icons.getbootstrap.com
+- [ ] Review Portfolio growth. It Indicates negative growth, which never really happened.
 - [ ] Provide more information in the Dashboard performance overview
 - [ ] Migrate UI to https://github.com/coreui/coreui
 - [ ] Add GitHub Dependabot support for Poetry: Track https://github.com/dependabot/dependabot-core/issues/11237
