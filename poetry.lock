@@ -782,17 +782,6 @@ attrs = ">=23.2.0,<24"
 tomli = ">=2.0.1,<3"
 
 [[package]]
-name = "fontawesomefree"
-version = "6.6.0"
-description = "Font Awesome Free"
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "fontawesomefree-6.6.0-py3-none-any.whl", hash = "sha256:599b574431c9bd92ed5fc054d1045a07c42335da36c17884f2b934755eef9089"},
-]
-
-[[package]]
 name = "frozendict"
 version = "2.4.6"
 description = "A simple immutable dictionary"
@@ -3013,4 +3002,4 @@ repair = ["scipy (>=1.6.3)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "53753d3df1765ec8d6aabd6b3342f17dca0b36da14cf26d80c399911ffa81c2b"
+content-hash = "97faca50010907eaf769de84a835dd0e3af6c230be7b4022c97e07298c9001da"
