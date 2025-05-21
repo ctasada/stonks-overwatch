@@ -214,7 +214,7 @@ class PortfolioEntry:
 
 
 class PortfolioId(Enum):
-    ALL = ("all", "Portfolios", "/static/logos/all-portfolio.svg")
+    ALL = ("all", "Portfolios", "/static/stonks_overwatch.svg")
     DEGIRO = ("degiro", "DeGiro", "/static/logos/degiro.svg")
     BITVAVO = ("bitvavo", "Bitvavo", "/static/logos/bitvavo.svg")
 
