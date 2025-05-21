@@ -473,14 +473,14 @@ files = [
 
 [[package]]
 name = "click"
-version = "8.2.0"
+version = "8.2.1"
 description = "Composable command line interface toolkit"
 optional = false
 python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "click-8.2.0-py3-none-any.whl", hash = "sha256:6b303f0b2aa85f1cb4e5303078fadcbcd4e476f114fab9b5007005711839325c"},
-    {file = "click-8.2.0.tar.gz", hash = "sha256:f5452aeddd9988eefa20f90f05ab66f17fce1ee2a36907fd30b05bbb5953814d"},
+    {file = "click-8.2.1-py3-none-any.whl", hash = "sha256:61a3265b914e850b85317d0b3109c7f8cd35a670f963866005d6ef1d5175a12b"},
+    {file = "click-8.2.1.tar.gz", hash = "sha256:27c491cc05d968d271d5a1db13e3b5a184636d9d930f148c50b038f0d0646202"},
 ]
 
 [package.dependencies]
@@ -674,18 +674,18 @@ wrapt = ">=1.14.1,<2.0.0"
 
 [[package]]
 name = "django"
-version = "5.1.9"
+version = "5.2.1"
 description = "A high-level Python web framework that encourages rapid development and clean, pragmatic design."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "django-5.1.9-py3-none-any.whl", hash = "sha256:2fd1d4a0a66a5ba702699eb692e75b0d828b73cc2f4e1fc4b6a854a918967411"},
-    {file = "django-5.1.9.tar.gz", hash = "sha256:565881bdd0eb67da36442e9ac788bda90275386b549070d70aee86327781a4fc"},
+    {file = "django-5.2.1-py3-none-any.whl", hash = "sha256:a9b680e84f9a0e71da83e399f1e922e1ab37b2173ced046b541c72e1589a5961"},
+    {file = "django-5.2.1.tar.gz", hash = "sha256:57fe1f1b59462caed092c80b3dd324fd92161b620d59a9ba9181c34746c97284"},
 ]
 
 [package.dependencies]
-asgiref = ">=3.8.1,<4"
+asgiref = ">=3.8.1"
 sqlparse = ">=0.3.1"
 tzdata = {version = "*", markers = "sys_platform == \"win32\""}
 
@@ -710,18 +710,18 @@ django = ">=4.2"
 
 [[package]]
 name = "django-node-assets"
-version = "0.9.14"
+version = "0.9.15"
 description = "The Django application that allows to install and serve assets via Node.js package manager infrastructure."
 optional = false
 python-versions = "*"
 groups = ["main"]
 files = [
-    {file = "django_node_assets-0.9.14-py3-none-any.whl", hash = "sha256:80cbe3d10521808309712b2aa5ef6d69799bbcafef844cf7f223d3c93f405768"},
-    {file = "django_node_assets-0.9.14.tar.gz", hash = "sha256:d5b5c472136084d533268f52ab77897327863a102e25c81f484aae85eb806987"},
+    {file = "django_node_assets-0.9.15-py3-none-any.whl", hash = "sha256:a5f8105ffe947bd049ddc2aca40694f86837a0ffbd627686252704b2b330ddcc"},
+    {file = "django_node_assets-0.9.15.tar.gz", hash = "sha256:60a52dbfc43add1b58a9134e7b761cc25abc553be43af1325261ececb397e403"},
 ]
 
 [package.extras]
-dev = ["black", "build", "flake8", "isort", "twine"]
+dev = ["build", "ruff", "twine"]
 
 [[package]]
 name = "dmgbuild"
@@ -2446,14 +2446,14 @@ files = [
 
 [[package]]
 name = "setuptools"
-version = "80.7.1"
+version = "80.8.0"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
 optional = false
 python-versions = ">=3.9"
 groups = ["main", "dev"]
 files = [
-    {file = "setuptools-80.7.1-py3-none-any.whl", hash = "sha256:ca5cc1069b85dc23070a6628e6bcecb3292acac802399c7f8edc0100619f9009"},
-    {file = "setuptools-80.7.1.tar.gz", hash = "sha256:f6ffc5f0142b1bd8d0ca94ee91b30c0ca862ffd50826da1ea85258a06fd94552"},
+    {file = "setuptools-80.8.0-py3-none-any.whl", hash = "sha256:95a60484590d24103af13b686121328cc2736bee85de8936383111e421b9edc0"},
+    {file = "setuptools-80.8.0.tar.gz", hash = "sha256:49f7af965996f26d43c8ae34539c8d99c5042fbff34302ea151eaa9c207cd257"},
 ]
 
 [package.extras]
@@ -2609,14 +2609,14 @@ files = [
 
 [[package]]
 name = "types-setuptools"
-version = "80.7.0.20250516"
+version = "80.8.0.20250521"
 description = "Typing stubs for setuptools"
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "types_setuptools-80.7.0.20250516-py3-none-any.whl", hash = "sha256:c1da6c11698139c8307c6df5987592df940e956912c204e42d844ba821dd2741"},
-    {file = "types_setuptools-80.7.0.20250516.tar.gz", hash = "sha256:57274b58e05434de42088a86074c9e630e5786f759cf9cc1e3015e886297ca21"},
+    {file = "types_setuptools-80.8.0.20250521-py3-none-any.whl", hash = "sha256:737cd1f54aade1f68fece1381871ea563b622b3ff28393ad65a9d4ed30d6454e"},
+    {file = "types_setuptools-80.8.0.20250521.tar.gz", hash = "sha256:7360b33b1ed3cda6e5a1f379701a61ec9dbee6e59e8bda072b88226157d8da80"},
 ]
 
 [[package]]
@@ -2714,30 +2714,30 @@ zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
 name = "uv"
-version = "0.7.5"
+version = "0.7.6"
 description = "An extremely fast Python package and project manager, written in Rust."
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "uv-0.7.5-py3-none-linux_armv6l.whl", hash = "sha256:e5dcc154a50d7169c3d53acb5574c145652210df703401bfdd68bc6b7db6449e"},
-    {file = "uv-0.7.5-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:837fc7fa86532e241fa98a80cb9588f643b986ccc74da4efc23d0d05c88600c5"},
-    {file = "uv-0.7.5-py3-none-macosx_11_0_arm64.whl", hash = "sha256:cfbba3790770e3b71536e6785cc78d9cb345e5715b19f3e98fca7e9103ec4c8e"},
-    {file = "uv-0.7.5-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.musllinux_1_1_aarch64.whl", hash = "sha256:674b96c4ddc8443c8314c3286d27a775c4026704555e7b93aa682f2ad58868f2"},
-    {file = "uv-0.7.5-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:54be7ba30f411255c24913ee60ac625665f7b228c300325cdb65a23350342e2c"},
-    {file = "uv-0.7.5-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:b2caf2bca3ac9d88eac66dc6fbaa221256900e5971dee4fcf990e6b2b3441110"},
-    {file = "uv-0.7.5-py3-none-manylinux_2_17_ppc64.manylinux2014_ppc64.whl", hash = "sha256:79bd69eb33cdedd052ebb1f93dad8daccd4fd4f1b2b149ebaf9c4aa65f9babc8"},
-    {file = "uv-0.7.5-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:6687d305c88be916bd9bcea2b0f5d25f29a8e3165da297802d1d3acef1057a26"},
-    {file = "uv-0.7.5-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:33c958bce0817313a5ee04cc5502c1b4424ea6f860376a341a9c6c1b3ef2b345"},
-    {file = "uv-0.7.5-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1f82fdc676f02cf580294903f8cf7ad219f067616fd79527dfe8a2040d8a4c3a"},
-    {file = "uv-0.7.5-py3-none-manylinux_2_28_aarch64.whl", hash = "sha256:3ea6ba7d02b32246c1446225d09e88bfd7496215ea33c2321f2ec3427a6b0da3"},
-    {file = "uv-0.7.5-py3-none-musllinux_1_1_armv7l.whl", hash = "sha256:0b788b63ff0b5893b14fb3787d224163a203559949b53ddccee352daae6e132a"},
-    {file = "uv-0.7.5-py3-none-musllinux_1_1_i686.whl", hash = "sha256:fa20f077ecdffe87a135717b790738fa3444a72077a539e26217dc98ede718fb"},
-    {file = "uv-0.7.5-py3-none-musllinux_1_1_x86_64.whl", hash = "sha256:d246a4a4ad5a2749f7ba6ac90f80ac064404570b39d40a313b6c515f0244fee1"},
-    {file = "uv-0.7.5-py3-none-win32.whl", hash = "sha256:50fd28007e74ecb2ee39c498c64b94adf2368dd454cd3b0e8db85ca1d5b6cb7c"},
-    {file = "uv-0.7.5-py3-none-win_amd64.whl", hash = "sha256:5cb35aced6eff536afe03ff73bc79aff6ac11ec7c895d0c6962a6ea499c60459"},
-    {file = "uv-0.7.5-py3-none-win_arm64.whl", hash = "sha256:c335beaf62c4e5ba2d07499dbbae9330f016df6911adf8034f4e7f0b3256610b"},
-    {file = "uv-0.7.5.tar.gz", hash = "sha256:ae2192283eb645ccab189b1dfd8b13d3264eae631469a903c0e0f2dffce65e3b"},
+    {file = "uv-0.7.6-py3-none-linux_armv6l.whl", hash = "sha256:434f1820a8fbf54494c53d8ebb2b6509d98a2792876a2d990f90ac70afc9a11a"},
+    {file = "uv-0.7.6-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:0bad870f797971423d7f654423cf3ccd3bbd3688f88aee3f84e79af008c6abae"},
+    {file = "uv-0.7.6-py3-none-macosx_11_0_arm64.whl", hash = "sha256:8a86cfefd0b9cd3b8a8577e79a0e61d52ade23a7876ed5b5312cc1f05baa140b"},
+    {file = "uv-0.7.6-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.musllinux_1_1_aarch64.whl", hash = "sha256:4cd32743d2c0c0b40ffbde48163ae2835353d319472aadabd71e9dcf98152e8b"},
+    {file = "uv-0.7.6-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:32aecfd27bd724d8ca8bafa811a69d436fcd403d589b025fbbd2e967eb154b46"},
+    {file = "uv-0.7.6-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:e15ac957e0a319dba40c897b9408c93e603d2317807384ec8f7d47a9e17c0d85"},
+    {file = "uv-0.7.6-py3-none-manylinux_2_17_ppc64.manylinux2014_ppc64.whl", hash = "sha256:832d7741117c41455ff43569b88892ec0a81938750a8bc4307e1160b70c91f3c"},
+    {file = "uv-0.7.6-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:17c79eec35c65bbd25180203be7266dd7d43381e02e28a8f2cb6ee809d008837"},
+    {file = "uv-0.7.6-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:c18b2437e254906b1f48710e1fc1b313052e2ee7261ff104d58b25ef2d347d98"},
+    {file = "uv-0.7.6-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1f46cfd2de04dd261cc75158c293de64f99cc907ab0d395f3a0f97c94e7f076a"},
+    {file = "uv-0.7.6-py3-none-manylinux_2_28_aarch64.whl", hash = "sha256:c44311ed1a32e397d81e346e7b868e4ae22f2df2e5ba601e055683fa4cc68323"},
+    {file = "uv-0.7.6-py3-none-musllinux_1_1_armv7l.whl", hash = "sha256:5e283166816f129f29023a4bfdf49fdb33e1e2bcb4e555e9d6996122867a44af"},
+    {file = "uv-0.7.6-py3-none-musllinux_1_1_i686.whl", hash = "sha256:72e9337db681a16a7203abe112fedc249f01fe4cadd6d65d23c85031183dcf23"},
+    {file = "uv-0.7.6-py3-none-musllinux_1_1_x86_64.whl", hash = "sha256:310e488493d03a843b838e9301af1731b02bc93b14bcaa38c62d448cebbdca3c"},
+    {file = "uv-0.7.6-py3-none-win32.whl", hash = "sha256:e3fb41bd4bf88ab21df773b642465fffc469e173645eb986d000db38d7bb8e3c"},
+    {file = "uv-0.7.6-py3-none-win_amd64.whl", hash = "sha256:4026513441dc01326f8bc04517956385442523ed1d40400e14723d8fb3d9c321"},
+    {file = "uv-0.7.6-py3-none-win_arm64.whl", hash = "sha256:ad79d71d2bb4cc1cb22d09771a23f70190e3b5fa41668da208e694b50b900178"},
+    {file = "uv-0.7.6.tar.gz", hash = "sha256:bd188ac9d9902f1652130837ede39768d7c8f72b0a68fd484ba884d88e963b66"},
 ]
 
 [[package]]
@@ -3013,4 +3013,4 @@ repair = ["scipy (>=1.6.3)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "cd7219411e581c62292c88058138cb2240766459e0d2bba0e53b94b1a4aa978e"
+content-hash = "53753d3df1765ec8d6aabd6b3342f17dca0b36da14cf26d80c399911ffa81c2b"

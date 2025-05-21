@@ -8,8 +8,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "degiro-connector >= 3.0.28",
-    # Upgrading to Django 5.2.0 breaks django-extensions and NPM
-    "django (>= 5.1.9,<5.2.0)",
+    "django >= 5.2.1",
     "pycountry >= 24.6.1",
     "currency-symbols >= 2.0.4",
     "pandas >= 2.2.3",
@@ -17,7 +16,7 @@ dependencies = [
     "django-extensions >= 4.1.0",
     "python-dateutil >= 2.8.2",
     "currencyconverter >= 0.18.6",
-    "django-node-assets >= 0.9.14",
+    "django-node-assets >= 0.9.15",
     "fontawesomefree >= 6.6.0",
     "apscheduler >= 3.11.0",
     "tzlocal >= 5.3.1",
