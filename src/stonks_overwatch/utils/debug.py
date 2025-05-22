@@ -12,6 +12,18 @@ def save_to_json(data: Any, json_file_path: str) -> None:
     ### Returns:
         None
     """
-    data_file = open(json_file_path, "w")
-    data_file.write(json.dumps(data, indent=4))
-    data_file.close()
+    with open(json_file_path, "w") as data_file:
+        data_file.write(json.dumps(data, indent=4))
+
+def load_from_json(json_file_path: str) -> Any:
+    """Load the data from the specified file using JSON format.
+
+    ### Parameters
+    * json_file_path: str
+        - The file where we want to load the data from
+    ### Returns:
+        None
+    """
+    with open(json_file_path, "r") as data_file:
+        data = json.load(data_file)
+    return data

@@ -1,4 +1,4 @@
-"""poetry run python ./scripts/y_finance.py"""
+"""poetry run python ./scripts/yfinance/y_finance.py"""
 
 from stonks_overwatch.services.yfinance.y_finance_client import YFinanceClient
 

@@ -8,6 +8,7 @@ from degiro_connector.trading.models.account import OverviewRequest
 from degiro_connector.trading.models.transaction import HistoryRequest
 from django.core.cache import cache
 from django.db import connection
+from pandas import DataFrame
 
 from stonks_overwatch.config.degiro_config import DegiroConfig
 from stonks_overwatch.repositories.degiro.cash_movements_repository import CashMovementsRepository
@@ -42,12 +43,21 @@ CACHE_TIMEOUT = 3600
 class UpdateService:
     logger = StonksLogger.get_logger("stonks_overwatch.update_service", "[DEGIRO|UPDATE]")
 
-    IMPORT_FOLDER = os.path.join(STONKS_OVERWATCH_DATA_DIR, "import")
-    DEBUG_MODE = os.getenv("DEBUG_MODE", False) in [True, "true", "True", "1"]
+    def __init__(self, import_folder: str = None, debug_mode: bool = None):
+        """
+        Initialize the UpdateService.
+        :param import_folder:
+            Folder to store the JSON files for debugging purposes.
+        :param debug_mode:
+            If True, the service will store the JSON files for debugging purposes.
+        """
+        self.import_folder = import_folder \
+            if import_folder is not None else os.path.join(STONKS_OVERWATCH_DATA_DIR, "import", "degiro")
+        self.debug_mode = debug_mode \
+            if debug_mode is not None else os.getenv("DEBUG_MODE", False) in [True, "true", "True", "1"]
 
-    def __init__(self):
-        if not os.path.exists(self.IMPORT_FOLDER):
-            os.makedirs(self.IMPORT_FOLDER)
+        if not os.path.exists(self.import_folder):
+            os.makedirs(self.import_folder)
 
         self.degiro_service = DeGiroService()
 
@@ -77,72 +87,83 @@ class UpdateService:
 
         return last_movement
 
+    def _log_message(self, message: str) -> None:
+        """Log a message to the console."""
+        if self.debug_mode:
+            self.logger.info(f"[Debug Mode] {message}")
+        else:
+            self.logger.info(message)
+
     def update_all(self):
         if not self.degiro_service.check_connection():
             self.logger.warning("Skipping update since cannot connect to DeGiro")
             return
 
-        if self.DEBUG_MODE:
-            self.logger.warning("Storing JSON files at %s", self.IMPORT_FOLDER)
+        if self.debug_mode:
+            self.logger.warning("Storing JSON files at %s", self.import_folder)
 
         try:
-            self.update_account(self.DEBUG_MODE)
-            self.update_transactions(self.DEBUG_MODE)
-            self.update_portfolio(self.DEBUG_MODE)
-            self.update_company_profile(self.DEBUG_MODE)
-            self.update_yfinance(self.DEBUG_MODE)
+            self.update_account()
+            self.update_transactions()
+            self.update_portfolio()
+            self.update_company_profile()
+            self.update_yfinance()
         except Exception as error:
             self.logger.error("Cannot Update Portfolio!")
             self.logger.error("Exception: ", error)
 
-    def update_account(self, debug_json_files: bool = True):
+    def update_account(self):
         """Update the Account DB data. Only does it if the data is older than today."""
-        self.logger.info(f"[Debug={debug_json_files}] Updating Account Data....")
+        self._log_message("Updating Account Data....")
 
         now = LocalizationUtility.now()
         last_movement = self._get_last_cash_movement_import().replace(tzinfo=timezone.utc)
 
-        if last_movement < now:
-            account_overview = self.__get_cash_movements(last_movement.date())
-            if debug_json_files:
-                account_file = self.IMPORT_FOLDER + "/account.json"
-                save_to_json(account_overview, account_file)
+        if last_movement >= now:
+            return
 
-            transformed_data = self.__transform_json(account_overview)
-            if debug_json_files:
-                account_transform_file = self.IMPORT_FOLDER + "/account_transform.json"
-                save_to_json(transformed_data, account_transform_file)
+        account_overview = self.__get_cash_movements(last_movement.date())
+        if self.debug_mode:
+            account_file = os.path.join(self.import_folder, "account.json")
+            save_to_json(account_overview, account_file)
 
-            self.__import_cash_movements(transformed_data)
+        transformed_data = self.__transform_json(account_overview)
+        if self.debug_mode:
+            save_to_json(transformed_data, os.path.join(self.import_folder, "account_transform.json"))
 
-    def update_transactions(self, debug_json_files: bool = True):
+        self.__import_cash_movements(transformed_data)
+
+    def update_transactions(self):
         """Update the Account DB data. Only does it if the data is older than today."""
-        self.logger.info(f"[Debug={debug_json_files}] Updating Transactions Data....")
+        self._log_message("Updating Transactions Data....")
 
         now = LocalizationUtility.now()
         last_movement = self._get_last_transactions_import().replace(tzinfo=timezone.utc)
 
-        if last_movement < now:
-            transactions_history = self.__get_transaction_history(last_movement.date())
-            if debug_json_files:
-                transactions_file = self.IMPORT_FOLDER + "/transactions.json"
-                save_to_json(transactions_history, transactions_file)
+        if last_movement >= now:
+            return
 
-            self.__import_transactions(transactions_history)
+        transactions_history = self.__get_transaction_history(last_movement.date())
 
-    def update_portfolio(self, debug_json_files: bool = True):
-        """Updating the Portfolio is expensive and time-consuming task.
+        if self.debug_mode:
+            transactions_file = os.path.join(self.import_folder, "transactions.json")
+            save_to_json(transactions_history, transactions_file)
+
+        self.__import_transactions(transactions_history)
+
+    def update_portfolio(self):
+        """Updating the Portfolio is an expensive and time-consuming task.
         This method caches the result for a period of time.
         """
-        self.logger.info(f"[Debug={debug_json_files}] Updating Portfolio Data....")
+        self._log_message("Updating Portfolio Data....")
 
         cached_data = cache.get(CACHE_KEY_UPDATE_PORTFOLIO)
 
-        # If result is already cached, return it
+        # If a result is already cached, return it
         if cached_data is None:
-            self.logger.info(f"[Debug={debug_json_files}] Portfolio data not found in cache. Calling DeGiro")
+            self._log_message("Portfolio data not found in cache. Calling DeGiro")
             # Otherwise, call the expensive method
-            result = self.__update_portfolio(debug_json_files)
+            result = self.__update_portfolio()
 
             cache.set(CACHE_KEY_UPDATE_PORTFOLIO, result, timeout=CACHE_TIMEOUT)
 
@@ -150,19 +171,19 @@ class UpdateService:
 
         return cached_data
 
-    def update_company_profile(self, debug_json_files: bool = True):
-        """Updating the Company Profiles is expensive and time-consuming task.
+    def update_company_profile(self):
+        """Updating the Company Profiles is an expensive and time-consuming task.
         This method caches the result for a period of time.
         """
-        self.logger.info(f"[Debug={debug_json_files}] Updating Company Profiles Data....")
+        self._log_message("Updating Company Profiles Data....")
 
         cached_data = cache.get(CACHE_KEY_UPDATE_COMPANIES)
 
-        # If result is already cached, return it
+        # If a result is already cached, return it
         if cached_data is None:
-            self.logger.info(f"[Debug={debug_json_files}] Companies Profile data not found in cache. Calling DeGiro")
+            self._log_message("Companies Profile data not found in cache. Calling DeGiro")
             # Otherwise, call the expensive method
-            result = self.__update_company_profile(debug_json_files)
+            result = self.__update_company_profile()
 
             cache.set(CACHE_KEY_UPDATE_COMPANIES, result, timeout=CACHE_TIMEOUT)
 
@@ -170,22 +191,22 @@ class UpdateService:
 
         return cached_data
 
-    def __update_portfolio(self, debug_json_files: bool = True):
+    def __update_portfolio(self):
         """Update the Portfolio DB data."""
         product_ids = self.__get_product_ids()
 
         products_info = self.__get_products_info(product_ids)
-        if debug_json_files:
-            products_info_file = self.IMPORT_FOLDER + "/products_info.json"
+        if self.debug_mode:
+            products_info_file = os.path.join(self.import_folder, "products_info.json")
             save_to_json(products_info, products_info_file)
 
         self.__import_products_info(products_info)
         self.__import_products_quotation()
 
-    def __update_company_profile(self, debug_json_files: bool = True) -> dict:
+    def __update_company_profile(self) -> dict:
         company_profiles = self.__get_company_profiles()
-        if debug_json_files:
-            company_profiles_file = self.IMPORT_FOLDER + "/company_profiles.json"
+        if self.debug_mode:
+            company_profiles_file = os.path.join(self.import_folder, "company_profiles.json")
             save_to_json(company_profiles, company_profiles_file)
 
         self.__import_company_profiles(company_profiles)
@@ -249,29 +270,31 @@ class UpdateService:
 
     def __transform_json(self, account_overview: dict) -> list[dict] | None:
         """Flattens the data from deGiro `get_account_overview`."""
+        def _fix_columns(dataframe: DataFrame, columns: list[str], func):
+            for col in columns:
+                if col in dataframe:
+                    dataframe[col] = df[col].apply(func)
 
-        if account_overview["data"]:
+        if account_overview.get("data") and account_overview["data"].get("cashMovements"):
             # Use pd.json_normalize to convert the JSON to a DataFrame
             df = pd.json_normalize(account_overview["data"]["cashMovements"], sep="_")
             # Fix id values format after Pandas
-            for col in ["productId", "id", "exchangeRate", "orderId"]:
-                if col in df:
-                    df[col] = df[col].apply(
-                        lambda x: None if (pd.isnull(x) or pd.isna(x)) else str(x).replace(".0", "")
-                    )
-            for col in ["change"]:
-                if col in df:
-                    df[col] = df[col].apply(lambda x: None if (pd.isnull(x) or pd.isna(x)) else str(x))
-
+            _fix_columns(
+                df,
+                ["productId", "id", "exchangeRate", "orderId"],
+                lambda x: None if (pd.isnull(x) or pd.isna(x)) else str(x).replace(".0", "")
+            )
+            _fix_columns(
+                df,
+                ["change"],
+                lambda x: None if (pd.isnull(x) or pd.isna(x)) else str(x)
+            )
             # Set the index explicitly
             df.set_index("date", inplace=True)
-
             # Sort the DataFrame by the 'date' column
             df = df.sort_values(by="date")
-
             return df.reset_index().to_dict(orient="records")
-        else:
-            return None
+        return None
 
     def __get_transaction_history(self, from_date: date) -> dict:
         """Import Transactions data from DeGiro. Uses the `get_transactions_history` method."""
@@ -342,7 +365,7 @@ class UpdateService:
         return product_ids
 
     def __import_products_info(self, products_info: dict) -> None:
-        """Store the products information into the DB."""
+        """Store the product information into the DB."""
 
         for key in products_info:
             row = products_info[key]
@@ -479,7 +502,7 @@ class UpdateService:
 
         ### Parameters
             * file_path : str
-                - Path to the Json file that stores the company profiles
+                - Path to the JSON file that stores the company profiles
         ### Returns:
             None.
         """
@@ -491,17 +514,17 @@ class UpdateService:
                 self.logger.error(f"Cannot import ISIN: {key}")
                 self.logger.error("Exception: ", error)
 
-    def update_yfinance(self, debug_json_files: bool = True):
+    def update_yfinance(self):
         """Updating the Yahoo Finance Data."""
-        self.logger.info(f"[Debug={debug_json_files}] Updating Yahoo Finance Data....")
+        self._log_message("Updating Yahoo Finance Data....")
 
         cached_data = cache.get(CACHE_KEY_UPDATE_YFINANCE)
 
-        # If result is already cached, return it
+        # If a result is already cached, return it
         if cached_data is None:
-            self.logger.info(f"[Debug={debug_json_files}] Yahoo Finance data not found in cache. Calling YFinance")
+            self._log_message("Yahoo Finance data not found in cache. Calling YFinance")
             # Otherwise, call the expensive method
-            result = self.__update_yfinance(debug_json_files)
+            result = self.__update_yfinance()
 
             cache.set(CACHE_KEY_UPDATE_YFINANCE, result, timeout=CACHE_TIMEOUT)
 
@@ -509,7 +532,7 @@ class UpdateService:
 
         return cached_data
 
-    def __update_yfinance(self, debug_json_files: bool = True) -> Dict[str, dict]:
+    def __update_yfinance(self) -> Dict[str, dict]:
         # Get the list of DeGiro Products
         symbols = self.__get_symbols()
 
@@ -531,11 +554,11 @@ class UpdateService:
                 tickers[symbol] = {}
                 splits[symbol] = []
 
-        if debug_json_files:
-            yfinance_tickers_file = self.IMPORT_FOLDER + "/yfinance_tickers.json"
+        if self.debug_mode:
+            yfinance_tickers_file = os.path.join(self.import_folder, "yfinance_tickers.json")
             save_to_json(tickers, yfinance_tickers_file)
 
-            yfinance_splits_file = self.IMPORT_FOLDER + "/yfinance_splits.json"
+            yfinance_splits_file = os.path.join(self.import_folder, "yfinance_splits.json")
             save_to_json(splits, yfinance_splits_file)
 
         self.__import_yfinance_tickers(tickers)
