@@ -94,7 +94,7 @@ briefcase-package: briefcase-create ## Packages the Briefcase project
 	poetry run briefcase package --update --adhoc-sign --no-input
 
 generate-images: ## Generates images to be used by the browsers and Briefcase
-	src/scripts/generate-icons.sh
+	scripts/generate-icons.sh
 
 cicd: ## Run CI/CD pipeline. Indicate the job you want to run with `make cicd job=<job_name>` or `make cicd workflow=<workflow_name>. If no job is specified, it will list all available jobs.
 	@if [ -n "$(workflow)" ]; then \

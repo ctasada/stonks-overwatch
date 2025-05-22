@@ -151,6 +151,7 @@ briefcase run
 * [Bootstrap](https://getbootstrap.com)
 
 ## Other interesting projects
+* https://giroscope.io
 * https://github.com/leo-pfeiffer/portfolio_dashboard
 * https://github.com/lucalaringe/degiro_portfolio_analytics <<< CHECK!!!!
 * https://github.com/CNugteren/DGPC
