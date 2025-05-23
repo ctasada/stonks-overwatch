@@ -61,7 +61,7 @@ class CashMovementsRepository:
             return cursor.fetchone()[0]
 
     @staticmethod
-    def get_total_cash(currency: str) -> float:
+    def get_total_cash(currency: str) -> float | None:
         with connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -74,8 +74,13 @@ class CashMovementsRepository:
                 """,
                 [currency],
             )
-            balance_total = dictfetchall(cursor)[0]["balanceTotal"]
-            return float(balance_total)
+
+            result = dictfetchall(cursor)
+            if result:
+                balance_total = result[0].get("balanceTotal")
+                return float(balance_total) if balance_total is not None else None
+
+            return None
 
     @staticmethod
     def get_last_movement() -> datetime|None:

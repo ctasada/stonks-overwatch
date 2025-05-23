@@ -12,11 +12,18 @@ else
     PROFILE_MODE = false
 endif
 
+ifneq ($(demo),)
+    DEMO_MODE = true
+else
+    DEMO_MODE = false
+endif
+
 WHEEL_DIR := ./wheels
 
 # Export the variable for child processes
 export DEBUG_MODE
 export PROFILE_MODE
+export DEMO_MODE
 
 install: ## Install dependencies
 	poetry install
@@ -48,8 +55,8 @@ collectstatic:
 	rm -rdf src/stonks_overwatch/static
 	poetry run src/manage.py collectstatic
 
-runserver: ## Run the Django development server. Supports `make runserver debug=true profile=true` to run in debug or profile mode
-	DEBUG_MODE="$(DEBUG_MODE)" PROFILE_MODE="$(PROFILE_MODE)" poetry run src/manage.py runserver
+runserver: ## Run the Django development server. Supports `make runserver debug=true profile=true demo=true` to run in debug, profile or demo mode
+	DEBUG_MODE="$(DEBUG_MODE)" PROFILE_MODE="$(PROFILE_MODE)" DEMO_MODE="$(DEMO_MODE)" poetry run src/manage.py runserver
 
 start: install collectstatic migrate runserver ## Install dependencies, apply migrations, and run the server
 

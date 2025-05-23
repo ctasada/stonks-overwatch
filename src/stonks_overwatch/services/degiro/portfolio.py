@@ -13,7 +13,7 @@ from stonks_overwatch.repositories.degiro.product_info_repository import Product
 from stonks_overwatch.repositories.degiro.product_quotations_repository import ProductQuotationsRepository
 from stonks_overwatch.repositories.degiro.transactions_repository import TransactionsRepository
 from stonks_overwatch.services.degiro.currency_converter_service import CurrencyConverterService
-from stonks_overwatch.services.degiro.degiro_service import DeGiroService
+from stonks_overwatch.services.degiro.degiro_service import DeGiroOfflineModeError, DeGiroService
 from stonks_overwatch.services.degiro.deposits import DepositsService
 from stonks_overwatch.services.models import Country, DailyValue, PortfolioEntry, TotalPortfolio
 from stonks_overwatch.services.yfinance.y_finance import YFinance
@@ -24,6 +24,8 @@ from stonks_overwatch.utils.logger import StonksLogger
 
 class PortfolioService:
     logger = StonksLogger.get_logger("stonks_overwatch.portfolio_data.degiro", "[DEGIRO|PORTFOLIO]")
+
+    SUPPORTED_CURRENCY_ACCOUNTS = ['EUR', 'USD', 'GBP']
 
     def __init__(
         self,
@@ -106,13 +108,7 @@ class PortfolioService:
                 base_currency_value = value
                 base_currency_break_even_price = break_even_price
 
-            exchange = None
-            if exchanges := products_config.get("exchanges"):
-                exchange_id = info["exchangeId"]
-                degiro_exchange = next((ex for ex in exchanges if ex["id"] == int(exchange_id)), None)
-                if degiro_exchange and 'micCode' in degiro_exchange:
-                    miccode = degiro_exchange["micCode"].lower()
-                    exchange = MIC[miccode].value
+            exchange = self.__get_exchange(info["exchangeId"], products_config.get("exchanges", []))
 
             my_portfolio.append(
                 PortfolioEntry(
@@ -141,8 +137,12 @@ class PortfolioService:
                 )
             )
 
-        for currency in ['EUR', 'USD']:
+        for currency in self.SUPPORTED_CURRENCY_ACCOUNTS:
             total_cash = CashMovementsRepository.get_total_cash(currency)
+            if total_cash is None:
+                self.logger.debug(f"No cash movements found for currency {currency}, skipping")
+                continue
+
             base_currency_price = total_cash
             if currency != self.base_currency:
                 base_currency_price = self.currency_service.convert(total_cash, currency, self.base_currency)
@@ -160,6 +160,18 @@ class PortfolioService:
         )
 
         return sorted(my_portfolio, key=lambda k: k.symbol)
+
+    def __get_exchange(self, exchange_id: str, exchanges: list) -> str | None:
+        """
+        Get the exchange name from the exchange ID.
+        """
+        exchange = None
+        if exchanges:
+            degiro_exchange = next((ex for ex in exchanges if ex["id"] == int(exchange_id)), None)
+            if degiro_exchange and 'micCode' in degiro_exchange:
+                mic_code = degiro_exchange["micCode"].lower()
+                exchange = MIC[mic_code].value
+        return exchange
 
     def __get_product_realized_gains(self, product_ids: list[str]) -> tuple[float, float]:
         data = self.transactions.get_product_transactions(product_ids)
@@ -239,8 +251,12 @@ class PortfolioService:
 
     def __get_total_cash(self) -> float:
         total_cash = 0.0
-        for currency in ['EUR', 'USD']:
+        for currency in self.SUPPORTED_CURRENCY_ACCOUNTS:
             cash = CashMovementsRepository.get_total_cash(currency)
+            if cash is None:
+                self.logger.debug(f"No cash movements found for currency {currency}, skipping")
+                continue
+
             if currency != self.base_currency:
                 cash = self.currency_service.convert(cash, currency, self.base_currency)
             total_cash += cash
@@ -278,6 +294,7 @@ class PortfolioService:
 
     def __get_porfolio_products(self) -> list[dict]:
         try:
+            # FIXME: Control OFFLINE mode
             update = self.degiro_service.get_client().get_update(
                 request_list=[
                     UpdateRequest(option=UpdateOption.PORTFOLIO, last_updated=0),
@@ -299,18 +316,27 @@ class PortfolioService:
 
                     my_portfolio.append(portfolio)
             return my_portfolio
-
+        except DeGiroOfflineModeError:
+            return self._get_local_portfolio(offline=True)
         except Exception:
-            logging.exception("Cannot connect to DeGiro, getting last known data")
-            local_portfolio = TransactionsRepository.get_portfolio_products()
-            for entry in local_portfolio:
-                entry["value"] = 1.0  # FIXME
+            return self._get_local_portfolio(offline=False)
 
-            return local_portfolio
+    def _get_local_portfolio(self, offline: bool = False):
+        if offline:
+            logging.info("Running in offline mode, using last known data")
+        else:
+            logging.exception("Cannot connect to DeGiro, getting last known data")
+        local_portfolio = TransactionsRepository.get_portfolio_products()
+        for entry in local_portfolio:
+            entry["value"] = 1.0  # FIXME
+        return local_portfolio
 
     def __get_products_info(self, products_ids: list) -> dict:
         try:
             return self.degiro_service.get_products_info(products_ids)
+        except DeGiroOfflineModeError:
+            logging.info("Running in offline mode, using last known data")
+            return ProductInfoRepository.get_products_info_raw(products_ids)
         except Exception:
             logging.exception("Cannot connect to DeGiro, getting last known data")
             return ProductInfoRepository.get_products_info_raw(products_ids)

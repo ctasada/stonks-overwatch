@@ -22,7 +22,7 @@ class JobsScheduler:
         JobsScheduler.scheduler = BackgroundScheduler()
         degiro_config = DegiroConfig.default()
 
-        if degiro_config.is_enabled():
+        if degiro_config.is_enabled() and not degiro_config.offline_mode:
             JobsScheduler.scheduler.add_job(
                 JobsScheduler.update_degiro_portfolio,
                 id='update_degiro_portfolio',

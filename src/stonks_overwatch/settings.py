@@ -109,10 +109,16 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# Defines if the application will use the Demo DB or not
+DEMO_MODE = os.getenv("DEMO_MODE", False) in [True, "true", "True", "1"]
+STONKS_OVERWATCH_DB_NAME = "db.sqlite3"
+if DEMO_MODE:
+    STONKS_OVERWATCH_DB_NAME = "demo_db.sqlite3"
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": Path(STONKS_OVERWATCH_DATA_DIR).resolve().joinpath("db.sqlite3"),
+        "NAME": Path(STONKS_OVERWATCH_DATA_DIR).resolve().joinpath(STONKS_OVERWATCH_DB_NAME),
         "TEST": {
             "NAME": Path(STONKS_OVERWATCH_CACHE_DIR).resolve().joinpath("test_db.sqlite3"),
         },
