@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
 
@@ -13,8 +14,10 @@ class AccountOverview(View):
         selected_portfolio = SessionManager.get_selected_portfolio(request)
         overview = self.account_overview.get_account_overview(selected_portfolio)
 
-        context = {
-            "account_overview": overview,
-        }
-
-        return render(request, "account_overview.html", context)
+        if request.headers.get('Accept') == 'application/json':
+            return JsonResponse(overview, safe=False)
+        else:
+            context = {
+                "account_overview": overview,
+            }
+            return render(request, "account_overview.html", context)

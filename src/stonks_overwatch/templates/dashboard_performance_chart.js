@@ -80,9 +80,13 @@ function drawPerformance(performanceGroup, timeRange) {
         chart.options = configPortfolio.options
     }
 
-    let url = HOST + URL + "?format=json&interval=" + timeRange
+    let url = HOST + URL + "?interval=" + timeRange
     // Fetch JSON data from a URL and update the chart
-    fetch(url)
+    fetch(url,{
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok ' + response.statusText);

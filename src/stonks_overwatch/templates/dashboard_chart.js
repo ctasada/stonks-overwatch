@@ -297,9 +297,13 @@ function drawPortfolio(portfolioType, timeRange) {
     }
     chart = new Chart(document.getElementById("portofolio-chart").getContext("2d"), configPortfolio);
 
-    let url = HOST + URL + "?format=json&type=" + portfolioType + "&interval=" + timeRange
+    let url = HOST + URL + "?type=" + portfolioType + "&interval=" + timeRange
     // Fetch JSON data from a URL and update the chart
-    fetch(url) // Replace with your JSON URL
+    fetch(url,{
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok ' + response.statusText);
