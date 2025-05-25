@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
 
@@ -41,4 +42,7 @@ class Fees(View):
             "fees": fees,
         }
 
-        return render(request, "fees.html", context)
+        if request.headers.get('Accept') == 'application/json':
+            return JsonResponse(context, safe=False)
+        else:
+            return render(request, "fees.html", context)

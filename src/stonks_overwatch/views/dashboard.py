@@ -50,11 +50,11 @@ class Dashboard(View):
         self.portfolio = PortfolioAggregatorService()
 
     def get(self, request) -> JsonResponse | HttpResponse:
-        """Handle GET request for dashboard view."""
+        """Handle GET request for a dashboard view."""
 
         data = self.__calculate_dashboard_data(request)
 
-        if request.GET.get("format") == "json":
+        if request.headers.get('Accept') == 'application/json':
             return JsonResponse(data)
 
         return render(request, "dashboard.html", data)

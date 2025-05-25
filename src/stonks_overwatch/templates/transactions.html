@@ -1,47 +1,59 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
 <div class="container-fluid row-gap-5">
-    <h4 class="mb-3">Transactions</h4>
-    <table class="table table-hover table-sm">
-        {% block table.thead %}
-        <thead>
-            <tr>
-                <th scope="col">Date</th>
-                <th scope="col">Action</th>
-                <th scope="col">Stock</th>
-                <th scope="col">Price</th>
-                <th scope="col">Quantity</th>
-                <th scope="col">Local Value</th>
-                <th scope="col">Value</th>
-                <th scope="col">Fees</th>
-            </tr>
-        </thead>
-        {% endblock table.thead %}
-        {% block table.tbody %}
-        <tbody>
-            {% for transaction in transactions %}
-            <tr>
-                <td>{{ transaction.date }}<br><small class="fw-lighter">{{ transaction.time }}</small></td>
-                <td>
-                    {% if transaction.buy_sell == "Buy" %}
-                    <span class="green-pill">{{ transaction.buy_sell }}</span>
-                    {% else %}
-                    <span class="red-pill">{{ transaction.buy_sell }}</span>
-                    {% endif %}
-                    <br>
-                    <small class="fw-lighter">{{ transaction.transaction_type }}</small>
-                </td>
-                <td>{{ transaction.symbol }}<br><small class="fw-lighter">{{ transaction.name }}</small></td>
-                <td>{{ transaction.price }}</td>
-                <td>{{ transaction.quantity }}</td>
-                <td>{{ transaction.total }}</td>
-                <td>{{ transaction.total_in_base_currency }}</td>
-                <td>{{ transaction.fees }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-        {% endblock table.tbody %}
-    </table>
+    <div class="row border border-primary-subtle bg-light rounded mb-3 position-relative">
+        <h4 class="position-absolute top-0 start-0 z-2 px-3" style="padding-top: 8px; padding-left: 4px">Transactions</h4>
+        <table id="transactions-table"
+               data-toggle="table"
+               data-search="true"
+               data-pagination="true"
+               data-pagination-loop="false"
+               data-page-list="[10, 25, 50, 100, 200, All]"
+               {#FIXME: pageSize doesn't work. https://bootstrap-table.com/docs/api/table-options/#paginationparts#}
+               data-pagination-parts="['pageList']"
+               data-page-size="10"
+               data-sortable="true"
+               data-sort-order="desc"
+               data-sort-name="date"
+               data-icons="icons"
+               data-icons-prefix="bi"
+               data-fixed-scroll="true">
+            <thead>
+                <tr>
+                    <th data-field="date" data-sortable="true" data-width="100" data-width-unit="px">Date</th>
+                    <th data-field="buy_sell" data-sortable="true" data-width="100" data-width-unit="px">Action</th>
+                    <th data-field="symbol" data-sortable="true">Stock</th>
+                    <th data-field="price" data-sortable="true" data-width="100" data-width-unit="px">Price</th>
+                    <th data-field="quantity" data-sortable="true" data-width="100" data-width-unit="px">Quantity</th>
+                    <th data-field="total" data-sortable="true" data-width="100" data-width-unit="px">Local Value</th>
+                    <th data-field="total_in_base_currency" data-sortable="true" data-width="100" data-width-unit="px">Value</th>
+                    <th data-field="fees" data-sortable="true" data-width="100" data-width-unit="px">Fees</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                <tr>
+                    <td class="text-nowrap">{{ transaction.date }}<br><small class="fw-lighter">{{ transaction.time }}</small></td>
+                    <td>
+                        {% if transaction.buy_sell == "Buy" %}
+                        <span class="green-pill">{{ transaction.buy_sell }}</span>
+                        {% else %}
+                        <span class="red-pill">{{ transaction.buy_sell }}</span>
+                        {% endif %}
+                        <br>
+                        <small class="fw-lighter">{{ transaction.transaction_type }}</small>
+                    </td>
+                    <td>{{ transaction.symbol }}<br><small class="fw-lighter">{{ transaction.name }}</small></td>
+                    <td>{{ transaction.price }}</td>
+                    <td>{{ transaction.quantity }}</td>
+                    <td>{{ transaction.total }}</td>
+                    <td>{{ transaction.total_in_base_currency }}</td>
+                    <td>{{ transaction.fees }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}
