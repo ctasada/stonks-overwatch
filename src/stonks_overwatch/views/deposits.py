@@ -1,4 +1,4 @@
-
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
 
@@ -31,4 +31,7 @@ class Deposits(View):
             "deposit_growth": {"value": cash_contributions},
         }
 
-        return render(request, "deposits.html", context)
+        if request.headers.get('Accept') == 'application/json':
+            return JsonResponse(context, safe=False)
+        else:
+            return render(request, "deposits.html", context)

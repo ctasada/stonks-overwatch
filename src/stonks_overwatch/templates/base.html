@@ -11,14 +11,16 @@
 
     <link rel="icon" type="image/png" href="{%  static 'stonks_overwatch-32x32.png' %}" sizes="32x32">
 
+    <!-- jQuery CDN - Full version -->
+    <script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
+
     <!-- Bootstrap CSS CDN -->
     <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
     <link href="{% static 'bootstrap-icons/font/bootstrap-icons.css' %}" rel="stylesheet">
-    <!-- JavaScript Bundle with Popper -->
-    <script src="{% static 'bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
-    <!-- jQuery CDN - Slim version (=without AJAX) -->
-    <script src="{% static 'jquery/dist/jquery.slim.min.js' %}"></script>
-
+    
+    <!-- Bootstrap Table CSS -->
+    <link href="{% static 'bootstrap-table/dist/bootstrap-table.min.css' %}" rel="stylesheet">
+    <link href="{% static 'bootstrap-table/dist/themes/bootstrap-table/bootstrap-table.min.css' %}" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/static/style.css">
 </head>
@@ -126,6 +128,11 @@
             </div>
         </div>
     </div>
+
+    <!-- Bootstrap JS -->
+    <script src="{% static 'bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+    <!-- Bootstrap Table JS -->
+    <script src="{% static 'bootstrap-table/dist/bootstrap-table.min.js' %}"></script>
 
     <script type="text/javascript">
         let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));

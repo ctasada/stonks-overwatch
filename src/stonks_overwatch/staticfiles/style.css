@@ -253,3 +253,72 @@ a.article:hover {
     position: relative;
     z-index: 100;
 }
+
+/* Bootstrap Table Pagination Styles */
+.bootstrap-table .btn:focus, .bootstrap-table .btn:hover {
+    background-color: #6a7ed2;
+}
+.bootstrap-table .btn {
+    background-color: #7386D5;
+    z-index: 1;
+}
+
+.bootstrap-table .pagination {
+    margin-bottom: 0;
+    --bs-pagination-border-width: 0;
+}
+
+.bootstrap-table .pagination .page-item {
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+}
+
+.bootstrap-table .pagination .page-pre {
+    margin: 0;
+    padding: 0;
+    border-radius: 4px 0 0 4px;
+}
+
+.bootstrap-table .pagination .page-next {
+    margin: 0;
+    padding: 0;
+    border-radius: 0 4px 4px 0;
+}
+
+.bootstrap-table .pagination .page-item.active {
+    background-color: #7386D5;
+    border-color: #7386D5;
+    color: white;
+}
+
+.bootstrap-table .page-item.active .page-link {
+    background-color: #7386D5;
+    border-color: #7386D5;
+    color: white;
+}
+
+.bootstrap-table .page-link {
+    color: #7386D5;
+}
+
+.bootstrap-table .page-link:hover {
+    color: #5a6cb2;
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+}
+
+.bootstrap-table .page-item.disabled .page-link {
+    color: #6c757d;
+}
+
+.bootstrap-table .page-size-selector {
+    color: #7386D5;
+    border-color: #dee2e6;
+    background-color: white;
+}
+
+.bootstrap-table .page-size-selector:focus {
+    border-color: #7386D5;
+    box-shadow: 0 0 0 0.2rem rgba(115, 134, 213, 0.25);
+}
