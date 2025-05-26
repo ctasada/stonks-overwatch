@@ -322,3 +322,8 @@ a.article:hover {
     border-color: #7386D5;
     box-shadow: 0 0 0 0.2rem rgba(115, 134, 213, 0.25);
 }
+
+.table td, .table th {
+  border-right: none !important;
+  border-left: none !important;
+}
