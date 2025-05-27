@@ -13,6 +13,7 @@ import textwrap
 from argparse import Namespace
 
 import django
+from django.core.management import call_command
 
 # Add the src directory to the Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
@@ -25,11 +26,10 @@ django.setup()
 from stonks_overwatch.services.degiro.update_service import UpdateService as DegiroUpdateService  # noqa: E402
 
 def init() -> None:
-    """Execute needed initializations for the scripts.
+    """Execute the necessary initializations for the scripts.
     ### Returns:
         None
     """
-
     # Configure logging for the stonks_overwatch module
     stonks_overwatch_logger = logging.getLogger("stonks_overwatch")
     stonks_overwatch_logger.setLevel(logging.INFO)
@@ -129,6 +129,8 @@ def degiro_yfinance(update_service: DegiroUpdateService) -> None:
 
 def main():
     init()
+    logging.info("Applying database migrations...")
+    call_command("migrate")
 
     args = parse_args()
 
