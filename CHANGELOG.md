@@ -22,8 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2025-05-18
 
 * Initial release
-  - Provides support to connect to DeGiro using login credentials and 2FA
-  - Keeps DeGiro information automatically up to date
+  - Provides support to connect to DEGIRO using login credentials and 2FA
+  - Keeps DEGIRO information automatically up to date
   - Shows Dashboard with Portfolio growth over time
   - Shows Portfolio, Dividends, Fees, Deposits, Transactions, and full Account Statement
   - Shows Diversification information
