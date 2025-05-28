@@ -178,8 +178,11 @@ briefcase run
 - Dashboard: Drawing the dashboard is slow. It seems that the code is executed three times
 - Review Closed/All positions in Portfolio Overview. Some entries contain unexpected/inconsistent values
 - TEAM: Growth values seem too low for what I remember, should be ~80%
+- When window is too wide, the sidebar grows larger than intended. Other minor issues with the sidebar
 
 ## TODOs
+- [ ] Tables should allow choosing the number of rows to show. 
+- [ ] Portfolio Tables would be migrated to http://bootstrap-table.com/
 - [ ] DeGiro Client: Stop using Totp and request 2FA for each connection
 - [ ] Provide support for both Unrealized and Realized Gain/Loss
         Onger. W/V € - Gain/Loss Unrealized - unrealizedPl
