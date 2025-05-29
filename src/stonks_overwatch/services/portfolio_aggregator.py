@@ -38,7 +38,7 @@ class PortfolioAggregatorService:
         for entry in portfolio:
             size = entry.value / portfolio_total_value
             entry.portfolio_size = size
-            # If some of the data is missing, we try to get it from yfinance
+            # If some data is missing, we try to get it from yfinance
             if not entry.country and entry.product_type in [ProductType.STOCK, ProductType.ETF]:
                 entry.country = self.yfinance.get_country(entry.symbol)
 

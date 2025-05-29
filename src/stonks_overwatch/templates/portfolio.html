@@ -7,11 +7,16 @@
             <h4>Portfolio</h4>
         </div>
         <div class="col-2">
-            <select class="form-select" id="visible-positions-selector" aria-label="Visible Portfolio Positions">
-                <option value="OPEN" {% if selected_positions == "OPEN" %}selected{% endif %}>Open Positions</option>
-                <option value="CLOSED" {% if selected_positions == "CLOSED" %}selected{% endif %}>Closed Positions</option>
-                <option value="ALL" {% if selected_positions == "ALL" %}selected{% endif %}>All Positions</option>
-            </select>
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="positionsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    {% if selected_positions == "OPEN" %}Open Positions{% elif selected_positions == "CLOSED" %}Closed Positions{% else %}All Positions{% endif %}
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="positionsDropdown">
+                    <li><a class="dropdown-item {% if selected_positions == 'OPEN' %}active{% endif %}" href="?positions=OPEN">Open Positions</a></li>
+                    <li><a class="dropdown-item {% if selected_positions == 'CLOSED' %}active{% endif %}" href="?positions=CLOSED">Closed Positions</a></li>
+                    <li><a class="dropdown-item {% if selected_positions == 'ALL' %}active{% endif %}" href="?positions=ALL">All Positions</a></li>
+                </ul>
+            </div>
         </div>
     </div>
     <div class="row mt-2">

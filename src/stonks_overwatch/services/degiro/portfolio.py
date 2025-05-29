@@ -40,7 +40,7 @@ class PortfolioService:
         self.yfinance = YFinance()
 
     @cached_property
-    def get_portfolio(self) -> List[PortfolioEntry]:
+    def get_portfolio(self) -> List[PortfolioEntry]: # noqa: C901
         self.logger.debug("Get Portfolio")
 
         portfolio_products = self.__get_porfolio_products()
@@ -56,6 +56,10 @@ class PortfolioService:
 
         for tmp in portfolio_products:
             info = products_info[tmp["productId"]]
+            if info.get("productType") == 'CASH':
+                # Cash products coming from Stocks are not supported
+                continue
+
             # Products may be closed and reopened with a different productId. We need to keep track of the symbols
             # Find other products for the same symbol. Use data from the 'active' product (should be only one) and
             #   update only the values that are "Unknown" (ideally none)
@@ -102,6 +106,7 @@ class PortfolioService:
                 base_currency_value = value
                 base_currency_break_even_price = break_even_price
 
+            exchange = None
             if exchanges := products_config.get("exchanges"):
                 exchange_id = info["exchangeId"]
                 degiro_exchange = next((ex for ex in exchanges if ex["id"] == int(exchange_id)), None)
