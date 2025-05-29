@@ -40,7 +40,7 @@ class PortfolioService:
         self.yfinance = YFinance()
 
     @cached_property
-    def get_portfolio(self) -> List[PortfolioEntry]:
+    def get_portfolio(self) -> List[PortfolioEntry]: # noqa: C901
         self.logger.debug("Get Portfolio")
 
         portfolio_products = self.__get_porfolio_products()
