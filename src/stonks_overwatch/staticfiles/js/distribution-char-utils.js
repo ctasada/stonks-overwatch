@@ -28,6 +28,8 @@ function drawDoughnutChart(chartId, pieTitle, chartLabels, chartValues) {
         data: data,
         plugins: [autocolors],
         options: {
+            layout: { padding: 0 },
+            radius: 200,
             responsive: true,
             plugins: {
                 legend: { display: false },
