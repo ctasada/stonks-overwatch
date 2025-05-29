@@ -37,7 +37,8 @@ licensecheck: ## Checks the licenses are compatible
 	poetry run licensecheck
 
 generate-third-party: ## Generate third-party licenses file
-	poetry run pip-licenses
+	@packages=$$(poetry show --only=main | awk '{print $$1}'); \
+	poetry run pip-licenses --packages $$packages
 
 migrate: ## Apply database migrations
 	poetry run src/manage.py makemigrations
