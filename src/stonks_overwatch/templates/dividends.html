@@ -38,7 +38,7 @@
     {% include 'distribution_with_list.html' with chart_id="dividends-chart" items=dividendsDiversification.table %}
     <div class="row border border-primary-subtle bg-light rounded mb-3" style="background-color:#dbf5ff">
         <div class="row">
-            <h5 class="mb-1">Dividends Overview</h5>
+            <h5 class="my-1">Dividends Overview</h5>
         </div>
         {% for key, value in dividendsCalendar.items %}
         <div class="col-sm-4 border">
@@ -80,7 +80,7 @@
             </div>
 
             {% if forloop.counter|divisibleby:3 %}
-            <!-- Force next columns to break to new line at md breakpoint and up -->
+            <!-- Force next columns to break to the new line at md breakpoint and up -->
             <div class="w-100 d-none d-md-block"></div>
             {% endif %}
         {% endfor %}
