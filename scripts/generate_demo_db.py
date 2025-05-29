@@ -13,8 +13,10 @@ import textwrap
 from argparse import Namespace
 from datetime import datetime, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import django
+import pandas as pd
 from degiro_connector.quotecast.models.chart import Interval
 from django.core.management import call_command
 
@@ -41,7 +43,7 @@ from stonks_overwatch.repositories.degiro.models import (  # noqa: E402
 from stonks_overwatch.repositories.degiro.product_quotations_repository import ProductQuotationsRepository  # noqa: E402
 from stonks_overwatch.services.degiro.currency_converter_service import CurrencyConverterService  # noqa: E402
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService  # noqa: E402
-from stonks_overwatch.settings import STONKS_OVERWATCH_DATA_DIR, STONKS_OVERWATCH_DB_NAME  # noqa: E402
+from stonks_overwatch.settings import STONKS_OVERWATCH_DATA_DIR, STONKS_OVERWATCH_DB_NAME, TIME_ZONE  # noqa: E402
 
 LIST_OF_PRODUCTS = {
     "5462588": {
@@ -179,7 +181,7 @@ class DBDemoGenerator:
         currency = product.currency
 
         # Generate random values
-        # FIXME: Should randomly sell products. Only if already bought.
+        # FIXME: Should randomly sell products. Only if already bought and we have enough balance
         buysell = "B" # Buy or Sell (B or S)
 
         trading_venue : str = ""
@@ -190,11 +192,16 @@ class DBDemoGenerator:
 
         # Calculate values
         quotations = ProductQuotationsRepository.get_product_quotations(product_id)
-        logging.info(f"Creating entry for date: {date}")
-        logging.info(f"{date} = {date.strftime(LocalizationUtility.DATE_FORMAT)}")
-        logging.info(f"Quotations for {product_id} ({LIST_OF_PRODUCTS[product_id]['symbol']}): {quotations}")
+
         value = quotations[date.strftime(LocalizationUtility.DATE_FORMAT)]
-        max_quantity = int(abs(balance) // abs(value))
+        change_in_base_currency = self.currency_converter.convert(
+            amount=value,
+            currency=currency,
+            new_currency="EUR",
+            fx_date=date.date()
+        )
+        max_quantity = int(abs(balance) // abs(change_in_base_currency))
+
         # We need more balance to buy this product
         if max_quantity < 1:
             return balance
@@ -207,7 +214,7 @@ class DBDemoGenerator:
 
         auto_fx_fee = 0
         exchange_rate = 0
-        change_in_base_currency = change
+        change_in_base_currency = change_in_base_currency * quantity
         if currency != "EUR":
             exchange_rate = self.currency_converter.convert(
                 amount=1.0,
@@ -216,9 +223,10 @@ class DBDemoGenerator:
                 fx_date=date.date()
             )
             auto_fx_fee = -1.00 * exchange_rate
-            change_in_base_currency = change / exchange_rate
 
         transaction_date = self.update_random_time(date)
+
+        self.update_dividends(product_id, quantity, transaction_date)
 
         last_transaction = DeGiroTransactions.objects.order_by('-id').first()
         DeGiroTransactions.objects.create(
@@ -246,52 +254,21 @@ class DBDemoGenerator:
             # executing_entity_id="4PQUHN3JPFGFNF3BB653"
         )
 
-        # Transactions
-        # Example: 2025-03-20 11:04:48 Buy VUSA 4 @ 99.00 EUR = -396.00 EUR + 1.00 EUR Fee
-        # Example: 2024-11-21 20:05:31 Buy KO 10 @ $ 63.63 = -636.30 USD (€ -606.87) + 2.00 EUR Fee
-
         description = "DEGIRO Transactiekosten en/of kosten van derden"
-        transaction_type = "CASH_TRANSACTION"
-
-        #description = "Degiro Cash Sweep Transfer"
-        #transaction_type = "FLATEX_CASH_SWEEP"
 
         movement_date = transaction_date.strftime(LocalizationUtility.TIME_DATE_FORMAT)
-        movement_value_date = self.update_random_time(transaction_date)
+        movement_value_date = self.update_random_time(transaction_date).strftime(LocalizationUtility.TIME_DATE_FORMAT)
 
         # Calculate balances
-        balance_unsettled_cash = balance + change
+        balance_unsettled_cash = balance - change_in_base_currency
         balance_flatex = balance
         balance_cash_fund = []
         balance_total = balance_unsettled_cash
-        # change_in_base_currency + fees
-
-        logging.info(f"Original balance: {balance}")
-        logging.info(f"Change: {change}")
-        logging.info(f"Balance Total: {balance_total}")
-        logging.info(f"Balance Unsettled: {balance_unsettled_cash}")
-        logging.info(f"Balance Flatex: {balance_flatex}")
 
         order_id = f"ORD{random.randint(10000, 99999)}"
 
         if currency == "EUR":
             exchange_rate = None
-
-        DeGiroCashMovements.objects.create(
-            date=movement_date,
-            value_date=movement_value_date,
-            description=description,
-            currency=currency,
-            type=transaction_type,
-            balance_unsettled_cash=str(balance_unsettled_cash),
-            balance_flatex_cash=str(balance_flatex),
-            balance_cash_fund=str(balance_cash_fund),
-            balance_total=str(balance_total),
-            product_id=product_id,
-            change=change,
-            exchange_rate=exchange_rate,
-            order_id=order_id
-        )
 
         DeGiroCashMovements.objects.create(
             date=movement_date,
@@ -309,129 +286,17 @@ class DBDemoGenerator:
             order_id=order_id
         )
 
-        if currency != "EUR":
-            DeGiroCashMovements.objects.create(
-                date=movement_date,
-                value_date=movement_value_date,
-                description=description,
-                currency=currency,
-                type="FLATEX_CASH_SWEEP",
-                balance_unsettled_cash=str(balance_unsettled_cash),
-                balance_flatex_cash=str(balance_flatex),
-                balance_cash_fund=str(balance_cash_fund),
-                balance_total=str(balance_total),
-                product_id=product_id,
-                change=change,
-                exchange_rate=exchange_rate,
-                order_id=order_id
-            )
+        return balance - change_in_base_currency
 
-        # Cash Movements
-        # Example: 2025-03-20 11:04:48 Buy VUSA 4 @ 99.00 EUR = -396.00 EUR + 1.00 EUR Fee
-        # {
-        #     "id": "2346742449",
-        #     "date": "2025-03-20 11:04:48",
-        #     "value_date": "2025-03-20 11:04:48",
-        #     "description": "DEGIRO Transactiekosten en/of kosten van derden",
-        #     "currency": "EUR",
-        #     "type": "CASH_TRANSACTION",
-        #     "balance_unsettled_cash": "-397.0",
-        #     "balance_flatex_cash": "429.74",
-        #     "balance_cash_fund": "[{'participation': 0.0, 'id': 15694501, 'price': 10573.79}, {'participation': 0.0, 'id': 15694498, 'price': 10573.79}]",
-        #     "balance_total": "32.74",
-        #     "product_id": "4587473",
-        #     "change": "-1",
-        #     "exchange_rate": "",
-        #     "order_id": "bebaa8b6-5884-4a79-83bb-bb9a684c20c0"
-        # },
-        # {
-        #     "id": "2346810286",
-        #     "date": "2025-03-20 12:41:05",
-        #     "value_date": "2025-03-20 12:41:05",
-        #     "description": "Degiro Cash Sweep Transfer",
-        #     "currency": "EUR",
-        #     "type": "FLATEX_CASH_SWEEP",
-        #     "balance_unsettled_cash": "0.0",
-        #     "balance_flatex_cash": "429.74",
-        #     "balance_cash_fund": "[{'participation': 0.0, 'id': 15694501, 'price': 10573.79}, {'participation': 0.0, 'id': 15694498, 'price': 10573.79}]",
-        #     "balance_total": "429.74",
-        #     "product_id": "",
-        #     "change": "397",
-        #     "exchange_rate": "",
-        #     "order_id": ""
-        # },
-        # {
-        #     "id": "2346810287",
-        #     "date": "2025-03-20 12:41:05",
-        #     "value_date": "2025-03-20 12:41:05",
-        #                    "Transfer from your cash account at flatexDEGIRO Bank 397 EUR"
-        #     "description": "Overboeking van uw geldrekening bij flatexDEGIRO Bank 397 EUR",
-        #     "currency": "EUR",
-        #     "type": "FLATEX_CASH_SWEEP",
-        #     "balance_unsettled_cash": "0.0",
-        #     "balance_flatex_cash": "32.74",
-        #     "balance_cash_fund": "[{'participation': 0.0, 'id': 15694501, 'price': 10573.79}, {'participation': 0.0, 'id': 15694498, 'price': 10573.79}]",
-        #     "balance_total": "32.74",
-        #     "product_id": "",
-        #     "change": "",
-        #     "exchange_rate": "",
-        #     "order_id": ""
-        # }
+    def update_dividends(self, product_id: str, quantity: int, transaction_date: datetime) -> None:
+        if "dividends" not in LIST_OF_PRODUCTS[product_id]:
+            return
 
-        # Cash Movements
-        # Example: 2024-11-21 20:05:31 Buy KO 10 @ $ 63.63 = -636.30 USD (€ -606.87) + 2.00 EUR Fee
-        # {
-        #     "id": "2209865277",
-        #     "date": "2024-11-21 20:05:31",
-        #     "value_date": "2024-11-21 20:05:31",
-        #     "description": "DEGIRO Transactiekosten en/of kosten van derden",
-        #     "currency": "EUR",
-        #     "type": "CASH_TRANSACTION",
-        #     "balance_unsettled_cash": "-2.0",
-        #     "balance_flatex_cash": "702.92",
-        #     "balance_cash_fund": "[{'participation': 0.0, 'id': 15694501, 'price': 10477.07}, {'participation': 0.0, 'id': 15694498, 'price': 10477.07}]",
-        #     "balance_total": "700.92",
-        #     "product_id": "331829",
-        #     "change": "-2",
-        #     "exchange_rate": "",
-        #     "order_id": "9392df05-8f1c-48aa-8f8a-da175329346e"
-        # },
-        # {
-        #     "id": "2209865279",
-        #     "date": "2024-11-21 20:05:31",
-        #     "value_date": "2024-11-21 20:05:31",
-        #     "description": "Valuta Debitering",
-        #     "currency": "EUR",
-        #     "type": "CASH_TRANSACTION",
-        #     "balance_unsettled_cash": "-610.39",
-        #     "balance_flatex_cash": "702.92",
-        #     "balance_cash_fund": "[{'participation': 0.0, 'id': 15694501, 'price': 10477.07}, {'participation': 0.0, 'id': 15694498, 'price': 10477.07}]",
-        #     "balance_total": "92.53",
-        #     "product_id": "331829",
-        #     "change": "-608.39",
-        #     "exchange_rate": "",
-        #     "order_id": "9392df05-8f1c-48aa-8f8a-da175329346e"
-        # },
-        # {
-        #     "id": "2209865280",
-        #     "date": "2024-11-21 20:05:31",
-        #     "value_date": "2024-11-21 20:05:31",
-        #     "description": "Valuta Creditering",
-        #     "currency": "USD",
-        #     "type": "CASH_TRANSACTION",
-        #     "balance_unsettled_cash": "0.0",
-        #     "balance_flatex_cash": "nan",
-        #     "balance_cash_fund": "nan",
-        #     "balance_total": "0.0",
-        #     "product_id": "331829",
-        #     "change": "636.3",
-        #     "exchange_rate": "1459",
-        #     "order_id": "9392df05-8f8a-da175329346e"
-        # }
-
-        # FIXME: This value should be always in EUR
-        return balance + change
-
+        dividends = LIST_OF_PRODUCTS[product_id]["dividends"]
+        transaction_date = transaction_date.astimezone(ZoneInfo(TIME_ZONE))
+        mask = dividends.index > transaction_date
+        dividends.loc[mask, "stocks"] += quantity
+        LIST_OF_PRODUCTS[product_id]["dividends"] = dividends
 
     def create_deposit(self, date: datetime, amount: float) -> None:
         """Create the initial deposit transaction.
@@ -534,27 +399,18 @@ class DBDemoGenerator:
             )
             DeGiroCompanyProfile.objects.update_or_create(isin=row["isin"], defaults={"data": company_profile})
 
-    def generate(self, from_date: str, num_transactions: int, initial_deposit: float) -> None:
-        # Parse start date
-        start_date = datetime.strptime(from_date, LocalizationUtility.DATE_FORMAT)
+    def create_transactions(
+            self, start_date: datetime, num_transactions: int, balance: float, monthly_deposit: float
+    ) -> None:
         end_date = datetime.now()
-
         # Calculate time delta between start and end date
         total_days = (end_date - start_date).days
 
-        logging.info("Creating demo DB with random data ...")
-        call_command("migrate")
-
-        # Create ProductsInfo
-        logging.info("Creating products info ...")
-        self.create_products_info(from_date)
-
-        # Generate transactions
-        balance: float = initial_deposit
         # Add initial deposit as first transaction
         self.create_deposit(start_date, balance)
 
         # Generate remaining transactions
+        last_month = start_date.month
         for i in range(num_transactions):
             # Calculate a date between start_date and end_date
             days_to_add = (total_days * i) // (num_transactions - 1)
@@ -565,11 +421,95 @@ class DBDemoGenerator:
             elif transaction_date.weekday() == 6:
                 transaction_date += timedelta(days=1)
 
+            # Add monthly deposit on the first of the month
+            if transaction_date.month != last_month:
+                first_of_month = transaction_date.replace(day=1)
+                self.create_deposit(first_of_month, monthly_deposit)
+                balance += monthly_deposit
+                last_month = transaction_date.month
+
             # Generate a random cash movement
             balance = self.generate_random_transaction(transaction_date, balance)
 
         # Save all transactions
         logging.info(f"Created {num_transactions} cash movements")
+
+    def init_dividends(self, start_date: str) -> None:
+        from stonks_overwatch.services.yfinance.y_finance_client import YFinanceClient
+
+        # Retrieve the list of products
+        products_list = list(LIST_OF_PRODUCTS.keys())
+
+        # Make sure 'start_date' is a Timestamp with the same tz as the index
+        start_date = pd.Timestamp(start_date).tz_localize(tz=TIME_ZONE)
+
+        # Retrieve the dividends for those products
+        yfinance_client = YFinanceClient()
+        for product_id in products_list:
+            product_info = LIST_OF_PRODUCTS[product_id]
+            dividends = yfinance_client.get_ticker(product_info["symbol"]).dividends
+
+            # If there are no dividends, skip this product
+            if dividends.empty:
+                continue
+
+            filtered_dividends = dividends[dividends.index > start_date]
+            if filtered_dividends.empty:
+                continue
+
+            # Add a new column with the number of stocks
+            df = filtered_dividends.to_frame(name="dividends")
+            df["stocks"] = 0
+            # Add the dividends to the product info
+            LIST_OF_PRODUCTS[product_id]["dividends"] = df
+
+    def create_dividend_payments(self):
+        """Create dividend payments for the products with dividends."""
+        for product_id, product_info in LIST_OF_PRODUCTS.items():
+            if "dividends" not in product_info:
+                continue
+
+            dividends = product_info["dividends"]
+
+            # Iterate through the dividends and create a cash movement for each
+            for date, row in dividends.iterrows():
+                if row["stocks"] <= 0:
+                    continue
+
+                amount = row["dividends"] * row["stocks"]
+                description = "Dividendbelasting"
+                DeGiroCashMovements.objects.create(
+                    date=date.strftime(LocalizationUtility.TIME_DATE_FORMAT),
+                    value_date=date.strftime(LocalizationUtility.TIME_DATE_FORMAT),
+                    description=description,
+                    currency=product_info["currency"],
+                    type="FLATEX_CASH_SWEEP",
+                    balance_unsettled_cash=str(amount),
+                    balance_flatex_cash="0",
+                    balance_cash_fund="0",
+                    balance_total=str(amount),
+                    product_id=product_id,
+                    change=amount,
+                    exchange_rate=None,
+                    order_id=None
+                )
+
+    def generate(self, from_date: str, num_transactions: int, initial_deposit: float, monthly_deposit: float) -> None:
+        # Parse start date
+        start_date = datetime.strptime(from_date, LocalizationUtility.DATE_FORMAT)
+
+        logging.info("Creating demo DB with random data ...")
+        call_command("migrate")
+
+        # Create ProductsInfo
+        logging.info("Creating products info ...")
+        self.create_products_info(from_date)
+        self.init_dividends(from_date)
+
+        # Generate transactions
+        self.create_transactions(start_date, num_transactions, initial_deposit, monthly_deposit)
+
+        self.create_dividend_payments()
 
 
 def init() -> None:
@@ -628,6 +568,14 @@ def parse_args() -> Namespace:
         help="Initial deposit amount in EUR",
     )
 
+    parser.add_argument(
+        "--monthly-deposit",
+        type=int,
+        required=True,
+        help="Monthly deposit in EUR",
+    )
+
+
     return parser.parse_args()
 
 def main():
@@ -641,7 +589,7 @@ def main():
 
     """Main function to run the script."""
     generator = DBDemoGenerator()
-    generator.generate(args.start_date, args.num_transactions, args.initial_deposit)
+    generator.generate(args.start_date, args.num_transactions, args.initial_deposit, args.monthly_deposit)
 
 if __name__ == "__main__":
     main()
