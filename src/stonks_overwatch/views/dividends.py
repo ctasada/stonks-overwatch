@@ -30,9 +30,9 @@ class Dividends(View):
         upcoming_dividends = self.dividends.get_upcoming_dividends(selected_portfolio)
 
         dividends_calendar = self._get_dividends_calendar(dividends_overview, upcoming_dividends)
-        dividends_growth = self._get_dividends_growth(dividends_calendar)
+        dividends_growth = self._get_dividends_growth(dividends_calendar["calendar"])
         dividends_diversification = self._get_diversification(dividends_overview)
-        total_dividends = self._get_total_dividends(dividends_calendar)
+        total_dividends = self._get_total_dividends(dividends_calendar["calendar"])
 
         if total_dividends > 0.0:
             context = {
@@ -60,7 +60,7 @@ class Dividends(View):
         dividends_calendar = {}
         joined_dividends = dividends_overview + upcoming_dividends
         # After merging dividends and upcoming dividends, we need to sort the result
-        joined_dividends = sorted(joined_dividends, key=lambda x: x.date(), reverse=True)
+        joined_dividends = sorted(joined_dividends, key=lambda x: x.date(), reverse=False)
 
         if not joined_dividends:
             return {}
@@ -72,7 +72,10 @@ class Dividends(View):
         period_start = date_as_datetime.min()
         today = pd.Timestamp("today").normalize()
         period_end = max(date_as_datetime.max(), today)
-        period = pd.period_range(start=period_start, end=period_end, freq="M")[::-1]
+        period = pd.period_range(start=period_start, end=period_end, freq="M")
+
+        # Extract unique years from the period
+        years = sorted(set(period.year), reverse=True)
 
         for month in period:
             month = month.strftime("%B %Y")
@@ -129,7 +132,10 @@ class Dividends(View):
                 value=month_entry["total"], currency=currency
             )
 
-        return dividends_calendar
+        return {
+            "years": years,
+            "calendar": dividends_calendar,
+        }
 
     def _get_dividends_growth(self, dividends_calendar: dict) -> dict:
         dividends_growth = {}

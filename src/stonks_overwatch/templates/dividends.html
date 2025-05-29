@@ -37,10 +37,24 @@
     </div>
     {% include 'distribution_with_list.html' with chart_id="dividends-chart" items=dividendsDiversification.table %}
     <div class="row border border-primary-subtle bg-light rounded mb-3" style="background-color:#dbf5ff">
-        <div class="row">
-            <h5 class="my-1">Dividends Overview</h5>
+        <div class="row my-2">
+            <div class="col-auto">
+                <h5 class="my-1">Dividends Calendar</h5>
+            </div>
+            <div class="col-auto">
+                <div class="dropdown btn-sm dropdown-custom" id="dividendsYearsDropdown">
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle dropdown-custom" type="button" id="dividendsYearsDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
+                        {{ dividendsCalendar.years.0 }}
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dividendsYearsDropdownButton" style="min-width: 100%; width: auto;">
+                        {% for year in dividendsCalendar.years %}
+                        <li><a class="dropdown-item" href="#">{{ year }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
         </div>
-        {% for key, value in dividendsCalendar.items %}
+        {% for key, value in dividendsCalendar.calendar.items %}
         <div class="col-sm-4 border">
             <div class="row-sm mt-1 fs-5">
                 {{ key }}
@@ -199,5 +213,23 @@
         {{ dividendsDiversification.chart.labels|safe }},
         {{ dividendsDiversification.chart.values|safe }}
     );
+
+    // Handle dividends year dropdown selection
+    $('#dividendsYearsDropdown .dropdown-item').on('click', function(e) {
+        e.preventDefault();
+        // Remove active class from all items
+        $('#dividendsYearsDropdown .dropdown-item').removeClass('active');
+        // Add active class to clicked item
+        $(this).addClass('active');
+        // Update the dropdown button text
+        $('#dividendsYearsDropdownButton').text($(this).text());
+        
+        // Get the selected year
+        const selectedYear = $(this).text();
+        console.log('Selected year:', selectedYear);
+        
+        // TODO: Add your custom logic here to handle the year selection
+        // For example, you could filter the dividends calendar to show only the selected year
+    });
 </script>
 {% endblock %}
