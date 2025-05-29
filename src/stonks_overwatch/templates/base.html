@@ -31,15 +31,15 @@
             <div class="col-1 px-0 sticky-top" id="sidebar">
                 <!-- Sidebar  -->
                 <div class="d-flex flex-sm-column flex-row flex-nowrap align-items-center sticky-top min-vh-100">
-                    <div class="d-block p-3 text-decoration-none text-white text-center border-bottom">
+                    <div class="d-block pt-2 pb-2 text-decoration-none text-white text-center border-bottom">
                         <p class="fw-semibold d-inline text-white fs-5">Stonks Overwatch</p>
                     </div>
-                    <div class="dropdown pb-2 pt-2"  id="sidebar-portfolio-selector">
-                        <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="selectPortfolio" data-bs-toggle="dropdown" aria-expanded="false">
-                            <!-- The selected portfolio is injected by the JScript block via a GET Request -->
-                        </a>
+                    <div class="dropdown"  id="sidebar-portfolio-selector">
+                        <button class="btn dropdown-toggle border-0 text-white text-decoration-none" id="selectPortfolio" data-bs-toggle="dropdown" aria-expanded="false">
+                            <!-- The JScript block injects the selected portfolio via a GET Request -->
+                        </button>
                         <ul class="dropdown-menu text-small shadow" id="sidebar-portfolio-menu">
-                            <!-- The list of portfolios is injected by the JScript block via a GET Request -->
+                            <!-- The JScript block injects the list of portfolios via a GET Request -->
                         </ul>
                     </div>
                     <ul class="nav flex-column mb-auto text-center w-100">
@@ -115,7 +115,7 @@
                 <!-- Page Content  -->
                 <!-- Top Navigation Bar  -->
                 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-                    <div class="container-fluid justify-content-start gap-4">
+                    <div class="container-fluid justify-content-start">
                         <!-- Shows Total Portfolio  -->
                         {% show_total_portfolio %}
                     </div>
