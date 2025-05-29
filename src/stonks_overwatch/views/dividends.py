@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import List
 
 import pandas as pd
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
 
@@ -45,6 +46,9 @@ class Dividends(View):
             }
         else:
             context = {}
+
+        if request.headers.get('Accept') == 'application/json':
+            return JsonResponse(context, safe=False)
 
         return render(request, "dividends.html", context)
 
