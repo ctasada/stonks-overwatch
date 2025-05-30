@@ -9,8 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
-- Tables now support sorting, pagination, and searching
 - New application icon
+- Tables now support sorting, pagination, and searching
+- Easier to navigate Dividends calendar
 
 ### Deprecated
 ### Removed

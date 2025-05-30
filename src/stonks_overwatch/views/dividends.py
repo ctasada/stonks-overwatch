@@ -2,7 +2,6 @@ from datetime import datetime
 from typing import List
 
 import pandas as pd
-from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
 
@@ -26,6 +25,8 @@ class Dividends(View):
         selected_portfolio = SessionManager.get_selected_portfolio(request)
         self.logger.debug(f"Selected Portfolio: {selected_portfolio}")
 
+        calendar_year = self._parse_request_calendar_year(request)
+
         dividends_overview = self.dividends.get_dividends(selected_portfolio)
         upcoming_dividends = self.dividends.get_upcoming_dividends(selected_portfolio)
 
@@ -35,6 +36,13 @@ class Dividends(View):
         total_dividends = self._get_total_dividends(dividends_calendar["calendar"])
 
         if total_dividends > 0.0:
+            # Filter the dividends_calendar to only include items matching the calendar_year
+            filtered_calendar = {
+                key: value for key, value in dividends_calendar['calendar'].items()
+                if key.endswith(str(calendar_year))
+            }
+            dividends_calendar['calendar'] = filtered_calendar
+
             context = {
                 "total_dividends": LocalizationUtility.format_money_value(
                     value=total_dividends, currency=self.base_currency
@@ -47,10 +55,17 @@ class Dividends(View):
         else:
             context = {}
 
-        if request.headers.get('Accept') == 'application/json':
-            return JsonResponse(context, safe=False)
+        if request.headers.get('Accept') == 'application/json' and request.GET.get('html_only'):
+            # Return only the calendar HTML
+            return render(request, "dividends_calendar_content.html", {"dividendsCalendar": dividends_calendar})
 
         return render(request, "dividends.html", context)
+
+    def _parse_request_calendar_year(self, request) -> str:
+        """Parse calendar year from request query parameters."""
+        calendar_year = request.GET.get("calendar_year", datetime.now().year)
+
+        return calendar_year
 
     def _get_dividends_calendar(
             self,
