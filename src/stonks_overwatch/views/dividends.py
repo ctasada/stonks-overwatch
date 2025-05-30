@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 
 import pandas as pd
@@ -29,8 +29,9 @@ class Dividends(View):
 
         dividends_overview = self.dividends.get_dividends(selected_portfolio)
         upcoming_dividends = self.dividends.get_upcoming_dividends(selected_portfolio)
+        forecast_dividends = self.dividends.get_forecasted_dividends(selected_portfolio)
 
-        dividends_calendar = self._get_dividends_calendar(dividends_overview, upcoming_dividends)
+        dividends_calendar = self._get_dividends_calendar(dividends_overview, upcoming_dividends, forecast_dividends)
         dividends_growth = self._get_dividends_growth(dividends_calendar["calendar"])
         dividends_diversification = self._get_diversification(dividends_overview)
         total_dividends = self._get_total_dividends(dividends_calendar["calendar"])
@@ -70,10 +71,11 @@ class Dividends(View):
     def _get_dividends_calendar(
             self,
             dividends_overview: List[AccountOverview],
-            upcoming_dividends: List[AccountOverview]
+            upcoming_dividends: List[AccountOverview],
+            forecast_dividends: List[AccountOverview]
     ) -> dict:
         dividends_calendar = {}
-        joined_dividends = dividends_overview + upcoming_dividends
+        joined_dividends = dividends_overview + upcoming_dividends + forecast_dividends
         # After merging dividends and upcoming dividends, we need to sort the result
         joined_dividends = sorted(joined_dividends, key=lambda x: x.date(), reverse=False)
 
@@ -83,7 +85,7 @@ class Dividends(View):
         df = pd.DataFrame(joined_dividends)
         # Find the maximum date. Since we have upcoming payments, it can be today or some point
         # in the future
-        date_as_datetime = pd.to_datetime(df["datetime"], format="%Y-%m-%d")
+        date_as_datetime = pd.to_datetime(df["datetime"], format="ISO8601")
         period_start = date_as_datetime.min()
         today = pd.Timestamp("today").normalize()
         period_end = max(date_as_datetime.max(), today)
@@ -120,7 +122,9 @@ class Dividends(View):
             payment_date = transaction.datetime.date()
 
             stock_entry["stockName"] = transaction.stock_name
-            stock_entry["isUpcoming"] = payment_date > today.date()
+            # FIXME: Now we need to differentiate between upcoming and forecasted dividends
+            stock_entry["isUpcoming"] = today.date() < payment_date <= today.date() + timedelta(days=30)
+            stock_entry["isForecasted"] = payment_date > (today.date() + timedelta(days=30))
             stock_entry["change"] = stock_entry.setdefault("change", 0) + transaction_change
             stock_entry["currency"] = currency
             stock_entry["formatedChange"] = LocalizationUtility.format_money_value(

@@ -5,6 +5,8 @@ from stonks_overwatch.repositories.degiro.product_info_repository import Product
 from stonks_overwatch.services.degiro.account_overview import AccountOverview, AccountOverviewService
 from stonks_overwatch.services.degiro.currency_converter_service import CurrencyConverterService
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
+from stonks_overwatch.services.degiro.portfolio import PortfolioService
+from stonks_overwatch.utils.constants import ProductType
 from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.logger import StonksLogger
 
@@ -16,9 +18,11 @@ class DividendsService:
         account_overview: AccountOverviewService,
         currency_service: CurrencyConverterService,
         degiro_service: DeGiroService,
+        portfolio_service: PortfolioService,
     ):
         self.account_overview = account_overview
         self.currency_service = currency_service
+        self.portfolio_service = portfolio_service
         self.degiro_service = degiro_service
         self.base_currency = Config.default().base_currency
 
@@ -75,3 +79,35 @@ class DividendsService:
         except Exception as error:
             self.logger.error(error)
             return result
+
+    def get_forecasted_dividends(self) -> List[AccountOverview]:
+        result = []
+
+        portfolio = self.portfolio_service.get_portfolio
+
+        for entry in portfolio:
+            if entry.is_open and entry.product_type == ProductType.STOCK:
+                forecasted_dividends = self.degiro_service.get_dividends_agenda(
+                    company_name=entry.name,
+                    isin=entry.isin
+                )
+
+                if forecasted_dividends is not None:
+                    amount = float(0.0)
+                    if "dividend" in forecasted_dividends and forecasted_dividends["dividend"] is not None:
+                        amount = float(forecasted_dividends["dividend"]) * entry.shares
+                    else:
+                        self.logger.warning(f"No dividend amount found for {entry.name} ({entry.isin})")
+
+                    result.append(
+                        AccountOverview(
+                            datetime=LocalizationUtility.convert_string_to_datetime(forecasted_dividends["paymentDate"]).replace(tzinfo=None),
+                            value_datetime=LocalizationUtility.convert_string_to_datetime(forecasted_dividends['exDividendDate']).replace(tzinfo=None),
+                            stock_name=entry.name,
+                            stock_symbol=entry.symbol,
+                            currency=forecasted_dividends['currency'],
+                            change=amount,
+                        )
+                    )
+
+        return result

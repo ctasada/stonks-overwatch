@@ -6,6 +6,7 @@
     --primary-color: #7386D5;
     --primary-dark: #6D7FCC;
     --primary-light: #A6B9FF;
+    --primary-lighter: #D0E0FF;
 }
 
 /* Base Styles */
@@ -251,9 +252,13 @@ a[aria-expanded="true"] {
         135deg,         /* Angle of the stripes */
         var(--primary-light),        /* Color of the stripes */
         var(--primary-light) 2px,    /* End color of the stripe */
-        #D0E0FF 2px,    /* Background color between stripes */
-        #D0E0FF 4px     /* End color of the stripe */
+        var(--primary-lighter) 2px,    /* Background color between stripes */
+        var(--primary-lighter) 4px     /* End color of the stripe */
     );
+}
+
+.forecasted-dividends {
+    background: var(--primary-lighter);
 }
 
 #togglePassword {
@@ -267,7 +272,7 @@ a[aria-expanded="true"] {
 
 /* Bootstrap Table Pagination Styles */
 .bootstrap-table .btn:focus, .bootstrap-table .btn:hover {
-    background-color: #6a7ed2;
+    background-color: #6A7ED2;
 }
 .bootstrap-table .btn {
     background-color: var(--primary-color);

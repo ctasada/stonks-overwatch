@@ -93,6 +93,7 @@ class Deposit:
 class PortfolioEntry:
     name: str = ""
     symbol: str = ""
+    isin: str = ""
     sector: Sector = None
     industry: str = ""
     category: str = ""

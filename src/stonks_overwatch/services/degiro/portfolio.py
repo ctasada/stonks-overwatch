@@ -118,6 +118,7 @@ class PortfolioService:
                 PortfolioEntry(
                     name=info["name"],
                     symbol=info["symbol"],
+                    isin=info["isin"],
                     sector=Sector.from_str(sector),
                     industry=industry,
                     category=info["category"],

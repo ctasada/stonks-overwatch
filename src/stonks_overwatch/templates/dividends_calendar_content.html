@@ -7,7 +7,7 @@
         <div class="col text-left">
             {{ value.payouts }} payouts
         </div>
-        <div class="col-md-auto text-right border rounded-pill" style="background-color: #7386D5; color: white">
+        <div class="col-md-auto text-right border rounded-pill" style="background-color: var(--primary-color); color: white">
             {{ value.formatedTotal }}
         </div>
     </div>
@@ -17,6 +17,8 @@
                 {% if dividend.change != 0 %}
                     {% if dividend.isUpcoming %}
                     <div class="row m-2 border rounded-pill upcoming-dividends">
+                    {% elif dividend.isForecasted %}
+                    <div class="row m-2 border rounded-pill forecasted-dividends">
                     {% else %}
                     <div class="row m-2 border rounded-pill dividends">
                     {% endif %}
