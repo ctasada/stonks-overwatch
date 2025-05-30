@@ -37,53 +37,25 @@
     </div>
     {% include 'distribution_with_list.html' with chart_id="dividends-chart" items=dividendsDiversification.table %}
     <div class="row border border-primary-subtle bg-light rounded mb-3" style="background-color:#dbf5ff">
-        <div class="row">
-            <h5 class="mb-1">Dividends Overview</h5>
+        <div class="row my-2">
+            <div class="col-auto">
+                <h5 class="my-1">Dividends Calendar</h5>
+            </div>
+            <div class="col-auto">
+                <div class="dropdown btn-sm dropdown-custom" id="dividendsYearsDropdown">
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle dropdown-custom" type="button" id="dividendsYearsDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
+                        {{ dividendsCalendar.years.0 }}
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dividendsYearsDropdownButton" style="min-width: 100%; width: auto;">
+                        {% for year in dividendsCalendar.years %}
+                        <li><a class="dropdown-item" href="#">{{ year }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
         </div>
-        {% for key, value in dividendsCalendar.items %}
-        <div class="col-sm-4 border">
-            <div class="row-sm mt-1 fs-5">
-                {{ key }}
-            </div>
-            <div class="row m-2">
-                <div class="col text-left">
-                    {{ value.payouts }} payouts
-                </div>
-                <div class="col-md-auto text-right border rounded-pill" style="background-color: #7386D5; color: white">
-                    {{ value.formatedTotal }}
-                </div>
-            </div>
-            {% if value.payouts > 0 %}
-                <!-- When there's no Payout, there is no Day field, so skip the condition to avoid a silent error -->
-                {% for day, dividends in value.days.items %}
-                    {% for key, dividend in dividends.items %}
-                        {% if dividend.change != 0 %}
-                            {% if dividend.isUpcoming %}
-                            <div class="row m-2 border rounded-pill upcoming-dividends">
-                            {% else %}
-                            <div class="row m-2 border rounded-pill dividends">
-                            {% endif %}
-                                <div class="col-sm-1 text-left">
-                                    {{ day }}
-                                </div>
-                                <div class="col-sm-8 text-truncate">
-                                    {{ dividend.stockName }}
-                                </div>
-                                <div class="col-sm-3 text-right">
-                                    {{ dividend.formatedChange }}
-                                </div>
-                            </div>
-                        {% endif %}
-                    {% endfor %}
-                {% endfor %}
-            {% endif %}
-            </div>
-
-            {% if forloop.counter|divisibleby:3 %}
-            <!-- Force next columns to break to new line at md breakpoint and up -->
-            <div class="w-100 d-none d-md-block"></div>
-            {% endif %}
-        {% endfor %}
+        <div class="row" id="dividends-calendar-container">
+            {% include 'dividends_calendar_content.html' with dividendsCalendar=dividendsCalendar %}
         </div>
     </div>
     {% endif %}
@@ -96,6 +68,9 @@
 {{ currencySymbol|json_script:"currency-symbol" }}
 <script src="{% static 'js/distribution-char-utils.js' %}"></script>
 <script>
+    const URL = "{% url 'dividends' %}"
+    const HOST = window.location.protocol + "//" + window.location.host
+
     $('#yearButton').on('click', function () {
         drawDividends("Year")
     })
@@ -199,5 +174,44 @@
         {{ dividendsDiversification.chart.labels|safe }},
         {{ dividendsDiversification.chart.values|safe }}
     );
+
+    // Handle dividends year dropdown selection
+    $('#dividendsYearsDropdown .dropdown-item').on('click', function(e) {
+        e.preventDefault();
+        // Remove active class from all items
+        $('#dividendsYearsDropdown .dropdown-item').removeClass('active');
+        // Add active class to clicked item
+        $(this).addClass('active');
+        // Update the dropdown button text
+        $('#dividendsYearsDropdownButton').text($(this).text());
+        
+        // Get the selected year
+        const selectedYear = $(this).text();
+        console.log('Selected year:', selectedYear);
+        
+        // Make AJAX request to get the calendar HTML
+        let url = HOST + URL + "?calendar_year=" + selectedYear + "&html_only=true";
+        
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            // Find the calendar container using its ID and replace its content
+            const calendarContainer = document.getElementById('dividends-calendar-container');
+            if (calendarContainer) {
+                calendarContainer.innerHTML = html;
+            } else {
+                console.error('Could not find calendar container');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching calendar HTML:', error);
+        });
+    });
 </script>
 {% endblock %}

@@ -1,0 +1,43 @@
+{% for key, value in dividendsCalendar.calendar.items %}
+<div class="col-sm-4 border">
+    <div class="row-sm mt-1 fs-5">
+        {{ key }}
+    </div>
+    <div class="row m-2">
+        <div class="col text-left">
+            {{ value.payouts }} payouts
+        </div>
+        <div class="col-md-auto text-right border rounded-pill" style="background-color: #7386D5; color: white">
+            {{ value.formatedTotal }}
+        </div>
+    </div>
+    {% if value.payouts > 0 %}
+        {% for day, dividends in value.days.items %}
+            {% for key, dividend in dividends.items %}
+                {% if dividend.change != 0 %}
+                    {% if dividend.isUpcoming %}
+                    <div class="row m-2 border rounded-pill upcoming-dividends">
+                    {% else %}
+                    <div class="row m-2 border rounded-pill dividends">
+                    {% endif %}
+                        <div class="col-sm-1 text-left">
+                            {{ day }}
+                        </div>
+                        <div class="col-sm-8 text-truncate">
+                            {{ dividend.stockName }}
+                        </div>
+                        <div class="col-sm-3 text-right">
+                            {{ dividend.formatedChange }}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+</div>
+
+{% if forloop.counter|divisibleby:3 %}
+<!-- Force next columns to break to the new line at md breakpoint and up -->
+<div class="w-100 d-none d-md-block"></div>
+{% endif %}
+{% endfor %} 
