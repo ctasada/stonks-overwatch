@@ -28,9 +28,9 @@ function drawDoughnutChart(chartId, pieTitle, chartLabels, chartValues) {
         data: data,
         plugins: [autocolors],
         options: {
-            layout: { padding: 0 },
-            radius: 200,
             responsive: true,
+            maintainAspectRatio: true,
+            layout: { padding: 0 },
             plugins: {
                 legend: { display: false },
                 tooltip: {

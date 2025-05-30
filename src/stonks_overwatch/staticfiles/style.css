@@ -188,31 +188,6 @@ a[aria-expanded="true"] {
     }
 }
 
-/* Custom style for positionsDropdown button */
-#positionsDropdown {
-    color: black !important;
-    background-color: white;
-    border-color: var(--primary-color);
-}
-
-#positionsDropdown:hover,
-#positionsDropdown:focus {
-    background-color: var(--primary-light) !important;
-    color: black !important;
-}
-
-#positionsDropdown + .dropdown-menu .dropdown-item.active,
-#positionsDropdown + .dropdown-menu .dropdown-item:active {
-    background-color: var(--primary-color) !important;
-    color: #fff !important;
-}
-
-#positionsDropdown + .dropdown-menu .dropdown-item:hover,
-#positionsDropdown + .dropdown-menu .dropdown-item:focus {
-    background-color: var(--primary-light) !important;
-    color: #000 !important;
-}
-
 /* ---------------------------------------------------
     CUSTOM COMPONENTS
 ----------------------------------------------------- */
@@ -245,9 +220,17 @@ a[aria-expanded="true"] {
     overflow-y: auto;
 }
 
+.diversification-chart-container {
+    position: relative;
+    width: 200px;
+    max-width: min(40vw, 40vh, 400px);
+    max-height: min(40vw, 40vh, 400px);
+    aspect-ratio: 1;
+}
+
 .diversification-scrollable-list {
     height: 100%;
-    max-height: 500px;
+    max-height: 325px;
     overflow-y: auto;
 }
 
@@ -354,4 +337,28 @@ a[aria-expanded="true"] {
 .table td, .table th {
   border-right: none !important;
   border-left: none !important;
+}
+
+.dropdown-custom {
+    color: black !important;
+    background-color: white;
+    border-color: var(--primary-color);
+}
+
+.dropdown-custom:hover,
+.dropdown-custom:focus {
+    background-color: var(--primary-light) !important;
+    color: black !important;
+}
+
+.dropdown-custom + .dropdown-menu .dropdown-item.active,
+.dropdown-custom + .dropdown-menu .dropdown-item:active {
+    background-color: var(--primary-color) !important;
+    color: #fff !important;
+}
+
+.dropdown-custom + .dropdown-menu .dropdown-item:hover,
+.dropdown-custom + .dropdown-menu .dropdown-item:focus {
+    background-color: var(--primary-light) !important;
+    color: #000 !important;
 }

@@ -70,12 +70,21 @@
                     <h5 class="mb-1">Performance </h5>
                 </span>
                 <span>
-                    <nav class="nav px-1" id="performanceYears">
-                        <a class="nav-link px-1 active" id="allTime" aria-selected="true" href="#">All Time</a>
-                        {% for year, values in portfolio.annual_twr.items %}
-                        <a class="nav-link px-1" id="performanceByYear-{{ year }}" aria-selected="false" href="#">{{ year }}</a>
-                        {% endfor %}
-                    </nav>
+                    <div class="dropdown dropdown-custom" id="performanceYearsDropdown">
+                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle dropdown-custom" type="button" id="performanceYearsDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            All Time
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="performanceYearsDropdownButton">
+                            <li>
+                                <a class="dropdown-item active" id="allTime" href="#">All Time</a>
+                            </li>
+                            {% for year, values in portfolio.annual_twr.items %}
+                            <li>
+                                <a class="dropdown-item" id="performanceByYear-{{ year }}" href="#">{{ year }}</a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </span>
             </div>
         </div>

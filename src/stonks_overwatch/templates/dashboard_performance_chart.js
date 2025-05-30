@@ -1,22 +1,24 @@
-
 const ALL_TIME_PERFORMANCE_GROUP = "ALLTIME"
 
-function getSelectedPerformanceGroup() {
-    let activeTab = $('#performanceYears .nav-link.active');
-    let id = activeTab.attr('id');
+function getSelectedPerformanceGroup(selectedElement) {
+    let id = selectedElement.id;
+
     if (id === "allTime") {
         return ALL_TIME_PERFORMANCE_GROUP
     }
     return id.replace("performanceByYear-", "")
 }
 
-$('#performanceYears a').on('click', function (e) {
-    e.preventDefault()
-    $(".active").removeClass("active").attr('aria-selected', 'false');
-    $(this).addClass("active").attr('aria-selected', 'true');
-
-    drawPerformance(getSelectedPerformanceGroup(), getSelectedTimeRange())
-})
+$('#performanceYearsDropdown .dropdown-item').on('click', function (e) {
+    e.preventDefault();
+    // Remove active class from all items
+    $('#performanceYearsDropdown .dropdown-item').removeClass('active');
+    // Add active class to clicked item
+    $(this).addClass('active');
+    // Update the dropdown button text
+    $('#performanceYearsDropdownButton').text($(this).text());
+    drawPerformance(getSelectedPerformanceGroup(e.currentTarget), getSelectedTimeRange());
+});
 
 function drawPerformance(performanceGroup, timeRange) {
     const datasets = {
