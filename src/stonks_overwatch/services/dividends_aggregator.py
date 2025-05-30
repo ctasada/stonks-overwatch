@@ -10,7 +10,7 @@ from stonks_overwatch.services.degiro.currency_converter_service import (
 from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.dividends import DividendsService as DeGiroDividendsService
 from stonks_overwatch.services.degiro.portfolio import PortfolioService as DeGiroPortfolioService
-from stonks_overwatch.services.models import AccountOverview, PortfolioId
+from stonks_overwatch.services.models import Dividend, PortfolioId
 
 class DividendsAggregatorService:
 
@@ -27,23 +27,9 @@ class DividendsAggregatorService:
             degiro_service=self.degiro_service,
         )
 
-    def get_dividends(self, selected_portfolio: PortfolioId) -> List[AccountOverview]:
+    def get_dividends(self, selected_portfolio: PortfolioId) -> List[Dividend]:
         dividends = []
         if Config.default().is_degiro_enabled(selected_portfolio):
             dividends += self.degiro_dividends.get_dividends()
 
-        return sorted(dividends, key=lambda k: k.datetime, reverse=True)
-
-    def get_upcoming_dividends(self, selected_portfolio: PortfolioId) -> List[AccountOverview]:
-        dividends = []
-        if Config.default().is_degiro_enabled(selected_portfolio):
-            dividends += self.degiro_dividends.get_upcoming_dividends()
-
-        return sorted(dividends, key=lambda k: k.datetime, reverse=True)
-
-    def get_forecasted_dividends(self, selected_portfolio: PortfolioId) -> List[AccountOverview]:
-        dividends = []
-        if Config.default().is_degiro_enabled(selected_portfolio):
-            dividends += self.degiro_dividends.get_forecasted_dividends()
-
-        return sorted(dividends, key=lambda k: k.datetime, reverse=True)
+        return sorted(dividends, key=lambda k: k.payment_date, reverse=True)

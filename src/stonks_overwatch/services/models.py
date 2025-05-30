@@ -89,6 +89,51 @@ class Deposit:
     def change_formatted(self) -> str:
         return LocalizationUtility.format_money_value(value=self.change, currency=self.currency)
 
+class DividendType(Enum):
+    PAID = 0
+    ANNOUNCED = 1
+    FORECASTED = 2
+
+@dataclass
+class Dividend:
+    dividend_type: DividendType
+    payment_date: datetime
+    stock_name: str
+    stock_symbol: str
+    currency: str
+    change: float
+    ex_dividend_date: datetime = None
+
+    def payment_date_as_string(self) -> str:
+        return LocalizationUtility.format_date_from_date(self.payment_date)
+
+    def payment_time_as_string(self) -> str:
+        return LocalizationUtility.format_time_from_date(self.payment_date)
+
+    def ex_dividend_date_as_string(self) -> str:
+        return LocalizationUtility.format_date_from_date(self.ex_dividend_date)
+
+    def ex_dividend_time_as_string(self) -> str:
+        return LocalizationUtility.format_time_from_date(self.ex_dividend_date)
+
+    def formated_change(self) -> str:
+        return LocalizationUtility.format_money_value(value=self.change, currency=self.currency)
+
+    def is_paid(self) -> bool:
+        return self.dividend_type == DividendType.PAID
+
+    def is_announced(self) -> bool:
+        return self.dividend_type == DividendType.ANNOUNCED
+
+    def is_forecasted(self) -> bool:
+        return self.dividend_type == DividendType.FORECASTED
+
+    def day(self) -> str:
+        return LocalizationUtility.get_date_day(self.payment_date)
+
+    def month_year(self) -> str:
+        return LocalizationUtility.format_date_to_month_year(self.payment_date)
+
 @dataclass
 class PortfolioEntry:
     name: str = ""

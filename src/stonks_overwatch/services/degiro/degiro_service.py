@@ -253,7 +253,9 @@ class DeGiroService:
             agenda_request=AgendaRequest(
                 calendar_type=CalendarType.DIVIDEND_CALENDAR,
                 start_date=datetime.now(),
-                end_date=datetime.now() + timedelta(days=360),
+                # DEGIRO API seems to limit the agenda to 6 months in the future
+                #  even with that limitation doesn't show the whole agenda
+                end_date=datetime.now() + timedelta(days=180),
                 offset=0,
                 limit=25,
                 company_name=company_name,

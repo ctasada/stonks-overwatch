@@ -15,9 +15,9 @@
         {% for day, dividends in value.days.items %}
             {% for key, dividend in dividends.items %}
                 {% if dividend.change != 0 %}
-                    {% if dividend.isUpcoming %}
+                    {% if dividend.is_announced %}
                     <div class="row m-2 border rounded-pill upcoming-dividends">
-                    {% elif dividend.isForecasted %}
+                    {% elif dividend.is_forecasted %}
                     <div class="row m-2 border rounded-pill forecasted-dividends">
                     {% else %}
                     <div class="row m-2 border rounded-pill dividends">
@@ -26,7 +26,7 @@
                             {{ day }}
                         </div>
                         <div class="col-sm-8 text-truncate">
-                            {{ dividend.stockName }}
+                            {{ dividend.stock_name }}
                         </div>
                         <div class="col-sm-3 text-right">
                             {{ dividend.formatedChange }}

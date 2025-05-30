@@ -15,6 +15,7 @@ from stonks_overwatch.services.degiro.account_overview import AccountOverviewSer
 from stonks_overwatch.services.degiro.currency_converter_service import CurrencyConverterService
 from stonks_overwatch.services.degiro.degiro_service import CredentialsManager
 from stonks_overwatch.services.degiro.dividends import DividendsService
+from stonks_overwatch.services.degiro.portfolio import PortfolioService
 from stonks_overwatch.utils.localization import LocalizationUtility
 from tests.stonks_overwatch.fixtures import TestDeGiroService
 
@@ -34,10 +35,12 @@ class TestDividendsService(TestCase):
 
         self.account_overview = AccountOverviewService()
         self.currency_service = CurrencyConverterService()
+        self.portfolio_service = PortfolioService(self.degiro_service)
 
         self.dividends_service = DividendsService(
             account_overview=self.account_overview,
             currency_service=self.currency_service,
+            portfolio_service=self.portfolio_service,
             degiro_service=self.degiro_service,
         )
 
@@ -98,19 +101,14 @@ class TestDividendsService(TestCase):
         for obj in self.created_objects.values():
             obj.delete()
 
-    def test_get_dividends_from_account_overview(self):
-        dividends = self.dividends_service.get_dividends()
+    def test_get_dividends(self):
+        dividends = self.dividends_service._get_dividends()
         assert len(dividends) == 1
 
-        assert dividends[0].date() == "2021-03-12"
-        assert dividends[0].time() == "08:16:38"
-        assert dividends[0].value_date() == "2021-03-11"
-        assert dividends[0].value_time() == "23:59:59"
+        assert dividends[0].payment_date_as_string() == "2021-03-12"
+        assert dividends[0].payment_time_as_string() == "08:16:38"
         assert dividends[0].stock_name == "Microsoft Corp"
         assert dividends[0].stock_symbol == "MSFT"
-        assert dividends[0].description == "Dividend"
-        assert dividends[0].type == "CASH_TRANSACTION"
-        assert dividends[0].type_str() == "Cash Transaction"
         assert dividends[0].currency == "EUR"
         assert dividends[0].change == 7.526881720430107
         assert dividends[0].formated_change() == "€ 7.53"
@@ -144,6 +142,6 @@ class TestDividendsService(TestCase):
                     ]
                 })
 
-            upcoming_dividends = self.dividends_service.get_upcoming_dividends()
+            upcoming_dividends = self.dividends_service._get_upcoming_dividends()
 
             assert len(upcoming_dividends) == 1
