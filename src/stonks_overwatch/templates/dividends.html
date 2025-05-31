@@ -53,6 +53,22 @@
                     </ul>
                 </div>
             </div>
+            <div class="col-auto ms-auto d-flex justify-content-end">
+                <div class="d-flex flex-row align-items-center">
+                    <div class="d-flex align-items-center me-3">
+                        <span class="dividends" style="width: 20px; height: 20px; border-radius: 50%; display: inline-block; margin-right: 5px;"></span>
+                        Paid
+                    </div>
+                    <div class="d-flex align-items-center me-3">
+                        <span class="upcoming-dividends" style="width: 20px; height: 20px; border-radius: 50%; display: inline-block; margin-right: 5px;"></span>
+                        Announced
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="forecasted-dividends" style="width: 20px; height: 20px; border-radius: 50%; display: inline-block; margin-right: 5px;"></span>
+                        Forecasted
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="row" id="dividends-calendar-container">
             {% include 'dividends_calendar_content.html' with dividendsCalendar=dividendsCalendar %}

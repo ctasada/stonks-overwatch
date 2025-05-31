@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New application icon
 - Tables now support sorting, pagination, and searching
 - Easier to navigate Dividends calendar
+- Added Dividends forecast
 
 ### Deprecated
 ### Removed

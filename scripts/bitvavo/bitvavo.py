@@ -35,8 +35,8 @@ class BitvavoImplementation:
         response = self.bitvavo.assets()
         print("Assets:", json.dumps(response, indent=2))
 
-    def balance(self):
-        response = self.bitvavo.balance("EUR")
+    def balance(self, symbol: str = None):
+        response = self.bitvavo.balance(symbol)
         print("Balance:", json.dumps(response, indent=2))
 
     def account_history(self):
@@ -88,12 +88,12 @@ if __name__ == '__main__':
     # portfolio.get_portfolio()
     # bvavo.account()
     # bvavo.assets()
-    # bvavo.balance()
+    bvavo.balance()
     # bvavo.orders()
     # bvavo.account_history()
     # bvavo.deposit_history()
     # bvavo.withdrawal_history()
     # bvavo.ticker_price()
-    bvavo.candles()
+    # bvavo.candles()
 
     # bvavo.wait_and_close()
