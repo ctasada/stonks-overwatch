@@ -1,5 +1,5 @@
 import os
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from typing import Any, List, Optional
 
 import polars as pl
@@ -7,6 +7,7 @@ import requests_cache
 from degiro_connector.quotecast.models.chart import Chart, ChartRequest, Interval
 from degiro_connector.quotecast.tools.chart_fetcher import ChartFetcher
 from degiro_connector.trading.api import API as TradingApi  # noqa: N811
+from degiro_connector.trading.models.agenda import AgendaRequest, CalendarType
 from degiro_connector.trading.models.credentials import Credentials
 
 import stonks_overwatch.settings
@@ -246,6 +247,28 @@ class DeGiroService:
         int_account = client_details["data"]["intAccount"]
 
         return int_account
+
+    def get_dividends_agenda(self, company_name: str, isin: str) -> dict | None:
+        agenda = self.get_client().get_agenda(
+            agenda_request=AgendaRequest(
+                calendar_type=CalendarType.DIVIDEND_CALENDAR,
+                start_date=datetime.now(),
+                # DEGIRO API seems to limit the agenda to 6 months in the future
+                #  even with that limitation doesn't show the whole agenda
+                end_date=datetime.now() + timedelta(days=180),
+                offset=0,
+                limit=25,
+                company_name=company_name,
+            ),
+            raw=True,
+        )
+
+        forecasted_dividends = [item for item in agenda["items"] if item.get("isin") == isin]
+        if len(forecasted_dividends) > 1:
+            self.logger.warning(f"Multiple forecasted dividends found for '{company_name}' ({isin}). " +
+                                "Using the first one.")
+
+        return forecasted_dividends[0] if forecasted_dividends else None
 
     def get_session_id(self) -> str:
         config_table = self.get_config()

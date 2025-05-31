@@ -7,7 +7,7 @@
         <div class="col text-left">
             {{ value.payouts }} payouts
         </div>
-        <div class="col-md-auto text-right border rounded-pill" style="background-color: #7386D5; color: white">
+        <div class="col-md-auto text-right border rounded-pill" style="background-color: var(--primary-color); color: white">
             {{ value.formatedTotal }}
         </div>
     </div>
@@ -15,8 +15,10 @@
         {% for day, dividends in value.days.items %}
             {% for key, dividend in dividends.items %}
                 {% if dividend.change != 0 %}
-                    {% if dividend.isUpcoming %}
+                    {% if dividend.is_announced %}
                     <div class="row m-2 border rounded-pill upcoming-dividends">
+                    {% elif dividend.is_forecasted %}
+                    <div class="row m-2 border rounded-pill forecasted-dividends">
                     {% else %}
                     <div class="row m-2 border rounded-pill dividends">
                     {% endif %}
@@ -24,7 +26,7 @@
                             {{ day }}
                         </div>
                         <div class="col-sm-8 text-truncate">
-                            {{ dividend.stockName }}
+                            {{ dividend.stock_name }}
                         </div>
                         <div class="col-sm-3 text-right">
                             {{ dividend.formatedChange }}
