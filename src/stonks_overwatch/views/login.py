@@ -1,5 +1,5 @@
 
-from degiro_connector.core.exceptions import DeGiroConnectionError
+from degiro_connector.core.exceptions import DeGiroConnectionError, MaintenanceError
 from degiro_connector.trading.models.credentials import Credentials
 from django.contrib import messages
 from django.shortcuts import redirect, render
@@ -61,6 +61,8 @@ class Login(View):
 
         try:
             self._authenticate_and_connect(request, username, password, one_time_password)
+        except MaintenanceError:
+            messages.warning(request, "DeGiro is currently under maintenance. Please try again later.")
         except DeGiroConnectionError as degiro_error:
             show_otp = self._handle_degiro_error(request, degiro_error, username, password)
         except ConnectionError as connection_error:
