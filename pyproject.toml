@@ -7,7 +7,7 @@ license = "MIT"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "degiro-connector >= 3.0.28",
+    "degiro-connector >= 3.0.29",
     "django >= 5.2.1",
     "pycountry >= 24.6.1",
     "currency-symbols >= 2.0.4",
