@@ -1,6 +1,8 @@
+from datetime import datetime, time
 from typing import List
 
 from stonks_overwatch.config.config import Config
+from stonks_overwatch.repositories.degiro.dividends_repository import DividendsRepository
 from stonks_overwatch.repositories.degiro.product_info_repository import ProductInfoRepository
 from stonks_overwatch.services.degiro.account_overview import AccountOverviewService
 from stonks_overwatch.services.degiro.currency_converter_service import CurrencyConverterService
@@ -8,7 +10,6 @@ from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.portfolio import PortfolioService
 from stonks_overwatch.services.models import Dividend, DividendType
 from stonks_overwatch.utils.constants import ProductType
-from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.logger import StonksLogger
 
 class DividendsService:
@@ -34,7 +35,7 @@ class DividendsService:
 
         joined_dividends = dividends + upcoming_dividends + forecasted_dividends
 
-        return sorted(joined_dividends, key=lambda k: k.payment_date, reverse=True)
+        return sorted(joined_dividends, key=lambda k: k.payment_date)
 
     def _get_dividends(self) -> List[Dividend]:
         overview = self.account_overview.get_account_overview()
@@ -72,25 +73,24 @@ class DividendsService:
     def _get_upcoming_dividends(self) -> List[Dividend]:
         result = []
         try:
-            upcoming_payments = self.degiro_service.get_client().get_upcoming_payments(raw=True)
-            if upcoming_payments and "data" in upcoming_payments and upcoming_payments["data"]:
-                for payment in upcoming_payments["data"]:
-                    stock_name = payment["product"]
-                    stock = ProductInfoRepository.get_product_info_from_name(stock_name)
-                    stock_symbol = stock["symbol"]
+            upcoming_payments = DividendsRepository.get_upcoming_payments()
+            for payment in upcoming_payments:
+                stock_name = payment["product"]
+                stock = ProductInfoRepository.get_product_info_from_name(stock_name)
+                stock_symbol = stock["symbol"]
 
-                    amount = float(payment["amount"])
-                    currency = payment["currency"]
-                    result.append(
-                        Dividend(
-                            dividend_type=DividendType.ANNOUNCED,
-                            payment_date=LocalizationUtility.convert_string_to_datetime(payment["payDate"]),
-                            stock_name=stock_name,
-                            stock_symbol=stock_symbol,
-                            currency=currency,
-                            change=amount,
-                        )
+                amount = float(payment["amount"])
+                currency = payment["currency"]
+                result.append(
+                    Dividend(
+                        dividend_type=DividendType.ANNOUNCED,
+                        payment_date=datetime.combine(payment["payDate"], time.min),
+                        stock_name=stock_name,
+                        stock_symbol=stock_symbol,
+                        currency=currency,
+                        change=amount,
                     )
+                )
 
             return result
         except Exception as error:
@@ -104,12 +104,9 @@ class DividendsService:
 
         for entry in portfolio:
             if entry.is_open and entry.product_type == ProductType.STOCK:
-                forecasted_dividends = self.degiro_service.get_dividends_agenda(
-                    company_name=entry.name,
-                    isin=entry.isin
-                )
+                forecasted_dividends = DividendsRepository.get_forecasted_payments(isin=entry.isin)
 
-                if forecasted_dividends is not None:
+                if forecasted_dividends:
                     amount = float(0.0)
                     if "dividend" in forecasted_dividends and forecasted_dividends["dividend"] is not None:
                         amount = float(forecasted_dividends["dividend"]) * entry.shares
@@ -119,8 +116,8 @@ class DividendsService:
                     result.append(
                         Dividend(
                             dividend_type=DividendType.FORECASTED,
-                            payment_date=LocalizationUtility.convert_string_to_datetime(forecasted_dividends["paymentDate"]).replace(tzinfo=None),
-                            ex_dividend_date=LocalizationUtility.convert_string_to_datetime(forecasted_dividends['exDividendDate']).replace(tzinfo=None),
+                            payment_date=forecasted_dividends["paymentDate"],
+                            ex_dividend_date=forecasted_dividends['exDividendDate'],
                             stock_name=entry.name,
                             stock_symbol=entry.symbol,
                             currency=forecasted_dividends['currency'],

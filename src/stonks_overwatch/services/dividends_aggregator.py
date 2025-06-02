@@ -32,4 +32,4 @@ class DividendsAggregatorService:
         if Config.default().is_degiro_enabled(selected_portfolio):
             dividends += self.degiro_dividends.get_dividends()
 
-        return sorted(dividends, key=lambda k: k.payment_date, reverse=True)
+        return sorted(dividends, key=lambda k: k.payment_date)

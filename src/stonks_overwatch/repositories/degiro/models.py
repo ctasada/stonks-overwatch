@@ -102,3 +102,35 @@ class DeGiroCompanyProfile(models.Model):
 
     isin = models.CharField(max_length=25, primary_key=True)
     data = models.JSONField()
+
+class DeGiroUpcomingPayments(models.Model):
+    class Meta:
+        db_table = '"degiro_upcomingpayments"'
+
+    id = models.AutoField(primary_key=True)
+    ca_id = models.CharField(max_length=20)
+    product = models.CharField(max_length=200)
+    description = models.CharField(max_length=255)
+    currency = models.CharField(max_length=3)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    amount_in_base_curr = models.DecimalField(max_digits=12, decimal_places=2)
+    pay_date = models.DateField()
+
+class DeGiroAgendaDividend(models.Model):
+    class Meta:
+        db_table = '"degiro_agendadividend"'
+
+    event_id = models.BigIntegerField(primary_key=True)
+    isin = models.CharField(max_length=25)
+    ric = models.CharField(max_length=16)
+    organization_name = models.CharField(max_length=200)
+    date_time = models.DateTimeField()
+    last_update = models.DateTimeField()
+    country_code = models.CharField(max_length=4)
+    event_type = models.CharField(max_length=32)
+    ex_dividend_date = models.DateTimeField()
+    payment_date = models.DateTimeField()
+    dividend = models.DecimalField(max_digits=10, decimal_places=4)
+    yield_value = models.DecimalField(max_digits=10, decimal_places=4)
+    currency = models.CharField(max_length=3)
+    market_cap = models.CharField(max_length=16)

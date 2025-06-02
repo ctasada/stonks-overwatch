@@ -102,6 +102,11 @@ def parse_args() -> Namespace:
         action="store_true",
         help="Import YFinance data for DeGiro products"
     )
+    parser.add_argument(
+        "--degiro_dividends",
+        action="store_true",
+        help="Import Degiro dividends data"
+    )
 
     return parser.parse_args()
 
@@ -127,6 +132,10 @@ def degiro_yfinance(update_service: DegiroUpdateService) -> None:
     logging.info("Importing DeGiro YFinance Data...")
     update_service.update_yfinance()
 
+def degiro_dividends(update_service: DegiroUpdateService) -> None:
+    logging.info("Importing DeGiro Dividends...")
+    update_service.update_dividends()
+
 def main():
     init()
     logging.info("Applying database migrations...")
@@ -149,6 +158,8 @@ def main():
         degiro_company_profile_import(degiro_update_service)
     elif args.degiro_yfinance:
         degiro_yfinance(degiro_update_service)
+    elif args.degiro_dividends:
+        degiro_dividends(degiro_update_service)
     else:
         logging.info("DeGiro Importer: No import option selected. Importing all data.")
         degiro_update_service.update_all()
