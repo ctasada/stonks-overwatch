@@ -1,0 +1,50 @@
+[
+    {
+        "eventId": 16349472,
+        "isin": "ES0144580Y14",
+        "ric": "IBE.MC",
+        "organizationName": "Iberdrola SA",
+        "dateTime": "2025-07-04T14:00:00+02:00",
+        "lastUpdate": "2025-04-30T15:21:03+02:00",
+        "countryCode": "ES",
+        "eventType": "ExDividends",
+        "exDividendDate": "2025-07-04T14:00:00+02:00",
+        "paymentDate": "2025-07-30T14:00:00+02:00",
+        "dividend": 0.0,
+        "yield": 3.9801,
+        "currency": "EUR",
+        "marketCap": "LARGE_CAP"
+    },
+    {
+        "eventId": 16383910,
+        "isin": "US46625H1005",
+        "ric": "JPM.N",
+        "organizationName": "JPMorgan Chase & Co",
+        "dateTime": "2025-07-03T14:00:00+02:00",
+        "lastUpdate": "2025-05-19T23:19:13+02:00",
+        "countryCode": "US",
+        "eventType": "ExDividends",
+        "exDividendDate": "2025-07-03T14:00:00+02:00",
+        "paymentDate": "2025-07-31T14:00:00+02:00",
+        "dividend": 1.4,
+        "yield": 2.12121,
+        "currency": "USD",
+        "marketCap": "LARGE_CAP"
+    },
+    {
+        "eventId": 16352942,
+        "isin": "US1912161007",
+        "ric": "KO.N",
+        "organizationName": "Coca-Cola Co",
+        "dateTime": "2025-06-13T14:00:00+02:00",
+        "lastUpdate": "2025-05-01T21:19:02+02:00",
+        "countryCode": "US",
+        "eventType": "ExDividends",
+        "exDividendDate": "2025-06-13T14:00:00+02:00",
+        "paymentDate": "2025-07-01T14:00:00+02:00",
+        "dividend": 0.51,
+        "yield": 2.8294,
+        "currency": "USD",
+        "marketCap": "LARGE_CAP"
+    }
+]

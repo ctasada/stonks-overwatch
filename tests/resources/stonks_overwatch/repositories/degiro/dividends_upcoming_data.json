@@ -1,0 +1,56 @@
+{
+    "1": {
+        "ca_id": "773063",
+        "product": "Microsoft Corp",
+        "description": "Dividend 0.8300 * 25.00 aandelen",
+        "currency": "USD",
+        "amount": "20.75",
+        "amount_in_base_curr": "18.28",
+        "pay_date": "2025-06-12"
+    },
+    "2": {
+        "ca_id": "773063",
+        "product": "Microsoft Corp",
+        "description": "Dividendbelasting -0.1244 * 25.00 Aandelen",
+        "currency": "USD",
+        "amount": "-3.11",
+        "amount_in_base_curr": "-2.74",
+        "pay_date": "2025-06-12"
+    },
+    "3": {
+        "ca_id": "775558",
+        "product": "Iberdrola",
+        "description": "Dividend 0.0050 * 107.00 aandelen",
+        "currency": "EUR",
+        "amount": "0.54",
+        "amount_in_base_curr": "0.54",
+        "pay_date": "2025-06-02"
+    },
+    "4": {
+        "ca_id": "775558",
+        "product": "Iberdrola",
+        "description": "Dividendbelasting -0.0009 * 107.00 Aandelen",
+        "currency": "EUR",
+        "amount": "-0.10",
+        "amount_in_base_curr": "-0.10",
+        "pay_date": "2025-06-02"
+    },
+    "5": {
+        "ca_id": "776816",
+        "product": "Johnson & Johnson",
+        "description": "Dividend 1.3000 * 70.00 aandelen",
+        "currency": "USD",
+        "amount": "91.00",
+        "amount_in_base_curr": "80.18",
+        "pay_date": "2025-06-10"
+    },
+    "6": {
+        "ca_id": "776816",
+        "product": "Johnson & Johnson",
+        "description": "Dividendbelasting -0.1950 * 70.00 Aandelen",
+        "currency": "USD",
+        "amount": "-13.65",
+        "amount_in_base_curr": "-12.03",
+        "pay_date": "2025-06-10"
+    }
+}
