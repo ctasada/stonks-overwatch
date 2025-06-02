@@ -69,7 +69,6 @@ docker-shell: docker-build
 
 _create-wheels:
 	rm -rdf ./wheels
-	poetry run pip wheel onetimepass --wheel-dir $(WHEEL_DIR)
 	poetry run pip wheel "peewee>=3.16.2" --wheel-dir $(WHEEL_DIR)
 	# This is a hack to rename the wheel so Briefcase doesn't complain
 	@for f in $(WHEEL_DIR)/peewee-*-cp*-*.whl; do \

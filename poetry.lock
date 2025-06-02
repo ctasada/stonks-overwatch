@@ -657,22 +657,22 @@ files = [
 
 [[package]]
 name = "degiro-connector"
-version = "3.0.28"
+version = "3.0.29"
 description = "This is yet another library to access Degiro's API."
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "degiro_connector-3.0.28-py3-none-any.whl", hash = "sha256:bbf0ed892176b4fc1d219d9c849296d4030eaa10a7c00a7201acd012ccd76c1b"},
-    {file = "degiro_connector-3.0.28.tar.gz", hash = "sha256:efdf40755631d5c0c0ca9849ea0cace787b08ead2c55f285153681b9c8d96acd"},
+    {file = "degiro_connector-3.0.29-py3-none-any.whl", hash = "sha256:5276f29d8aa129ff08aca01c048d569968f931d715509c13fa6b1aa4c5a0be69"},
+    {file = "degiro_connector-3.0.29.tar.gz", hash = "sha256:76a4b91b9cbbfbba9d7ccda28cabffdc7a100b5d25dab6eef4bfcdd1fcf06993"},
 ]
 
 [package.dependencies]
 isodate = ">=0.6.1,<0.7.0"
-onetimepass = ">=1.0.1,<2.0.0"
 orjson = ">=3.9.10,<4.0.0"
 polars = ">=0.20.2,<0.21.0"
 pydantic = ">=2.0.3,<3.0.0"
+pyotp = ">=2.9.0,<3.0.0"
 requests = ">=2.31.0,<3.0.0"
 wrapt = ">=1.14.1,<2.0.0"
 
@@ -1336,20 +1336,6 @@ files = [
 ]
 
 [[package]]
-name = "onetimepass"
-version = "1.0.1"
-description = "Module for generating and validating HOTP and TOTP tokens"
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "onetimepass-1.0.1.tar.gz", hash = "sha256:a569dac076d6e3761cbc55e36952144a637ca1b075c6d509de1c1dbc5e7f6a27"},
-]
-
-[package.dependencies]
-six = "*"
-
-[[package]]
 name = "orderedmultidict"
 version = "1.0.1"
 description = "Ordered Multivalue Dictionary"
@@ -1996,6 +1982,21 @@ docs = ["furo (==2024.7.18)", "myst-parser (==3.0.1)", "sphinx (==7.4.7)", "sphi
 examples = ["django", "litestar", "numpy"]
 test = ["cffi (>=1.17.0)", "flaky", "greenlet (>=3)", "ipython", "pytest", "pytest-asyncio (==0.23.8)", "trio"]
 types = ["typing_extensions"]
+
+[[package]]
+name = "pyotp"
+version = "2.9.0"
+description = "Python One Time Password Library"
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "pyotp-2.9.0-py3-none-any.whl", hash = "sha256:81c2e5865b8ac55e825b0358e496e1d9387c811e85bb40e71a3b29b288963612"},
+    {file = "pyotp-2.9.0.tar.gz", hash = "sha256:346b6642e0dbdde3b4ff5a930b664ca82abfa116356ed48cc42c7d6590d36f63"},
+]
+
+[package.extras]
+test = ["coverage", "mypy", "ruff", "wheel"]
 
 [[package]]
 name = "pyproject-hooks"
@@ -2709,30 +2710,30 @@ zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
 name = "uv"
-version = "0.7.8"
+version = "0.7.9"
 description = "An extremely fast Python package and project manager, written in Rust."
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "uv-0.7.8-py3-none-linux_armv6l.whl", hash = "sha256:ff1b7e4bc8a1d260062782ad34d12ce0df068df01d4a0f61d0ddc20aba1a5688"},
-    {file = "uv-0.7.8-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:b83866be6a69f680f3d2e36b3befd2661b5596e59e575e266e7446b28efa8319"},
-    {file = "uv-0.7.8-py3-none-macosx_11_0_arm64.whl", hash = "sha256:f749b58a5c348c455083781c92910e49b4ddba85c591eb67e97a8b84db03ef9b"},
-    {file = "uv-0.7.8-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.musllinux_1_1_aarch64.whl", hash = "sha256:c058ee0f8c20b0942bd9f5c83a67b46577fa79f5691df8867b8e0f2d74cbadb1"},
-    {file = "uv-0.7.8-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:2a07bdf9d6aadef40dd4edbe209bca698a3d3244df5285d40d2125f82455519c"},
-    {file = "uv-0.7.8-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:13af6b94563f25bdca6bb73e294648af9c0b165af5bb60f0c913ab125ec45e06"},
-    {file = "uv-0.7.8-py3-none-manylinux_2_17_ppc64.manylinux2014_ppc64.whl", hash = "sha256:4acc09c06d6cf7a27e0f1de4edb8c1698b8a3ffe34f322b10f4c145989e434b9"},
-    {file = "uv-0.7.8-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:9221a9679f2ffd031b71b735b84f58d5a2f1adf9bfa59c8e82a5201dad7db466"},
-    {file = "uv-0.7.8-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:409cee21edcaf4a7c714893656ab4dd0814a15659cb4b81c6929cbb75cd2d378"},
-    {file = "uv-0.7.8-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:81ac0bb371979f48d1293f9c1bee691680ea6a724f16880c8f76718f5ff50049"},
-    {file = "uv-0.7.8-py3-none-manylinux_2_28_aarch64.whl", hash = "sha256:3c620cecd6f3cdab59b316f41c2b1c4d1b709d9d5226cadeec370cfeed56f80c"},
-    {file = "uv-0.7.8-py3-none-musllinux_1_1_armv7l.whl", hash = "sha256:0c691090ff631dde788c8f4f1b1ea20f9deb9d805289796dcf10bc4a144a817e"},
-    {file = "uv-0.7.8-py3-none-musllinux_1_1_i686.whl", hash = "sha256:4a117fe3806ba4ebb9c68fdbf91507e515a883dfab73fa863df9bc617d6de7a3"},
-    {file = "uv-0.7.8-py3-none-musllinux_1_1_x86_64.whl", hash = "sha256:91d022235b39e59bab4bce7c4b634dc67e16fa89725cdfb2149a6ef7eaf6d784"},
-    {file = "uv-0.7.8-py3-none-win32.whl", hash = "sha256:6ebe252f34c50b09b7f641f8e603d7b627f579c76f181680c757012b808be456"},
-    {file = "uv-0.7.8-py3-none-win_amd64.whl", hash = "sha256:b5b62ca8a1bea5fdbf8a6372eabb03376dffddb5d139688bbb488c0719fa52fc"},
-    {file = "uv-0.7.8-py3-none-win_arm64.whl", hash = "sha256:ad79388b0c6eff5383b963d8d5ddcb7fbb24b0b82bf5d0c8b1bdbfbe445cb868"},
-    {file = "uv-0.7.8.tar.gz", hash = "sha256:a59d6749587946d63d371170d8f69d168ca8f4eade5cf880ad3be2793ea29c77"},
+    {file = "uv-0.7.9-py3-none-linux_armv6l.whl", hash = "sha256:0f8c53d411f95cec2fa19471c23b41ec456fc0d5f2efca96480d94e0c34026c2"},
+    {file = "uv-0.7.9-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:85c1a63669e49b825923fc876b7467cc3c20d4aa010f522c0ac8b0f30ce2b18e"},
+    {file = "uv-0.7.9-py3-none-macosx_11_0_arm64.whl", hash = "sha256:aa10c61668f94515acf93f31dbb8de41b1f2e7a9c41db828f2448cef786498ff"},
+    {file = "uv-0.7.9-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.musllinux_1_1_aarch64.whl", hash = "sha256:9de67ca9ea97db71e5697c1320508e25679fb68d4ee2cea27bbeac499a6bad56"},
+    {file = "uv-0.7.9-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:13ce63524f88228152edf8a9c1c07cecc07d69a2853b32ecc02ac73538aaa5c1"},
+    {file = "uv-0.7.9-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:3453b7bb65eaea87c9129e27bff701007a8bd1a563249982a1ede7ec4357ced6"},
+    {file = "uv-0.7.9-py3-none-manylinux_2_17_ppc64.manylinux2014_ppc64.whl", hash = "sha256:d7b1e36a8b39600d0f0333bf50c966e83beeaaee1a38380ccb0f16ab45f351c3"},
+    {file = "uv-0.7.9-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:ab412ed3d415f07192805788669c8a89755086cdd6fe9f021e1ba21781728031"},
+    {file = "uv-0.7.9-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:cbeb229ee86f69913f5f9236ff1b8ccbae212f559d7f029f8432fa8d9abcc7e0"},
+    {file = "uv-0.7.9-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f1d654a14d632ecb078969ae7252d89dd98c89205df567a1eff18b5f078a6d00"},
+    {file = "uv-0.7.9-py3-none-manylinux_2_28_aarch64.whl", hash = "sha256:f5f47e93a5f948f431ca55d765af6e818c925500807539b976bfda7f94369aa9"},
+    {file = "uv-0.7.9-py3-none-musllinux_1_1_armv7l.whl", hash = "sha256:267fe25ad3adf024e13617be9fc99bedebf96bf726c6140e48d856e844f21af4"},
+    {file = "uv-0.7.9-py3-none-musllinux_1_1_i686.whl", hash = "sha256:473d3c6ee07588cff8319079d9225fb393ed177d8d57186fce0d7c1aebff79c0"},
+    {file = "uv-0.7.9-py3-none-musllinux_1_1_x86_64.whl", hash = "sha256:19792c88058894c10f0370a5e5492bb4a7e6302c439fed9882e73ba2e4b231ef"},
+    {file = "uv-0.7.9-py3-none-win32.whl", hash = "sha256:298e9b3c65742edcb3097c2cf3f62ec847df174a7c62c85fe139dddaa1b9ab65"},
+    {file = "uv-0.7.9-py3-none-win_amd64.whl", hash = "sha256:82d76ea988ff1347158c6de46a571b1db7d344219e452bd7b3339c21ec37cfd8"},
+    {file = "uv-0.7.9-py3-none-win_arm64.whl", hash = "sha256:4d419bcc3138fd787ce77305f1a09e2a984766e0804c6e5a2b54adfa55d2439a"},
+    {file = "uv-0.7.9.tar.gz", hash = "sha256:baac54e49f3b0d05ee83f534fdcb27b91d2923c585bf349a1532ca25d62c216f"},
 ]
 
 [[package]]
@@ -3008,4 +3009,4 @@ repair = ["scipy (>=1.6.3)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "e0dd14ed42d6065e0080913a1e1d669e46cdf0f8f41e43ccbcb4a6874a53c9dd"
+content-hash = "051726240633b603d24f2733851d1b53730c1c9eafcf258b23497c48c5cb265b"
