@@ -1,28 +1,27 @@
 import json
 import pathlib
 
-import requests
-from degiro_connector.core.constants import urls
-from isodate import parse_datetime
+from isodate import parse_date, parse_datetime
 
 from stonks_overwatch.config.degiro_credentials import DegiroCredentials
 from stonks_overwatch.repositories.degiro.models import (
     DeGiroCashMovements,
     DeGiroProductInfo,
     DeGiroProductQuotation,
+    DeGiroUpcomingPayments,
 )
 from stonks_overwatch.services.degiro.account_overview import AccountOverviewService
 from stonks_overwatch.services.degiro.currency_converter_service import CurrencyConverterService
 from stonks_overwatch.services.degiro.degiro_service import CredentialsManager
 from stonks_overwatch.services.degiro.dividends import DividendsService
 from stonks_overwatch.services.degiro.portfolio import PortfolioService
+from stonks_overwatch.services.models import DividendType
 from stonks_overwatch.utils.localization import LocalizationUtility
 from tests.stonks_overwatch.fixtures import TestDeGiroService
 
 import pook
 import pytest
 from django.test import TestCase
-from unittest.mock import patch
 
 @pytest.mark.django_db
 class TestDividendsService(TestCase):
@@ -31,6 +30,7 @@ class TestDividendsService(TestCase):
         self.fixture_cash_movements_repository()
         self.fixture_product_info_repository()
         self.fixture_product_quotation_repository()
+        self.fixture_dividends_upcoming_repository()
         self.degiro_service = TestDeGiroService(CredentialsManager(self.fixture_credentials()))
 
         self.account_overview = AccountOverviewService()
@@ -87,6 +87,18 @@ class TestDividendsService(TestCase):
             )
             self.created_objects[key] = obj
 
+    def fixture_dividends_upcoming_repository(self):
+        data_file = pathlib.Path("tests/resources/stonks_overwatch/repositories/degiro/dividends_upcoming_data.json")
+
+        with open(data_file, "r") as file:
+            data = json.load(file)
+
+        for key, value in data.items():
+            # Create and save the ProductInfo object
+            value["pay_date"] = parse_date(value["pay_date"])
+            obj = DeGiroUpcomingPayments.objects.create(**value)
+            self.created_objects[key] = obj
+
     def fixture_credentials(self):
         return DegiroCredentials(
             username="testuser",
@@ -112,36 +124,26 @@ class TestDividendsService(TestCase):
         assert dividends[0].currency == "EUR"
         assert dividends[0].change == 7.526881720430107
         assert dividends[0].formated_change() == "€ 7.53"
+        assert dividends[0].dividend_type == DividendType.PAID
 
     @pook.on
     def test_get_upcoming_dividends(self):
-        with patch("requests_cache.CachedSession", requests.Session):
-            pook.post(urls.LOGIN + "/totp").reply(200).json({"sessionId": "abcdefg12345"})
-            pook.get(urls.CLIENT_DETAILS).reply(200).json({
-                    "data": {
-                        "clientRole": "basic",
-                        "contractType": "PRIVATE",
-                        "displayLanguage": "en",
-                        "email": "user@domain.com",
-                        "id": 98765,
-                        "intAccount": 1234567,
-                        "username": "someuser"
-                    }
-                })
-            pook.get(urls.UPCOMING_PAYMENTS + "/987654").reply(200).json({
-                    "data": [
-                        {
-                            "ca_id": "str",
-                            "product": "Microsoft Corp",
-                            "description": "Dividend 0.555 * 10.00 aandelen",
-                            "currency": "USD",
-                            "amount": "5.55",
-                            "amountInBaseCurr": "7.79",
-                            "payDate": "2024-10-03",
-                        }
-                    ]
-                })
+        upcoming_dividends = self.dividends_service._get_upcoming_dividends()
 
-            upcoming_dividends = self.dividends_service._get_upcoming_dividends()
+        assert len(upcoming_dividends) == 2
 
-            assert len(upcoming_dividends) == 1
+        assert upcoming_dividends[0].payment_date_as_string() == "2025-06-12"
+        assert upcoming_dividends[0].stock_name == "Microsoft Corp"
+        assert upcoming_dividends[0].stock_symbol == "MSFT"
+        assert upcoming_dividends[0].currency == "USD"
+        assert upcoming_dividends[0].change == -3.11
+        assert upcoming_dividends[0].formated_change() == "$ -3.11"
+        assert upcoming_dividends[0].dividend_type == DividendType.ANNOUNCED
+
+        assert upcoming_dividends[1].payment_date_as_string() == "2025-06-12"
+        assert upcoming_dividends[1].stock_name == "Microsoft Corp"
+        assert upcoming_dividends[1].stock_symbol == "MSFT"
+        assert upcoming_dividends[1].currency == "USD"
+        assert upcoming_dividends[1].change == 20.75
+        assert upcoming_dividends[1].formated_change() == "$ 20.75"
+        assert upcoming_dividends[1].dividend_type == DividendType.ANNOUNCED

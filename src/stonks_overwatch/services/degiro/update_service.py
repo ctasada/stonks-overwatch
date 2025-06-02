@@ -13,11 +13,13 @@ from pandas import DataFrame
 from stonks_overwatch.config.degiro_config import DegiroConfig
 from stonks_overwatch.repositories.degiro.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.repositories.degiro.models import (
+    DeGiroAgendaDividend,
     DeGiroCashMovements,
     DeGiroCompanyProfile,
     DeGiroProductInfo,
     DeGiroProductQuotation,
     DeGiroTransactions,
+    DeGiroUpcomingPayments,
 )
 from stonks_overwatch.repositories.degiro.product_info_repository import ProductInfoRepository
 from stonks_overwatch.repositories.degiro.product_quotations_repository import ProductQuotationsRepository
@@ -28,6 +30,7 @@ from stonks_overwatch.services.degiro.degiro_service import DeGiroService
 from stonks_overwatch.services.degiro.portfolio import PortfolioService
 from stonks_overwatch.services.yfinance.y_finance import YFinanceClient
 from stonks_overwatch.settings import STONKS_OVERWATCH_DATA_DIR
+from stonks_overwatch.utils.constants import ProductType
 from stonks_overwatch.utils.datetime import DateTimeUtility
 from stonks_overwatch.utils.db_utils import dictfetchall
 from stonks_overwatch.utils.debug import save_to_json
@@ -108,6 +111,7 @@ class UpdateService:
             self.update_portfolio()
             self.update_company_profile()
             self.update_yfinance()
+            self.update_dividends()
         except Exception as error:
             self.logger.error("Cannot Update Portfolio!")
             self.logger.error("Exception: ", error)
@@ -601,4 +605,101 @@ class UpdateService:
                 YFinanceStockSplits.objects.update_or_create(symbol=key, defaults={"data": splits[key]})
             except Exception as error:
                 self.logger.error(f"Cannot import Splits: {key}")
+                self.logger.error("Exception: ", error)
+
+    def update_dividends(self):
+        """Update the dividends data from DeGiro."""
+        self._log_message("Updating Dividends Data....")
+
+        upcoming_dividends = self.__get_upcoming_dividends()
+        if self.debug_mode:
+            upcoming_dividends_file = os.path.join(self.import_folder, "upcoming_dividends.json")
+            save_to_json(upcoming_dividends, upcoming_dividends_file)
+
+        self.__import_upcoming_dividends(upcoming_dividends["data"])
+
+        agenda = self.__get_agenda()
+        if self.debug_mode:
+            agenda_file = os.path.join(self.import_folder, "agenda.json")
+            save_to_json(agenda, agenda_file)
+
+        self.__import_agenda(agenda)
+
+    def __get_upcoming_dividends(self) -> List[Dict]:
+        """Get the upcoming dividends from DeGiro."""
+        trading_api = self.degiro_service.get_client()
+
+        # FETCH DATA
+        upcoming_dividends = trading_api.get_upcoming_payments(raw=True)
+
+        if not upcoming_dividends:
+            self.logger.info("No upcoming dividends found.")
+            return []
+
+        return upcoming_dividends
+
+    def __get_agenda(self) -> List[Dict]:
+        """Get the dividend agenda from DeGiro."""
+        portfolio = self.portfolio_data.get_portfolio
+
+        results = []
+        for entry in portfolio:
+            if entry.is_open and entry.product_type == ProductType.STOCK:
+                forecasted_dividends = self.degiro_service.get_dividends_agenda(
+                    company_name=entry.name,
+                    isin=entry.isin
+                )
+                if forecasted_dividends is not None:
+                    results.append(forecasted_dividends)
+
+        return results
+
+    def __import_upcoming_dividends(self, upcoming_dividends: List[Dict]) -> None:
+        """Store the upcoming dividends into the DB."""
+
+        # Clear the existing upcoming dividends
+        DeGiroUpcomingPayments.objects.all().delete()
+
+        for entry in upcoming_dividends:
+            try:
+                DeGiroUpcomingPayments.objects.create(
+                    ca_id=entry["caId"],
+                    product=entry["product"],
+                    description=entry["description"],
+                    currency=entry["currency"],
+                    amount=entry["amount"],
+                    amount_in_base_curr=entry["amountInBaseCurr"],
+                    pay_date=LocalizationUtility.convert_string_to_date(entry["payDate"]),
+                )
+            except Exception as error:
+                self.logger.error(f"Cannot import upcoming dividend: {entry}")
+                self.logger.error("Exception: ", error)
+
+    def __import_agenda(self, agenda: List[Dict]) -> None:
+        """Store the dividend agenda into the DB."""
+        # Clear the existing upcoming dividends
+        DeGiroAgendaDividend.objects.all().delete()
+
+        for entry in agenda:
+            try:
+                DeGiroAgendaDividend.objects.update_or_create(
+                    event_id=entry["eventId"],
+                    defaults={
+                        "isin": entry["isin"],
+                        "ric": entry["ric"],
+                        "organization_name": entry["organizationName"],
+                        "date_time": LocalizationUtility.convert_string_to_datetime(entry["dateTime"]),
+                        "last_update": LocalizationUtility.convert_string_to_datetime(entry["lastUpdate"]),
+                        "country_code": entry["countryCode"],
+                        "event_type": entry["eventType"],
+                        "ex_dividend_date": LocalizationUtility.convert_string_to_datetime(entry["exDividendDate"]),
+                        "payment_date": LocalizationUtility.convert_string_to_datetime(entry["paymentDate"]),
+                        "dividend": entry.get("dividend", 0.0),
+                        "yield_value": entry.get("yieldValue", 0.0),
+                        "currency": entry["currency"],
+                        "market_cap": entry.get("marketCap", ""),
+                    }
+                )
+            except Exception as error:
+                self.logger.error(f"Cannot import agenda dividend: {entry}")
                 self.logger.error("Exception: ", error)

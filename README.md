@@ -91,7 +91,6 @@ See [Wiki - Developing Stonks Overwatch](https://github.com/ctasada/stonks-overw
 - [ ] Add GitHub Dependabot support for Poetry: Track https://github.com/dependabot/dependabot-core/issues/11237
 - [ ] Provide more details about Dividends per year
 - [ ] Should include Dividends in the Deposit Overview?
-- [ ] Show future Dividends. Use the DEGIRO Agenda API to get the future dividends
 - [ ] Track delisted stocks
   - EODHD: https://eodhd.medium.com/leveraging-delisted-stocks-for-backtesting-a-3-ema-strategy-using-python-d67221e774f5
     - https://eodhd.com/pricing
