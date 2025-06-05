@@ -64,10 +64,10 @@ class BitvavoImplementation:
         response = self.bitvavo.candles('BTC-EUR', '1d', start)
         pprint(response)
 
-    # Sockets are fast, but asynchronous. Keep the socket open while you are
+    # Sockets are fast but asynchronous. Keep the socket open while you are
     # trading.
     def wait_and_close(self):
-        # Bitvavo uses a weight based rate limiting system. Your app is limited to 1000 weight points per IP or
+        # Bitvavo uses a weight-based rate limiting system. Your app is limited to 1000 weight points per IP or
         # API key per minute. The rate weighting for each endpoint is supplied in Bitvavo API documentation.
         # This call returns the amount of points left. If you make more requests than permitted by the weight limit,
         # your IP or API key is banned.
@@ -79,16 +79,30 @@ class BitvavoImplementation:
         except KeyboardInterrupt:
             self.bitvavo_socket.closeSocket()
 
+    def calculate_staking(self):
+        totals = {}
+        response = self.bitvavo.account_history()
+        for transaction in response['items']:
+            if transaction['type'] == 'staking':
+                print(transaction)
+                staked = totals.get(transaction['receivedCurrency'], 0.0)
+                totals[transaction['receivedCurrency']] = staked + float(transaction['receivedAmount'])
+
+        print("Total staking rewards:")
+        for asset, total in totals.items():
+            print(f"{asset}: {total:.8f}")
 
 # Shall I re-explain main? Naaaaaaaaaa.
 if __name__ == '__main__':
     bvavo = BitvavoImplementation()
 
+    bvavo.calculate_staking()
+
     # portfolio = PortfolioService()
     # portfolio.get_portfolio()
     # bvavo.account()
     # bvavo.assets()
-    bvavo.balance()
+    # bvavo.balance()
     # bvavo.orders()
     # bvavo.account_history()
     # bvavo.deposit_history()
