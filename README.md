@@ -58,7 +58,7 @@ See [Wiki - Developing Stonks Overwatch](https://github.com/ctasada/stonks-overw
 - Dashboard: JNJ & JPM are associated with the wrong sector
 - IBERDROLA Non-Tradable Dividends: Are properly calculated? Doesn't seem to calculate quantity properly
 - Dividends show IBE.D as a dividend, when should show IBE
-- Some stocks are no longer available in DEGIRO. Need to find a way to handle them
+- Some stocks are no longer available in DEGIRO. We Need to find a way to handle them
     - 'ATVI'(350113856)
     - 'TYME'(600028575)
     - 'DPZ'(330187819): The symbol is available, but maybe the productId is not?
@@ -72,7 +72,6 @@ See [Wiki - Developing Stonks Overwatch](https://github.com/ctasada/stonks-overw
 - Dashboard: Drawing the dashboard is slow. It seems that the code is executed three times
 - Review Closed/All positions in Portfolio Overview. Some entries contain unexpected/inconsistent values
 - TEAM: Growth values seem too low for what I remember, should be ~80%
-- When window is too wide, the sidebar grows larger than intended. Other minor issues with the sidebar
 - Sort Transactions: 2025-03-20 SYRS shows 2 issues:
   - Transactions are in the wrong order. Should use date, time and transactionId to sort them properly
   - This transaction is an example of "Product change", one product is sold to be bought with the new productId. This 
@@ -82,11 +81,10 @@ See [Wiki - Developing Stonks Overwatch](https://github.com/ctasada/stonks-overw
 ## TODOs
 - [ ] Tables should allow choosing the number of rows to show. 
 - [ ] Portfolio Tables would be migrated to http://bootstrap-table.com/
-- [ ] DEGIRO Client: Stop using Totp and request 2FA for each connection
 - [ ] Review ALL BUGS and TODOs and move them to their corresponding Github issues
 - [ ] Replace all the Tables with https://bootstrap-table.com
 - [ ] Evaluate the migration from Poetry to Uv
-- [ ] DeGiro Client: Stop using Totp and request 2FA for each connection
+- [ ] DEGIRO Client: Stop using Totp and request 2FA for each connection
 - [ ] Provide support for both Unrealized and Realized Gain/Loss
         Onger. W/V € - Gain/Loss Unrealized - unrealizedPl
         Totale W/V € - Gain/Loss Total (Realized + unrealized) - totalPl
@@ -110,7 +108,7 @@ See [Wiki - Developing Stonks Overwatch](https://github.com/ctasada/stonks-overw
 - [ ] DEGIRO Risk Category is a local term: https://www.degiro.ie/helpdesk/trading-platform/what-are-risk-categories
 - [ ] Improve code quality. Check https://pyre-check.org/docs/pysa-quickstart/
 - [ ] Enable usage of Demo DB in the application (running natively)
-- [ ] Provide support to configure the settings (API Key, etc) in the application. 
+- [ ] Provide support to configure the settings (API Key, etc.) in the application. 
   - [ ] Values should be stored in the keyring for security
 
 ## Logos
