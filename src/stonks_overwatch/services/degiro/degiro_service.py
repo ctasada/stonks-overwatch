@@ -16,6 +16,17 @@ from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.logger import StonksLogger
 from stonks_overwatch.utils.singleton import singleton
 
+class DeGiroOfflineModeError(Exception):
+    """Exception raised for data validation errors."""
+    def __init__(self, message):
+        """
+        Initializes the exception with a message and a structure of error details.
+
+        Args:
+            message (str): The error message.
+        """
+        super().__init__(message)
+
 class CredentialsManager:
     """Manages the credentials for the DeGiro API."""
 
@@ -68,11 +79,17 @@ class DeGiroService:
     logger = StonksLogger.get_logger("stonks_overwatch.degiro_service", "[DEGIRO|CLIENT]")
     api_client: TradingApi = None
     credentials_manager: Optional[CredentialsManager] = None
+    force: bool = False
 
     __cache_path = os.path.join(stonks_overwatch.settings.STONKS_OVERWATCH_CACHE_DIR, 'http_request.cache')
 
-    def __init__(self, credentials_manager: Optional[CredentialsManager] = None):
+    def __init__(
+            self,
+            credentials_manager: Optional[CredentialsManager] = None,
+            force: bool = False,
+    ):
         self.set_credentials(credentials_manager)
+        self.force = force
 
     def set_credentials(self, credentials_manager: CredentialsManager):
         self.credentials_manager = credentials_manager or CredentialsManager()
@@ -95,13 +112,16 @@ class DeGiroService:
 
     def check_connection(self) -> bool:
         """Check if the API client is connected."""
+        if not self.force and DegiroConfig.default().offline_mode:
+            raise DeGiroOfflineModeError("DEGIRO working in offline mode. No connection is allowed")
+
         is_connected = self.__check_connection__()
         if not is_connected:
             try:
                 self.connect()
             except ConnectionError:
-                # Just try to connect and validate the connection.
-                # If we want more details we can always call the connect method
+                # Try to connect and validate the connection.
+                # If we want more details, we can always call the connect method
                 pass
 
         return self.__check_connection__()
@@ -115,18 +135,15 @@ class DeGiroService:
 
     def get_account_info(self) -> Any:
         """Get account information."""
-        self.check_connection()
-        return self.api_client.get_account_info()
+        return self.get_client().get_account_info()
 
     def get_client_details(self) -> Any:
         """Get client details."""
-        self.check_connection()
-        return self.api_client.get_client_details()
+        return self.get_client().get_client_details()
 
     def get_config(self) -> Any:
         """Get configuration details."""
-        self.check_connection()
-        return self.api_client.get_config()
+        return self.get_client().get_config()
 
     def get_products_info(self, product_ids: List[str]) -> Any:
         """Get information about the specified products."""

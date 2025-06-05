@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 def connect_to_degiro():
     from stonks_overwatch.services.degiro.degiro_service import DeGiroService
-    degiro = DeGiroService()
+    degiro = DeGiroService(force=True)
 
     # CONNECT
     degiro.connect()

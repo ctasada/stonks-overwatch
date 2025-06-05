@@ -16,7 +16,7 @@ from django.core.management import call_command
 from django.core.servers.basehttp import WSGIRequestHandler
 
 # Middleware to serve static files from the staticfiles directory.
-# For some reason the static files cannot be served directly when using Toga. This class provides a solution
+# For some reason, the static files cannot be served directly when using Toga. This class provides a solution
 class StaticFilesMiddleware:
     def __init__(self, app, static_url='/static/', static_root='staticfiles'):
         self.app = app

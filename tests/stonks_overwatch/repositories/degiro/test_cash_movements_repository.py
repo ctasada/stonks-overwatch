@@ -49,6 +49,10 @@ class TestCashMovementsRepository(BaseRepositoryTest):
         total_cash = CashMovementsRepository.get_total_cash('EUR')
         assert total_cash == 300.0
 
+    def test_get_total_cash_from_nonexisting_currency(self):
+        total_cash = CashMovementsRepository.get_total_cash('XXX')
+        assert total_cash is None
+
     def test_get_last_movement(self):
         last_movement = CashMovementsRepository.get_last_movement()
         assert last_movement == self.get_test_object("flatex_cash_sweep").date

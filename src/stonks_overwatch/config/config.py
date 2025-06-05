@@ -51,6 +51,9 @@ class Config:
         return (self.degiro_configuration.is_enabled()
                 and selected_portfolio in [PortfolioId.ALL, PortfolioId.DEGIRO])
 
+    def is_degiro_offline(self):
+        return self.degiro_configuration.offline_mode
+
     def is_degiro_connected(self, selected_portfolio: PortfolioId = PortfolioId.ALL) -> bool:
         return ((DeGiroService().check_connection()
                      or (self.degiro_configuration is not None
