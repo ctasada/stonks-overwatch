@@ -70,7 +70,10 @@ class Dividends(View):
         dividends_calendar = {}
 
         if not dividends:
-            return {}
+            return {
+                "years": [],
+                "calendar": {},
+            }
 
         df = pd.DataFrame(dividends)
         # Find the maximum date. Since we have upcoming payments, it can be today or some point

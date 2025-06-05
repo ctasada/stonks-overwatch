@@ -22,7 +22,7 @@ class DeGiroAuthMiddleware:
     def __call__(self, request):
         current_url = resolve(request.path_info).url_name
 
-        if Config.default().is_degiro_enabled():
+        if Config.default().is_degiro_enabled() and not Config.default().is_degiro_offline():
             if self._should_check_connection(request):
                 try:
                     self._authenticate_user(request)

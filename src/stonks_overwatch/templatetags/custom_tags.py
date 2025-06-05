@@ -4,12 +4,13 @@ from django.template import RequestContext
 from django.utils import timezone
 
 from stonks_overwatch.config.config import Config
-from stonks_overwatch.services.degiro.degiro_service import DeGiroService
+from stonks_overwatch.services.degiro.degiro_service import DeGiroOfflineModeError, DeGiroService
 from stonks_overwatch.services.degiro.update_service import UpdateService
 from stonks_overwatch.services.models import dataclass_to_dict
 from stonks_overwatch.services.portfolio_aggregator import PortfolioAggregatorService
 from stonks_overwatch.services.session_manager import SessionManager
 from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.utils.logger import StonksLogger
 
 register = template.Library()
 
@@ -28,9 +29,15 @@ def show_total_portfolio(context: RequestContext) -> dict:
 
 @register.simple_tag
 def is_connected_to_degiro() -> bool:
-    if Config.default().is_degiro_enabled():
-        return DeGiroService().check_connection()
-    else:
+    try:
+        if Config.default().is_degiro_enabled():
+            return DeGiroService().check_connection()
+        else:
+            return False
+    except DeGiroOfflineModeError:
+        return False
+    except Exception as error:
+        StonksLogger.get_logger("stonks_overwatch.views.templates", "CUSTOMTAGS|AUTH_MIDDLEWARE").error(error)
         return False
 
 @register.simple_tag

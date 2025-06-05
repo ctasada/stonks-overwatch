@@ -31,6 +31,9 @@ class StonksOverwatchConfig(AppConfig):
         profile_mode = os.getenv("PROFILE_MODE", False) in [True, "true", "True", "1"]
         if profile_mode:
             self.logger.info("Enabling PROFILE_MODE: %s", profile_mode)
+        demo_mode = os.getenv("DEMO_MODE", False) in [True, "true", "True", "1"]
+        if demo_mode:
+            self.logger.info("Using DEMO database: %s", profile_mode)
 
     def handle_shutdown(self, signum, frame):
         try:
