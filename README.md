@@ -58,6 +58,7 @@ See [Wiki - Developing Stonks Overwatch](https://github.com/ctasada/stonks-overw
 - Dashboard: JNJ & JPM are associated with the wrong sector
 - IBERDROLA Non-Tradable Dividends: Are properly calculated? Doesn't seem to calculate quantity properly
 - Dividends show IBE.D as a dividend, when should show IBE
+  - Transactions: The Buy/Sell of stocks resulting from dividends like IBE.D are not properly handled
 - Some stocks are no longer available in DEGIRO. We Need to find a way to handle them
     - 'ATVI'(350113856)
     - 'TYME'(600028575)
@@ -72,10 +73,6 @@ See [Wiki - Developing Stonks Overwatch](https://github.com/ctasada/stonks-overw
 - Dashboard: Drawing the dashboard is slow. It seems that the code is executed three times
 - Review Closed/All positions in Portfolio Overview. Some entries contain unexpected/inconsistent values
 - TEAM: Growth values seem too low for what I remember, should be ~80%
-- Sort Transactions: 2025-03-20 SYRS shows 2 issues:
-  - Transactions are in the wrong order. Should use date, time and transactionId to sort them properly
-  - This transaction is an example of "Product change", one product is sold to be bought with the new productId. This 
-      transaction is not properly identified.
 - Portfolio Growth drops to 0 when running in offline mode
 
 ## TODOs
@@ -112,6 +109,7 @@ See [Wiki - Developing Stonks Overwatch](https://github.com/ctasada/stonks-overw
   - [ ] Values should be stored in the keyring for security
 
 ## Logos
+- https://docs.brandfetch.com/docs/getting-started (requires API Key)
 - https://eodhd.com/financial-apis-blog/40000-company-logos (requires API Key)
 - https://github.com/nvstly/icons (misses icons)
 - https://github.com/ahmeterenodaci/Nasdaq-Stock-Exchange-including-Symbols-and-Logos?tab=readme-ov-file (misses many icons)

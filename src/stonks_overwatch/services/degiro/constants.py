@@ -8,6 +8,9 @@ class TransactionType(Enum):
     - 101: Stock Split
     - 102: Dividend payment
     - 106: Corporate actions (e.g., stock splits, stock dividends)
+    - 108: Fusion
+    - 112: Delisting
+    - 204: Swap stocks (PRODUCTWIJZIGING)
     """
 
     BUY_SELL = 0
@@ -21,6 +24,15 @@ class TransactionType(Enum):
 
     CORPORATE_ACTION = 106  # Relates with Stock Dividends
     """Represents a Corporate action, such as stock splits, corporation rename or stock dividends."""
+
+    FUSION = 108
+    """Represents a Fusion, which is a type of corporate action where two companies merge."""
+
+    DELISTING = 112
+    """Represents a Delisting, which is the removal of a stock from an exchange or brokerage platform."""
+
+    PRODUCT_CHANGE = 204
+    """Represents a product change, such as a swap of stocks due to ISIN updates."""
 
     # INTEREST = 108 # Could be reverse split, but also stock dividends or interests
     # """Represents Interest payments, e.g., for margin or balances (transactionTypeId 108)."""
@@ -56,6 +68,9 @@ class TransactionType(Enum):
             TransactionType.STOCK_SPLIT: "Stock Split",
             TransactionType.DIVIDEND: "Dividend Payment",
             TransactionType.CORPORATE_ACTION: "Corporate Action",
+            TransactionType.PRODUCT_CHANGE: "Product Change",
+            TransactionType.DELISTING: "Delisting",
+            TransactionType.FUSION: "Fusion",
         }
         return readable_strings.get(self, "Unknown Transaction Type")
 
