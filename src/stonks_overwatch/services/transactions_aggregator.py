@@ -23,4 +23,4 @@ class TransactionsAggregatorService:
         if Config.default().is_bitvavo_enabled(selected_portfolio):
             transactions += self.bitvavo_transactions.get_transactions()
 
-        return sorted(transactions, key=lambda k: (k.date, k.time), reverse=True)
+        return sorted(transactions, key=lambda k: (k.date, k.time, 1 if k.buy_sell == "S" else 0), reverse=True)
