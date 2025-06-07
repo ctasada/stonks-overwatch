@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime, timedelta
 from typing import List, Optional
+from zoneinfo import ZoneInfo
 
 from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
 from django.utils.functional import cached_property
@@ -17,6 +18,7 @@ from stonks_overwatch.services.degiro.degiro_service import DeGiroOfflineModeErr
 from stonks_overwatch.services.degiro.deposits import DepositsService
 from stonks_overwatch.services.models import Country, DailyValue, PortfolioEntry, TotalPortfolio
 from stonks_overwatch.services.yfinance.y_finance import YFinance
+from stonks_overwatch.settings import TIME_ZONE
 from stonks_overwatch.utils.constants import ProductType, Sector
 from stonks_overwatch.utils.datetime import DateTimeUtility
 from stonks_overwatch.utils.localization import LocalizationUtility
@@ -443,13 +445,77 @@ class PortfolioService:
                 position_value[d] = entry["history"][date_change]
 
         stock_splits = self.yfinance.get_stock_splits(entry["product"]["symbol"])
+
+        # GENERAL SOLUTION for stock split date mismatches:
+        # Sometimes position data already reflects post-split values starting from a date that's
+        # before the "official" split date recorded by YFinance. This causes double-counting.
+        #
+        # Solution: Analyze position value jumps to detect when splits are already reflected,
+        # then use the detected "effective" split date instead of the official one.
+        symbol = entry["product"]["symbol"]
+
+        # Configuration for debugging (change as needed)
+        DEBUG_SYMBOL = "NVDA"  # Change this to debug other symbols
+        DEBUG_DATES = ["2021-07-18", "2021-07-19", "2021-07-20"]  # Adjust for specific date ranges
+        is_target_symbol = symbol == DEBUG_SYMBOL
+
+        # Detect when position data already includes split effects
+        effective_split_dates = self._detect_effective_split_dates(symbol, position_value, stock_splits)
+
+        if is_target_symbol:
+            self.logger.debug(f"[{symbol} DEBUG] Processing stock splits for {symbol}")
+            self.logger.debug(f"[{symbol} DEBUG] Found {len(stock_splits)} stock splits")
+            if effective_split_dates:
+                self.logger.debug(f"[{symbol} DEBUG] Detected effective split dates: {effective_split_dates}")
+
+            # Log all stock splits
+            for i, split in enumerate(stock_splits):
+                split_date_str = LocalizationUtility.format_date_from_date(split.date.astimezone(ZoneInfo(TIME_ZONE)))
+                self.logger.debug(f"[{symbol} DEBUG] Split {i+1}: Date={split_date_str}, Ratio={split.split_ratio}")
+
         if len(stock_splits) > 0:
-            stocks_multiplier = 1
-            for split_data in reversed(stock_splits):
-                stocks_multiplier = stocks_multiplier * split_data.split_ratio
-                for date_value in reversed(position_value):
-                    if date_value < LocalizationUtility.format_date_from_date(split_data.date):
-                        position_value[date_value] = position_value[date_value] * stocks_multiplier
+            for date_value in reversed(position_value):
+                original_value = position_value[date_value]
+                multiplier = 1
+
+                # Only log for target dates when debugging specific symbols
+                should_log = is_target_symbol and date_value in DEBUG_DATES
+
+                if should_log:
+                    self.logger.debug(f"[{symbol} DEBUG] Processing date {date_value} "
+                                      f"with original value {original_value}")
+
+                for split_data in reversed(stock_splits):
+                    split_date_str = (LocalizationUtility.
+                                      format_date_from_date(split_data.date.astimezone(ZoneInfo(TIME_ZONE))))
+
+                    # Use detected effective split date if available
+                    effective_split_date = effective_split_dates.get(split_date_str, split_date_str)
+                    if effective_split_date != split_date_str and should_log:
+                        self.logger.debug(f"[{symbol} DEBUG]   Using effective split date {effective_split_date} "
+                                          f"instead of {split_date_str}")
+
+                    # FIXED: Use > to exclude the split date itself (position data already reflects post-split values)
+                    if effective_split_date > date_value:
+                        multiplier *= split_data.split_ratio
+                        if should_log:
+                            self.logger.debug(f"[{symbol} DEBUG]   Applying split: "
+                                              f"{effective_split_date} > {date_value}, "
+                                           f"ratio={split_data.split_ratio}, multiplier now={multiplier}")
+                    else:
+                        if should_log:
+                            self.logger.debug(f"[{symbol} DEBUG]   Skipping split: " +
+                                              "{effective_split_date} <= {date_value}")
+
+                position_value[date_value] *= multiplier
+
+                if should_log:
+                    if multiplier != 1:
+                        self.logger.debug(f"[{symbol} DEBUG]   Final adjustment: "
+                                          f"{original_value} * {multiplier} = {position_value[date_value]}")
+                    else:
+                        self.logger.debug(f"[{symbol} DEBUG]   No adjustment needed: "
+                                          f"{original_value} remains {position_value[date_value]}")
 
         aggregate = {}
         if entry["quotation"]["quotes"]:
@@ -460,6 +526,66 @@ class PortfolioService:
             self.logger.warning(f"No quotes found for '{entry['product']['symbol']}': productId {entry['productId']} ")
 
         return aggregate
+
+    def _detect_effective_split_dates(self, symbol: str, position_value: dict, stock_splits: list) -> dict:
+        """
+        Detect when position data already includes split effects by analyzing position value jumps.
+
+        Args:
+            position_value: Dictionary of {date: shares}
+            stock_splits: List of StockSplit objects
+
+        Returns:
+            Dictionary mapping official split dates to detected effective split dates
+        """
+        if not stock_splits:
+            return {}
+
+        effective_split_dates = {}
+
+        # Convert to sorted list of (date, value) pairs
+        sorted_positions = sorted(position_value.items())
+
+        for split in stock_splits:
+            split_date_str = LocalizationUtility.format_date_from_date(split.date.astimezone(ZoneInfo(TIME_ZONE)))
+            split_ratio = split.split_ratio
+
+            # Look for jumps in position values that match the split ratio
+            # Check a window around the official split date (±5 days)
+            split_date_obj = LocalizationUtility.convert_string_to_date(split_date_str)
+
+            for i in range(1, len(sorted_positions)):
+                prev_date_str, prev_value = sorted_positions[i-1]
+                curr_date_str, curr_value = sorted_positions[i]
+
+                # Skip if values are zero or negative
+                if prev_value <= 0 or curr_value <= 0:
+                    continue
+
+                # Check if this position change date is within ±5 days of the split date
+                curr_date_obj = LocalizationUtility.convert_string_to_date(curr_date_str)
+                days_diff = abs((curr_date_obj - split_date_obj).days)
+
+                if days_diff > 5:
+                    continue
+
+                # Calculate the ratio of position change
+                ratio = curr_value / prev_value
+
+                # Check if this ratio matches the split ratio (within 10% tolerance)
+                # Allow for both forward and reverse splits
+                ratio_tolerance = 0.1
+                if (abs(ratio - split_ratio) / split_ratio < ratio_tolerance or
+                    abs(ratio - (1/split_ratio)) / (1/split_ratio) < ratio_tolerance):
+
+                    # Found a jump that matches the split ratio
+                    # The effective split date is the current date (when the jump happens)
+                    effective_split_dates[split_date_str] = curr_date_str
+                    self.logger.debug(f"[{symbol}] Detected effective split date: {split_date_str} -> {curr_date_str} "
+                                    f"(ratio: {ratio:.2f}, expected: {split_ratio})")
+                    break
+
+        return effective_split_dates
 
     def _create_products_quotation(self) -> dict:
         """
