@@ -68,6 +68,7 @@ See [Wiki - Developing Stonks Overwatch](https://github.com/ctasada/stonks-overw
     - 'TEF.D'(280180545)
     - 'FRZA'(600236745)
     - 600179738: No chart found
+  Test https://github.com/alvarobartt/investiny to retrieve data from delisted stocks
 - CreateProduct Quotation does not respect the proper timeframes
 - Django Cache is disabled so that the portfolio selection works, otherwise the page is not properly reload
 - Dashboard: Drawing the dashboard is slow. It seems that the code is executed three times

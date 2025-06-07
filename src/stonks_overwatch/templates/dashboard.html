@@ -7,6 +7,7 @@
 <script src="{% static 'luxon/build/global/luxon.js' %}"></script>
 <script src="{% static 'chartjs-adapter-luxon/dist/chartjs-adapter-luxon.umd.min.js' %}"></script>
 <script src="{% static '@seahsky/chartjs-plugin-autocolors/dist/chartjs-plugin-autocolors.min.js' %}"></script>
+<script src="{% static 'chartjs-plugin-zoom/dist/chartjs-plugin-zoom.js' %}"></script>
 
 <div class="container-fluid row-gap-5">
     <div class="row border border-primary-subtle bg-light rounded mb-3">
@@ -29,12 +30,6 @@
 
                     <input type="radio" class="btn-check" name="portfolioTime" id="MTDButton" autocomplete="off">
                     <label class="btn btn-outline-primary" for="MTDButton">MTD</label>
-
-                    <input type="radio" class="btn-check" name="portfolioTime" id="1DButton" autocomplete="off">
-                    <label class="btn btn-outline-primary" for="1DButton">1D</label>
-
-                    <input type="radio" class="btn-check" name="portfolioTime" id="1WButton" autocomplete="off">
-                    <label class="btn btn-outline-primary" for="1WButton">1W</label>
 
                     <input type="radio" class="btn-check" name="portfolioTime" id="1MButton" autocomplete="off">
                     <label class="btn btn-outline-primary" for="1MButton">1M</label>
