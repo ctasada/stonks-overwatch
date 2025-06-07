@@ -41,7 +41,7 @@ class Dashboard(View):
     CACHE_KEY_PORTFOLIO = "portfolio_value"
     CACHE_TIMEOUT = 60 * 5  # 5 minutes
 
-    VALID_INTERVALS = frozenset({"YTD", "MTD", "1D", "1W", "1M", "3M", "6M", "1Y", "3Y", "5Y", "ALL"})
+    VALID_INTERVALS = frozenset({"YTD", "MTD", "1M", "3M", "6M", "1Y", "3Y", "5Y", "ALL"})
     VALID_VIEWS = frozenset({"performance", "value"})
 
     def __init__(self, **kwargs):
@@ -163,6 +163,7 @@ class Dashboard(View):
             portfolio_value = self.portfolio.calculate_historical_value(selected_portfolio)
 
             cache.set(Dashboard.CACHE_KEY_PORTFOLIO, portfolio_value, timeout=Dashboard.CACHE_TIMEOUT)
+
 
         return portfolio_value
 

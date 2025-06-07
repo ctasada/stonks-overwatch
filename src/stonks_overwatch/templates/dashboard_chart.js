@@ -6,8 +6,6 @@ const PortfolioTypes = {
 const TimeRanges = {
     YTD: "YTD",
     MTD: "MTD",
-    D1: "1D",
-    W1: "1W",
     M1: "1M",
     M3: "3M",
     M6: "6M",
@@ -33,10 +31,6 @@ function getSelectedTimeRange() {
             return TimeRanges.YTD
         case "MTDButton":
             return TimeRanges.MTD
-        case "1DButton":
-            return TimeRanges.D1
-        case "1WButton":
-            return TimeRanges.W1
         case "1MButton":
             return TimeRanges.M1
         case "3MButton":
@@ -107,61 +101,74 @@ function getTimeRangeConfig(timeRange, minimumDate) {
         timeUnit: 'month',
         timeRound: 'day'
     }
+
     switch (timeRange) {
         case TimeRanges.YTD:
-            config.minDate = Math.max.apply(null, [minimumDate, new Date(new Date().getFullYear(), 0, 1)])
+            config.minDate = new Date(Math.max(
+                new Date(minimumDate).getTime(),
+                new Date(new Date().getFullYear(), 0, 1).getTime()
+            ));
             config.timeUnit = 'week'
             break
         case TimeRanges.MTD:
-            config.minDate = Math.max.apply(null, [minimumDate, new Date(new Date().getFullYear(), new Date().getMonth(), 1)])
-            config.timeUnit = 'day'
-            break
-        case TimeRanges.D1:
-            const yesterday = new Date(today)
-            yesterday.setDate(today.getDate() - 1)
-            config.minDate = Math.max.apply(null, [minimumDate, yesterday])
-            config.timeUnit = 'day'
-            break
-        case TimeRanges.W1:
-            const lastWeek = new Date(today)
-            lastWeek.setDate(today.getDate() - 7)
-            config.minDate = Math.max.apply(null, [minimumDate, lastWeek])
+            config.minDate = new Date(Math.max(
+                new Date(minimumDate).getTime(),
+                new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime()
+            ));
             config.timeUnit = 'day'
             break
         case TimeRanges.M1:
-            const oneMonthAgo = new Date(today)
-            oneMonthAgo.setMonth(today.getMonth() - 1)
-            config.minDate = Math.max.apply(null, [minimumDate, oneMonthAgo])
+            const oneMonthAgo = new Date(today);
+            oneMonthAgo.setMonth(today.getMonth() - 1);
+            config.minDate = new Date(Math.max(
+                new Date(minimumDate).getTime(),
+                oneMonthAgo.getTime()
+            ));
             config.timeUnit = 'day'
             break
         case TimeRanges.M3:
-            const threeMonthsAgo = new Date(today)
-            threeMonthsAgo.setMonth(today.getMonth() - 3)
-            config.minDate = Math.max.apply(null, [minimumDate, threeMonthsAgo])
+            const threeMonthsAgo = new Date(today);
+            threeMonthsAgo.setMonth(today.getMonth() - 3);
+            config.minDate = new Date(Math.max(
+                new Date(minimumDate).getTime(),
+                threeMonthsAgo.getTime()
+            ));
             config.timeUnit = 'day'
             break
         case TimeRanges.M6:
-            const sixMonthsAgo = new Date(today)
-            sixMonthsAgo.setMonth(today.getMonth() - 6)
-            config.minDate = Math.max.apply(null, [minimumDate, sixMonthsAgo])
+            const sixMonthsAgo = new Date(today);
+            sixMonthsAgo.setMonth(today.getMonth() - 6);
+            config.minDate = new Date(Math.max(
+                new Date(minimumDate).getTime(),
+                sixMonthsAgo.getTime()
+            ));
             config.timeUnit = 'week'
             break
         case TimeRanges.Y1:
-            const oneYearAgo = new Date(today)
-            oneYearAgo.setFullYear(today.getFullYear() - 1)
-            config.minDate = Math.max.apply(null, [minimumDate, oneYearAgo])
+            const oneYearAgo = new Date(today);
+            oneYearAgo.setFullYear(today.getFullYear() - 1);
+            config.minDate = new Date(Math.max(
+                new Date(minimumDate).getTime(),
+                oneYearAgo.getTime()
+            ));
             config.timeUnit = 'week'
             break
         case TimeRanges.Y3:
-            const threeYearsAgo = new Date(today)
-            threeYearsAgo.setFullYear(today.getFullYear() - 3)
-            config.minDate = Math.max.apply(null, [minimumDate, threeYearsAgo])
+            const threeYearsAgo = new Date(today);
+            threeYearsAgo.setFullYear(today.getFullYear() - 3);
+            config.minDate = new Date(Math.max(
+                new Date(minimumDate).getTime(),
+                threeYearsAgo.getTime()
+            ));
             config.timeUnit = 'month'
             break
         case TimeRanges.Y5:
-            const fiveYearsAgo = new Date(today)
-            fiveYearsAgo.setFullYear(today.getFullYear() - 5)
-            config.minDate = Math.max.apply(null, [minimumDate, fiveYearsAgo])
+            const fiveYearsAgo = new Date(today);
+            fiveYearsAgo.setFullYear(today.getFullYear() - 5);
+            config.minDate = new Date(Math.max(
+                new Date(minimumDate).getTime(),
+                fiveYearsAgo.getTime()
+            ));
             config.timeUnit = 'month'
             break
         case TimeRanges.ALL:
@@ -200,7 +207,7 @@ function getTooltipLabel(portfolioType) {
     }
 }
 
-function getTicksCallback(portfolioType) {
+function getYAxisTicksCallback(portfolioType) {
     if (portfolioType === PortfolioTypes.PERFORMANCE) {
         return function (value, index, ticks) {
             return (value * 100).toFixed(2) + "%";
@@ -232,7 +239,7 @@ function getPortfolioConfiguration(portfolioType) {
                 y: {
                     beginAtZero: false,
                     ticks: {
-                        callback: getTicksCallback(portfolioType),
+                        callback: getYAxisTicksCallback(portfolioType),
                     }
                 }
             },
@@ -278,12 +285,44 @@ function getPortfolioConfiguration(portfolioType) {
                         }
                     }
                 },
+                zoom: {
+                    limits: {
+                        x: {
+                            min: null, // Set dynamically based on time range
+                            max: null, // Set dynamically based on time range
+                            minRange: 1000 * 60 * 60 * 24 * 7 // 7 days in milliseconds
+                        },
+                        y: {
+                            min: null, // Automatically determined by the chart
+                            max: null // Automatically determined by the chart
+                        }
+                    },
+                    pan: {
+                        enabled: true,
+                        mode: 'x',
+                        modifierKey: null
+                    },
+                    zoom: {
+                        wheel: {
+                            enabled: true,
+                            speed: 0.1
+                        },
+                        pinch: {
+                            enabled: true
+                        },
+                        mode: 'x',
+                        onZoomComplete({chart}) {
+                            // FIXME: Here we can eventually update the axis labels
+                            chart.update('none');
+                        }
+                    }
+                },
                 tooltip: {
                     callbacks: {
                         label: getTooltipLabel(portfolioType),
                     }
                 }
-            }
+            },
         },
     };
 }
@@ -296,6 +335,13 @@ function drawPortfolio(portfolioType, timeRange) {
         chart.destroy();
     }
     chart = new Chart(document.getElementById("portofolio-chart").getContext("2d"), configPortfolio);
+
+    // Adding the double click to reset zoom functionality so we can directly reference the chart instance
+    chart.options.onClick = (e) => {
+        if (e.native?.detail === 2) {
+            chart.resetZoom();
+        }
+    }
 
     let url = HOST + URL + "?type=" + portfolioType + "&interval=" + timeRange
     // Fetch JSON data from a URL and update the chart
@@ -344,6 +390,13 @@ function drawPortfolio(portfolioType, timeRange) {
                 },
             }
 
+            chart.options.plugins.zoom.limits = {
+                x: {
+                    min: data[0].x,
+                    max: new Date(),
+                    minRange: 1000 * 60 * 60 * 24 * 7 // 7 days in milliseconds
+                }
+            }
             chart.update();
         })
         .catch(error => {

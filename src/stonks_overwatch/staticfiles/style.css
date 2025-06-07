@@ -80,6 +80,10 @@ span {
     background-color: var(--primary-color);
 }
 
+.nav-link.active {
+    text-decoration: underline;
+}
+
 #sidebar .sidebar-header {
     padding: 20px;
 }
@@ -345,7 +349,7 @@ a[aria-expanded="true"] {
 }
 
 .dropdown-custom {
-    color: black !important;
+    color: var(--primary-color) !important;
     background-color: white;
     border-color: var(--primary-color);
 }
@@ -365,5 +369,5 @@ a[aria-expanded="true"] {
 .dropdown-custom + .dropdown-menu .dropdown-item:hover,
 .dropdown-custom + .dropdown-menu .dropdown-item:focus {
     background-color: var(--primary-light) !important;
-    color: #000 !important;
+    color: black !important;
 }
