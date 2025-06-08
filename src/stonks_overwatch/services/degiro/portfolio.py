@@ -190,11 +190,8 @@ class PortfolioService:
             price = product_info[self.CLOSE_PRICE_FIELD]
 
         value = product_data["size"] * price
-        break_even_price = product_data["breakEvenPrice"]
+        break_even_price = product_data.get("breakEvenPrice", 0.0)
         is_open = product_data["size"] != 0.0 and product_data["value"] != 0.0
-
-        if not is_open:
-            print(f"Product {product_data[self.PRODUCT_ID_FIELD]} is not open")
 
         return {
             "price": price,
@@ -207,19 +204,22 @@ class PortfolioService:
     def _convert_to_base_currency(self, price_data: dict, currency: str) -> dict:
         """Convert price data to base currency."""
         size = price_data["size"]
+        break_even_price = price_data.get("break_even_price", 0.0)
+        if break_even_price is None:
+            break_even_price = 0.0
 
         if currency == self.base_currency:
             return {
                 "price": price_data["price"],
                 "value": price_data["value"],
-                "break_even_price": price_data["break_even_price"],
-                "unrealized_gain": (price_data["price"] - price_data["break_even_price"]) * size
+                "break_even_price": break_even_price,
+                "unrealized_gain": (price_data["price"] - break_even_price) * size
             }
 
         # Convert to base currency
         base_price = self.currency_service.convert(price_data["price"], currency, self.base_currency)
         base_value = self.currency_service.convert(price_data["value"], currency, self.base_currency)
-        base_break_even = self.currency_service.convert(price_data["break_even_price"], currency, self.base_currency)
+        base_break_even = self.currency_service.convert(break_even_price, currency, self.base_currency)
 
         # Calculate unrealized gain in base currency
         unrealized_gain = (base_price - base_break_even) * size
@@ -397,7 +397,6 @@ class PortfolioService:
 
     def __get_portfolio_products(self) -> list[dict]:
         try:
-            # FIXME: Control OFFLINE mode
             update = self.degiro_service.get_client().get_update(
                 request_list=[
                     UpdateRequest(option=UpdateOption.PORTFOLIO, last_updated=0),

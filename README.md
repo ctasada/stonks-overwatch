@@ -112,6 +112,7 @@ See [Wiki - Developing Stonks Overwatch](https://github.com/ctasada/stonks-overw
 
 ## Logos
 - https://docs.brandfetch.com/docs/getting-started (requires API Key)
+- https://docs.alpaca.markets/docs/getting-started-with-alpaca-market-data (Logos and Data) (requires API Key)
 - https://eodhd.com/financial-apis-blog/40000-company-logos (requires API Key)
 - https://github.com/nvstly/icons (misses icons)
 - https://github.com/ahmeterenodaci/Nasdaq-Stock-Exchange-including-Symbols-and-Logos?tab=readme-ov-file (misses many icons)
