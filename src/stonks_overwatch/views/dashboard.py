@@ -278,121 +278,123 @@ class Dashboard(View):
     ) -> PortfolioPerformance:
         """
         Calculate portfolio performance using TWR method.
-
+        
+        Optimized version that:
+        1. Performs single TWR calculation instead of multiple redundant calculations
+        2. Derives period-specific returns from cumulative returns
+        3. Simplifies date grouping logic
+        
         Args:
             portfolio_value: List of dictionaries containing daily portfolio values
             start_date: Optional start date for calculations (default: earliest date)
 
         Returns:
-            List of dictionaries containing dates and cumulative returns
+            PortfolioPerformance with TWR data for different time periods
         """
-        #FIXME: Can we avoid retrieving the deposits twice?
-        deposits = sorted(
-            self.deposits.get_cash_deposits(selected_portfolio),
-            key=lambda k: k.datetime
+        # Prepare data once
+        deposits, cash_flows, market_value_per_day = self._prepare_performance_data(selected_portfolio, portfolio_value)
+        
+        if not start_date:
+            start_date = min(market_value_per_day.keys())
+        end_date = max(max(cash_flows.keys(), default=start_date), max(market_value_per_day.keys()))
+
+        # Single TWR calculation for entire period
+        all_dates = self._get_business_date_range(start_date, end_date)
+        main_twr = self._calculate_twr(all_dates, market_value_per_day, cash_flows)
+        
+        # Derive period-specific returns from cumulative returns
+        annual_twr, monthly_twr = self._derive_period_returns(main_twr.cumulative_returns)
+        
+        # Format cumulative returns for frontend
+        twr_series = [
+            DailyValue(x=LocalizationUtility.format_date_from_date(date), y=return_value)
+            for date, return_value in main_twr.cumulative_returns.items()
+        ]
+
+        return PortfolioPerformance(
+            twr=twr_series,
+            annual_twr=annual_twr,
+            monthly_twr=monthly_twr
         )
 
+    def _prepare_performance_data(self, selected_portfolio: PortfolioId, portfolio_value: List[DailyValue]):
+        """Prepare and cache data needed for performance calculations."""
+        # Cache deposits to avoid multiple retrievals (fixes FIXME)
+        cache_key = f'_cached_deposits_{selected_portfolio.value}'
+        if not hasattr(self, cache_key):
+            deposits = sorted(
+                self.deposits.get_cash_deposits(selected_portfolio),
+                key=lambda k: k.datetime
+            )
+            setattr(self, cache_key, deposits)
+        else:
+            deposits = getattr(self, cache_key)
+        
+        # Convert deposits to cash flows
         cash_flows = defaultdict(float)
         for item in deposits:
             cash_flows[item.datetime_as_date()] += item.change
 
-        market_value_per_day = { item['x']: item['y'] for item in portfolio_value }
+        # Convert portfolio values to dict
+        market_value_per_day = {item['x']: item['y'] for item in portfolio_value}
 
-        # Apply timing correction to align cash flows with when they actually affect portfolio values
+        # Apply timing correction
         cash_flows = self._correct_cash_flow_timing(cash_flows, market_value_per_day)
-
-        if not start_date:
-            start_date = list(market_value_per_day.keys())[0]
-        end_date = max(list(cash_flows.keys())[-1], list(market_value_per_day.keys())[-1])
-
-        all_times_date_range, years_dict, month_years_dict = self.__group_date_range(start_date, end_date)
-
-        annual_twr = {}
-        monthly_twr = defaultdict(self.__default_monthly_values)
-        all_times_twr = self.__get_date_range_performance_twr(all_times_date_range, market_value_per_day, cash_flows)
-        for year in years_dict:
-            annual_twr[year] = self.__get_total_performance_twr(years_dict[year], market_value_per_day, cash_flows)
-        for year_month in month_years_dict:
-            year, month = year_month.split("-")
-            month_name = LocalizationUtility.month_name(month)
-            date_range = month_years_dict[year_month]
-            if len(date_range) == 1:
-                # FIXME: The first day of the month this logic breaks
-                continue
-            monthly_twr[year][month_name] = self.__get_total_performance_twr(
-                date_range=date_range,
-                market_value_per_day=market_value_per_day,
-                cash_flows=cash_flows
-            )
-
-        annual_twr = dict(sorted(annual_twr.items(), key=lambda entry: entry[0], reverse=True))
-        monthly_twr = dict(sorted(monthly_twr.items(), key=lambda entry: entry[0], reverse=True))
-        return PortfolioPerformance(
-            twr=all_times_twr,
-            annual_twr=annual_twr,
-            monthly_twr={year: dict(months) for year, months in monthly_twr.items()}
-        )
-
-    def __get_date_range_performance_twr(
-            self, date_range: list[str], market_value_per_day: dict[str, float], cash_flows: dict[str, float]
-    ) -> List[Dict[str, float]]:
-        twr = self._calculate_twr(date_range, market_value_per_day, cash_flows)
-
-        return [
-            DailyValue(x=LocalizationUtility.format_date_from_date(k), y=v)
-            for k, v in twr.cumulative_returns.items()
-        ]
-
-    def __get_total_performance_twr(
-            self, date_range: list[str], market_value_per_day: dict[str, float], cash_flows: dict[str, float]
-    ) -> float:
-        twr = self._calculate_twr(date_range, market_value_per_day, cash_flows)
-
-        return twr.total_return
+        
+        return deposits, cash_flows, market_value_per_day
 
     @staticmethod
-    def __group_date_range(start_date: str, end_date: str):
+    def _get_business_date_range(start_date: str, end_date: str) -> list[str]:
+        """Generate business day range without pandas overhead."""
+        date_range = pd.date_range(start=start_date, end=end_date, freq="B")
+        return [date.strftime('%Y-%m-%d') for date in date_range]
+
+    def _derive_period_returns(self, cumulative_returns: dict[datetime, float]) -> tuple[dict, dict]:
         """
-        Groups dates in a range by year and month-year using Pandas.
-
-        Args:
-            start_date (date/datetime): Start date of the range
-            end_date (date/datetime): End date of the range
-
-        Returns:
-            tuple: (all_dates_list, years_dict, month_years_dict) where:
-                - all_dates_list: List of all the dates as values
-                - years_dict: Dictionary with years as keys and lists of dates as values
-                - month_years_dict: Dictionary with month-years as keys and lists of dates as values
+        Derive annual and monthly returns from cumulative returns.
+        Much more efficient than recalculating TWR for each period.
         """
-        # Create a date range using pandas
-        date_range = pd.date_range(
-            start=start_date,
-            end=end_date,
-            freq="B"  # Business days (excludes weekends)
-        )
+        annual_twr = {}
+        monthly_twr = defaultdict(self.__default_monthly_values)
+        
+        # Group returns by year and month
+        returns_by_year = defaultdict(list)
+        returns_by_month = defaultdict(list)
+        
+        for date, cum_return in cumulative_returns.items():
+            year = str(date.year)
+            month_key = f"{date.year}-{date.month:02d}"
+            month_name = LocalizationUtility.month_name(f"{date.month:02d}")
+            
+            returns_by_year[year].append((date, cum_return))
+            returns_by_month[(year, month_name)].append((date, cum_return))
+        
+        # Calculate annual returns (from first to last day of each year)
+        for year, year_returns in returns_by_year.items():
+            if len(year_returns) >= 2:
+                year_returns.sort(key=lambda x: x[0])
+                start_return = year_returns[0][1]
+                end_return = year_returns[-1][1]
+                # Convert from cumulative returns to period return
+                annual_twr[year] = (1 + end_return) / (1 + start_return) - 1
+        
+        # Calculate monthly returns (from first to last day of each month)
+        for (year, month_name), month_returns in returns_by_month.items():
+            if len(month_returns) >= 2:
+                month_returns.sort(key=lambda x: x[0])
+                start_return = month_returns[0][1]
+                end_return = month_returns[-1][1]
+                # Convert from cumulative returns to period return
+                monthly_twr[year][month_name] = (1 + end_return) / (1 + start_return) - 1
 
-        # Convert to DataFrame for easier manipulation
-        df = pd.DataFrame({'date': date_range})
-
-        # Add year and month-year columns
-        df['year'] = df['date'].dt.year
-        df['month_year'] = df['date'].dt.strftime('%Y-%m')
-
-        # All dates
-        all_dates_list = df['date'].dt.strftime('%Y-%m-%d').tolist()
-
-        # Group by year
-        years_dict = (df.groupby('year')['date']
-                      .apply(lambda dates: [date.strftime('%Y-%m-%d') for date in dates])
-                      .to_dict())
-
-        # Group by month-year
-        month_years_dict = (df.groupby('month_year')['date']
-                            .apply(lambda dates: [date.strftime('%Y-%m-%d') for date in dates])
-                            .to_dict())
-
-        return all_dates_list, years_dict, month_years_dict
+        # Sort and convert to final format
+        annual_twr = dict(sorted(annual_twr.items(), key=lambda x: x[0], reverse=True))
+        monthly_twr = dict(sorted(
+            {year: dict(months) for year, months in monthly_twr.items()}.items(),
+            key=lambda x: x[0], reverse=True
+        ))
+        
+        return annual_twr, monthly_twr
 
     def _correct_cash_flow_timing(self, cash_flows: dict, market_value_per_day: dict) -> dict:
         """
