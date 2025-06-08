@@ -58,7 +58,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "stonks_overwatch",
+    "stonks_overwatch.app_config.StonksOverwatchConfig",
     "django_extensions",
     "django_node_assets",
 ]
