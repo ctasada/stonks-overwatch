@@ -46,6 +46,8 @@ class Portfolio(View):
         cash = [item for item in portfolio if item.product_type == ProductType.CASH]
         cryptos = [item for item in portfolio if item.product_type == ProductType.CRYPTO]
 
+        # print([stock.to_dict() for stock in stocks])
+
         context = {
             "selected_positions": status.value,
             "stocks": [stock.to_dict() for stock in stocks if self.__show_position(stock, status)],

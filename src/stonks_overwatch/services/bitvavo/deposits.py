@@ -100,3 +100,28 @@ class DepositsService:
             dataset[TransactionsService.format_date(transaction["executedAt"])] = round(cash_value, 2)
 
         return self.__fill_missing_dates(dataset)
+
+    def calculate_cash_account_value_excluding_deposits(self) -> dict[str, float]:
+        """
+        Calculate cash account value excluding deposits for performance measurement.
+        This prevents double-counting when deposits are separately tracked as cash flows in TWR calculations.
+        """
+        transactions = self.bitvavo_service.account_history()
+        transactions = sorted(transactions["items"], key=lambda k: k["executedAt"], reverse=False)
+        transactions = [item for item in transactions if item["type"] in ["deposit", "withdrawal", "buy", "sell"]]
+
+        dataset = {}
+        cash_value = 0.0
+        for transaction in transactions:
+            cash_value -= float(transaction["feesAmount"])
+
+            # Exclude deposits and withdrawals from cash value calculation
+            if transaction["type"] == "sell":
+                cash_value += float(transaction["receivedAmount"])
+            elif transaction["type"] == "buy":
+                cash_value -= float(transaction["sentAmount"])
+            # Skip "deposit" and "withdrawal" - these are handled as external cash flows
+
+            dataset[TransactionsService.format_date(transaction["executedAt"])] = round(cash_value, 2)
+
+        return self.__fill_missing_dates(dataset)

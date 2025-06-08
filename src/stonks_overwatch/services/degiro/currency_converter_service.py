@@ -24,6 +24,9 @@ class CurrencyConverterService:
         self.currency_maps = self.__calculate_maps()
 
     def convert(self, amount: float, currency: str, new_currency: str="EUR", fx_date: datetime.date=None) -> float:
+        if amount is None:
+            amount = 0.0
+
         # If both currencies are the same, no conversion is needed
         if currency == new_currency:
             return amount
