@@ -278,12 +278,12 @@ class Dashboard(View):
     ) -> PortfolioPerformance:
         """
         Calculate portfolio performance using TWR method.
-        
+
         Optimized version that:
         1. Performs single TWR calculation instead of multiple redundant calculations
         2. Derives period-specific returns from cumulative returns
         3. Simplifies date grouping logic
-        
+
         Args:
             portfolio_value: List of dictionaries containing daily portfolio values
             start_date: Optional start date for calculations (default: earliest date)
@@ -293,7 +293,7 @@ class Dashboard(View):
         """
         # Prepare data once
         deposits, cash_flows, market_value_per_day = self._prepare_performance_data(selected_portfolio, portfolio_value)
-        
+
         if not start_date:
             start_date = min(market_value_per_day.keys())
         end_date = max(max(cash_flows.keys(), default=start_date), max(market_value_per_day.keys()))
@@ -301,10 +301,10 @@ class Dashboard(View):
         # Single TWR calculation for entire period
         all_dates = self._get_business_date_range(start_date, end_date)
         main_twr = self._calculate_twr(all_dates, market_value_per_day, cash_flows)
-        
+
         # Derive period-specific returns from cumulative returns
         annual_twr, monthly_twr = self._derive_period_returns(main_twr.cumulative_returns)
-        
+
         # Format cumulative returns for frontend
         twr_series = [
             DailyValue(x=LocalizationUtility.format_date_from_date(date), y=return_value)
@@ -329,7 +329,7 @@ class Dashboard(View):
             setattr(self, cache_key, deposits)
         else:
             deposits = getattr(self, cache_key)
-        
+
         # Convert deposits to cash flows
         cash_flows = defaultdict(float)
         for item in deposits:
@@ -340,7 +340,7 @@ class Dashboard(View):
 
         # Apply timing correction
         cash_flows = self._correct_cash_flow_timing(cash_flows, market_value_per_day)
-        
+
         return deposits, cash_flows, market_value_per_day
 
     @staticmethod
@@ -356,19 +356,18 @@ class Dashboard(View):
         """
         annual_twr = {}
         monthly_twr = defaultdict(self.__default_monthly_values)
-        
+
         # Group returns by year and month
         returns_by_year = defaultdict(list)
         returns_by_month = defaultdict(list)
-        
+
         for date, cum_return in cumulative_returns.items():
             year = str(date.year)
-            month_key = f"{date.year}-{date.month:02d}"
             month_name = LocalizationUtility.month_name(f"{date.month:02d}")
-            
+
             returns_by_year[year].append((date, cum_return))
             returns_by_month[(year, month_name)].append((date, cum_return))
-        
+
         # Calculate annual returns (from first to last day of each year)
         for year, year_returns in returns_by_year.items():
             if len(year_returns) >= 2:
@@ -377,7 +376,7 @@ class Dashboard(View):
                 end_return = year_returns[-1][1]
                 # Convert from cumulative returns to period return
                 annual_twr[year] = (1 + end_return) / (1 + start_return) - 1
-        
+
         # Calculate monthly returns (from first to last day of each month)
         for (year, month_name), month_returns in returns_by_month.items():
             if len(month_returns) >= 2:
@@ -393,7 +392,7 @@ class Dashboard(View):
             {year: dict(months) for year, months in monthly_twr.items()}.items(),
             key=lambda x: x[0], reverse=True
         ))
-        
+
         return annual_twr, monthly_twr
 
     def _correct_cash_flow_timing(self, cash_flows: dict, market_value_per_day: dict) -> dict:

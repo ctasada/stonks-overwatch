@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime, timedelta
 from typing import List, Optional
 from zoneinfo import ZoneInfo
@@ -27,9 +26,25 @@ from stonks_overwatch.utils.logger import StonksLogger
 class PortfolioService:
     logger = StonksLogger.get_logger("stonks_overwatch.portfolio_data.degiro", "[DEGIRO|PORTFOLIO]")
 
+    # Configuration constants
     SUPPORTED_CURRENCY_ACCOUNTS = ['EUR', 'USD', 'GBP']
     DEBUG_SYMBOL = "NVDA"  # Change this to debug other symbols
     DEBUG_DATES = ["2021-07-18", "2021-07-19", "2021-07-20"]  # Adjust for specific date ranges
+
+    # Product type constants
+    CASH_PRODUCT_TYPE = 'CASH'
+    NON_TRADEABLE_IDENTIFIER = "Non tradeable"
+
+    # Field name constants
+    CLOSE_PRICE_FIELD = "closePrice"
+    PRODUCT_ID_FIELD = "productId"
+
+    # Default values
+    DEFAULT_PORTFOLIO_VALUE = 1.0
+    FALLBACK_PRICE = 0.0
+
+    # Display constants
+    CASH_BALANCE_NAME_TEMPLATE = "Cash Balance ${currency}"
 
     def __init__(
         self,
@@ -46,100 +61,179 @@ class PortfolioService:
         self.yfinance = YFinance()
 
     @cached_property
-    def get_portfolio(self) -> List[PortfolioEntry]: # noqa: C901
+    def get_portfolio(self) -> List[PortfolioEntry]:
         self.logger.debug("Get Portfolio")
 
-        portfolio_products = self.__get_porfolio_products()
-
-        products_ids = [row["productId"] for row in portfolio_products]
+        portfolio_products = self.__get_portfolio_products()
+        products_ids = [row[self.PRODUCT_ID_FIELD] for row in portfolio_products]
         products_info = self.__get_products_info(products_ids=products_ids)
-
         products_config = self.__get_product_config()
 
-        my_portfolio = []
+        stock_entries = self._create_stock_portfolio_entries(
+            portfolio_products, products_info, products_config
+        )
+        cash_entries = self._create_cash_portfolio_entries()
 
-        tmp_processed_symbols = []
+        return sorted(stock_entries + cash_entries, key=lambda k: k.symbol)
 
-        for tmp in portfolio_products:
-            info = products_info[tmp["productId"]]
-            if info.get("productType") == 'CASH':
-                # Cash products coming from Stocks are not supported
+    def _create_stock_portfolio_entries(
+        self,
+        portfolio_products: list[dict],
+        products_info: dict,
+        products_config: dict
+    ) -> List[PortfolioEntry]:
+        """Create portfolio entries for stock/ETF products."""
+        stock_entries = []
+        processed_symbols = set()
+
+        for product_data in portfolio_products:
+            product_info = products_info[product_data[self.PRODUCT_ID_FIELD]]
+
+            if product_info.get("productType") == self.CASH_PRODUCT_TYPE:
                 continue
 
-            # Products may be closed and reopened with a different productId. We need to keep track of the symbols
-            # Find other products for the same symbol. Use data from the 'active' product (should be only one) and
-            #   update only the values that are "Unknown" (ideally none)
-            if info["symbol"] not in tmp_processed_symbols:
-                tmp_products = self.product_info.get_products_info_raw_by_symbol([info["symbol"]])
-                correlated_products = [p["id"] for p in tmp_products.values()]
-            else:
+            symbol = product_info["symbol"]
+            if symbol in processed_symbols:
                 continue
 
-            tmp_processed_symbols.append(info["symbol"])
+            processed_symbols.add(symbol)
 
-            company_profile = CompanyProfileRepository.get_company_profile_raw(info["isin"])
-            sector = None
-            industry = "Unknown"
-            country = "Unknown"
-            if company_profile.get("data"):
-                sector = company_profile["data"]["sector"]
-                industry = company_profile["data"]["industry"]
-                country = company_profile["data"]["contacts"]["COUNTRY"]
+            # Get correlated products for the same symbol
+            correlated_products = self._get_correlated_products(symbol)
 
-            total_realized_gains, total_costs = self.__get_product_realized_gains(correlated_products)
-
-            currency = info["currency"]
-            price = ProductQuotationsRepository.get_product_price(tmp["productId"])
-            if price == 0.0 and "closePrince" in info:
-                self.logger.warning(f"No quotation found for product {tmp['productId']}, using closePrice")
-                price = info["closePrice"]
-
-            value = tmp["size"] * price
-            break_even_price = tmp["breakEvenPrice"]
-
-            is_open = tmp["size"] != 0.0 and tmp["value"] != 0.0
-            unrealized_gain = (price - break_even_price) * tmp["size"]
-
-            if currency != self.base_currency:
-                base_currency_price = self.currency_service.convert(price, currency, self.base_currency)
-                base_currency_value = self.currency_service.convert(value, currency, self.base_currency)
-                base_currency_break_even_price = self.currency_service.convert(
-                    break_even_price, currency, self.base_currency
-                )
-                unrealized_gain = (base_currency_price - base_currency_break_even_price) * tmp["size"]
-            else:
-                base_currency_price = price
-                base_currency_value = value
-                base_currency_break_even_price = break_even_price
-
-            exchange = self.__get_exchange(info["exchangeId"], products_config.get("exchanges", []))
-
-            my_portfolio.append(
-                PortfolioEntry(
-                    name=info["name"],
-                    symbol=info["symbol"],
-                    isin=info["isin"],
-                    sector=Sector.from_str(sector),
-                    industry=industry,
-                    category=info["category"],
-                    exchange=exchange,
-                    country=Country(country) if country != "Unknown" else None,
-                    product_type=ProductType.from_str(info["productType"]),
-                    shares=tmp["size"],
-                    product_currency=currency,
-                    price=price,
-                    base_currency_price=base_currency_price,
-                    base_currency=self.base_currency,
-                    break_even_price=break_even_price,
-                    base_currency_break_even_price=base_currency_break_even_price,
-                    value=value,
-                    base_currency_value=base_currency_value,
-                    is_open=is_open,
-                    unrealized_gain=unrealized_gain,
-                    realized_gain=total_realized_gains,
-                    total_costs=total_costs,
-                )
+            # Create portfolio entry
+            entry = self._create_portfolio_entry(
+                product_data, product_info, products_config, correlated_products
             )
+            stock_entries.append(entry)
+
+        return stock_entries
+
+    def _get_correlated_products(self, symbol: str) -> list[str]:
+        """Get all product IDs for the same symbol (handles reopened products)."""
+        tmp_products = self.product_info.get_products_info_raw_by_symbol([symbol])
+        return [p["id"] for p in tmp_products.values()]
+
+    def _create_portfolio_entry(
+        self,
+        product_data: dict,
+        product_info: dict,
+        products_config: dict,
+        correlated_products: list[str]
+    ) -> PortfolioEntry:
+        """Create a single portfolio entry from product data."""
+        # Get company profile data
+        company_data = self._get_company_data(product_info["isin"])
+
+        # Calculate financial metrics
+        total_realized_gains, total_costs = self.__get_product_realized_gains(correlated_products)
+
+        # Get pricing information
+        price_data = self._get_price_data(product_data, product_info)
+
+        # Convert to base currency if needed
+        base_currency_data = self._convert_to_base_currency(price_data, product_info["currency"])
+
+        # Get exchange information
+        exchange = self.__get_exchange(product_info["exchangeId"], products_config.get("exchanges", []))
+
+        return PortfolioEntry(
+            name=product_info["name"],
+            symbol=product_info["symbol"],
+            isin=product_info["isin"],
+            sector=Sector.from_str(company_data["sector"]),
+            industry=company_data["industry"],
+            category=product_info["category"],
+            exchange=exchange,
+            country=Country(company_data["country"]) if company_data["country"] != "Unknown" else None,
+            product_type=ProductType.from_str(product_info["productType"]),
+            shares=product_data["size"],
+            product_currency=product_info["currency"],
+            price=price_data["price"],
+            base_currency_price=base_currency_data["price"],
+            base_currency=self.base_currency,
+            break_even_price=price_data["break_even_price"],
+            base_currency_break_even_price=base_currency_data["break_even_price"],
+            value=price_data["value"],
+            base_currency_value=base_currency_data["value"],
+            is_open=price_data["is_open"],
+            unrealized_gain=base_currency_data["unrealized_gain"],
+            realized_gain=total_realized_gains,
+            total_costs=total_costs,
+        )
+
+    def _get_company_data(self, isin: str) -> dict:
+        """Extract company profile data with defaults."""
+        company_profile = CompanyProfileRepository.get_company_profile_raw(isin)
+
+        if company_profile.get("data"):
+            return {
+                "sector": company_profile["data"]["sector"],
+                "industry": company_profile["data"]["industry"],
+                "country": company_profile["data"]["contacts"]["COUNTRY"]
+            }
+
+        return {
+            "sector": None,
+            "industry": "Unknown",
+            "country": "Unknown"
+        }
+
+    def _get_price_data(self, product_data: dict, product_info: dict) -> dict:
+        """Get pricing information for a product."""
+        price = ProductQuotationsRepository.get_product_price(product_data[self.PRODUCT_ID_FIELD])
+
+        # Fallback to close price if no quotation found
+        if price == self.FALLBACK_PRICE and self.CLOSE_PRICE_FIELD in product_info:
+            self.logger.warning(f"No quotation found for product {product_data[self.PRODUCT_ID_FIELD]}, "
+                                f"using {self.CLOSE_PRICE_FIELD}")
+            price = product_info[self.CLOSE_PRICE_FIELD]
+
+        value = product_data["size"] * price
+        break_even_price = product_data["breakEvenPrice"]
+        is_open = product_data["size"] != 0.0 and product_data["value"] != 0.0
+
+        if not is_open:
+            print(f"Product {product_data[self.PRODUCT_ID_FIELD]} is not open")
+
+        return {
+            "price": price,
+            "value": value,
+            "break_even_price": break_even_price,
+            "is_open": is_open,
+            "size": product_data["size"]  # Include size for currency conversion
+        }
+
+    def _convert_to_base_currency(self, price_data: dict, currency: str) -> dict:
+        """Convert price data to base currency."""
+        size = price_data["size"]
+
+        if currency == self.base_currency:
+            return {
+                "price": price_data["price"],
+                "value": price_data["value"],
+                "break_even_price": price_data["break_even_price"],
+                "unrealized_gain": (price_data["price"] - price_data["break_even_price"]) * size
+            }
+
+        # Convert to base currency
+        base_price = self.currency_service.convert(price_data["price"], currency, self.base_currency)
+        base_value = self.currency_service.convert(price_data["value"], currency, self.base_currency)
+        base_break_even = self.currency_service.convert(price_data["break_even_price"], currency, self.base_currency)
+
+        # Calculate unrealized gain in base currency
+        unrealized_gain = (base_price - base_break_even) * size
+
+        return {
+            "price": base_price,
+            "value": base_value,
+            "break_even_price": base_break_even,
+            "unrealized_gain": unrealized_gain
+        }
+
+    def _create_cash_portfolio_entries(self) -> List[PortfolioEntry]:
+        """Create portfolio entries for cash balances."""
+        cash_entries = []
 
         for currency in self.SUPPORTED_CURRENCY_ACCOUNTS:
             total_cash = CashMovementsRepository.get_total_cash(currency)
@@ -147,23 +241,24 @@ class PortfolioService:
                 self.logger.debug(f"No cash movements found for currency {currency}, skipping")
                 continue
 
-            base_currency_price = total_cash
+            base_currency_value = total_cash
             if currency != self.base_currency:
-                base_currency_price = self.currency_service.convert(total_cash, currency, self.base_currency)
-            my_portfolio.append(
+                base_currency_value = self.currency_service.convert(total_cash, currency, self.base_currency)
+
+            cash_entries.append(
                 PortfolioEntry(
-                    name=f"Cash Balance ${currency}",
+                    name=self.CASH_BALANCE_NAME_TEMPLATE.format(currency=currency),
                     symbol=currency,
                     product_type=ProductType.CASH,
                     product_currency=currency,
                     value=total_cash,
-                    base_currency_value=base_currency_price,
+                    base_currency_value=base_currency_value,
                     base_currency=self.base_currency,
                     is_open=True,
                 )
-        )
+            )
 
-        return sorted(my_portfolio, key=lambda k: k.symbol)
+        return cash_entries
 
     def __get_exchange(self, exchange_id: str, exchanges: list) -> str | None:
         """
@@ -293,10 +388,14 @@ class PortfolioService:
                     tmp_total_portfolio[value["name"]] = value["value"]
 
             return tmp_total_portfolio
-        except Exception:
+        except (ConnectionError, TimeoutError, DeGiroOfflineModeError):
+            self.logger.warning("Cannot get realtime portfolio total from DeGiro")
+            return None
+        except Exception as e:
+            self.logger.error(f"Unexpected error getting realtime portfolio total: {e}")
             return None
 
-    def __get_porfolio_products(self) -> list[dict]:
+    def __get_portfolio_products(self) -> list[dict]:
         try:
             # FIXME: Control OFFLINE mode
             update = self.degiro_service.get_client().get_update(
@@ -315,7 +414,7 @@ class PortfolioService:
                         if value.get("value") is not None:
                             key = value["name"]
                             if key == "id":
-                                key = "productId"
+                                key = self.PRODUCT_ID_FIELD
                             portfolio[key] = value["value"]
 
                     my_portfolio.append(portfolio)
@@ -327,30 +426,35 @@ class PortfolioService:
 
     def _get_local_portfolio(self, offline: bool = False):
         if offline:
-            logging.info("Running in offline mode, using last known data")
+            self.logger.info("Running in offline mode, using last known data")
         else:
-            logging.exception("Cannot connect to DeGiro, getting last known data")
+            self.logger.warning("Cannot connect to DeGiro, getting last known data")
         local_portfolio = TransactionsRepository.get_portfolio_products()
         for entry in local_portfolio:
-            entry["value"] = 1.0  # FIXME
+            entry["value"] = self.DEFAULT_PORTFOLIO_VALUE  # FIXME: Use actual portfolio value
         return local_portfolio
 
     def __get_products_info(self, products_ids: list) -> dict:
         try:
             return self.degiro_service.get_products_info(products_ids)
         except DeGiroOfflineModeError:
-            logging.info("Running in offline mode, using last known data")
+            self.logger.info("Running in offline mode, using last known data")
             return ProductInfoRepository.get_products_info_raw(products_ids)
-        except Exception:
-            logging.exception("Cannot connect to DeGiro, getting last known data")
+        except (ConnectionError, TimeoutError) as e:
+            self.logger.warning(f"Cannot connect to DeGiro: {e}, getting last known data")
+            return ProductInfoRepository.get_products_info_raw(products_ids)
+        except Exception as e:
+            self.logger.error(f"Unexpected error getting products info: {e}")
             return ProductInfoRepository.get_products_info_raw(products_ids)
 
     def __get_product_config(self) -> dict:
         try:
-            products_config = self.degiro_service.get_client().get_products_config()
-
-            return products_config
-        except Exception:
+            return self.degiro_service.get_client().get_products_config()
+        except (ConnectionError, TimeoutError, DeGiroOfflineModeError):
+            self.logger.warning("Cannot get product config from DeGiro")
+            return {}
+        except Exception as e:
+            self.logger.error(f"Unexpected error getting product config: {e}")
             return {}
 
     def calculate_product_growth(self) -> dict:
@@ -360,7 +464,7 @@ class PortfolioService:
 
         product_growth = {}
         for entry in results:
-            key = entry["productId"]
+            key = entry[self.PRODUCT_ID_FIELD]
             product = product_growth.get(key, {})
             carry_total = product.get("carryTotal", 0)
 
@@ -636,10 +740,10 @@ class PortfolioService:
             # The 'tradable' attribute identifies old Stocks, like the ones that are
             # renamed for some reason, and it's not good enough to identify stocks
             # that are provided as dividends, for example.
-            if "Non tradeable" in product.get("name", ""):
+            if self.NON_TRADEABLE_IDENTIFIER in product.get("name", ""):
                 continue
 
-            data["productId"] = key
+            data[self.PRODUCT_ID_FIELD] = key
             data["product"] = {
                 "name": product["name"],
                 "isin": product["isin"],
