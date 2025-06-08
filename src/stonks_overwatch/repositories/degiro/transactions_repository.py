@@ -39,19 +39,19 @@ class TransactionsRepository:
             return dictfetchall(cursor)
 
     @staticmethod
-    def get_portfolio_products() -> list[dict]:
+    def get_portfolio_products(only_open: bool = False) -> list[dict]:
         with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT product_id,
-                    SUM(quantity) AS size,
-                    SUM(total_plus_all_fees_in_base_currency) as total_plus_all_fees_in_base_currency,
-                    ABS(SUM(total_plus_all_fees_in_base_currency) / SUM(quantity)) AS break_even_price
-                FROM degiro_transactions
-                GROUP BY product_id
-                HAVING SUM(quantity) > 0;
-                """
-            )
+            query = """
+                    SELECT product_id,
+                           SUM(quantity) AS size,
+                           SUM(total_plus_all_fees_in_base_currency) as total_plus_all_fees_in_base_currency,
+                           ABS(SUM(total_plus_all_fees_in_base_currency) / SUM(quantity)) AS break_even_price
+                    FROM degiro_transactions
+                    GROUP BY product_id
+                    """
+            if only_open:
+                query += "\nHAVING SUM(quantity) > 0"
+            cursor.execute(query)
             return dictfetchall(cursor)
 
     @staticmethod
