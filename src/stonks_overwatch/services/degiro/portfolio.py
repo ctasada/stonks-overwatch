@@ -28,6 +28,8 @@ class PortfolioService:
     logger = StonksLogger.get_logger("stonks_overwatch.portfolio_data.degiro", "[DEGIRO|PORTFOLIO]")
 
     SUPPORTED_CURRENCY_ACCOUNTS = ['EUR', 'USD', 'GBP']
+    DEBUG_SYMBOL = "NVDA"  # Change this to debug other symbols
+    DEBUG_DATES = ["2021-07-18", "2021-07-19", "2021-07-20"]  # Adjust for specific date ranges
 
     def __init__(
         self,
@@ -486,7 +488,6 @@ class PortfolioService:
         should_log = self._should_log_debug(symbol, date_value)
 
         if should_log:
-            original_value = multiplier
             self.logger.debug(f"[{symbol} DEBUG] Processing date {date_value}")
 
         for split_data in reversed(stock_splits):
@@ -552,16 +553,14 @@ class PortfolioService:
 
     def _is_debug_symbol(self, symbol: str) -> bool:
         """Check if this symbol should have debug logging enabled."""
-        DEBUG_SYMBOL = "NVDA"  # Change this to debug other symbols
-        return symbol == DEBUG_SYMBOL
+        return symbol == self.DEBUG_SYMBOL
 
     def _should_log_debug(self, symbol: str, date_value: str) -> bool:
         """Check if debug logging should be enabled for this symbol and date."""
         if not self._is_debug_symbol(symbol):
             return False
 
-        DEBUG_DATES = ["2021-07-18", "2021-07-19", "2021-07-20"]  # Adjust for specific date ranges
-        return date_value in DEBUG_DATES
+        return date_value in self.DEBUG_DATES
 
     def _detect_effective_split_dates(self, symbol: str, position_value: dict, stock_splits: list) -> dict:
         """

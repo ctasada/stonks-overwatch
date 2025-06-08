@@ -44,6 +44,9 @@ class Dashboard(View):
     VALID_INTERVALS = frozenset({"YTD", "MTD", "1M", "3M", "6M", "1Y", "3Y", "5Y", "ALL"})
     VALID_VIEWS = frozenset({"performance", "value"})
 
+    # Data quality threshold: warn if daily return exceeds 20%
+    LARGE_RETURN_THRESHOLD = 0.20
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.deposits = DepositsAggregatorService()
@@ -212,6 +215,8 @@ class Dashboard(View):
         # Calculate daily returns and accumulate
         cumulative_return = 1.0
 
+        logger = StonksLogger.get_logger("stonks_overwatch.dashboard.twr", "[TWR|CALCULATION]")
+
         for i in range(len(dates)-1):
             start_value = modified_values[i]
             if start_value == 0:
@@ -226,7 +231,16 @@ class Dashboard(View):
             # Update cumulative return
             daily_return = (adjusted_end_value - start_value) / start_value
             cumulative_return *= (1 + daily_return)
-            cumulative_returns[dates[i]] = cumulative_return - 1
+
+            # Data quality check: warn about unusually large daily returns
+            if abs(daily_return) > Dashboard.LARGE_RETURN_THRESHOLD:
+                logger.warning(f"Large daily return detected: {daily_return:.2%} from "
+                             f"{dates[i].strftime('%Y-%m-%d')} to {dates[i+1].strftime('%Y-%m-%d')} "
+                             f"(€{start_value:,.2f} → €{end_value:,.2f}, cashflow: €{cashflow:,.2f}). "
+                             f"This may indicate data quality issues or corporate actions.")
+
+            # Fix: Attribute the return to the END date of the period, not the start date
+            cumulative_returns[dates[i+1]] = cumulative_return - 1
 
             # Modify next period's starting value to include cashflow
             if i < len(dates)-2:
@@ -283,6 +297,9 @@ class Dashboard(View):
             cash_flows[item.datetime_as_date()] += item.change
 
         market_value_per_day = { item['x']: item['y'] for item in portfolio_value }
+
+        # Apply timing correction to align cash flows with when they actually affect portfolio values
+        cash_flows = self._correct_cash_flow_timing(cash_flows, market_value_per_day)
 
         if not start_date:
             start_date = list(market_value_per_day.keys())[0]
@@ -376,3 +393,79 @@ class Dashboard(View):
                             .to_dict())
 
         return all_dates_list, years_dict, month_years_dict
+
+    def _correct_cash_flow_timing(self, cash_flows: dict, market_value_per_day: dict) -> dict:
+        """
+        Correct timing misalignment between when deposits appear in portfolio values
+        vs. when they're officially recorded.
+
+        This detects cases where:
+        1. Portfolio value has a large jump on day X with no recorded cash flow
+        2. A cash flow is recorded on day X+1 that roughly matches the jump
+        3. Moves the cash flow from day X+1 to day X
+        """
+        corrected_cash_flows = cash_flows.copy()
+
+        # Get all dates with portfolio values, sorted
+        portfolio_dates = sorted(market_value_per_day.keys())
+
+        # Track corrections made
+        corrections_made = []
+
+        for i in range(len(portfolio_dates) - 1):
+            current_date = portfolio_dates[i]
+            next_date = portfolio_dates[i + 1]
+
+            current_value = market_value_per_day[current_date]
+            next_value = market_value_per_day[next_date]
+
+            # Skip if values are too small to be meaningful
+            if current_value < 1000 or next_value < 1000:
+                continue
+
+            # Calculate day-over-day change
+            day_change = next_value - current_value
+            day_change_pct = abs(day_change / current_value)
+
+            # Look for large changes (>20%) with no corresponding cash flow
+            if day_change_pct > 0.20 and corrected_cash_flows.get(next_date, 0) == 0:
+
+                # Look for a matching cash flow in the next few days
+                for look_ahead in range(1, 4):  # Check next 1-3 days
+                    if i + 1 + look_ahead >= len(portfolio_dates):
+                        break
+
+                    candidate_date = portfolio_dates[i + 1 + look_ahead]
+                    candidate_cash_flow = corrected_cash_flows.get(candidate_date, 0)
+
+                    if candidate_cash_flow != 0:
+                        # Check if the cash flow roughly matches the portfolio jump
+                        # Allow for some difference due to market movement
+                        expected_jump = abs(candidate_cash_flow)
+                        actual_jump = abs(day_change)
+
+                        # If the cash flow is within 50% of the portfolio jump, it's likely a timing issue
+                        if 0.5 <= actual_jump / expected_jump <= 1.5:
+                            # Move the cash flow to the date when it actually affected portfolio
+                            corrected_cash_flows[next_date] = candidate_cash_flow
+                            corrected_cash_flows[candidate_date] = 0
+
+                            corrections_made.append({
+                                'from_date': candidate_date,
+                                'to_date': next_date,
+                                'amount': candidate_cash_flow,
+                                'portfolio_jump': day_change,
+                                'jump_pct': day_change_pct * 100
+                            })
+
+                            self.logger.info(f"Cash flow timing corrected: €{candidate_cash_flow:,.0f} moved "
+                                             f"from {candidate_date} to {next_date} "
+                                             f"(aligned with {day_change_pct*100:.1f}% portfolio change)")
+                            break
+
+        if corrections_made:
+            self.logger.info(f"Applied {len(corrections_made)} cash flow timing corrections")
+
+        return corrected_cash_flows
+
+

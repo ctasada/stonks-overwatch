@@ -75,6 +75,7 @@ See [Wiki - Developing Stonks Overwatch](https://github.com/ctasada/stonks-overw
 - Review Closed/All positions in Portfolio Overview. Some entries contain unexpected/inconsistent values
 - TEAM: Growth values seem too low for what I remember, should be ~80%
 - Portfolio Growth drops to 0 when running in offline mode
+- Portfolio Growth: Zoom works, but Panning doesn't work. Needs to be fixed
 
 ## TODOs
 - [ ] Tables should allow choosing the number of rows to show. 
