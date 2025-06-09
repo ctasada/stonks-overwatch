@@ -1,6 +1,6 @@
 [project]
 name = "stonks-overwatch"
-version = "0.1.1.dev0"
+version = "0.1.0"
 description = "Stonks Overwatch"
 authors = [{name = "Carlos Tasada", email = "carlos.tasada@gmail.com"}]
 license = "MIT"
@@ -20,7 +20,7 @@ dependencies = [
     "apscheduler >= 3.11.0",
     "tzlocal >= 5.3.1",
     "python-bitvavo-api >= 1.4.3",
-    "yfinance >= 0.2.61",
+    "yfinance >= 0.2.62",
     "iso10383 >=2025.2.10",
 ]
 

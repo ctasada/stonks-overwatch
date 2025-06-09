@@ -20,14 +20,14 @@ generate_rounded_icon() {
   rect_y2=$((height - margin_h))
   radius=$((width / 6))
 
-  magick \
-    \( -size "$size" gradient:"#5cacee-#3b5998" \) \
-    \( -background none "$ICON_DIR/stonks_overwatch.svg" -density 300 -resize "$size" \) \
-    -compose over -composite "$ICON_DIR/original.png"
-
+#  magick \
+#    \( -size "$size" gradient:"#5cacee-#3b5998" \) \
+#    \( -background none "$ICON_DIR/stonks_overwatch.svg" -density 300 -resize "$size" \) \
+#    -compose over -composite "$ICON_DIR/original.png"
+  magick "$ICON_DIR/original.png" -resize "$size"
   magick -size "$size" xc:none -draw "roundrectangle $margin_w,$margin_h,$rect_x2,$rect_y2,$radius,$radius" png:- | \
   magick "$ICON_DIR/original.png" -alpha Set - -compose DstIn -composite "$ICON_PATH"
-  rm -f "$ICON_DIR/original.png"
+#  rm -f "$ICON_DIR/original.png"
 }
 
 generate_icns() {
