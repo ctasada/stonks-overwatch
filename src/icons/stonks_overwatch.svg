@@ -1,45 +1,27 @@
-<?xml version="1.0" standalone="no"?>
-<svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="1024.000000pt" height="1024.000000pt" viewBox="0 0 1024.000000 1024.000000" preserveAspectRatio="xMidYMid meet">
-<g transform="translate(0.000000,1024.000000) scale(0.100000,-0.100000)"
-   fill="#000000" stroke="none">
-<path d="M8720 8034 c-63 -13 -144 -28 -180 -33 -36 -6 -117 -19 -180 -31
--117 -22 -244 -44 -450 -79 -196 -33 -217 -40 -249 -86 -27 -40 -27 -77 0
--133 24 -49 88 -100 297 -237 67 -44 121 -85 119 -92 -1 -6 -40 -51 -86 -100
--125 -132 -1155 -1173 -2146 -2169 l-881 -885 -509 512 c-346 347 -523 517
--550 530 -87 40 -143 20 -247 -89 -118 -124 -557 -568 -1325 -1342 -778 -784
--882 -890 -900 -923 -41 -74 20 -229 116 -294 39 -27 107 -31 149 -9 15 8 88
-76 162 151 74 75 548 551 1052 1058 l917 922 498 -497 c274 -274 508 -506 520
--516 42 -36 99 -55 140 -48 41 8 -78 -109 2096 2076 315 316 730 736 922 933
-193 196 354 356 359 354 6 -2 53 -66 105 -142 53 -77 119 -163 147 -192 49
--51 52 -53 106 -53 72 0 115 28 139 90 9 25 31 151 49 280 17 129 35 262 40
-295 5 33 14 96 20 140 5 44 22 161 37 260 41 269 38 295 -47 353 -42 28 -88
-27 -240 -4z"  style="fill: rgb(91, 194, 54);"/>
-<path d="M4880 7484 c-406 -35 -655 -85 -999 -199 -720 -241 -1286 -614 -1958
--1292 -281 -283 -528 -568 -566 -653 -27 -61 -27 -141 0 -203 25 -54 160 -239
-260 -354 108 -126 162 -183 451 -476 l274 -277 127 122 c69 67 127 126 129
-132 1 6 -63 71 -142 145 -80 73 -221 215 -315 315 -176 188 -421 474 -421 491
-0 6 91 111 202 235 585 653 1033 1012 1603 1286 251 121 245 122 113 -14 -378
--390 -566 -771 -629 -1276 -15 -121 -7 -399 16 -576 9 -68 18 -126 20 -128 2
--2 56 39 121 93 l117 96 2 252 c2 265 14 365 65 542 189 656 744 1191 1370
-1319 397 81 862 19 1255 -168 264 -125 522 -337 670 -549 33 -47 64 -85 69
--83 5 1 51 47 102 102 l93 100 -50 79 c-28 43 -81 110 -117 148 l-67 69 70
--38 c39 -20 116 -64 173 -96 l104 -59 85 78 c47 43 110 101 140 128 l55 50
--89 52 c-346 203 -850 410 -1239 507 -170 43 -278 62 -454 82 -130 14 -548 26
--640 18z" style="fill: rgb(34, 38, 40);"/>
-<path d="M7853 6188 l-122 -123 191 -185 c190 -184 393 -397 533 -560 l73 -86
--161 -184 c-467 -533 -881 -902 -1297 -1155 -156 -95 -451 -241 -548 -271 -15
--5 -15 -4 -2 8 45 39 229 252 299 345 295 395 429 869 392 1382 -7 91 -14 168
--16 170 -3 2 -60 -45 -128 -105 l-124 -109 -6 -165 c-10 -282 -68 -518 -188
--760 -103 -210 -204 -345 -391 -525 -285 -274 -615 -439 -973 -486 -132 -17
--431 -6 -575 21 -507 95 -938 356 -1183 718 -21 31 -42 60 -46 65 -4 4 -48
--37 -98 -91 l-92 -99 59 -99 c33 -54 87 -130 121 -168 l63 -68 -130 67 c-71
-37 -156 82 -189 100 l-60 33 -142 -129 -143 -128 102 -57 c470 -264 888 -414
-1413 -508 264 -47 337 -55 545 -63 340 -11 750 38 1095 133 631 173 1176 464
-1720 919 139 116 542 515 698 691 165 185 296 353 325 414 32 69 34 146 5 210
--23 51 -108 160 -257 330 -119 136 -617 640 -631 640 -6 0 -65 -55 -132 -122z" style="fill: rgb(34, 38, 40);"/>
-<path d="M4930 6211 c-256 -56 -479 -220 -615 -452 -82 -140 -123 -283 -131
--454 l-5 -110 353 -355 c195 -195 370 -371 391 -390 l37 -34 528 534 c290 293
-533 541 539 551 11 14 8 29 -12 84 -116 306 -343 522 -642 611 -121 36 -319
-43 -443 15z" style="fill: rgb(34, 38, 40);"/>
-</g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-0 0 1024 1024">
+  <defs>
+    <radialGradient gradientUnits="userSpaceOnUse" cx="971.744" cy="640.931" r="513.85" id="bg-gradient" gradientTransform="matrix(7.517022, 0, -0.000001, 7.483042, -4403.025831, 6707.487183)">
+      <stop offset="0" style="stop-color: #4064A4"></stop>
+      <stop offset="1" style="stop-color: #57A0E2"></stop>
+    </radialGradient>
+  </defs>
+  <g transform="matrix(0.1, 0, 0, -0.1, 5606.561035, 5718.910645)" fill="none" stroke="#222628" stroke-width="100">
+    <g transform="matrix(1.333333, 0, 0, 1.333333, -58481.4375, 45547.34375)" fill="#000000" stroke="none">
+      <rect id="background" y="7646.5" width="7699.97" height="7699.97" style="stroke-width: 8.696; fill-rule: nonzero; fill: url(#bg-gradient); stroke: url(#gradient-0);" transform="matrix(1, 0, -0.000269, -1, 2358.019701, 16387.807739)" x="-553.04"></rect>
+      <g id="eye" transform="matrix(0.976603, 0, 0, 1.032299, 83.458092, -340.243683)" fill="none" stroke="#222628" stroke-width="100" stroke-linecap="round" stroke-linejoin="round" style="">
+        <path d="M 7191.13 5067.91 C 7191.13 3921.43 5950.07 3204.89 4957.16 3778.11 C 4496.36 4044.15 4212.52 4535.81 4212.52 5067.91 C 4212.52 6214.37 5453.57 6930.9 6446.48 6357.63 C 6907.29 6091.61 7191.13 5599.95 7191.13 5067.91 Z" style="stroke: rgb(0, 0, 0); fill: rgb(0, 0, 0);"></path>
+        <path d="M 2757.42 5067.86 C 4777.12 7206.72 6740.22 7206.72 8646.22 5067.86 C 6626.42 2929.05 4663.52 2929.05 2757.42 5067.86 Z" style="stroke: rgb(0, 0, 0); stroke-width: 225px;"></path>
+      </g>
+      <g id="doughnut-chart" style="transform-origin: 251.807068px 191.141312px;" transform="matrix(11.533887, 0, 0, -11.416698, 2445.39624, 6882.505859)">
+        <circle r="40" cx="358.192" cy="845.872" fill="transparent" stroke-dasharray="62.8318 251.3272" stroke-dashoffset="0" style="transform-box: fill-box; transform-origin: 50% 50%; stroke-width: 27.000094px; stroke: rgb(130, 159, 102); stroke-linecap: butt;" transform="matrix(0, -2.235725, 2.098034, 0, 148.319519, -461.363739)"></circle>
+        <circle r="40" cx="358.192" cy="845.872" fill="transparent" stroke-dasharray="50.26544 251.3272" stroke-dashoffset="-62.8318" style="transform-box: fill-box; transform-origin: 50% 50%; stroke-width: 27.000094px; stroke: rgb(170, 123, 216); stroke-linecap: butt;" transform="matrix(0, -2.235725, 2.098034, 0, 148.319519, -461.363739)"></circle>
+        <circle r="40" cx="358.192" cy="845.872" fill="transparent" stroke-dasharray="37.69908 251.3272" stroke-dashoffset="-113.09724" style="transform-box: fill-box; transform-origin: 50% 50%; stroke-width: 27.000094px; stroke: rgb(130, 100, 159); stroke-linecap: butt;" transform="matrix(0, -2.235725, 2.098034, 0, 148.319519, -461.363739)"></circle>
+        <circle r="40" cx="358.192" cy="845.872" fill="transparent" stroke-dasharray="30.159264 251.3272" stroke-dashoffset="-150.79632" style="transform-box: fill-box; transform-origin: 50% 50%; stroke-width: 27.000094px; stroke: rgb(215, 192, 125); stroke-linecap: butt;" transform="matrix(0, -2.235725, 2.098034, 0, 148.319519, -461.363739)"></circle>
+        <circle r="40" cx="358.192" cy="845.872" fill="transparent" stroke-dasharray="25.13272 251.3272" stroke-dashoffset="-180.955584" style="transform-box: fill-box; transform-origin: 50% 50%; stroke-width: 27.000094px; stroke: rgb(158, 143, 101); stroke-linecap: butt;" transform="matrix(0, -2.235725, 2.098034, 0, 148.319519, -461.363739)"></circle>
+        <circle r="40" cx="358.192" cy="845.872" fill="transparent" stroke-dasharray="20.106176 251.3272" stroke-dashoffset="-206.088304" style="transform-box: fill-box; transform-origin: 50% 50%; stroke-width: 27.000094px; stroke: rgb(129, 216, 147); stroke-linecap: butt;" transform="matrix(0, -2.235725, 2.098034, 0, 148.319519, -461.363739)"></circle>
+        <circle r="40" cx="358.192" cy="845.872" fill="transparent" stroke-dasharray="15.079632 251.3272" stroke-dashoffset="-226.19448" style="transform-box: fill-box; transform-origin: 50% 50%; stroke-width: 27.000094px; stroke: rgb(124, 146, 216); stroke-linecap: butt;" transform="matrix(0, -2.235725, 2.098034, 0, 148.319519, -461.363739)"></circle>
+        <circle r="40" cx="358.192" cy="845.872" fill="transparent" stroke-dasharray="10.053088 251.3272" stroke-dashoffset="-241.274112" style="transform-box: fill-box; transform-origin: 50% 50%; stroke-width: 27.000094px; stroke: rgb(217, 125, 193); stroke-linecap: butt;" transform="matrix(0, -2.235725, 2.098034, 0, 148.319519, -461.363739)"></circle>
+      </g>
+    </g>
+  </g>
 </svg>

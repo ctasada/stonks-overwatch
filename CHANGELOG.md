@@ -7,22 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-
 ### Changed
-- New application icon
-- Tables now support sorting, pagination, and searching
-- Easier to navigate Dividends calendar
-- Added Dividends forecast
-
 ### Deprecated
 ### Removed
 ### Fixed
-- Minor internal fixes
-- Different tweaks to improve the user experience
-
 ### Security
 
-## [0.1.0] - 2025-05-18
+## [0.1.0] - 2025-06-08
 
 * Initial release
   - Provides support to connect to DEGIRO using login credentials and 2FA
