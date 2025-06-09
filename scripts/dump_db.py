@@ -18,52 +18,17 @@ from pathlib import Path
 
 # Django setup
 import django
-from django.apps import apps
 from django.core import serializers
 from django.core.management import call_command
 from django.db import transaction
 
 from stonks_overwatch.settings import STONKS_OVERWATCH_DATA_DIR
+from stonks_overwatch.utils.db_utils import dump_database
 
 def setup_django():
     """Setup Django environment"""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'stonks_overwatch.settings')
     django.setup()
-
-def get_models():
-    """Get the necessary models for the database dump"""
-
-    models = []
-    for model in apps.get_models():
-        app_label = model._meta.app_label
-
-        if app_label in ['stonks_overwatch']:
-            models.append(model)
-
-    return models
-
-
-def dump_database(output_file='db_dump.json'):
-    """Dump database content to JSON file"""
-
-    print(f"Dumping database to {output_file}...")
-
-    # Get all objects from selected models
-    objects_to_serialize = []
-    for model in get_models():
-        objects = model.objects.all()
-        objects_to_serialize.extend(objects)
-        print(f"Found {objects.count()} objects in {model._meta.app_label}.{model._meta.model_name}")
-
-    # Serialize to JSON
-    serialized_data = serializers.serialize('json', objects_to_serialize, indent=2)
-
-    # Write to a file
-    with open(output_file, 'w', encoding='utf-8') as f:
-        f.write(serialized_data)
-
-    print(f"Successfully dumped {len(objects_to_serialize)} objects to {output_file}")
-
 
 def load_database(input_file):
     """Load database content from the JSON file"""
@@ -75,8 +40,8 @@ def load_database(input_file):
 
     if os.path.exists(existing_db_file):
         print(f"Warning: Existing database file '{existing_db_file}' found.")
-        user_choice = (input("Would you like to exit (e), rename (r) or delete (d) the existing database file? " +
-                             "(e/r/d): ").strip().lower())
+        user_choice = (input("Would you like to exit (x), rename (r) or delete (d) the existing database file? " +
+                             "(x/r/d): ").strip().lower())
 
         if user_choice == 'r':
             new_name = input("Enter the new name for the existing database file: ").strip()
@@ -85,7 +50,7 @@ def load_database(input_file):
         elif user_choice == 'd':
             os.remove(existing_db_file)
             print(f"Database file '{existing_db_file}' deleted.")
-        elif user_choice == 'e':
+        elif user_choice == 'x':
             print("Exiting...")
             return
         else:
@@ -122,8 +87,8 @@ def main():
 
     # Dump command
     dump_parser = subparsers.add_parser('dump', help='Dump database to file')
-    dump_parser.add_argument('--output', '-o', default='db_dump.json',
-                             help='Output file name (default: db_dump.json)')
+    dump_parser.add_argument('--output', '-o', default='db_dump.zip',
+                             help='Output file name (default: db_dump.zip)')
 
     # Load command
     load_parser = subparsers.add_parser('load', help='Load database from file')

@@ -11,9 +11,14 @@ from wsgiref.util import FileWrapper
 
 import django
 import toga
+from asgiref.sync import sync_to_async
 from django.core.handlers.wsgi import WSGIHandler
 from django.core.management import call_command
 from django.core.servers.basehttp import WSGIRequestHandler
+from toga.command import Command, Group
+from toga.dialogs import ConfirmDialog, ErrorDialog, InfoDialog, SaveFileDialog
+
+from stonks_overwatch.utils.db_utils import dump_database
 
 # Middleware to serve static files from the staticfiles directory.
 # For some reason, the static files cannot be served directly when using Toga. This class provides a solution
@@ -109,10 +114,120 @@ class StonksOverwatchApp(toga.App):
         self.main_window.size = (1024, 768)
         self.main_window.content = self.web_view
 
+        # Add debug menu items
+        self._setup_debug_menu()
+
         # Remove default menu items that are not needed
         for command in self.commands:
             if command.group.text == "File" and command.text == "Close All":
                 self.commands.remove(command)
+
+    def _setup_debug_menu(self):
+        """Set up debug menu items."""
+
+        # Create a Debug group for organizing debug commands
+        tools_group = Group("Tools")
+
+        # Create the download database command
+        download_db_cmd = Command(
+            self._download_database,
+            text="Export Internal Database...",
+            tooltip="Download the internal database for debugging",
+            group=tools_group,
+            section=0  # Section 0 for primary debug actions
+        )
+
+        # Add more debug commands as needed
+        clear_cache_cmd = Command(
+            self._clear_cache,
+            text="Clear Cache",
+            tooltip="Clear application cache",
+            group=tools_group,
+            section=1  # Different section will be separated by divider
+        )
+
+        # Add commands to the app
+        self.commands.add(download_db_cmd)
+        self.commands.add(clear_cache_cmd)
+
+    async def _download_database(self, widget):
+        """Handle database download action."""
+        try:
+            # Show confirmation dialog
+            confirmed = await self.main_window.dialog(
+                ConfirmDialog(
+                    "Export Database",
+                    "This will export the internal database for debugging purposes. Continue?"
+                )
+            )
+
+            if not confirmed:
+                return
+
+            # Get save location from user
+            save_path = await self.main_window.dialog(
+                SaveFileDialog(
+                    "Save Database Export",
+                    suggested_filename="db_export.zip",
+                    file_types=['zip']
+                )
+            )
+
+            if save_path:
+                await self._export_database(save_path)
+                await self.main_window.dialog(
+                    InfoDialog(
+                        "Export Complete",
+                        f"Database exported successfully to:\n{save_path}"
+                    )
+                )
+
+        except Exception as e:
+            print(f"Error exporting database: {e}")
+            await self.main_window.dialog(
+                ErrorDialog(
+                    "Export Failed",
+                    f"Failed to export database: {str(e)}"
+                )
+            )
+
+    async def _export_database(self, destination_path):
+        """Export the internal database to a specified path."""
+
+        source_db_path = os.path.join(self.paths.data, "db.sqlite3")
+
+        if not os.path.exists(source_db_path):
+            raise FileNotFoundError(f"Database not found at {source_db_path}")
+
+        print(f"Exporting database {source_db_path} to {destination_path}...")
+
+        return await sync_to_async(dump_database)(destination_path)
+
+    async def _clear_cache(self, widget):
+        """Handle cache clearing action."""
+        confirmed = await self.main_window.dialog(
+            ConfirmDialog(
+                "Clear Cache",
+                "This will clear all cached data. Continue?"
+            )
+        )
+
+        if confirmed:
+            # Implement your cache clearing logic here
+            cache_dir = self.paths.cache
+            # Clear cache files...
+            print(f"Clearing cache at {cache_dir}")
+            files = os.listdir(cache_dir)
+            for file in files:
+                os.remove(os.path.join(cache_dir, file))
+                print(f"- Deleted {file}")
+
+            await self.main_window.dialog(
+                InfoDialog(
+                    "Cache Cleared",
+                    "Application cache has been cleared successfully."
+                )
+            )
 
     async def on_running(self):
         await self.server_exists
@@ -126,6 +241,6 @@ class StonksOverwatchApp(toga.App):
 def main():
     return StonksOverwatchApp(
         'Stonks Overwatch',
-        'com.caribay.investments.stonks_overwatch'
+        'com.caribay.stonks_overwatch'
     )
 

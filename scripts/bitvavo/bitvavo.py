@@ -92,19 +92,30 @@ class BitvavoImplementation:
         for asset, total in totals.items():
             print(f"{asset}: {total:.8f}")
 
+    def get_balances(self):
+        try:
+            balances = self.bitvavo.balance()
+            for asset in balances:
+                available = float(asset.get('available', 0))
+                in_order = float(asset.get('inOrder', 0))
+                if available > 0 or in_order > 0:
+                    print(f"{asset['symbol']}: Available = {available}, In Order = {in_order}")
+        except Exception as e:
+            print(f"Error fetching balances: {e}")
+
 # Shall I re-explain main? Naaaaaaaaaa.
 if __name__ == '__main__':
     bvavo = BitvavoImplementation()
 
-    bvavo.calculate_staking()
-
+    # bvavo.calculate_staking()
+    bvavo.get_balances()
     # portfolio = PortfolioService()
     # portfolio.get_portfolio()
     # bvavo.account()
     # bvavo.assets()
     # bvavo.balance()
     # bvavo.orders()
-    # bvavo.account_history()
+    bvavo.account_history()
     # bvavo.deposit_history()
     # bvavo.withdrawal_history()
     # bvavo.ticker_price()
