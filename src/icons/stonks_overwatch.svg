@@ -1,13 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-0 0 1024 1024">
-  <defs>
-    <radialGradient gradientUnits="userSpaceOnUse" cx="971.744" cy="640.931" r="513.85" id="bg-gradient" gradientTransform="matrix(7.517022, 0, -0.000001, 7.483042, -4403.025831, 6707.487183)">
-      <stop offset="0" style="stop-color: #4064A4"></stop>
-      <stop offset="1" style="stop-color: #57A0E2"></stop>
-    </radialGradient>
-  </defs>
   <g transform="matrix(0.1, 0, 0, -0.1, 5606.561035, 5718.910645)" fill="none" stroke="#222628" stroke-width="100">
     <g transform="matrix(1.333333, 0, 0, 1.333333, -58481.4375, 45547.34375)" fill="#000000" stroke="none">
-      <rect id="background" y="7646.5" width="7699.97" height="7699.97" style="stroke-width: 8.696; fill-rule: nonzero; fill: url(#bg-gradient); stroke: url(#gradient-0);" transform="matrix(1, 0, -0.000269, -1, 2358.019701, 16387.807739)" x="-553.04"></rect>
       <g id="eye" transform="matrix(0.976603, 0, 0, 1.032299, 83.458092, -340.243683)" fill="none" stroke="#222628" stroke-width="100" stroke-linecap="round" stroke-linejoin="round" style="">
         <path d="M 7191.13 5067.91 C 7191.13 3921.43 5950.07 3204.89 4957.16 3778.11 C 4496.36 4044.15 4212.52 4535.81 4212.52 5067.91 C 4212.52 6214.37 5453.57 6930.9 6446.48 6357.63 C 6907.29 6091.61 7191.13 5599.95 7191.13 5067.91 Z" style="stroke: rgb(0, 0, 0); fill: rgb(0, 0, 0);"></path>
         <path d="M 2757.42 5067.86 C 4777.12 7206.72 6740.22 7206.72 8646.22 5067.86 C 6626.42 2929.05 4663.52 2929.05 2757.42 5067.86 Z" style="stroke: rgb(0, 0, 0); stroke-width: 225px;"></path>

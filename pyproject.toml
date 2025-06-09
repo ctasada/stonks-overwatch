@@ -171,7 +171,7 @@ addopts = [
 
 [tool.briefcase]
 project_name = "Stonks Overwatch"
-bundle = "com.caribay.investments"
+bundle = "com.caribay"
 url = "https://github.com/ctasada/stonks-overwatch"
 license.file = "LICENSE"
 author = "Carlos Tasada"
