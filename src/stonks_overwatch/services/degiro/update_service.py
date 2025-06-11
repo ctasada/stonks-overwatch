@@ -410,6 +410,24 @@ class UpdateService:
                 self.logger.error(f"Cannot import row: {row}")
                 self.logger.error("Exception: ", error)
 
+    def __is_non_tradeable_product(self, product: dict) -> bool:
+        """Check if the product is non tradeable.
+
+        This method checks if the product is a non tradeable product.
+        Non-tradeable products are identified by the presence of "Non tradeable" in the name.
+
+        If the product is NOT tradable, we shouldn't consider it for Growth.
+
+        The 'tradable' attribute identifies old Stocks, like the ones that are
+        renamed for some reason, and it's not good enough to identify stocks
+        that are provided as dividends, for example.
+        """
+        if product["symbol"].endswith(".D"):
+            # This is a DeGiro-specific symbol, which is not tradeable
+            return True
+
+        return "Non tradeable" in product["name"]
+
     def __import_products_quotation(self) -> None: # noqa: C901
         product_growth = self.portfolio_data.calculate_product_growth()
 
@@ -429,11 +447,7 @@ class UpdateService:
             product = ProductInfoRepository.get_product_info_from_id(key)
 
             # FIXME: Code copied from dashboard._create_products_quotation()
-            # If the product is NOT tradable, we shouldn't consider it for Growth
-            # The 'tradable' attribute identifies old Stocks, like the ones that are
-            # renamed for some reason, and it's not good enough to identify stocks
-            # that are provided as dividends, for example.
-            if "Non tradeable" in product["name"]:
+            if self.__is_non_tradeable_product(product):
                 delete_keys.append(key)
                 continue
 

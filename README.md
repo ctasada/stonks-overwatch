@@ -60,14 +60,10 @@ See [Wiki - Developing Stonks Overwatch](https://github.com/ctasada/stonks-overw
 - Dividends show IBE.D as a dividend, when should show IBE
   - Transactions: The Buy/Sell of stocks resulting from dividends like IBE.D are not properly handled
 - Some stocks are no longer available in DEGIRO. We Need to find a way to handle them
-    - 'ATVI'(350113856)
     - 'TYME'(600028575)
-    - 'DPZ'(330187819): The symbol is available, but maybe the productId is not?
-    - 'PLTR'(600121287): The symbol is available, but maybe the productId is not?
-    - 'WEBR'(600179738): The symbol is available, but maybe the productId is not?
+    - 'WEBR'(600179738)
     - 'TEF.D'(280180545)
     - 'FRZA'(600236745)
-    - 600179738: No chart found
   Test https://github.com/alvarobartt/investiny to retrieve data from delisted stocks
 - CreateProduct Quotation does not respect the proper timeframes
 - Django Cache is disabled so that the portfolio selection works, otherwise the page is not properly reload
