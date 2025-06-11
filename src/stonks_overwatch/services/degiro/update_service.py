@@ -466,17 +466,18 @@ class UpdateService:
         # We need to use the productIds to get the daily quote for each product
         for key in product_growth.keys():
             symbol = product_growth[key]["product"]["symbol"]
+            isin = product_growth[key]["product"]["isin"]
             if product_growth[key]["product"].get("vwdIdSecondary") is not None:
                 issue_id = product_growth[key]["product"].get("vwdIdSecondary")
             else:
                 issue_id = product_growth[key]["product"].get("vwdId")
 
-            if issue_id is None:
-                self.logger.info(f"Issue ID not found for '{symbol}'({key}): {product_growth[key]}")
-                continue
-
             interval = product_growth[key]["quotation"]["interval"]
-            quotes_dict = self.degiro_service.get_product_quotation(issue_id, interval, symbol)
+            quotes_dict = self.degiro_service.get_product_quotation(issue_id, isin, interval, symbol)
+
+            if not quotes_dict:
+                self.logger.info(f"Quotation not found for '{symbol}' ({key}): {issue_id} / {interval}")
+                continue
 
             # Update the data ONLY if we get something back from DeGiro
             if quotes_dict:
