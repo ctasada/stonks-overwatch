@@ -185,8 +185,8 @@ class PortfolioService:
 
         # Fallback to close price if no quotation found
         if price == self.FALLBACK_PRICE and self.CLOSE_PRICE_FIELD in product_info:
-            self.logger.warning(f"No quotation found for product {product_data[self.PRODUCT_ID_FIELD]}, "
-                                f"using {self.CLOSE_PRICE_FIELD}")
+            self.logger.warning(f"No quotation found for '{product_info['symbol']}' "
+                                f"(productId {product_data[self.PRODUCT_ID_FIELD]}), using {self.CLOSE_PRICE_FIELD}")
             price = product_info[self.CLOSE_PRICE_FIELD]
 
         value = product_data["size"] * price

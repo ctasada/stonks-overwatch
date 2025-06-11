@@ -109,6 +109,9 @@ See [Wiki - Developing Stonks Overwatch](https://github.com/ctasada/stonks-overw
 - [ ] Enable usage of Demo DB in the application (running natively)
 - [ ] Provide support to configure the settings (API Key, etc.) in the application. 
   - [ ] Values should be stored in the keyring for security
+- [ ] `make check-dependencies` needs some extra work
+  - [ ] Review the usage of `polars` and `pandas` in the codebase and try to use only one of them
+  - [ ] `toga` is only used for the `app`. Probably it should be moved as a full dependency
 
 ## Logos
 - https://docs.brandfetch.com/docs/getting-started (requires API Key)
