@@ -26,8 +26,8 @@ chart_request = ChartRequest(
     requestid="1",
     resolution=Interval.P1D,
     series=[
-        "issueid:350016959",
-        "price:issueid:350016959",
+        "isin:US87184Q2066",
+        "price:isin:US87184Q2066",
     ],
     tz="Europe/Amsterdam",
 )

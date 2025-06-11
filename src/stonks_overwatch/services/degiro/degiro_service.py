@@ -12,6 +12,7 @@ from degiro_connector.trading.models.credentials import Credentials
 
 import stonks_overwatch.settings
 from stonks_overwatch.config.degiro_config import DegiroConfig
+from stonks_overwatch.settings import TIME_ZONE
 from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.logger import StonksLogger
 from stonks_overwatch.utils.singleton import singleton
@@ -152,24 +153,24 @@ class DeGiroService:
         products_info = self.api_client.get_products_info(product_list=product_ids, raw=True)
         return products_info["data"]
 
-    def get_product_quotation(self, issue_id: str, period: Interval, symbol: str) -> dict:
-        daily_quotations = self._get_product_daily_quotation(issue_id, period)
+    def get_product_quotation(self, issue_id: str|None, isin: str, period: Interval, symbol: str) -> dict:
+        daily_quotations = self._get_product_daily_quotation(issue_id=issue_id, isin=isin, period=period)
         if not daily_quotations:
-            self.logger.error(f"Product Quotations for '{symbol}'({issue_id}) / {period} not found")
+            self.logger.error(f"Product Quotations for '{symbol}' ({issue_id}) / {period} not found")
             return {}
         last_key = next(reversed(daily_quotations))
         last_value = daily_quotations[last_key]
-        last_quotation = self._get_product_last_quotation(issue_id, symbol, last_value)
+        last_quotation = self._get_product_last_quotation(issue_id, isin, symbol, last_value)
         return daily_quotations | last_quotation
 
-    def _get_product_daily_quotation(self, issue_id: str, period: Interval) -> dict:
+    def _get_product_daily_quotation(self, issue_id: str|None, isin: str, period: Interval) -> dict:
         """
         Get the list of quotations for the provided product for the indicated interval.
         The response is a list of date-value pairs.
         """
         self.check_connection()
 
-        chart = self._get_chart(issue_id, period, Interval.P1D)
+        chart = self._get_chart(issue_id=issue_id, isin=isin, period=period, resolution=Interval.P1D)
         if not chart:
             self.logger.warning(f"No chart found for {issue_id} / {period}")
             return {}
@@ -202,14 +203,14 @@ class DeGiroService:
 
         return quotes
 
-    def _get_product_last_quotation(self, issue_id: str, symbol: str, default_quotation: str) -> dict:
+    def _get_product_last_quotation(self, issue_id: str, isin: str, symbol: str, default_quotation: str) -> dict:
         """
         Get the list of quotations for the provided product for the indicated interval.
         The response is a list of date-value pairs.
         """
         self.check_connection()
 
-        chart = self._get_chart(issue_id, Interval.P1D, Interval.PT15M)
+        chart = self._get_chart(issue_id=issue_id, isin=isin, period=Interval.P1D, resolution=Interval.P1D)
         if not chart:
             self.logger.warning(f"No chart found for {issue_id} / {Interval.P1D}")
             return {}
@@ -224,18 +225,48 @@ class DeGiroService:
             if "column_1" in data_frame.columns:
                 quotes[current_date_str] = data_frame["column_1"][-1]
             else:
-                self.logger.warning(f"No daily quotation found for '{symbol}'({issue_id}) / {Interval.P1D}")
+                self.logger.warning(f"No daily quotation found for '{symbol}' ({issue_id} - {isin}) / {Interval.P1D}")
                 quotes[current_date_str] = default_quotation
 
         return quotes
 
     @staticmethod
-    def __is_chart_error_type(chart: dict) -> bool:
+    def __is_chart_error_type(chart: Chart|None) -> bool:
         return chart.get('series', [{}])[0].get('type') == 'error'
 
-    def _get_chart(self, issue_id: str, period: Interval, resolution: Interval) -> Chart | None:
-        user_token = self._get_user_token()
+    def _get_chart(
+            self,
+            issue_id: str|None,
+            isin: str,
+            period: Interval,
+            resolution: Interval
+    ) -> Chart | None:
+        """Using the issue_id guarantees that we get exactly the product quotes. If it's not available, then we can use
+        the isin. The issue_id may not be available if the product doesn't exist anymore.
+        """
+        chart = None
+        if issue_id:
+            chart = self.__get_chart(issue_id=issue_id, isin=None, period=period, resolution=resolution)
 
+        if chart is None:
+            chart = self.__get_chart(issue_id=None, isin=isin, period=period, resolution=resolution)
+
+        return chart
+
+    def __get_chart(
+            self,
+            issue_id: Optional[str],
+            isin: Optional[str],
+            period: Interval,
+            resolution: Interval
+    ) -> Chart | None:
+        if not issue_id and not isin:
+            raise ValueError("Either 'issue_id' or 'isin' must be provided")
+
+        identifier_type = "isin" if isin else "issueid"
+        identifier_value = isin if isin else issue_id
+
+        user_token = self._get_user_token()
         chart_fetcher = ChartFetcher(user_token=user_token)
         chart_request = ChartRequest(
             culture="nl-NL",
@@ -243,10 +274,10 @@ class DeGiroService:
             requestid="1",
             resolution=resolution,
             series=[
-                f"issueid:{issue_id}",
-                f"price:issueid:{issue_id}",
+                f"{identifier_type}:{identifier_value}",
+                f"price:{identifier_type}:{identifier_value}",
             ],
-            tz="Europe/Amsterdam",
+            tz=TIME_ZONE,
         )
         response = chart_fetcher.get_chart(chart_request=chart_request, raw=True)
         if not response or self.__is_chart_error_type(response):
