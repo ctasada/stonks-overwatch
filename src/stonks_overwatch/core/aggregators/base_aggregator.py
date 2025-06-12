@@ -75,19 +75,7 @@ class BaseAggregator(ABC):
             elif broker_name == "bitvavo":
                 return self._create_bitvavo_service()
             else:
-                # Try using the factory for other brokers
-                if self._service_type == ServiceType.PORTFOLIO:
-                    return self._service_factory.create_portfolio_service(broker_name)
-                elif self._service_type == ServiceType.TRANSACTION:
-                    return self._service_factory.create_transaction_service(broker_name)
-                elif self._service_type == ServiceType.DEPOSIT:
-                    return self._service_factory.create_deposit_service(broker_name)
-                elif self._service_type == ServiceType.DIVIDEND:
-                    return self._service_factory.create_dividend_service(broker_name)
-                elif self._service_type == ServiceType.FEE:
-                    return self._service_factory.create_fee_service(broker_name)
-                elif self._service_type == ServiceType.ACCOUNT:
-                    return self._service_factory.create_account_service(broker_name)
+                self._logger.error(f"{broker_name} is not supported")
                 return None
         except Exception as e:
             self._logger.error(f"Failed to create {self._service_type.value} service for {broker_name}: {e}")
