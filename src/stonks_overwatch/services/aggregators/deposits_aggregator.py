@@ -3,24 +3,15 @@ from typing import List
 
 import pandas as pd
 
-from stonks_overwatch.config.config import Config
-from stonks_overwatch.services.brokers.bitvavo.services.deposit_service import DepositsService as BitvavoDepositsService
-from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
-from stonks_overwatch.services.brokers.degiro.services.deposit_service import DepositsService as DeGiroDepositsService
+from stonks_overwatch.core.aggregators.base_aggregator import BaseAggregator
+from stonks_overwatch.core.factories.broker_registry import ServiceType
 from stonks_overwatch.services.models import Deposit, PortfolioId
 from stonks_overwatch.utils.core.localization import LocalizationUtility
-from stonks_overwatch.utils.core.logger import StonksLogger
 
-class DepositsAggregatorService:
-    logger = StonksLogger.get_logger("stonks_overwatch.portfolio_data", "[AGGREGATOR|DEPOSITS]")
+class DepositsAggregatorService(BaseAggregator):
 
     def __init__(self):
-        self.degiro_service = DeGiroService()
-
-        self.degiro_deposits = DeGiroDepositsService(
-            degiro_service=self.degiro_service,
-        )
-        self.bitvavo_deposits = BitvavoDepositsService()
+        super().__init__(ServiceType.DEPOSIT)
 
     def cash_deposits_history(self, selected_portfolio: PortfolioId) -> list[dict]:
         cash_contributions = self.get_cash_deposits(selected_portfolio)
@@ -57,13 +48,18 @@ class DepositsAggregatorService:
         return dataset
 
     def get_cash_deposits(self, selected_portfolio: PortfolioId) -> List[Deposit]:
-        deposits = []
-        if Config.default().is_degiro_enabled(selected_portfolio):
-            deposits += self.degiro_deposits.get_cash_deposits()
+        # Use the new helper method to collect and sort deposit data
+        return self._collect_and_sort(
+            selected_portfolio,
+            "get_cash_deposits",
+            sort_key=lambda x: x.datetime,
+            reverse=True
+        )
 
-        if Config.default().is_bitvavo_enabled(selected_portfolio):
-            deposits += self.bitvavo_deposits.get_cash_deposits()
+    def aggregate_data(self, selected_portfolio: PortfolioId, **kwargs) -> List[Deposit]:
+        """
+        Aggregate deposit data from all enabled brokers.
 
-        deposits = sorted(deposits, key=lambda x: x.datetime, reverse=True)
-
-        return deposits
+        This is the main aggregation method required by BaseAggregator.
+        """
+        return self.get_cash_deposits(selected_portfolio)

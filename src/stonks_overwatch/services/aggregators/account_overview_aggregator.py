@@ -1,26 +1,27 @@
 from typing import List
 
-from stonks_overwatch.config.config import Config
-from stonks_overwatch.services.brokers.bitvavo.services.account_service import (
-    AccountOverviewService as BitvavoAccountOverviewService,
-)
-from stonks_overwatch.services.brokers.degiro.services.account_service import (
-    AccountOverviewService as DeGiroAccountOverviewService,
-)
+from stonks_overwatch.core.aggregators.base_aggregator import BaseAggregator
+from stonks_overwatch.core.factories.broker_registry import ServiceType
 from stonks_overwatch.services.models import AccountOverview, PortfolioId
 
-class AccountOverviewAggregatorService:
+class AccountOverviewAggregatorService(BaseAggregator):
 
     def __init__(self):
-        self.degiro_account_overview = DeGiroAccountOverviewService()
-        self.bitvavo_account_overview = BitvavoAccountOverviewService()
+        super().__init__(ServiceType.ACCOUNT)
 
     def get_account_overview(self, selected_portfolio: PortfolioId) -> List[AccountOverview]:
-        overview = []
-        if Config.default().is_degiro_enabled(selected_portfolio):
-            overview += self.degiro_account_overview.get_account_overview()
+        # Use the new helper method to collect and sort account overview data
+        return self._collect_and_sort(
+            selected_portfolio,
+            "get_account_overview",
+            sort_key=lambda k: k.datetime,
+            reverse=True
+        )
 
-        if Config.default().is_bitvavo_enabled(selected_portfolio):
-            overview += self.bitvavo_account_overview.get_account_overview()
+    def aggregate_data(self, selected_portfolio: PortfolioId, **kwargs) -> List[AccountOverview]:
+        """
+        Aggregate account overview data from all enabled brokers.
 
-        return sorted(overview, key=lambda k: k.datetime, reverse=True)
+        This is the main aggregation method required by BaseAggregator.
+        """
+        return self.get_account_overview(selected_portfolio)

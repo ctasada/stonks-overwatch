@@ -117,7 +117,7 @@ class BaseAggregator(ABC):
                 from stonks_overwatch.services.brokers.degiro.services.portfolio_service import PortfolioService
 
                 degiro_client = DeGiroService()
-                account_service = AccountOverviewService(degiro_service=degiro_client)
+                account_service = AccountOverviewService()
                 currency_service = CurrencyConverterService()
                 portfolio_service = PortfolioService(degiro_service=degiro_client)
 
@@ -133,8 +133,7 @@ class BaseAggregator(ABC):
                 return FeesService(degiro_service=degiro_client)
             elif self._service_type == ServiceType.ACCOUNT:
                 from stonks_overwatch.services.brokers.degiro.services.account_service import AccountOverviewService
-                degiro_client = DeGiroService()
-                return AccountOverviewService(degiro_service=degiro_client)
+                return AccountOverviewService()
         except Exception as e:
             self._logger.error(f"Failed to create DeGiro {self._service_type.value} service: {e}")
             return None

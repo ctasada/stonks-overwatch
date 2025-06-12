@@ -1,24 +1,25 @@
-from stonks_overwatch.config.config import Config
-from stonks_overwatch.services.brokers.bitvavo.services.fee_service import FeesService as BitvavoFeesService
-from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
-from stonks_overwatch.services.brokers.degiro.services.fee_service import FeesService as DeGiroFeesService
+from stonks_overwatch.core.aggregators.base_aggregator import BaseAggregator
+from stonks_overwatch.core.factories.broker_registry import ServiceType
 from stonks_overwatch.services.models import PortfolioId
 
-class FeesAggregatorService:
+class FeesAggregatorService(BaseAggregator):
 
     def __init__(self):
-        self.degiro_service = DeGiroService()
-        self.degiro_fees = DeGiroFeesService(
-            degiro_service=self.degiro_service,
-        )
-        self.bitvavo_fees = BitvavoFeesService()
+        super().__init__(ServiceType.FEE)
 
     def get_fees(self, selected_portfolio: PortfolioId) -> list[dict]:
-        fees = []
-        if Config.default().is_degiro_enabled(selected_portfolio):
-            fees += self.degiro_fees.get_fees()
+        # Use the new helper method to collect and sort fee data
+        return self._collect_and_sort(
+            selected_portfolio,
+            "get_fees",
+            sort_key=lambda k: (k["date"], k["time"]),
+            reverse=True
+        )
 
-        if Config.default().is_bitvavo_enabled(selected_portfolio):
-            fees += self.bitvavo_fees.get_fees()
+    def aggregate_data(self, selected_portfolio: PortfolioId, **kwargs) -> list[dict]:
+        """
+        Aggregate fee data from all enabled brokers.
 
-        return sorted(fees, key=lambda k: (k["date"], k["time"]), reverse=True)
+        This is the main aggregation method required by BaseAggregator.
+        """
+        return self.get_fees(selected_portfolio)

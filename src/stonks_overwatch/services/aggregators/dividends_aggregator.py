@@ -1,39 +1,26 @@
 from typing import List
 
-from stonks_overwatch.config.config import Config
-from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
-from stonks_overwatch.services.brokers.degiro.services.account_service import (
-    AccountOverviewService as DeGiroAccountOverviewService,
-)
-from stonks_overwatch.services.brokers.degiro.services.currency_service import (
-    CurrencyConverterService as DeGiroCurrencyConverterService,
-)
-from stonks_overwatch.services.brokers.degiro.services.dividend_service import (
-    DividendsService as DeGiroDividendsService,
-)
-from stonks_overwatch.services.brokers.degiro.services.portfolio_service import (
-    PortfolioService as DeGiroPortfolioService,
-)
+from stonks_overwatch.core.aggregators.base_aggregator import BaseAggregator
+from stonks_overwatch.core.factories.broker_registry import ServiceType
 from stonks_overwatch.services.models import Dividend, PortfolioId
 
-class DividendsAggregatorService:
+class DividendsAggregatorService(BaseAggregator):
 
     def __init__(self):
-        self.degiro_service = DeGiroService()
-
-        self.account_overview = DeGiroAccountOverviewService()
-        self.currency_service = DeGiroCurrencyConverterService()
-        self.portfolio_service = DeGiroPortfolioService(self.degiro_service)
-        self.degiro_dividends = DeGiroDividendsService(
-            account_overview=self.account_overview,
-            currency_service=self.currency_service,
-            portfolio_service=self.portfolio_service,
-            degiro_service=self.degiro_service,
-        )
+        super().__init__(ServiceType.DIVIDEND)
 
     def get_dividends(self, selected_portfolio: PortfolioId) -> List[Dividend]:
-        dividends = []
-        if Config.default().is_degiro_enabled(selected_portfolio):
-            dividends += self.degiro_dividends.get_dividends()
+        # Use the new helper method to collect and sort dividend data
+        return self._collect_and_sort(
+            selected_portfolio,
+            "get_dividends",
+            sort_key=lambda k: k.payment_date
+        )
 
-        return sorted(dividends, key=lambda k: k.payment_date)
+    def aggregate_data(self, selected_portfolio: PortfolioId, **kwargs) -> List[Dividend]:
+        """
+        Aggregate dividend data from all enabled brokers.
+
+        This is the main aggregation method required by BaseAggregator.
+        """
+        return self.get_dividends(selected_portfolio)
