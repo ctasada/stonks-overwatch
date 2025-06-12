@@ -2,15 +2,15 @@ from datetime import datetime, time
 from typing import List
 
 from stonks_overwatch.config.config import Config
-from ..repositories.dividends_repository import DividendsRepository
-from ..repositories.product_info_repository import ProductInfoRepository
-from .account_service import AccountOverviewService
-from .currency_service import CurrencyConverterService
-from ..client.degiro_client import DeGiroService
-from .portfolio_service import PortfolioService
+from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
+from stonks_overwatch.services.brokers.degiro.repositories.dividends_repository import DividendsRepository
+from stonks_overwatch.services.brokers.degiro.repositories.product_info_repository import ProductInfoRepository
+from stonks_overwatch.services.brokers.degiro.services.account_service import AccountOverviewService
+from stonks_overwatch.services.brokers.degiro.services.currency_service import CurrencyConverterService
+from stonks_overwatch.services.brokers.degiro.services.portfolio_service import PortfolioService
 from stonks_overwatch.services.models import Dividend, DividendType
-from stonks_overwatch.utils.constants import ProductType
-from stonks_overwatch.utils.logger import StonksLogger
+from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.utils.domain.constants import ProductType
 
 class DividendsService:
     logger = StonksLogger.get_logger("stonks_overwatch.dividends_service", "[DEGIRO|DIVIDENDS]")

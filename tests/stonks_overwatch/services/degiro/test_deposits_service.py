@@ -4,8 +4,8 @@ import pathlib
 from isodate import parse_datetime
 
 from stonks_overwatch.config.degiro_credentials import DegiroCredentials
-from stonks_overwatch.services.brokers.degiro.repositories.models import DeGiroCashMovements
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import CredentialsManager
+from stonks_overwatch.services.brokers.degiro.repositories.models import DeGiroCashMovements
 from stonks_overwatch.services.brokers.degiro.services.deposit_service import DepositsService
 from stonks_overwatch.services.models import DepositType
 from tests.stonks_overwatch.fixtures import TestDeGiroService

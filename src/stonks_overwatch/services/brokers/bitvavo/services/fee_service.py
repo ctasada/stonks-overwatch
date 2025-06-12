@@ -1,8 +1,7 @@
 from stonks_overwatch.config.config import Config
-from stonks_overwatch.utils.localization import LocalizationUtility
-
-from .transaction_service import TransactionsService
-from ..client.bitvavo_client import BitvavoService
+from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import BitvavoService
+from stonks_overwatch.services.brokers.bitvavo.services.transaction_service import TransactionsService
+from stonks_overwatch.utils.core.localization import LocalizationUtility
 
 class FeesService:
 

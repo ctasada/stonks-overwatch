@@ -1,9 +1,9 @@
 from typing import List
 
-from ..repositories.cash_movements_repository import CashMovementsRepository
-from ..repositories.product_info_repository import ProductInfoRepository
+from stonks_overwatch.services.brokers.degiro.repositories.cash_movements_repository import CashMovementsRepository
+from stonks_overwatch.services.brokers.degiro.repositories.product_info_repository import ProductInfoRepository
 from stonks_overwatch.services.models import AccountOverview
-from stonks_overwatch.utils.logger import StonksLogger
+from stonks_overwatch.utils.core.logger import StonksLogger
 
 class AccountOverviewService:
     logger = StonksLogger.get_logger("stonks_overwatch.account_overview_data", "DEGIRO|ACCOUNT_OVERVIEW")

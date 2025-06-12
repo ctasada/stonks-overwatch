@@ -1,11 +1,10 @@
 from stonks_overwatch.config.config import Config
-from stonks_overwatch.utils.localization import LocalizationUtility
-
-from .currency_service import CurrencyConverterService
-from ..client.degiro_client import DeGiroService
-from ..repositories.cash_movements_repository import CashMovementsRepository
-from ..repositories.product_info_repository import ProductInfoRepository
-from ..repositories.transactions_repository import TransactionsRepository
+from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
+from stonks_overwatch.services.brokers.degiro.repositories.cash_movements_repository import CashMovementsRepository
+from stonks_overwatch.services.brokers.degiro.repositories.product_info_repository import ProductInfoRepository
+from stonks_overwatch.services.brokers.degiro.repositories.transactions_repository import TransactionsRepository
+from stonks_overwatch.services.brokers.degiro.services.currency_service import CurrencyConverterService
+from stonks_overwatch.utils.core.localization import LocalizationUtility
 
 class FeesService:
 

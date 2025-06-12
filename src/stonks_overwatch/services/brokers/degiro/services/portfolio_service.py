@@ -7,22 +7,23 @@ from django.utils.functional import cached_property
 from iso10383 import MIC
 
 from stonks_overwatch.config.config import Config
+from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroOfflineModeError, DeGiroService
+from stonks_overwatch.services.brokers.degiro.repositories.cash_movements_repository import CashMovementsRepository
+from stonks_overwatch.services.brokers.degiro.repositories.company_profile_repository import CompanyProfileRepository
+from stonks_overwatch.services.brokers.degiro.repositories.product_info_repository import ProductInfoRepository
+from stonks_overwatch.services.brokers.degiro.repositories.product_quotations_repository import (
+    ProductQuotationsRepository,
+)
+from stonks_overwatch.services.brokers.degiro.repositories.transactions_repository import TransactionsRepository
+from stonks_overwatch.services.brokers.degiro.services.currency_service import CurrencyConverterService
+from stonks_overwatch.services.brokers.degiro.services.deposit_service import DepositsService
+from stonks_overwatch.services.brokers.yfinance.services.market_data_service import YFinance
+from stonks_overwatch.services.models import Country, DailyValue, PortfolioEntry, TotalPortfolio
 from stonks_overwatch.settings import TIME_ZONE
-from stonks_overwatch.utils.constants import ProductType, Sector
-from stonks_overwatch.utils.datetime import DateTimeUtility
-from stonks_overwatch.utils.localization import LocalizationUtility
-from stonks_overwatch.utils.logger import StonksLogger
-
-from .currency_service import CurrencyConverterService
-from .deposit_service import DepositsService
-from ..client.degiro_client import DeGiroOfflineModeError, DeGiroService
-from ..repositories.cash_movements_repository import CashMovementsRepository
-from ..repositories.company_profile_repository import CompanyProfileRepository
-from ..repositories.product_info_repository import ProductInfoRepository
-from ..repositories.product_quotations_repository import ProductQuotationsRepository
-from ..repositories.transactions_repository import TransactionsRepository
-from ...yfinance.services.market_data_service import YFinance
-from ....models import Country, DailyValue, PortfolioEntry, TotalPortfolio
+from stonks_overwatch.utils.core.datetime import DateTimeUtility
+from stonks_overwatch.utils.core.localization import LocalizationUtility
+from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.utils.domain.constants import ProductType, Sector
 
 class PortfolioService:
     logger = StonksLogger.get_logger("stonks_overwatch.portfolio_data.degiro", "[DEGIRO|PORTFOLIO]")

@@ -1,4 +1,4 @@
-from stonks_overwatch.utils.constants import ProductType, Sector
+from stonks_overwatch.utils.domain.constants import ProductType, Sector
 
 import pytest
 

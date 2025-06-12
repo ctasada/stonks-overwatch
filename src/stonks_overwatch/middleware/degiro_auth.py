@@ -8,7 +8,7 @@ from django.urls import resolve
 from stonks_overwatch.config.config import Config
 from stonks_overwatch.config.degiro_config import DegiroConfig
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
-from stonks_overwatch.utils.logger import StonksLogger
+from stonks_overwatch.utils.core.logger import StonksLogger
 
 class DeGiroAuthMiddleware:
     PUBLIC_URLS = {'login'}

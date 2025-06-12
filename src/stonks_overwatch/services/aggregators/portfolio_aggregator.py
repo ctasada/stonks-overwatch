@@ -10,8 +10,8 @@ from stonks_overwatch.services.brokers.degiro.services.portfolio_service import 
 )
 from stonks_overwatch.services.brokers.yfinance.services.market_data_service import YFinance
 from stonks_overwatch.services.models import DailyValue, PortfolioEntry, PortfolioId, TotalPortfolio
-from stonks_overwatch.utils.constants import ProductType, Sector
-from stonks_overwatch.utils.logger import StonksLogger
+from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.utils.domain.constants import ProductType, Sector
 
 class PortfolioAggregatorService:
     logger = StonksLogger.get_logger("stonks_overwatch.portfolio_data", "[AGGREGATOR]")

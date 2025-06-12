@@ -1,13 +1,12 @@
 from typing import List
 
 from stonks_overwatch.config.config import Config
-from stonks_overwatch.utils.localization import LocalizationUtility
-
-from ..client.constants import TransactionType
-from ..client.degiro_client import DeGiroService
-from ..repositories.product_info_repository import ProductInfoRepository
-from ..repositories.transactions_repository import TransactionsRepository
-from ....models import Transaction
+from stonks_overwatch.services.brokers.degiro.client.constants import TransactionType
+from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
+from stonks_overwatch.services.brokers.degiro.repositories.product_info_repository import ProductInfoRepository
+from stonks_overwatch.services.brokers.degiro.repositories.transactions_repository import TransactionsRepository
+from stonks_overwatch.services.models import Transaction
+from stonks_overwatch.utils.core.localization import LocalizationUtility
 
 class TransactionsService:
     def __init__(
@@ -27,7 +26,7 @@ class TransactionsService:
         for transaction in transactions_history:
             products_ids.append(int(transaction["productId"]))
 
-        # Remove duplicates from list
+        # Remove duplicates from the list
         products_ids = list(set(products_ids))
         products_info = ProductInfoRepository.get_products_info_raw(products_ids)
 

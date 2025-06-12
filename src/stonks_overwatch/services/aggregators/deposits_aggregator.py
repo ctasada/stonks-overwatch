@@ -8,8 +8,8 @@ from stonks_overwatch.services.brokers.bitvavo.services.deposit_service import D
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
 from stonks_overwatch.services.brokers.degiro.services.deposit_service import DepositsService as DeGiroDepositsService
 from stonks_overwatch.services.models import Deposit, PortfolioId
-from stonks_overwatch.utils.localization import LocalizationUtility
-from stonks_overwatch.utils.logger import StonksLogger
+from stonks_overwatch.utils.core.localization import LocalizationUtility
+from stonks_overwatch.utils.core.logger import StonksLogger
 
 class DepositsAggregatorService:
     logger = StonksLogger.get_logger("stonks_overwatch.portfolio_data", "[AGGREGATOR|DEPOSITS]")

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.utils.core.localization import LocalizationUtility
 
 import pytest
 

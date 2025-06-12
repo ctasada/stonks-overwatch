@@ -1,6 +1,6 @@
 from django.db import connection
 
-from stonks_overwatch.utils.db_utils import dictfetchall, dictfetchone
+from stonks_overwatch.utils.database.db_utils import dictfetchall, dictfetchone
 
 class ProductInfoRepository:
     @staticmethod

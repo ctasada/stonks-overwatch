@@ -2,7 +2,7 @@ import json
 
 from django.db import connection
 
-from stonks_overwatch.utils.db_utils import dictfetchall
+from stonks_overwatch.utils.database.db_utils import dictfetchall
 
 class CompanyProfileRepository:
     @staticmethod

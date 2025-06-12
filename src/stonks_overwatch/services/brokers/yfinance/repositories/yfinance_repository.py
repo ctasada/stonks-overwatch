@@ -3,7 +3,7 @@ from typing import List
 
 from django.db import connection
 
-from stonks_overwatch.utils.db_utils import dictfetchone
+from stonks_overwatch.utils.database.db_utils import dictfetchone
 
 class YFinanceRepository:
     @staticmethod

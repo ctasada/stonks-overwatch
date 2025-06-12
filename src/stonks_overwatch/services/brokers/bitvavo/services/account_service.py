@@ -2,10 +2,9 @@ from datetime import datetime
 from typing import List
 
 from stonks_overwatch.config.config import Config
-from stonks_overwatch.utils.logger import StonksLogger
-
-from ..client.bitvavo_client import BitvavoService
-from ....models import AccountOverview
+from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import BitvavoService
+from stonks_overwatch.services.models import AccountOverview
+from stonks_overwatch.utils.core.logger import StonksLogger
 
 class AccountOverviewService:
     logger = StonksLogger.get_logger("stonks_overwatch.account_overview_data", "BITVAVO|ACCOUNT_OVERVIEW")

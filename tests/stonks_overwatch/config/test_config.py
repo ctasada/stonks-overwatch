@@ -158,11 +158,13 @@ def test_config_degiro_status():
     assert not config.is_degiro_enabled(PortfolioId.BITVAVO)
 
     # Test connection status
-    with patch('stonks_overwatch.services.brokers.degiro.client.degiro_client.DeGiroService.check_connection', return_value=True):
+    with patch('stonks_overwatch.services.brokers.degiro.client.degiro_client.DeGiroService.check_connection',
+               return_value=True):
         assert config.is_degiro_connected()
         assert config.is_degiro_enabled_and_connected()
 
-    with patch('stonks_overwatch.services.brokers.degiro.client.degiro_client.DeGiroService.check_connection', return_value=False):
+    with patch('stonks_overwatch.services.brokers.degiro.client.degiro_client.DeGiroService.check_connection',
+               return_value=False):
         assert not config.is_degiro_connected()
         assert not config.is_degiro_enabled_and_connected()
 

@@ -21,8 +21,8 @@ from degiro_connector.quotecast.models.chart import Interval
 from django.core.management import call_command
 
 from stonks_overwatch.services.brokers.degiro.client.constants import TransactionType
+from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.datetime import DateTimeUtility
-from stonks_overwatch.utils.localization import LocalizationUtility
 
 # Add the src directory to the Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
@@ -33,6 +33,7 @@ os.environ["DEMO_MODE"] = "True"
 django.setup()
 
 # The import is defined here, so all the Django configuration can be executed
+from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService  # noqa: E402
 from stonks_overwatch.services.brokers.degiro.repositories.models import (  # noqa: E402
     DeGiroCashMovements,
     DeGiroCompanyProfile,
@@ -40,9 +41,10 @@ from stonks_overwatch.services.brokers.degiro.repositories.models import (  # no
     DeGiroProductQuotation,
     DeGiroTransactions,
 )
-from stonks_overwatch.services.brokers.degiro.repositories.product_quotations_repository import ProductQuotationsRepository # noqa: E402
+from stonks_overwatch.services.brokers.degiro.repositories.product_quotations_repository import (  # noqa: E402
+    ProductQuotationsRepository,
+)
 from stonks_overwatch.services.brokers.degiro.services.currency_service import CurrencyConverterService  # noqa: E402
-from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService  # noqa: E402
 from stonks_overwatch.settings import STONKS_OVERWATCH_DATA_DIR, STONKS_OVERWATCH_DB_NAME, TIME_ZONE  # noqa: E402
 
 LIST_OF_PRODUCTS = {

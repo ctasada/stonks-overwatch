@@ -2,10 +2,9 @@ from datetime import datetime
 from typing import List
 
 from stonks_overwatch.config.config import Config
-from stonks_overwatch.utils.localization import LocalizationUtility
-
-from ..client.bitvavo_client import BitvavoService
-from ....models import Transaction
+from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import BitvavoService
+from stonks_overwatch.services.models import Transaction
+from stonks_overwatch.utils.core.localization import LocalizationUtility
 
 class TransactionsService:
     TIME_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"

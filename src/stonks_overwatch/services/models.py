@@ -8,8 +8,8 @@ from typing import Any, Dict, Optional, TypedDict
 import pycountry
 from iso10383 import MICEntry
 
-from stonks_overwatch.utils.constants import ProductType, Sector
-from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.utils.core.localization import LocalizationUtility
+from stonks_overwatch.utils.domain.constants import ProductType, Sector
 
 @dataclass
 class AccountOverview:

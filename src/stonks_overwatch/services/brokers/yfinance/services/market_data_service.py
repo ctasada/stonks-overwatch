@@ -1,10 +1,9 @@
 from typing import List
 
-from ..repositories.yfinance_repository import YFinanceRepository
-from stonks_overwatch.services.models import Country
-from ..client.yfinance_client import StockSplit, YFinanceClient
-from stonks_overwatch.utils.constants import Sector
-from stonks_overwatch.utils.logger import StonksLogger
+from stonks_overwatch.services.brokers.yfinance.client.yfinance_client import StockSplit, YFinanceClient
+from stonks_overwatch.services.brokers.yfinance.repositories.yfinance_repository import YFinanceRepository
+from stonks_overwatch.services.models import Country, Sector
+from stonks_overwatch.utils.core.logger import StonksLogger
 
 class YFinance:
     logger = StonksLogger.get_logger("stonks_overwatch.yfinance", "[YFINANCE|SERVICE]")

@@ -3,9 +3,8 @@ from datetime import datetime
 
 from django.db import connection
 
-from stonks_overwatch.utils.db_utils import dictfetchone
-
-from .models import DeGiroProductQuotation
+from stonks_overwatch.services.brokers.degiro.repositories.models import DeGiroProductQuotation
+from stonks_overwatch.utils.database.db_utils import dictfetchone
 
 class ProductQuotationsRepository:
     @staticmethod

@@ -7,8 +7,8 @@ import yfinance as yf
 from yfinance import Ticker
 
 import stonks_overwatch.settings
-from stonks_overwatch.utils.logger import StonksLogger
-from stonks_overwatch.utils.singleton import singleton
+from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.utils.core.singleton import singleton
 
 @dataclass
 class StockSplit:

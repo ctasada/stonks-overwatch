@@ -1,12 +1,11 @@
 from datetime import datetime, timedelta
 from typing import List
 
-from stonks_overwatch.utils.localization import LocalizationUtility
-from stonks_overwatch.utils.logger import StonksLogger
-
-from .transaction_service import TransactionsService
-from ..client.bitvavo_client import BitvavoService
-from ....models import Deposit, DepositType
+from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import BitvavoService
+from stonks_overwatch.services.brokers.bitvavo.services.transaction_service import TransactionsService
+from stonks_overwatch.services.models import Deposit, DepositType
+from stonks_overwatch.utils.core.localization import LocalizationUtility
+from stonks_overwatch.utils.core.logger import StonksLogger
 
 class DepositsService:
     logger = StonksLogger.get_logger("stonks_overwatch.deposits.bitvavo", "[BITVAVO|DEPOSITS]")

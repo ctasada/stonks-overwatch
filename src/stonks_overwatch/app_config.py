@@ -4,7 +4,7 @@ import sys
 
 from django.apps import AppConfig
 
-from stonks_overwatch.utils.logger import StonksLogger
+from stonks_overwatch.utils.core.logger import StonksLogger
 
 class StonksOverwatchConfig(AppConfig):
     logger = StonksLogger.get_logger("stonks_overwatch.config", "[MAIN]")

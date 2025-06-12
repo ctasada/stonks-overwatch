@@ -3,8 +3,8 @@ from typing import List
 import pandas as pd
 
 from stonks_overwatch.config.config import Config
-from ..repositories.cash_movements_repository import CashMovementsRepository
-from ..client.degiro_client import DeGiroService
+from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
+from stonks_overwatch.services.brokers.degiro.repositories.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.services.models import Deposit, DepositType
 
 # FIXME: If data cannot be found in the DB, the code should get it from DeGiro, updating the DB

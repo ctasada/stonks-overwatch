@@ -13,9 +13,9 @@ from degiro_connector.trading.models.credentials import Credentials
 import stonks_overwatch.settings
 from stonks_overwatch.config.degiro_config import DegiroConfig
 from stonks_overwatch.settings import TIME_ZONE
-from stonks_overwatch.utils.localization import LocalizationUtility
-from stonks_overwatch.utils.logger import StonksLogger
-from stonks_overwatch.utils.singleton import singleton
+from stonks_overwatch.utils.core.localization import LocalizationUtility
+from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.utils.core.singleton import singleton
 
 class DeGiroOfflineModeError(Exception):
     """Exception raised for data validation errors."""

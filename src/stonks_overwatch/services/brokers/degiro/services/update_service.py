@@ -11,12 +11,10 @@ from django.db import connection
 from pandas import DataFrame
 
 from stonks_overwatch.config.degiro_config import DegiroConfig
-
-from .portfolio_service import PortfolioService
-from ..client.constants import CurrencyFX
-from ..client.degiro_client import DeGiroService
-from ..repositories.cash_movements_repository import CashMovementsRepository
-from ..repositories.models import (
+from stonks_overwatch.services.brokers.degiro.client.constants import CurrencyFX, ProductType
+from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
+from stonks_overwatch.services.brokers.degiro.repositories.cash_movements_repository import CashMovementsRepository
+from stonks_overwatch.services.brokers.degiro.repositories.models import (
     DeGiroAgendaDividend,
     DeGiroCashMovements,
     DeGiroCompanyProfile,
@@ -25,18 +23,20 @@ from ..repositories.models import (
     DeGiroTransactions,
     DeGiroUpcomingPayments,
 )
-from ..repositories.product_info_repository import ProductInfoRepository
-from ..repositories.product_quotations_repository import ProductQuotationsRepository
-from ..repositories.transactions_repository import TransactionsRepository
-from ...yfinance.client.yfinance_client import YFinanceClient
-from ...yfinance.repositories.models import YFinanceStockSplits, YFinanceTickerInfo
+from stonks_overwatch.services.brokers.degiro.repositories.product_info_repository import ProductInfoRepository
+from stonks_overwatch.services.brokers.degiro.repositories.product_quotations_repository import (
+    ProductQuotationsRepository,
+)
+from stonks_overwatch.services.brokers.degiro.repositories.transactions_repository import TransactionsRepository
+from stonks_overwatch.services.brokers.degiro.services.portfolio_service import PortfolioService
+from stonks_overwatch.services.brokers.yfinance.client.yfinance_client import YFinanceClient
+from stonks_overwatch.services.brokers.yfinance.repositories.models import YFinanceStockSplits, YFinanceTickerInfo
 from stonks_overwatch.settings import STONKS_OVERWATCH_DATA_DIR
-from stonks_overwatch.utils.constants import ProductType
-from stonks_overwatch.utils.datetime import DateTimeUtility
-from stonks_overwatch.utils.db_utils import dictfetchall
-from stonks_overwatch.utils.debug import save_to_json
-from stonks_overwatch.utils.localization import LocalizationUtility
-from stonks_overwatch.utils.logger import StonksLogger
+from stonks_overwatch.utils.core.datetime import DateTimeUtility
+from stonks_overwatch.utils.core.debug import save_to_json
+from stonks_overwatch.utils.core.localization import LocalizationUtility
+from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.utils.database.db_utils import dictfetchall
 
 CACHE_KEY_UPDATE_PORTFOLIO = "portfolio_data_update_from_degiro"
 CACHE_KEY_UPDATE_COMPANIES = "company_profile_update_from_degiro"

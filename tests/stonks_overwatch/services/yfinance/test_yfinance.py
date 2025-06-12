@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from stonks_overwatch.services.models import Country
-from stonks_overwatch.services.brokers.yfinance.services.market_data_service import YFinance
 from stonks_overwatch.services.brokers.yfinance.client.yfinance_client import StockSplit
-from stonks_overwatch.utils.constants import Sector
+from stonks_overwatch.services.brokers.yfinance.services.market_data_service import YFinance
+from stonks_overwatch.services.models import Country
+from stonks_overwatch.utils.domain.constants import Sector
 
 import pytest
 from unittest.mock import MagicMock, patch

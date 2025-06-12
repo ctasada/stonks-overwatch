@@ -2,9 +2,8 @@ from datetime import datetime
 
 from django.db import connection
 
-from stonks_overwatch.utils.db_utils import dictfetchall
-
-from .models import DeGiroCashMovements
+from stonks_overwatch.services.brokers.degiro.repositories.models import DeGiroCashMovements
+from stonks_overwatch.utils.database.db_utils import dictfetchall
 
 class CashMovementsRepository:
     @staticmethod

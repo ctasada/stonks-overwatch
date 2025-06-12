@@ -1,11 +1,11 @@
 from datetime import date
 
 from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.services.aggregators.deposits_aggregator import DepositsAggregatorService
 from stonks_overwatch.services.brokers.bitvavo.services.deposit_service import DepositsService as BitvavoDepositsService
 from stonks_overwatch.services.brokers.degiro.services.deposit_service import DepositsService as DegiroDepositsService
-from stonks_overwatch.services.aggregators.deposits_aggregator import DepositsAggregatorService
 from stonks_overwatch.services.models import Deposit, DepositType, PortfolioId
-from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.utils.core.localization import LocalizationUtility
 
 import pytest
 from unittest.mock import patch

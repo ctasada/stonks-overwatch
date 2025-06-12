@@ -2,8 +2,10 @@ import json
 import pathlib
 
 from stonks_overwatch.services.brokers.degiro.repositories.models import DeGiroProductQuotation
-from stonks_overwatch.services.brokers.degiro.repositories.product_quotations_repository import ProductQuotationsRepository
-from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.services.brokers.degiro.repositories.product_quotations_repository import (
+    ProductQuotationsRepository,
+)
+from stonks_overwatch.utils.core.localization import LocalizationUtility
 from tests.stonks_overwatch.repositories.base_repository_test import BaseRepositoryTest
 
 import pytest

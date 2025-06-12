@@ -13,8 +13,8 @@ from stonks_overwatch.services.aggregators.deposits_aggregator import DepositsAg
 from stonks_overwatch.services.aggregators.portfolio_aggregator import PortfolioAggregatorService
 from stonks_overwatch.services.models import DailyValue, PortfolioId
 from stonks_overwatch.services.utilities.session_manager import SessionManager
-from stonks_overwatch.utils.localization import LocalizationUtility
-from stonks_overwatch.utils.logger import StonksLogger
+from stonks_overwatch.utils.core.localization import LocalizationUtility
+from stonks_overwatch.utils.core.logger import StonksLogger
 
 @dataclass
 class PortfolioMetrics:

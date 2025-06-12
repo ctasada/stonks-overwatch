@@ -4,10 +4,12 @@ from typing import Dict, Optional
 
 from currency_converter import CurrencyConverter
 
-from ..repositories.product_quotations_repository import ProductQuotationsRepository
-from ..client.constants import CurrencyFX
-from stonks_overwatch.utils.localization import LocalizationUtility
-from stonks_overwatch.utils.logger import StonksLogger
+from stonks_overwatch.services.brokers.degiro.client.constants import CurrencyFX
+from stonks_overwatch.services.brokers.degiro.repositories.product_quotations_repository import (
+    ProductQuotationsRepository,
+)
+from stonks_overwatch.utils.core.localization import LocalizationUtility
+from stonks_overwatch.utils.core.logger import StonksLogger
 
 @dataclass
 class CurrencyMapEntry:
