@@ -2,6 +2,7 @@ from datetime import datetime, time
 from typing import List
 
 from stonks_overwatch.config.config import Config
+from stonks_overwatch.core.interfaces.dividend_service import DividendServiceInterface
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
 from stonks_overwatch.services.brokers.degiro.repositories.dividends_repository import DividendsRepository
 from stonks_overwatch.services.brokers.degiro.repositories.product_info_repository import ProductInfoRepository
@@ -12,7 +13,7 @@ from stonks_overwatch.services.models import Dividend, DividendType
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.domain.constants import ProductType
 
-class DividendsService:
+class DividendsService(DividendServiceInterface):
     logger = StonksLogger.get_logger("stonks_overwatch.dividends_service", "[DEGIRO|DIVIDENDS]")
 
     def __init__(

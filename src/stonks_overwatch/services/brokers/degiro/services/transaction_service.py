@@ -1,6 +1,7 @@
 from typing import List
 
 from stonks_overwatch.config.config import Config
+from stonks_overwatch.core.interfaces.transaction_service import TransactionServiceInterface
 from stonks_overwatch.services.brokers.degiro.client.constants import TransactionType
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
 from stonks_overwatch.services.brokers.degiro.repositories.product_info_repository import ProductInfoRepository
@@ -8,7 +9,7 @@ from stonks_overwatch.services.brokers.degiro.repositories.transactions_reposito
 from stonks_overwatch.services.models import Transaction
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 
-class TransactionsService:
+class TransactionsService(TransactionServiceInterface):
     def __init__(
             self,
             degiro_service: DeGiroService,

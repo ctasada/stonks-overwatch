@@ -7,6 +7,7 @@ from django.utils.functional import cached_property
 from iso10383 import MIC
 
 from stonks_overwatch.config.config import Config
+from stonks_overwatch.core.interfaces.portfolio_service import PortfolioServiceInterface
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroOfflineModeError, DeGiroService
 from stonks_overwatch.services.brokers.degiro.repositories.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.services.brokers.degiro.repositories.company_profile_repository import CompanyProfileRepository
@@ -25,7 +26,7 @@ from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.domain.constants import ProductType, Sector
 
-class PortfolioService:
+class PortfolioService(PortfolioServiceInterface):
     logger = StonksLogger.get_logger("stonks_overwatch.portfolio_data.degiro", "[DEGIRO|PORTFOLIO]")
 
     # Configuration constants

@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 
 from stonks_overwatch.config.config import Config
+from stonks_overwatch.core.interfaces.portfolio_service import PortfolioServiceInterface
 from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import BitvavoService
 from stonks_overwatch.services.brokers.bitvavo.services.deposit_service import DepositsService
 from stonks_overwatch.services.brokers.bitvavo.services.transaction_service import TransactionsService
@@ -12,7 +13,7 @@ from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.domain.constants import ProductType
 
-class PortfolioService:
+class PortfolioService(PortfolioServiceInterface):
     @dataclass
     class Quotation:
         from_date: Optional[str]
