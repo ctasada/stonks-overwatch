@@ -23,7 +23,7 @@ from django.core.management import call_command
 from django.db import transaction
 
 from stonks_overwatch.settings import STONKS_OVERWATCH_DATA_DIR
-from stonks_overwatch.utils.db_utils import dump_database
+from stonks_overwatch.utils.database.db_utils import dump_database
 
 def setup_django():
     """Setup Django environment"""

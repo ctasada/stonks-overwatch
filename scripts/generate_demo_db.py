@@ -21,8 +21,8 @@ from degiro_connector.quotecast.models.chart import Interval
 from django.core.management import call_command
 
 from stonks_overwatch.services.brokers.degiro.client.constants import TransactionType
+from stonks_overwatch.utils.core.datetime import DateTimeUtility
 from stonks_overwatch.utils.core.localization import LocalizationUtility
-from stonks_overwatch.utils.datetime import DateTimeUtility
 
 # Add the src directory to the Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
@@ -437,7 +437,7 @@ class DBDemoGenerator:
         logging.info(f"Created {num_transactions} cash movements")
 
     def init_dividends(self, start_date: str) -> None:
-        from stonks_overwatch.services.yfinance.y_finance_client import YFinanceClient
+        from stonks_overwatch.services.brokers.yfinance.client.yfinance_client import YFinanceClient
 
         # Retrieve the list of products
         products_list = list(LIST_OF_PRODUCTS.keys())
