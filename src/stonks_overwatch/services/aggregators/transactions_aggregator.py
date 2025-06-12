@@ -1,30 +1,27 @@
 from typing import List
 
-from stonks_overwatch.config.config import Config
-from stonks_overwatch.services.brokers.bitvavo.services.transaction_service import (
-    TransactionsService as BitvavoTransactionsService,
-)
-from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
-from stonks_overwatch.services.brokers.degiro.services.transaction_service import (
-    TransactionsService as DeGiroTransactionsService,
-)
+from stonks_overwatch.core.aggregators.base_aggregator import BaseAggregator
+from stonks_overwatch.core.factories.broker_registry import ServiceType
 from stonks_overwatch.services.models import PortfolioId, Transaction
 
-class TransactionsAggregatorService:
+class TransactionsAggregatorService(BaseAggregator):
 
     def __init__(self):
-        self.degiro_service = DeGiroService()
-        self.degiro_transactions = DeGiroTransactionsService(
-            degiro_service=self.degiro_service,
-        )
-        self.bitvavo_transactions = BitvavoTransactionsService()
+        super().__init__(ServiceType.TRANSACTION)
 
     def get_transactions(self, selected_portfolio: PortfolioId) -> List[Transaction]:
-        transactions = []
-        if Config.default().is_degiro_enabled(selected_portfolio):
-            transactions += self.degiro_transactions.get_transactions()
+        # Use the new helper method to collect and sort transaction data
+        return self._collect_and_sort(
+            selected_portfolio,
+            "get_transactions",
+            sort_key=lambda k: (k.date, k.time, 1 if k.buy_sell == "S" else 0),
+            reverse=True
+        )
 
-        if Config.default().is_bitvavo_enabled(selected_portfolio):
-            transactions += self.bitvavo_transactions.get_transactions()
+    def aggregate_data(self, selected_portfolio: PortfolioId, **kwargs) -> List[Transaction]:
+        """
+        Aggregate transaction data from all enabled brokers.
 
-        return sorted(transactions, key=lambda k: (k.date, k.time, 1 if k.buy_sell == "S" else 0), reverse=True)
+        This is the main aggregation method required by BaseAggregator.
+        """
+        return self.get_transactions(selected_portfolio)
