@@ -7,7 +7,7 @@ from degiro_connector.core.exceptions import DeGiroConnectionError
 from degiro_connector.quotecast.models.chart import Interval
 from degiro_connector.trading.models.credentials import Credentials
 
-from stonks_overwatch.services.degiro.degiro_service import CredentialsManager
+from stonks_overwatch.services.brokers.degiro.client.degiro_client import CredentialsManager
 from stonks_overwatch.utils.localization import LocalizationUtility
 from tests.stonks_overwatch.fixtures import (
     TestDeGiroService,

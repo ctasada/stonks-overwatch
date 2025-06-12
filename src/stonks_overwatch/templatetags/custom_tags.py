@@ -4,11 +4,11 @@ from django.template import RequestContext
 from django.utils import timezone
 
 from stonks_overwatch.config.config import Config
-from stonks_overwatch.services.degiro.degiro_service import DeGiroOfflineModeError, DeGiroService
-from stonks_overwatch.services.degiro.update_service import UpdateService
+from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroOfflineModeError, DeGiroService
+from stonks_overwatch.services.brokers.degiro.services.update_service import UpdateService
 from stonks_overwatch.services.models import dataclass_to_dict
-from stonks_overwatch.services.portfolio_aggregator import PortfolioAggregatorService
-from stonks_overwatch.services.session_manager import SessionManager
+from stonks_overwatch.services.aggregators.portfolio_aggregator import PortfolioAggregatorService
+from stonks_overwatch.services.utilities.session_manager import SessionManager
 from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.logger import StonksLogger
 

@@ -1,9 +1,9 @@
 from stonks_overwatch.config.base_config import BaseConfig
-from stonks_overwatch.services.account_overview_aggregator import AccountOverviewAggregatorService
-from stonks_overwatch.services.bitvavo.account_overview import (
+from stonks_overwatch.services.aggregators.account_overview_aggregator import AccountOverviewAggregatorService
+from stonks_overwatch.services.brokers.bitvavo.services.account_service import (
     AccountOverviewService as BitvavoAccountOverviewService,
 )
-from stonks_overwatch.services.degiro.account_overview import (
+from stonks_overwatch.services.brokers.degiro.services.account_service import (
     AccountOverviewService as DeGiroAccountOverviewService,
 )
 from stonks_overwatch.services.models import AccountOverview, PortfolioId

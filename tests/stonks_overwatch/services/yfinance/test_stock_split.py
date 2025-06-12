@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from stonks_overwatch.services.yfinance.y_finance_client import StockSplit
+from stonks_overwatch.services.brokers.yfinance.client.yfinance_client import StockSplit
 
 import pytest
 

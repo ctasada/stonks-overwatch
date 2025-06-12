@@ -1,6 +1,6 @@
 """poetry run python ./scripts/yfinance/y_finance.py"""
 
-from stonks_overwatch.services.yfinance.y_finance_client import YFinanceClient
+from stonks_overwatch.services.brokers.yfinance.client.yfinance_client import YFinanceClient
 
 client = YFinanceClient(enable_debug = True)
 

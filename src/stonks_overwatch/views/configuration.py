@@ -5,7 +5,7 @@ from django.views import View
 
 from stonks_overwatch.config.config import Config
 from stonks_overwatch.services.models import PortfolioId
-from stonks_overwatch.services.session_manager import SessionManager
+from stonks_overwatch.services.utilities.session_manager import SessionManager
 from stonks_overwatch.utils.logger import StonksLogger
 
 class ConfigurationView(View):

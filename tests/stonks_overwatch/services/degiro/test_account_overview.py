@@ -3,8 +3,8 @@ import pathlib
 
 from isodate import parse_datetime
 
-from stonks_overwatch.repositories.degiro.models import DeGiroCashMovements, DeGiroProductInfo
-from stonks_overwatch.services.degiro.account_overview import AccountOverviewService
+from stonks_overwatch.services.brokers.degiro.repositories.models import DeGiroCashMovements, DeGiroProductInfo
+from stonks_overwatch.services.brokers.degiro.services.account_service import AccountOverviewService
 
 import pytest
 from django.test import TestCase

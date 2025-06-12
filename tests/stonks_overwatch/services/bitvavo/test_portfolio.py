@@ -1,5 +1,5 @@
 from stonks_overwatch.config.base_config import BaseConfig
-from stonks_overwatch.services.bitvavo.portfolio import PortfolioService
+from stonks_overwatch.services.brokers.bitvavo.services.portfolio_service import PortfolioService
 from stonks_overwatch.services.models import PortfolioEntry
 from stonks_overwatch.utils.constants import ProductType
 

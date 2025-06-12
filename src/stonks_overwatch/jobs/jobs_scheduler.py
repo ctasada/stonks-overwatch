@@ -4,7 +4,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
 from stonks_overwatch.config.degiro_config import DegiroConfig
-from stonks_overwatch.services.degiro.update_service import UpdateService as DegiroUpdateService
+from stonks_overwatch.services.brokers.degiro.services.update_service import UpdateService as DegiroUpdateService
 from stonks_overwatch.utils.logger import StonksLogger
 
 class JobsScheduler:

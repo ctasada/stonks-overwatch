@@ -23,7 +23,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'stonks_overwatch.settings')
 django.setup()
 
 # The import is defined here, so all the Django configuration can be executed
-from stonks_overwatch.services.degiro.update_service import UpdateService as DegiroUpdateService  # noqa: E402
+from stonks_overwatch.services.brokers.degiro.services.update_service import UpdateService as DegiroUpdateService  # noqa: E402
 
 def init() -> None:
     """Execute the necessary initializations for the scripts.

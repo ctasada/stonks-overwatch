@@ -9,10 +9,10 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views import View
 
-from stonks_overwatch.services.deposits_aggregator import DepositsAggregatorService
+from stonks_overwatch.services.aggregators.deposits_aggregator import DepositsAggregatorService
+from stonks_overwatch.services.aggregators.portfolio_aggregator import PortfolioAggregatorService
 from stonks_overwatch.services.models import DailyValue, PortfolioId
-from stonks_overwatch.services.portfolio_aggregator import PortfolioAggregatorService
-from stonks_overwatch.services.session_manager import SessionManager
+from stonks_overwatch.services.utilities.session_manager import SessionManager
 from stonks_overwatch.utils.localization import LocalizationUtility
 from stonks_overwatch.utils.logger import StonksLogger
 

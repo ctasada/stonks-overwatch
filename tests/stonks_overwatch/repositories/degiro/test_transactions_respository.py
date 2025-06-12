@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from stonks_overwatch.repositories.degiro.models import DeGiroTransactions
-from stonks_overwatch.repositories.degiro.transactions_repository import TransactionsRepository
+from stonks_overwatch.services.brokers.degiro.repositories.models import DeGiroTransactions
+from stonks_overwatch.services.brokers.degiro.repositories.transactions_repository import TransactionsRepository
 from tests.stonks_overwatch.repositories.base_repository_test import BaseRepositoryTest
 
 import pytest

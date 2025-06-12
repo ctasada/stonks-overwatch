@@ -1,8 +1,8 @@
 import json
 import pathlib
 
-from stonks_overwatch.repositories.yfinance.models import YFinanceStockSplits, YFinanceTickerInfo
-from stonks_overwatch.repositories.yfinance.yfinance_repository import YFinanceRepository
+from stonks_overwatch.services.brokers.yfinance.repositories.models import YFinanceStockSplits, YFinanceTickerInfo
+from stonks_overwatch.services.brokers.yfinance.repositories.yfinance_repository import YFinanceRepository
 
 import pytest
 from django.test import TestCase

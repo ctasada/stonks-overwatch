@@ -1,5 +1,5 @@
-from stonks_overwatch.repositories.degiro.models import DeGiroProductInfo
-from stonks_overwatch.repositories.degiro.product_info_repository import ProductInfoRepository
+from stonks_overwatch.services.brokers.degiro.repositories.models import DeGiroProductInfo
+from stonks_overwatch.services.brokers.degiro.repositories.product_info_repository import ProductInfoRepository
 from tests.stonks_overwatch.repositories.base_repository_test import BaseRepositoryTest
 
 import pytest
