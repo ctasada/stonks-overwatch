@@ -18,7 +18,7 @@ from django.core.servers.basehttp import WSGIRequestHandler
 from toga.command import Command, Group
 from toga.dialogs import ConfirmDialog, ErrorDialog, InfoDialog, SaveFileDialog
 
-from stonks_overwatch.utils.db_utils import dump_database
+from stonks_overwatch.utils.database.db_utils import dump_database
 
 # Middleware to serve static files from the staticfiles directory.
 # For some reason, the static files cannot be served directly when using Toga. This class provides a solution
