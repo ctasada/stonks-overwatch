@@ -1,4 +1,4 @@
-from stonks_overwatch.services.degiro.constants import CurrencyFX, ProductType, TransactionType
+from stonks_overwatch.services.brokers.degiro.client.constants import CurrencyFX, ProductType, TransactionType
 
 import pytest
 

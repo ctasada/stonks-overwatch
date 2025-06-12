@@ -6,12 +6,12 @@ from django.shortcuts import render
 from django.views import View
 
 from stonks_overwatch.config.config import Config
-from stonks_overwatch.services.degiro.constants import ProductType
-from stonks_overwatch.services.dividends_aggregator import DividendsAggregatorService
+from stonks_overwatch.services.aggregators.dividends_aggregator import DividendsAggregatorService
+from stonks_overwatch.services.brokers.degiro.client.constants import ProductType
 from stonks_overwatch.services.models import Dividend
-from stonks_overwatch.services.session_manager import SessionManager
-from stonks_overwatch.utils.localization import LocalizationUtility
-from stonks_overwatch.utils.logger import StonksLogger
+from stonks_overwatch.services.utilities.session_manager import SessionManager
+from stonks_overwatch.utils.core.localization import LocalizationUtility
+from stonks_overwatch.utils.core.logger import StonksLogger
 
 class Dividends(View):
     logger = StonksLogger.get_logger("stonks_overwatch.dividends.views", "[VIEW|DIVIDENDS]")

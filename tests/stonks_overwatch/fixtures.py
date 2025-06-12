@@ -4,7 +4,7 @@ import requests
 
 from stonks_overwatch.config.degiro_config import DegiroConfig
 from stonks_overwatch.config.degiro_credentials import DegiroCredentials
-from stonks_overwatch.services.degiro.degiro_service import DeGiroService
+from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
 
 import pytest
 from unittest.mock import patch

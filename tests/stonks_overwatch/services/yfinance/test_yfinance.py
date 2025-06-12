@@ -1,23 +1,23 @@
 from datetime import datetime
 
+from stonks_overwatch.services.brokers.yfinance.client.yfinance_client import StockSplit
+from stonks_overwatch.services.brokers.yfinance.services.market_data_service import YFinance
 from stonks_overwatch.services.models import Country
-from stonks_overwatch.services.yfinance.y_finance import YFinance
-from stonks_overwatch.services.yfinance.y_finance_client import StockSplit
-from stonks_overwatch.utils.constants import Sector
+from stonks_overwatch.utils.domain.constants import Sector
 
 import pytest
 from unittest.mock import MagicMock, patch
 
 @pytest.fixture
 def mock_yfinance_client():
-    with patch('stonks_overwatch.services.yfinance.y_finance.YFinanceClient') as mock:
+    with patch('stonks_overwatch.services.brokers.yfinance.services.market_data_service.YFinanceClient') as mock:
         client_instance = MagicMock()
         mock.return_value = client_instance
         yield client_instance
 
 @pytest.fixture
 def mock_yfinance_repository():
-    with patch('stonks_overwatch.services.yfinance.y_finance.YFinanceRepository') as mock:
+    with patch('stonks_overwatch.services.brokers.yfinance.services.market_data_service.YFinanceRepository') as mock:
         repo_instance = MagicMock()
         mock.return_value = repo_instance
         yield repo_instance

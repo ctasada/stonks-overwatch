@@ -2,7 +2,7 @@ from datetime import date, datetime, timedelta
 
 from degiro_connector.quotecast.models.chart import Interval
 
-from stonks_overwatch.utils.datetime import DateTimeUtility
+from stonks_overwatch.utils.core.datetime import DateTimeUtility
 
 import pytest
 

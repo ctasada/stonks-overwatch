@@ -5,7 +5,7 @@ import time
 from datetime import datetime
 from pprint import pprint
 
-from stonks_overwatch.services.bitvavo.bitvavo_service import BitvavoService
+from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import BitvavoService
 
 # Use this class to connect to Bitvavo and make your first calls.
 # Add trading strategies to implement your business logic.

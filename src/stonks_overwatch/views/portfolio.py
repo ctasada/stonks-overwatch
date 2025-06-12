@@ -3,11 +3,11 @@ from enum import Enum
 from django.shortcuts import render
 from django.views import View
 
+from stonks_overwatch.services.aggregators.portfolio_aggregator import PortfolioAggregatorService
 from stonks_overwatch.services.models import PortfolioEntry
-from stonks_overwatch.services.portfolio_aggregator import PortfolioAggregatorService
-from stonks_overwatch.services.session_manager import SessionManager
-from stonks_overwatch.utils.constants import ProductType
-from stonks_overwatch.utils.logger import StonksLogger
+from stonks_overwatch.services.utilities.session_manager import SessionManager
+from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.utils.domain.constants import ProductType
 
 class PositionStatus(Enum):
     OPEN = "OPEN"
