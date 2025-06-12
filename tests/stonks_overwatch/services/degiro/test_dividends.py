@@ -4,19 +4,19 @@ import pathlib
 from isodate import parse_date, parse_datetime
 
 from stonks_overwatch.config.degiro_credentials import DegiroCredentials
-from stonks_overwatch.repositories.degiro.models import (
+from stonks_overwatch.services.brokers.degiro.client.degiro_client import CredentialsManager
+from stonks_overwatch.services.brokers.degiro.repositories.models import (
     DeGiroCashMovements,
     DeGiroProductInfo,
     DeGiroProductQuotation,
     DeGiroUpcomingPayments,
 )
-from stonks_overwatch.services.degiro.account_overview import AccountOverviewService
-from stonks_overwatch.services.degiro.currency_converter_service import CurrencyConverterService
-from stonks_overwatch.services.degiro.degiro_service import CredentialsManager
-from stonks_overwatch.services.degiro.dividends import DividendsService
-from stonks_overwatch.services.degiro.portfolio import PortfolioService
+from stonks_overwatch.services.brokers.degiro.services.account_service import AccountOverviewService
+from stonks_overwatch.services.brokers.degiro.services.currency_service import CurrencyConverterService
+from stonks_overwatch.services.brokers.degiro.services.dividend_service import DividendsService
+from stonks_overwatch.services.brokers.degiro.services.portfolio_service import PortfolioService
 from stonks_overwatch.services.models import DividendType
-from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.utils.core.localization import LocalizationUtility
 from tests.stonks_overwatch.fixtures import TestDeGiroService
 
 import pook

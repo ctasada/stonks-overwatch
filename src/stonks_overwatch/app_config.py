@@ -4,7 +4,7 @@ import sys
 
 from django.apps import AppConfig
 
-from stonks_overwatch.utils.logger import StonksLogger
+from stonks_overwatch.utils.core.logger import StonksLogger
 
 class StonksOverwatchConfig(AppConfig):
     logger = StonksLogger.get_logger("stonks_overwatch.config", "[MAIN]")
@@ -19,6 +19,14 @@ class StonksOverwatchConfig(AppConfig):
 
             signal.signal(signal.SIGINT, self.handle_shutdown)
             signal.signal(signal.SIGTERM, self.handle_shutdown)
+
+            # Register broker services with the core framework
+            try:
+                from stonks_overwatch.core.registry_setup import register_broker_services
+                register_broker_services()
+                self.logger.info("Broker services registered successfully")
+            except Exception as e:
+                self.logger.error("Failed to register broker services: %s", e)
 
             # Schedule automatic tasks
             from stonks_overwatch.jobs.jobs_scheduler import JobsScheduler

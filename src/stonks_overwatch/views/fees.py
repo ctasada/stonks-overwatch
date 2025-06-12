@@ -2,9 +2,9 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
 
-from stonks_overwatch.services.fees_aggregator import FeesAggregatorService
-from stonks_overwatch.services.session_manager import SessionManager
-from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.services.aggregators.fees_aggregator import FeesAggregatorService
+from stonks_overwatch.services.utilities.session_manager import SessionManager
+from stonks_overwatch.utils.core.localization import LocalizationUtility
 
 class Fees(View):
     def __init__(self, **kwargs):

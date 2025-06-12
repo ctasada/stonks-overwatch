@@ -1,17 +1,36 @@
 from datetime import date
 
 from stonks_overwatch.config.base_config import BaseConfig
-from stonks_overwatch.services.bitvavo.deposits import DepositsService as BitvavoDepositsService
-from stonks_overwatch.services.degiro.deposits import DepositsService as DegiroDepositsService
-from stonks_overwatch.services.deposits_aggregator import DepositsAggregatorService
+from stonks_overwatch.services.aggregators.deposits_aggregator import DepositsAggregatorService
+from stonks_overwatch.services.brokers.bitvavo.services.deposit_service import DepositsService as BitvavoDepositsService
+from stonks_overwatch.services.brokers.degiro.services.deposit_service import DepositsService as DegiroDepositsService
 from stonks_overwatch.services.models import Deposit, DepositType, PortfolioId
-from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.utils.core.localization import LocalizationUtility
 
 import pytest
 from unittest.mock import patch
 
 @pytest.fixture(scope="function", autouse=True)
-def mock_degiro_get_cash_deposits():
+def setup_broker_registry():
+    """Setup broker service registry for tests."""
+    from stonks_overwatch.core.factories.broker_registry import BrokerRegistry
+    from stonks_overwatch.core.registry_setup import register_broker_services
+
+    # Clear the registry to ensure clean state
+    registry = BrokerRegistry()
+    registry._brokers.clear()
+    registry._broker_capabilities.clear()
+
+    # Register broker services
+    register_broker_services()
+    yield
+
+    # Clean up after test
+    registry._brokers.clear()
+    registry._broker_capabilities.clear()
+
+@pytest.fixture(scope="function", autouse=True)
+def mock_degiro_deposits():
     with patch.object(DegiroDepositsService, "get_cash_deposits") as mock_method:
         mock_method.return_value = [
             Deposit(
@@ -32,7 +51,7 @@ def mock_degiro_get_cash_deposits():
         yield mock_method
 
 @pytest.fixture(scope="function", autouse=True)
-def mock_bitvavo_get_cash_deposits():
+def mock_bitvavo_deposits():
     with patch.object(BitvavoDepositsService, "get_cash_deposits") as mock_method:
         mock_method.return_value = [
             Deposit(
@@ -52,7 +71,7 @@ def mock_bitvavo_get_cash_deposits():
         ]
         yield mock_method
 
-def test_get_deposit_aggregator_service(mock_bitvavo_get_cash_deposits, mock_degiro_get_cash_deposits):
+def test_get_deposit_aggregator_service(setup_broker_registry, mock_bitvavo_deposits, mock_degiro_deposits):
     BaseConfig.CONFIG_PATH = "tests/resources/stonks_overwatch/config/sample-config.json"
 
     aggregator = DepositsAggregatorService()
@@ -69,7 +88,7 @@ def test_get_deposit_aggregator_service(mock_bitvavo_get_cash_deposits, mock_deg
     assert deposits[3].type == DepositType.DEPOSIT
     assert deposits[3].change == 1000.0
 
-def test_get_deposit_aggregator_service_only_degiro(mock_degiro_get_cash_deposits):
+def test_get_deposit_aggregator_service_only_degiro(setup_broker_registry, mock_degiro_deposits):
     BaseConfig.CONFIG_PATH = "tests/resources/stonks_overwatch/config/sample-config.json"
 
     aggregator = DepositsAggregatorService()
@@ -82,7 +101,7 @@ def test_get_deposit_aggregator_service_only_degiro(mock_degiro_get_cash_deposit
     assert deposits[1].type == DepositType.DEPOSIT
     assert deposits[1].change == 10000.0
 
-def test_get_deposit_aggregator_service_only_bitvavo(mock_bitvavo_get_cash_deposits):
+def test_get_deposit_aggregator_service_only_bitvavo(setup_broker_registry, mock_bitvavo_deposits):
     BaseConfig.CONFIG_PATH = "tests/resources/stonks_overwatch/config/sample-config.json"
 
     aggregator = DepositsAggregatorService()
@@ -95,7 +114,7 @@ def test_get_deposit_aggregator_service_only_bitvavo(mock_bitvavo_get_cash_depos
     assert deposits[1].type == DepositType.DEPOSIT
     assert deposits[1].change == 1000.0
 
-def test_get_cash_deposits_history(mock_bitvavo_get_cash_deposits, mock_degiro_get_cash_deposits):
+def test_get_cash_deposits_history(setup_broker_registry, mock_bitvavo_deposits, mock_degiro_deposits):
     BaseConfig.CONFIG_PATH = "tests/resources/stonks_overwatch/config/sample-config.json"
 
     aggregator = DepositsAggregatorService()

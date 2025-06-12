@@ -6,7 +6,7 @@ from typing import Optional
 
 from stonks_overwatch.config.base_credentials import BaseCredentials
 from stonks_overwatch.settings import PROJECT_PATH
-from stonks_overwatch.utils.logger import StonksLogger
+from stonks_overwatch.utils.core.logger import StonksLogger
 
 class BaseConfig:
     logger = StonksLogger.get_logger("stonks_overwatch.config", "[BASE_CONFIG]")

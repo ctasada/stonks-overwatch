@@ -1,13 +1,13 @@
 import json
 import pathlib
 
-from stonks_overwatch.repositories.degiro.models import DeGiroProductQuotation
-from stonks_overwatch.services.degiro.constants import CurrencyFX
-from stonks_overwatch.services.degiro.currency_converter_service import (
+from stonks_overwatch.services.brokers.degiro.client.constants import CurrencyFX
+from stonks_overwatch.services.brokers.degiro.repositories.models import DeGiroProductQuotation
+from stonks_overwatch.services.brokers.degiro.services.currency_service import (
     CurrencyConverterService,
     CurrencyMapEntry,
 )
-from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.utils.core.localization import LocalizationUtility
 
 import pytest
 from django.test import TestCase

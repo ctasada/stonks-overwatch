@@ -3,14 +3,12 @@ from typing import Optional
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.degiro_credentials import DegiroCredentials
-from stonks_overwatch.utils.localization import LocalizationUtility
+from stonks_overwatch.utils.core.localization import LocalizationUtility
 
 class DegiroConfig(BaseConfig):
     config_key = "degiro"
     DEFAULT_DEGIRO_UPDATE_FREQUENCY = 5
     DEFAULT_DEGIRO_START_DATE_STR = "2020-01-01"
-
-    # FIXME: Use Localization method
     DEFAULT_DEGIRO_START_DATE = LocalizationUtility.convert_string_to_date(DEFAULT_DEGIRO_START_DATE_STR)
 
     def __init__(

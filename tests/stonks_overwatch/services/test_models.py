@@ -12,7 +12,7 @@ from stonks_overwatch.services.models import (
     TotalPortfolio,
     dataclass_to_dict,
 )
-from stonks_overwatch.utils.constants import ProductType, Sector
+from stonks_overwatch.utils.domain.constants import ProductType, Sector
 
 import pytest
 

@@ -1,5 +1,5 @@
 from stonks_overwatch.config.base_config import BaseConfig
-from stonks_overwatch.services.bitvavo.deposits import DepositsService
+from stonks_overwatch.services.brokers.bitvavo.services.deposit_service import DepositsService
 from stonks_overwatch.services.models import DepositType
 
 import pook

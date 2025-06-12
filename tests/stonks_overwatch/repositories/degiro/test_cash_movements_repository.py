@@ -3,8 +3,8 @@ import pathlib
 
 from django.utils.dateparse import parse_datetime
 
-from stonks_overwatch.repositories.degiro.cash_movements_repository import CashMovementsRepository
-from stonks_overwatch.repositories.degiro.models import DeGiroCashMovements
+from stonks_overwatch.services.brokers.degiro.repositories.cash_movements_repository import CashMovementsRepository
+from stonks_overwatch.services.brokers.degiro.repositories.models import DeGiroCashMovements
 from tests.stonks_overwatch.assertions import assert_dates_descending
 from tests.stonks_overwatch.repositories.base_repository_test import BaseRepositoryTest
 

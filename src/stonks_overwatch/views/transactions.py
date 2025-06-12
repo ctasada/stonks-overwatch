@@ -4,8 +4,8 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
 
-from stonks_overwatch.services.session_manager import SessionManager
-from stonks_overwatch.services.transactions_aggregator import TransactionsAggregatorService
+from stonks_overwatch.services.aggregators.transactions_aggregator import TransactionsAggregatorService
+from stonks_overwatch.services.utilities.session_manager import SessionManager
 
 class Transactions(View):
     def __init__(self, **kwargs):
