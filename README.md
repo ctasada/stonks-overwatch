@@ -57,11 +57,9 @@ See [Wiki - Developing Stonks Overwatch](https://github.com/ctasada/stonks-overw
 ## BUGS
 - Dashboard: JNJ & JPM are associated with the wrong sector
 - IBERDROLA Non-Tradable Dividends: Are properly calculated? Doesn't seem to calculate quantity properly
-- Dividends show IBE.D as a dividend, when should show IBE
-  - Transactions: The Buy/Sell of stocks resulting from dividends like IBE.D are not properly handled
 - Some stocks are no longer available in DEGIRO. We Need to find a way to handle them
     - 'TYME'(600028575)
-    - 'WEBR'(600179738)
+    - 'WEBR'(600179738) (https://www.investing.com/equities/weber-chart)
     - 'TEF.D'(280180545)
     - 'FRZA'(600236745)
   Test https://github.com/alvarobartt/investiny to retrieve data from delisted stocks
@@ -81,8 +79,8 @@ See [Wiki - Developing Stonks Overwatch](https://github.com/ctasada/stonks-overw
 - [ ] Evaluate the migration from Poetry to Uv
 - [ ] DEGIRO Client: Stop using Totp and request 2FA for each connection
 - [ ] Provide support for both Unrealized and Realized Gain/Loss
-        Onger. W/V € - Gain/Loss Unrealized - unrealizedPl
-        Totale W/V € - Gain/Loss Total (Realized + unrealized) - totalPl
+    - Onger. W/V € - Gain/Loss Unrealized - unrealizedPl
+    - Totale W/V € - Gain/Loss Total (Realized + unrealized) - totalPl
 - [ ] It would be interesting to add filters to the Account Overview page and aggregate
 - [ ] Add the graph with Portfolio Cumulative P&L / Cumulative Net Contributions / Portfolio NAV (https://www.investopedia.com/terms/n/nav.asp)
 - [ ] Check migration from ChartJS to https://plotly.com/javascript/ or https://recharts.org/ or https://d3js.org
