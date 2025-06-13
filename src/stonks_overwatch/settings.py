@@ -122,6 +122,16 @@ DATABASES = {
         "TEST": {
             "NAME": Path(STONKS_OVERWATCH_CACHE_DIR).resolve().joinpath("test_db.sqlite3"),
         },
+        "OPTIONS": {
+            "timeout": 30,  # Increase timeout for database operations
+            "init_command": """
+                PRAGMA journal_mode = WAL;
+                PRAGMA synchronous = NORMAL;
+                PRAGMA temp_store = MEMORY;
+                PRAGMA mmap_size = 268435456;
+                PRAGMA busy_timeout = 30000;
+            """,
+        },
     },
 }
 # With the flattening of the prj structure, the auto register doesn't seem to work anymore.
