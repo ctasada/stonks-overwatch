@@ -104,9 +104,9 @@ class Diversification(View):
                     symbol = stock.country.get_flag() if stock.country else None
                     product_type = "country"
                 elif field_name == "product_currency":
-                    symbol = stock.product_currency
+                    symbol = Diversification.__get_currency_logo(stock.product_currency)
                     name = stock.product_currency
-                    product_type = ProductType.CASH.name
+                    product_type = "cash"
                 elif field_name == "sector":
                     name = stock.sector.value if stock.sector else Sector.UNKNOWN.value
                     symbol = stock.sector.to_logo() if stock.sector else Sector.UNKNOWN.to_logo()
@@ -151,3 +151,11 @@ class Diversification(View):
             },
             "table": data_table,
         }
+
+    @staticmethod
+    def __get_currency_logo(currency: str) -> str:
+        """Returns the logo for the given currency."""
+        if currency.lower() == "eur":
+            return "euro-sign"
+        else:
+            return "dollar-sign"
