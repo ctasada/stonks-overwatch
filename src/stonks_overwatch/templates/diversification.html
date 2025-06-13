@@ -2,6 +2,11 @@
 {% load custom_tags %}
 {% load static %}
 {% block content %}
+
+<!-- Font Awesome JS -->
+<script src="{% static 'fontawesomefree/js/solid.js' %}"></script>
+<script src="{% static 'fontawesomefree/js/fontawesome.js' %}"></script>
+
 <div class="container-fluid row-gap-5">
     {% include 'distribution_with_list.html' with chart_id="type-chart" items=productTypes.table %}
     {% include 'distribution_with_list.html' with chart_id="positions-chart" items=positions.table %}
