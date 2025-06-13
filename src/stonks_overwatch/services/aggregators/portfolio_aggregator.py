@@ -36,6 +36,13 @@ class PortfolioAggregatorService(BaseAggregator):
             if not entry.country and entry.product_type in [ProductType.STOCK, ProductType.ETF]:
                 entry.country = self.yfinance.get_country(entry.symbol)
 
+            if entry.product_type == ProductType.CASH:
+                entry.sector = Sector.CASH
+            elif entry.product_type == ProductType.CRYPTO:
+                entry.sector = Sector.CRYPTO
+            elif entry.product_type == ProductType.ETF:
+                entry.sector = Sector.ETF
+
             if ((entry.sector == Sector.UNKNOWN or entry.industry == 'Unknown')
                     and entry.product_type in [ProductType.STOCK]):
                 sector, industry = self.yfinance.get_sector_industry(entry.symbol)
@@ -43,6 +50,9 @@ class PortfolioAggregatorService(BaseAggregator):
                     entry.sector = sector
                 if entry.industry == 'Unknown':
                     entry.industry = industry
+
+            if entry.sector == Sector.UNKNOWN:
+                self._logger.warning(f"Warning: Sector for {entry.symbol} is UNKNOWN.")
 
         return sorted(portfolio, key=lambda k: k.symbol)
 

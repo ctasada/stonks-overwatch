@@ -113,6 +113,7 @@ class Diversification(View):
                     product_type = "sector"
                 else:
                     name =  getattr(stock, field_name)
+
                 value = 0.0
                 portfolio_size = 0.0
                 if name in data:

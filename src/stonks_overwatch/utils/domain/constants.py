@@ -35,6 +35,10 @@ class Sector(Enum):
     UTILITIES = "Utilities"
     ENERGY = "Energy"
     UNKNOWN = "Unknown"
+    # Special sectors for non-stock products
+    CASH = "Cash"
+    CRYPTO = "Crypto"
+    ETF = "ETF"
 
     @staticmethod
     def from_str(label: str|None):  # noqa: C901
@@ -64,6 +68,12 @@ class Sector(Enum):
             return Sector.UTILITIES
         elif value == "energy":
             return Sector.ENERGY
+        elif value == "cash":
+            return Sector.CASH
+        elif value == "crypto":
+            return Sector.CRYPTO
+        elif value == "etf":
+            return Sector.ETF
 
         raise ValueError(f"Unknown sector: {label}")
 
@@ -90,5 +100,11 @@ class Sector(Enum):
             return "hammer"
         elif self == Sector.ENERGY:
             return "bolt"
+        elif self == Sector.CASH:
+            return "money-bill"
+        elif self == Sector.CRYPTO:
+            return "bitcoin-sign"
+        elif self == Sector.ETF:
+            return "briefcase"
         else:
             return "question"
