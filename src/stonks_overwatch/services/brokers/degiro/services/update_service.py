@@ -8,6 +8,7 @@ from degiro_connector.trading.models.account import OverviewRequest
 from degiro_connector.trading.models.transaction import HistoryRequest
 from django.core.cache import cache
 from django.db import connection
+from django.db.utils import OperationalError
 from pandas import DataFrame
 
 from stonks_overwatch.config.degiro_config import DegiroConfig
@@ -115,7 +116,42 @@ class UpdateService:
             self.update_dividends()
         except Exception as error:
             self.logger.error("Cannot Update Portfolio!")
-            self.logger.error("Exception: ", error)
+            self.logger.error("Exception: %s", str(error))
+
+    def _retry_database_operation(self, operation, *args, max_retries=3, delay=0.1, **kwargs):
+        """
+        Retry a database operation if it fails due to database lock.
+
+        Args:
+            operation: A callable that performs the database operation
+            *args: Positional arguments to pass to the operation
+            max_retries: Maximum number of retry attempts
+            delay: Initial delay between retries (will be doubled each time)
+            **kwargs: Keyword arguments to pass to the operation
+
+        Returns:
+            The result of the operation
+
+        Raises:
+            The last exception if all retries fail
+        """
+        last_exception = None
+        current_delay = delay
+
+        for attempt in range(max_retries + 1):
+            try:
+                return operation(*args, **kwargs)
+            except OperationalError as e:
+                last_exception = e
+                if "database is locked" in str(e).lower() and attempt < max_retries:
+                    self.logger.warning("Database locked, retrying in %.2f seconds (attempt %d/%d)",
+                                      current_delay, attempt + 1, max_retries)
+                    time.sleep(current_delay)
+                    current_delay *= 2  # Exponential backoff
+                else:
+                    raise
+
+        raise last_exception
 
     def update_account(self):
         """Update the Account DB data. Only does it if the data is older than today."""
@@ -251,7 +287,8 @@ class UpdateService:
         if cash_data:
             for row in cash_data:
                 try:
-                    DeGiroCashMovements.objects.update_or_create(
+                    self._retry_database_operation(
+                        DeGiroCashMovements.objects.update_or_create,
                         id=row["id"],
                         defaults={
                             "date": LocalizationUtility.convert_string_to_datetime(row["date"]),
@@ -271,7 +308,7 @@ class UpdateService:
                     )
                 except Exception as error:
                     self.logger.error(f"Cannot import row: {row}")
-                    self.logger.error("Exception: ", error)
+                    self.logger.error("Exception: %s", str(error))
 
     def __transform_json(self, account_overview: dict) -> list[dict] | None:
         """Flattens the data from deGiro `get_account_overview`."""
@@ -316,7 +353,8 @@ class UpdateService:
 
         for row in transactions_history["data"]:
             try:
-                DeGiroTransactions.objects.update_or_create(
+                self._retry_database_operation(
+                    DeGiroTransactions.objects.update_or_create,
                     id=row["id"],
                     defaults={
                         "product_id": row["productId"],
@@ -344,7 +382,7 @@ class UpdateService:
                 )
             except Exception as error:
                 self.logger.error(f"Cannot import row: {row}")
-                self.logger.error("Exception: ", error)
+                self.logger.error("Exception: %s", str(error))
 
     def __get_product_ids(self) -> list:
         """Get the list of product ids from the DB.
@@ -375,7 +413,8 @@ class UpdateService:
         for key in products_info:
             row = products_info[key]
             try:
-                DeGiroProductInfo.objects.update_or_create(
+                self._retry_database_operation(
+                    DeGiroProductInfo.objects.update_or_create,
                     id=int(row["id"]),
                     defaults={
                         "name": row["name"],
@@ -409,7 +448,7 @@ class UpdateService:
                 )
             except Exception as error:
                 self.logger.error(f"Cannot import row: {row}")
-                self.logger.error("Exception: ", error)
+                self.logger.error("Exception: %s", str(error))
 
     def __is_non_tradeable_product(self, product: dict) -> bool:
         """Check if the product is non tradeable.
@@ -496,11 +535,15 @@ class UpdateService:
 
             # Update the data ONLY if we get something back from DeGiro
             if quotes_dict:
-                DeGiroProductQuotation.objects.update_or_create(id=int(key), defaults={
-                    "interval": Interval.P1D,
-                    "last_import": LocalizationUtility.now(),
-                    "quotations": quotes_dict
-                })
+                self._retry_database_operation(
+                    DeGiroProductQuotation.objects.update_or_create,
+                    id=int(key),
+                    defaults={
+                        "interval": Interval.P1D,
+                        "last_import": LocalizationUtility.now(),
+                        "quotations": quotes_dict
+                    }
+                )
 
     def __get_company_profiles(self) -> dict:
         """Import Company Profiles data from DeGiro. Uses the `get_transactions_history` method."""
@@ -529,10 +572,14 @@ class UpdateService:
 
         for key in company_profiles:
             try:
-                DeGiroCompanyProfile.objects.update_or_create(isin=key, defaults={"data": company_profiles[key]})
+                self._retry_database_operation(
+                    DeGiroCompanyProfile.objects.update_or_create,
+                    isin=key,
+                    defaults={"data": company_profiles[key]}
+                )
             except Exception as error:
                 self.logger.error(f"Cannot import ISIN: {key}")
-                self.logger.error("Exception: ", error)
+                self.logger.error("Exception: %s", str(error))
 
     def update_yfinance(self):
         """Updating the Yahoo Finance Data."""
@@ -608,20 +655,28 @@ class UpdateService:
 
         for key in tickers:
             try:
-                YFinanceTickerInfo.objects.update_or_create(symbol=key, defaults={"data": tickers[key]})
+                self._retry_database_operation(
+                    YFinanceTickerInfo.objects.update_or_create,
+                    symbol=key,
+                    defaults={"data": tickers[key]}
+                )
             except Exception as error:
                 self.logger.error(f"Cannot import Ticker: {key}")
-                self.logger.error("Exception: ", error)
+                self.logger.error("Exception: %s", str(error))
 
     def __import_yfinance_splits(self, splits: Dict[str, List[dict]]) -> None:
         """Store the Yahoo Finance Stock Splits into the DB."""
 
         for key in splits:
             try:
-                YFinanceStockSplits.objects.update_or_create(symbol=key, defaults={"data": splits[key]})
+                self._retry_database_operation(
+                    YFinanceStockSplits.objects.update_or_create,
+                    symbol=key,
+                    defaults={"data": splits[key]}
+                )
             except Exception as error:
                 self.logger.error(f"Cannot import Splits: {key}")
-                self.logger.error("Exception: ", error)
+                self.logger.error("Exception: %s", str(error))
 
     def update_dividends(self):
         """Update the dividends data from DeGiro."""
@@ -689,7 +744,7 @@ class UpdateService:
                 )
             except Exception as error:
                 self.logger.error(f"Cannot import upcoming dividend: {entry}")
-                self.logger.error("Exception: ", error)
+                self.logger.error("Exception: %s", str(error))
 
     def __import_agenda(self, agenda: List[Dict]) -> None:
         """Store the dividend agenda into the DB."""
@@ -698,7 +753,8 @@ class UpdateService:
 
         for entry in agenda:
             try:
-                DeGiroAgendaDividend.objects.update_or_create(
+                self._retry_database_operation(
+                    DeGiroAgendaDividend.objects.update_or_create,
                     event_id=entry["eventId"],
                     defaults={
                         "isin": entry["isin"],
@@ -718,4 +774,4 @@ class UpdateService:
                 )
             except Exception as error:
                 self.logger.error(f"Cannot import agenda dividend: {entry}")
-                self.logger.error("Exception: ", error)
+                self.logger.error("Exception: %s", str(error))
