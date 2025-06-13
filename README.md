@@ -55,7 +55,6 @@ See [Wiki - Developing Stonks Overwatch](https://github.com/ctasada/stonks-overw
 * https://giroscope.io → Seems to have some errors, but data and graphs are interesting
 
 ## BUGS
-- Dashboard: JNJ & JPM are associated with the wrong sector
 - IBERDROLA Non-Tradable Dividends: Are properly calculated? Doesn't seem to calculate quantity properly
 - Some stocks are no longer available in DEGIRO. We Need to find a way to handle them
     - 'TYME'(600028575)
@@ -72,6 +71,7 @@ See [Wiki - Developing Stonks Overwatch](https://github.com/ctasada/stonks-overw
 - Portfolio Growth: Zoom works, but Panning doesn't work. Needs to be fixed
 
 ## TODOs
+- [ ] Add information about the sectors. Maybe a tooltip in the places where sectors are used.
 - [ ] Tables should allow choosing the number of rows to show. 
 - [ ] Portfolio Tables would be migrated to http://bootstrap-table.com/
 - [ ] Review ALL BUGS and TODOs and move them to their corresponding Github issues
