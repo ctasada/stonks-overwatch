@@ -18,16 +18,21 @@ class AccountOverviewService:
             if cash_movement["productId"] is not None:
                 products_ids.append(cash_movement["productId"])
 
-        # Remove duplicates from list
-        products_ids = list(set(products_ids))
-        products_info = ProductInfoRepository.get_products_info_raw(products_ids)
+        products_info = self.__get_products_info(products_ids)
 
         overview = []
         for cash_movement in account_overview:
             stock_name = ""
             stock_symbol = ""
+            description = cash_movement["description"]
+
             if cash_movement["productId"] is not None:
                 info = products_info[int(cash_movement["productId"])]
+
+                if self.__is_non_tradeable_product(info):
+                    # If the product is non-tradeable, we want to include the real product, if exists
+                    info = self.__find_equivalent_tradeable_product(info, products_info)
+
                 stock_name = info["name"]
                 stock_symbol = info["symbol"]
 
@@ -37,7 +42,7 @@ class AccountOverviewService:
                     value_datetime=cash_movement["valueDate"],
                     stock_name=stock_name,
                     stock_symbol=stock_symbol,
-                    description=cash_movement["description"],
+                    description=description,
                     type=cash_movement["type"],
                     currency=cash_movement["currency"],
                     change=cash_movement.get("change", 0.0),
@@ -45,3 +50,61 @@ class AccountOverviewService:
             )
 
         return overview
+
+    def __get_products_info(self, products_ids: List[int]) -> dict:
+        """Fetch product information for the given product IDs.
+
+        This method retrieves product information from the ProductInfoRepository
+        for the specified product IDs. It returns a dict containing
+        product details with the productId as key
+        """
+        # Remove duplicates from the list
+        products_ids = list(set(products_ids))
+
+        products_info = ProductInfoRepository.get_products_info_raw(products_ids)
+        non_tradeable_products = []
+        for product in products_info.values():
+            if self.__is_non_tradeable_product(product):
+                non_tradeable_products.append(product["symbol"].replace(".D", ""))
+
+        # Retrieve the real product info for non-tradeable products
+        if non_tradeable_products:
+            non_tradeable_products_info = ProductInfoRepository.get_products_info_raw_by_symbol(non_tradeable_products)
+            products_info = products_info | self.__filter_non_tradeable_products(non_tradeable_products_info)
+
+        return products_info
+
+    def __is_non_tradeable_product(self, product: dict) -> bool:
+        """Check if the product is non-tradeable.
+
+        This method checks if the product is a non-tradeable product.
+        Non-tradeable products are identified by the presence of "Non-tradeable" in the name.
+
+        If the product is NOT tradable, we shouldn't consider it for Growth.
+
+        The 'tradable' attribute identifies old Stocks, like the ones that are
+        renamed for some reason, and it's not good enough to identify stocks
+        that are provided as dividends, for example.
+        """
+        if product["symbol"].endswith(".D"):
+            # This is a DeGiro-specific symbol, which is not-tradeable
+            return True
+
+        return "Non tradeable" in product["name"]
+
+    def __filter_non_tradeable_products(self, products: dict) -> dict:
+        """Filter out non-tradeable products from the list of products."""
+        return {k: v for k, v in products.items() if not self.__is_non_tradeable_product(v)}
+
+    def __find_equivalent_tradeable_product(self, product: dict, all_products: dict) -> dict:
+        """Find the equivalent tradeable product for a non-tradeable product."""
+        if not self.__is_non_tradeable_product(product):
+            return product
+
+        # Remove the ".D" suffix to find the equivalent tradeable product
+        tradeable_symbol = product["symbol"].replace(".D", "")
+        for entry in all_products.values():
+            if entry["symbol"] == tradeable_symbol and not self.__is_non_tradeable_product(entry):
+                return entry
+
+        return product
