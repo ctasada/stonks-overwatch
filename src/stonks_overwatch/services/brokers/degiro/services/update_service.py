@@ -1,5 +1,7 @@
 import os
-from datetime import date, datetime, time, timezone
+import time
+from datetime import date, datetime, timezone
+from datetime import time as dt_time
 from typing import Dict, List
 
 import pandas as pd
@@ -81,14 +83,14 @@ class UpdateService:
     def _get_last_cash_movement_import(self) -> datetime:
         last_movement = CashMovementsRepository.get_last_movement()
         if last_movement is None:
-            last_movement = datetime.combine(DegiroConfig.default().start_date, time.min)
+            last_movement = datetime.combine(DegiroConfig.default().start_date, dt_time.min)
 
         return last_movement
 
     def _get_last_transactions_import(self) -> datetime:
         last_movement = TransactionsRepository.get_last_movement()
         if last_movement is None:
-            last_movement = datetime.combine(DegiroConfig.default().start_date, time.min)
+            last_movement = datetime.combine(DegiroConfig.default().start_date, dt_time.min)
 
         return last_movement
 
