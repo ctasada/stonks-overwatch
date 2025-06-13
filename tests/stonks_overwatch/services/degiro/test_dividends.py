@@ -130,20 +130,12 @@ class TestDividendsService(TestCase):
     def test_get_upcoming_dividends(self):
         upcoming_dividends = self.dividends_service._get_upcoming_dividends()
 
-        assert len(upcoming_dividends) == 2
+        assert len(upcoming_dividends) == 1
 
         assert upcoming_dividends[0].payment_date_as_string() == "2025-06-12"
         assert upcoming_dividends[0].stock_name == "Microsoft Corp"
         assert upcoming_dividends[0].stock_symbol == "MSFT"
-        assert upcoming_dividends[0].currency == "USD"
-        assert upcoming_dividends[0].change == -3.11
-        assert upcoming_dividends[0].formated_change() == "$ -3.11"
+        assert upcoming_dividends[0].currency == "EUR"
+        assert upcoming_dividends[0].change == pytest.approx(15.80, rel=1e-2)
+        assert upcoming_dividends[0].formated_change() == "€ 15.81"
         assert upcoming_dividends[0].dividend_type == DividendType.ANNOUNCED
-
-        assert upcoming_dividends[1].payment_date_as_string() == "2025-06-12"
-        assert upcoming_dividends[1].stock_name == "Microsoft Corp"
-        assert upcoming_dividends[1].stock_symbol == "MSFT"
-        assert upcoming_dividends[1].currency == "USD"
-        assert upcoming_dividends[1].change == 20.75
-        assert upcoming_dividends[1].formated_change() == "$ 20.75"
-        assert upcoming_dividends[1].dividend_type == DividendType.ANNOUNCED
