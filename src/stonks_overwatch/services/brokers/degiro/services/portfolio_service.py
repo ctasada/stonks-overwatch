@@ -47,7 +47,7 @@ class PortfolioService(PortfolioServiceInterface):
     FALLBACK_PRICE = 0.0
 
     # Display constants
-    CASH_BALANCE_NAME_TEMPLATE = "Cash Balance ${currency}"
+    CASH_BALANCE_NAME_TEMPLATE = "Cash Balance {currency}"
 
     def __init__(
         self,
