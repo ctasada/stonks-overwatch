@@ -12,9 +12,9 @@ from .portfolio_service import PortfolioServiceInterface
 from .transaction_service import TransactionServiceInterface
 
 __all__ = [
-    'BrokerServiceInterface',
-    'PortfolioServiceInterface',
-    'TransactionServiceInterface',
-    'DepositServiceInterface',
-    'DividendServiceInterface',
+    "BrokerServiceInterface",
+    "PortfolioServiceInterface",
+    "TransactionServiceInterface",
+    "DepositServiceInterface",
+    "DividendServiceInterface",
 ]

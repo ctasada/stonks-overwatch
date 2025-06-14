@@ -2,6 +2,7 @@ from django.db import connection
 
 from stonks_overwatch.utils.database.db_utils import dictfetchall
 
+
 class DividendsRepository:
     @staticmethod
     def get_upcoming_payments() -> list[dict]:
@@ -26,7 +27,7 @@ class DividendsRepository:
                 WHERE isin = %s
                 ORDER BY date_time DESC, event_id DESC
                 """,
-                [isin]
+                [isin],
             )
             result = dictfetchall(cursor)
             return result[0] if result else None

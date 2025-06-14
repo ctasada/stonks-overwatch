@@ -4,6 +4,7 @@ from stonks_overwatch.services.models import PortfolioEntry, ProductType
 
 import pook
 
+
 @pook.on
 def test_get_portfolio():
     BaseConfig.CONFIG_PATH = "tests/resources/stonks_overwatch/config/sample-config.json"
@@ -19,15 +20,10 @@ def test_get_portfolio():
                 "symbol": "EUR",
                 "available": 100.0,
                 "inOrder": "0",
-            }
+            },
         ]
     )
-    pook.get("https://api.bitvavo.com/v2/ticker/price").reply(200).json(
-        {
-            "market": "BTC-EUR",
-            "price": "75398"
-        }
-    )
+    pook.get("https://api.bitvavo.com/v2/ticker/price").reply(200).json({"market": "BTC-EUR", "price": "75398"})
     pook.get("https://api.bitvavo.com/v2/assets").reply(200).json(
         {
             "symbol": "BTC",
@@ -39,11 +35,9 @@ def test_get_portfolio():
             "withdrawalFee": "0.000021",
             "withdrawalMinAmount": "0.000021",
             "withdrawalStatus": "OK",
-            "networks": [
-                "BTC"
-            ],
-            "message": ""
-            }
+            "networks": ["BTC"],
+            "message": "",
+        }
     )
     pook.get("https://api.bitvavo.com/v2/account/history").reply(200).json(
         {
@@ -60,7 +54,7 @@ def test_get_portfolio():
                     "receivedAmount": "0.00318807",
                     "feesCurrency": "EUR",
                     "feesAmount": "0.7486213800000314",
-                    "address": 'null'
+                    "address": "null",
                 },
             ]
         }
@@ -94,6 +88,7 @@ def test_get_portfolio():
     assert portfolio[1].base_currency_value == 100.0
     assert portfolio[1].unrealized_gain == 0.0
 
+
 @pook.on
 def test_get_portfolio_total():
     BaseConfig.CONFIG_PATH = "tests/resources/stonks_overwatch/config/sample-config.json"
@@ -110,7 +105,7 @@ def test_get_portfolio_total():
             base_currency_price=75398,
             base_currency="EUR",
             base_currency_value=240.37410186,
-            unrealized_gain=-59.62589814000001
+            unrealized_gain=-59.62589814000001,
         ),
         PortfolioEntry(
             name="Cash Balance EUR",
@@ -120,9 +115,8 @@ def test_get_portfolio_total():
             is_open=True,
             value=100.0,
             base_currency="EUR",
-            base_currency_value=100.0
+            base_currency_value=100.0,
         ),
-
     ]
 
     pook.get("https://api.bitvavo.com/v2/depositHistory").reply(200).json(
@@ -133,7 +127,7 @@ def test_get_portfolio_total():
                 "amount": "400",
                 "fee": "0",
                 "status": "completed",
-                "address": "NL42ABNA1234567891"
+                "address": "NL42ABNA1234567891",
             },
         ]
     )
@@ -150,12 +144,12 @@ def test_get_portfolio_total():
     total_portfolio = PortfolioService().get_portfolio_total(portfolio)
 
     assert total_portfolio.total_pl == -59.625898140000004
-    assert total_portfolio.total_pl_formatted == '€ -59.63'
+    assert total_portfolio.total_pl_formatted == "€ -59.63"
     assert total_portfolio.total_cash == 100
-    assert total_portfolio.total_cash_formatted == '€ 100.00'
+    assert total_portfolio.total_cash_formatted == "€ 100.00"
     assert total_portfolio.current_value == 340.37410186
-    assert total_portfolio.current_value_formatted == '€ 340.37'
+    assert total_portfolio.current_value_formatted == "€ 340.37"
     assert total_portfolio.total_roi == -14.906474535000003
-    assert total_portfolio.total_roi_formatted == '-14.91%'
+    assert total_portfolio.total_roi_formatted == "-14.91%"
     assert total_portfolio.total_deposit_withdrawal == 400
-    assert total_portfolio.total_deposit_withdrawal_formatted == '€ 400.00'
+    assert total_portfolio.total_deposit_withdrawal_formatted == "€ 400.00"

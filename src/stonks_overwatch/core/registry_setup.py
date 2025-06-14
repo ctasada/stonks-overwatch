@@ -30,6 +30,7 @@ from stonks_overwatch.services.brokers.degiro.services.transaction_service impor
     TransactionsService as DeGiroTransactionService,
 )
 
+
 def register_broker_services() -> None:
     """
     Register all broker services with the broker registry.

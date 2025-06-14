@@ -4,8 +4,8 @@ from stonks_overwatch.core.aggregators.base_aggregator import BaseAggregator
 from stonks_overwatch.core.factories.broker_registry import ServiceType
 from stonks_overwatch.services.models import PortfolioId, Transaction
 
-class TransactionsAggregatorService(BaseAggregator):
 
+class TransactionsAggregatorService(BaseAggregator):
     def __init__(self):
         super().__init__(ServiceType.TRANSACTION)
 
@@ -15,7 +15,7 @@ class TransactionsAggregatorService(BaseAggregator):
             selected_portfolio,
             "get_transactions",
             sort_key=lambda k: (k.date, k.time, 1 if k.buy_sell == "S" else 0),
-            reverse=True
+            reverse=True,
         )
 
     def aggregate_data(self, selected_portfolio: PortfolioId, **kwargs) -> List[Transaction]:

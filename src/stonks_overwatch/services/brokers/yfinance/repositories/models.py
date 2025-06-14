@@ -1,5 +1,6 @@
 from django.db import models
 
+
 # Full Yahoo Finance Ticker Information
 class YFinanceTickerInfo(models.Model):
     class Meta:
@@ -17,6 +18,3 @@ class YFinanceStockSplits(models.Model):
 
     symbol = models.CharField(max_length=8)
     data = models.JSONField()
-
-
-

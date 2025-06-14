@@ -5,6 +5,7 @@ from django.db import connection
 
 from stonks_overwatch.utils.database.db_utils import dictfetchone
 
+
 class YFinanceRepository:
     @staticmethod
     def get_ticker_info(symbol: str) -> dict | None:
@@ -23,7 +24,6 @@ class YFinanceRepository:
             return json.loads(results["data"])
 
         return None
-
 
     @staticmethod
     def get_stock_splits(symbol: str) -> List[dict] | None:

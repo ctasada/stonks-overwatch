@@ -5,6 +5,7 @@ from django.db import connection
 from stonks_overwatch.services.brokers.degiro.repositories.models import DeGiroCashMovements
 from stonks_overwatch.utils.database.db_utils import dictfetchall
 
+
 class CashMovementsRepository:
     @staticmethod
     def get_cash_movements_raw() -> list[dict]:
@@ -83,7 +84,7 @@ class CashMovementsRepository:
             return None
 
     @staticmethod
-    def get_last_movement() -> datetime|None:
+    def get_last_movement() -> datetime | None:
         """Return the latest update from the DB.
 
         ### Returns:

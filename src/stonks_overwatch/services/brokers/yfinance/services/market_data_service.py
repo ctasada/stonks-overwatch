@@ -5,6 +5,7 @@ from stonks_overwatch.services.brokers.yfinance.repositories.yfinance_repository
 from stonks_overwatch.services.models import Country, Sector
 from stonks_overwatch.utils.core.logger import StonksLogger
 
+
 class YFinance:
     logger = StonksLogger.get_logger("stonks_overwatch.yfinance", "[YFINANCE|SERVICE]")
 
@@ -40,11 +41,11 @@ class YFinance:
             ticker_info = ticker.info
 
         try:
-            if ticker_info.get('country'):
-                return Country(ticker_info['country'])
+            if ticker_info.get("country"):
+                return Country(ticker_info["country"])
 
-            if ticker_info.get('region'):
-                return Country(ticker_info['region'])
+            if ticker_info.get("region"):
+                return Country(ticker_info["region"])
         except AttributeError:
             pass
 
@@ -57,8 +58,8 @@ class YFinance:
             ticker_info = ticker.info
 
         try:
-            sector = Sector(ticker_info.get('sector')) if ticker_info.get('sector') else Sector.UNKNOWN
-            industry = ticker_info.get('industry')
+            sector = Sector(ticker_info.get("sector")) if ticker_info.get("sector") else Sector.UNKNOWN
+            industry = ticker_info.get("industry")
             return sector, industry
         except (AttributeError, ValueError):
             return Sector.UNKNOWN, None

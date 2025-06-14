@@ -11,11 +11,13 @@ from stonks_overwatch.services.brokers.degiro.repositories.product_quotations_re
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.core.logger import StonksLogger
 
+
 @dataclass
 class CurrencyMapEntry:
     product_id: int
     inverse: bool
     quotations: Optional[Dict[date, float]] = None
+
 
 class CurrencyConverterService:
     logger = StonksLogger.get_logger("stonks_overwatch.currency_converter", "DEGIRO|CURRENCY_CONVERTER")
@@ -25,7 +27,7 @@ class CurrencyConverterService:
         self.known_currency_pairs = CurrencyFX.known_currencies()
         self.currency_maps = self.__calculate_maps()
 
-    def convert(self, amount: float, currency: str, new_currency: str="EUR", fx_date: datetime.date=None) -> float:
+    def convert(self, amount: float, currency: str, new_currency: str = "EUR", fx_date: datetime.date = None) -> float:
         if amount is None:
             amount = 0.0
 
@@ -40,7 +42,7 @@ class CurrencyConverterService:
         # Fallback
         return self.currency_converter.convert(amount, currency, new_currency, fx_date)
 
-    def __convert(self, amount: float, currency: str, new_currency: str, fx_date: date=None):
+    def __convert(self, amount: float, currency: str, new_currency: str, fx_date: date = None):
         if self.currency_maps[currency][new_currency].quotations is None:
             self.currency_maps[currency][new_currency].quotations = self.__load_quotations(currency, new_currency)
 
@@ -66,8 +68,7 @@ class CurrencyConverterService:
         tmp_quotations = ProductQuotationsRepository.get_product_quotations(product_id)
 
         return {
-            LocalizationUtility.convert_string_to_date(date_str): value
-            for date_str, value in tmp_quotations.items()
+            LocalizationUtility.convert_string_to_date(date_str): value for date_str, value in tmp_quotations.items()
         }
 
     @staticmethod
@@ -75,13 +76,9 @@ class CurrencyConverterService:
         calculated_map = {}
         for pair in CurrencyFX:
             # Extract the currencies from the enum name
-            base, quote = pair.name.split('_')
+            base, quote = pair.name.split("_")
             product_id = pair.value
-            calculated_map[base] = {
-                quote: CurrencyMapEntry(product_id=product_id, inverse=False)
-            }
-            calculated_map[quote] = {
-                base: CurrencyMapEntry(product_id=product_id, inverse=True)
-            }
+            calculated_map[base] = {quote: CurrencyMapEntry(product_id=product_id, inverse=False)}
+            calculated_map[quote] = {base: CurrencyMapEntry(product_id=product_id, inverse=True)}
 
         return calculated_map

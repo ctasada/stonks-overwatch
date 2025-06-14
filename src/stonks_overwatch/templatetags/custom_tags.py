@@ -1,4 +1,3 @@
-
 from django import template
 from django.template import RequestContext
 from django.utils import timezone
@@ -14,6 +13,7 @@ from stonks_overwatch.utils.core.logger import StonksLogger
 
 register = template.Library()
 
+
 @register.filter
 def index(sequence, position):
     return sequence[position]
@@ -26,6 +26,7 @@ def show_total_portfolio(context: RequestContext) -> dict:
     total_portfolio = portfolio.get_portfolio_total(selected_portfolio)
 
     return {"total_portfolio": dataclass_to_dict(total_portfolio)}
+
 
 @register.simple_tag
 def is_connected_to_degiro() -> bool:
@@ -40,13 +41,15 @@ def is_connected_to_degiro() -> bool:
         StonksLogger.get_logger("stonks_overwatch.views.templates", "CUSTOMTAGS|AUTH_MIDDLEWARE").error(error)
         return False
 
+
 @register.simple_tag
 def last_import() -> str:
     last_update = UpdateService().get_last_import()
 
-    local_time =  timezone.localtime(last_update)
+    local_time = timezone.localtime(last_update)
 
     return LocalizationUtility.format_date_time_from_date(local_time)
+
 
 @register.simple_tag
 def get_connected_tooltip() -> str:

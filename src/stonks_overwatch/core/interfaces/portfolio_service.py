@@ -10,6 +10,7 @@ from typing import List, Optional
 
 from stonks_overwatch.services.models import DailyValue, PortfolioEntry, TotalPortfolio
 
+
 class PortfolioServiceInterface(ABC):
     """
     Interface for portfolio service implementations.

@@ -16,16 +16,17 @@ import django
 from django.core.management import call_command
 
 # Add the src directory to the Python path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
 
 # Set up Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'stonks_overwatch.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "stonks_overwatch.settings")
 django.setup()
 
 # The import is defined here, so all the Django configuration can be executed
 from stonks_overwatch.services.brokers.degiro.services.update_service import (  # noqa: E402
     UpdateService as DegiroUpdateService,
 )
+
 
 def init() -> None:
     """Execute the necessary initializations for the scripts.
@@ -48,6 +49,7 @@ def init() -> None:
     # Configure logging
     logging.basicConfig(level=logging.INFO, format=_format)
 
+
 def parse_args() -> Namespace:
     """Parse command line arguments.
     ### Returns:
@@ -64,79 +66,62 @@ def parse_args() -> Namespace:
 
         Supported brokers are:
             * DeGiro
-        """)
+        """),
     )
     default_degiro_import_folder = os.path.join(STONKS_OVERWATCH_DATA_DIR, "import", "degiro")
     parser.add_argument(
         "--import_folder",
         type=str,
         default=os.path.join(STONKS_OVERWATCH_DATA_DIR, "import", "degiro"),
-        help=f"Folder to import data from/to. Defaults to: '{default_degiro_import_folder}'"
+        help=f"Folder to import data from/to. Defaults to: '{default_degiro_import_folder}'",
     )
     parser.add_argument(
         "--debug",
         action="store_true",
-        help="Enable debug mode. When using debug mode, the script will store the DeGiro data in the import folder."
+        help="Enable debug mode. When using debug mode, the script will store the DeGiro data in the import folder.",
     )
 
-    parser.add_argument(
-        "--degiro_account",
-        action="store_true",
-        help="Import DeGiro account information"
-    )
-    parser.add_argument(
-        "--degiro_transactions",
-        action="store_true",
-        help="Import DeGiro transactions"
-    )
-    parser.add_argument(
-        "--degiro_products",
-        action="store_true",
-        help="Import DeGiro product information"
-    )
-    parser.add_argument(
-        "--degiro_companies",
-        action="store_true",
-        help="Import DeGiro company profiles"
-    )
-    parser.add_argument(
-        "--degiro_yfinance",
-        action="store_true",
-        help="Import YFinance data for DeGiro products"
-    )
-    parser.add_argument(
-        "--degiro_dividends",
-        action="store_true",
-        help="Import Degiro dividends data"
-    )
+    parser.add_argument("--degiro_account", action="store_true", help="Import DeGiro account information")
+    parser.add_argument("--degiro_transactions", action="store_true", help="Import DeGiro transactions")
+    parser.add_argument("--degiro_products", action="store_true", help="Import DeGiro product information")
+    parser.add_argument("--degiro_companies", action="store_true", help="Import DeGiro company profiles")
+    parser.add_argument("--degiro_yfinance", action="store_true", help="Import YFinance data for DeGiro products")
+    parser.add_argument("--degiro_dividends", action="store_true", help="Import Degiro dividends data")
 
     return parser.parse_args()
+
 
 def degiro_account_import(update_service: DegiroUpdateService) -> None:
     """Import DeGiro Account information."""
     logging.info("Importing DeGiro Account Information...")
     update_service.update_account()
 
+
 def degiro_transactions_import(update_service: DegiroUpdateService) -> None:
     logging.info("Importing DeGiro Transactions...")
     update_service.update_transactions()
+
 
 def degiro_products_info_import(update_service: DegiroUpdateService) -> None:
     """Import Product Information from DeGiro."""
     logging.info("Importing DeGiro Products Information...")
     update_service.update_portfolio()
 
+
 def degiro_company_profile_import(update_service: DegiroUpdateService) -> None:
     logging.info("Importing DeGiro Company Profiles...")
     update_service.update_company_profile()
+
 
 def degiro_yfinance(update_service: DegiroUpdateService) -> None:
     logging.info("Importing DeGiro YFinance Data...")
     update_service.update_yfinance()
 
+
 def degiro_dividends(update_service: DegiroUpdateService) -> None:
     logging.info("Importing DeGiro Dividends...")
     update_service.update_dividends()
+
 
 def main():
     init()
@@ -145,10 +130,7 @@ def main():
 
     args = parse_args()
 
-    degiro_update_service = DegiroUpdateService(
-        import_folder=args.import_folder,
-        debug_mode=args.debug
-    )
+    degiro_update_service = DegiroUpdateService(import_folder=args.import_folder, debug_mode=args.debug)
 
     if args.degiro_account:
         degiro_account_import(degiro_update_service)
@@ -165,6 +147,7 @@ def main():
     else:
         logging.info("DeGiro Importer: No import option selected. Importing all data.")
         degiro_update_service.update_all()
+
 
 if __name__ == "__main__":
     main()

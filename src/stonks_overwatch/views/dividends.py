@@ -13,6 +13,7 @@ from stonks_overwatch.services.utilities.session_manager import SessionManager
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.core.logger import StonksLogger
 
+
 class Dividends(View):
     logger = StonksLogger.get_logger("stonks_overwatch.dividends.views", "[VIEW|DIVIDENDS]")
 
@@ -37,10 +38,9 @@ class Dividends(View):
         if total_dividends > 0.0:
             # Filter the dividends_calendar to only include items matching the calendar_year
             filtered_calendar = {
-                key: value for key, value in dividends_calendar['calendar'].items()
-                if key.endswith(str(calendar_year))
+                key: value for key, value in dividends_calendar["calendar"].items() if key.endswith(str(calendar_year))
             }
-            dividends_calendar['calendar'] = filtered_calendar
+            dividends_calendar["calendar"] = filtered_calendar
 
             context = {
                 "total_dividends": LocalizationUtility.format_money_value(
@@ -54,7 +54,7 @@ class Dividends(View):
         else:
             context = {}
 
-        if request.headers.get('Accept') == 'application/json' and request.GET.get('html_only'):
+        if request.headers.get("Accept") == "application/json" and request.GET.get("html_only"):
             # Return only the calendar HTML
             return render(request, "dividends_calendar_content.html", {"dividendsCalendar": dividends_calendar})
 
@@ -101,7 +101,6 @@ class Dividends(View):
             )
 
         for dividend_pay in dividends:
-
             month_entry = dividends_calendar.setdefault(dividend_pay.month_year(), {})
             days = month_entry.setdefault("days", {})
             day_entry = days.setdefault(dividend_pay.day(), {})

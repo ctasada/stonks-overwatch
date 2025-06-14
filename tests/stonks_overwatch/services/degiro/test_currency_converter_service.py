@@ -12,6 +12,7 @@ from stonks_overwatch.utils.core.localization import LocalizationUtility
 import pytest
 from django.test import TestCase
 
+
 @pytest.mark.django_db
 class TestCurrencyConverterService(TestCase):
     def setUp(self):
@@ -28,10 +29,7 @@ class TestCurrencyConverterService(TestCase):
         for key, value in data.items():
             # Create and save the ProductQuotation object
             obj = DeGiroProductQuotation.objects.create(
-                id=key,
-                interval="P1D",
-                last_import=LocalizationUtility.now(),
-                quotations=value
+                id=key, interval="P1D", last_import=LocalizationUtility.now(), quotations=value
             )
             self.created_objects[key] = obj
 
@@ -50,12 +48,8 @@ class TestCurrencyConverterService(TestCase):
         calculated_map = self.currency_service._CurrencyConverterService__calculate_maps()
 
         assert calculated_map == {
-            'EUR': {
-                'USD': CurrencyMapEntry(product_id=705366, inverse=False)
-            },
-            'USD': {
-                'EUR': CurrencyMapEntry(product_id=705366, inverse=True)
-            }
+            "EUR": {"USD": CurrencyMapEntry(product_id=705366, inverse=False)},
+            "USD": {"EUR": CurrencyMapEntry(product_id=705366, inverse=True)},
         }
 
         # If this fails, means we have missing maps
@@ -68,13 +62,15 @@ class TestCurrencyConverterService(TestCase):
         assert result == 1.0
 
     def test_convert_eur_to_usd_with_date(self):
-        result = self.currency_service.convert(1.0, "EUR", "USD",
-                                               LocalizationUtility.convert_string_to_date("2020-03-14"))
+        result = self.currency_service.convert(
+            1.0, "EUR", "USD", LocalizationUtility.convert_string_to_date("2020-03-14")
+        )
         assert round(result, 3) == round(1.1101, 3)
 
     def test_convert_usd_to_eur_with_date(self):
-        result = self.currency_service.convert(1.0, "USD", "EUR",
-                                               LocalizationUtility.convert_string_to_date("2020-03-14"))
+        result = self.currency_service.convert(
+            1.0, "USD", "EUR", LocalizationUtility.convert_string_to_date("2020-03-14")
+        )
         assert round(result, 3) == round(0.9008, 3)
 
     def test_convert_eur_to_usd(self):

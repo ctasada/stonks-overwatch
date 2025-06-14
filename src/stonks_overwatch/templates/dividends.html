@@ -200,14 +200,14 @@
         $(this).addClass('active');
         // Update the dropdown button text
         $('#dividendsYearsDropdownButton').text($(this).text());
-        
+
         // Get the selected year
         const selectedYear = $(this).text();
         console.log('Selected year:', selectedYear);
-        
+
         // Make AJAX request to get the calendar HTML
         let url = HOST + URL + "?calendar_year=" + selectedYear + "&html_only=true";
-        
+
         fetch(url, {
             method: 'GET',
             headers: {

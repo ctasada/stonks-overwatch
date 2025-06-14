@@ -6,7 +6,8 @@ from django.db import models
 
 from django.test import TestCase
 
-T = TypeVar('T', bound=models.Model)
+T = TypeVar("T", bound=models.Model)
+
 
 class BaseRepositoryTest(TestCase):
     """Base class for repository tests that provides common functionality for loading and managing test data.
@@ -17,6 +18,7 @@ class BaseRepositoryTest(TestCase):
     - Cleaning up test data
     - Common assertions for repository tests
     """
+
     model_class: Type[T]
     data_file: str
 

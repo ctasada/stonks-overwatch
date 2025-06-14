@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional
 
 from stonks_overwatch.config.base_credentials import BaseCredentials
 
+
 @dataclass
 class DegiroCredentials(BaseCredentials):
     username: str

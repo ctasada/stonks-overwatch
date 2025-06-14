@@ -5,6 +5,7 @@ from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.degiro_credentials import DegiroCredentials
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 
+
 class DegiroConfig(BaseConfig):
     config_key = "degiro"
     DEFAULT_DEGIRO_UPDATE_FREQUENCY = 5
@@ -12,12 +13,12 @@ class DegiroConfig(BaseConfig):
     DEFAULT_DEGIRO_START_DATE = LocalizationUtility.convert_string_to_date(DEFAULT_DEGIRO_START_DATE_STR)
 
     def __init__(
-            self,
-            credentials: Optional[DegiroCredentials],
-            start_date: date,
-            update_frequency_minutes: int = DEFAULT_DEGIRO_UPDATE_FREQUENCY,
-            enabled: bool = True,
-            offline_mode: bool = False,
+        self,
+        credentials: Optional[DegiroCredentials],
+        start_date: date,
+        update_frequency_minutes: int = DEFAULT_DEGIRO_UPDATE_FREQUENCY,
+        enabled: bool = True,
+        offline_mode: bool = False,
     ) -> None:
         super().__init__(credentials, enabled)
         if update_frequency_minutes < 1:
@@ -29,19 +30,21 @@ class DegiroConfig(BaseConfig):
     def __eq__(self, value: object) -> bool:
         if isinstance(value, DegiroConfig):
             return (
-                    super().__eq__(value) and
-                    self.start_date == value.start_date and
-                    self.update_frequency_minutes == value.update_frequency_minutes and
-                    self.offline_mode == value.offline_mode
+                super().__eq__(value)
+                and self.start_date == value.start_date
+                and self.update_frequency_minutes == value.update_frequency_minutes
+                and self.offline_mode == value.offline_mode
             )
         return False
 
     def __repr__(self) -> str:
-        return (f"DegiroConfig(enabled={self.enabled}, "
-                f"offline_mode={self.offline_mode}, "
-                f"credentials={self.credentials}, "
-                f"start_date={self.start_date}, "
-                f"update_frequency_minutes={self.update_frequency_minutes})")
+        return (
+            f"DegiroConfig(enabled={self.enabled}, "
+            f"offline_mode={self.offline_mode}, "
+            f"credentials={self.credentials}, "
+            f"start_date={self.start_date}, "
+            f"update_frequency_minutes={self.update_frequency_minutes})"
+        )
 
     @property
     def get_credentials(self) -> DegiroCredentials:

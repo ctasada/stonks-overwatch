@@ -10,6 +10,7 @@ from requests.exceptions import RequestException
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.core.logger import StonksLogger
 
+
 # Should be extending ProductType
 class LogoType(Enum):
     STOCK = "Stock"
@@ -39,7 +40,8 @@ class LogoType(Enum):
 
         return LogoType.UNKNOWN
 
-@method_decorator(cache_page(60 * 60), name='get')  # Cache for 1 hour
+
+@method_decorator(cache_page(60 * 60), name="get")  # Cache for 1 hour
 class AssetLogoView(View):
     logger = StonksLogger.get_logger("stonks_overwatch.dashboard.views", "[VIEW|ASSET_LOGO]")
 
@@ -64,7 +66,7 @@ class AssetLogoView(View):
                 return HttpResponse(
                     content=self.__generate_symbol(LocalizationUtility.get_currency_symbol(symbol)),
                     content_type="image/svg+xml",
-                    status=200
+                    status=200,
                 )
             elif product_type in [LogoType.COUNTRY, LogoType.SECTOR]:
                 url = self.__emoji_to_svg(symbol)
@@ -76,15 +78,13 @@ class AssetLogoView(View):
 
             return HttpResponse(
                 content=response.content,
-                content_type=response.headers.get('Content-Type', 'image/svg+xml'),
-                status=response.status_code
+                content_type=response.headers.get("Content-Type", "image/svg+xml"),
+                status=response.status_code,
             )
         except RequestException:
             self.logger.warning(f"Logo for {product_type.name} {symbol.upper()} not found. Creating fallback logo.")
             return HttpResponse(
-                content=self.__generate_symbol(symbol.upper()),
-                content_type="image/svg+xml",
-                status=200
+                content=self.__generate_symbol(symbol.upper()), content_type="image/svg+xml", status=200
             )
 
     def __generate_symbol(self, symbol: str) -> str:
@@ -99,7 +99,7 @@ class AssetLogoView(View):
 
     def __emoji_to_svg(self, emoji_char):
         # Convert emoji to its Unicode codepoint
-        codepoint = '-'.join(f"{ord(c):x}" for c in emoji_char)
+        codepoint = "-".join(f"{ord(c):x}" for c in emoji_char)
 
         # Twemoji URL for the SVG. See https://github.com/jdecked/twemoji
         return f"https://cdnjs.cloudflare.com/ajax/libs/twemoji/16.0.1/svg/{codepoint}.svg"

@@ -9,6 +9,6 @@ from .broker_registry import BrokerRegistry
 from .service_factory import ServiceFactory
 
 __all__ = [
-    'BrokerRegistry',
-    'ServiceFactory',
+    "BrokerRegistry",
+    "ServiceFactory",
 ]

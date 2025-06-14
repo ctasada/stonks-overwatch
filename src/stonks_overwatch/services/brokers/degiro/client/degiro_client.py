@@ -17,8 +17,10 @@ from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.singleton import singleton
 
+
 class DeGiroOfflineModeError(Exception):
     """Exception raised for data validation errors."""
+
     def __init__(self, message):
         """
         Initializes the exception with a message and a structure of error details.
@@ -27,6 +29,7 @@ class DeGiroOfflineModeError(Exception):
             message (str): The error message.
         """
         super().__init__(message)
+
 
 class CredentialsManager:
     """Manages the credentials for the DeGiro API."""
@@ -47,8 +50,11 @@ class CredentialsManager:
 
     def are_credentials_valid(self) -> bool:
         """Checks if credentials contains, at least, username and password."""
-        if (not self.credentials or not hasattr(self.credentials, 'username')
-                or not hasattr(self.credentials, 'password')):
+        if (
+            not self.credentials
+            or not hasattr(self.credentials, "username")
+            or not hasattr(self.credentials, "password")
+        ):
             return False
         return bool(self.credentials.username and self.credentials.password)
 
@@ -57,6 +63,7 @@ class CredentialsManager:
         Return a string representation of the CredentialsManager.
         Sensitive data is masked for security.
         """
+
         def mask_string(value: str | None, visible_chars: int = 4) -> str:
             if not value:
                 return "None"
@@ -75,6 +82,7 @@ class CredentialsManager:
             f")"
         )
 
+
 @singleton
 class DeGiroService:
     logger = StonksLogger.get_logger("stonks_overwatch.degiro_service", "[DEGIRO|CLIENT]")
@@ -82,12 +90,12 @@ class DeGiroService:
     credentials_manager: Optional[CredentialsManager] = None
     force: bool = False
 
-    __cache_path = os.path.join(stonks_overwatch.settings.STONKS_OVERWATCH_CACHE_DIR, 'http_request.cache')
+    __cache_path = os.path.join(stonks_overwatch.settings.STONKS_OVERWATCH_CACHE_DIR, "http_request.cache")
 
     def __init__(
-            self,
-            credentials_manager: Optional[CredentialsManager] = None,
-            force: bool = False,
+        self,
+        credentials_manager: Optional[CredentialsManager] = None,
+        force: bool = False,
     ):
         self.set_credentials(credentials_manager)
         self.force = force
@@ -153,7 +161,7 @@ class DeGiroService:
         products_info = self.api_client.get_products_info(product_list=product_ids, raw=True)
         return products_info["data"]
 
-    def get_product_quotation(self, issue_id: str|None, isin: str, period: Interval, symbol: str) -> dict:
+    def get_product_quotation(self, issue_id: str | None, isin: str, period: Interval, symbol: str) -> dict:
         daily_quotations = self._get_product_daily_quotation(issue_id=issue_id, isin=isin, period=period)
         if not daily_quotations:
             self.logger.error(f"Product Quotations for '{symbol}' ({issue_id}) / {period} not found")
@@ -163,7 +171,7 @@ class DeGiroService:
         last_quotation = self._get_product_last_quotation(issue_id, isin, symbol, last_value)
         return daily_quotations | last_quotation
 
-    def _get_product_daily_quotation(self, issue_id: str|None, isin: str, period: Interval) -> dict:
+    def _get_product_daily_quotation(self, issue_id: str | None, isin: str, period: Interval) -> dict:
         """
         Get the list of quotations for the provided product for the indicated interval.
         The response is a list of date-value pairs.
@@ -180,7 +188,7 @@ class DeGiroService:
             if series.type != "time":
                 continue
 
-            init_date = LocalizationUtility.convert_string_to_date(series.times.split('/')[0])
+            init_date = LocalizationUtility.convert_string_to_date(series.times.split("/")[0])
             last_date = init_date
 
             data_frame = pl.DataFrame(data=series.data, orient="row")
@@ -231,16 +239,10 @@ class DeGiroService:
         return quotes
 
     @staticmethod
-    def __is_chart_error_type(chart: Chart|None) -> bool:
-        return chart.get('series', [{}])[0].get('type') == 'error'
+    def __is_chart_error_type(chart: Chart | None) -> bool:
+        return chart.get("series", [{}])[0].get("type") == "error"
 
-    def _get_chart(
-            self,
-            issue_id: str|None,
-            isin: str,
-            period: Interval,
-            resolution: Interval
-    ) -> Chart | None:
+    def _get_chart(self, issue_id: str | None, isin: str, period: Interval, resolution: Interval) -> Chart | None:
         """Using the issue_id guarantees that we get exactly the product quotes. If it's not available, then we can use
         the isin. The issue_id may not be available if the product doesn't exist anymore.
         """
@@ -254,11 +256,7 @@ class DeGiroService:
         return chart
 
     def __get_chart(
-            self,
-            issue_id: Optional[str],
-            isin: Optional[str],
-            period: Interval,
-            resolution: Interval
+        self, issue_id: Optional[str], isin: Optional[str], period: Interval, resolution: Interval
     ) -> Chart | None:
         if not issue_id and not isin:
             raise ValueError("Either 'issue_id' or 'isin' must be provided")
@@ -313,11 +311,12 @@ class DeGiroService:
 
         forecasted_dividends = [item for item in agenda["items"] if item.get("isin") == isin]
         if len(forecasted_dividends) > 1:
-            self.logger.warning(f"Multiple forecasted dividends found for '{company_name}' ({isin}). " +
-                                "Using the first one.")
+            self.logger.warning(
+                f"Multiple forecasted dividends found for '{company_name}' ({isin}). " + "Using the first one."
+            )
 
         return forecasted_dividends[0] if forecasted_dividends else None
 
     def get_session_id(self) -> str:
         config_table = self.get_config()
-        return config_table['sessionId']
+        return config_table["sessionId"]

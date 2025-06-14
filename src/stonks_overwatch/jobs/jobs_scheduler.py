@@ -7,6 +7,7 @@ from stonks_overwatch.config.degiro_config import DegiroConfig
 from stonks_overwatch.services.brokers.degiro.services.update_service import UpdateService as DegiroUpdateService
 from stonks_overwatch.utils.core.logger import StonksLogger
 
+
 class JobsScheduler:
     logger = StonksLogger.get_logger("stonks_overwatch.jobs_scheduler", "[JOB_SCHEDULER]")
 
@@ -25,11 +26,11 @@ class JobsScheduler:
         if degiro_config.is_enabled() and not degiro_config.offline_mode:
             JobsScheduler.scheduler.add_job(
                 JobsScheduler.update_degiro_portfolio,
-                id='update_degiro_portfolio',
+                id="update_degiro_portfolio",
                 trigger=IntervalTrigger(minutes=degiro_config.update_frequency_minutes),
                 max_instances=1,
                 replace_existing=True,
-                next_run_time=datetime.now()
+                next_run_time=datetime.now(),
             )
 
         JobsScheduler.scheduler.start()

@@ -2,33 +2,33 @@
 
 from django.db import migrations, models
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
-        ('stonks_overwatch', '0001_degiro'),
+        ("stonks_overwatch", "0001_degiro"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='YFinanceStockSplits',
+            name="YFinanceStockSplits",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('symbol', models.CharField(max_length=8)),
-                ('data', models.JSONField()),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("symbol", models.CharField(max_length=8)),
+                ("data", models.JSONField()),
             ],
             options={
-                'db_table': '"yfinance_stock_splits"',
+                "db_table": '"yfinance_stock_splits"',
             },
         ),
         migrations.CreateModel(
-            name='YFinanceTickerInfo',
+            name="YFinanceTickerInfo",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('symbol', models.CharField(max_length=8)),
-                ('data', models.JSONField()),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("symbol", models.CharField(max_length=8)),
+                ("data", models.JSONField()),
             ],
             options={
-                'db_table': '"yfinance_ticker_info"',
+                "db_table": '"yfinance_ticker_info"',
             },
         ),
     ]

@@ -23,6 +23,7 @@ import pook
 import pytest
 from django.test import TestCase
 
+
 @pytest.mark.django_db
 class TestDividendsService(TestCase):
     def setUp(self):
@@ -58,7 +59,6 @@ class TestDividendsService(TestCase):
             obj = DeGiroCashMovements.objects.create(**value)
             self.created_objects[key] = obj
 
-
     def fixture_product_info_repository(self):
         data_file = pathlib.Path("tests/resources/stonks_overwatch/repositories/degiro/product_info_data.json")
 
@@ -80,10 +80,7 @@ class TestDividendsService(TestCase):
         for key, value in data.items():
             # Create and save the ProductQuotation object
             obj = DeGiroProductQuotation.objects.create(
-                id=key,
-                interval="P1D",
-                last_import=LocalizationUtility.now(),
-                quotations=value
+                id=key, interval="P1D", last_import=LocalizationUtility.now(), quotations=value
             )
             self.created_objects[key] = obj
 

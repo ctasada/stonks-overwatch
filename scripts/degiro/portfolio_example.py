@@ -19,7 +19,7 @@ update = trading_api.get_update(
 )
 
 # print(update)
-print(json.dumps(update, indent = 4))
+print(json.dumps(update, indent=4))
 
 # update_dict['portfolio']['values] =>
 # {

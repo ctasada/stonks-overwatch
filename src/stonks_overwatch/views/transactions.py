@@ -7,6 +7,7 @@ from django.views import View
 from stonks_overwatch.services.aggregators.transactions_aggregator import TransactionsAggregatorService
 from stonks_overwatch.services.utilities.session_manager import SessionManager
 
+
 class Transactions(View):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -17,7 +18,7 @@ class Transactions(View):
         transactions = self.transactions.get_transactions(selected_portfolio)
         transactions_data = [dataclasses.asdict(transaction) for transaction in transactions]
 
-        if request.headers.get('Accept') == 'application/json':
+        if request.headers.get("Accept") == "application/json":
             return JsonResponse({"transactions": transactions_data}, safe=False)
         else:
             context = {"transactions": transactions_data}

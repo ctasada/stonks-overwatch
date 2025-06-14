@@ -6,11 +6,11 @@ from stonks_overwatch.services.brokers.degiro.repositories.transactions_reposito
 from stonks_overwatch.services.brokers.degiro.services.currency_service import CurrencyConverterService
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 
-class FeesService:
 
+class FeesService:
     def __init__(
-            self,
-            degiro_service: DeGiroService,
+        self,
+        degiro_service: DeGiroService,
     ):
         self.currency_service = CurrencyConverterService()
         self.degiro_service = degiro_service

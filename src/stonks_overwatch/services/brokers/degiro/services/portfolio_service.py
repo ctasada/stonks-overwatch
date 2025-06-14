@@ -26,16 +26,17 @@ from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.domain.constants import ProductType, Sector
 
+
 class PortfolioService(PortfolioServiceInterface):
     logger = StonksLogger.get_logger("stonks_overwatch.portfolio_data.degiro", "[DEGIRO|PORTFOLIO]")
 
     # Configuration constants
-    SUPPORTED_CURRENCY_ACCOUNTS = ['EUR', 'USD', 'GBP']
+    SUPPORTED_CURRENCY_ACCOUNTS = ["EUR", "USD", "GBP"]
     DEBUG_SYMBOL = "NVDA"  # Change this to debug other symbols
     DEBUG_DATES = ["2021-07-18", "2021-07-19", "2021-07-20"]  # Adjust for specific date ranges
 
     # Product type constants
-    CASH_PRODUCT_TYPE = 'CASH'
+    CASH_PRODUCT_TYPE = "CASH"
     NON_TRADEABLE_IDENTIFIER = "Non tradeable"
 
     # Field name constants
@@ -72,18 +73,13 @@ class PortfolioService(PortfolioServiceInterface):
         products_info = self.__get_products_info(products_ids=products_ids)
         products_config = self.__get_product_config()
 
-        stock_entries = self._create_stock_portfolio_entries(
-            portfolio_products, products_info, products_config
-        )
+        stock_entries = self._create_stock_portfolio_entries(portfolio_products, products_info, products_config)
         cash_entries = self._create_cash_portfolio_entries()
 
         return sorted(stock_entries + cash_entries, key=lambda k: k.symbol)
 
     def _create_stock_portfolio_entries(
-        self,
-        portfolio_products: list[dict],
-        products_info: dict,
-        products_config: dict
+        self, portfolio_products: list[dict], products_info: dict, products_config: dict
     ) -> List[PortfolioEntry]:
         """Create portfolio entries for stock/ETF products."""
         stock_entries = []
@@ -105,9 +101,7 @@ class PortfolioService(PortfolioServiceInterface):
             correlated_products = self._get_correlated_products(symbol)
 
             # Create portfolio entry
-            entry = self._create_portfolio_entry(
-                product_data, product_info, products_config, correlated_products
-            )
+            entry = self._create_portfolio_entry(product_data, product_info, products_config, correlated_products)
             stock_entries.append(entry)
 
         return stock_entries
@@ -118,11 +112,7 @@ class PortfolioService(PortfolioServiceInterface):
         return [p["id"] for p in tmp_products.values()]
 
     def _create_portfolio_entry(
-        self,
-        product_data: dict,
-        product_info: dict,
-        products_config: dict,
-        correlated_products: list[str]
+        self, product_data: dict, product_info: dict, products_config: dict, correlated_products: list[str]
     ) -> PortfolioEntry:
         """Create a single portfolio entry from product data."""
         # Get company profile data
@@ -173,14 +163,10 @@ class PortfolioService(PortfolioServiceInterface):
             return {
                 "sector": company_profile["data"]["sector"],
                 "industry": company_profile["data"]["industry"],
-                "country": company_profile["data"]["contacts"]["COUNTRY"]
+                "country": company_profile["data"]["contacts"]["COUNTRY"],
             }
 
-        return {
-            "sector": None,
-            "industry": "Unknown",
-            "country": "Unknown"
-        }
+        return {"sector": None, "industry": "Unknown", "country": "Unknown"}
 
     def _get_price_data(self, product_data: dict, product_info: dict) -> dict:
         """Get pricing information for a product."""
@@ -188,8 +174,10 @@ class PortfolioService(PortfolioServiceInterface):
 
         # Fallback to close price if no quotation found
         if price == self.FALLBACK_PRICE and self.CLOSE_PRICE_FIELD in product_info:
-            self.logger.warning(f"No quotation found for '{product_info['symbol']}' "
-                                f"(productId {product_data[self.PRODUCT_ID_FIELD]}), using {self.CLOSE_PRICE_FIELD}")
+            self.logger.warning(
+                f"No quotation found for '{product_info['symbol']}' "
+                f"(productId {product_data[self.PRODUCT_ID_FIELD]}), using {self.CLOSE_PRICE_FIELD}"
+            )
             price = product_info[self.CLOSE_PRICE_FIELD]
 
         value = product_data["size"] * price
@@ -201,7 +189,7 @@ class PortfolioService(PortfolioServiceInterface):
             "value": value,
             "break_even_price": break_even_price,
             "is_open": is_open,
-            "size": product_data["size"]  # Include size for currency conversion
+            "size": product_data["size"],  # Include size for currency conversion
         }
 
     def _convert_to_base_currency(self, price_data: dict, currency: str) -> dict:
@@ -216,7 +204,7 @@ class PortfolioService(PortfolioServiceInterface):
                 "price": price_data["price"],
                 "value": price_data["value"],
                 "break_even_price": break_even_price,
-                "unrealized_gain": (price_data["price"] - break_even_price) * size
+                "unrealized_gain": (price_data["price"] - break_even_price) * size,
             }
 
         # Convert to base currency
@@ -231,7 +219,7 @@ class PortfolioService(PortfolioServiceInterface):
             "price": base_price,
             "value": base_value,
             "break_even_price": base_break_even,
-            "unrealized_gain": unrealized_gain
+            "unrealized_gain": unrealized_gain,
         }
 
     def _create_cash_portfolio_entries(self) -> List[PortfolioEntry]:
@@ -270,7 +258,7 @@ class PortfolioService(PortfolioServiceInterface):
         exchange = None
         if exchanges:
             degiro_exchange = next((ex for ex in exchanges if ex["id"] == int(exchange_id)), None)
-            if degiro_exchange and 'micCode' in degiro_exchange:
+            if degiro_exchange and "micCode" in degiro_exchange:
                 mic_code = degiro_exchange["micCode"].lower()
                 exchange = MIC[mic_code].value
         return exchange
@@ -278,20 +266,20 @@ class PortfolioService(PortfolioServiceInterface):
     def __get_product_realized_gains(self, product_ids: list[str]) -> tuple[float, float]:
         data = self.transactions.get_product_transactions(product_ids)
 
-        buys = [t for t in data if t['buysell'] == 'B']
-        sells = [t for t in data if t['buysell'] == 'S']
+        buys = [t for t in data if t["buysell"] == "B"]
+        sells = [t for t in data if t["buysell"] == "S"]
 
         # Sort transactions by stock_id and transaction_date
-        buys.sort(key=lambda x: x['date'])
-        sells.sort(key=lambda x: x['date'])
+        buys.sort(key=lambda x: x["date"])
+        sells.sort(key=lambda x: x["date"])
 
         # FIFO matching logic
         realized_gains = []
-        total_costs = sum([abs(b['quantity']) * b['price'] for b in buys])
+        total_costs = sum([abs(b["quantity"]) * b["price"] for b in buys])
         total_realized_gains = 0.0
         for sell in sells:
-            sell_qty = abs(sell['quantity'])
-            sell_price = sell['price']
+            sell_qty = abs(sell["quantity"])
+            sell_price = sell["price"]
             gains = 0.0
 
             # Match sells with existing buys using FIFO
@@ -299,21 +287,18 @@ class PortfolioService(PortfolioServiceInterface):
                 if sell_qty <= 0:
                     break
 
-                match_qty = min(sell_qty, buy['quantity'])
-                gains += match_qty * (sell_price - buy['price'])
+                match_qty = min(sell_qty, buy["quantity"])
+                gains += match_qty * (sell_price - buy["price"])
 
                 # Update quantities
-                buy['quantity'] -= match_qty
+                buy["quantity"] -= match_qty
                 sell_qty -= match_qty
 
                 # Remove fully used buys
-                if buy['quantity'] == 0:
+                if buy["quantity"] == 0:
                     buys.remove(buy)
 
-            realized_gains.append({
-                'sell_date': sell['date'],
-                'realized_gain': gains
-            })
+            realized_gains.append({"sell_date": sell["date"], "realized_gain": gains})
             total_realized_gains += gains
 
         return total_realized_gains, total_costs
@@ -485,7 +470,6 @@ class PortfolioService(PortfolioServiceInterface):
 
         return product_growth
 
-
     def calculate_historical_value(self) -> List[DailyValue]:
         self.logger.debug("Calculating historical value")
 
@@ -580,8 +564,10 @@ class PortfolioService(PortfolioServiceInterface):
         final_date = self._get_growth_final_date(product_history_dates[-1])
 
         # Generate complete date range
-        dates = [(start_date + timedelta(days=i)).strftime(LocalizationUtility.DATE_FORMAT)
-                 for i in range((final_date - start_date).days + 1)]
+        dates = [
+            (start_date + timedelta(days=i)).strftime(LocalizationUtility.DATE_FORMAT)
+            for i in range((final_date - start_date).days + 1)
+        ]
 
         # Fill position values for all dates
         position_value = {}
@@ -602,15 +588,14 @@ class PortfolioService(PortfolioServiceInterface):
 
         # Apply split adjustments to each date
         for date_value in reversed(position_value):
-            multiplier = self._calculate_split_multiplier(
-                symbol, date_value, stock_splits, effective_split_dates
-            )
+            multiplier = self._calculate_split_multiplier(symbol, date_value, stock_splits, effective_split_dates)
             position_value[date_value] *= multiplier
 
         return position_value
 
-    def _calculate_split_multiplier(self, symbol: str, date_value: str, stock_splits: list,
-                                   effective_split_dates: dict) -> float:
+    def _calculate_split_multiplier(
+        self, symbol: str, date_value: str, stock_splits: list, effective_split_dates: dict
+    ) -> float:
         """Calculate the cumulative split multiplier for a specific date."""
         multiplier = 1.0
         should_log = self._should_log_debug(symbol, date_value)
@@ -619,27 +604,27 @@ class PortfolioService(PortfolioServiceInterface):
             self.logger.debug(f"[{symbol} DEBUG] Processing date {date_value}")
 
         for split_data in reversed(stock_splits):
-            split_date_str = LocalizationUtility.format_date_from_date(
-                split_data.date.astimezone(ZoneInfo(TIME_ZONE))
-            )
+            split_date_str = LocalizationUtility.format_date_from_date(split_data.date.astimezone(ZoneInfo(TIME_ZONE)))
 
             # Use effective split date if detected
             effective_split_date = effective_split_dates.get(split_date_str, split_date_str)
 
             if effective_split_date != split_date_str and should_log:
-                self.logger.debug(f"[{symbol} DEBUG]   Using effective split date "
-                                f"{effective_split_date} instead of {split_date_str}")
+                self.logger.debug(
+                    f"[{symbol} DEBUG]   Using effective split date {effective_split_date} instead of {split_date_str}"
+                )
 
             # Apply split if the effective date is after the current date
             if effective_split_date > date_value:
                 multiplier *= split_data.split_ratio
                 if should_log:
-                    self.logger.debug(f"[{symbol} DEBUG]   Applying split: "
-                                    f"{effective_split_date} > {date_value}, "
-                                    f"ratio={split_data.split_ratio}, multiplier now={multiplier}")
+                    self.logger.debug(
+                        f"[{symbol} DEBUG]   Applying split: "
+                        f"{effective_split_date} > {date_value}, "
+                        f"ratio={split_data.split_ratio}, multiplier now={multiplier}"
+                    )
             elif should_log:
-                self.logger.debug(f"[{symbol} DEBUG]   Skipping split: "
-                                f"{effective_split_date} <= {date_value}")
+                self.logger.debug(f"[{symbol} DEBUG]   Skipping split: {effective_split_date} <= {date_value}")
 
         if should_log and multiplier != 1:
             self.logger.debug(f"[{symbol} DEBUG]   Total multiplier: {multiplier}")
@@ -654,8 +639,7 @@ class PortfolioService(PortfolioServiceInterface):
         if entry["quotation"]["quotes"]:
             for date_quote in entry["quotation"]["quotes"]:
                 if date_quote in position_value:
-                    aggregate[date_quote] = (position_value[date_quote] *
-                                           entry["quotation"]["quotes"][date_quote])
+                    aggregate[date_quote] = position_value[date_quote] * entry["quotation"]["quotes"][date_quote]
         else:
             self.logger.warning(f"No quotes found for '{symbol}': productId {entry['productId']}")
 
@@ -674,10 +658,8 @@ class PortfolioService(PortfolioServiceInterface):
 
         # Log all stock splits
         for i, split in enumerate(stock_splits):
-            split_date_str = LocalizationUtility.format_date_from_date(
-                split.date.astimezone(ZoneInfo(TIME_ZONE))
-            )
-            self.logger.debug(f"[{symbol} DEBUG] Split {i+1}: Date={split_date_str}, Ratio={split.split_ratio}")
+            split_date_str = LocalizationUtility.format_date_from_date(split.date.astimezone(ZoneInfo(TIME_ZONE)))
+            self.logger.debug(f"[{symbol} DEBUG] Split {i + 1}: Date={split_date_str}, Ratio={split.split_ratio}")
 
     def _is_debug_symbol(self, symbol: str) -> bool:
         """Check if this symbol should have debug logging enabled."""
@@ -718,7 +700,7 @@ class PortfolioService(PortfolioServiceInterface):
             split_date_obj = LocalizationUtility.convert_string_to_date(split_date_str)
 
             for i in range(1, len(sorted_positions)):
-                prev_date_str, prev_value = sorted_positions[i-1]
+                prev_date_str, prev_value = sorted_positions[i - 1]
                 curr_date_str, curr_value = sorted_positions[i]
 
                 # Skip if values are zero or negative
@@ -738,14 +720,17 @@ class PortfolioService(PortfolioServiceInterface):
                 # Check if this ratio matches the split ratio (within 10% tolerance)
                 # Allow for both forward and reverse splits
                 ratio_tolerance = 0.1
-                if (abs(ratio - split_ratio) / split_ratio < ratio_tolerance or
-                    abs(ratio - (1/split_ratio)) / (1/split_ratio) < ratio_tolerance):
-
+                if (
+                    abs(ratio - split_ratio) / split_ratio < ratio_tolerance
+                    or abs(ratio - (1 / split_ratio)) / (1 / split_ratio) < ratio_tolerance
+                ):
                     # Found a jump that matches the split ratio
                     # The effective split date is the current date (when the jump happens)
                     effective_split_dates[split_date_str] = curr_date_str
-                    self.logger.debug(f"[{symbol}] Detected effective split date: {split_date_str} -> {curr_date_str} "
-                                    f"(ratio: {ratio:.2f}, expected: {split_ratio})")
+                    self.logger.debug(
+                        f"[{symbol}] Detected effective split date: {split_date_str} -> {curr_date_str} "
+                        f"(ratio: {ratio:.2f}, expected: {split_ratio})"
+                    )
                     break
 
         return effective_split_dates
@@ -791,6 +776,6 @@ class PortfolioService(PortfolioServiceInterface):
     @staticmethod
     def _is_weekend(date_str: str):
         # Parse the date string into a datetime object
-        day = datetime.strptime(date_str, '%Y-%m-%d')
+        day = datetime.strptime(date_str, "%Y-%m-%d")
         # Check if the day of the week is Saturday (5) or Sunday (6)
         return day.weekday() >= 5

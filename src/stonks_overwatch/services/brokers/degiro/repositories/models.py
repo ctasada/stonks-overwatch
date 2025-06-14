@@ -103,6 +103,7 @@ class DeGiroCompanyProfile(models.Model):
     isin = models.CharField(max_length=25, primary_key=True)
     data = models.JSONField()
 
+
 class DeGiroUpcomingPayments(models.Model):
     class Meta:
         db_table = '"degiro_upcomingpayments"'
@@ -115,6 +116,7 @@ class DeGiroUpcomingPayments(models.Model):
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     amount_in_base_curr = models.DecimalField(max_digits=12, decimal_places=2)
     pay_date = models.DateField()
+
 
 class DeGiroAgendaDividend(models.Model):
     class Meta:
