@@ -43,7 +43,7 @@ RESET := \033[0m
 .PHONY: migrate collectstatic runserver start run test coverage
 .PHONY: docker-build docker-run docker-shell docker-clean
 .PHONY: briefcase-create briefcase-update briefcase-run briefcase-package
-.PHONY: generate-images cicd
+.PHONY: generate-images cicd pre-commit-install pre-commit-run pre-commit-update
 
 #==============================================================================
 # Help and information
@@ -226,6 +226,22 @@ generate-images: ## Generate images for browsers and Briefcase
 		echo "$(RED)Error: scripts/generate-icons.sh not found$(RESET)"; \
 		exit 1; \
 	fi
+
+#==============================================================================
+##@ Git Hooks
+#==============================================================================
+
+pre-commit-install: ## Install pre-commit hooks
+	@echo -e "$(BOLD)$(GREEN)Installing pre-commit hooks...$(RESET)"
+	poetry run pre-commit install
+
+pre-commit-run: ## Run pre-commit hooks on all files
+	@echo -e "$(BOLD)$(BLUE)Running pre-commit hooks...$(RESET)"
+	poetry run pre-commit run --all-files
+
+pre-commit-update: ## Update pre-commit hook versions
+	@echo -e "$(BOLD)$(YELLOW)Updating pre-commit hooks...$(RESET)"
+	poetry run pre-commit autoupdate
 
 #==============================================================================
 ##@ CI/CD Operations

@@ -1,0 +1,40 @@
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-merge-conflict
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.13
+    hooks:
+      # Run the linter
+      - id: ruff
+        args: [--fix]
+      # Run the formatter
+      - id: ruff-format
+
+  # Optional: Check Django migrations
+  - repo: local
+    hooks:
+      - id: django-check
+        name: Django Check
+        entry: poetry run python src/manage.py check
+        language: system
+        pass_filenames: false
+        files: \.(py)$
+
+  # Optional: Run tests on commit
+  - repo: local
+    hooks:
+      - id: tests
+        name: Run tests
+        entry: poetry run pytest --maxfail=1 -q
+        language: system
+        pass_filenames: false
+        files: \.(py)$
+        stages: [pre-commit]  # Only run on commit, not push

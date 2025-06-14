@@ -43,6 +43,7 @@ licensecheck = "^2025.1.0"
 pip-licenses = "^5.0.0"
 briefcase = "^0.3.23"
 deptry = "^0.23.0"
+pre-commit = "^4.2.0"
 
 [tool.poetry]
 include = [
