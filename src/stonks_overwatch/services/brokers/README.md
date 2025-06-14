@@ -68,15 +68,15 @@ class PortfolioService(PortfolioServiceInterface):
     def get_portfolio(self) -> List[PortfolioEntry]:
         # Implementation here
         pass
-    
+
     def get_portfolio_total(self) -> TotalPortfolio:
         # Implementation here
         pass
-    
+
     def calculate_historical_value(self, days: int) -> dict:
         # Implementation here
         pass
-    
+
     def calculate_product_growth(self, days: int) -> dict:
         # Implementation here
         pass
@@ -92,9 +92,9 @@ from stonks_overwatch.services.brokers.your_broker.services.portfolio_service im
 
 def register_broker_services() -> None:
     registry = BrokerRegistry()
-    
+
     # ... existing registrations
-    
+
     # Register Your Broker services
     registry.register_broker(
         broker_name="your_broker",
@@ -136,21 +136,21 @@ from stonks_overwatch.utils.core.logger import StonksLogger
 class YourBrokerClient:
     """
     Low-level API client for YourBroker.
-    
+
     Handles authentication, API calls, and response parsing.
     """
-    
+
     def __init__(self):
         self.logger = StonksLogger.get_logger("your_broker.client", "[YOUR_BROKER|CLIENT]")
         self.base_url = "https://api.yourbroker.com"
         self.session = requests.Session()
         self._authenticate()
-    
+
     def _authenticate(self) -> None:
         """Handle authentication with the broker API."""
         # Implementation here
         pass
-    
+
     def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Make GET request to broker API."""
         try:
@@ -205,11 +205,11 @@ from ..client.your_broker_client import YourBrokerClient
 class PortfolioService(PortfolioServiceInterface):
     def __init__(self):
         self.client = YourBrokerClient()
-    
+
     def get_portfolio(self) -> List[PortfolioEntry]:
         """Get current portfolio holdings."""
         raw_data = self.client.get("portfolio")
-        
+
         portfolio_entries = []
         for item in raw_data:
             entry = PortfolioEntry(
@@ -223,34 +223,34 @@ class PortfolioService(PortfolioServiceInterface):
                 # ... other required fields
             )
             portfolio_entries.append(entry)
-        
+
         return portfolio_entries
-    
+
     def get_portfolio_total(self) -> TotalPortfolio:
         """Get portfolio summary/totals."""
         raw_data = self.client.get("portfolio/summary")
-        
+
         return TotalPortfolio(
             total_value=float(raw_data["total_value"]),
             total_gain_loss=float(raw_data["total_pnl"]),
             total_gain_loss_percentage=float(raw_data["total_pnl_percentage"]),
             currency=raw_data["currency"]
         )
-    
+
     def calculate_historical_value(self, days: int) -> dict:
         """Get historical portfolio values."""
         raw_data = self.client.get(f"portfolio/history?days={days}")
-        
+
         # Transform to expected format: {"YYYY-MM-DD": float_value}
         return {
             entry["date"]: float(entry["value"])
             for entry in raw_data
         }
-    
+
     def calculate_product_growth(self, days: int) -> dict:
         """Get product-specific growth data."""
         raw_data = self.client.get(f"portfolio/growth?days={days}")
-        
+
         # Transform to expected format
         return {
             item["symbol"]: {
@@ -274,11 +274,11 @@ from ..client.your_broker_client import YourBrokerClient
 class TransactionsService(TransactionServiceInterface):
     def __init__(self):
         self.client = YourBrokerClient()
-    
+
     def get_transactions(self) -> List[Transaction]:
         """Get all transactions."""
         raw_data = self.client.get("transactions")
-        
+
         transactions = []
         for item in raw_data:
             transaction = Transaction(
@@ -293,7 +293,7 @@ class TransactionsService(TransactionServiceInterface):
                 fees=float(item.get("fees", 0.0))
             )
             transactions.append(transaction)
-        
+
         return transactions
 ```
 
@@ -309,11 +309,11 @@ from ..client.your_broker_client import YourBrokerClient
 class DepositsService(DepositServiceInterface):
     def __init__(self):
         self.client = YourBrokerClient()
-    
+
     def get_cash_deposits(self) -> List[Deposit]:
         """Get cash deposit/withdrawal history."""
         raw_data = self.client.get("deposits")
-        
+
         deposits = []
         for item in raw_data:
             deposit = Deposit(
@@ -324,13 +324,13 @@ class DepositsService(DepositServiceInterface):
                 currency=item["currency"]
             )
             deposits.append(deposit)
-        
+
         return deposits
-    
+
     def calculate_cash_account_value(self) -> dict:
         """Get historical cash account values."""
         raw_data = self.client.get("cash/history")
-        
+
         # Transform to expected format: {"YYYY-MM-DD": float_value}
         return {
             entry["date"]: float(entry["balance"])
@@ -406,7 +406,7 @@ class YourBrokerTransaction:
     price: float
     fees: float
     transaction_type: str
-    
+
     @classmethod
     def from_api_response(cls, data: dict) -> 'YourBrokerTransaction':
         """Create instance from API response."""
@@ -474,7 +474,7 @@ from unittest.mock import Mock, patch
 from stonks_overwatch.services.brokers.your_broker.services.portfolio_service import PortfolioService
 
 class TestPortfolioService:
-    
+
     @patch('stonks_overwatch.services.brokers.your_broker.client.your_broker_client.YourBrokerClient')
     def test_get_portfolio(self, mock_client):
         # Setup mock
@@ -489,11 +489,11 @@ class TestPortfolioService:
                 "currency": "USD"
             }
         ]
-        
+
         # Test
         service = PortfolioService()
         portfolio = service.get_portfolio()
-        
+
         # Assertions
         assert len(portfolio) == 1
         assert portfolio[0].symbol == "AAPL"
@@ -510,10 +510,10 @@ def test_your_broker_portfolio_aggregation():
     """Test that YourBroker integrates with portfolio aggregator."""
     from stonks_overwatch.services.aggregators.portfolio_aggregator import PortfolioAggregatorService
     from stonks_overwatch.services.models import PortfolioId
-    
+
     aggregator = PortfolioAggregatorService()
     portfolio = aggregator.get_portfolio(PortfolioId.YOUR_BROKER)
-    
+
     # Should not raise exceptions and return proper format
     assert isinstance(portfolio, list)
 ```
@@ -529,9 +529,9 @@ Add your broker to `core/registry_setup.py`:
 ```python
 def register_broker_services() -> None:
     registry = BrokerRegistry()
-    
+
     # ... existing brokers
-    
+
     # Register YourBroker services
     registry.register_broker(
         broker_name="your_broker",
@@ -569,25 +569,25 @@ Before considering your broker integration complete:
 
 - [ ] **Core Services Implemented**
   - [ ] ✅ PortfolioService (implements PortfolioServiceInterface)
-  - [ ] ✅ TransactionsService (implements TransactionServiceInterface)  
+  - [ ] ✅ TransactionsService (implements TransactionServiceInterface)
   - [ ] ✅ DepositsService (implements DepositServiceInterface)
-  
+
 - [ ] **Architecture Compliance**
   - [ ] ✅ Follows 3-layer structure (client/services/repositories)
   - [ ] ✅ Proper type hints throughout
   - [ ] ✅ Error handling implemented
   - [ ] ✅ Logging added where appropriate
-  
+
 - [ ] **Integration**
   - [ ] ✅ Registered in `core/registry_setup.py`
   - [ ] ✅ Configuration added and tested
   - [ ] ✅ Portfolio ID added to enum
-  
+
 - [ ] **Testing**
   - [ ] ✅ Unit tests for all services
   - [ ] ✅ Integration tests with aggregators
   - [ ] ✅ Configuration tests
-  
+
 - [ ] **Documentation**
   - [ ] ✅ Code documented with docstrings
   - [ ] ✅ README updated if needed
@@ -639,16 +639,16 @@ class PortfolioService:
         self._portfolio_cache = None
         self._portfolio_cache_time = None
         self._cache_duration = timedelta(minutes=5)
-    
+
     def get_portfolio(self) -> List[PortfolioEntry]:
         now = datetime.now()
-        if (self._portfolio_cache is None or 
+        if (self._portfolio_cache is None or
             self._portfolio_cache_time is None or
             now - self._portfolio_cache_time > self._cache_duration):
-            
+
             self._portfolio_cache = self._fetch_portfolio_from_api()
             self._portfolio_cache_time = now
-        
+
         return self._portfolio_cache
 ```
 
@@ -662,13 +662,13 @@ class PortfolioEntry(BaseModel):
     symbol: str
     quantity: float
     current_price: float
-    
+
     @validator('quantity')
     def quantity_must_be_positive(cls, v):
         if v < 0:
             raise ValueError('Quantity must be positive')
         return v
-    
+
     @validator('current_price')
     def price_must_be_positive(cls, v):
         if v <= 0:
@@ -685,7 +685,7 @@ class PortfolioEntry(BaseModel):
 Study these existing implementations for reference:
 
 - **DeGiro** (`services/brokers/degiro/`) - Complex broker with all features
-- **Bitvavo** (`services/brokers/bitvavo/`) - Crypto broker example  
+- **Bitvavo** (`services/brokers/bitvavo/`) - Crypto broker example
 - **YFinance** (`services/brokers/yfinance/`) - Market data provider example
 
 ### **Core Interfaces**
@@ -750,4 +750,4 @@ Your broker is now a first-class citizen in the Stonks Overwatch ecosystem! 🚀
 
 ---
 
-**Need help?** Check the existing broker implementations or review the core framework documentation for additional guidance. 
+**Need help?** Check the existing broker implementations or review the core framework documentation for additional guidance.

@@ -10,6 +10,7 @@ from tests.stonks_overwatch.repositories.base_repository_test import BaseReposit
 
 import pytest
 
+
 @pytest.mark.django_db
 class TestProductQuotationsRepository(BaseRepositoryTest):
     """Tests for the ProductQuotationsRepository class.
@@ -18,6 +19,7 @@ class TestProductQuotationsRepository(BaseRepositoryTest):
     - Microsoft Corp (MSFT) quotations
     - Daily prices: 50.85 (2020-03-11), 54.43 (2020-03-15)
     """
+
     model_class = DeGiroProductQuotation
     data_file = "tests/resources/stonks_overwatch/repositories/degiro/product_quotations_data.json"
 
@@ -32,10 +34,7 @@ class TestProductQuotationsRepository(BaseRepositoryTest):
         self.created_objects = {}
         for key, value in data.items():
             obj = self.model_class.objects.create(
-                id=key,
-                interval="P1D",
-                last_import=self.last_update,
-                quotations=value
+                id=key, interval="P1D", last_import=self.last_update, quotations=value
             )
             self.created_objects[key] = obj
 

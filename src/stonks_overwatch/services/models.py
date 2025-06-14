@@ -11,6 +11,7 @@ from iso10383 import MICEntry
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.domain.constants import ProductType, Sector
 
+
 @dataclass
 class AccountOverview:
     datetime: datetime = None
@@ -39,10 +40,9 @@ class AccountOverview:
 
     def formated_change(self) -> str:
         if self.change and self.change != 0.0:
-            return LocalizationUtility.format_money_value(
-                value=self.change, currency=self.currency
-            )
+            return LocalizationUtility.format_money_value(value=self.change, currency=self.currency)
         return ""
+
 
 class Country:
     def __init__(self, iso_code: str):
@@ -57,7 +57,7 @@ class Country:
     @staticmethod
     def __clean_string(input_string: str) -> str:
         # Remove anything between parentheses
-        cleaned_string = re.sub(r'\(.*?\)', '', input_string)
+        cleaned_string = re.sub(r"\(.*?\)", "", input_string)
         # Strip the string
         return cleaned_string.strip()
 
@@ -67,13 +67,16 @@ class Country:
     def get_flag(self) -> str:
         return self.country.flag
 
+
 class DailyValue(TypedDict):
     x: str  # date
     y: float  # value
 
+
 class DepositType(Enum):
     DEPOSIT = "Deposit"
     WITHDRAWAL = "Withdrawal"
+
 
 @dataclass
 class Deposit:
@@ -89,10 +92,12 @@ class Deposit:
     def change_formatted(self) -> str:
         return LocalizationUtility.format_money_value(value=self.change, currency=self.currency)
 
+
 class DividendType(Enum):
     PAID = 0
     ANNOUNCED = 1
     FORECASTED = 2
+
 
 @dataclass
 class Dividend:
@@ -134,6 +139,7 @@ class Dividend:
     def month_year(self) -> str:
         return LocalizationUtility.format_date_to_month_year(self.payment_date)
 
+
 @dataclass
 class PortfolioEntry:
     name: str = ""
@@ -162,13 +168,15 @@ class PortfolioEntry:
 
     @property
     def percentage_unrealized_gain(self) -> float:
-        return self.unrealized_gain / (self.value - self.unrealized_gain) \
-            if self.value > 0 and self.value != self.unrealized_gain else 0.0
+        return (
+            self.unrealized_gain / (self.value - self.unrealized_gain)
+            if self.value > 0 and self.value != self.unrealized_gain
+            else 0.0
+        )
 
     @property
     def percentage_realized_gain(self) -> float:
-        return self.realized_gain / self.total_costs \
-            if self.realized_gain != 0.0 and self.total_costs != 0.0 else 0.0
+        return self.realized_gain / self.total_costs if self.realized_gain != 0.0 and self.total_costs != 0.0 else 0.0
 
     def to_dict(self) -> Dict[str, Any]:
         # FIXME: The asdict does infinite recursion. Need to handle the country separately
@@ -176,26 +184,26 @@ class PortfolioEntry:
         self.country = None
         # Convert to dict and handle enum specifically
         result = asdict(self)
-        result['country'] = country_name
-        result['sector'] = self.sector.value if self.sector else ""
-        del result['exchange']
-        result['exchange_acronym'] = self.get_exchange_acronym()
-        result['exchange_name'] = self.get_exchange_name()
-        result['product_type'] = self.product_type.value
-        result['formatted_portfolio_size'] = self.formatted_portfolio_size
-        result['formatted_break_even_price'] = self.formatted_break_even_price
-        result['formatted_base_currency_break_even_price'] = self.formatted_base_currency_break_even_price
-        result['formatted_price'] = self.formatted_price
-        result['formatted_base_currency_price'] = self.formatted_base_currency_price
-        result['formatted_value'] = self.formatted_value
-        result['formatted_base_currency_value'] = self.formatted_base_currency_value
-        result['formatted_unrealized_gain'] = self.formatted_unrealized_gain
-        result['formatted_realized_gain'] = self.formatted_realized_gain
-        result['formatted_percentage_unrealized_gain'] = self.formatted_percentage_unrealized_gain
-        result['formatted_percentage_realized_gain'] = self.formatted_percentage_realized_gain
+        result["country"] = country_name
+        result["sector"] = self.sector.value if self.sector else ""
+        del result["exchange"]
+        result["exchange_acronym"] = self.get_exchange_acronym()
+        result["exchange_name"] = self.get_exchange_name()
+        result["product_type"] = self.product_type.value
+        result["formatted_portfolio_size"] = self.formatted_portfolio_size
+        result["formatted_break_even_price"] = self.formatted_break_even_price
+        result["formatted_base_currency_break_even_price"] = self.formatted_base_currency_break_even_price
+        result["formatted_price"] = self.formatted_price
+        result["formatted_base_currency_price"] = self.formatted_base_currency_price
+        result["formatted_value"] = self.formatted_value
+        result["formatted_base_currency_value"] = self.formatted_base_currency_value
+        result["formatted_unrealized_gain"] = self.formatted_unrealized_gain
+        result["formatted_realized_gain"] = self.formatted_realized_gain
+        result["formatted_percentage_unrealized_gain"] = self.formatted_percentage_unrealized_gain
+        result["formatted_percentage_realized_gain"] = self.formatted_percentage_realized_gain
 
         if self.product_type == ProductType.CASH:
-            result['category'] = ""
+            result["category"] = ""
         return result
 
     def get_exchange_acronym(self) -> str:
@@ -213,13 +221,11 @@ class PortfolioEntry:
 
         return name.title()
 
-    def formatted_portfolio_size(self) -> str :
+    def formatted_portfolio_size(self) -> str:
         return f"{self.portfolio_size:.2%}"
 
     def formatted_break_even_price(self) -> str:
-        return LocalizationUtility.format_money_value(
-            value=self.break_even_price, currency=self.product_currency
-        )
+        return LocalizationUtility.format_money_value(value=self.break_even_price, currency=self.product_currency)
 
     def formatted_base_currency_break_even_price(self) -> str:
         return LocalizationUtility.format_money_value(
@@ -230,27 +236,19 @@ class PortfolioEntry:
         return LocalizationUtility.format_money_value(value=self.price, currency=self.product_currency)
 
     def formatted_base_currency_price(self) -> str:
-        return LocalizationUtility.format_money_value(
-            value=self.base_currency_price, currency=self.base_currency
-        )
+        return LocalizationUtility.format_money_value(value=self.base_currency_price, currency=self.base_currency)
 
     def formatted_value(self) -> str:
         return LocalizationUtility.format_money_value(value=self.value, currency=self.product_currency)
 
     def formatted_base_currency_value(self) -> str:
-        return LocalizationUtility.format_money_value(
-            value=self.base_currency_value, currency=self.base_currency
-        )
+        return LocalizationUtility.format_money_value(value=self.base_currency_value, currency=self.base_currency)
 
     def formatted_unrealized_gain(self) -> str:
-        return LocalizationUtility.format_money_value(
-            value=self.unrealized_gain, currency=self.base_currency
-        )
+        return LocalizationUtility.format_money_value(value=self.unrealized_gain, currency=self.base_currency)
 
     def formatted_realized_gain(self) -> str:
-        return LocalizationUtility.format_money_value(
-            value=self.realized_gain, currency=self.base_currency
-        )
+        return LocalizationUtility.format_money_value(value=self.realized_gain, currency=self.base_currency)
 
     def formatted_percentage_unrealized_gain(self) -> str:
         return f"{self.percentage_unrealized_gain:.2%}"
@@ -270,7 +268,7 @@ class PortfolioId(Enum):
         self.logo = logo
 
     @classmethod
-    def values(cls) -> list['PortfolioId']:
+    def values(cls) -> list["PortfolioId"]:
         return list(cls)
 
     @classmethod
@@ -281,11 +279,8 @@ class PortfolioId(Enum):
         return cls.ALL
 
     def to_dict(self):
-        return {
-            "id": self.id,
-            "name": self.long_name,
-            "logo": self.logo
-        }
+        return {"id": self.id, "name": self.long_name, "logo": self.logo}
+
 
 @dataclass
 class TotalPortfolio:
@@ -316,6 +311,7 @@ class TotalPortfolio:
     def total_deposit_withdrawal_formatted(self) -> str:
         return LocalizationUtility.format_money_value(value=self.total_deposit_withdrawal, currency=self.base_currency)
 
+
 @dataclass
 class Transaction:
     name: str
@@ -329,6 +325,7 @@ class Transaction:
     total: str
     total_in_base_currency: str
     fees: str
+
 
 def dataclass_to_dict(obj) -> dict:
     """

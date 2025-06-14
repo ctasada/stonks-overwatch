@@ -7,6 +7,7 @@ from pprint import pprint
 
 from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import BitvavoService
 
+
 # Use this class to connect to Bitvavo and make your first calls.
 # Add trading strategies to implement your business logic.
 class BitvavoImplementation:
@@ -25,7 +26,7 @@ class BitvavoImplementation:
     # Handle errors.
     def error_callback(self, error):
         print("Add your error message.")
-        #print("Errors:", json.dumps(error, indent=2))
+        # print("Errors:", json.dumps(error, indent=2))
 
     def account(self):
         response = self.bitvavo.account()
@@ -44,7 +45,7 @@ class BitvavoImplementation:
         print("Account History:", json.dumps(response, indent=2))
 
     def orders(self):
-        response = self.bitvavo.get_client().getOrders('ETH-EUR', {})
+        response = self.bitvavo.get_client().getOrders("ETH-EUR", {})
         print("Orders:", json.dumps(response, indent=2))
 
     def deposit_history(self):
@@ -56,12 +57,12 @@ class BitvavoImplementation:
         print("Withdrawal History:", json.dumps(response, indent=2))
 
     def ticker_price(self):
-        response = self.bitvavo.ticker_price('SOL-EUR')
+        response = self.bitvavo.ticker_price("SOL-EUR")
         print("Ticker Price:", json.dumps(response, indent=2))
 
     def candles(self):
-        start = datetime.fromisoformat('2025-02-08')
-        response = self.bitvavo.candles('BTC-EUR', '1d', start)
+        start = datetime.fromisoformat("2025-02-08")
+        response = self.bitvavo.candles("BTC-EUR", "1d", start)
         pprint(response)
 
     # Sockets are fast but asynchronous. Keep the socket open while you are
@@ -82,11 +83,11 @@ class BitvavoImplementation:
     def calculate_staking(self):
         totals = {}
         response = self.bitvavo.account_history()
-        for transaction in response['items']:
-            if transaction['type'] == 'staking':
+        for transaction in response["items"]:
+            if transaction["type"] == "staking":
                 print(transaction)
-                staked = totals.get(transaction['receivedCurrency'], 0.0)
-                totals[transaction['receivedCurrency']] = staked + float(transaction['receivedAmount'])
+                staked = totals.get(transaction["receivedCurrency"], 0.0)
+                totals[transaction["receivedCurrency"]] = staked + float(transaction["receivedAmount"])
 
         print("Total staking rewards:")
         for asset, total in totals.items():
@@ -96,15 +97,16 @@ class BitvavoImplementation:
         try:
             balances = self.bitvavo.balance()
             for asset in balances:
-                available = float(asset.get('available', 0))
-                in_order = float(asset.get('inOrder', 0))
+                available = float(asset.get("available", 0))
+                in_order = float(asset.get("inOrder", 0))
                 if available > 0 or in_order > 0:
                     print(f"{asset['symbol']}: Available = {available}, In Order = {in_order}")
         except Exception as e:
             print(f"Error fetching balances: {e}")
 
+
 # Shall I re-explain main? Naaaaaaaaaa.
-if __name__ == '__main__':
+if __name__ == "__main__":
     bvavo = BitvavoImplementation()
 
     # bvavo.calculate_staking()

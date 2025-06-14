@@ -15,15 +15,16 @@ from stonks_overwatch.core.interfaces.transaction_service import TransactionServ
 import pytest
 from unittest.mock import MagicMock
 
+
 class TestServiceFactory:
     """Test cases for ServiceFactory."""
 
     def setup_method(self):
         """Set up test fixtures before each test method."""
         # Clear singleton instances for clean state
-        if hasattr(ServiceFactory, '_instance'):
+        if hasattr(ServiceFactory, "_instance"):
             ServiceFactory._instance = None
-        if hasattr(BrokerRegistry, '_instance'):
+        if hasattr(BrokerRegistry, "_instance"):
             BrokerRegistry._instance = None
 
         self.factory = ServiceFactory()
@@ -52,9 +53,9 @@ class TestServiceFactory:
         self.factory.clear_cache()
 
         # Clear singleton instances
-        if hasattr(ServiceFactory, '_instance'):
+        if hasattr(ServiceFactory, "_instance"):
             ServiceFactory._instance = None
-        if hasattr(BrokerRegistry, '_instance'):
+        if hasattr(BrokerRegistry, "_instance"):
             BrokerRegistry._instance = None
 
     def test_singleton_behavior(self):
@@ -71,7 +72,7 @@ class TestServiceFactory:
             broker_name="test_broker",
             portfolio_service=self.mock_portfolio_service_class,
             transaction_service=self.mock_transaction_service_class,
-            deposit_service=self.mock_deposit_service_class
+            deposit_service=self.mock_deposit_service_class,
         )
 
         # Create service
@@ -95,7 +96,7 @@ class TestServiceFactory:
             broker_name="test_broker",
             portfolio_service=self.mock_portfolio_service_class,
             transaction_service=self.mock_transaction_service_class,
-            deposit_service=self.mock_deposit_service_class
+            deposit_service=self.mock_deposit_service_class,
         )
 
         # Create service twice
@@ -113,7 +114,7 @@ class TestServiceFactory:
             broker_name="test_broker",
             portfolio_service=self.mock_portfolio_service_class,
             transaction_service=self.mock_transaction_service_class,
-            deposit_service=self.mock_deposit_service_class
+            deposit_service=self.mock_deposit_service_class,
         )
 
         # Create service (should be cached)

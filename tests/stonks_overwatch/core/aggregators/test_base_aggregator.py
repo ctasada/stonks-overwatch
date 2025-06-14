@@ -12,6 +12,7 @@ from stonks_overwatch.services.models import PortfolioId
 import pytest
 from unittest.mock import MagicMock, patch
 
+
 class ConcreteAggregator(BaseAggregator):
     """Concrete implementation of BaseAggregator for testing."""
 
@@ -28,13 +29,14 @@ class TestBaseAggregator:
         # Clear any singleton instances
         from stonks_overwatch.core.factories.broker_registry import BrokerRegistry
         from stonks_overwatch.core.factories.service_factory import ServiceFactory
-        if hasattr(ServiceFactory, '_instance'):
+
+        if hasattr(ServiceFactory, "_instance"):
             ServiceFactory._instance = None
-        if hasattr(BrokerRegistry, '_instance'):
+        if hasattr(BrokerRegistry, "_instance"):
             BrokerRegistry._instance = None
 
-    @patch('stonks_overwatch.core.aggregators.base_aggregator.ServiceFactory')
-    @patch('stonks_overwatch.core.aggregators.base_aggregator.Config')
+    @patch("stonks_overwatch.core.aggregators.base_aggregator.ServiceFactory")
+    @patch("stonks_overwatch.core.aggregators.base_aggregator.Config")
     def test_initialization(self, mock_config, mock_service_factory_class):
         """Test aggregator initialization."""
         # Mock the factory instance
@@ -53,8 +55,8 @@ class TestBaseAggregator:
         assert aggregator._service_type == ServiceType.PORTFOLIO
         mock_factory.get_available_brokers.assert_called_once()
 
-    @patch('stonks_overwatch.core.aggregators.base_aggregator.ServiceFactory')
-    @patch('stonks_overwatch.core.aggregators.base_aggregator.Config')
+    @patch("stonks_overwatch.core.aggregators.base_aggregator.ServiceFactory")
+    @patch("stonks_overwatch.core.aggregators.base_aggregator.Config")
     def test_collect_broker_data_success(self, mock_config, mock_service_factory_class):
         """Test successful data collection from brokers."""
         # Mock setup
@@ -75,7 +77,7 @@ class TestBaseAggregator:
         aggregator._broker_services = {"broker1": mock_service1, "broker2": mock_service2}
 
         # Mock _get_enabled_brokers to return both brokers
-        with patch.object(aggregator, '_get_enabled_brokers') as mock_get_enabled:
+        with patch.object(aggregator, "_get_enabled_brokers") as mock_get_enabled:
             mock_get_enabled.return_value = ["broker1", "broker2"]
 
             # Collect data
@@ -87,8 +89,8 @@ class TestBaseAggregator:
             assert result["broker1"] == ["data1", "data2"]
             assert result["broker2"] == ["data3", "data4"]
 
-    @patch('stonks_overwatch.core.aggregators.base_aggregator.ServiceFactory')
-    @patch('stonks_overwatch.core.aggregators.base_aggregator.Config')
+    @patch("stonks_overwatch.core.aggregators.base_aggregator.ServiceFactory")
+    @patch("stonks_overwatch.core.aggregators.base_aggregator.Config")
     def test_collect_and_merge_lists(self, mock_config, mock_service_factory_class):
         """Test the _collect_and_merge_lists helper method."""
         # Mock setup
@@ -101,11 +103,8 @@ class TestBaseAggregator:
         aggregator = ConcreteAggregator(ServiceType.PORTFOLIO)
 
         # Mock _collect_broker_data
-        with patch.object(aggregator, '_collect_broker_data') as mock_collect:
-            mock_collect.return_value = {
-                "broker1": ["item1", "item2"],
-                "broker2": ["item3", "item4"]
-            }
+        with patch.object(aggregator, "_collect_broker_data") as mock_collect:
+            mock_collect.return_value = {"broker1": ["item1", "item2"], "broker2": ["item3", "item4"]}
 
             # Test without merger function
             portfolio_id = PortfolioId.ALL

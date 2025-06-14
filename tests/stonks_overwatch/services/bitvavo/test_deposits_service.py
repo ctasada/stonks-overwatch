@@ -4,6 +4,7 @@ from stonks_overwatch.services.models import DepositType
 
 import pook
 
+
 @pook.on
 def test_get_cash_deposits():
     BaseConfig.CONFIG_PATH = "tests/resources/stonks_overwatch/config/sample-config.json"
@@ -16,7 +17,7 @@ def test_get_cash_deposits():
                 "amount": "500",
                 "fee": "0",
                 "status": "completed",
-                "address": "BACKACCOUNTNUMBER"
+                "address": "BACKACCOUNTNUMBER",
             },
         ]
     )
@@ -28,7 +29,7 @@ def test_get_cash_deposits():
                 "amount": "100",
                 "fee": "0",
                 "status": "completed",
-                "address": "BACKACCOUNTNUMBER"
+                "address": "BACKACCOUNTNUMBER",
             },
         ]
     )

@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class TransactionType(Enum):
     """
     Enum representing various transaction types in DeGiro's API.
@@ -114,6 +115,7 @@ class ProductType(Enum):
         }
         return readable_strings.get(self, "Unknown Product Type")
 
+
 class CurrencyFX(Enum):
     EUR_USD = 705366
     """Represents the EUR/USD ProductId"""
@@ -132,7 +134,7 @@ class CurrencyFX(Enum):
 
         for pair in CurrencyFX:
             # Extract the currencies from the enum name
-            base, quote = pair.name.split('_')
+            base, quote = pair.name.split("_")
             pairs.append(base)
             pairs.append(quote)
 

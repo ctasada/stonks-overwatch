@@ -25,7 +25,7 @@ cursor.execute(f"""
 """)
 
 cursor.execute(f"""
-    SELECT * FROM degiro_productinfo  
+    SELECT * FROM degiro_productinfo
     WHERE name = '{name}'
 """)
 ```
@@ -58,15 +58,15 @@ cursor.execute("""
 ```python
 class BaseRepository(ABC):
     """Base repository with security, caching, and error handling."""
-    
+
     @staticmethod
     def _execute_safe_query(query: str, params: tuple = None) -> List[dict]:
         """Execute parameterized query safely."""
-        
-    @staticmethod 
+
+    @staticmethod
     def _handle_db_error(operation: str, error: Exception) -> None:
         """Centralized error handling."""
-        
+
     @abstractmethod
     def get_table_name(self) -> str:
         """Get table name for this repository."""
@@ -168,10 +168,10 @@ class CacheManager:
 ```python
 class BrokerServiceException(Exception):
     """Base exception for broker services."""
-    
+
 class DataNotAvailableException(BrokerServiceException):
     """Data temporarily unavailable."""
-    
+
 class ConfigurationException(BrokerServiceException):
     """Service configuration error."""
 ```
@@ -202,7 +202,7 @@ def update_degiro_portfolio():
 class JobsScheduler:
     def __init__(self, broker_registry: BrokerRegistry):
         self.broker_registry = broker_registry
-        
+
     def schedule_broker_updates(self):
         for broker_name in self.broker_registry.get_available_brokers():
             config = self.broker_registry.get_broker_config(broker_name)
@@ -236,7 +236,7 @@ class BrokerAuthMiddleware:
     def __init__(self, get_response):
         self.broker_registry = BrokerRegistry()
         self.config = Config.default()
-        
+
     def __call__(self, request):
         for broker_name in self.broker_registry.get_available_brokers():
             if self.config.is_enabled(broker_name):
@@ -255,7 +255,7 @@ class BrokerAuthMiddleware:
 # CURRENT: Hardcoded broker-specific methods
 def is_degiro_enabled(self) -> bool:
     return self.degiro_configuration.is_enabled()
-    
+
 def is_bitvavo_enabled(self) -> bool:
     return self.bitvavo_configuration.is_enabled()
 ```
@@ -265,10 +265,10 @@ def is_bitvavo_enabled(self) -> bool:
 class Config:
     def __init__(self):
         self.broker_configs = {}  # Dynamic broker configuration storage
-        
+
     def register_broker_config(self, broker_name: str, config: BaseConfig):
         self.broker_configs[broker_name] = config
-        
+
     def is_broker_enabled(self, broker_name: str) -> bool:
         return self.broker_configs.get(broker_name, {}).is_enabled()
 ```
@@ -385,12 +385,12 @@ This analysis was conducted through:
 - **Performance analysis**: Query and caching pattern review
 - **Module architecture review**: Analysis of jobs, middleware, and config modules
 
-**Total Files Analyzed**: 150+  
-**Security Vulnerabilities Found**: 6 critical  
-**Code Duplication Instances**: 20+  
-**Architecture Patterns Identified**: 15+  
+**Total Files Analyzed**: 150+
+**Security Vulnerabilities Found**: 6 critical
+**Code Duplication Instances**: 20+
+**Architecture Patterns Identified**: 15+
 **Broker-Specific Modules Requiring Refactoring**: 3
 
 ---
 
-*This document reflects the current state as of analysis date and should be updated as improvements are implemented.* 
+*This document reflects the current state as of analysis date and should be updated as improvements are implemented.*

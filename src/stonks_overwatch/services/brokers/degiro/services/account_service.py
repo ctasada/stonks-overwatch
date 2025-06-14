@@ -5,6 +5,7 @@ from stonks_overwatch.services.brokers.degiro.repositories.product_info_reposito
 from stonks_overwatch.services.models import AccountOverview
 from stonks_overwatch.utils.core.logger import StonksLogger
 
+
 class AccountOverviewService:
     logger = StonksLogger.get_logger("stonks_overwatch.account_overview_data", "DEGIRO|ACCOUNT_OVERVIEW")
 

@@ -15,13 +15,14 @@ from stonks_overwatch.core.interfaces.transaction_service import TransactionServ
 import pytest
 from unittest.mock import MagicMock
 
+
 class TestBrokerRegistry:
     """Test cases for BrokerRegistry."""
 
     def setup_method(self):
         """Set up test fixtures before each test method."""
         # Clear singleton instance for clean state
-        if hasattr(BrokerRegistry, '_instance'):
+        if hasattr(BrokerRegistry, "_instance"):
             BrokerRegistry._instance = None
 
         self.registry = BrokerRegistry()
@@ -41,7 +42,7 @@ class TestBrokerRegistry:
         self.registry._broker_capabilities.clear()
 
         # Clear singleton instance
-        if hasattr(BrokerRegistry, '_instance'):
+        if hasattr(BrokerRegistry, "_instance"):
             BrokerRegistry._instance = None
 
     def test_singleton_behavior(self):
@@ -58,7 +59,7 @@ class TestBrokerRegistry:
             broker_name="test_broker",
             portfolio_service=self.mock_portfolio_service,
             transaction_service=self.mock_transaction_service,
-            deposit_service=self.mock_deposit_service
+            deposit_service=self.mock_deposit_service,
         )
 
         # Check broker is registered
@@ -85,7 +86,7 @@ class TestBrokerRegistry:
             deposit_service=self.mock_deposit_service,
             dividend_service=self.mock_dividend_service,
             fee_service=self.mock_fee_service,
-            account_service=self.mock_account_service
+            account_service=self.mock_account_service,
         )
 
         # Check all services are available
@@ -108,7 +109,7 @@ class TestBrokerRegistry:
             broker_name="duplicate_broker",
             portfolio_service=self.mock_portfolio_service,
             transaction_service=self.mock_transaction_service,
-            deposit_service=self.mock_deposit_service
+            deposit_service=self.mock_deposit_service,
         )
 
         # Try to register same broker again
@@ -117,7 +118,7 @@ class TestBrokerRegistry:
                 broker_name="duplicate_broker",
                 portfolio_service=self.mock_portfolio_service,
                 transaction_service=self.mock_transaction_service,
-                deposit_service=self.mock_deposit_service
+                deposit_service=self.mock_deposit_service,
             )
 
         assert "Broker 'duplicate_broker' is already registered" in str(exc_info.value)
@@ -134,7 +135,7 @@ class TestBrokerRegistry:
             broker_name="limited_broker",
             portfolio_service=self.mock_portfolio_service,
             transaction_service=self.mock_transaction_service,
-            deposit_service=self.mock_deposit_service
+            deposit_service=self.mock_deposit_service,
         )
 
         result = self.registry.get_broker_service("limited_broker", ServiceType.DIVIDEND)
@@ -152,14 +153,14 @@ class TestBrokerRegistry:
             broker_name="broker1",
             portfolio_service=self.mock_portfolio_service,
             transaction_service=self.mock_transaction_service,
-            deposit_service=self.mock_deposit_service
+            deposit_service=self.mock_deposit_service,
         )
 
         self.registry.register_broker(
             broker_name="broker2",
             portfolio_service=self.mock_portfolio_service,
             transaction_service=self.mock_transaction_service,
-            deposit_service=self.mock_deposit_service
+            deposit_service=self.mock_deposit_service,
         )
 
         brokers = self.registry.get_available_brokers()
@@ -179,7 +180,7 @@ class TestBrokerRegistry:
             portfolio_service=self.mock_portfolio_service,
             transaction_service=self.mock_transaction_service,
             deposit_service=self.mock_deposit_service,
-            dividend_service=self.mock_dividend_service
+            dividend_service=self.mock_dividend_service,
         )
 
         assert self.registry.broker_supports_service("test_broker", ServiceType.PORTFOLIO) is True
@@ -192,7 +193,7 @@ class TestBrokerRegistry:
             broker_name="test_broker",
             portfolio_service=self.mock_portfolio_service,
             transaction_service=self.mock_transaction_service,
-            deposit_service=self.mock_deposit_service
+            deposit_service=self.mock_deposit_service,
         )
 
         assert self.registry.broker_supports_service("test_broker", ServiceType.FEE) is False
@@ -208,7 +209,7 @@ class TestBrokerRegistry:
             broker_name="test_broker",
             portfolio_service=self.mock_portfolio_service,
             transaction_service=self.mock_transaction_service,
-            deposit_service=self.mock_deposit_service
+            deposit_service=self.mock_deposit_service,
         )
 
         # Verify broker is registered
@@ -247,7 +248,7 @@ class TestBrokerRegistry:
             broker_name="basic_broker",
             portfolio_service=self.mock_portfolio_service,
             transaction_service=self.mock_transaction_service,
-            deposit_service=self.mock_deposit_service
+            deposit_service=self.mock_deposit_service,
         )
 
         # Register broker with extended services
@@ -257,7 +258,7 @@ class TestBrokerRegistry:
             transaction_service=self.mock_transaction_service,
             deposit_service=self.mock_deposit_service,
             dividend_service=self.mock_dividend_service,
-            fee_service=self.mock_fee_service
+            fee_service=self.mock_fee_service,
         )
 
         # Check capabilities are independent

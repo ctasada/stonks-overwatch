@@ -1,4 +1,3 @@
-
 from typing import Optional
 
 from django.http import HttpRequest
@@ -10,8 +9,9 @@ from stonks_overwatch.config.degiro_config import DegiroConfig
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
 from stonks_overwatch.utils.core.logger import StonksLogger
 
+
 class DeGiroAuthMiddleware:
-    PUBLIC_URLS = {'login'}
+    PUBLIC_URLS = {"login"}
 
     logger = StonksLogger.get_logger("stonks_overwatch.degiro_auth", "DEGIRO|AUTH_MIDDLEWARE")
 
@@ -31,23 +31,25 @@ class DeGiroAuthMiddleware:
 
             if not self._is_authenticated(request) and not self._is_public_url(current_url):
                 self.logger.warning("User not authenticated, redirecting to Login page...")
-                return redirect('login')
+                return redirect("login")
 
         return self.get_response(request)
 
     def _should_check_connection(self, request) -> bool:
-        has_default_credentials = (DegiroConfig.default().credentials is not None
-                and DegiroConfig.default().get_credentials.username is not None
-                and DegiroConfig.default().get_credentials.password is not None)
+        has_default_credentials = (
+            DegiroConfig.default().credentials is not None
+            and DegiroConfig.default().get_credentials.username is not None
+            and DegiroConfig.default().get_credentials.password is not None
+        )
 
-        return has_default_credentials or 'session_id' in request.session
+        return has_default_credentials or "session_id" in request.session
 
     def _is_public_url(self, url_name: Optional[str]) -> bool:
         return url_name in self.PUBLIC_URLS
 
     def _authenticate_user(self, request: HttpRequest) -> None:
-        request.session['is_authenticated'] = self.degiro_service.check_connection()
-        request.session['session_id'] = self.degiro_service.get_session_id()
+        request.session["is_authenticated"] = self.degiro_service.check_connection()
+        request.session["session_id"] = self.degiro_service.get_session_id()
 
     def _is_authenticated(self, request: HttpRequest) -> bool:
         """
@@ -57,12 +59,12 @@ class DeGiroAuthMiddleware:
         """
         try:
             # Check if basic session authentication exists
-            if not request.session.get('is_authenticated'):
+            if not request.session.get("is_authenticated"):
                 self.logger.debug("Session not authenticated")
                 return False
 
             # Verify session_id exists
-            session_id = request.session.get('session_id')
+            session_id = request.session.get("session_id")
             if not session_id:
                 self.logger.debug("No session ID found")
                 return False

@@ -15,6 +15,7 @@ from stonks_overwatch.core.interfaces.portfolio_service import PortfolioServiceI
 from stonks_overwatch.core.interfaces.transaction_service import TransactionServiceInterface
 from stonks_overwatch.utils.core.singleton import singleton
 
+
 @singleton
 class ServiceFactory:
     """
@@ -44,9 +45,7 @@ class ServiceFactory:
         """
         service_class = self._registry.get_broker_service(broker_name, ServiceType.PORTFOLIO)
         if not service_class:
-            raise ServiceFactoryException(
-                f"Broker '{broker_name}' does not support portfolio service"
-            )
+            raise ServiceFactoryException(f"Broker '{broker_name}' does not support portfolio service")
 
         return self._create_service(broker_name, ServiceType.PORTFOLIO, service_class, **kwargs)
 
@@ -66,9 +65,7 @@ class ServiceFactory:
         """
         service_class = self._registry.get_broker_service(broker_name, ServiceType.TRANSACTION)
         if not service_class:
-            raise ServiceFactoryException(
-                f"Broker '{broker_name}' does not support transaction service"
-            )
+            raise ServiceFactoryException(f"Broker '{broker_name}' does not support transaction service")
 
         return self._create_service(broker_name, ServiceType.TRANSACTION, service_class, **kwargs)
 
@@ -88,9 +85,7 @@ class ServiceFactory:
         """
         service_class = self._registry.get_broker_service(broker_name, ServiceType.DEPOSIT)
         if not service_class:
-            raise ServiceFactoryException(
-                f"Broker '{broker_name}' does not support deposit service"
-            )
+            raise ServiceFactoryException(f"Broker '{broker_name}' does not support deposit service")
 
         return self._create_service(broker_name, ServiceType.DEPOSIT, service_class, **kwargs)
 

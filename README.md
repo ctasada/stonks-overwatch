@@ -2,10 +2,10 @@
 
 **Stonks Overwatch** is a new Open Source Stocks Dashboard.
 
-Why do we need yet another dashboard? I have been a DEGIRO user for many years, and the more active I was, 
+Why do we need yet another dashboard? I have been a DEGIRO user for many years, and the more active I was,
 the more frustrated I became with the lack of any decent dashboard to overview my investments.
 
-After trying different options (I will omit names), I couldn't find any that was really covering my needs, or 
+After trying different options (I will omit names), I couldn't find any that was really covering my needs, or
 that I could trust.
 
 Stonks Overwatch runs locally and doesn't share your data with anyone. Your data is yours.
@@ -72,7 +72,7 @@ See [Wiki - Developing Stonks Overwatch](https://github.com/ctasada/stonks-overw
 
 ## TODOs
 - [ ] Add information about the sectors. Maybe a tooltip in the places where sectors are used.
-- [ ] Tables should allow choosing the number of rows to show. 
+- [ ] Tables should allow choosing the number of rows to show.
 - [ ] Portfolio Tables would be migrated to http://bootstrap-table.com/
 - [ ] Review ALL BUGS and TODOs and move them to their corresponding Github issues
 - [ ] Replace all the Tables with https://bootstrap-table.com
@@ -101,7 +101,7 @@ See [Wiki - Developing Stonks Overwatch](https://github.com/ctasada/stonks-overw
 - [ ] DEGIRO Risk Category is a local term: https://www.degiro.ie/helpdesk/trading-platform/what-are-risk-categories
 - [ ] Improve code quality. Check https://pyre-check.org/docs/pysa-quickstart/
 - [ ] Enable usage of Demo DB in the application (running natively)
-- [ ] Provide support to configure the settings (API Key, etc.) in the application. 
+- [ ] Provide support to configure the settings (API Key, etc.) in the application.
   - [ ] Values should be stored in the keyring for security
 - [ ] `make check-dependencies` needs some extra work
   - [ ] Review the usage of `polars` and `pandas` in the codebase and try to use only one of them
@@ -123,9 +123,9 @@ See [Wiki - Developing Stonks Overwatch](https://github.com/ctasada/stonks-overw
 - https://stonksfolio.com/portfolios/4qltYv/performance
 - https://blog.quantinsti.com/portfolio-analysis-performance-measurement-evaluation/
 
-* TWRR focuses purely on the timing of cash flows, providing an accurate measure of performance that disregards the 
+* TWRR focuses purely on the timing of cash flows, providing an accurate measure of performance that disregards the
   amount of money involved.
-* XIRR, on the other hand, considers both the timing and the size of cash flows, offering a complete picture of 
+* XIRR, on the other hand, considers both the timing and the size of cash flows, offering a complete picture of
   investment returns.
 
 # Libraries

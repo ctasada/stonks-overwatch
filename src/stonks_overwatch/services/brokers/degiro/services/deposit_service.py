@@ -8,11 +8,12 @@ from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiro
 from stonks_overwatch.services.brokers.degiro.repositories.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.services.models import Deposit, DepositType
 
+
 # FIXME: If data cannot be found in the DB, the code should get it from DeGiro, updating the DB
 class DepositsService(DepositServiceInterface):
     def __init__(
-            self,
-            degiro_service: DeGiroService,
+        self,
+        degiro_service: DeGiroService,
     ):
         self.degiro_service = degiro_service
         self.base_currency = Config.default().base_currency
@@ -39,9 +40,7 @@ class DepositsService(DepositServiceInterface):
     @staticmethod
     def _capitalize_deposit_description(input_string: str):
         words = input_string.split()
-        capitalized_words = [
-            word if word == "iDEAL" else word.capitalize() for word in words
-        ]
+        capitalized_words = [word if word == "iDEAL" else word.capitalize() for word in words]
         return " ".join(capitalized_words)
 
     def calculate_cash_account_value(self) -> dict:
@@ -85,11 +84,11 @@ class DepositsService(DepositServiceInterface):
         cumulative_deposits = 0.0
 
         # Sort deposits by date
-        sorted_deposits = sorted(deposits_raw, key=lambda x: x['date'])
+        sorted_deposits = sorted(deposits_raw, key=lambda x: x["date"])
 
         for deposit in sorted_deposits:
-            deposit_date = deposit['date'].strftime("%Y-%m-%d")
-            cumulative_deposits += float(deposit['change'])
+            deposit_date = deposit["date"].strftime("%Y-%m-%d")
+            cumulative_deposits += float(deposit["change"])
             deposits_by_date[deposit_date] = cumulative_deposits
 
         # Create DataFrame from cash balance data

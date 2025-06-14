@@ -13,6 +13,7 @@ from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.domain.constants import ProductType
 
+
 class PortfolioService(PortfolioServiceInterface):
     @dataclass
     class Quotation:
@@ -25,12 +26,12 @@ class PortfolioService(PortfolioServiceInterface):
     class Product:
         product_id: Optional[str]
         history: Optional[dict]
-        quotation: Optional['PortfolioService.Quotation']
+        quotation: Optional["PortfolioService.Quotation"]
 
     logger = StonksLogger.get_logger("stonks_overwatch.portfolio_data.bitvavo", "[BITVAVO|PORTFOLIO]")
 
     def __init__(
-            self,
+        self,
     ):
         self.bitvavo_service = BitvavoService()
         self.deposits = DepositsService()
@@ -100,7 +101,6 @@ class PortfolioService(PortfolioServiceInterface):
 
         return sorted(bitvavo_portfolio, key=lambda k: k.symbol)
 
-
     def get_portfolio_total(self, portfolio: Optional[List[PortfolioEntry]] = None) -> TotalPortfolio:
         self.logger.debug("Get Portfolio Total")
 
@@ -114,8 +114,7 @@ class PortfolioService(PortfolioServiceInterface):
             if entry.is_open:
                 portfolio_total_value += entry.base_currency_value
 
-        total_deposit_withdrawal = (
-            sum(float(deposit["amount"]) for deposit in self.bitvavo_service.deposit_history()))
+        total_deposit_withdrawal = sum(float(deposit["amount"]) for deposit in self.bitvavo_service.deposit_history())
 
         total_cash = 0.0
         balance = self.bitvavo_service.balance(self.base_currency)
@@ -168,8 +167,10 @@ class PortfolioService(PortfolioServiceInterface):
         final_date = self._get_growth_final_date(product_history_dates[-1])
 
         # Generate a list of dates between start and final date
-        dates = [(start_date + timedelta(days=i)).strftime(LocalizationUtility.DATE_FORMAT)
-                 for i in range((final_date - start_date).days + 1)]
+        dates = [
+            (start_date + timedelta(days=i)).strftime(LocalizationUtility.DATE_FORMAT)
+            for i in range((final_date - start_date).days + 1)
+        ]
 
         position_value = {}
         for date_change in entry["history"]:
@@ -261,7 +262,6 @@ class PortfolioService(PortfolioServiceInterface):
         tradeable_products = {}
 
         for key, data in product_growth.items():
-
             data["productId"] = key
 
             product_history_dates = list(data["history"].keys())
@@ -270,9 +270,9 @@ class PortfolioService(PortfolioServiceInterface):
             candles = self.bitvavo_service.candles(f"{key}-{self.base_currency}", "1d", start_date)
             # Creates the dictionary with the date as key and the value as the close price
             date_to_value = {
-                start_date + timedelta(days=i): candle['close']
+                start_date + timedelta(days=i): candle["close"]
                 for i, candle in enumerate(candles)
-                if candle['timestamp'] >= start_date
+                if candle["timestamp"] >= start_date
             }
             quotes = {
                 LocalizationUtility.format_date_from_date(date): float(value) for date, value in date_to_value.items()
@@ -291,6 +291,6 @@ class PortfolioService(PortfolioServiceInterface):
     @staticmethod
     def _is_weekend(date_str: str) -> bool:
         # Parse the date string into a datetime object
-        day = datetime.strptime(date_str, '%Y-%m-%d')
+        day = datetime.strptime(date_str, "%Y-%m-%d")
         # Check if the day of the week is Saturday (5) or Sunday (6)
         return day.weekday() >= 5

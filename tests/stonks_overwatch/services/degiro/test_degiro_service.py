@@ -19,6 +19,7 @@ from tests.stonks_overwatch.fixtures import (
 import pook
 import pytest
 
+
 def test_credentials_manager_init(mock_degiro_config: mock_degiro_config, mock_full_credentials: mock_full_credentials):
     manager = CredentialsManager(mock_full_credentials)
     assert manager.credentials.username == mock_full_credentials.username
@@ -36,7 +37,7 @@ def test_degiro_service_init(mock_degiro_config: mock_degiro_config, mock_full_c
 
 @pook.on
 def test_degiro_service_connect_with_full_credential(
-        disable_requests_cache: disable_requests_cache, mock_full_credentials: mock_full_credentials
+    disable_requests_cache: disable_requests_cache, mock_full_credentials: mock_full_credentials
 ):
     manager = CredentialsManager(mock_full_credentials)
 
@@ -45,6 +46,7 @@ def test_degiro_service_connect_with_full_credential(
     service.connect()
 
     assert service.check_connection() is True
+
 
 @pook.on
 def test_degiro_service_connect_with_credential(disable_requests_cache: disable_requests_cache):
@@ -55,15 +57,18 @@ def test_degiro_service_connect_with_credential(disable_requests_cache: disable_
     )
     manager = CredentialsManager(credential)
 
-    pook.post(urls.LOGIN + "/totp").reply(200).json({
+    pook.post(urls.LOGIN + "/totp").reply(200).json(
+        {
             "isPassCodeEnabled": True,
             "locale": "nl_NL",
             "redirectUrl": "https://trader.degiro.nl/trader/",
             "sessionId": "abcdefg12345",
             "status": 0,
             "statusText": "success",
-        })
-    pook.get(urls.CLIENT_DETAILS).reply(200).json({
+        }
+    )
+    pook.get(urls.CLIENT_DETAILS).reply(200).json(
+        {
             "data": {
                 "clientRole": "basic",
                 "contractType": "PRIVATE",
@@ -71,9 +76,10 @@ def test_degiro_service_connect_with_credential(disable_requests_cache: disable_
                 "email": "user@domain.com",
                 "id": 98765,
                 "intAccount": 1234567,
-                "username": "someuser"
+                "username": "someuser",
             }
-        })
+        }
+    )
     service = TestDeGiroService(manager)
 
     # Check we have the right credentials
@@ -155,24 +161,26 @@ def test_degiro_service_update_credentials(disable_requests_cache: disable_reque
     assert service.api_client.credentials.totp_secret_key is None
     assert service.api_client.credentials.one_time_password == 123456
 
-    pook.post(urls.LOGIN + "/totp").reply(200).json({
+    pook.post(urls.LOGIN + "/totp").reply(200).json(
+        {
             "isPassCodeEnabled": True,
             "locale": "nl_NL",
             "redirectUrl": "https://trader.degiro.nl/trader/",
             "sessionId": "abcdefg12345",
             "status": 0,
             "statusText": "success",
-        })
+        }
+    )
 
     service.connect()
 
     assert service.check_connection() is True
     assert service.api_client.connection_storage.session_id == "abcdefg12345"
 
+
 @pook.on
 def test_get_product_quotation(
-        disable_requests_cache: disable_requests_cache,
-        mock_full_credentials: mock_full_credentials
+    disable_requests_cache: disable_requests_cache, mock_full_credentials: mock_full_credentials
 ):
     manager = CredentialsManager(mock_full_credentials)
     chart_data_file = pathlib.Path("tests/resources/stonks_overwatch/services/aapl-chart-fetcher.json")

@@ -9,6 +9,7 @@ from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiro
 import pytest
 from unittest.mock import patch
 
+
 @pytest.fixture
 def mock_degiro_config():
     with patch("stonks_overwatch.config.degiro_config.DegiroConfig.default") as mock_config:
@@ -37,6 +38,7 @@ def disable_requests_cache():
 
 
 class TestDeGiroService(DeGiroService):
-    """Test specific DeGiroService to avoid the singleton limitations """
+    """Test specific DeGiroService to avoid the singleton limitations"""
+
     def __new__(cls, *args, **kwargs):
         return object.__new__(cls)

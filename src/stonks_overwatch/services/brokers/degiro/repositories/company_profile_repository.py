@@ -4,6 +4,7 @@ from django.db import connection
 
 from stonks_overwatch.utils.database.db_utils import dictfetchall
 
+
 class CompanyProfileRepository:
     @staticmethod
     def get_company_profile_raw(isin: str) -> dict:

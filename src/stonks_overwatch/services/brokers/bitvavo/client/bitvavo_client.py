@@ -7,6 +7,7 @@ from stonks_overwatch.config.bitvavo_config import BitvavoConfig
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.singleton import singleton
 
+
 @singleton
 class BitvavoService:
     START_TIMESTAMP = 0
@@ -15,18 +16,20 @@ class BitvavoService:
     client: Bitvavo = None
 
     def __init__(
-            self,
-            debugging: bool = False,
+        self,
+        debugging: bool = False,
     ):
         self.bitvavo_config = BitvavoConfig.default()
         bitvavo_credentials = self.bitvavo_config.credentials
 
         if bitvavo_credentials and bitvavo_credentials.apikey and bitvavo_credentials.apisecret:
-            self.client = Bitvavo({
-                'APIKEY': bitvavo_credentials.apikey,
-                'APISECRET': bitvavo_credentials.apisecret,
-                'debugging': debugging,
-            })
+            self.client = Bitvavo(
+                {
+                    "APIKEY": bitvavo_credentials.apikey,
+                    "APISECRET": bitvavo_credentials.apisecret,
+                    "debugging": debugging,
+                }
+            )
 
     def get_client(self) -> Bitvavo:
         return self.client
@@ -44,9 +47,9 @@ class BitvavoService:
         self.logger.debug("Retrieving account history")
         options = {"fromDate": self.START_TIMESTAMP}
         postfix = createPostfix(options)
-        return self.client.privateRequest('/account/history', postfix, {}, 'GET')
+        return self.client.privateRequest("/account/history", postfix, {}, "GET")
 
-    def assets(self, symbol: str=None) -> json:
+    def assets(self, symbol: str = None) -> json:
         """Returns information on the supported assets."""
         self.logger.debug(f"Retrieving assets for symbol {symbol}")
         options = {}
@@ -54,7 +57,7 @@ class BitvavoService:
             options["symbol"] = symbol
         return self.client.assets(options)
 
-    def balance(self, symbol: str=None) -> json:
+    def balance(self, symbol: str = None) -> json:
         """Returns the current balance for this account."""
         self.logger.debug(f"Retrieving balance for symbol {symbol}")
         options = {}
@@ -62,7 +65,7 @@ class BitvavoService:
             options["symbol"] = symbol
         return self.client.balance(options)
 
-    def candles(self, market: str, interval: str, start: datetime, end: datetime=None) -> list[dict]:
+    def candles(self, market: str, interval: str, start: datetime, end: datetime = None) -> list[dict]:
         """
         Retrieve the Open, High, Low, Close, Volume (OHLCV) data you use to create candlestick charts for market with
         interval time between each candlestick.
@@ -76,22 +79,24 @@ class BitvavoService:
         response = self.client.candles(market, interval, {}, start=start, end=end)
         result = []
         for candle in response:
-            result.append({
-                "timestamp": datetime.fromtimestamp(candle[0] / 1000),
-                "open": candle[1],
-                "high": candle[2],
-                "low": candle[3],
-                "close": candle[4],
-                "volume": candle[5],
-            })
-        return sorted(result, key=lambda k: k['timestamp'])
+            result.append(
+                {
+                    "timestamp": datetime.fromtimestamp(candle[0] / 1000),
+                    "open": candle[1],
+                    "high": candle[2],
+                    "low": candle[3],
+                    "close": candle[4],
+                    "volume": candle[5],
+                }
+            )
+        return sorted(result, key=lambda k: k["timestamp"])
 
     def deposit_history(self) -> json:
         """Returns the deposit history of the account."""
         self.logger.debug("Retrieving deposit history")
         return self.client.depositHistory()
 
-    def ticker_price(self, market: str=None) -> json:
+    def ticker_price(self, market: str = None) -> json:
         """Retrieve the price of the latest trades on Bitvavo for all markets or a single market."""
         self.logger.debug(f"Retrieving ticker price for market {market}")
         options = {}

@@ -4,6 +4,7 @@ import sys
 import pandas as pd
 from util import CSV_DECIMAL, CSV_SEPARATOR, EXPORT_COLUMNS_TRANSACTIONS, convert_date
 
+
 class DeGiroConverterTrans:
     def __init__(self, inputfile: str = None, data=None):
         if data is None:

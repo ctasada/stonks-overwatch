@@ -10,6 +10,7 @@ from typing import Dict, List
 
 from stonks_overwatch.services.models import Deposit
 
+
 class DepositServiceInterface(ABC):
     """
     Interface for deposit service implementations.

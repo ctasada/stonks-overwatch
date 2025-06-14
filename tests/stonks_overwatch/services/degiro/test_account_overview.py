@@ -9,6 +9,7 @@ from stonks_overwatch.services.brokers.degiro.services.account_service import Ac
 import pytest
 from django.test import TestCase
 
+
 @pytest.mark.django_db
 class TestAccountOverviewService(TestCase):
     def setUp(self):

@@ -8,11 +8,12 @@ from stonks_overwatch.services.models import Deposit, DepositType
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.core.logger import StonksLogger
 
+
 class DepositsService(DepositServiceInterface):
     logger = StonksLogger.get_logger("stonks_overwatch.deposits.bitvavo", "[BITVAVO|DEPOSITS]")
 
     def __init__(
-            self,
+        self,
     ):
         self.bitvavo_service = BitvavoService()
 

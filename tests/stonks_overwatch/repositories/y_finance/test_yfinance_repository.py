@@ -7,6 +7,7 @@ from stonks_overwatch.services.brokers.yfinance.repositories.yfinance_repository
 import pytest
 from django.test import TestCase
 
+
 @pytest.mark.django_db
 class TestYFinanceRepository(TestCase):
     """Tests for the YFinanceRepository class.
@@ -15,6 +16,7 @@ class TestYFinanceRepository(TestCase):
     - Apple Inc (AAPL) ticker info and stock splits
     - Palantir (PLTR) ticker info without splits
     """
+
     def setUp(self):
         """Set up test data for both ticker info and stock splits."""
         # Load ticker info data
@@ -24,10 +26,7 @@ class TestYFinanceRepository(TestCase):
 
         self.ticker_info = {}
         for key, value in data.items():
-            obj = YFinanceTickerInfo.objects.create(
-                symbol=key,
-                data=value
-            )
+            obj = YFinanceTickerInfo.objects.create(symbol=key, data=value)
             self.ticker_info[key] = obj
 
         # Load stock splits data
@@ -37,10 +36,7 @@ class TestYFinanceRepository(TestCase):
 
         self.stock_splits = {}
         for key, value in data.items():
-            obj = YFinanceStockSplits.objects.create(
-                symbol=key,
-                data=value
-            )
+            obj = YFinanceStockSplits.objects.create(symbol=key, data=value)
             self.stock_splits[key] = obj
 
     def tearDown(self):
@@ -56,10 +52,10 @@ class TestYFinanceRepository(TestCase):
         """Test retrieving ticker info for a known symbol."""
         info = YFinanceRepository.get_ticker_info("AAPL")
         self.assertIsNotNone(info)
-        self.assertEqual(info['industry'], "Consumer Electronics")
-        self.assertEqual(info['currency'], "USD")
-        self.assertEqual(info['symbol'], "AAPL")
-        self.assertEqual(info['country'], "United States")
+        self.assertEqual(info["industry"], "Consumer Electronics")
+        self.assertEqual(info["currency"], "USD")
+        self.assertEqual(info["symbol"], "AAPL")
+        self.assertEqual(info["country"], "United States")
 
     def test_get_unknown_symbol(self):
         """Test retrieving ticker info for an unknown symbol."""
@@ -82,5 +78,5 @@ class TestYFinanceRepository(TestCase):
         splits = YFinanceRepository.get_stock_splits("AAPL")
         self.assertIsNotNone(splits)
         self.assertEqual(len(splits), 5)
-        self.assertEqual(splits[3]['split_ratio'], 7.0)
-        self.assertEqual(splits[4]['split_ratio'], 4.0)
+        self.assertEqual(splits[3]["split_ratio"], 7.0)
+        self.assertEqual(splits[4]["split_ratio"], 4.0)

@@ -6,6 +6,7 @@ from stonks_overwatch.utils.core.datetime import DateTimeUtility
 
 import pytest
 
+
 def test_calculate_interval_valid_dates():
     # Test cases for valid date ranges
     today = date.today()
@@ -57,6 +58,7 @@ def test_calculate_dates_in_interval():
     dates = DateTimeUtility.calculate_dates_in_interval(to_date, Interval.P1W)
     assert dates == expected_dates
 
+
 def test_convert_interval_to_days():
     today = datetime.today()
     start_of_year = datetime(today.year, 1, 1)
@@ -71,7 +73,7 @@ def test_convert_interval_to_days():
         (Interval.P5Y, 5 * 365),
         (Interval.P10Y, 10 * 365),
         (Interval.P50Y, 50 * 365),
-        (Interval.YTD, ytd_days)
+        (Interval.YTD, ytd_days),
     ]
 
     for interval, expected_days in test_cases:

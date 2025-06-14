@@ -1,6 +1,7 @@
 import json
 from typing import Any
 
+
 def save_to_json(data: Any, json_file_path: str) -> None:
     """Save the data into the specified file using JSON format.
 
@@ -14,6 +15,7 @@ def save_to_json(data: Any, json_file_path: str) -> None:
     """
     with open(json_file_path, "w") as data_file:
         data_file.write(json.dumps(data, indent=4))
+
 
 def load_from_json(json_file_path: str) -> Any:
     """Load the data from the specified file using JSON format.

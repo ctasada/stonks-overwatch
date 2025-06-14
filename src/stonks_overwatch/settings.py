@@ -86,7 +86,7 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            os.path.join(BASE_DIR, 'templates'),
+            os.path.join(BASE_DIR, "templates"),
         ],
         "APP_DIRS": True,
         "OPTIONS": {
@@ -98,14 +98,14 @@ TEMPLATES = [
             # With the flattening of the prj structure, the auto register doesn't seem to work anymore.
             "libraries": {
                 "custom_tags": "stonks_overwatch.templatetags.custom_tags",
-            }
+            },
         },
     },
 ]
 
 WSGI_APPLICATION = "stonks_overwatch.wsgi.application"
 
-SESSION_COOKIE_AGE = 180 * 60 # 180 minutes in seconds
+SESSION_COOKIE_AGE = 180 * 60  # 180 minutes in seconds
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -137,15 +137,13 @@ DATABASES = {
 }
 # With the flattening of the prj structure, the auto register doesn't seem to work anymore.
 MIGRATION_MODULES = {
-    'stonks_overwatch': 'stonks_overwatch.migrations',
+    "stonks_overwatch": "stonks_overwatch.migrations",
 }
 
 TEST_RUNNER = "django.test.runner.DiscoverRunner"
 
 # Needed because the AUTH framework is not used in this project
-REST_FRAMEWORK = {
-    "UNAUTHENTICATED_USER": None
-}
+REST_FRAMEWORK = {"UNAUTHENTICATED_USER": None}
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
@@ -164,10 +162,7 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "staticfiles"),
-    os.path.join(PROJECT_PATH, "src", "icons")
-]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "staticfiles"), os.path.join(PROJECT_PATH, "src", "icons")]
 
 file_path = os.path.abspath(__file__)
 

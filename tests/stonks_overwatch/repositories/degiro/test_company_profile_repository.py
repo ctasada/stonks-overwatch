@@ -7,6 +7,7 @@ from tests.stonks_overwatch.repositories.base_repository_test import BaseReposit
 
 import pytest
 
+
 @pytest.mark.django_db
 class TestCompanyProfileRepository(BaseRepositoryTest):
     """Tests for the CompanyProfileRepository class.
@@ -15,6 +16,7 @@ class TestCompanyProfileRepository(BaseRepositoryTest):
     - Microsoft Corp (MSFT) with ISIN US5949181045
     - Company profile with 228,000 employees
     """
+
     model_class = DeGiroCompanyProfile
     data_file = "tests/resources/stonks_overwatch/repositories/degiro/company_profile_data.json"
 
@@ -34,10 +36,7 @@ class TestCompanyProfileRepository(BaseRepositoryTest):
         """Test retrieving raw company profile data."""
         # Test existing company profile
         company_profile = CompanyProfileRepository.get_company_profile_raw("US5949181045")
-        self.assert_dict_contains(
-            company_profile["data"],
-            employees=228000
-        )
+        self.assert_dict_contains(company_profile["data"], employees=228000)
 
         # Test non-existent company profile
         company_profile = CompanyProfileRepository.get_company_profile_raw("US04546C1062")

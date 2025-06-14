@@ -15,8 +15,10 @@ from stonks_overwatch.core.interfaces.portfolio_service import PortfolioServiceI
 from stonks_overwatch.core.interfaces.transaction_service import TransactionServiceInterface
 from stonks_overwatch.utils.core.singleton import singleton
 
+
 class ServiceType(Enum):
     """Enumeration of available service types."""
+
     PORTFOLIO = "portfolio"
     TRANSACTION = "transaction"
     DEPOSIT = "deposit"

@@ -8,8 +8,8 @@ from stonks_overwatch.services.brokers.yfinance.services.market_data_service imp
 from stonks_overwatch.services.models import DailyValue, PortfolioEntry, PortfolioId, TotalPortfolio
 from stonks_overwatch.utils.domain.constants import ProductType, Sector
 
-class PortfolioAggregatorService(BaseAggregator):
 
+class PortfolioAggregatorService(BaseAggregator):
     def __init__(self):
         super().__init__(ServiceType.PORTFOLIO)
         self.yfinance = YFinance()
@@ -19,9 +19,7 @@ class PortfolioAggregatorService(BaseAggregator):
 
         # Use the new helper method to collect and merge portfolio data
         portfolio = self._collect_and_merge_lists(
-            selected_portfolio,
-            "get_portfolio",
-            merger_func=DataMerger.merge_portfolio_entries
+            selected_portfolio, "get_portfolio", merger_func=DataMerger.merge_portfolio_entries
         )
 
         # Apply business-specific enrichment logic
@@ -43,12 +41,13 @@ class PortfolioAggregatorService(BaseAggregator):
             elif entry.product_type == ProductType.ETF:
                 entry.sector = Sector.ETF
 
-            if ((entry.sector == Sector.UNKNOWN or entry.industry == 'Unknown')
-                    and entry.product_type in [ProductType.STOCK]):
+            if (entry.sector == Sector.UNKNOWN or entry.industry == "Unknown") and entry.product_type in [
+                ProductType.STOCK
+            ]:
                 sector, industry = self.yfinance.get_sector_industry(entry.symbol)
                 if entry.sector == Sector.UNKNOWN:
                     entry.sector = sector
-                if entry.industry == 'Unknown':
+                if entry.industry == "Unknown":
                     entry.industry = industry
 
             if entry.sector == Sector.UNKNOWN:
@@ -65,7 +64,7 @@ class PortfolioAggregatorService(BaseAggregator):
             "get_portfolio_total",
             expected_type=TotalPortfolio,
             merger_func=DataMerger.merge_total_portfolios,
-            portfolio=None
+            portfolio=None,
         )
 
         # If we got a merged result, return it; otherwise return empty portfolio
@@ -88,9 +87,7 @@ class PortfolioAggregatorService(BaseAggregator):
 
         # Use the new helper method to collect and merge historical data
         return self._collect_and_merge_lists(
-            selected_portfolio,
-            "calculate_historical_value",
-            merger_func=DataMerger.merge_historical_values
+            selected_portfolio, "calculate_historical_value", merger_func=DataMerger.merge_historical_values
         )
 
     def aggregate_data(self, selected_portfolio: PortfolioId, **kwargs) -> List[PortfolioEntry]:

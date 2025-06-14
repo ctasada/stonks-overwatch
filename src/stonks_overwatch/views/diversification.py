@@ -11,6 +11,7 @@ from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.domain.constants import ProductType, Sector
 
+
 class Diversification(View):
     logger = StonksLogger.get_logger("stonks_overwatch.dashboard.views", "VIEW|DIVERSIFICATION")
 
@@ -112,7 +113,7 @@ class Diversification(View):
                     symbol = stock.sector.to_logo() if stock.sector else Sector.UNKNOWN.to_logo()
                     product_type = "sector"
                 else:
-                    name =  getattr(stock, field_name)
+                    name = getattr(stock, field_name)
 
                 value = 0.0
                 portfolio_size = 0.0

@@ -10,6 +10,7 @@ from typing import List
 
 from stonks_overwatch.services.models import Transaction
 
+
 class TransactionServiceInterface(ABC):
     """
     Interface for transaction service implementations.

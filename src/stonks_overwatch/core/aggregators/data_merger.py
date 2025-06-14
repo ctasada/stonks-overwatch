@@ -11,6 +11,7 @@ from stonks_overwatch.services.models import DailyValue, PortfolioEntry, TotalPo
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.domain.constants import ProductType
 
+
 class DataMerger:
     """
     Utility class for merging financial data from multiple broker sources.
@@ -73,7 +74,7 @@ class DataMerger:
             symbol=entry1.symbol,
             isin=entry1.isin or entry2.isin,
             sector=entry1.sector or entry2.sector,
-            industry=entry1.industry if entry1.industry != 'Unknown' else entry2.industry,
+            industry=entry1.industry if entry1.industry != "Unknown" else entry2.industry,
             category=entry1.category or entry2.category,
             exchange=entry1.exchange or entry2.exchange,
             country=entry1.country or entry2.country,
@@ -103,12 +104,11 @@ class DataMerger:
             total_shares = entry1.shares + entry2.shares
             if total_shares > 0:
                 weighted_break_even = (
-                    (entry1.break_even_price or 0) * entry1.shares +
-                    (entry2.break_even_price or 0) * entry2.shares
+                    (entry1.break_even_price or 0) * entry1.shares + (entry2.break_even_price or 0) * entry2.shares
                 ) / total_shares
                 weighted_base_break_even = (
-                    (entry1.base_currency_break_even_price or 0) * entry1.shares +
-                    (entry2.base_currency_break_even_price or 0) * entry2.shares
+                    (entry1.base_currency_break_even_price or 0) * entry1.shares
+                    + (entry2.base_currency_break_even_price or 0) * entry2.shares
                 ) / total_shares
 
                 merged_entry.break_even_price = weighted_break_even
@@ -138,10 +138,7 @@ class DataMerger:
             merged[date] += value
 
         # Convert back to DailyValue objects and sort by date
-        merged_values = [
-            DailyValue(x=date, y=value)
-            for date, value in sorted(merged.items())
-        ]
+        merged_values = [DailyValue(x=date, y=value) for date, value in sorted(merged.items())]
 
         return merged_values
 

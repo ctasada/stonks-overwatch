@@ -11,18 +11,14 @@ from stonks_overwatch.utils.domain.constants import ProductType
 
 import pytest
 
+
 class TestDataMerger:
     """Test cases for DataMerger."""
 
     def test_merge_portfolio_entries_different_symbols(self):
         """Test merging portfolio entries with different symbols."""
         entry1 = PortfolioEntry(
-            symbol="AAPL",
-            name="Apple Inc.",
-            shares=10.0,
-            price=150.0,
-            value=1500.0,
-            product_type=ProductType.STOCK
+            symbol="AAPL", name="Apple Inc.", shares=10.0, price=150.0, value=1500.0, product_type=ProductType.STOCK
         )
 
         entry2 = PortfolioEntry(
@@ -31,7 +27,7 @@ class TestDataMerger:
             shares=5.0,
             price=2800.0,
             value=14000.0,
-            product_type=ProductType.STOCK
+            product_type=ProductType.STOCK,
         )
 
         # Merge entries
@@ -56,7 +52,7 @@ class TestDataMerger:
             is_open=True,
             unrealized_gain=100.0,
             realized_gain=50.0,
-            total_costs=1400.0
+            total_costs=1400.0,
         )
 
         entry2 = PortfolioEntry(
@@ -70,7 +66,7 @@ class TestDataMerger:
             is_open=True,
             unrealized_gain=50.0,
             realized_gain=25.0,
-            total_costs=700.0
+            total_costs=700.0,
         )
 
         # Merge entries
@@ -96,15 +92,11 @@ class TestDataMerger:
             name="Cash Balance EUR",
             value=1000.0,
             base_currency_value=1000.0,
-            product_type=ProductType.CASH
+            product_type=ProductType.CASH,
         )
 
         cash2 = PortfolioEntry(
-            symbol="EUR",
-            name="Cash Balance EUR",
-            value=500.0,
-            base_currency_value=500.0,
-            product_type=ProductType.CASH
+            symbol="EUR", name="Cash Balance EUR", value=500.0, base_currency_value=500.0, product_type=ProductType.CASH
         )
 
         # Merge entries
@@ -138,7 +130,7 @@ class TestDataMerger:
             break_even_price=140.0,
             base_currency_break_even_price=140.0,
             is_open=True,
-            product_type=ProductType.STOCK
+            product_type=ProductType.STOCK,
         )
 
         entry2 = PortfolioEntry(
@@ -147,7 +139,7 @@ class TestDataMerger:
             break_even_price=160.0,
             base_currency_break_even_price=160.0,
             is_open=True,
-            product_type=ProductType.STOCK
+            product_type=ProductType.STOCK,
         )
 
         # Merge entries
@@ -189,7 +181,7 @@ class TestDataMerger:
             total_cash=500.0,
             current_value=15000.0,
             total_roi=10.0,
-            total_deposit_withdrawal=14000.0
+            total_deposit_withdrawal=14000.0,
         )
 
         portfolio2 = TotalPortfolio(
@@ -198,7 +190,7 @@ class TestDataMerger:
             total_cash=200.0,
             current_value=8000.0,
             total_roi=8.0,
-            total_deposit_withdrawal=7500.0
+            total_deposit_withdrawal=7500.0,
         )
 
         # Merge portfolios

@@ -6,6 +6,7 @@ from django.apps import AppConfig
 
 from stonks_overwatch.utils.core.logger import StonksLogger
 
+
 class StonksOverwatchConfig(AppConfig):
     logger = StonksLogger.get_logger("stonks_overwatch.config", "[MAIN]")
     default_auto_field = "django.db.models.BigAutoField"
@@ -13,7 +14,7 @@ class StonksOverwatchConfig(AppConfig):
 
     def ready(self):
         # Guarantee that the Jobs are initialized only once
-        if os.environ.get('RUN_MAIN'):
+        if os.environ.get("RUN_MAIN"):
             self.logger.info("Stonks Overwatch ready - RUN MAIN")
             self.show_env_vars()
 
@@ -23,6 +24,7 @@ class StonksOverwatchConfig(AppConfig):
             # Register broker services with the core framework
             try:
                 from stonks_overwatch.core.registry_setup import register_broker_services
+
                 register_broker_services()
                 self.logger.info("Broker services registered successfully")
             except Exception as e:
@@ -30,6 +32,7 @@ class StonksOverwatchConfig(AppConfig):
 
             # Schedule automatic tasks
             from stonks_overwatch.jobs.jobs_scheduler import JobsScheduler
+
             JobsScheduler.start()
 
     def show_env_vars(self):
@@ -53,5 +56,6 @@ class StonksOverwatchConfig(AppConfig):
     def close_connections(self):
         # Ensure scheduler is shut down properly
         from stonks_overwatch.jobs.jobs_scheduler import JobsScheduler
+
         self.logger.info("Stonks Overwatch - Stopping JobsScheduler")
         JobsScheduler.stop()

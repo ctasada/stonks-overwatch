@@ -13,6 +13,7 @@ from stonks_overwatch.services.models import Dividend, DividendType
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.domain.constants import ProductType
 
+
 class DividendsService(DividendServiceInterface):
     logger = StonksLogger.get_logger("stonks_overwatch.dividends_service", "[DEGIRO|DIVIDENDS]")
 
@@ -64,14 +65,14 @@ class DividendsService(DividendServiceInterface):
 
                 if key not in dividend_groups:
                     dividend_groups[key] = {
-                        'payment_date': transaction.datetime,
-                        'stock_name': transaction.stock_name,
-                        'stock_symbol': transaction.stock_symbol,
-                        'currency': currency,
-                        'total_change': 0.0
+                        "payment_date": transaction.datetime,
+                        "stock_name": transaction.stock_name,
+                        "stock_symbol": transaction.stock_symbol,
+                        "currency": currency,
+                        "total_change": 0.0,
                     }
 
-                dividend_groups[key]['total_change'] += transaction_change
+                dividend_groups[key]["total_change"] += transaction_change
 
         # Convert grouped data to Dividend objects
         dividends = []
@@ -79,11 +80,11 @@ class DividendsService(DividendServiceInterface):
             dividends.append(
                 Dividend(
                     dividend_type=DividendType.PAID,
-                    payment_date=group_data['payment_date'],
-                    stock_name=group_data['stock_name'],
-                    stock_symbol=group_data['stock_symbol'],
-                    currency=group_data['currency'],
-                    change=group_data['total_change'],
+                    payment_date=group_data["payment_date"],
+                    stock_name=group_data["stock_name"],
+                    stock_symbol=group_data["stock_symbol"],
+                    currency=group_data["currency"],
+                    change=group_data["total_change"],
                 )
             )
 
@@ -111,32 +112,32 @@ class DividendsService(DividendServiceInterface):
                 key = (payment_date.date(), stock_symbol)
 
                 amount = float(payment["amount"])
-                currency = payment['currency']
+                currency = payment["currency"]
                 if currency != self.base_currency:
                     amount = self.currency_service.convert(amount, currency, self.base_currency)
                     currency = self.base_currency
 
                 if key not in dividend_groups:
                     dividend_groups[key] = {
-                        'payment_date': payment_date,
-                        'stock_name': stock_name,
-                        'stock_symbol': stock_symbol,
-                        'currency': currency,
-                        'total_amount': 0.0
+                        "payment_date": payment_date,
+                        "stock_name": stock_name,
+                        "stock_symbol": stock_symbol,
+                        "currency": currency,
+                        "total_amount": 0.0,
                     }
 
-                dividend_groups[key]['total_amount'] += amount
+                dividend_groups[key]["total_amount"] += amount
 
             # Convert grouped data to Dividend objects
             for group_data in dividend_groups.values():
                 result.append(
                     Dividend(
                         dividend_type=DividendType.ANNOUNCED,
-                        payment_date=group_data['payment_date'],
-                        stock_name=group_data['stock_name'],
-                        stock_symbol=group_data['stock_symbol'],
-                        currency=group_data['currency'],
-                        change=group_data['total_amount'],
+                        payment_date=group_data["payment_date"],
+                        stock_name=group_data["stock_name"],
+                        stock_symbol=group_data["stock_symbol"],
+                        currency=group_data["currency"],
+                        change=group_data["total_amount"],
                     )
                 )
 
@@ -161,7 +162,7 @@ class DividendsService(DividendServiceInterface):
                     else:
                         self.logger.warning(f"No dividend amount found for {entry.name} ({entry.isin})")
 
-                    currency = forecasted_dividends['currency']
+                    currency = forecasted_dividends["currency"]
                     if currency != self.base_currency:
                         amount = self.currency_service.convert(amount, currency, self.base_currency)
                         currency = self.base_currency
@@ -170,7 +171,7 @@ class DividendsService(DividendServiceInterface):
                         Dividend(
                             dividend_type=DividendType.FORECASTED,
                             payment_date=forecasted_dividends["paymentDate"],
-                            ex_dividend_date=forecasted_dividends['exDividendDate'],
+                            ex_dividend_date=forecasted_dividends["exDividendDate"],
                             stock_name=entry.name,
                             stock_symbol=entry.symbol,
                             currency=currency,

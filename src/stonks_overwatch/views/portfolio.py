@@ -9,6 +9,7 @@ from stonks_overwatch.services.utilities.session_manager import SessionManager
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.domain.constants import ProductType
 
+
 class PositionStatus(Enum):
     OPEN = "OPEN"
     CLOSED = "CLOSED"
@@ -25,6 +26,7 @@ class PositionStatus(Enum):
             return PositionStatus.ALL
 
         return None
+
 
 class Portfolio(View):
     logger = StonksLogger.get_logger("stonks_overwatch.dashboard.views", "[VIEW|PORTFOLIO]")
