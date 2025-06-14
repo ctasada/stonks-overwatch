@@ -198,6 +198,9 @@ class Dividends(View):
                 {
                     "name": key,
                     "value": dividends[key]["value"],
+                    "formatted_value": LocalizationUtility.format_money_value(
+                        value=dividends[key]["value"], currency=self.base_currency
+                    ),
                     "size": dividends_size,
                     "formatted_size": f"{dividends_size:.2%}",
                     "weight": (dividends[key]["dividends_size"] / max_percentage) * 100,
