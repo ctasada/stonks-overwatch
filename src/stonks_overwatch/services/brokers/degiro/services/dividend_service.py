@@ -69,10 +69,14 @@ class DividendsService(DividendServiceInterface):
                         "stock_name": transaction.stock_name,
                         "stock_symbol": transaction.stock_symbol,
                         "currency": currency,
-                        "total_change": 0.0,
+                        "amount": 0.0,
+                        "taxes": 0.0,
                     }
 
-                dividend_groups[key]["total_change"] += transaction_change
+                if transaction_change > 0:
+                    dividend_groups[key]["amount"] += transaction_change
+                else:
+                    dividend_groups[key]["taxes"] += abs(transaction_change)
 
         # Convert grouped data to Dividend objects
         dividends = []
@@ -84,7 +88,8 @@ class DividendsService(DividendServiceInterface):
                     stock_name=group_data["stock_name"],
                     stock_symbol=group_data["stock_symbol"],
                     currency=group_data["currency"],
-                    change=group_data["total_change"],
+                    amount=group_data["amount"],
+                    taxes=group_data["taxes"],
                 )
             )
 
@@ -123,10 +128,14 @@ class DividendsService(DividendServiceInterface):
                         "stock_name": stock_name,
                         "stock_symbol": stock_symbol,
                         "currency": currency,
-                        "total_amount": 0.0,
+                        "amount": 0.0,
+                        "taxes": 0.0,
                     }
 
-                dividend_groups[key]["total_amount"] += amount
+                if amount > 0:
+                    dividend_groups[key]["amount"] += amount
+                else:
+                    dividend_groups[key]["taxes"] += abs(amount)
 
             # Convert grouped data to Dividend objects
             for group_data in dividend_groups.values():
@@ -137,7 +146,8 @@ class DividendsService(DividendServiceInterface):
                         stock_name=group_data["stock_name"],
                         stock_symbol=group_data["stock_symbol"],
                         currency=group_data["currency"],
-                        change=group_data["total_amount"],
+                        amount=group_data["amount"],
+                        taxes=group_data["taxes"],
                     )
                 )
 
@@ -175,7 +185,7 @@ class DividendsService(DividendServiceInterface):
                             stock_name=entry.name,
                             stock_symbol=entry.symbol,
                             currency=currency,
-                            change=amount,
+                            amount=amount,
                         )
                     )
 
