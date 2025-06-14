@@ -2,7 +2,8 @@ from functools import wraps
 from threading import Lock
 from typing import Any, TypeVar
 
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 def singleton(cls: type[T]) -> type[T]:
     """
@@ -34,7 +35,7 @@ def singleton(cls: type[T]) -> type[T]:
     lock = Lock()
 
     @wraps(cls.__new__)
-    def __new__(cls_: type[T], *args: Any, **kwargs: Any) -> T: # noqa: N807
+    def __new__(cls_: type[T], *args: Any, **kwargs: Any) -> T:  # noqa: N807
         """
         Override of __new__ to implement the singleton pattern.
 
@@ -61,7 +62,7 @@ def singleton(cls: type[T]) -> type[T]:
             return instance
 
     @wraps(cls.__init__)
-    def __init__(self: T, *args: Any, **kwargs: Any) -> None: # noqa: N807
+    def __init__(self: T, *args: Any, **kwargs: Any) -> None:  # noqa: N807
         """
         Override of __init__ to prevent multiple initializations.
 
@@ -78,7 +79,7 @@ def singleton(cls: type[T]) -> type[T]:
             Subsequent calls to __init__ on the same instance will be ignored
             to prevent re-initialization of the singleton.
         """
-        if not hasattr(self, '_initialized'):
+        if not hasattr(self, "_initialized"):
             original_init(self, *args, **kwargs)
             self._initialized = True
 

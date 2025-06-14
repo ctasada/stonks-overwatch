@@ -5,6 +5,7 @@ The script is used to update or re-create the DB with all the necessary data fro
 Usage:
     poetry run python ./scripts/generate_demo_db.py --help
 """
+
 import logging
 import os
 import random
@@ -25,10 +26,10 @@ from stonks_overwatch.utils.core.datetime import DateTimeUtility
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 
 # Add the src directory to the Python path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
 
 # Set up Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'stonks_overwatch.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "stonks_overwatch.settings")
 os.environ["DEMO_MODE"] = "True"
 django.setup()
 
@@ -135,7 +136,7 @@ LIST_OF_PRODUCTS = {
         "symbol": "DIS",
         "productType": "STOCK",
         "currency": "USD",
-    }
+    },
 }
 
 CURRENCY_PRODUCT_LIST = {
@@ -148,6 +149,7 @@ CURRENCY_PRODUCT_LIST = {
         "currency": "USD",
     }
 }
+
 
 class DBDemoGenerator:
     """Class to generate a demo DB with random data."""
@@ -184,9 +186,9 @@ class DBDemoGenerator:
 
         # Generate random values
         # FIXME: Should randomly sell products. Only if already bought and we have enough balance
-        buysell = "B" # Buy or Sell (B or S)
+        buysell = "B"  # Buy or Sell (B or S)
 
-        trading_venue : str = ""
+        trading_venue: str = ""
         for exchange in self.products_config["exchanges"]:
             if exchange["id"] == product.exchange_id:
                 trading_venue = exchange["tradingVenue"]
@@ -197,10 +199,7 @@ class DBDemoGenerator:
 
         value = quotations[date.strftime(LocalizationUtility.DATE_FORMAT)]
         change_in_base_currency = self.currency_converter.convert(
-            amount=value,
-            currency=currency,
-            new_currency="EUR",
-            fx_date=date.date()
+            amount=value, currency=currency, new_currency="EUR", fx_date=date.date()
         )
         max_quantity = int(abs(balance) // abs(change_in_base_currency))
 
@@ -210,7 +209,7 @@ class DBDemoGenerator:
 
         quantity = random.randint(1, max_quantity)
         change = value * quantity
-        fees = -1.00 # Hardcoded fees for the transaction
+        fees = -1.00  # Hardcoded fees for the transaction
         if buysell == "B":
             change = -change
 
@@ -219,10 +218,7 @@ class DBDemoGenerator:
         change_in_base_currency = change_in_base_currency * quantity
         if currency != "EUR":
             exchange_rate = self.currency_converter.convert(
-                amount=1.0,
-                currency=currency,
-                new_currency="EUR",
-                fx_date=date.date()
+                amount=1.0, currency=currency, new_currency="EUR", fx_date=date.date()
             )
             auto_fx_fee = -1.00 * exchange_rate
 
@@ -230,7 +226,7 @@ class DBDemoGenerator:
 
         self.update_dividends(product_id, quantity, transaction_date)
 
-        last_transaction = DeGiroTransactions.objects.order_by('-id').first()
+        last_transaction = DeGiroTransactions.objects.order_by("-id").first()
         DeGiroTransactions.objects.create(
             id=last_transaction.id + 1 if last_transaction else 1,
             product_id=product_id,
@@ -285,7 +281,7 @@ class DBDemoGenerator:
             product_id=product_id,
             change=change_in_base_currency,
             exchange_rate=exchange_rate,
-            order_id=order_id
+            order_id=order_id,
         )
 
         return balance - change_in_base_currency
@@ -325,7 +321,7 @@ class DBDemoGenerator:
             product_id=None,
             change=amount,
             exchange_rate=None,
-            order_id=None
+            order_id=None,
         )
 
     def create_products_info(self, start_date: str) -> None:
@@ -338,33 +334,33 @@ class DBDemoGenerator:
             try:
                 DeGiroProductInfo.objects.create(
                     id=int(row["id"]),
-                    name= row["name"],
-                    isin= row["isin"],
-                    symbol= row["symbol"],
-                    contract_size= row["contractSize"],
-                    product_type= row["productType"],
-                    product_type_id= row["productTypeId"],
-                    tradable= row["tradable"],
-                    category= row["category"],
-                    currency= row["currency"],
-                    active= row["active"],
-                    exchange_id= row["exchangeId"],
-                    only_eod_prices= row["onlyEodPrices"],
-                    is_shortable= row.get("isShortable", False),
-                    feed_quality= row.get("feedQuality"),
-                    order_book_depth= row.get("orderBookDepth"),
-                    vwd_identifier_type= row.get("vwdIdentifierType"),
-                    vwd_id= row.get("vwdId"),
-                    quality_switchable= row.get("qualitySwitchable"),
-                    quality_switch_free= row.get("qualitySwitchFree"),
-                    vwd_module_id= row.get("vwdModuleId"),
-                    feed_quality_secondary= row.get("feedQualitySecondary"),
-                    order_book_depth_secondary= row.get("orderBookDepthSecondary"),
-                    vwd_identifier_type_secondary= row.get("vwdIdentifierTypeSecondary"),
-                    vwd_id_secondary= row.get("vwdIdSecondary"),
-                    quality_switchable_secondary= row.get("qualitySwitchableSecondary"),
-                    quality_switch_free_secondary= row.get("qualitySwitchFreeSecondary"),
-                    vwd_module_id_secondary= row.get("vwdModuleIdSecondary"),
+                    name=row["name"],
+                    isin=row["isin"],
+                    symbol=row["symbol"],
+                    contract_size=row["contractSize"],
+                    product_type=row["productType"],
+                    product_type_id=row["productTypeId"],
+                    tradable=row["tradable"],
+                    category=row["category"],
+                    currency=row["currency"],
+                    active=row["active"],
+                    exchange_id=row["exchangeId"],
+                    only_eod_prices=row["onlyEodPrices"],
+                    is_shortable=row.get("isShortable", False),
+                    feed_quality=row.get("feedQuality"),
+                    order_book_depth=row.get("orderBookDepth"),
+                    vwd_identifier_type=row.get("vwdIdentifierType"),
+                    vwd_id=row.get("vwdId"),
+                    quality_switchable=row.get("qualitySwitchable"),
+                    quality_switch_free=row.get("qualitySwitchFree"),
+                    vwd_module_id=row.get("vwdModuleId"),
+                    feed_quality_secondary=row.get("feedQualitySecondary"),
+                    order_book_depth_secondary=row.get("orderBookDepthSecondary"),
+                    vwd_identifier_type_secondary=row.get("vwdIdentifierTypeSecondary"),
+                    vwd_id_secondary=row.get("vwdIdSecondary"),
+                    quality_switchable_secondary=row.get("qualitySwitchableSecondary"),
+                    quality_switch_free_secondary=row.get("qualitySwitchFreeSecondary"),
+                    vwd_module_id_secondary=row.get("vwdModuleIdSecondary"),
                 )
             except Exception as error:
                 logging.error(f"Cannot import row: {row}")
@@ -386,11 +382,14 @@ class DBDemoGenerator:
 
             # Update the data ONLY if we get something back from DeGiro
             if quotes_dict:
-                DeGiroProductQuotation.objects.update_or_create(id=int(key), defaults={
-                    "interval": Interval.P1D,
-                    "last_import": LocalizationUtility.now(),
-                    "quotations": quotes_dict
-                })
+                DeGiroProductQuotation.objects.update_or_create(
+                    id=int(key),
+                    defaults={
+                        "interval": Interval.P1D,
+                        "last_import": LocalizationUtility.now(),
+                        "quotations": quotes_dict,
+                    },
+                )
             else:
                 logging.info(f"No quotes found for '{symbol}'({key}): {row}")
 
@@ -402,7 +401,7 @@ class DBDemoGenerator:
             DeGiroCompanyProfile.objects.update_or_create(isin=row["isin"], defaults={"data": company_profile})
 
     def create_transactions(
-            self, start_date: datetime, num_transactions: int, balance: float, monthly_deposit: float
+        self, start_date: datetime, num_transactions: int, balance: float, monthly_deposit: float
     ) -> None:
         end_date = datetime.now()
         # Calculate time delta between start and end date
@@ -493,7 +492,7 @@ class DBDemoGenerator:
                     product_id=product_id,
                     change=amount,
                     exchange_rate=None,
-                    order_id=None
+                    order_id=None,
                 )
 
     def generate(self, from_date: str, num_transactions: int, initial_deposit: float, monthly_deposit: float) -> None:
@@ -532,6 +531,7 @@ def init() -> None:
     # Configure logging
     logging.basicConfig(level=logging.INFO, format=_format)
 
+
 def parse_args() -> Namespace:
     """Parse command line arguments.
     ### Returns:
@@ -546,7 +546,7 @@ def parse_args() -> Namespace:
 
         Supported brokers are:
             * DeGiro
-        """)
+        """),
     )
 
     parser.add_argument(
@@ -577,8 +577,8 @@ def parse_args() -> Namespace:
         help="Monthly deposit in EUR",
     )
 
-
     return parser.parse_args()
+
 
 def main():
     init()
@@ -592,6 +592,7 @@ def main():
     """Main function to run the script."""
     generator = DBDemoGenerator()
     generator.generate(args.start_date, args.num_transactions, args.initial_deposit, args.monthly_deposit)
+
 
 if __name__ == "__main__":
     main()

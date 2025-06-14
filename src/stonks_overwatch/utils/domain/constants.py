@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class ProductType(Enum):
     STOCK = "Stock"
     ETF = "ETF"
@@ -22,6 +23,7 @@ class ProductType(Enum):
 
         return ProductType.UNKNOWN
 
+
 class Sector(Enum):
     TECHNOLOGY = "Technology"
     FINANCIAL_SERVICES = "Financial Services"
@@ -41,7 +43,7 @@ class Sector(Enum):
     ETF = "ETF"
 
     @staticmethod
-    def from_str(label: str|None):  # noqa: C901
+    def from_str(label: str | None):  # noqa: C901
         if not label:
             return Sector.UNKNOWN
 
@@ -77,7 +79,7 @@ class Sector(Enum):
 
         raise ValueError(f"Unknown sector: {label}")
 
-    def to_logo(self) -> str: # noqa: C901
+    def to_logo(self) -> str:  # noqa: C901
         if self == Sector.TECHNOLOGY:
             return "microchip"
         elif self == Sector.FINANCIAL_SERVICES:

@@ -7,6 +7,7 @@ from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import Bitv
 from stonks_overwatch.services.models import Transaction
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 
+
 class TransactionsService(TransactionServiceInterface):
     TIME_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
     TIME_FORMAT = "%H:%M:%S"
@@ -37,20 +38,20 @@ class TransactionsService(TransactionServiceInterface):
                     transaction_type=self.__transaction_type(transaction["type"]),
                     price=LocalizationUtility.format_money_value(
                         transaction.get("priceAmount", 0.0),
-                        currency=transaction.get("priceCurrency", self.base_currency)
+                        currency=transaction.get("priceCurrency", self.base_currency),
                     ),
                     quantity=transaction["receivedAmount"],
                     total=LocalizationUtility.format_money_value(
                         value=transaction.get("sentAmount", 0.0),
-                        currency=transaction.get("sentCurrency", self.base_currency)
+                        currency=transaction.get("sentCurrency", self.base_currency),
                     ),
                     total_in_base_currency=LocalizationUtility.format_money_value(
                         value=transaction.get("sentAmount", 0.0),
-                        currency=transaction.get("sentCurrency", self.base_currency)
+                        currency=transaction.get("sentCurrency", self.base_currency),
                     ),
                     fees=LocalizationUtility.format_money_value(
                         value=transaction.get("feesAmount", 0.0),
-                        currency=transaction.get("feesCurrency", self.base_currency)
+                        currency=transaction.get("feesCurrency", self.base_currency),
                     ),
                 )
             )
@@ -62,7 +63,7 @@ class TransactionsService(TransactionServiceInterface):
         if type == "buy":
             return ""
 
-        return  type.capitalize()
+        return type.capitalize()
 
     @staticmethod
     def __convert_buy_sell(buy_sell: str) -> str:
@@ -72,7 +73,6 @@ class TransactionsService(TransactionServiceInterface):
             return "Sell"
 
         return "Unknown"
-
 
     @staticmethod
     def format_date(value: str) -> str:

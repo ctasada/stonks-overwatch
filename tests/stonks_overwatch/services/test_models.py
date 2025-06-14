@@ -16,6 +16,7 @@ from stonks_overwatch.utils.domain.constants import ProductType, Sector
 
 import pytest
 
+
 def test_portfolio_ids():
     assert PortfolioId.values() == [PortfolioId.ALL, PortfolioId.DEGIRO, PortfolioId.BITVAVO]
 
@@ -27,6 +28,7 @@ def test_portfolio_ids():
         assert as_dict["logo"] == portfolio_id.logo
 
     assert PortfolioId.from_id("XXX") == PortfolioId.ALL
+
 
 def test_default_account_overview():
     model = AccountOverview()
@@ -43,6 +45,7 @@ def test_default_account_overview():
     assert model.type_str() == ""
     assert model.formated_change() == ""
 
+
 def test_account_overview():
     now = datetime.now()
     model = AccountOverview(
@@ -53,7 +56,7 @@ def test_account_overview():
         description="Bought some stocks",
         type="BUY_TRANSACTION",
         currency="EUR",
-        change=-14.36
+        change=-14.36,
     )
 
     assert model.date() == now.strftime("%Y-%m-%d")
@@ -66,17 +69,20 @@ def test_account_overview():
     model.change = 0
     assert model.formated_change() == ""
 
+
 def test_country_by_iso_code():
     country = Country("NL")
     assert country.iso_code == "NL"
     assert country.get_name() == "Netherlands"
     assert country.get_flag() == "🇳🇱"
 
+
 def test_country_by_name():
     country = Country("Netherlands")
     assert country.iso_code == "NL"
     assert country.get_name() == "Netherlands"
     assert country.get_flag() == "🇳🇱"
+
 
 def test_default_portfolio_entry():
     model = PortfolioEntry()
@@ -105,6 +111,7 @@ def test_default_portfolio_entry():
 
     with pytest.raises(AttributeError):
         model.to_dict()
+
 
 def test_portfolio_entry():
     model = PortfolioEntry(
@@ -165,7 +172,7 @@ def test_cash_portfolio_entry():
         is_open=True,
         value=100.0,
         base_currency="EUR",
-        base_currency_value=100.0
+        base_currency_value=100.0,
     )
 
     as_dict = model.to_dict()
@@ -174,6 +181,7 @@ def test_cash_portfolio_entry():
     assert as_dict["sector"] == ""
     assert as_dict["industry"] == ""
     assert as_dict["category"] == ""
+
 
 def test_deposit():
     model = Deposit(
@@ -187,6 +195,7 @@ def test_deposit():
     assert model.datetime_as_date() == "2024-09-16"
     assert model.change_formatted() == "€ 100.00"
 
+
 def test_dataclass_to_dict():
     model = TotalPortfolio(
         base_currency="EUR",
@@ -198,11 +207,12 @@ def test_dataclass_to_dict():
     )
 
     as_dict = dataclass_to_dict(model)
-    assert as_dict['total_pl_formatted'] == "€ 1,000.00"
-    assert as_dict['total_cash_formatted'] == "€ 50.00"
-    assert as_dict['current_value_formatted'] == "€ 10,000.00"
-    assert as_dict['total_roi_formatted'] == "10.00%"
-    assert as_dict['total_deposit_withdrawal_formatted'] == "€ 9,000.00"
+    assert as_dict["total_pl_formatted"] == "€ 1,000.00"
+    assert as_dict["total_cash_formatted"] == "€ 50.00"
+    assert as_dict["current_value_formatted"] == "€ 10,000.00"
+    assert as_dict["total_roi_formatted"] == "10.00%"
+    assert as_dict["total_deposit_withdrawal_formatted"] == "€ 9,000.00"
+
 
 def test_dataclass_to_dict_exception():
     with pytest.raises(ValueError):

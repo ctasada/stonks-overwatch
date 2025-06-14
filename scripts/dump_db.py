@@ -25,10 +25,12 @@ from django.db import transaction
 from stonks_overwatch.settings import STONKS_OVERWATCH_DATA_DIR
 from stonks_overwatch.utils.database.db_utils import dump_database
 
+
 def setup_django():
     """Setup Django environment"""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'stonks_overwatch.settings')
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "stonks_overwatch.settings")
     django.setup()
+
 
 def load_database(input_file):
     """Load database content from the JSON file"""
@@ -40,17 +42,20 @@ def load_database(input_file):
 
     if os.path.exists(existing_db_file):
         print(f"Warning: Existing database file '{existing_db_file}' found.")
-        user_choice = (input("Would you like to exit (x), rename (r) or delete (d) the existing database file? " +
-                             "(x/r/d): ").strip().lower())
+        user_choice = (
+            input("Would you like to exit (x), rename (r) or delete (d) the existing database file? " + "(x/r/d): ")
+            .strip()
+            .lower()
+        )
 
-        if user_choice == 'r':
+        if user_choice == "r":
             new_name = input("Enter the new name for the existing database file: ").strip()
             os.rename(existing_db_file, new_name)
             print(f"Database file renamed to '{new_name}'.")
-        elif user_choice == 'd':
+        elif user_choice == "d":
             os.remove(existing_db_file)
             print(f"Database file '{existing_db_file}' deleted.")
-        elif user_choice == 'x':
+        elif user_choice == "x":
             print("Exiting...")
             return
         else:
@@ -64,13 +69,13 @@ def load_database(input_file):
 
     # Load data from a file
     try:
-        with open(input_file, 'r', encoding='utf-8') as f:
+        with open(input_file, "r", encoding="utf-8") as f:
             data = f.read()
 
         # Deserialize and save
         objects_loaded = 0
         with transaction.atomic():
-            for obj in serializers.deserialize('json', data):
+            for obj in serializers.deserialize("json", data):
                 obj.save()
                 objects_loaded += 1
 
@@ -82,18 +87,16 @@ def load_database(input_file):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Django Database Dump/Load Tool')
-    subparsers = parser.add_subparsers(dest='command', help='Available commands')
+    parser = argparse.ArgumentParser(description="Django Database Dump/Load Tool")
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # Dump command
-    dump_parser = subparsers.add_parser('dump', help='Dump database to file')
-    dump_parser.add_argument('--output', '-o', default='db_dump.zip',
-                             help='Output file name (default: db_dump.zip)')
+    dump_parser = subparsers.add_parser("dump", help="Dump database to file")
+    dump_parser.add_argument("--output", "-o", default="db_dump.zip", help="Output file name (default: db_dump.zip)")
 
     # Load command
-    load_parser = subparsers.add_parser('load', help='Load database from file')
-    load_parser.add_argument('--input', '-i', required=True,
-                             help='Input file name')
+    load_parser = subparsers.add_parser("load", help="Load database from file")
+    load_parser.add_argument("--input", "-i", required=True, help="Input file name")
 
     args = parser.parse_args()
 
@@ -104,11 +107,11 @@ def main():
     # Setup Django
     setup_django()
 
-    if args.command == 'dump':
+    if args.command == "dump":
         dump_database(output_file=args.output)
-    elif args.command == 'load':
+    elif args.command == "load":
         load_database(input_file=args.input)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

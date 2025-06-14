@@ -3,13 +3,14 @@ from typing import Optional
 
 from degiro_connector.quotecast.models.chart import Interval
 
+
 class DateTimeUtility:
     """
     A utility class for handling date and time-related operations.
     """
 
     @staticmethod
-    def calculate_interval(date_from: str) -> Optional[Interval]: # noqa: C901
+    def calculate_interval(date_from: str) -> Optional[Interval]:  # noqa: C901
         """
         Calculate the interval between the provided date and today.
 
@@ -67,7 +68,7 @@ class DateTimeUtility:
         return [start_date + timedelta(days=i) for i in range(0, days)]
 
     @staticmethod
-    def convert_interval_to_days(interval: Interval) -> int: # noqa: C901
+    def convert_interval_to_days(interval: Interval) -> int:  # noqa: C901
         """
         Convert an interval into the number of days.
 

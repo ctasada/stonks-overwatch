@@ -13,6 +13,7 @@ from tests.stonks_overwatch.fixtures import TestDeGiroService
 import pytest
 from django.test import TestCase
 
+
 @pytest.mark.django_db
 class TestDepositsService(TestCase):
     def setUp(self):
@@ -72,5 +73,5 @@ class TestDepositsService(TestCase):
         value = self.deposits_service.calculate_cash_account_value()
 
         assert value is not None
-        assert value['2020-03-10'] == 300.0
-        assert value['2024-09-15'] == 250.0
+        assert value["2020-03-10"] == 300.0
+        assert value["2024-09-15"] == 250.0

@@ -10,6 +10,7 @@ from tests.stonks_overwatch.repositories.base_repository_test import BaseReposit
 
 import pytest
 
+
 @pytest.mark.django_db
 class TestDividendsRepository(BaseRepositoryTest):
     model_class = DeGiroUpcomingPayments
@@ -24,7 +25,7 @@ class TestDividendsRepository(BaseRepositoryTest):
 
         self.created_objects = {}
         for key, value in data.items():
-            value["pay_date"]= parse_datetime(value["pay_date"])
+            value["pay_date"] = parse_datetime(value["pay_date"])
             obj = self.model_class.objects.create(**value)
             self.created_objects[key] = obj
 

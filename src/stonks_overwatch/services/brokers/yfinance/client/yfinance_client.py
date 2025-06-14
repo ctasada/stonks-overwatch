@@ -10,30 +10,25 @@ import stonks_overwatch.settings
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.singleton import singleton
 
+
 @dataclass
 class StockSplit:
     date: datetime
     split_ratio: float
 
     def to_dict(self) -> dict:
-        return {
-            "date": self.date.isoformat(),
-            "split_ratio": self.split_ratio
-        }
+        return {"date": self.date.isoformat(), "split_ratio": self.split_ratio}
 
     @classmethod
     def from_dict(cls, split):
-        return cls(
-            date=datetime.fromisoformat(split['date']),
-            split_ratio=split['split_ratio']
-        )
+        return cls(date=datetime.fromisoformat(split["date"]), split_ratio=split["split_ratio"])
 
 
 @singleton
 class YFinanceClient:
     logger = StonksLogger.get_logger("stonks_overwatch.yfinance_client", "[YFINANCE|CLIENT]")
 
-    cache_path = os.path.join(stonks_overwatch.settings.STONKS_OVERWATCH_CACHE_DIR, 'yfinance.cache')
+    cache_path = os.path.join(stonks_overwatch.settings.STONKS_OVERWATCH_CACHE_DIR, "yfinance.cache")
 
     def __init__(self, enable_debug: bool = False):
         if enable_debug:
@@ -49,7 +44,7 @@ class YFinanceClient:
         self.logger.debug(f"Get Ticker for {ticker}")
         return yf.Ticker(ticker)
 
-    def get_stock_splits(self, ticker: Ticker|str) -> List[StockSplit]:
+    def get_stock_splits(self, ticker: Ticker | str) -> List[StockSplit]:
         """Get stock splits for a given ticker
 
         Args:
@@ -65,6 +60,5 @@ class YFinanceClient:
             return []
 
         splits = ticker_info.splits
-        splits_list = [StockSplit(date.to_pydatetime().astimezone(), ratio)
-                       for date, ratio in splits.to_dict().items()]
+        splits_list = [StockSplit(date.to_pydatetime().astimezone(), ratio) for date, ratio in splits.to_dict().items()]
         return splits_list

@@ -3,6 +3,7 @@ from typing import Optional
 
 from currency_symbols import CurrencySymbols
 
+
 class LocalizationUtility:
     """
     A utility class for handling localization-related tasks, such as formatting dates, times, and currency values.
@@ -91,7 +92,7 @@ class LocalizationUtility:
         return value.strftime(LocalizationUtility.TIME_FORMAT)
 
     @staticmethod
-    def format_date_to_month_year(value: str|datetime) -> str:
+    def format_date_to_month_year(value: str | datetime) -> str:
         """
         Formats a date string to a month and year string.
         """
@@ -105,7 +106,7 @@ class LocalizationUtility:
         return time.strftime("%B %Y")
 
     @staticmethod
-    def get_date_day(value: str|datetime) -> str:
+    def get_date_day(value: str | datetime) -> str:
         """
         Returns the day of the month from a date string.
         """
@@ -119,7 +120,7 @@ class LocalizationUtility:
         return time.strftime("%d")
 
     @staticmethod
-    def format_date_to_month_number(value: str|datetime) -> str:
+    def format_date_to_month_number(value: str | datetime) -> str:
         """
         Formats a date string to a month number string.
         """
@@ -133,7 +134,7 @@ class LocalizationUtility:
         return time.strftime("%m")
 
     @staticmethod
-    def format_date_to_year(value: str|datetime) -> str:
+    def format_date_to_year(value: str | datetime) -> str:
         """
         Formats a date string to a year string.
         """
@@ -161,7 +162,7 @@ class LocalizationUtility:
         return datetime.fromisoformat(value)
 
     @staticmethod
-    def month_name(month_number: str|int) -> str:
+    def month_name(month_number: str | int) -> str:
         return datetime(datetime.now().year, int(month_number), 1).strftime("%B")
 
     @staticmethod

@@ -20,32 +20,35 @@ from toga.dialogs import ConfirmDialog, ErrorDialog, InfoDialog, SaveFileDialog
 
 from stonks_overwatch.utils.database.db_utils import dump_database
 
+
 # Middleware to serve static files from the staticfiles directory.
 # For some reason, the static files cannot be served directly when using Toga. This class provides a solution
 class StaticFilesMiddleware:
-    def __init__(self, app, static_url='/static/', static_root='staticfiles'):
+    def __init__(self, app, static_url="/static/", static_root="staticfiles"):
         self.app = app
         self.static_url = static_url
         self.static_root = static_root
 
     def __call__(self, environ, start_response):
-        path = environ.get('PATH_INFO', '')
+        path = environ.get("PATH_INFO", "")
         if path.startswith(self.static_url):
-            rel_path = unquote(path[len(self.static_url):].lstrip('/'))
+            rel_path = unquote(path[len(self.static_url) :].lstrip("/"))
             file_path = os.path.join(self.static_root, rel_path)
 
             if os.path.exists(file_path) and os.path.isfile(file_path):
-                content_type = guess_type(file_path)[0] or 'application/octet-stream'
-                start_response('200 OK', [('Content-Type', content_type)])
-                return FileWrapper(open(file_path, 'rb'))
+                content_type = guess_type(file_path)[0] or "application/octet-stream"
+                start_response("200 OK", [("Content-Type", content_type)])
+                return FileWrapper(open(file_path, "rb"))
 
-            start_response('404 Not Found', [('Content-Type', 'text/plain')])
-            return [b'Static file not found']
+            start_response("404 Not Found", [("Content-Type", "text/plain")])
+            return [b"Static file not found"]
 
         return self.app(environ, start_response)
 
+
 class ThreadedWSGIServer(socketserver.ThreadingMixIn, WSGIServer):
     pass
+
 
 class StonksOverwatchApp(toga.App):
     def __init__(self, *args, **kwargs):
@@ -80,7 +83,8 @@ class StonksOverwatchApp(toga.App):
         # If the import is not done locally, the settings.py file is loaded too early,
         # ignoring the necessary configuration
         from stonks_overwatch.settings import STATIC_ROOT
-        static_middleware = StaticFilesMiddleware(wsgi_handler, static_url='/static/', static_root=STATIC_ROOT)
+
+        static_middleware = StaticFilesMiddleware(wsgi_handler, static_url="/static/", static_root=STATIC_ROOT)
         self._httpd.set_app(static_middleware)
 
         # The server is now listening, but connections will block until
@@ -90,9 +94,7 @@ class StonksOverwatchApp(toga.App):
 
     async def exit_handler(self, app):
         # Return True if app should close, and False if it should remain open
-        if await self.dialog(
-                toga.ConfirmDialog("Confirm Exit", "Are you sure you want to exit?")
-        ):
+        if await self.dialog(toga.ConfirmDialog("Confirm Exit", "Are you sure you want to exit?")):
             print("Shutting down...")
             self._httpd.shutdown()
 
@@ -134,7 +136,7 @@ class StonksOverwatchApp(toga.App):
             text="Export Internal Database...",
             tooltip="Download the internal database for debugging",
             group=tools_group,
-            section=0  # Section 0 for primary debug actions
+            section=0,  # Section 0 for primary debug actions
         )
 
         # Add more debug commands as needed
@@ -143,7 +145,7 @@ class StonksOverwatchApp(toga.App):
             text="Clear Cache",
             tooltip="Clear application cache",
             group=tools_group,
-            section=1  # Different section will be separated by divider
+            section=1,  # Different section will be separated by divider
         )
 
         # Add commands to the app
@@ -156,8 +158,7 @@ class StonksOverwatchApp(toga.App):
             # Show confirmation dialog
             confirmed = await self.main_window.dialog(
                 ConfirmDialog(
-                    "Export Database",
-                    "This will export the internal database for debugging purposes. Continue?"
+                    "Export Database", "This will export the internal database for debugging purposes. Continue?"
                 )
             )
 
@@ -166,30 +167,18 @@ class StonksOverwatchApp(toga.App):
 
             # Get save location from user
             save_path = await self.main_window.dialog(
-                SaveFileDialog(
-                    "Save Database Export",
-                    suggested_filename="db_export.zip",
-                    file_types=['zip']
-                )
+                SaveFileDialog("Save Database Export", suggested_filename="db_export.zip", file_types=["zip"])
             )
 
             if save_path:
                 await self._export_database(save_path)
                 await self.main_window.dialog(
-                    InfoDialog(
-                        "Export Complete",
-                        f"Database exported successfully to:\n{save_path}"
-                    )
+                    InfoDialog("Export Complete", f"Database exported successfully to:\n{save_path}")
                 )
 
         except Exception as e:
             print(f"Error exporting database: {e}")
-            await self.main_window.dialog(
-                ErrorDialog(
-                    "Export Failed",
-                    f"Failed to export database: {str(e)}"
-                )
-            )
+            await self.main_window.dialog(ErrorDialog("Export Failed", f"Failed to export database: {str(e)}"))
 
     async def _export_database(self, destination_path):
         """Export the internal database to a specified path."""
@@ -206,10 +195,7 @@ class StonksOverwatchApp(toga.App):
     async def _clear_cache(self, widget):
         """Handle cache clearing action."""
         confirmed = await self.main_window.dialog(
-            ConfirmDialog(
-                "Clear Cache",
-                "This will clear all cached data. Continue?"
-            )
+            ConfirmDialog("Clear Cache", "This will clear all cached data. Continue?")
         )
 
         if confirmed:
@@ -223,10 +209,7 @@ class StonksOverwatchApp(toga.App):
                 print(f"- Deleted {file}")
 
             await self.main_window.dialog(
-                InfoDialog(
-                    "Cache Cleared",
-                    "Application cache has been cleared successfully."
-                )
+                InfoDialog("Cache Cleared", "Application cache has been cleared successfully.")
             )
 
     async def on_running(self):
@@ -238,9 +221,6 @@ class StonksOverwatchApp(toga.App):
 
         self.main_window.show()
 
-def main():
-    return StonksOverwatchApp(
-        'Stonks Overwatch',
-        'com.caribay.stonks_overwatch'
-    )
 
+def main():
+    return StonksOverwatchApp("Stonks Overwatch", "com.caribay.stonks_overwatch")

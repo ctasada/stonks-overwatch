@@ -8,14 +8,15 @@ from stonks_overwatch.config.base_credentials import BaseCredentials
 from stonks_overwatch.settings import PROJECT_PATH
 from stonks_overwatch.utils.core.logger import StonksLogger
 
+
 class BaseConfig:
     logger = StonksLogger.get_logger("stonks_overwatch.config", "[BASE_CONFIG]")
     CONFIG_PATH = os.path.join(PROJECT_PATH, "config", "config.json")
 
     def __init__(
-            self,
-            credentials: Optional[BaseCredentials],
-            enabled: bool = True,
+        self,
+        credentials: Optional[BaseCredentials],
+        enabled: bool = True,
     ) -> None:
         self.enabled = enabled
         self.credentials = credentials

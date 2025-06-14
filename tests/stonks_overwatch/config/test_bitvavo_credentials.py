@@ -1,5 +1,6 @@
 from stonks_overwatch.config.bitvavo_credentials import BitvavoCredentials
 
+
 def test_bitvavo_credentials_init():
     api_key = "testapikey"
     api_secret = "testapisecret"
@@ -12,6 +13,7 @@ def test_bitvavo_credentials_init():
     assert credentials.apikey == api_key
     assert credentials.apisecret == api_secret
 
+
 def test_bitvavo_credentials_to_dict():
     credentials = BitvavoCredentials(
         apikey="testapikey",
@@ -22,6 +24,7 @@ def test_bitvavo_credentials_to_dict():
 
     assert credentials_dict["apikey"] == "testapikey"
     assert credentials_dict["apisecret"] == "testapisecret"
+
 
 def test_bitvavo_credentials_from_dict():
     credentials_dict = {

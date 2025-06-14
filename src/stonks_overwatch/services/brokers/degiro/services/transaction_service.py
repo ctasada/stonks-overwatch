@@ -9,10 +9,11 @@ from stonks_overwatch.services.brokers.degiro.repositories.transactions_reposito
 from stonks_overwatch.services.models import Transaction
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 
+
 class TransactionsService(TransactionServiceInterface):
     def __init__(
-            self,
-            degiro_service: DeGiroService,
+        self,
+        degiro_service: DeGiroService,
     ):
         self.degiro_service = degiro_service
         self.base_currency = Config.default().base_currency
@@ -48,9 +49,7 @@ class TransactionsService(TransactionServiceInterface):
                     transaction_type=TransactionType.from_int(transaction["transactionTypeId"]).to_string(),
                     price=LocalizationUtility.format_money_value(transaction["price"], currency=info["currency"]),
                     quantity=transaction["quantity"],
-                    total=LocalizationUtility.format_money_value(
-                        value=transaction["total"], currency=info["currency"]
-                    ),
+                    total=LocalizationUtility.format_money_value(value=transaction["total"], currency=info["currency"]),
                     total_in_base_currency=LocalizationUtility.format_money_value(
                         value=transaction["totalInBaseCurrency"],
                         currency=self.base_currency,
@@ -69,4 +68,3 @@ class TransactionsService(TransactionServiceInterface):
             return "Sell"
 
         return "Unknown"
-

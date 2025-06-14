@@ -15,6 +15,7 @@ from stonks_overwatch.core.factories.service_factory import ServiceFactory
 from stonks_overwatch.services.models import PortfolioId
 from stonks_overwatch.utils.core.logger import StonksLogger
 
+
 class BaseAggregator(ABC):
     """
     Base class for all data aggregators.
@@ -36,7 +37,7 @@ class BaseAggregator(ABC):
         self._config = Config.default()
         self._logger = StonksLogger.get_logger(
             f"stonks_overwatch.aggregators.{self.__class__.__name__.lower()}",
-            f"[AGGREGATOR|{service_type.value.upper()}]"
+            f"[AGGREGATOR|{service_type.value.upper()}]",
         )
         self._broker_services: Dict[str, Any] = {}
         self._initialize_broker_services()
@@ -88,14 +89,17 @@ class BaseAggregator(ABC):
 
             if self._service_type == ServiceType.PORTFOLIO:
                 from stonks_overwatch.services.brokers.degiro.services.portfolio_service import PortfolioService
+
                 degiro_client = DeGiroService()
                 return PortfolioService(degiro_service=degiro_client)
             elif self._service_type == ServiceType.TRANSACTION:
                 from stonks_overwatch.services.brokers.degiro.services.transaction_service import TransactionsService
+
                 degiro_client = DeGiroService()
                 return TransactionsService(degiro_service=degiro_client)
             elif self._service_type == ServiceType.DEPOSIT:
                 from stonks_overwatch.services.brokers.degiro.services.deposit_service import DepositsService
+
                 degiro_client = DeGiroService()
                 return DepositsService(degiro_service=degiro_client)
             elif self._service_type == ServiceType.DIVIDEND:
@@ -113,14 +117,16 @@ class BaseAggregator(ABC):
                     account_overview=account_service,
                     currency_service=currency_service,
                     degiro_service=degiro_client,
-                    portfolio_service=portfolio_service
+                    portfolio_service=portfolio_service,
                 )
             elif self._service_type == ServiceType.FEE:
                 from stonks_overwatch.services.brokers.degiro.services.fee_service import FeesService
+
                 degiro_client = DeGiroService()
                 return FeesService(degiro_service=degiro_client)
             elif self._service_type == ServiceType.ACCOUNT:
                 from stonks_overwatch.services.brokers.degiro.services.account_service import AccountOverviewService
+
                 return AccountOverviewService()
         except Exception as e:
             self._logger.error(f"Failed to create DeGiro {self._service_type.value} service: {e}")
@@ -131,18 +137,23 @@ class BaseAggregator(ABC):
         try:
             if self._service_type == ServiceType.PORTFOLIO:
                 from stonks_overwatch.services.brokers.bitvavo.services.portfolio_service import PortfolioService
+
                 return PortfolioService()
             elif self._service_type == ServiceType.TRANSACTION:
                 from stonks_overwatch.services.brokers.bitvavo.services.transaction_service import TransactionsService
+
                 return TransactionsService()
             elif self._service_type == ServiceType.DEPOSIT:
                 from stonks_overwatch.services.brokers.bitvavo.services.deposit_service import DepositsService
+
                 return DepositsService()
             elif self._service_type == ServiceType.FEE:
                 from stonks_overwatch.services.brokers.bitvavo.services.fee_service import FeesService
+
                 return FeesService()
             elif self._service_type == ServiceType.ACCOUNT:
                 from stonks_overwatch.services.brokers.bitvavo.services.account_service import AccountOverviewService
+
                 return AccountOverviewService()
             # Bitvavo doesn't support dividends
             elif self._service_type == ServiceType.DIVIDEND:
@@ -181,16 +192,13 @@ class BaseAggregator(ABC):
             List of enabled broker names
         """
         return [
-            broker_name for broker_name in self._broker_services.keys()
+            broker_name
+            for broker_name in self._broker_services.keys()
             if self._is_broker_enabled(broker_name, selected_portfolio)
         ]
 
     def _collect_broker_data(
-        self,
-        selected_portfolio: PortfolioId,
-        method_name: str,
-        *args,
-        **kwargs
+        self, selected_portfolio: PortfolioId, method_name: str, *args, **kwargs
     ) -> Dict[str, Any]:
         """
         Collect data from all enabled brokers using the specified method.
@@ -303,12 +311,7 @@ class BaseAggregator(ABC):
         pass
 
     def _collect_and_merge_lists(
-        self,
-        selected_portfolio: PortfolioId,
-        method_name: str,
-        merger_func=None,
-        *args,
-        **kwargs
+        self, selected_portfolio: PortfolioId, method_name: str, merger_func=None, *args, **kwargs
     ) -> List[Any]:
         """
         Collect data from brokers, combine into a single list, and optionally merge.
@@ -346,13 +349,7 @@ class BaseAggregator(ABC):
         return combined_data
 
     def _collect_and_merge_objects(
-        self,
-        selected_portfolio: PortfolioId,
-        method_name: str,
-        expected_type: type,
-        merger_func=None,
-        *args,
-        **kwargs
+        self, selected_portfolio: PortfolioId, method_name: str, expected_type: type, merger_func=None, *args, **kwargs
     ) -> Any:
         """
         Collect objects of a specific type from brokers and optionally merge them.
@@ -396,7 +393,7 @@ class BaseAggregator(ABC):
         reverse: bool = False,
         merger_func=None,
         *args,
-        **kwargs
+        **kwargs,
     ) -> List[Any]:
         """
         Collect data from brokers, combine, optionally merge, and sort.
@@ -415,9 +412,7 @@ class BaseAggregator(ABC):
         Returns:
             Combined, merged, and sorted list of data
         """
-        combined_data = self._collect_and_merge_lists(
-            selected_portfolio, method_name, merger_func, *args, **kwargs
-        )
+        combined_data = self._collect_and_merge_lists(selected_portfolio, method_name, merger_func, *args, **kwargs)
 
         if sort_key:
             return sorted(combined_data, key=sort_key, reverse=reverse)

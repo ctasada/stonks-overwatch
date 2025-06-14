@@ -16,6 +16,7 @@ from stonks_overwatch.services.utilities.session_manager import SessionManager
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.core.logger import StonksLogger
 
+
 @dataclass
 class PortfolioMetrics:
     total_return: float
@@ -24,11 +25,13 @@ class PortfolioMetrics:
     total_days: int
     total_cashflows: float
 
+
 @dataclass
 class PortfolioPerformance:
     twr: List[Dict[str, float]]
     annual_twr: Dict[str, float]
     monthly_twr: Dict[str, Dict[str, float]]
+
 
 class Dashboard(View):
     """Dashboard view handling portfolio performance and value visualization.
@@ -57,7 +60,7 @@ class Dashboard(View):
 
         data = self.__calculate_dashboard_data(request)
 
-        if request.headers.get('Accept') == 'application/json':
+        if request.headers.get("Accept") == "application/json":
             return JsonResponse(data)
 
         return render(request, "dashboard.html", data)
@@ -80,7 +83,7 @@ class Dashboard(View):
             portfolio_value = self.__filter_dashboard_values(portfolio_value, start_date)
             cash_contributions = self.__filter_dashboard_values(cash_contributions, start_date)
         else:
-            start_date = portfolio_value[0]['x']
+            start_date = portfolio_value[0]["x"]
 
         performance_twr = self._calculate_portfolio_performance(selected_portfolio, portfolio_value, start_date)
         return {
@@ -89,31 +92,30 @@ class Dashboard(View):
                 "cash_contributions": cash_contributions,
                 "performance": performance_twr.twr,
                 "annual_twr": performance_twr.annual_twr,
-                "monthly_twr": performance_twr.monthly_twr
+                "monthly_twr": performance_twr.monthly_twr,
             }
         }
 
     @staticmethod
     def __filter_dashboard_values(data_values: List[DailyValue], start_date: str) -> List[DailyValue]:
         # Ensure the list is sorted by date
-        data_values.sort(key=lambda item: item['x'])
+        data_values.sort(key=lambda item: item["x"])
 
         # Find the index of the first element where 'x' is greater than or equal to start_date
-        index = next((i for i, item in enumerate(data_values) if item['x'] >= start_date), None)
+        index = next((i for i, item in enumerate(data_values) if item["x"] >= start_date), None)
 
         # If start_date is between values, include the previous element
         if index is not None and index > 0:
-            previous_value = data_values[index - 1]['y']
-            data_values.insert(index, {'x': start_date, 'y': previous_value})
+            previous_value = data_values[index - 1]["y"]
+            data_values.insert(index, {"x": start_date, "y": previous_value})
         elif index is None:
             return []
 
         # Return the filtered list
         return data_values[index:] if index is not None else []
 
-
     @staticmethod
-    def _get_interval_start_date(interval: str) -> str|None:  # noqa: C901
+    def _get_interval_start_date(interval: str) -> str | None:  # noqa: C901
         """Get start date for the given interval."""
         today = datetime.today()
         match interval:
@@ -167,12 +169,11 @@ class Dashboard(View):
 
             cache.set(Dashboard.CACHE_KEY_PORTFOLIO, portfolio_value, timeout=Dashboard.CACHE_TIMEOUT)
 
-
         return portfolio_value
 
     @staticmethod
     def _calculate_twr(
-            date_range: list[str], market_value_per_day: dict[str, float], daily_cash_flows: dict[str, float]
+        date_range: list[str], market_value_per_day: dict[str, float], daily_cash_flows: dict[str, float]
     ) -> PortfolioMetrics:
         """
         Calculate Time-Weighted Return (TWR) for an investment portfolio.
@@ -205,8 +206,7 @@ class Dashboard(View):
             raise ValueError("Need at least two periods to calculate returns")
 
         # Convert dates to datetime if they're strings
-        dates = [d if isinstance(d, datetime) else datetime.strptime(d, '%Y-%m-%d')
-                 for d in dates]
+        dates = [d if isinstance(d, datetime) else datetime.strptime(d, "%Y-%m-%d") for d in dates]
 
         # Calculate sub-period returns
         cumulative_returns = {}
@@ -217,34 +217,36 @@ class Dashboard(View):
 
         logger = StonksLogger.get_logger("stonks_overwatch.dashboard.twr", "[TWR|CALCULATION]")
 
-        for i in range(len(dates)-1):
+        for i in range(len(dates) - 1):
             start_value = modified_values[i]
             if start_value == 0:
                 continue  # Skip periods with zero starting value to avoid division by zero
 
-            end_value = modified_values[i+1]
-            cashflow = cashflows[i+1]
+            end_value = modified_values[i + 1]
+            cashflow = cashflows[i + 1]
 
             # Adjust end value for any cashflows
             adjusted_end_value = end_value - cashflow
 
             # Update cumulative return
             daily_return = (adjusted_end_value - start_value) / start_value
-            cumulative_return *= (1 + daily_return)
+            cumulative_return *= 1 + daily_return
 
             # Data quality check: warn about unusually large daily returns
             if abs(daily_return) > Dashboard.LARGE_RETURN_THRESHOLD:
-                logger.warning(f"Large daily return detected: {daily_return:.2%} from "
-                             f"{dates[i].strftime('%Y-%m-%d')} to {dates[i+1].strftime('%Y-%m-%d')} "
-                             f"(€{start_value:,.2f} → €{end_value:,.2f}, cashflow: €{cashflow:,.2f}). "
-                             f"This may indicate data quality issues or corporate actions.")
+                logger.warning(
+                    f"Large daily return detected: {daily_return:.2%} from "
+                    f"{dates[i].strftime('%Y-%m-%d')} to {dates[i + 1].strftime('%Y-%m-%d')} "
+                    f"(€{start_value:,.2f} → €{end_value:,.2f}, cashflow: €{cashflow:,.2f}). "
+                    f"This may indicate data quality issues or corporate actions."
+                )
 
             # Fix: Attribute the return to the END date of the period, not the start date
-            cumulative_returns[dates[i+1]] = cumulative_return - 1
+            cumulative_returns[dates[i + 1]] = cumulative_return - 1
 
             # Modify next period's starting value to include cashflow
-            if i < len(dates)-2:
-                modified_values[i+1] = end_value
+            if i < len(dates) - 2:
+                modified_values[i + 1] = end_value
 
         # Calculate TWR
         total_return = cumulative_return - 1
@@ -259,22 +261,29 @@ class Dashboard(View):
             annualized_return=annualized_return,
             cumulative_returns=cumulative_returns,
             total_days=total_days,
-            total_cashflows=sum(cashflows)
+            total_cashflows=sum(cashflows),
         )
 
     @staticmethod
     def __default_monthly_values():
         months = [
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
         ]
         return dict.fromkeys(months, 0.0)
 
     def _calculate_portfolio_performance(
-            self,
-            selected_portfolio: PortfolioId,
-            portfolio_value: List[DailyValue],
-            start_date: Optional[str]=None
+        self, selected_portfolio: PortfolioId, portfolio_value: List[DailyValue], start_date: Optional[str] = None
     ) -> PortfolioPerformance:
         """
         Calculate portfolio performance using TWR method.
@@ -311,21 +320,14 @@ class Dashboard(View):
             for date, return_value in main_twr.cumulative_returns.items()
         ]
 
-        return PortfolioPerformance(
-            twr=twr_series,
-            annual_twr=annual_twr,
-            monthly_twr=monthly_twr
-        )
+        return PortfolioPerformance(twr=twr_series, annual_twr=annual_twr, monthly_twr=monthly_twr)
 
     def _prepare_performance_data(self, selected_portfolio: PortfolioId, portfolio_value: List[DailyValue]):
         """Prepare and cache data needed for performance calculations."""
         # Cache deposits to avoid multiple retrievals (fixes FIXME)
-        cache_key = f'_cached_deposits_{selected_portfolio.value}'
+        cache_key = f"_cached_deposits_{selected_portfolio.value}"
         if not hasattr(self, cache_key):
-            deposits = sorted(
-                self.deposits.get_cash_deposits(selected_portfolio),
-                key=lambda k: k.datetime
-            )
+            deposits = sorted(self.deposits.get_cash_deposits(selected_portfolio), key=lambda k: k.datetime)
             setattr(self, cache_key, deposits)
         else:
             deposits = getattr(self, cache_key)
@@ -336,7 +338,7 @@ class Dashboard(View):
             cash_flows[item.datetime_as_date()] += item.change
 
         # Convert portfolio values to dict
-        market_value_per_day = {item['x']: item['y'] for item in portfolio_value}
+        market_value_per_day = {item["x"]: item["y"] for item in portfolio_value}
 
         # Apply timing correction
         cash_flows = self._correct_cash_flow_timing(cash_flows, market_value_per_day)
@@ -347,7 +349,7 @@ class Dashboard(View):
     def _get_business_date_range(start_date: str, end_date: str) -> list[str]:
         """Generate business day range without pandas overhead."""
         date_range = pd.date_range(start=start_date, end=end_date, freq="B")
-        return [date.strftime('%Y-%m-%d') for date in date_range]
+        return [date.strftime("%Y-%m-%d") for date in date_range]
 
     def _derive_period_returns(self, cumulative_returns: dict[datetime, float]) -> tuple[dict, dict]:
         """
@@ -388,10 +390,11 @@ class Dashboard(View):
 
         # Sort and convert to final format
         annual_twr = dict(sorted(annual_twr.items(), key=lambda x: x[0], reverse=True))
-        monthly_twr = dict(sorted(
-            {year: dict(months) for year, months in monthly_twr.items()}.items(),
-            key=lambda x: x[0], reverse=True
-        ))
+        monthly_twr = dict(
+            sorted(
+                {year: dict(months) for year, months in monthly_twr.items()}.items(), key=lambda x: x[0], reverse=True
+            )
+        )
 
         return annual_twr, monthly_twr
 
@@ -430,7 +433,6 @@ class Dashboard(View):
 
             # Look for large changes (>20%) with no corresponding cash flow
             if day_change_pct > 0.20 and corrected_cash_flows.get(next_date, 0) == 0:
-
                 # Look for a matching cash flow in the next few days
                 for look_ahead in range(1, 4):  # Check next 1-3 days
                     if i + 1 + look_ahead >= len(portfolio_dates):
@@ -451,22 +453,24 @@ class Dashboard(View):
                             corrected_cash_flows[next_date] = candidate_cash_flow
                             corrected_cash_flows[candidate_date] = 0
 
-                            corrections_made.append({
-                                'from_date': candidate_date,
-                                'to_date': next_date,
-                                'amount': candidate_cash_flow,
-                                'portfolio_jump': day_change,
-                                'jump_pct': day_change_pct * 100
-                            })
+                            corrections_made.append(
+                                {
+                                    "from_date": candidate_date,
+                                    "to_date": next_date,
+                                    "amount": candidate_cash_flow,
+                                    "portfolio_jump": day_change,
+                                    "jump_pct": day_change_pct * 100,
+                                }
+                            )
 
-                            self.logger.info(f"Cash flow timing corrected: €{candidate_cash_flow:,.0f} moved "
-                                             f"from {candidate_date} to {next_date} "
-                                             f"(aligned with {day_change_pct*100:.1f}% portfolio change)")
+                            self.logger.info(
+                                f"Cash flow timing corrected: €{candidate_cash_flow:,.0f} moved "
+                                f"from {candidate_date} to {next_date} "
+                                f"(aligned with {day_change_pct * 100:.1f}% portfolio change)"
+                            )
                             break
 
         if corrections_made:
             self.logger.info(f"Applied {len(corrections_made)} cash flow timing corrections")
 
         return corrected_cash_flows
-
-

@@ -10,6 +10,7 @@ from tests.stonks_overwatch.repositories.base_repository_test import BaseReposit
 
 import pytest
 
+
 @pytest.mark.django_db
 class TestCashMovementsRepository(BaseRepositoryTest):
     model_class = DeGiroCashMovements
@@ -46,11 +47,11 @@ class TestCashMovementsRepository(BaseRepositoryTest):
         assert total_cash_deposits == 250.0
 
     def test_get_total_cash(self):
-        total_cash = CashMovementsRepository.get_total_cash('EUR')
+        total_cash = CashMovementsRepository.get_total_cash("EUR")
         assert total_cash == 300.0
 
     def test_get_total_cash_from_nonexisting_currency(self):
-        total_cash = CashMovementsRepository.get_total_cash('XXX')
+        total_cash = CashMovementsRepository.get_total_cash("XXX")
         assert total_cash is None
 
     def test_get_last_movement(self):
@@ -65,6 +66,6 @@ class TestCashMovementsRepository(BaseRepositoryTest):
     def test_get_cash_balance_by_date(self):
         cash_deposits = CashMovementsRepository.get_cash_balance_by_date()
         assert len(cash_deposits) == 3
-        assert cash_deposits[0]["balanceTotal"] == '100.0'
-        assert cash_deposits[1]["balanceTotal"] == '300.0'
-        assert cash_deposits[2]["balanceTotal"] == '250.0'
+        assert cash_deposits[0]["balanceTotal"] == "100.0"
+        assert cash_deposits[1]["balanceTotal"] == "300.0"
+        assert cash_deposits[2]["balanceTotal"] == "250.0"

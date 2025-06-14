@@ -7,6 +7,7 @@ from stonks_overwatch.services.aggregators.portfolio_aggregator import Portfolio
 from stonks_overwatch.services.utilities.session_manager import SessionManager
 from stonks_overwatch.utils.core.logger import StonksLogger
 
+
 class Deposits(View):
     logger = StonksLogger.get_logger("stonks_overwatch.deposits.views", "VIEW|DEPOSITS")
 
@@ -31,7 +32,7 @@ class Deposits(View):
             "deposit_growth": {"value": cash_contributions},
         }
 
-        if request.headers.get('Accept') == 'application/json':
+        if request.headers.get("Accept") == "application/json":
             return JsonResponse(context, safe=False)
         else:
             return render(request, "deposits.html", context)

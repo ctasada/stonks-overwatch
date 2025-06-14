@@ -10,6 +10,7 @@ from stonks_overwatch.utils.core.localization import LocalizationUtility
 import pytest
 from unittest.mock import patch
 
+
 @pytest.fixture(scope="function", autouse=True)
 def setup_broker_registry():
     """Setup broker service registry for tests."""
@@ -28,6 +29,7 @@ def setup_broker_registry():
     # Clean up after test
     registry._brokers.clear()
     registry._broker_capabilities.clear()
+
 
 @pytest.fixture(scope="function", autouse=True)
 def mock_degiro_deposits():
@@ -50,6 +52,7 @@ def mock_degiro_deposits():
         ]
         yield mock_method
 
+
 @pytest.fixture(scope="function", autouse=True)
 def mock_bitvavo_deposits():
     with patch.object(BitvavoDepositsService, "get_cash_deposits") as mock_method:
@@ -71,6 +74,7 @@ def mock_bitvavo_deposits():
         ]
         yield mock_method
 
+
 def test_get_deposit_aggregator_service(setup_broker_registry, mock_bitvavo_deposits, mock_degiro_deposits):
     BaseConfig.CONFIG_PATH = "tests/resources/stonks_overwatch/config/sample-config.json"
 
@@ -88,6 +92,7 @@ def test_get_deposit_aggregator_service(setup_broker_registry, mock_bitvavo_depo
     assert deposits[3].type == DepositType.DEPOSIT
     assert deposits[3].change == 1000.0
 
+
 def test_get_deposit_aggregator_service_only_degiro(setup_broker_registry, mock_degiro_deposits):
     BaseConfig.CONFIG_PATH = "tests/resources/stonks_overwatch/config/sample-config.json"
 
@@ -100,6 +105,7 @@ def test_get_deposit_aggregator_service_only_degiro(setup_broker_registry, mock_
     assert deposits[0].change == -200.0
     assert deposits[1].type == DepositType.DEPOSIT
     assert deposits[1].change == 10000.0
+
 
 def test_get_deposit_aggregator_service_only_bitvavo(setup_broker_registry, mock_bitvavo_deposits):
     BaseConfig.CONFIG_PATH = "tests/resources/stonks_overwatch/config/sample-config.json"
@@ -114,6 +120,7 @@ def test_get_deposit_aggregator_service_only_bitvavo(setup_broker_registry, mock
     assert deposits[1].type == DepositType.DEPOSIT
     assert deposits[1].change == 1000.0
 
+
 def test_get_cash_deposits_history(setup_broker_registry, mock_bitvavo_deposits, mock_degiro_deposits):
     BaseConfig.CONFIG_PATH = "tests/resources/stonks_overwatch/config/sample-config.json"
 
@@ -124,7 +131,9 @@ def test_get_cash_deposits_history(setup_broker_registry, mock_bitvavo_deposits,
 
     today_str = LocalizationUtility.format_date_from_date(date.today())
 
-    assert deposits == [{'date': '2024-09-16', 'total_deposit': 11000.0},
-                        {'date': '2024-10-16', 'total_deposit': 10900.0},
-                        {'date': '2024-10-26', 'total_deposit': 10700.0},
-                        {'date': today_str, 'total_deposit': 10700.0}]
+    assert deposits == [
+        {"date": "2024-09-16", "total_deposit": 11000.0},
+        {"date": "2024-10-16", "total_deposit": 10900.0},
+        {"date": "2024-10-26", "total_deposit": 10700.0},
+        {"date": today_str, "total_deposit": 10700.0},
+    ]

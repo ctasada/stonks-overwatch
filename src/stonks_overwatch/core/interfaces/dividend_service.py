@@ -11,6 +11,7 @@ from typing import List
 
 from stonks_overwatch.services.models import Dividend
 
+
 class DividendServiceInterface(ABC):
     """
     Interface for dividend service implementations.

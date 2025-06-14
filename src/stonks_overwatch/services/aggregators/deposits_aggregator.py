@@ -8,8 +8,8 @@ from stonks_overwatch.core.factories.broker_registry import ServiceType
 from stonks_overwatch.services.models import Deposit, PortfolioId
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 
-class DepositsAggregatorService(BaseAggregator):
 
+class DepositsAggregatorService(BaseAggregator):
     def __init__(self):
         super().__init__(ServiceType.DEPOSIT)
 
@@ -50,10 +50,7 @@ class DepositsAggregatorService(BaseAggregator):
     def get_cash_deposits(self, selected_portfolio: PortfolioId) -> List[Deposit]:
         # Use the new helper method to collect and sort deposit data
         return self._collect_and_sort(
-            selected_portfolio,
-            "get_cash_deposits",
-            sort_key=lambda x: x.datetime,
-            reverse=True
+            selected_portfolio, "get_cash_deposits", sort_key=lambda x: x.datetime, reverse=True
         )
 
     def aggregate_data(self, selected_portfolio: PortfolioId, **kwargs) -> List[Deposit]:

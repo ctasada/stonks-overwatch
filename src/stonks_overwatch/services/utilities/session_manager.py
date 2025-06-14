@@ -3,6 +3,7 @@ from django.http import HttpRequest
 from stonks_overwatch.config.config import Config
 from stonks_overwatch.services.models import PortfolioId
 
+
 class SessionManager:
     # Session keys
     SESSION_SELECTED_PORTFOLIO = "selected_portfolio"
@@ -28,7 +29,6 @@ class SessionManager:
             if Config().default().is_enabled(value):
                 portfolios.append(value)
         return portfolios
-
 
     @staticmethod
     def set_selected_portfolio(request: HttpRequest, portfolio_id: PortfolioId):

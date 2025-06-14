@@ -45,7 +45,6 @@ urlpatterns = [
     path("portfolio", Portfolio.as_view(), name="portfolio"),
     path("transactions", Transactions.as_view(), name="transactions"),
     path("configuration", ConfigurationView.as_view(), name="configuration"),
-    path('assets/<str:product_type>/<str:symbol>', AssetLogoView.as_view(), name='asset_logo'),
-
-    re_path(r'^(favicon\.ico|apple-touch-icon\.png|apple-touch-icon-precomposed\.png)$', RootStaticFileView.as_view()),
+    path("assets/<str:product_type>/<str:symbol>", AssetLogoView.as_view(), name="asset_logo"),
+    re_path(r"^(favicon\.ico|apple-touch-icon\.png|apple-touch-icon-precomposed\.png)$", RootStaticFileView.as_view()),
 ]

@@ -3,8 +3,8 @@ from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import Bitv
 from stonks_overwatch.services.brokers.bitvavo.services.transaction_service import TransactionsService
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 
-class FeesService:
 
+class FeesService:
     def __init__(self):
         self.bitvavo_service = BitvavoService()
         self.base_currency = Config.default().base_currency

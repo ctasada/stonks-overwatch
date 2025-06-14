@@ -11,6 +11,7 @@ from stonks_overwatch.services.models import AccountOverview, PortfolioId
 import pytest
 from unittest.mock import patch
 
+
 @pytest.fixture(scope="function", autouse=True)
 def setup_broker_registry():
     """Setup broker service registry for tests."""
@@ -30,6 +31,7 @@ def setup_broker_registry():
     registry._brokers.clear()
     registry._broker_capabilities.clear()
 
+
 @pytest.fixture(scope="function", autouse=True)
 def mock_degiro_get_account_overview():
     with patch.object(DeGiroAccountOverviewService, "get_account_overview") as mock_method:
@@ -43,7 +45,6 @@ def mock_degiro_get_account_overview():
                 type="FLATEX_CASH_SWEEP",
                 currency="EUR",
                 change=-14.36,
-
             ),
             AccountOverview(
                 datetime="2024-08-29 14:33:41",
@@ -54,9 +55,10 @@ def mock_degiro_get_account_overview():
                 type="TRANSACTION",
                 currency="EUR",
                 change=-200.0,
-            )
+            ),
         ]
         yield mock_method
+
 
 @pytest.fixture(scope="function", autouse=True)
 def mock_bitvavo_get_account_overview():
@@ -81,14 +83,13 @@ def mock_bitvavo_get_account_overview():
                 type="TRANSACTION",
                 currency="EUR",
                 change=-200.0,
-            )
+            ),
         ]
         yield mock_method
 
+
 def test_get_account_overview_aggregator(
-        setup_broker_registry,
-        mock_degiro_get_account_overview,
-        mock_bitvavo_get_account_overview
+    setup_broker_registry, mock_degiro_get_account_overview, mock_bitvavo_get_account_overview
 ):
     BaseConfig.CONFIG_PATH = "tests/resources/stonks_overwatch/config/sample-config.json"
 
@@ -102,6 +103,7 @@ def test_get_account_overview_aggregator(
     assert overview[2].stock_name == "Apple Inc"
     assert overview[3].stock_name == "Bitcoin"
 
+
 def test_get_account_overview_aggregator_only_degiro(setup_broker_registry, mock_degiro_get_account_overview):
     BaseConfig.CONFIG_PATH = "tests/resources/stonks_overwatch/config/sample-config.json"
 
@@ -112,6 +114,7 @@ def test_get_account_overview_aggregator_only_degiro(setup_broker_registry, mock
     assert len(overview) == 2
     assert overview[0].description == "Degiro Cash Sweep Transfer"
     assert overview[1].stock_name == "Apple Inc"
+
 
 def test_get_account_overview_aggregator_only_bitvavo(setup_broker_registry, mock_bitvavo_get_account_overview):
     BaseConfig.CONFIG_PATH = "tests/resources/stonks_overwatch/config/sample-config.json"

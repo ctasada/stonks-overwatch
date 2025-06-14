@@ -1,7 +1,6 @@
 import os
-import time
-from datetime import date, datetime, timezone
-from datetime import time as dt_time
+import time as core_time
+from datetime import date, datetime, time, timezone
 from typing import Dict, List
 
 import pandas as pd
@@ -47,6 +46,7 @@ CACHE_KEY_UPDATE_YFINANCE = "yfinance_update"
 # Cache the result for 1 hour (3600 seconds)
 CACHE_TIMEOUT = 3600
 
+
 class UpdateService:
     logger = StonksLogger.get_logger("stonks_overwatch.update_service", "[DEGIRO|UPDATE]")
 
@@ -58,10 +58,12 @@ class UpdateService:
         :param debug_mode:
             If True, the service will store the JSON files for debugging purposes.
         """
-        self.import_folder = import_folder \
-            if import_folder is not None else os.path.join(STONKS_OVERWATCH_DATA_DIR, "import", "degiro")
-        self.debug_mode = debug_mode \
-            if debug_mode is not None else os.getenv("DEBUG_MODE", False) in [True, "true", "True", "1"]
+        self.import_folder = (
+            import_folder if import_folder is not None else os.path.join(STONKS_OVERWATCH_DATA_DIR, "import", "degiro")
+        )
+        self.debug_mode = (
+            debug_mode if debug_mode is not None else os.getenv("DEBUG_MODE", False) in [True, "true", "True", "1"]
+        )
 
         if not os.path.exists(self.import_folder):
             os.makedirs(self.import_folder)
@@ -83,14 +85,14 @@ class UpdateService:
     def _get_last_cash_movement_import(self) -> datetime:
         last_movement = CashMovementsRepository.get_last_movement()
         if last_movement is None:
-            last_movement = datetime.combine(DegiroConfig.default().start_date, dt_time.min)
+            last_movement = datetime.combine(DegiroConfig.default().start_date, time.min)
 
         return last_movement
 
     def _get_last_transactions_import(self) -> datetime:
         last_movement = TransactionsRepository.get_last_movement()
         if last_movement is None:
-            last_movement = datetime.combine(DegiroConfig.default().start_date, dt_time.min)
+            last_movement = datetime.combine(DegiroConfig.default().start_date, time.min)
 
         return last_movement
 
@@ -146,9 +148,13 @@ class UpdateService:
             except OperationalError as e:
                 last_exception = e
                 if "database is locked" in str(e).lower() and attempt < max_retries:
-                    self.logger.warning("Database locked, retrying in %.2f seconds (attempt %d/%d)",
-                                      current_delay, attempt + 1, max_retries)
-                    time.sleep(current_delay)
+                    self.logger.warning(
+                        "Database locked, retrying in %.2f seconds (attempt %d/%d)",
+                        current_delay,
+                        attempt + 1,
+                        max_retries,
+                    )
+                    core_time.sleep(current_delay)
                     current_delay *= 2  # Exponential backoff
                 else:
                     raise
@@ -305,8 +311,8 @@ class UpdateService:
                             "balance_cash_fund": row.get("balance_cashFund", None),
                             "balance_total": row.get("balance_total", None),
                             "exchange_rate": self.__conv(row.get("exchangeRate", None)),
-                            "order_id": row.get("orderId", None)
-                        }
+                            "order_id": row.get("orderId", None),
+                        },
                     )
                 except Exception as error:
                     self.logger.error(f"Cannot import row: {row}")
@@ -314,6 +320,7 @@ class UpdateService:
 
     def __transform_json(self, account_overview: dict) -> list[dict] | None:
         """Flattens the data from deGiro `get_account_overview`."""
+
         def _fix_columns(dataframe: DataFrame, columns: list[str], func):
             for col in columns:
                 if col in dataframe:
@@ -326,13 +333,9 @@ class UpdateService:
             _fix_columns(
                 df,
                 ["productId", "id", "exchangeRate", "orderId"],
-                lambda x: None if (pd.isnull(x) or pd.isna(x)) else str(x).replace(".0", "")
+                lambda x: None if (pd.isnull(x) or pd.isna(x)) else str(x).replace(".0", ""),
             )
-            _fix_columns(
-                df,
-                ["change"],
-                lambda x: None if (pd.isnull(x) or pd.isna(x)) else str(x)
-            )
+            _fix_columns(df, ["change"], lambda x: None if (pd.isnull(x) or pd.isna(x)) else str(x))
             # Set the index explicitly
             df.set_index("date", inplace=True)
             # Sort the DataFrame by the 'date' column
@@ -470,16 +473,14 @@ class UpdateService:
 
         return "Non tradeable" in product["name"]
 
-    def __import_products_quotation(self) -> None: # noqa: C901
+    def __import_products_quotation(self) -> None:  # noqa: C901
         product_growth = self.portfolio_data.calculate_product_growth()
 
         # Include Currencies in the Quotations
         start_date = DegiroConfig.default().start_date.strftime(LocalizationUtility.DATE_FORMAT)
         for currency in CurrencyFX.to_list():
             if currency not in product_growth:
-                product_growth[currency] = {
-                    "history": {}
-                }
+                product_growth[currency] = {"history": {}}
                 product_growth[currency]["history"][start_date] = 1
 
         delete_keys = []
@@ -543,8 +544,8 @@ class UpdateService:
                     defaults={
                         "interval": Interval.P1D,
                         "last_import": LocalizationUtility.now(),
-                        "quotations": quotes_dict
-                    }
+                        "quotations": quotes_dict,
+                    },
                 )
 
     def __get_company_profiles(self) -> dict:
@@ -575,9 +576,7 @@ class UpdateService:
         for key in company_profiles:
             try:
                 self._retry_database_operation(
-                    DeGiroCompanyProfile.objects.update_or_create,
-                    isin=key,
-                    defaults={"data": company_profiles[key]}
+                    DeGiroCompanyProfile.objects.update_or_create, isin=key, defaults={"data": company_profiles[key]}
                 )
             except Exception as error:
                 self.logger.error(f"Cannot import ISIN: {key}")
@@ -605,7 +604,7 @@ class UpdateService:
         # Get the list of DeGiro Products
         symbols = self.__get_symbols()
 
-        tickers : Dict[str, dict] = {}
+        tickers: Dict[str, dict] = {}
         splits = {}
         for symbol in symbols:
             try:
@@ -658,9 +657,7 @@ class UpdateService:
         for key in tickers:
             try:
                 self._retry_database_operation(
-                    YFinanceTickerInfo.objects.update_or_create,
-                    symbol=key,
-                    defaults={"data": tickers[key]}
+                    YFinanceTickerInfo.objects.update_or_create, symbol=key, defaults={"data": tickers[key]}
                 )
             except Exception as error:
                 self.logger.error(f"Cannot import Ticker: {key}")
@@ -672,9 +669,7 @@ class UpdateService:
         for key in splits:
             try:
                 self._retry_database_operation(
-                    YFinanceStockSplits.objects.update_or_create,
-                    symbol=key,
-                    defaults={"data": splits[key]}
+                    YFinanceStockSplits.objects.update_or_create, symbol=key, defaults={"data": splits[key]}
                 )
             except Exception as error:
                 self.logger.error(f"Cannot import Splits: {key}")
@@ -719,8 +714,7 @@ class UpdateService:
         for entry in portfolio:
             if entry.is_open and entry.product_type == ProductType.STOCK:
                 forecasted_dividends = self.degiro_service.get_dividends_agenda(
-                    company_name=entry.name,
-                    isin=entry.isin
+                    company_name=entry.name, isin=entry.isin
                 )
                 if forecasted_dividends is not None:
                     results.append(forecasted_dividends)
@@ -772,7 +766,7 @@ class UpdateService:
                         "yield_value": entry.get("yieldValue", 0.0),
                         "currency": entry["currency"],
                         "market_cap": entry.get("marketCap", ""),
-                    }
+                    },
                 )
             except Exception as error:
                 self.logger.error(f"Cannot import agenda dividend: {entry}")

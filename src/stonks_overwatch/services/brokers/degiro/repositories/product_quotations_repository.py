@@ -6,6 +6,7 @@ from django.db import connection
 from stonks_overwatch.services.brokers.degiro.repositories.models import DeGiroProductQuotation
 from stonks_overwatch.utils.database.db_utils import dictfetchone
 
+
 class ProductQuotationsRepository:
     @staticmethod
     def get_product_quotations(product_id: int) -> dict | None:
@@ -44,7 +45,7 @@ class ProductQuotationsRepository:
         return 0.0
 
     @staticmethod
-    def get_last_update() -> datetime|None:
+    def get_last_update() -> datetime | None:
         """Return the latest update from the DB.
 
         ### Returns:

@@ -6,6 +6,7 @@ from stonks_overwatch.services.aggregators.fees_aggregator import FeesAggregator
 from stonks_overwatch.services.utilities.session_manager import SessionManager
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 
+
 class Fees(View):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -42,7 +43,7 @@ class Fees(View):
             "fees": fees,
         }
 
-        if request.headers.get('Accept') == 'application/json':
+        if request.headers.get("Accept") == "application/json":
             return JsonResponse(context, safe=False)
         else:
             return render(request, "fees.html", context)
