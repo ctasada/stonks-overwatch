@@ -123,8 +123,10 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 order-by-type = true
 relative-imports-order = "closest-to-furthest"
 extra-standard-library = ["typing"]
-lines-after-imports = 1
+lines-after-imports = -1
 lines-between-types = 0
+combine-as-imports = true
+force-single-line = false
 section-order = ["future", "standard-library", "third-party", "first-party", "local-folder", "testing"]
 
 [tool.ruff.lint.isort.sections]
@@ -166,9 +168,6 @@ python_files = [
 ]
 addopts = [
     '--import-mode=importlib',
-    '--cov',
-    '--cov-report=term',
-    '--cov-report=html:htmlcov'
 ]
 
 [tool.briefcase]
@@ -240,6 +239,6 @@ extend_exclude = ["scripts"]
 known_first_party = ["stonks_overwatch"]
 
 [tool.deptry.per_rule_ignores]
-# django-extensions are not actively used in the codebase, but it can be usefult
+# django-extensions are not actively used in the codebase, but it can be useful
 # django-node-assets is used to simplify the management of NPM dependencies
 DEP002 = ["django-extensions", "django-node-assets"]
