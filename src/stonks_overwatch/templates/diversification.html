@@ -8,11 +8,11 @@
 <script src="{% static 'fontawesomefree/js/fontawesome.js' %}"></script>
 
 <div class="container-fluid row-gap-5">
-    {% include 'distribution_with_list.html' with chart_id="type-chart" items=productTypes.table %}
-    {% include 'distribution_with_list.html' with chart_id="positions-chart" items=positions.table %}
-    {% include 'distribution_with_list.html' with chart_id="sectors-chart" items=sectors.table %}
-    {% include 'distribution_with_list.html' with chart_id="currencies-chart" items=currencies.table %}
-    {% include 'distribution_with_list.html' with chart_id="countries-chart" items=countries.table %}
+    {% include 'components/distribution_with_list.html' with chart_id="type-chart" items=productTypes.table %}
+    {% include 'components/distribution_with_list.html' with chart_id="positions-chart" items=positions.table %}
+    {% include 'components/distribution_with_list.html' with chart_id="sectors-chart" items=sectors.table %}
+    {% include 'components/distribution_with_list.html' with chart_id="currencies-chart" items=currencies.table %}
+    {% include 'components/distribution_with_list.html' with chart_id="countries-chart" items=countries.table %}
 </div>
 
 <!-- ChartJS -->
