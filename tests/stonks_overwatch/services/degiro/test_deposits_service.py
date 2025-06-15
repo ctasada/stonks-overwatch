@@ -8,7 +8,7 @@ from stonks_overwatch.services.brokers.degiro.client.degiro_client import Creden
 from stonks_overwatch.services.brokers.degiro.repositories.models import DeGiroCashMovements
 from stonks_overwatch.services.brokers.degiro.services.deposit_service import DepositsService
 from stonks_overwatch.services.models import DepositType
-from tests.stonks_overwatch.fixtures import TestDeGiroService
+from tests.stonks_overwatch.fixtures import DeGiroServiceTest
 
 import pytest
 from django.test import TestCase
@@ -19,7 +19,7 @@ class TestDepositsService(TestCase):
     def setUp(self):
         self.created_objects = {}
         self.fixture_cash_movements_repository()
-        self.degiro_service = TestDeGiroService(CredentialsManager(self.fixture_credentials()))
+        self.degiro_service = DeGiroServiceTest(CredentialsManager(self.fixture_credentials()))
 
         self.deposits_service = DepositsService(
             degiro_service=self.degiro_service,

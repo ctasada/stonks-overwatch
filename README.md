@@ -26,7 +26,7 @@ Right now the features we offer are:
 * Transactions
 * Account Statements
 
-### How to login to DEGIRO?
+### How to login to DEGIRO
 
 See [Wiki - DEGIRO](https://github.com/ctasada/stonks-overwatch/wiki/DEGIRO)
 
@@ -60,7 +60,6 @@ See [Wiki - Developing Stonks Overwatch](https://github.com/ctasada/stonks-overw
     - 'WEBR'(600179738) (https://www.investing.com/equities/weber-chart)
     - 'TEF.D'(280180545)
     - 'FRZA'(600236745)
-  Test https://github.com/alvarobartt/investiny to retrieve data from delisted stocks
 - CreateProduct Quotation does not respect the proper timeframes
 - Django Cache is disabled so that the portfolio selection works, otherwise the page is not properly reload
 - Dashboard: Drawing the dashboard is slow. It seems that the code is executed three times
@@ -134,6 +133,7 @@ See [Wiki - Developing Stonks Overwatch](https://github.com/ctasada/stonks-overw
 
 # Libraries
 - https://pypi.org/project/QuantStats/
+- https://quantlib-python-docs.readthedocs.io/en/latest/
 - https://github.com/wilsonfreitas/awesome-quant?tab=readme-ov-file#python
 - https://github.com/robertmartin8/PyPortfolioOpt
 - https://pypi.org/project/pyxirr/
