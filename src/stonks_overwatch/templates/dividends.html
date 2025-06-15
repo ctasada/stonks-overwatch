@@ -10,21 +10,9 @@
     </div>
     {% else %}
     <div class="row mt-2 column-gap-3">
-        <div class="col-md-auto border border-primary-subtle bg-light rounded mb-3 position-relative" style="padding: 0.75rem 2.5rem 0.75rem 0.75rem;">
-             <span class="position-absolute top-0 end-0 m-2" data-bs-toggle="tooltip" data-bs-placement="right" title="Total net dividends received.">
-                <i class="bi bi-info-circle text-secondary"></i>
-            </span>
-            <label class="fs-5 text-primary">Net Dividends</label>
-            <br>
-            <span class="h4 fw-semibold text-success">{{ total_net_dividends }}</span>
-        </div>
-        <div class="col-md-auto border border-primary-subtle bg-light rounded mb-3 position-relative" style="padding: 0.75rem 2.5rem 0.75rem 0.75rem;">
-             <span class="position-absolute top-0 end-0 m-2" data-bs-toggle="tooltip" data-bs-placement="right" title="Gross dividend is the total amount paid out before dividend tax is deducted.">
-                <i class="bi bi-info-circle text-secondary"></i>
-            </span>
-            <label class="fs-5 text-primary">Gross Dividends</label>
-            <br>
-            <span class="h4 fw-semibold text-success">{{ total_gross_dividends }}</span>
+        {% include 'components/summary_card.html' with label="Net Dividends" value=total_net_dividends tooltip="Total net dividends received." %}
+        {% include 'components/summary_card.html' with label="Dividend Tax" value=total_tax_dividends tooltip="Total amount paid in dividend taxes." %}
+        {% include 'components/summary_card.html' with label="Gross Dividends" value=total_gross_dividends tooltip="Gross dividend is the total amount paid out before dividend tax is deducted." %}
         </div>
     </div>
     <div class="row border border-primary-subtle bg-light rounded mb-3">
@@ -46,7 +34,7 @@
             <canvas id="dividends-growth"></canvas>
         </div>
     </div>
-    {% include 'distribution_with_list.html' with chart_id="dividends-chart" items=dividendsDiversification.table %}
+    {% include 'components/distribution_with_list.html' with chart_id="dividends-chart" items=dividendsDiversification.table %}
     <div class="row border border-primary-subtle bg-light rounded mb-3" style="background-color:#dbf5ff">
         <div class="row my-2">
             <div class="col-auto">
@@ -82,7 +70,7 @@
             </div>
         </div>
         <div class="row" id="dividends-calendar-container">
-            {% include 'dividends_calendar_content.html' with dividendsCalendar=dividendsCalendar %}
+            {% include 'dividends/calendar.html' with dividendsCalendar=dividendsCalendar %}
         </div>
     </div>
     {% endif %}

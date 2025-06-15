@@ -3,26 +3,10 @@
 {% block content %}
 <div class="container-fluid row-gap-5">
     <div class="row mt-2 column-gap-3">
-        <div class="col-md-auto border border-primary-subtle bg-light rounded mb-3">
-            <label class="col-form-label-p-0 text-secondary">Transaction Fees</label>
-            <br>
-            <span class="h5 fw-semibold text-danger">{{ transaction_fees }}</span>
-        </div>
-        <div class="col-md-auto border border-primary-subtle bg-light rounded mb-3">
-            <label class="col-form-label-p-0 text-secondary">Exchange Connection Fees</label>
-            <br>
-            <span class="h5 fw-semibold text-danger">{{ exchange_fees }}</span>
-        </div>
-        <div class="col-md-auto border border-primary-subtle bg-light rounded mb-3">
-            <label class="col-form-label-p-0 text-secondary">Financial Transaction Tax</label>
-            <br>
-            <span class="h5 fw-semibold text-danger">{{ ftt_fees }}</span>
-        </div>
-        <div class="col-md-auto border border-primary-subtle bg-light rounded mb-3">
-            <label class="col-form-label-p-0 text-secondary">ADR/GDR Passthrough Fees</label>
-            <br>
-            <span class="h5 fw-semibold text-danger">{{ adr_fees }}</span>
-        </div>
+        {% include 'components/summary_card.html' with label="Transaction Fees" value=transaction_fees %}
+        {% include 'components/summary_card.html' with label="Exchange Connection Fees" value=exchange_fees %}
+        {% include 'components/summary_card.html' with label="Financial Transaction Tax" value=ftt_fees %}
+        {% include 'components/summary_card.html' with label="ADR/GDR Passthrough Fees" value=adr_fees %}
     </div>
     <div class="row border border-primary-subtle bg-light rounded mb-3 position-relative">
         <h4 class="position-absolute top-0 start-0 z-2 px-3" style="padding-top: 8px; padding-left: 4px">Fees</h4>

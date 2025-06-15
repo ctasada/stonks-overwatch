@@ -35,6 +35,7 @@ class Dividends(View):
         dividends_diversification = self._get_diversification(dividends_overview)
         total_net_dividends = self._get_total_net_dividends(dividends_overview)
         total_gross_dividends = self._get_total_gross_dividends(dividends_overview)
+        total_tax_dividends = total_net_dividends - total_gross_dividends
 
         if total_net_dividends > 0.0:
             # Filter the dividends_calendar to only include items matching the calendar_year
@@ -49,6 +50,9 @@ class Dividends(View):
                 ),
                 "total_gross_dividends": LocalizationUtility.format_money_value(
                     value=total_gross_dividends, currency=self.base_currency
+                ),
+                "total_tax_dividends": LocalizationUtility.format_money_value(
+                    value=total_tax_dividends, currency=self.base_currency
                 ),
                 "dividendsCalendar": dividends_calendar,
                 "dividendsDiversification": dividends_diversification,

@@ -45,7 +45,6 @@ See [Wiki - Developing Stonks Overwatch](https://github.com/ctasada/stonks-overw
 * [Bootstrap](https://getbootstrap.com)
 
 ## Other interesting projects
-* https://giroscope.io
 * https://github.com/leo-pfeiffer/portfolio_dashboard
 * https://github.com/lucalaringe/degiro_portfolio_analytics <<< CHECK!!!!
 * https://github.com/CNugteren/DGPC
@@ -89,8 +88,13 @@ See [Wiki - Developing Stonks Overwatch](https://github.com/ctasada/stonks-overw
 - [ ] Provide more information in the Dashboard performance overview
 - [ ] Migrate UI to https://github.com/coreui/coreui
 - [ ] Add GitHub Dependabot support for Poetry: Track https://github.com/dependabot/dependabot-core/issues/11237
-- [ ] Provide more details about Dividends per year
-- [ ] Should include Dividends in the Deposit Overview?
+- [ ] Dividends
+  - [ ] Provide more details about Dividends per year
+  - [ ] Should include Dividends in the Deposit Overview?
+  - [ ] Add information about the Dividend Yield
+- [ ] Fees
+  - [ ] Provide more details about Fees timeline
+  - [ ] Provide more visual details about the fees, maybe a pie chart?
 - [ ] Track delisted stocks
   - EODHD: https://eodhd.medium.com/leveraging-delisted-stocks-for-backtesting-a-3-ema-strategy-using-python-d67221e774f5
     - https://eodhd.com/pricing
