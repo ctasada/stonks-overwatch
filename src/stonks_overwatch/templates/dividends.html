@@ -81,7 +81,7 @@
 <script src="{% static 'chartjs-adapter-luxon/dist/chartjs-adapter-luxon.umd.min.js' %}"></script>
 <script src="{% static '@seahsky/chartjs-plugin-autocolors/dist/chartjs-plugin-autocolors.min.js' %}"></script>
 {{ currencySymbol|json_script:"currency-symbol" }}
-<script src="{% static 'js/distribution-char-utils.js' %}"></script>
+<script src="{% static 'js/distribution-chart-utils.js' %}"></script>
 <script>
     const URL = "{% url 'dividends' %}"
     const HOST = window.location.protocol + "//" + window.location.host

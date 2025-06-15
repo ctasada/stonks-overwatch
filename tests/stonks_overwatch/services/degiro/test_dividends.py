@@ -17,7 +17,7 @@ from stonks_overwatch.services.brokers.degiro.services.dividend_service import D
 from stonks_overwatch.services.brokers.degiro.services.portfolio_service import PortfolioService
 from stonks_overwatch.services.models import DividendType
 from stonks_overwatch.utils.core.localization import LocalizationUtility
-from tests.stonks_overwatch.fixtures import TestDeGiroService
+from tests.stonks_overwatch.fixtures import DeGiroServiceTest
 
 import pook
 import pytest
@@ -32,7 +32,7 @@ class TestDividendsService(TestCase):
         self.fixture_product_info_repository()
         self.fixture_product_quotation_repository()
         self.fixture_dividends_upcoming_repository()
-        self.degiro_service = TestDeGiroService(CredentialsManager(self.fixture_credentials()))
+        self.degiro_service = DeGiroServiceTest(CredentialsManager(self.fixture_credentials()))
 
         self.account_overview = AccountOverviewService()
         self.currency_service = CurrencyConverterService()

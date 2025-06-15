@@ -10,7 +10,7 @@ from degiro_connector.trading.models.credentials import Credentials
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import CredentialsManager
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 from tests.stonks_overwatch.fixtures import (
-    TestDeGiroService,
+    DeGiroServiceTest,
     disable_requests_cache,
     mock_degiro_config,
     mock_full_credentials,
@@ -31,7 +31,7 @@ def test_credentials_manager_init(mock_degiro_config: mock_degiro_config, mock_f
 
 def test_degiro_service_init(mock_degiro_config: mock_degiro_config, mock_full_credentials: mock_full_credentials):
     manager = CredentialsManager(mock_full_credentials)
-    service = TestDeGiroService(manager)
+    service = DeGiroServiceTest(manager)
     assert service.credentials_manager == manager
 
 
@@ -42,7 +42,7 @@ def test_degiro_service_connect_with_full_credential(
     manager = CredentialsManager(mock_full_credentials)
 
     pook.post(urls.LOGIN + "/totp").reply(200).json({"sessionId": "abcdefg12345"})
-    service = TestDeGiroService(manager)
+    service = DeGiroServiceTest(manager)
     service.connect()
 
     assert service.check_connection() is True
@@ -80,7 +80,7 @@ def test_degiro_service_connect_with_credential(disable_requests_cache: disable_
             }
         }
     )
-    service = TestDeGiroService(manager)
+    service = DeGiroServiceTest(manager)
 
     # Check we have the right credentials
     assert service.api_client.credentials.username == credential.username
@@ -100,7 +100,7 @@ def test_degiro_service_connect_with_bad_credentials(disable_requests_cache: dis
     manager = CredentialsManager(credential)
 
     pook.post(urls.LOGIN).reply(400).json({"loginFailures": 1, "status": 3, "statusText": "badCredentials"})
-    service = TestDeGiroService(manager)
+    service = DeGiroServiceTest(manager)
 
     # Check we have the right credentials
     assert service.api_client.credentials.username == credential.username
@@ -120,7 +120,7 @@ def test_degiro_service_connect_with_missing_totp(disable_requests_cache: disabl
     credentials = Credentials(username="testuser", password="testpassword")
     manager = CredentialsManager(credentials)
     pook.post(urls.LOGIN).reply(202).json({"status": 6, "statusText": "totpNeeded"})
-    service = TestDeGiroService(manager)
+    service = DeGiroServiceTest(manager)
 
     # Check we have the right credentials
     assert service.api_client.credentials.username == credentials.username
@@ -140,7 +140,7 @@ def test_degiro_service_update_credentials(disable_requests_cache: disable_reque
     credentials = Credentials(username="testuser", password="testpassword")
     manager = CredentialsManager(credentials)
     pook.post(urls.LOGIN).reply(202).json({"status": 6, "statusText": "totpNeeded"})
-    service = TestDeGiroService(manager)
+    service = DeGiroServiceTest(manager)
 
     # Check we have the right credentials
     assert service.api_client.credentials.username == credentials.username
@@ -196,7 +196,7 @@ def test_get_product_quotation(
     pook.get(urls.CHART).reply(200).json(chart_data)
     pook.get(urls.CHART).reply(200).json(chart_data)
 
-    service = TestDeGiroService(manager)
+    service = DeGiroServiceTest(manager)
     service.connect()
 
     quotes = service.get_product_quotation("350015372", "US0378331005", Interval.P1M, "AAPL")
