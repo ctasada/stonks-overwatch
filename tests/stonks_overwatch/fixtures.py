@@ -37,7 +37,7 @@ def disable_requests_cache():
         yield
 
 
-class TestDeGiroService(DeGiroService):
+class DeGiroServiceTest(DeGiroService):
     """Test specific DeGiroService to avoid the singleton limitations"""
 
     def __new__(cls, *args, **kwargs):
