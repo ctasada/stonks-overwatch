@@ -15,20 +15,20 @@
         <label for="totalPL" class="col-form-label-p-0">Total P/L:
             {% if total_portfolio.total_pl > 0 %}
             <span class="fw-semibold text-success">
-                {% else %}
-                <span class="fw-semibold text-danger">
-                    {% endif %}
-                    {{ total_portfolio.total_pl_formatted }}</span>
+            {% else %}
+            <span class="fw-semibold text-danger">
+            {% endif %}
+                {{ total_portfolio.total_pl_formatted }}</span>
         </label>
     </div>
     <div class="col-5">
         <label for="totalROI" class="col-form-label-p-0">ROI:
             {% if total_portfolio.total_roi > 0 %}
             <span class="fw-semibold text-success">
-                {% else %}
-                <span class="fw-semibold text-danger">
-                    {% endif %}
-                    {{ total_portfolio.total_roi_formatted }}</span>
+            {% else %}
+            <span class="fw-semibold text-danger">
+            {% endif %}
+                {{ total_portfolio.total_roi_formatted }}</span>
         </label>
     </div>
 </div>

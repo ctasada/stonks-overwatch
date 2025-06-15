@@ -1,0 +1,15 @@
+<div class="col-md-auto border border-primary-subtle bg-light rounded mb-3 position-relative" style="padding: 0.5rem 1rem 0.25rem 0.75rem;">
+    <div class="d-flex justify-content-between align-items-start w-100">
+        <label class="fs-6 text-primary mb-0">{{ label }}</label>
+        {% if tooltip %}
+        <span class="ms-2" data-bs-toggle="tooltip" data-bs-placement="right" title="{{ tooltip }}">
+            <i class="bi bi-info-circle text-secondary"></i>
+        </span>
+        {% endif %}
+    </div>
+    {% if '-' in value %}
+    <span class="h5 fw-semibold text-danger">{{ value }}</span>
+    {% else %}
+    <span class="h5 fw-semibold text-success">{{ value }}</span>
+    {% endif %}
+</div>
