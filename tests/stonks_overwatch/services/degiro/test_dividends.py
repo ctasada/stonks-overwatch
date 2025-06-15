@@ -119,7 +119,8 @@ class TestDividendsService(TestCase):
         assert dividends[0].stock_name == "Microsoft Corp"
         assert dividends[0].stock_symbol == "MSFT"
         assert dividends[0].currency == "EUR"
-        assert dividends[0].change == 7.526881720430107
+        assert dividends[0].amount == pytest.approx(7.52, rel=1e-2)
+        assert dividends[0].taxes == pytest.approx(0.0, rel=1e-2)
         assert dividends[0].formated_change() == "€ 7.53"
         assert dividends[0].dividend_type == DividendType.PAID
 
@@ -133,6 +134,7 @@ class TestDividendsService(TestCase):
         assert upcoming_dividends[0].stock_name == "Microsoft Corp"
         assert upcoming_dividends[0].stock_symbol == "MSFT"
         assert upcoming_dividends[0].currency == "EUR"
-        assert upcoming_dividends[0].change == pytest.approx(15.80, rel=1e-2)
+        assert upcoming_dividends[0].amount == pytest.approx(18.59, rel=1e-2)
+        assert upcoming_dividends[0].taxes == pytest.approx(2.78, rel=1e-2)
         assert upcoming_dividends[0].formated_change() == "€ 15.81"
         assert upcoming_dividends[0].dividend_type == DividendType.ANNOUNCED
