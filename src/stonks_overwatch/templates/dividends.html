@@ -4,16 +4,27 @@
 {% block content %}
 
 <div class="container-fluid row-gap-5">
-    {% if total_dividends == None%}
+    {% if total_net_dividends == None %}
     <div class="row mt-2 column-gap-3">
         <h4 class="mb-1">No dividends found</h4>
     </div>
     {% else %}
     <div class="row mt-2 column-gap-3">
-        <div class="col-md-auto border border-primary-subtle bg-light rounded mb-3">
-            <label class="col-form-label-p-0 text-secondary">Total Dividends</label>
+        <div class="col-md-auto border border-primary-subtle bg-light rounded mb-3 position-relative" style="padding: 0.75rem 2.5rem 0.75rem 0.75rem;">
+             <span class="position-absolute top-0 end-0 m-2" data-bs-toggle="tooltip" data-bs-placement="right" title="Total net dividends received.">
+                <i class="bi bi-info-circle text-secondary"></i>
+            </span>
+            <label class="fs-5 text-primary">Net Dividends</label>
             <br>
-            <span class="h5 fw-semibold text-success">{{ total_dividends }}</span>
+            <span class="h4 fw-semibold text-success">{{ total_net_dividends }}</span>
+        </div>
+        <div class="col-md-auto border border-primary-subtle bg-light rounded mb-3 position-relative" style="padding: 0.75rem 2.5rem 0.75rem 0.75rem;">
+             <span class="position-absolute top-0 end-0 m-2" data-bs-toggle="tooltip" data-bs-placement="right" title="Gross dividend is the total amount paid out before dividend tax is deducted.">
+                <i class="bi bi-info-circle text-secondary"></i>
+            </span>
+            <label class="fs-5 text-primary">Gross Dividends</label>
+            <br>
+            <span class="h4 fw-semibold text-success">{{ total_gross_dividends }}</span>
         </div>
     </div>
     <div class="row border border-primary-subtle bg-light rounded mb-3">
@@ -31,7 +42,7 @@
                 </div>
             </div>
         </div>
-        <div id="chart-container" style="position: relative; width: 100%; height: 40vh;">
+        <div id="chart-container" style="position: relative; width: 100%; height: 25vh;">
             <canvas id="dividends-growth"></canvas>
         </div>
     </div>

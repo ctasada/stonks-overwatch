@@ -61,6 +61,7 @@ class Diversification(View):
                         "size": stock.portfolio_size,
                         "formatted_size": stock.formatted_portfolio_size,
                         "weight": (stock.portfolio_size / max_percentage) * 100,
+                        "formatted_value": stock.formatted_base_currency_value(),
                     }
                 )
 
@@ -84,8 +85,7 @@ class Diversification(View):
     def _get_countries(self, portfolio: List[PortfolioEntry]) -> dict:
         return self._get_data("country", portfolio)
 
-    @staticmethod
-    def _get_data(field_name: str, portfolio: List[PortfolioEntry]) -> dict:
+    def _get_data(self, field_name: str, portfolio: List[PortfolioEntry]) -> dict:
         data_table = []
         data = {}
 
@@ -134,6 +134,9 @@ class Diversification(View):
                 {
                     "name": key,
                     "value": data[key]["value"],
+                    "formatted_value": LocalizationUtility.format_money_value(
+                        value=data[key]["value"], currency=self.base_currency
+                    ),
                     "size": portfolio_size,
                     "formatted_size": f"{portfolio_size:.2%}",
                     "weight": (data[key]["portfolio_size"] / max_percentage) * 100,

@@ -106,7 +106,8 @@ class Dividend:
     stock_name: str
     stock_symbol: str
     currency: str
-    change: float
+    amount: float = 0.0
+    taxes: float = 0.0
     ex_dividend_date: datetime = None
 
     def payment_date_as_string(self) -> str:
@@ -122,7 +123,8 @@ class Dividend:
         return LocalizationUtility.format_time_from_date(self.ex_dividend_date)
 
     def formated_change(self) -> str:
-        return LocalizationUtility.format_money_value(value=self.change, currency=self.currency)
+        """Returns the formatted change in the dividend amount after taxes."""
+        return LocalizationUtility.format_money_value(value=self.net_amount(), currency=self.currency)
 
     def is_paid(self) -> bool:
         return self.dividend_type == DividendType.PAID
@@ -138,6 +140,18 @@ class Dividend:
 
     def month_year(self) -> str:
         return LocalizationUtility.format_date_to_month_year(self.payment_date)
+
+    def net_amount(self) -> float:
+        """
+        Returns the net amount after taxes.
+        """
+        return self.amount - self.taxes
+
+    def gross_amount(self) -> float:
+        """
+        Returns the gross amount before taxes.
+        """
+        return self.amount
 
 
 @dataclass

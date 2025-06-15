@@ -33,9 +33,10 @@ class Dividends(View):
         dividends_calendar = self._get_dividends_calendar(dividends_overview)
         dividends_growth = self._get_dividends_growth(dividends_calendar["calendar"])
         dividends_diversification = self._get_diversification(dividends_overview)
-        total_dividends = self._get_total_dividends(dividends_calendar["calendar"])
+        total_net_dividends = self._get_total_net_dividends(dividends_overview)
+        total_gross_dividends = self._get_total_gross_dividends(dividends_overview)
 
-        if total_dividends > 0.0:
+        if total_net_dividends > 0.0:
             # Filter the dividends_calendar to only include items matching the calendar_year
             filtered_calendar = {
                 key: value for key, value in dividends_calendar["calendar"].items() if key.endswith(str(calendar_year))
@@ -43,8 +44,11 @@ class Dividends(View):
             dividends_calendar["calendar"] = filtered_calendar
 
             context = {
-                "total_dividends": LocalizationUtility.format_money_value(
-                    value=total_dividends, currency=self.base_currency
+                "total_net_dividends": LocalizationUtility.format_money_value(
+                    value=total_net_dividends, currency=self.base_currency
+                ),
+                "total_gross_dividends": LocalizationUtility.format_money_value(
+                    value=total_gross_dividends, currency=self.base_currency
                 ),
                 "dividendsCalendar": dividends_calendar,
                 "dividendsDiversification": dividends_diversification,
@@ -118,10 +122,10 @@ class Dividends(View):
 
             # Number of Payouts in the month
             payouts = month_entry.setdefault("payouts", 0)
-            if dividend_pay.change > 0:
+            if dividend_pay.amount > 0:
                 month_entry["payouts"] = payouts + 1
             # Total payout in the month
-            month_entry["total"] = month_entry.setdefault("total", 0) + dividend_pay.change
+            month_entry["total"] = month_entry.setdefault("total", 0) + dividend_pay.net_amount()
             month_entry["formatedTotal"] = LocalizationUtility.format_money_value(
                 value=month_entry["total"], currency=dividend_pay.currency
             )
@@ -149,13 +153,19 @@ class Dividends(View):
         dividends_growth = dict(sorted(dividends_growth.items(), key=lambda item: item[0]))
         return dividends_growth
 
-    def _get_total_dividends(self, dividends_calendar: dict) -> float:
-        total_dividends = 0
-        for month_year in dividends_calendar.keys():
-            month_entry = dividends_calendar.setdefault(month_year, {})
-            total_dividends += month_entry["total"]
+    def _get_total_net_dividends(self, dividends_list: List[Dividend]) -> float:
+        total_net_dividends = 0
+        for dividend in dividends_list:
+            total_net_dividends += dividend.net_amount()
 
-        return total_dividends
+        return total_net_dividends
+
+    def _get_total_gross_dividends(self, dividends_list: List[Dividend]) -> float:
+        total_gross_dividends = 0
+        for dividend in dividends_list:
+            total_gross_dividends += dividend.gross_amount()
+
+        return total_gross_dividends
 
     def _get_diversification(self, dividends_overview: List[Dividend]) -> dict:
         dividends_table = []
@@ -170,9 +180,9 @@ class Dividends(View):
             if dividend_name in dividends:
                 dividend_value = dividends[dividend_name]["value"]
 
-            total_dividends += entry.change
+            total_dividends += entry.net_amount()
             dividends[dividend_name] = {
-                "value": dividend_value + entry.change,
+                "value": dividend_value + entry.net_amount(),
                 "symbol": entry.stock_symbol,
                 "product_type": ProductType.STOCK.name,
             }
@@ -188,6 +198,9 @@ class Dividends(View):
                 {
                     "name": key,
                     "value": dividends[key]["value"],
+                    "formatted_value": LocalizationUtility.format_money_value(
+                        value=dividends[key]["value"], currency=self.base_currency
+                    ),
                     "size": dividends_size,
                     "formatted_size": f"{dividends_size:.2%}",
                     "weight": (dividends[key]["dividends_size"] / max_percentage) * 100,
