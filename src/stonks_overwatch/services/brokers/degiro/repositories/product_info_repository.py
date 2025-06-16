@@ -14,12 +14,15 @@ class ProductInfoRepository:
             list: list of product infos
         """
         with connection.cursor() as cursor:
+            # Use parameterized query to prevent SQL injection
+            placeholders = ",".join(["%s"] * len(ids))
             cursor.execute(
                 f"""
                 SELECT *
                 FROM degiro_productinfo
-                WHERE id IN ({", ".join(map(str, ids))})
-                """
+                WHERE id IN ({placeholders})
+                """,
+                ids,
             )
             rows = dictfetchall(cursor)
 
@@ -37,12 +40,15 @@ class ProductInfoRepository:
             list: list of product infos. For a single symbol, the list may contain multiple products.
         """
         with connection.cursor() as cursor:
+            # Use parameterized query to prevent SQL injection
+            placeholders = ",".join(["%s"] * len(symbols))
             cursor.execute(
                 f"""
                 SELECT *
                 FROM degiro_productinfo
-                WHERE symbol IN ({", ".join(f"'{item}'" for item in symbols)})
-                """
+                WHERE symbol IN ({placeholders})
+                """,
+                symbols,
             )
             rows = dictfetchall(cursor)
 
@@ -64,13 +70,15 @@ class ProductInfoRepository:
             Product Info
         """
         with connection.cursor() as cursor:
+            # Use parameterized query to prevent SQL injection
             cursor.execute(
-                f"""
+                """
                 SELECT *
                 FROM degiro_productinfo
-                WHERE name = '{name}'
+                WHERE name = %s
                 LIMIT 1
-                """
+                """,
+                [name],
             )
             return dictfetchone(cursor)
 
