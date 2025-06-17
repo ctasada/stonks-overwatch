@@ -64,7 +64,7 @@ class Dividends(View):
 
         if request.headers.get("Accept") == "application/json" and request.GET.get("html_only"):
             # Return only the calendar HTML
-            return render(request, "dividends_calendar_content.html", {"dividendsCalendar": dividends_calendar})
+            return render(request, "dividends/calendar.html", {"dividendsCalendar": dividends_calendar})
 
         return render(request, "dividends.html", context)
 
