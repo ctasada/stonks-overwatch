@@ -18,6 +18,16 @@ repos:
       # Run the formatter
       - id: ruff-format
 
+  - repo: local
+    hooks:
+      - id: poetry-check
+        name: Poetry Check
+        entry: poetry check
+        language: system
+        pass_filenames: false
+        files: \.(toml)$
+        stages: [pre-commit]  # Only run on commit, not push
+
   # Optional: Check Django migrations
   - repo: local
     hooks:
