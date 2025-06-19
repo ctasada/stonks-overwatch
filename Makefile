@@ -39,7 +39,7 @@ RESET := \033[0m
 #==============================================================================
 
 .PHONY: help install update clean
-.PHONY: lint lint-check lint-fix license-check generate-third-party check-dependencies
+.PHONY: lint lint-check lint-fix license-check generate-third-party check-dependencies scan
 .PHONY: migrate collectstatic runserver start run test coverage
 .PHONY: docker-build docker-run docker-shell docker-clean
 .PHONY: briefcase-create briefcase-update briefcase-run briefcase-package
@@ -113,6 +113,10 @@ generate-third-party: ## Generate third-party licenses file
 check-dependencies: ## Check for dependency issues
 	@echo -e  "$(BOLD)$(BLUE)Checking dependencies...$(RESET)"
 	poetry run deptry .
+
+scan: ## Run security scans
+	@echo -e  "$(BOLD)$(BLUE)Running security scans...$(RESET)"
+	poetry run bandit -c pyproject.toml -ll -r .
 
 #==============================================================================
 ##@ Database Operations
@@ -189,7 +193,7 @@ _create-wheels: ## Internal: Create wheel files for Briefcase
 		if [ -f "$$f" ]; then \
 			version=$$(echo $$f | sed -E 's|.*peewee-([0-9.]+)-cp[0-9]+.*\.whl|\1|'); \
 			new_name="peewee-$${version}-py3-none-any.whl"; \
-			echo "$(YELLOW)Renaming $$(basename $$f) to $$new_name$(RESET)"; \
+			echo -e "$(YELLOW)Renaming $$(basename $$f) to $$new_name$(RESET)"; \
 			mv "$$f" "$(WHEEL_DIR)/$$new_name"; \
 		fi; \
 	done
@@ -223,7 +227,7 @@ generate-images: ## Generate images for browsers and Briefcase
 		chmod +x scripts/generate-icons.sh; \
 		./scripts/generate-icons.sh; \
 	else \
-		echo "$(RED)Error: scripts/generate-icons.sh not found$(RESET)"; \
+		echo -e "$(RED)Error: scripts/generate-icons.sh not found$(RESET)"; \
 		exit 1; \
 	fi
 
@@ -250,13 +254,13 @@ pre-commit-update: ## Update pre-commit hook versions
 cicd: ## Run CI/CD pipeline (use job=<name> or workflow=<name>)
 	@echo -e  "$(BOLD)$(BLUE)Running CI/CD pipeline...$(RESET)"
 	@if [ -n "$(workflow)" ]; then \
-		echo "$(YELLOW)Running workflow: $(workflow)$(RESET)"; \
+		echo -e "$(YELLOW)Running workflow: $(workflow)$(RESET)"; \
 		act -W ".github/workflows/$(workflow).yml" --container-architecture linux/arm64 -P macos-latest=self-hosted; \
 	elif [ -n "$(job)" ]; then \
-		echo "$(YELLOW)Running job: $(job)$(RESET)"; \
+		echo -e "$(YELLOW)Running job: $(job)$(RESET)"; \
 		act --job $(job) --container-architecture linux/arm64 -P macos-latest=self-hosted; \
 	else \
-		echo "$(YELLOW)Available jobs and workflows:$(RESET)"; \
+		echo -e "$(YELLOW)Available jobs and workflows:$(RESET)"; \
 		act --list; \
 	fi
 
@@ -266,11 +270,11 @@ cicd: ## Run CI/CD pipeline (use job=<name> or workflow=<name>)
 
 # Check if poetry is installed
 _check-poetry:
-	@which poetry > /dev/null || (echo "$(RED)Error: Poetry not found. Please install Poetry first.$(RESET)" && exit 1)
+	@which poetry > /dev/null || (echo -e "$(RED)Error: Poetry not found. Please install Poetry first.$(RESET)" && exit 1)
 
 # Check if Docker is running
 _check-docker:
-	@docker info > /dev/null 2>&1 || (echo "$(RED)Error: Docker is not running$(RESET)" && exit 1)
+	@docker info > /dev/null 2>&1 || (echo -e "$(RED)Error: Docker is not running$(RESET)" && exit 1)
 
 # Add dependency checks to relevant targets
 install: _check-poetry

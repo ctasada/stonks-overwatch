@@ -44,6 +44,7 @@ pip-licenses = "^5.0.0"
 briefcase = "^0.3.23"
 deptry = "^0.23.0"
 pre-commit = "^4.2.0"
+bandit = "^1.8.5"
 
 [tool.poetry]
 include = [
@@ -243,3 +244,8 @@ known_first_party = ["stonks_overwatch"]
 # django-extensions are not actively used in the codebase, but it can be useful
 # django-node-assets is used to simplify the management of NPM dependencies
 DEP002 = ["django-extensions", "django-node-assets"]
+
+[tool.bandit]
+exclude_dirs = ["build", ".venv"]
+#tests = ["B201", "B301"]
+#skips = ["B101", "B601"]
