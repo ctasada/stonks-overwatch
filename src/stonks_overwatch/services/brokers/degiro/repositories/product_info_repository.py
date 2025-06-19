@@ -14,14 +14,14 @@ class ProductInfoRepository:
             list: list of product infos
         """
         with connection.cursor() as cursor:
-            # Use parameterized query to prevent SQL injection
+            # Use a parameterized query to prevent SQL injection
             placeholders = ",".join(["%s"] * len(ids))
             cursor.execute(
                 f"""
                 SELECT *
                 FROM degiro_productinfo
                 WHERE id IN ({placeholders})
-                """,
+                """,  # nosec B608
                 ids,
             )
             rows = dictfetchall(cursor)
@@ -40,14 +40,14 @@ class ProductInfoRepository:
             list: list of product infos. For a single symbol, the list may contain multiple products.
         """
         with connection.cursor() as cursor:
-            # Use parameterized query to prevent SQL injection
+            # Use a parameterized query to prevent SQL injection
             placeholders = ",".join(["%s"] * len(symbols))
             cursor.execute(
                 f"""
                 SELECT *
                 FROM degiro_productinfo
                 WHERE symbol IN ({placeholders})
-                """,
+                """,  # nosec B608
                 symbols,
             )
             rows = dictfetchall(cursor)

@@ -31,13 +31,13 @@ class TransactionsRepository:
     @staticmethod
     def get_product_transactions(product_ids: list[str]) -> list[dict]:
         with connection.cursor() as cursor:
-            # Use parameterized query to prevent SQL injection
+            # Use a parameterized query to prevent SQL injection
             placeholders = ",".join(["%s"] * len(product_ids))
             cursor.execute(
                 f"""
                 SELECT * FROM degiro_transactions
                 WHERE product_id IN ({placeholders})
-                """,
+                """,  # nosec B608
                 product_ids,
             )
             return dictfetchall(cursor)
