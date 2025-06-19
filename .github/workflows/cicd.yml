@@ -33,3 +33,18 @@ jobs:
       - name: Run tests
         run: |
           poetry run pytest
+
+#  FIXME: The GitHub Action is failing. Lets do it local until it can be fixed
+#  analyze:
+#    runs-on: ubuntu-latest
+#    permissions:
+#      # Required for all workflows
+#      security-events: write
+#      # Only required for workflows in private repositories
+#      actions: read
+#      contents: read
+#    steps:
+#      - name: Perform Bandit Analysis
+#        uses: PyCQA/bandit-action@v1
+#        with:
+#          configfile: 'pyproject.toml'
