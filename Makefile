@@ -15,6 +15,7 @@ PROJECT_NAME := stonks-overwatch
 SRC_DIR := src
 WHEEL_DIR := ./wheels
 STATIC_DIR := $(SRC_DIR)/stonks_overwatch/static
+NODE_MODULES_DIR := $(SRC_DIR)/node_modules
 
 # Runtime flags (can be overridden via command line)
 DEBUG_MODE := $(if $(debug),true,false)
@@ -69,7 +70,7 @@ help: ## Show this help message
 install: ## Install all dependencies
 	@echo -e  "$(BOLD)$(GREEN)Installing dependencies...$(RESET)"
 	poetry install --no-root
-	poetry run $(SRC_DIR)/manage.py npminstall
+	poetry run python $(SRC_DIR)/manage.py npminstall
 
 update: ## Update all dependencies
 	@echo -e  "$(BOLD)$(YELLOW)Updating dependencies...$(RESET)"
@@ -85,6 +86,7 @@ clean: ## Clean temporary files and caches
 	rm -rf .pytest_cache .coverage htmlcov
 	rm -rf $(WHEEL_DIR) build dist
 	rm -rf $(STATIC_DIR)
+	rm -rf $(NODE_MODULES_DIR)
 
 #==============================================================================
 ##@ Code Quality
@@ -124,24 +126,28 @@ scan: ## Run security scans
 
 migrate: ## Apply database migrations
 	@echo -e  "$(BOLD)$(GREEN)Applying database migrations...$(RESET)"
-	poetry run $(SRC_DIR)/manage.py makemigrations
-	poetry run $(SRC_DIR)/manage.py migrate
+	poetry run python $(SRC_DIR)/manage.py makemigrations
+	poetry run python $(SRC_DIR)/manage.py migrate
 
 #==============================================================================
 ##@ Django Operations
 #==============================================================================
 
-collectstatic: ## Collect static files
+npminstall: ## Install Node.js dependencies
+	@echo -e  "$(BOLD)$(GREEN)Installing Node.js dependencies...$(RESET)"
+	poetry run python $(SRC_DIR)/manage.py npminstall
+
+collectstatic: npminstall ## Collect static files
 	@echo -e  "$(BOLD)$(BLUE)Collecting static files...$(RESET)"
 	rm -rf $(STATIC_DIR)
-	poetry run $(SRC_DIR)/manage.py collectstatic --noinput
+	poetry run python $(SRC_DIR)/manage.py collectstatic --noinput
 
 runserver: ## Run Django development server (supports debug=true, profile=true, demo=true)
 	@echo -e  "$(BOLD)$(GREEN)Starting Django development server...$(RESET)"
 	@echo -e  "$(YELLOW)Debug mode: $(DEBUG_MODE)$(RESET)"
 	@echo -e  "$(YELLOW)Profile mode: $(PROFILE_MODE)$(RESET)"
 	@echo -e  "$(YELLOW)Demo mode: $(DEMO_MODE)$(RESET)"
-	poetry run $(SRC_DIR)/manage.py runserver
+	poetry run python $(SRC_DIR)/manage.py runserver
 
 start: install collectstatic migrate runserver ## Full setup: install, collect static, migrate, and run server
 
@@ -261,7 +267,8 @@ cicd: ## Run CI/CD pipeline (use job=<name> or workflow=<name>)
 		act --job $(job) --container-architecture linux/arm64 -P macos-latest=self-hosted; \
 	else \
 		echo -e "$(YELLOW)Available jobs and workflows:$(RESET)"; \
-		act --list; \
+		act --list --container-architecture linux/arm64; \
+		echo -e "$(YELLOW)Use 'make cicd job=<jobId>' or 'make cicd workflow=<workflowFile>' to run specific jobs or workflows$(RESET)"; \
 	fi
 
 #==============================================================================
