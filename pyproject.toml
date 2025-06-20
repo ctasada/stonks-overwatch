@@ -45,6 +45,7 @@ briefcase = "^0.3.23"
 deptry = "^0.23.0"
 pre-commit = "^4.2.0"
 bandit = "^1.8.5"
+pymarkdownlnt = "^0.9.30"
 
 [tool.poetry]
 include = [
@@ -249,3 +250,6 @@ DEP002 = ["django-extensions", "django-node-assets"]
 exclude_dirs = ["build", ".venv"]
 #tests = ["B201", "B301"]
 #skips = ["B101", "B601"]
+
+[tool.pymarkdown]
+plugins.md013.enabled = false

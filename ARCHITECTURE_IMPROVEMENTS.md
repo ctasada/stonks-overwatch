@@ -13,6 +13,7 @@ This document presents a comprehensive analysis of pending architecture improvem
 ### 1. **Repository Layer Architecture** (HIGH PRIORITY)
 
 **Issues Identified**:
+
 - No base repository class (100% code duplication)
 - Inconsistent ORM vs raw SQL usage
 - Poor error handling patterns
@@ -48,6 +49,7 @@ class BaseRepository(ABC):
 4. **Inconsistent Naming**: Mixed snake_case and camelCase in field names
 
 **Examples**:
+
 ```python
 # CURRENT: Inconsistent balance field types
 balance_total = models.CharField(max_length=200)  # Should be Decimal
@@ -69,6 +71,7 @@ product = models.ForeignKey(DeGiroProductInfo, on_delete=models.CASCADE)
 **Identified Duplications**:
 
 #### A. **Service Creation Logic** (9+ instances)
+
 ```python
 # DUPLICATED: Manual service instantiation across aggregators
 def __init__(self):
@@ -78,6 +81,7 @@ def __init__(self):
 ```
 
 #### B. **Data Transformation Patterns** (15+ instances)
+
 ```python
 # DUPLICATED: Similar transformation logic across services
 for transaction in transactions_history:
@@ -87,6 +91,7 @@ for transaction in transactions_history:
 ```
 
 #### C. **Error Handling Patterns** (20+ instances)
+
 ```python
 # DUPLICATED: Generic exception handling everywhere
 try:
@@ -104,12 +109,14 @@ except Exception as error:
 ### 4. **Caching Architecture** (MEDIUM PRIORITY)
 
 **Issues Identified**:
+
 - **Hardcoded cache keys**: `"portfolio_data_update_from_degiro"`
-- **Inconsistent timeouts**: Some 3600s, others 300s, some disabled
-- **No cache invalidation strategy**
-- **Cache disabled in settings**: Using DummyCache
+- **Inconsistent timeouts**: Some 3600s, others 300s, some disabled.
+- **No cache invalidation strategy**.
+- **Cache disabled in settings**: Using DummyCache.
 
 **Examples**:
+
 ```python
 # CURRENT: Hardcoded patterns
 CACHE_KEY_UPDATE_PORTFOLIO = "portfolio_data_update_from_degiro"
@@ -130,6 +137,7 @@ class CacheManager:
 - **Inconsistent Logging**: Different log levels for similar errors
 
 **Proposed Improvements**:
+
 ```python
 class BrokerServiceException(Exception):
     """Base exception for broker services."""
@@ -154,6 +162,7 @@ class ConfigurationException(BrokerServiceException):
 - **Static Class Anti-pattern**: Uses static methods instead of proper instance management
 
 **Current Code** (`jobs/jobs_scheduler.py`):
+
 ```python
 # CURRENT: Hardcoded DeGiro dependency
 @staticmethod
@@ -163,6 +172,7 @@ def update_degiro_portfolio():
 ```
 
 **Proposed Solution**: Broker-agnostic job scheduler:
+
 ```python
 class JobsScheduler:
     def __init__(self, broker_registry: BrokerRegistry):
@@ -188,6 +198,7 @@ class JobsScheduler:
 - **Scalability Problem**: New brokers require new middleware classes
 
 **Current Code** (`middleware/degiro_auth.py`):
+
 ```python
 # CURRENT: DeGiro-only middleware
 class DeGiroAuthMiddleware:
@@ -196,6 +207,7 @@ class DeGiroAuthMiddleware:
 ```
 
 **Proposed Solution**: Generic broker authentication middleware:
+
 ```python
 class BrokerAuthMiddleware:
     def __init__(self, get_response):
@@ -216,6 +228,7 @@ class BrokerAuthMiddleware:
 - **Extension Complexity**: Adding new brokers requires Config class modifications
 
 **Current Code** (`config/config.py`):
+
 ```python
 # CURRENT: Hardcoded broker-specific methods
 def is_degiro_enabled(self) -> bool:
@@ -226,6 +239,7 @@ def is_bitvavo_enabled(self) -> bool:
 ```
 
 **Proposed Solution**: Registry-based configuration:
+
 ```python
 class Config:
     def __init__(self):
@@ -245,9 +259,9 @@ class Config:
 ### 9. **Configuration Management** (LOW PRIORITY)
 
 **Issues**:
-- **Scattered Constants**: Hardcoded values across 20+ files
-- **No Environment-Specific Configuration**
-- **Missing Validation**: No config validation on startup
+- **Scattered Constants**: Hardcoded values across 20+ files.
+- **No Environment-Specific Configuration**.
+- **Missing Validation**: No config validation on startup.
 
 ### 10. **Logging Standardization** (LOW PRIORITY)
 
@@ -260,27 +274,29 @@ class Config:
 
 ## 📊 Impact Analysis
 
-
-
 ### Code Quality Impact
+
 - **~500 lines of duplicate code** → **~150 lines** (70% reduction)
 - **15+ error handling patterns** → **1 centralized pattern**
 - **6 different service creation patterns** → **1 factory pattern**
 - **3 broker-specific modules** → **Generic extensible modules**
 
 ### Performance Impact
+
 - **Database query optimization**: 40-60% faster queries with proper indexing
 - **Cache efficiency**: 30-50% cache hit rate improvement
 - **Error recovery**: Reduce error-related downtime by 80%
 - **Job scheduling efficiency**: 50% reduction in scheduler overhead
 
 ### Maintainability Impact
+
 - **Repository maintenance**: 60-70% less code to maintain
 - **Testing coverage**: Enable 90%+ repository test coverage
 - **Development velocity**: 40% faster feature development
 - **New broker integration**: 80% faster onboarding with generic modules
 
 ### Extensibility Impact
+
 - **Jobs module**: New brokers auto-registered for scheduling
 - **Authentication**: Single middleware handles all broker authentication
 - **Configuration**: Dynamic broker config registration
@@ -290,47 +306,53 @@ class Config:
 ## 🎯 Implementation Roadmap
 
 ### Phase 1: Repository & Database Layer (2-3 weeks)
-1. **Add input validation** to all repository methods
-2. **Create BaseRepository** with secure patterns
-3. **Refactor all repositories** to extend BaseRepository
-4. **Add proper foreign key relationships** to models
-5. **Fix type inconsistencies** in database fields
-6. **Implement model validation**
+
+1. **Add input validation** to all repository methods.
+2. **Create BaseRepository** with secure patterns.
+3. **Refactor all repositories** to extend BaseRepository.
+4. **Add proper foreign key relationships** to models.
+5. **Fix type inconsistencies** in database fields.
+6. **Implement model validation**.
 
 ### Phase 2: Code Duplication & Architecture (2-3 weeks)
-1. **Create DataTransformerService** for common transformations
-2. **Implement centralized error handling**
-3. **Refactor service creation** to use dependency injection
-4. **Standardize caching patterns**
-5. **Refactor Jobs module** to be broker-agnostic
-6. **Create generic BrokerAuthMiddleware** to replace DeGiro-specific version
-7. **Implement registry-based configuration** management
+
+1. **Create DataTransformerService** for common transformations.
+2. **Implement centralized error handling**.
+3. **Refactor service creation** to use dependency injection.
+4. **Standardize caching patterns**.
+5. **Refactor Jobs module** to be broker-agnostic.
+6. **Create generic BrokerAuthMiddleware** to replace DeGiro-specific version.
+7. **Implement registry-based configuration** management.
 
 ### Phase 3: Configuration & Monitoring (1-2 weeks)
-1. **Centralize configuration management**
-2. **Implement structured logging**
-3. **Add performance monitoring**
-4. **Create admin dashboards**
+
+1. **Centralize configuration management**.
+2. **Implement structured logging**.
+3. **Add performance monitoring**.
+4. **Create admin dashboards**.
 
 ---
 
 ## 📋 Next Steps
 
 ### Immediate Actions (This Week)
+
 1. **Set up code scanning** to prevent future vulnerabilities
-2. **Begin BaseRepository implementation**
-3. **Start repository input validation**
+2. **Begin BaseRepository implementation**.
+3. **Start repository input validation**.
 
 ### Short Term (Next Month)
-1. **Begin BaseRepository implementation**
-2. **Start database model refactoring**
-3. **Implement comprehensive test coverage**
+
+1. **Begin BaseRepository implementation**.
+2. **Start database model refactoring**.
+3. **Implement comprehensive test coverage**.
 
 ### Long Term (Next Quarter)
-1. **Complete architecture modernization**
-2. **Achieve 90%+ test coverage**
-3. **Implement monitoring dashboards**
-4. **Document all architectural decisions**
+
+1. **Complete architecture modernization**.
+2. **Achieve 90%+ test coverage**.
+3. **Implement monitoring dashboards**.
+4. **Document all architectural decisions**.
 
 ---
 
