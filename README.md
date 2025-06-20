@@ -28,15 +28,15 @@ Right now the features we offer are:
 
 ### How to login to DEGIRO
 
-See [Wiki - DEGIRO](https://github.com/ctasada/stonks-overwatch/wiki/DEGIRO)
+See [Wiki - DEGIRO](./docs/DEGIRO)
 
 ### How to login to Bitvavo
 
-See [Wiki - Bitvavo](https://github.com/ctasada/stonks-overwatch/wiki/Bitvavo)
+See [Wiki - Bitvavo](./docs/Bitvavo)
 
 ## Start Developing
 
-See [Wiki - Developing Stonks Overwatch](https://github.com/ctasada/stonks-overwatch/wiki/Developing-Stonks-Overwatch)
+See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
 
 ## Documentation
 
