@@ -2,10 +2,12 @@
 
 DEGIRO is the main tracker supported by **Stonks Overwatch**. It provides real-time access to your investments, portfolio value, growth, dividends, fees, deposits, and more.
 
-### How to login to DEGIRO
+## How to login to DEGIRO
+
 You can log in to DEGIRO in two different ways
 
-#### Use the Login form
+### Use the Login form
+
 When you open your browser at [http://127.0.0.1:8000](http://127.0.0.1:8000) you will see a login form. Introduce
 your credentials, including the OTP (One-Time-Password).
 
@@ -14,6 +16,7 @@ The first time, the application will retrieve all your portfolio from DEGIRO, an
 > Using this approach, no credentials are stored anywhere. You will need to repeat this step everytime
 
 #### Automatic login
+
 If you don't want to introduce your credentials everytime, it's possible to store them in a file, so login will be much
 more comfortable and transparent.
 
@@ -35,6 +38,7 @@ Copy the file `config/config.json.template` to `config/config.json`
     }
 }
 ```
+
 Only the `credentials` section is mandatory, put your credentials in the corresponding fields, and follow the instructions
 to obtain your `totp_secret_key`. You can also skip it, and the application will ask for your OTP everytime.
 
@@ -66,11 +70,14 @@ If you want to test a new version of the DEGIRO connector, you can do it by foll
 1. Clone the [DEGIRO Connector](https://github.com/Chavithra/degiro-connector) or your own fork
 2. Modify the code in DEGIRO Connector as needed
 3. In `pyproject.toml`, update the version to reflect the changes made
+
    ```toml
    [tool.poetry]
-   version = "3.0.29.dev1"  # Update this to the new version
+      version = "3.0.29.dev1"  # Update this to the new version
    ```
+
 4. Use the new version in your project by running:
-   ```bash
+
+```bash
    poetry add path/to/your/degiro-connector/dist/degiro_connector-3.0.29.dev1-py3-none-any.whl
-   ```
+```

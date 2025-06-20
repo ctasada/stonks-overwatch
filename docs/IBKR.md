@@ -1,7 +1,8 @@
 # IBKR (Interactive Brokers)
 
-### How to login to IBR (Interactive Brokers)
-Follow instructions at https://github.com/Voyz/ibind/wiki/OAuth-1.0a
+## How to login to IBR (Interactive Brokers)
+
+Follow instructions at [iBind - OAuth-1.0a](https://github.com/Voyz/ibind/wiki/OAuth-1.0a)
 
 Copy the generated files to a folder, for example `config/ibkr_certs`. Now you can update your `config.json` file with
 the new values:
@@ -23,6 +24,7 @@ the new values:
   }
 }
 ```
+
 Only the `credentials` section is mandatory, put your credentials in the corresponding fields, and follow the instructions
 to obtain your `totp_secret_key`. You can also skip it, and the application will ask for your OTP everytime.
 
@@ -52,11 +54,14 @@ If you want to test a new version of iBind, you can do it by following these ste
 1. Clone the [iBind](https://github.com/Voyz/ibind) or your own fork
 2. Modify the code in iBind as needed
 3. In `pyproject.toml`, update the version to reflect the changes made
+
    ```toml
    [tool.poetry]
-   version = "0.1.15.dev1"  # Update this to the new version
+      version = "0.1.15.dev1"  # Update this to the new version
    ```
+
 4. Use the new version in your project by running:
-   ```bash
+
+```bash
    poetry add path/to/your/ibind/dist/ibind-0.1.15.dev1-py3-none-any.whl
-   ```
+```

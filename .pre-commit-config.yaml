@@ -28,6 +28,14 @@ repos:
         files: \.(toml)$
         stages: [pre-commit]  # Only run on commit, not push
 
+  - repo: local
+    hooks:
+      - id: pymarkdown
+        name: Pymarkdown Check
+        entry: make markdown-check
+        language: system
+        stages: [pre-commit]
+
   # Optional: Check Django migrations
   - repo: local
     hooks:

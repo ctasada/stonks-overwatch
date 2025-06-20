@@ -16,6 +16,7 @@ Stonks Overwatch runs locally and doesn't share your data with anyone. Your data
 to keep growing to provide many more features in the future.
 
 Right now the features we offer are:
+
 * Realtime access to your DEGIRO investments
 * Portfolio value overtime
 * Portfolio growth
@@ -26,25 +27,27 @@ Right now the features we offer are:
 * Transactions
 * Account Statements
 
-# Developing Stonks Overwatch
+## Developing Stonks Overwatch
+
 See [Wiki - Developing Stonks Overwatch](./Developing-Stonks-Overwatch.md).
 
-# Which trackers are supported?
+## Which trackers are supported?
+
 **Stonks Overwatch** is continuously evolving. Currently, it supports the following trackers:
 
-## [DEGIRO](./DEGIRO.md)
+### [DEGIRO](./DEGIRO.md)
 
 [DEGIRO](https://www.degiro.com/) is the main tracker supported by **Stonks Overwatch**. It provides real-time access to your investments, portfolio value, growth, dividends, fees, deposits, and more.
 
 More information about DEGIRO can be found in the [DEGIRO documentation](./DEGIRO.md).
 
-## [Bitvavo](./Bitvavo.md)
+### [Bitvavo](./Bitvavo.md)
 
 [Bitvavo](https://bitvavo.com/en/) is a cryptocurrency exchange that **Stonks Overwatch** supports. It allows you to track your crypto investments, portfolio value, and growth.
 
 More information about Bitvavo can be found in the [Bitvavo documentation](./bitvavo.md).
 
-## [IBKR](./IBKR.md) (Interactive Brokers) [WIP]
+### [IBKR](./IBKR.md) (Interactive Brokers) [WIP]
 
 [Interactive Brokers](https://www.interactivebrokers.com/) is a global brokerage firm that **Stonks Overwatch** supports.
 
