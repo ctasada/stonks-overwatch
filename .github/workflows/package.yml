@@ -57,6 +57,11 @@ jobs:
         run: |
           ${{ matrix.pre-command }}
 
+      - name: Collect Static Files
+        run: |
+          # Collect static files for the app
+          make collectstatic
+
       - name: Build App for ${{ matrix.target }}
         run: |
           ${{ matrix.briefcase-build-prefix }} \

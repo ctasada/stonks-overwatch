@@ -15,6 +15,7 @@ PROJECT_NAME := stonks-overwatch
 SRC_DIR := src
 WHEEL_DIR := ./wheels
 STATIC_DIR := $(SRC_DIR)/stonks_overwatch/static
+NODE_MODULES_DIR := $(SRC_DIR)/node_modules
 
 # Runtime flags (can be overridden via command line)
 DEBUG_MODE := $(if $(debug),true,false)
@@ -85,6 +86,7 @@ clean: ## Clean temporary files and caches
 	rm -rf .pytest_cache .coverage htmlcov
 	rm -rf $(WHEEL_DIR) build dist
 	rm -rf $(STATIC_DIR)
+	rm -rf $(NODE_MODULES_DIR)
 
 #==============================================================================
 ##@ Code Quality
@@ -131,7 +133,11 @@ migrate: ## Apply database migrations
 ##@ Django Operations
 #==============================================================================
 
-collectstatic: ## Collect static files
+npminstall: ## Install Node.js dependencies
+	@echo -e  "$(BOLD)$(GREEN)Installing Node.js dependencies...$(RESET)"
+	poetry run $(SRC_DIR)/manage.py npminstall
+
+collectstatic: npminstall ## Collect static files
 	@echo -e  "$(BOLD)$(BLUE)Collecting static files...$(RESET)"
 	rm -rf $(STATIC_DIR)
 	poetry run $(SRC_DIR)/manage.py collectstatic --noinput
@@ -261,7 +267,8 @@ cicd: ## Run CI/CD pipeline (use job=<name> or workflow=<name>)
 		act --job $(job) --container-architecture linux/arm64 -P macos-latest=self-hosted; \
 	else \
 		echo -e "$(YELLOW)Available jobs and workflows:$(RESET)"; \
-		act --list; \
+		act --list --container-architecture linux/arm64; \
+		echo -e "$(YELLOW)Use 'make cicd job=<jobId>' or 'make cicd workflow=<workflowFile>' to run specific jobs or workflows$(RESET)"; \
 	fi
 
 #==============================================================================
