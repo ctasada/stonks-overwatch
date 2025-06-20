@@ -105,11 +105,11 @@ lint-fix: ## Fix code style issues automatically
 
 markdown-check: ## Check Markdown files for style issues
 	@echo -e  "$(BOLD)$(BLUE)Checking Markdown files...$(RESET)"
-	pymarkdown --config=pyproject.toml scan -r README.md CHANGELOG.md ./docs
+	poetry run pymarkdown --config=pyproject.toml scan -r README.md CHANGELOG.md ./docs
 
 markdown-fix: ## Fix Markdown files automatically
 	@echo -e  "$(BOLD)$(GREEN)Fixing Markdown files...$(RESET)"
-	pymarkdown --config=pyproject.toml fix -r README.md CHANGELOG.md ./docs
+	poetry run pymarkdown --config=pyproject.toml fix -r README.md CHANGELOG.md ./docs
 
 license-check: ## Check license compatibility
 	@echo -e  "$(BOLD)$(BLUE)Checking license compatibility...$(RESET)"
