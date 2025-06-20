@@ -70,7 +70,7 @@ help: ## Show this help message
 install: ## Install all dependencies
 	@echo -e  "$(BOLD)$(GREEN)Installing dependencies...$(RESET)"
 	poetry install --no-root
-	poetry run $(SRC_DIR)/manage.py npminstall
+	poetry run python $(SRC_DIR)/manage.py npminstall
 
 update: ## Update all dependencies
 	@echo -e  "$(BOLD)$(YELLOW)Updating dependencies...$(RESET)"
@@ -126,8 +126,8 @@ scan: ## Run security scans
 
 migrate: ## Apply database migrations
 	@echo -e  "$(BOLD)$(GREEN)Applying database migrations...$(RESET)"
-	poetry run $(SRC_DIR)/manage.py makemigrations
-	poetry run $(SRC_DIR)/manage.py migrate
+	poetry run python $(SRC_DIR)/manage.py makemigrations
+	poetry run python $(SRC_DIR)/manage.py migrate
 
 #==============================================================================
 ##@ Django Operations
@@ -135,19 +135,19 @@ migrate: ## Apply database migrations
 
 npminstall: ## Install Node.js dependencies
 	@echo -e  "$(BOLD)$(GREEN)Installing Node.js dependencies...$(RESET)"
-	poetry run $(SRC_DIR)/manage.py npminstall
+	poetry run python $(SRC_DIR)/manage.py npminstall
 
 collectstatic: npminstall ## Collect static files
 	@echo -e  "$(BOLD)$(BLUE)Collecting static files...$(RESET)"
 	rm -rf $(STATIC_DIR)
-	poetry run $(SRC_DIR)/manage.py collectstatic --noinput
+	poetry run python $(SRC_DIR)/manage.py collectstatic --noinput
 
 runserver: ## Run Django development server (supports debug=true, profile=true, demo=true)
 	@echo -e  "$(BOLD)$(GREEN)Starting Django development server...$(RESET)"
 	@echo -e  "$(YELLOW)Debug mode: $(DEBUG_MODE)$(RESET)"
 	@echo -e  "$(YELLOW)Profile mode: $(PROFILE_MODE)$(RESET)"
 	@echo -e  "$(YELLOW)Demo mode: $(DEMO_MODE)$(RESET)"
-	poetry run $(SRC_DIR)/manage.py runserver
+	poetry run python $(SRC_DIR)/manage.py runserver
 
 start: install collectstatic migrate runserver ## Full setup: install, collect static, migrate, and run server
 
