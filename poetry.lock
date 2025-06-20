@@ -46,6 +46,23 @@ files = [
 ]
 
 [[package]]
+name = "application-properties"
+version = "0.8.3"
+description = "A simple, easy to use, unified manner of accessing program properties."
+optional = false
+python-versions = ">=3.9.0"
+groups = ["dev"]
+files = [
+    {file = "application_properties-0.8.3-py3-none-any.whl", hash = "sha256:7913ac84408051f095e19e72eda3cba627c3a14d25737620dfb05cbedddb992d"},
+    {file = "application_properties-0.8.3.tar.gz", hash = "sha256:aabb54e26cdc37ba73f5b02ef453b7738cca94468f706c8522876a08164c188a"},
+]
+
+[package.dependencies]
+pyyaml = ">=5.4.1"
+tomli = ">=2.0.1"
+typing-extensions = ">=4.5.0"
+
+[[package]]
 name = "apscheduler"
 version = "3.11.0"
 description = "In-process task scheduler with Cron-like capabilities"
@@ -535,6 +552,22 @@ files = [
     {file = "colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"},
     {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
 ]
+
+[[package]]
+name = "columnar"
+version = "1.4.1"
+description = "A tool for printing data in a columnar format."
+optional = false
+python-versions = "*"
+groups = ["dev"]
+files = [
+    {file = "Columnar-1.4.1-py3-none-any.whl", hash = "sha256:8efb692a7e6ca07dcc8f4ea889960421331a5dffa8e5af81f0a67ad8ea1fc798"},
+    {file = "Columnar-1.4.1.tar.gz", hash = "sha256:c3cb57273333b2ff9cfaafc86f09307419330c97faa88dcfe23df05e6fbb9c72"},
+]
+
+[package.dependencies]
+toolz = "*"
+wcwidth = "*"
 
 [[package]]
 name = "cookiecutter"
@@ -1259,14 +1292,14 @@ test = ["pytest", "pytest-cov", "pytest-tldr"]
 
 [[package]]
 name = "markdown"
-version = "3.8.1"
+version = "3.8.2"
 description = "Python implementation of John Gruber's Markdown."
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "markdown-3.8.1-py3-none-any.whl", hash = "sha256:46cc0c0f1e5211ab2e9d453582f0b28a1bfaf058a9f7d5c50386b99b588d8811"},
-    {file = "markdown-3.8.1.tar.gz", hash = "sha256:a2e2f01cead4828ee74ecca9623045f62216aef2212a7685d6eb9163f590b8c1"},
+    {file = "markdown-3.8.2-py3-none-any.whl", hash = "sha256:5c83764dbd4e00bdd94d85a19b8d55ccca20fe35b2e678a1422b380324dd5f24"},
+    {file = "markdown-3.8.2.tar.gz", hash = "sha256:247b9a70dd12e27f67431ce62523e675b866d254f900c4fe75ce3dda62237c45"},
 ]
 
 [package.extras]
@@ -2133,6 +2166,23 @@ test = ["cffi (>=1.17.0)", "flaky", "greenlet (>=3)", "ipython", "pytest", "pyte
 types = ["typing_extensions"]
 
 [[package]]
+name = "pymarkdownlnt"
+version = "0.9.30"
+description = "A GitHub Flavored Markdown compliant Markdown linter."
+optional = false
+python-versions = ">=3.9.0"
+groups = ["dev"]
+files = [
+    {file = "pymarkdownlnt-0.9.30-py3-none-any.whl", hash = "sha256:29b881434def9d3796be4a89cb277ab9f8f4fbb558379ce7836c653c9c351d2c"},
+    {file = "pymarkdownlnt-0.9.30.tar.gz", hash = "sha256:cf274935b128abd7f30c44314510d0f4d36965149bb9dae84f6cac9491dc1f58"},
+]
+
+[package.dependencies]
+application-properties = ">=0.8.2"
+columnar = ">=1.4.0"
+typing-extensions = ">=4.7.0"
+
+[[package]]
 name = "pyotp"
 version = "2.9.0"
 description = "Python One Time Password Library"
@@ -2770,6 +2820,18 @@ files = [
 ]
 
 [[package]]
+name = "toolz"
+version = "1.0.0"
+description = "List processing tools and functional utilities"
+optional = false
+python-versions = ">=3.8"
+groups = ["dev"]
+files = [
+    {file = "toolz-1.0.0-py3-none-any.whl", hash = "sha256:292c8f1c4e7516bf9086f8850935c799a874039c8bcf959d47b600e4c44a6236"},
+    {file = "toolz-1.0.0.tar.gz", hash = "sha256:2c86e3d9a04798ac556793bced838816296a2f085017664e4995cb40a1047a02"},
+]
+
+[[package]]
 name = "types-python-dateutil"
 version = "2.9.0.20250516"
 description = "Typing stubs for python-dateutil"
@@ -2787,7 +2849,7 @@ version = "4.14.0"
 description = "Backported and Experimental Type Hints for Python 3.9+"
 optional = false
 python-versions = ">=3.9"
-groups = ["main"]
+groups = ["main", "dev"]
 files = [
     {file = "typing_extensions-4.14.0-py3-none-any.whl", hash = "sha256:a1514509136dd0b477638fc68d6a91497af5076466ad0fa6c338e44e359944af"},
     {file = "typing_extensions-4.14.0.tar.gz", hash = "sha256:8676b788e32f02ab42d9e7c61324048ae4c6d844a399eebace3d4979d75ceef4"},
@@ -3196,4 +3258,4 @@ repair = ["scipy (>=1.6.3)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "0ca71cfe1506e6eb41aa61d2c17b8153c13a7633783bb9670fe08ebe4d3e6992"
+content-hash = "0d177fe02d79579dd6299bf5e61441d2c96b35079620e36ea95575149d1cf13b"

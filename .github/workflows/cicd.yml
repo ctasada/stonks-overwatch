@@ -19,7 +19,10 @@ jobs:
         uses: ./.github/actions/common-action
       - name: Run lint check
         run: |
-          poetry run ruff check
+          make lint-check
+      - name: Markdown Check
+        run: |
+          make markdown-check
 
   test:
     name: Tests
