@@ -33,6 +33,9 @@ The templates are using Bootstrap for the layout and styling, Bootstrap Table fo
 Some custom components are also used and are located either in the `src/stonks_overwatch/templates` directory or in the
 `src/stonks_overwatch/staticfiles` directory.
 
+> **Note:** It's important to note that for the application to work correctly all the static files **must** be collected
+> using the `collectstatic` command. This will copy all the static files to the `src/stonks_overwatch/static` folder.
+
 ## Native Application
 
 The native application is built using [Toga](https://toga.readthedocs.io/en/stable/)

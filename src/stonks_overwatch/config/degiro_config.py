@@ -68,7 +68,7 @@ class DegiroConfig(BaseConfig):
         try:
             return cls.from_json_file(cls.CONFIG_PATH)
         except Exception:
-            cls.logger.warning("Cannot find DEGIRO configuration file. Using default values")
+            cls.logger.debug("Cannot find DEGIRO configuration file. Using default values")
             return DegiroConfig(
                 credentials=None,
                 start_date=cls.DEFAULT_DEGIRO_START_DATE,
