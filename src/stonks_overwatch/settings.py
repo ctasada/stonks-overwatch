@@ -39,6 +39,7 @@ STONKS_OVERWATCH_LOGS_DIR = os.environ.get("STONKS_OVERWATCH_LOGS_DIR", DEFAULT_
 # Ensure the directory exists
 if not os.path.exists(STONKS_OVERWATCH_LOGS_DIR):
     os.makedirs(STONKS_OVERWATCH_LOGS_DIR)
+STONKS_OVERWATCH_LOGS_FILENAME = "stonks-overwatch.log"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -218,7 +219,7 @@ LOGGING = {
         "file": {
             "level": "DEBUG",
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": os.path.join(STONKS_OVERWATCH_LOGS_DIR, "stonks-overwatch.log"),
+            "filename": os.path.join(STONKS_OVERWATCH_LOGS_DIR, STONKS_OVERWATCH_LOGS_FILENAME),
             "formatter": "verbose",
             "maxBytes": 5 * 1024 * 1024,  # 5MB per file
             "backupCount": 5,  # Keeps the last 5 logs
