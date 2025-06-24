@@ -31,7 +31,7 @@ class BitvavoConfig(BaseConfig):
         try:
             return cls.from_json_file(cls.CONFIG_PATH)
         except Exception:
-            cls.logger.warning("Cannot find BITVAVO configuration file. Using default values")
+            cls.logger.debug("Cannot find BITVAVO configuration file. Using default values")
             return BitvavoConfig(
                 credentials=None,
             )
