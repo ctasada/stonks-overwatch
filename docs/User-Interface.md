@@ -1,4 +1,4 @@
-# User Interface
+# Developing the User Interface
 
 The user interface of **Stonks Overwatch** is build with the next technologies:
 
@@ -7,6 +7,7 @@ The user interface of **Stonks Overwatch** is build with the next technologies:
 - [Bootstrap Icons](https://icons.getbootstrap.com/) for the icons
 - [Font Awesome](https://fontawesome.com/) for additional icons
 - [Charts.js](https://www.chartjs.org/) for the charts
+- [Toga](https://toga.readthedocs.io/en/stable/) for the native application
 
 The code for the user interface is located in the `src/stonks_overwatch/templates` directory.
 The templates are written in HTML and use the Jinja2 templating engine to render dynamic content.
@@ -31,3 +32,19 @@ The templates are using Bootstrap for the layout and styling, Bootstrap Table fo
 
 Some custom components are also used and are located either in the `src/stonks_overwatch/templates` directory or in the
 `src/stonks_overwatch/staticfiles` directory.
+
+## Native Application
+
+The native application is built using [Toga](https://toga.readthedocs.io/en/stable/)
+
+The native application is very light and simple. A webview is used to display the web interface, which is the same as the one used in the browser.
+
+The application provides some extra features to the user, such as:
+- About dialog: Shows the version and build of the application.
+- Tools:
+  - Export internal database: Allows the user to export the internal database to a file. This is useful for debugging.
+  - Clear cache: Allows the user to clear the caches of the application.
+  - Show logs: Opens the log view.
+- Help:
+  - Bug report / Feedback: Redirects to a Google Form to collect feedback.
+  - Visit Homepage: Will redirect to the public site.
