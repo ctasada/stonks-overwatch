@@ -65,9 +65,9 @@ class MenuManager:
 
     def __license_label(self) -> str:
         """Generate the license expiration label."""
-        from stonks_overwatch.build_config import EXPIRATION_TIMESTAMP
+        from stonks_overwatch.build_config import EXPIRATION_DATE
 
-        expiration = datetime.fromisoformat(EXPIRATION_TIMESTAMP)
+        expiration = datetime.fromisoformat(EXPIRATION_DATE)
         now = datetime.now(expiration.tzinfo)
         delta = expiration - now
         if delta.days < 0:

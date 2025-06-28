@@ -74,13 +74,13 @@ jobs:
           # Calculate expiration timestamp
           if [[ "$OSTYPE" == "darwin"* ]]; then
             # macOS
-            EXPIRATION_TIMESTAMP=$(date -u -v+${LICENSE_EXPIRATION_DAYS}d +"%Y-%m-%dT%H:%M:%SZ")
+            EXPIRATION_DATE=$(date -u -v+${LICENSE_EXPIRATION_DAYS}d +"%Y-%m-%dT%H:%M:%SZ")
           else
             # Linux
-            EXPIRATION_TIMESTAMP=$(date -u -d "+${LICENSE_EXPIRATION_DAYS} days" +"%Y-%m-%dT%H:%M:%SZ")
+            EXPIRATION_DATE=$(date -u -d "+${LICENSE_EXPIRATION_DAYS} days" +"%Y-%m-%dT%H:%M:%SZ")
           fi
-          echo "EXPIRATION_TIMESTAMP=$EXPIRATION_TIMESTAMP" >> $GITHUB_ENV
-          echo "expiration_timestamp=$EXPIRATION_TIMESTAMP" >> $GITHUB_OUTPUT
+          echo "EXPIRATION_DATE=$EXPIRATION_DATE" >> $GITHUB_ENV
+          echo "expiration_date=$EXPIRATION_DATE" >> $GITHUB_OUTPUT
 
           # Extract the version
           VERSION=$(poetry version -s)
@@ -89,7 +89,7 @@ jobs:
 
           echo "🔧 Build Configuration:"
           echo "  - Build Time: $BUILD_DATE"
-          echo "  - Expiration: $EXPIRATION_TIMESTAMP ($LICENSE_EXPIRATION_DAYS days)"
+          echo "  - Expiration: $EXPIRATION_DATE ($LICENSE_EXPIRATION_DAYS days)"
           echo "  - Version: $VERSION"
 
       - name: Generate build configuration
@@ -97,16 +97,15 @@ jobs:
           # Create build_config.py that will be imported by settings
           cat > src/stonks_overwatch/build_config.py << EOF
           # Auto-generated build configuration
-          # Generated at: ${{ env.BUILD_TIMESTAMP }}
-          # Build ID: ${{ env.BUILD_ID }}
+          # Generated at: ${{ env.BUILD_DATE }}
 
           from datetime import datetime
 
           # Trial License configuration
           TRIAL_MODE = True
           LICENSE_EXPIRATION_DAYS = ${{ env.LICENSE_EXPIRATION_DAYS }}
-          BUILD_DATE = datetime.fromisoformat('${{ env.BUILD_DATE }}')
-          EXPIRATION_DATE = datetime.fromisoformat('${{ env.EXPIRATION_TIMESTAMP }}')
+          BUILD_DATE = '${{ env.BUILD_DATE }}'
+          EXPIRATION_DATE = '${{ env.EXPIRATION_DATE }}'
 
           # Version information
           VERSION = '${{ env.VERSION }}'

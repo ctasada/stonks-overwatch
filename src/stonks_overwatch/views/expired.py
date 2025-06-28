@@ -9,7 +9,7 @@ class ExpiredView(View):
     def get(self, request):
         """View shown when the license has expired"""
         build_date = getattr(settings, "BUILD_DATE", datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"))
-        expiration_date = getattr(settings, "EXPIRATION_TIMESTAMP", datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"))
+        expiration_date = getattr(settings, "EXPIRATION_DATE", datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"))
         expiration_days = getattr(settings, "LICENSE_EXPIRATION_DAYS", 30)
         version = getattr(settings, "VERSION", "Unknown")
         support_url = settings.STONKS_OVERWATCH_SUPPORT_URL

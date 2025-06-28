@@ -39,7 +39,7 @@ def mock_build_info(monkeypatch):
         build_date = timezone.now() - timedelta(days=days_ago)
         build_info = {
             "trial_mode": True,
-            "build_timestamp": build_date.isoformat(),
+            "build_date": build_date.isoformat(),
             "expiration_days": 30,
         }
 
