@@ -729,10 +729,11 @@ name = "degiro-connector"
 version = "3.0.29"
 description = "This is yet another library to access Degiro's API."
 optional = false
-python-versions = ">=3.10,<4.0"
+python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "degiro_connector-3.0.29-py3-none-any.whl", hash = "sha256:b57938a21fb19b56ac80a1b2007a989f6745ab6cb73db3c59beadc2031f95d93"},
+    {file = "degiro_connector-3.0.29-py3-none-any.whl", hash = "sha256:5276f29d8aa129ff08aca01c048d569968f931d715509c13fa6b1aa4c5a0be69"},
+    {file = "degiro_connector-3.0.29.tar.gz", hash = "sha256:76a4b91b9cbbfbba9d7ccda28cabffdc7a100b5d25dab6eef4bfcdd1fcf06993"},
 ]
 
 [package.dependencies]
@@ -743,10 +744,6 @@ pydantic = ">=2.0.3,<3.0.0"
 pyotp = ">=2.9.0,<3.0.0"
 requests = ">=2.31.0,<3.0.0"
 wrapt = ">=1.14.1,<2.0.0"
-
-[package.source]
-type = "file"
-url = "../degiro-connector/dist/degiro_connector-3.0.29-py3-none-any.whl"
 
 [[package]]
 name = "deptry"
@@ -3260,4 +3257,4 @@ repair = ["scipy (>=1.6.3)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "afc30d27fe97a2b030c2371ea7669fffdc239a54a6b07ee30a5215088b1b5433"
+content-hash = "347fe260a6182b6b5336372d3ef5e8df2c872d6f92f4fc27ae840a433f476daa"
