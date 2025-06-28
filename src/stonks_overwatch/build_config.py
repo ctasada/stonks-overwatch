@@ -12,7 +12,7 @@ LICENSE_EXPIRATION_DAYS = 1
 # Always store dates as ISO format strings with UTC timezone
 BUILD_DATE = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
 expiration_dt = datetime.strptime(BUILD_DATE, "%Y-%m-%dT%H:%M:%SZ") + timedelta(days=LICENSE_EXPIRATION_DAYS)
-EXPIRATION_TIMESTAMP = expiration_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+EXPIRATION_DATE = expiration_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def get_version():

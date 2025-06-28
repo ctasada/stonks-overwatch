@@ -20,7 +20,7 @@ def expired_view():
 def mock_settings(settings):
     now = datetime.now(timezone.utc)
     settings.BUILD_DATE = now - timedelta(days=40)
-    settings.EXPIRATION_TIMESTAMP = now - timedelta(days=10)
+    settings.EXPIRATION_DATE = now - timedelta(days=10)
     settings.LICENSE_EXPIRATION_DAYS = 30
     settings.VERSION = "1.0.0"
     settings.STONKS_OVERWATCH_SUPPORT_URL = "https://support.example.com"
@@ -40,7 +40,7 @@ def test_expired_view_get(rf, expired_view, mock_settings):
 
 @override_settings(
     BUILD_DATE=datetime.now(timezone.utc) - timedelta(days=5),
-    EXPIRATION_TIMESTAMP=datetime.now(timezone.utc) + timedelta(days=25),
+    EXPIRATION_DATE=datetime.now(timezone.utc) + timedelta(days=25),
     LICENSE_EXPIRATION_DAYS=30,
     VERSION="1.0.0",
     STONKS_OVERWATCH_SUPPORT_URL="https://support.example.com",
@@ -55,7 +55,7 @@ def test_expired_view_not_expired(rf, expired_view):
 
 @override_settings(
     BUILD_DATE=datetime.now(timezone.utc) - timedelta(days=25),
-    EXPIRATION_TIMESTAMP=datetime.now(timezone.utc) + timedelta(days=5),
+    EXPIRATION_DATE=datetime.now(timezone.utc) + timedelta(days=5),
     LICENSE_EXPIRATION_DAYS=30,
     VERSION="1.0.0",
     STONKS_OVERWATCH_SUPPORT_URL="https://support.example.com",

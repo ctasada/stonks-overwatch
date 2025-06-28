@@ -43,29 +43,27 @@ class LicenseMiddleware(MiddlewareMixin):
         self.build_info = {
             "trial_mode": getattr(settings, "TRIAL_MODE", True),
             "expiration_days": getattr(settings, "LICENSE_EXPIRATION_DAYS", 30),
-            "build_timestamp": build_date.isoformat(),
-            "expiration_timestamp": getattr(settings, "EXPIRATION_TIMESTAMP", None),
+            "build_date": build_date.isoformat(),
+            "expiration_date": getattr(settings, "EXPIRATION_DATE", None),
         }
         self.logger.info("Loaded build info from Django settings")
 
     def _calculate_expiration(self):
         """Calculate expiration date and remaining days"""
         try:
-            if "expiration_timestamp" in self.build_info and self.build_info["expiration_timestamp"]:
+            if "expiration_date" in self.build_info and self.build_info["expiration_date"]:
                 # Use explicit expiration timestamp from CI/CD
-                expiration_str = self.build_info["expiration_timestamp"]
+                expiration_str = self.build_info["expiration_date"]
                 # Handle both with and without 'Z' suffix
                 if expiration_str.endswith("Z"):
                     expiration_str = expiration_str[:-1] + "+00:00"
                 self.expiration_date = datetime.fromisoformat(expiration_str)
             else:
                 # Calculate from build date and expiration days
-                build_timestamp = self.build_info.get("build_timestamp")
-                if build_timestamp:
-                    if isinstance(build_timestamp, str):
-                        build_date = datetime.fromisoformat(build_timestamp.replace("Z", "+00:00"))
-                    else:
-                        build_date = build_timestamp
+                build_date = self.build_info.get("build_date")
+                if build_date:
+                    if isinstance(build_date, str):
+                        build_date = datetime.fromisoformat(build_date.replace("Z", "+00:00"))
                 else:
                     build_date = getattr(settings, "BUILD_DATE", datetime.now())
 

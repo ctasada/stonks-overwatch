@@ -11,7 +11,7 @@ def license_processor(request):
     # Read build information
     build_date = getattr(settings, "BUILD_DATE", datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"))
     expiration_days = getattr(settings, "LICENSE_EXPIRATION_DAYS", 30)
-    expiration_date = getattr(settings, "EXPIRATION_TIMESTAMP", datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"))
+    expiration_date = getattr(settings, "EXPIRATION_DATE", datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"))
 
     # Parse the dates with timezone awareness
     now = datetime.now(timezone.utc)
