@@ -6,15 +6,15 @@ from django.conf import settings
 class LicenseManager:
     def is_license_expired(self) -> bool:
         """Check if the license is expired."""
-        from stonks_overwatch.build_config import EXPIRATION_TIMESTAMP
+        from stonks_overwatch.build_config import EXPIRATION_DATE
 
-        expiration = datetime.fromisoformat(EXPIRATION_TIMESTAMP)
+        expiration = datetime.fromisoformat(EXPIRATION_DATE)
         now = datetime.now(expiration.tzinfo)
         return now > expiration
 
     def get_license_info(self) -> dict:
         build_date = getattr(settings, "BUILD_DATE", datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"))
-        expiration_date = getattr(settings, "EXPIRATION_TIMESTAMP", datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"))
+        expiration_date = getattr(settings, "EXPIRATION_DATE", datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"))
         expiration_days = getattr(settings, "LICENSE_EXPIRATION_DAYS", 30)
         version = getattr(settings, "VERSION", "Unknown")
         support_url = settings.STONKS_OVERWATCH_SUPPORT_URL
