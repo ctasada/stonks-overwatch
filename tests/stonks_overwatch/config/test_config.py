@@ -142,17 +142,22 @@ def test_config_portfolio_status():
     """Test portfolio status checks."""
     config = Config.default()
 
-    # Test DeGiro portfolio status
-    assert config.is_enabled(PortfolioId.DEGIRO) == config.is_degiro_enabled()
-    assert config.is_enabled_and_connected(PortfolioId.DEGIRO) == config.is_degiro_enabled_and_connected()
+    # Patch DeGiroService.check_connection to avoid real connection attempts
+    with patch(
+        "stonks_overwatch.services.brokers.degiro.client.degiro_client.DeGiroService.check_connection",
+        return_value=True,
+    ):
+        # Test DeGiro portfolio status
+        assert config.is_enabled(PortfolioId.DEGIRO) == config.is_degiro_enabled()
+        assert config.is_enabled_and_connected(PortfolioId.DEGIRO) == config.is_degiro_enabled_and_connected()
 
-    # Test Bitvavo portfolio status
-    assert config.is_enabled(PortfolioId.BITVAVO) == config.is_bitvavo_enabled()
-    assert config.is_enabled_and_connected(PortfolioId.BITVAVO) == config.is_bitvavo_enabled()
+        # Test Bitvavo portfolio status
+        assert config.is_enabled(PortfolioId.BITVAVO) == config.is_bitvavo_enabled()
+        assert config.is_enabled_and_connected(PortfolioId.BITVAVO) == config.is_bitvavo_enabled()
 
-    # Test invalid portfolio
-    assert not config.is_enabled("INVALID_PORTFOLIO")
-    assert not config.is_enabled_and_connected("INVALID_PORTFOLIO")
+        # Test invalid portfolio
+        assert not config.is_enabled("INVALID_PORTFOLIO")
+        assert not config.is_enabled_and_connected("INVALID_PORTFOLIO")
 
 
 def test_config_degiro_status():

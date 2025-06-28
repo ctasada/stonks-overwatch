@@ -29,11 +29,25 @@ class DeGiroAuthMiddleware:
                 except ConnectionError:
                     pass
 
-            if not self._is_authenticated(request) and not self._is_public_url(current_url):
+            if (
+                not self._is_authenticated(request)
+                and not self._is_public_url(current_url)
+                and not self._is_maintenance_mode_allowed()
+            ):
                 self.logger.warning("User not authenticated, redirecting to Login page...")
+                request.session["is_authenticated"] = False
                 return redirect("login")
 
         return self.get_response(request)
+
+    def _is_maintenance_mode_allowed(self) -> bool:
+        if self.degiro_service.is_maintenance_mode:
+            credentials = DegiroConfig.default().get_credentials
+            if credentials and credentials.username and credentials.password:
+                self.logger.warning("DeGiro is in maintenance mode, but credentials are provided.")
+                return True
+
+        return False
 
     def _should_check_connection(self, request) -> bool:
         has_default_credentials = (
