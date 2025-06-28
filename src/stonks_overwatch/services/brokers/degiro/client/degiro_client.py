@@ -4,6 +4,7 @@ from typing import Any, List, Optional
 
 import polars as pl
 import requests_cache
+from degiro_connector.core.exceptions import MaintenanceError
 from degiro_connector.quotecast.models.chart import Chart, ChartRequest, Interval
 from degiro_connector.quotecast.tools.chart_fetcher import ChartFetcher
 from degiro_connector.trading.api import API as TradingApi  # noqa: N811
@@ -99,6 +100,7 @@ class DeGiroService:
     ):
         self.set_credentials(credentials_manager)
         self.force = force
+        self.is_maintenance_mode = False
 
     def set_credentials(self, credentials_manager: CredentialsManager):
         self.credentials_manager = credentials_manager or CredentialsManager()
@@ -127,11 +129,20 @@ class DeGiroService:
         is_connected = self.__check_connection__()
         if not is_connected:
             try:
+                self.is_maintenance_mode = False
                 self.connect()
+            except MaintenanceError:
+                # If we are in maintenance mode, we can still try to connect,
+                # but we will not be able to get any data.
+                self.logger.warning("DeGiro is in maintenance mode. Connection will not be established.")
+                self.is_maintenance_mode = True
             except ConnectionError:
                 # Try to connect and validate the connection.
                 # If we want more details, we can always call the connect method
                 pass
+
+        if self.is_maintenance_mode:
+            return True
 
         return self.__check_connection__()
 
