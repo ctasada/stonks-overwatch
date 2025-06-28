@@ -3,11 +3,9 @@
 <html>
 
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Stonks Overwatch</title>
-
     <link rel="icon" type="image/png" href="{% static 'stonks_overwatch-32x32.png' %}" sizes="32x32">
 
     <!-- Bootstrap CSS CDN -->
@@ -23,92 +21,92 @@
 </head>
 
 <body>
-<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh">
-    <div class="card shadow p-4" style="width: 100%; max-width: 400px;">
-        <img src="/static/logos/degiro.svg" alt="DeGiro" width="25" height="25" class="card-img-top rounded-circle m-2">
-        {% if show_otp %}
-            <h4 class="text-center mb-4">Please enter your 2FA code</h4>
-        {% else %}
-            <h3 class="text-center mb-4">Login - DEGIRO</h3>
-        {% endif %}
-        <form id="login-form" method="POST" action="{% url 'login' %}">
-            {% csrf_token %}
-            {% if messages %}
-                <div class="messages mb-3" style="max-height: 150px; overflow-y: auto;">
-                    {% for message in messages %}
-                        <div class="alert {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}alert-danger{% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}alert-warning{% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}alert-success{% else %}alert-info{% endif %} d-flex align-items-start py-2 mb-2" role="alert" style="word-break: break-word;">
-                            {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
-                                <i class="bi bi-exclamation-triangle-fill me-2 mt-1"></i>
-                            {% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
-                                <i class="bi bi-exclamation-circle-fill me-2 mt-1"></i>
-                            {% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
-                                <i class="bi bi-check-circle-fill me-2 mt-1"></i>
-                            {% else %}
-                                <i class="bi bi-info-circle-fill me-2 mt-1"></i>
-                            {% endif %}
-                            <div class="flex-grow-1">{{ message }}</div>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
+    <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh">
+        <div class="card shadow p-4" style="width: 100%; max-width: 400px;">
+            <img src="/static/logos/degiro.svg" alt="DeGiro" width="25" height="25" class="card-img-top rounded-circle m-2">
             {% if show_otp %}
-                <div class="form-group mb-2">
-                    <input type="text" class="form-control text-center"
-                           style="letter-spacing: 1rem; line-height: 1.75em;"
-                           id="2fa_code" name="2fa_code" maxlength="6" pattern="\d{6}"
-                           placeholder="123456" aria-label="2FA code" required autofocus>
-                </div>
-                <button type="submit" class="btn btn-primary btn-block w-100">Confirm</button>
-            {% elif show_loading %}
-                <div class="d-flex justify-content-center">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>
-                <p class="text-center mt-3">Updating Portfolio, please wait...</p>
-                <!-- Submit form indicating that should update the portfolio -->
-                <input type="hidden" name="update_portfolio" id="update_portfolio" value="true">
-                <script>
-                    $(document).ready(function() {
-                        <!-- In this scenario we want to submit the form automatically -->
-                        document.getElementById("login-form").submit();
-                    });
-                </script>
+                <h4 class="text-center mb-4">Please enter your 2FA code</h4>
             {% else %}
-                <div class="form-group mb-2">
-                    <label for="username">Username</label>
-                    <input type="text" class="form-control" id="username" name="username" placeholder="Enter username"
-                           required autofocus>
-                </div>
-                <div class="form-group mb-2">
-                    <label for="password">Password</label>
-                    <div class="input-group">
-                        <input type="password" class="form-control" id="password" name="password"
-                               placeholder="Enter password" required>
-                        <i class="bi bi-eye-slash-fill" id="togglePassword"></i>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary btn-block w-100">Login</button>
+                <h3 class="text-center mb-4">Login - DEGIRO</h3>
             {% endif %}
-        </form>
+            <form id="login-form" method="POST" action="{% url 'login' %}">
+                {% csrf_token %}
+                {% if messages %}
+                    <div class="messages mb-3" style="max-height: 150px; overflow-y: auto;">
+                        {% for message in messages %}
+                            <div class="alert {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}alert-danger{% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}alert-warning{% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}alert-success{% else %}alert-info{% endif %} d-flex align-items-start py-2 mb-2" role="alert" style="word-break: break-word;">
+                                {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                                    <i class="bi bi-exclamation-triangle-fill me-2 mt-1"></i>
+                                {% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
+                                    <i class="bi bi-exclamation-circle-fill me-2 mt-1"></i>
+                                {% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                                    <i class="bi bi-check-circle-fill me-2 mt-1"></i>
+                                {% else %}
+                                    <i class="bi bi-info-circle-fill me-2 mt-1"></i>
+                                {% endif %}
+                                <div class="flex-grow-1">{{ message }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                {% if show_otp %}
+                    <div class="form-group mb-2">
+                        <input type="text" class="form-control text-center"
+                               style="letter-spacing: 1rem; line-height: 1.75em;"
+                               id="2fa_code" name="2fa_code" maxlength="6" pattern="\d{6}"
+                               placeholder="123456" aria-label="2FA code" required autofocus>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block w-100">Confirm</button>
+                {% elif show_loading %}
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    <p class="text-center mt-3">Updating Portfolio, please wait...</p>
+                    <!-- Submit form indicating that should update the portfolio -->
+                    <input type="hidden" name="update_portfolio" id="update_portfolio" value="true">
+                    <script>
+                        $(document).ready(function() {
+                            <!-- In this scenario we want to submit the form automatically -->
+                            document.getElementById("login-form").submit();
+                        });
+                    </script>
+                {% else %}
+                    <div class="form-group mb-2">
+                        <label for="username">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Enter username"
+                               required autofocus>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label for="password">Password</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password" name="password"
+                                   placeholder="Enter password" required>
+                            <i class="bi bi-eye-slash-fill" id="togglePassword"></i>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block w-100">Login</button>
+                {% endif %}
+            </form>
+        </div>
     </div>
-</div>
-<script>
-    const togglePassword = document.querySelector("#togglePassword");
-    const password = document.querySelector("#password");
+    <script>
+        const togglePassword = document.querySelector("#togglePassword");
+        const password = document.querySelector("#password");
 
-    if (togglePassword) {
-        togglePassword.addEventListener("click", function () {
-            // toggle the type attribute
-            const type = password.getAttribute("type") === "password" ? "text" : "password";
-            password.setAttribute("type", type);
+        if (togglePassword) {
+            togglePassword.addEventListener("click", function () {
+                // toggle the type attribute
+                const type = password.getAttribute("type") === "password" ? "text" : "password";
+                password.setAttribute("type", type);
 
-            // toggle the icon
-            this.classList.toggle("bi-eye-fill");
-            this.classList.toggle("bi-eye-slash-fill");
-        });
-    }
-</script>
+                // toggle the icon
+                this.classList.toggle("bi-eye-fill");
+                this.classList.toggle("bi-eye-slash-fill");
+            });
+        }
+    </script>
 </body>
 
 </html>

@@ -11,7 +11,7 @@ from stonks_overwatch.utils.core.logger import StonksLogger
 
 
 class DeGiroAuthMiddleware:
-    PUBLIC_URLS = {"login"}
+    PUBLIC_URLS = {"login", "expired"}
 
     logger = StonksLogger.get_logger("stonks_overwatch.degiro_auth", "DEGIRO|AUTH_MIDDLEWARE")
 

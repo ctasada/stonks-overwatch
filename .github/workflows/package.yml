@@ -57,6 +57,65 @@ jobs:
         run: |
           ${{ matrix.pre-command }}
 
+      # This job is used to set the necessary TRIAL information until we have a better solution
+      - name: Set build variables
+        id: build_vars
+        run: |
+          # Set build timestamp
+          BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_ENV
+          echo "build_date=$BUILD_DATE" >> $GITHUB_OUTPUT
+
+          # Set expiration days (from input or default)
+          LICENSE_EXPIRATION_DAYS="${{ github.event.inputs.expiration_days || '30' }}"
+          echo "LICENSE_EXPIRATION_DAYS=$LICENSE_EXPIRATION_DAYS" >> $GITHUB_ENV
+          echo "license_expiration_days=$LICENSE_EXPIRATION_DAYS" >> $GITHUB_OUTPUT
+
+          # Calculate expiration timestamp
+          if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS
+            EXPIRATION_TIMESTAMP=$(date -u -v+${LICENSE_EXPIRATION_DAYS}d +"%Y-%m-%dT%H:%M:%SZ")
+          else
+            # Linux
+            EXPIRATION_TIMESTAMP=$(date -u -d "+${LICENSE_EXPIRATION_DAYS} days" +"%Y-%m-%dT%H:%M:%SZ")
+          fi
+          echo "EXPIRATION_TIMESTAMP=$EXPIRATION_TIMESTAMP" >> $GITHUB_ENV
+          echo "expiration_timestamp=$EXPIRATION_TIMESTAMP" >> $GITHUB_OUTPUT
+
+          # Extract the version
+          VERSION=$(poetry version -s)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          echo "🔧 Build Configuration:"
+          echo "  - Build Time: $BUILD_DATE"
+          echo "  - Expiration: $EXPIRATION_TIMESTAMP ($LICENSE_EXPIRATION_DAYS days)"
+          echo "  - Version: $VERSION"
+
+      - name: Generate build configuration
+        run: |
+          # Create build_config.py that will be imported by settings
+          cat > src/stonks_overwatch/build_config.py << EOF
+          # Auto-generated build configuration
+          # Generated at: ${{ env.BUILD_TIMESTAMP }}
+          # Build ID: ${{ env.BUILD_ID }}
+
+          from datetime import datetime
+
+          # Trial License configuration
+          TRIAL_MODE = True
+          LICENSE_EXPIRATION_DAYS = ${{ env.LICENSE_EXPIRATION_DAYS }}
+          BUILD_DATE = datetime.fromisoformat('${{ env.BUILD_DATE }}')
+          EXPIRATION_DATE = datetime.fromisoformat('${{ env.EXPIRATION_TIMESTAMP }}')
+
+          # Version information
+          VERSION = '${{ env.VERSION }}'
+          EOF
+
+          echo "📄 Generated build_config.py:"
+          cat src/stonks_overwatch/build_config.py
+      # ========= The special jobs end here =========
+
       - name: Collect Static Files
         run: |
           # Collect static files for the app
