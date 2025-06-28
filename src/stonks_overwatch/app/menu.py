@@ -1,9 +1,11 @@
 import os
 import webbrowser
+from datetime import datetime
 
 from toga.command import Command, Group
 
 from stonks_overwatch.app.logs_window import LogStreamWindow
+from stonks_overwatch.services.utilities.license_manager import LicenseManager
 
 
 class MenuManager:
@@ -11,9 +13,10 @@ class MenuManager:
         self.app = app
         # Track the log viewer window
         self.log_window = None
+        self.license_manager = LicenseManager()
 
     def setup_debug_menu(self):
-        tools_group = Group("Tools")
+        tools_group = Group.COMMANDS
         download_db_cmd = Command(
             self._download_database,
             text="Export Internal Database...",
@@ -49,10 +52,42 @@ class MenuManager:
             group=Group.HELP,
             section=0,
         )
+        license_cmd = Command(
+            self._open_license_info,
+            text=self.__license_label(),
+            tooltip="License information",
+            enabled=not self.license_manager.is_license_expired(),
+            group=Group.HELP,
+            section=1,
+        )
         self.app.commands.add(bug_report_cmd)
+        self.app.commands.add(license_cmd)
+
+    def __license_label(self) -> str:
+        """Generate the license expiration label."""
+        from stonks_overwatch.build_config import EXPIRATION_TIMESTAMP
+
+        expiration = datetime.fromisoformat(EXPIRATION_TIMESTAMP)
+        now = datetime.now(expiration.tzinfo)
+        delta = expiration - now
+        if delta.days < 0:
+            return "License Expired"
+        elif delta.days == 0:
+            return "License Expires Today"
+        elif delta.days == 1:
+            return "License Expires Tomorrow"
+        elif delta.days < 30:
+            return f"License Expires in {delta.days} days"
+        else:
+            return f"License Expires: {expiration.strftime('%Y-%m-%d')}"
 
     def open_bug_report(self, widget):
-        webbrowser.open_new_tab("https://forms.gle/djPWAtLSFfRYbDwV7")
+        from stonks_overwatch.settings import STONKS_OVERWATCH_SUPPORT_URL
+
+        webbrowser.open_new_tab(STONKS_OVERWATCH_SUPPORT_URL)
+
+    async def _open_license_info(self, widget):
+        await self.app.dialog_manager.license_info(widget)
 
     async def _download_database(self, widget):
         await self.app.dialog_manager.download_database(widget)

@@ -23,6 +23,8 @@ dependencies = [
     "iso10383 >=2025.2.10",
     "requests (>=2.32.4,<3.0.0)",
     "fontawesomefree >= 6.6.0",
+    # `toml` is used to parse the `pyproject.toml` file for the license information.
+    "toml >=0.10.2",
 ]
 
 [tool.poetry.dependencies]
@@ -197,7 +199,6 @@ Stonks Overwatch runs locally and doesn't share your data with anyone. Your data
 icon = "src/icons/stonks_overwatch"
 sources = [
     "src/stonks_overwatch",
-    "config/config.json.template"
 ]
 test_sources = [
     "tests",

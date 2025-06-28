@@ -3,12 +3,19 @@ import os
 from asgiref.sync import sync_to_async
 from toga.dialogs import ConfirmDialog, ErrorDialog, InfoDialog, SaveFileDialog
 
+from stonks_overwatch.app.expired_dialog import ExpiredDialog
+from stonks_overwatch.services.utilities.license_manager import LicenseManager
+from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.database.db_utils import dump_database
 
 
 class DialogManager:
-    def __init__(self, app):
+    _expired_dialog_instance = None
+
+    def __init__(self, app, license_manager: LicenseManager):
         self.app = app
+        self.license_manager = license_manager
+        self.logger = StonksLogger.get_logger("stonks_overwatch.app", "[DIALOG_MANAGER]")
 
     async def download_database(self, widget):
         try:
@@ -28,6 +35,7 @@ class DialogManager:
                     InfoDialog("Export Complete", f"Database exported successfully to:\n{save_path}")
                 )
         except Exception as e:
+            self.logger.error(f"Failed to export database: {str(e)}")
             await self.app.main_window.dialog(ErrorDialog("Export Failed", f"Failed to export database: {str(e)}"))
 
     async def export_database(self, destination_path):
@@ -48,3 +56,27 @@ class DialogManager:
             await self.app.main_window.dialog(
                 InfoDialog("Cache Cleared", "Application cache has been cleared successfully.")
             )
+
+    async def license_info(self, widget):
+        """Show the license information dialog."""
+        try:
+            if DialogManager._expired_dialog_instance is not None:
+                self.logger.debug("ExpiredDialog already open, focusing window.")
+                DialogManager._expired_dialog_instance.show()
+                return
+
+            license_info = self.license_manager.get_license_info()
+            dialog = ExpiredDialog("License Information", license_info, main_window=self.app.main_window)
+            DialogManager._expired_dialog_instance = dialog
+
+            def on_close(widget):
+                self.logger.debug("ExpiredDialog close handler called")
+                DialogManager._expired_dialog_instance = None
+                dialog.close()
+
+            dialog.on_close = on_close
+            dialog.show()
+
+        except Exception as e:
+            self.logger.error(f"Failed to retrieve license info: {str(e)}")
+            await self.app.main_window.dialog(ErrorDialog("License", f"Failed to retrieve license info: {str(e)}"))
