@@ -34,11 +34,22 @@
         <form id="login-form" method="POST" action="{% url 'login' %}">
             {% csrf_token %}
             {% if messages %}
-                <ul>
+                <div class="messages mb-3" style="max-height: 150px; overflow-y: auto;">
                     {% for message in messages %}
-                        <li>{{ message }}</li>
+                        <div class="alert {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}alert-danger{% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}alert-warning{% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}alert-success{% else %}alert-info{% endif %} d-flex align-items-start py-2 mb-2" role="alert" style="word-break: break-word;">
+                            {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                                <i class="bi bi-exclamation-triangle-fill me-2 mt-1"></i>
+                            {% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
+                                <i class="bi bi-exclamation-circle-fill me-2 mt-1"></i>
+                            {% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                                <i class="bi bi-check-circle-fill me-2 mt-1"></i>
+                            {% else %}
+                                <i class="bi bi-info-circle-fill me-2 mt-1"></i>
+                            {% endif %}
+                            <div class="flex-grow-1">{{ message }}</div>
+                        </div>
                     {% endfor %}
-                </ul>
+                </div>
             {% endif %}
             {% if show_otp %}
                 <div class="form-group mb-2">

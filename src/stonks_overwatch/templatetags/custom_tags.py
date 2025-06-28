@@ -32,7 +32,11 @@ def show_total_portfolio(context: RequestContext) -> dict:
 def is_connected_to_degiro() -> bool:
     try:
         if Config.default().is_degiro_enabled():
-            return DeGiroService().check_connection()
+            degiro_client = DeGiroService()
+            is_connected = degiro_client.check_connection()
+            if is_connected and degiro_client.is_maintenance_mode:
+                return False
+            return is_connected
         else:
             return False
     except DeGiroOfflineModeError:

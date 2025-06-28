@@ -59,8 +59,8 @@ class Login(View):
 
         try:
             self._authenticate_and_connect(request, username, password, one_time_password)
-        except MaintenanceError:
-            messages.warning(request, "DeGiro is currently under maintenance. Please try again later.")
+        except MaintenanceError as maintenance_error:
+            messages.error(request, maintenance_error.error_details.error)
         except DeGiroConnectionError as degiro_error:
             show_otp = self._handle_degiro_error(request, degiro_error, username, password)
         except ConnectionError as connection_error:
