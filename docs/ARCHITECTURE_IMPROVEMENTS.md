@@ -20,6 +20,7 @@ This document presents an up-to-date analysis of the Stonks Overwatch architectu
 - No input validation
 
 **Current Pattern**:
+
 ```python
 # Each repository duplicates the same patterns
 class DegiroTransactionsRepository:
@@ -38,6 +39,7 @@ class DegiroTransactionsRepository:
 ```
 
 **Proposed Solution**:
+
 ```python
 class BaseRepository:
     def __init__(self, db_connection):
@@ -76,6 +78,7 @@ class DegiroTransactionsRepository(BaseRepository):
 4. **Inconsistent Naming**: Mixed snake_case and camelCase in field names
 
 **Current Issues**:
+
 ```python
 # Inconsistent field types
 class Transaction(models.Model):
@@ -94,6 +97,7 @@ class Dividend(models.Model):
 ```
 
 **Proposed Solution**:
+
 ```python
 class Transaction(models.Model):
     amount = models.DecimalField(max_digits=15, decimal_places=2)
@@ -124,6 +128,7 @@ class Transaction(models.Model):
 - **Service Creation**: Duplicate service instantiation code
 
 **Current Pattern**:
+
 ```python
 # Repeated across multiple services
 class DegiroPortfolioService:
@@ -154,6 +159,7 @@ class BitvavoPortfolioService:
 ```
 
 **Proposed Solution**:
+
 ```python
 class DataTransformerService:
     @staticmethod
@@ -191,6 +197,7 @@ class DegiroPortfolioService:
 - **Memory Leaks**: No cache size limits
 
 **Current Pattern**:
+
 ```python
 # Each service has its own cache implementation
 class DegiroPortfolioService:
@@ -219,6 +226,7 @@ class BitvavoPortfolioService:
 ```
 
 **Proposed Solution**:
+
 ```python
 class CacheManager:
     def __init__(self, default_ttl=300, max_size=1000):
@@ -276,6 +284,7 @@ class DegiroPortfolioService:
 - **Missing Error Logging**: Errors not properly logged for debugging
 
 **Current Pattern**:
+
 ```python
 # Inconsistent exception handling
 class DegiroPortfolioService:
@@ -301,6 +310,7 @@ class BitvavoPortfolioService:
 ```
 
 **Proposed Solution**:
+
 ```python
 class BrokerServiceException(Exception):
     """Base exception for broker service errors"""
@@ -356,6 +366,7 @@ class DegiroPortfolioService:
 - **No Job Monitoring**: No visibility into job execution
 
 **Current Pattern**:
+
 ```python
 # Hardcoded broker-specific jobs
 class JobsScheduler:
@@ -383,6 +394,7 @@ class JobsScheduler:
 ```
 
 **Proposed Solution**:
+
 ```python
 class JobRegistry:
     def __init__(self):
@@ -443,6 +455,7 @@ for broker in ['degiro', 'bitvavo']:
 - **No Auth Strategy Pattern**: No pluggable authentication strategies
 
 **Current Pattern**:
+
 ```python
 # Degiro-specific middleware
 class DegiroAuthMiddleware:
@@ -470,6 +483,7 @@ class DegiroAuthMiddleware:
 ```
 
 **Proposed Solution**:
+
 ```python
 class BrokerAuthStrategy:
     """Base class for broker authentication strategies"""

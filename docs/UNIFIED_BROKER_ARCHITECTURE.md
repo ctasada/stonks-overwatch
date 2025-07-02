@@ -5,6 +5,7 @@
 After reviewing both the configuration module and services/brokers module, I identified **two parallel but inconsistent patterns** for managing broker components.
 
 ### **Configuration Module Pattern**
+
 ```python
 # 1. Registry (ConfigRegistry) - Instance-based
 class ConfigRegistry:
@@ -26,6 +27,7 @@ class Config:
 ```
 
 ### **Services/Brokers Module Pattern**
+
 ```python
 # 1. Registry (BrokerRegistry) - Singleton
 @singleton
@@ -51,18 +53,22 @@ def register_broker_services():
 ## **Inconsistencies Identified**
 
 ### 1. **Registry Pattern Inconsistency**
+
 - **Config**: Uses instance-based `ConfigRegistry` (each `Config` has its own registry)
 - **Services**: Uses singleton `BrokerRegistry` (global shared registry)
 
 ### 2. **Registration Strategy Inconsistency**
+
 - **Config**: Auto-registration in factory constructor (`_register_default_brokers()`)
 - **Services**: Manual registration in separate setup function (`register_broker_services()`)
 
 ### 3. **Factory Responsibilities Inconsistency**
+
 - **Config**: Factory handles both registration AND creation
 - **Services**: Factory only handles creation, registry handles registration
 
 ### 4. **Singleton Usage Inconsistency**
+
 - **Config**: Factory is singleton, registry is instance-based
 - **Services**: Both registry and factory are singletons
 
@@ -89,6 +95,7 @@ For better consistency, I recommend **standardizing on the Services pattern** be
 ## **Proposed Unified Pattern**
 
 ### **1. Unified Registry (Singleton)**
+
 ```python
 @singleton
 class BrokerRegistry:
@@ -124,6 +131,7 @@ class BrokerRegistry:
 ```
 
 ### **2. Unified Factory (Singleton)**
+
 ```python
 @singleton
 class BrokerFactory:
@@ -167,6 +175,7 @@ class BrokerFactory:
 ```
 
 ### **3. Unified Setup**
+
 ```python
 def register_all_brokers() -> None:
     """
@@ -202,6 +211,7 @@ def register_all_brokers() -> None:
 ```
 
 ### **4. Updated Config Class**
+
 ```python
 class Config:
     """
@@ -232,21 +242,25 @@ class Config:
 ## **Migration Strategy**
 
 ### **Phase 1: Create Unified Registry**
+
 - [ ] Create new `BrokerRegistry` that handles both configs and services
 - [ ] Add configuration management methods to existing `BrokerRegistry`
 - [ ] Update tests to use unified registry
 
 ### **Phase 2: Create Unified Factory**
+
 - [ ] Create new `BrokerFactory` that handles both config and service creation
 - [ ] Add configuration creation methods to factory
 - [ ] Implement caching for both configs and services
 
 ### **Phase 3: Update Config Class**
+
 - [ ] Modify `Config` class to use unified registry/factory
 - [ ] Remove instance-based `ConfigRegistry`
 - [ ] Update all config-related tests
 
 ### **Phase 4: Cleanup**
+
 - [ ] Remove old `ConfigFactory` and `ConfigRegistry`
 - [ ] Remove old `ServiceFactory` (if not already unified)
 - [ ] Update all imports and references
