@@ -13,7 +13,7 @@ class AccountOverviewService:
 
     def __init__(self):
         self.bitvavo_service = BitvavoService()
-        self.base_currency = Config.default().base_currency
+        self.base_currency = Config.get_global().base_currency
 
     def get_account_overview(self) -> List[AccountOverview]:
         self.logger.debug("Get Account Overview")

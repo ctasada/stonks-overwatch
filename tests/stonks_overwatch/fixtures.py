@@ -2,8 +2,7 @@ import pathlib
 
 import requests
 
-from stonks_overwatch.config.degiro_config import DegiroConfig
-from stonks_overwatch.config.degiro_credentials import DegiroCredentials
+from stonks_overwatch.config.degiro import DegiroConfig, DegiroCredentials
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
 
 import pytest
@@ -12,7 +11,7 @@ from unittest.mock import patch
 
 @pytest.fixture
 def mock_degiro_config():
-    with patch("stonks_overwatch.config.degiro_config.DegiroConfig.default") as mock_config:
+    with patch("stonks_overwatch.config.degiro.DegiroConfig.default") as mock_config:
         file = pathlib.Path("tests/resources/stonks_overwatch/config/sample-config.json")
         mock_config.return_value = DegiroConfig.from_json_file(file)
         yield mock_config

@@ -1,5 +1,4 @@
 import os
-import signal
 import sys
 
 from django.apps import AppConfig
@@ -14,12 +13,16 @@ class StonksOverwatchConfig(AppConfig):
 
     def ready(self):
         # Guarantee that the Jobs are initialized only once
-        if os.environ.get("RUN_MAIN"):
+        if os.environ.get("RUN_MAIN") or os.environ.get("STONKS_OVERWATCH_APP"):
             self.logger.info("Stonks Overwatch ready - RUN MAIN")
             self.show_env_vars()
 
-            signal.signal(signal.SIGINT, self.handle_shutdown)
-            signal.signal(signal.SIGTERM, self.handle_shutdown)
+            if os.environ.get("RUN_MAIN"):
+                # FIXME: An equivalent is needed when running the app in production
+                import signal
+
+                signal.signal(signal.SIGINT, self.handle_shutdown)
+                signal.signal(signal.SIGTERM, self.handle_shutdown)
 
             # Register broker services with the core framework
             try:

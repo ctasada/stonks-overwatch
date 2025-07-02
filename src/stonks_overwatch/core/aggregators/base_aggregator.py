@@ -34,7 +34,7 @@ class BaseAggregator(ABC):
         """
         self._service_type = service_type
         self._service_factory = ServiceFactory()
-        self._config = Config.default()
+        self._config = Config.get_global()
         self._logger = StonksLogger.get_logger(
             f"stonks_overwatch.aggregators.{self.__class__.__name__.lower()}",
             f"[AGGREGATOR|{service_type.value.upper()}]",

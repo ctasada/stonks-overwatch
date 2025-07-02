@@ -1,4 +1,4 @@
-from stonks_overwatch.config.bitvavo_credentials import BitvavoCredentials
+from stonks_overwatch.config.bitvavo import BitvavoCredentials
 
 
 def test_bitvavo_credentials_init():

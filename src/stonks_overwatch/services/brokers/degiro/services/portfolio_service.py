@@ -56,7 +56,7 @@ class PortfolioService(PortfolioServiceInterface):
     ):
         self.degiro_service = degiro_service
         self.currency_service = CurrencyConverterService()
-        self.base_currency = Config.default().base_currency
+        self.base_currency = Config.get_global().base_currency
         self.deposits = DepositsService(
             degiro_service=self.degiro_service,
         )

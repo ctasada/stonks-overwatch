@@ -16,7 +16,7 @@ class DepositsService(DepositServiceInterface):
         degiro_service: DeGiroService,
     ):
         self.degiro_service = degiro_service
-        self.base_currency = Config.default().base_currency
+        self.base_currency = Config.get_global().base_currency
 
     def get_cash_deposits(self) -> List[Deposit]:
         df = pd.DataFrame(CashMovementsRepository.get_cash_deposits_raw())

@@ -12,7 +12,7 @@ from django.db import connection
 from django.db.utils import OperationalError
 from pandas import DataFrame
 
-from stonks_overwatch.config.degiro_config import DegiroConfig
+from stonks_overwatch.config.config import Config
 from stonks_overwatch.services.brokers.degiro.client.constants import CurrencyFX, ProductType
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
 from stonks_overwatch.services.brokers.degiro.repositories.cash_movements_repository import CashMovementsRepository
@@ -85,14 +85,18 @@ class UpdateService:
     def _get_last_cash_movement_import(self) -> datetime:
         last_movement = CashMovementsRepository.get_last_movement()
         if last_movement is None:
-            last_movement = datetime.combine(DegiroConfig.default().start_date, time.min)
+            last_movement = datetime.combine(
+                Config.get_global().registry.get_broker_config("degiro").start_date, time.min
+            )
 
         return last_movement
 
     def _get_last_transactions_import(self) -> datetime:
         last_movement = TransactionsRepository.get_last_movement()
         if last_movement is None:
-            last_movement = datetime.combine(DegiroConfig.default().start_date, time.min)
+            last_movement = datetime.combine(
+                Config.get_global().registry.get_broker_config("degiro").start_date, time.min
+            )
 
         return last_movement
 
@@ -477,7 +481,11 @@ class UpdateService:
         product_growth = self.portfolio_data.calculate_product_growth()
 
         # Include Currencies in the Quotations
-        start_date = DegiroConfig.default().start_date.strftime(LocalizationUtility.DATE_FORMAT)
+        start_date = (
+            Config.get_global()
+            .registry.get_broker_config("degiro")
+            .start_date.strftime(LocalizationUtility.DATE_FORMAT)
+        )
         for currency in CurrencyFX.to_list():
             if currency not in product_growth:
                 product_growth[currency] = {"history": {}}

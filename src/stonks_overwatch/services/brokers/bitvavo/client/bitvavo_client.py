@@ -3,7 +3,7 @@ from datetime import datetime
 
 from python_bitvavo_api.bitvavo import Bitvavo, createPostfix
 
-from stonks_overwatch.config.bitvavo_config import BitvavoConfig
+from stonks_overwatch.config.config import Config
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.singleton import singleton
 
@@ -19,7 +19,7 @@ class BitvavoService:
         self,
         debugging: bool = False,
     ):
-        self.bitvavo_config = BitvavoConfig.default()
+        self.bitvavo_config = Config.get_global().registry.get_broker_config("bitvavo")
         bitvavo_credentials = self.bitvavo_config.credentials
 
         if bitvavo_credentials and bitvavo_credentials.apikey and bitvavo_credentials.apisecret:
