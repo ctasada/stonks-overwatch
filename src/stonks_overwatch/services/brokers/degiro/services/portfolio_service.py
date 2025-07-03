@@ -159,7 +159,10 @@ class PortfolioService(PortfolioServiceInterface):
         """Extract company profile data with defaults."""
         company_profile = CompanyProfileRepository.get_company_profile_raw(isin)
 
-        if company_profile.get("data"):
+        if not company_profile:
+            self.logger.warning(f"No company profile found for ISIN {isin}, using defaults")
+
+        if company_profile and company_profile.get("data"):
             return {
                 "sector": company_profile["data"]["sector"],
                 "industry": company_profile["data"]["industry"],

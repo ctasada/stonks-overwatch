@@ -93,6 +93,7 @@ class StonksOverwatchApp(toga.App):
     async def on_running(self):
         await self.server_exists
         host, port = self._httpd.socket.getsockname()
+        self.logger.debug("Using server at %s:%s", host, port)
         self.web_view.url = f"http://{host}:{port}"
         self.main_window.show()
 

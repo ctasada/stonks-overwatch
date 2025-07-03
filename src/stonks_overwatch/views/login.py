@@ -21,7 +21,7 @@ class Login(View):
     * Loading: The user is shown a loading indicator while the portfolio is updated.
     """
 
-    logger = StonksLogger.get_logger("stonks_overwatch.login", "VIEW|LOGIN")
+    logger = StonksLogger.get_logger("stonks_overwatch.login", "[VIEW|LOGIN]")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

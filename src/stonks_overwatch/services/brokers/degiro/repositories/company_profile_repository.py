@@ -7,7 +7,7 @@ from stonks_overwatch.utils.database.db_utils import dictfetchall
 
 class CompanyProfileRepository:
     @staticmethod
-    def get_company_profile_raw(isin: str) -> dict:
+    def get_company_profile_raw(isin: str) -> dict | None:
         with connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -17,6 +17,8 @@ class CompanyProfileRepository:
                 """,
                 [isin],
             )
-            rows = dictfetchall(cursor)
+            result = dictfetchall(cursor)
 
-        return json.loads(rows[0]["data"])
+        if result:
+            return json.loads(result[0]["data"])
+        return None

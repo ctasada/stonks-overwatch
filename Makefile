@@ -223,7 +223,7 @@ briefcase-update: install collectstatic _create-wheels ## Update Briefcase proje
 	poetry run briefcase update
 	poetry run briefcase build
 
-briefcase-run: ## Run Briefcase project
+briefcase-run: ## Run Briefcase project (supports debug=true, profile=true, demo=true)
 	@echo -e  "$(BOLD)$(GREEN)Running Briefcase project...$(RESET)"
 	poetry run briefcase run
 
