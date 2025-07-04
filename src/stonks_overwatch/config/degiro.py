@@ -1,9 +1,30 @@
+from dataclasses import dataclass
 from datetime import date
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from stonks_overwatch.config.base_config import BaseConfig
-from stonks_overwatch.config.degiro_credentials import DegiroCredentials
+from stonks_overwatch.config.base_credentials import BaseCredentials
 from stonks_overwatch.utils.core.localization import LocalizationUtility
+
+
+@dataclass
+class DegiroCredentials(BaseCredentials):
+    username: str
+    password: str
+    int_account: Optional[int] = None
+    totp_secret_key: Optional[str] = None
+    one_time_password: Optional[int] = None
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "DegiroCredentials":
+        if not data:
+            return cls("", "")
+        return cls(**data)
+
+    @classmethod
+    def from_request(cls, request) -> "DegiroCredentials":
+        session_credentials = request.session.get("credentials", {})
+        return cls.from_dict(session_credentials)
 
 
 class DegiroConfig(BaseConfig):

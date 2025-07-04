@@ -31,7 +31,7 @@ def show_total_portfolio(context: RequestContext) -> dict:
 @register.simple_tag
 def is_connected_to_degiro() -> bool:
     try:
-        if Config.default().is_degiro_enabled():
+        if Config.get_global().is_degiro_enabled():
             degiro_client = DeGiroService()
             is_connected = degiro_client.check_connection()
             if is_connected and degiro_client.is_maintenance_mode:
@@ -42,7 +42,7 @@ def is_connected_to_degiro() -> bool:
     except DeGiroOfflineModeError:
         return False
     except Exception as error:
-        StonksLogger.get_logger("stonks_overwatch.views.templates", "CUSTOMTAGS|AUTH_MIDDLEWARE").error(error)
+        StonksLogger.get_logger("stonks_overwatch.views.templates", "[CUSTOMTAGS]").error(error)
         return False
 
 

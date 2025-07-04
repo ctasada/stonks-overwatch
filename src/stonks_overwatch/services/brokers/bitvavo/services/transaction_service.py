@@ -14,7 +14,7 @@ class TransactionsService(TransactionServiceInterface):
 
     def __init__(self):
         self.bitvavo_service = BitvavoService()
-        self.base_currency = Config.default().base_currency
+        self.base_currency = Config.get_global().base_currency
 
     def get_transactions(self) -> List[Transaction]:
         # FETCH TRANSACTIONS DATA

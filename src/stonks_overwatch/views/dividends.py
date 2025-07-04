@@ -20,7 +20,7 @@ class Dividends(View):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.dividends = DividendsAggregatorService()
-        self.base_currency = Config.default().base_currency
+        self.base_currency = Config.get_global().base_currency
 
     def get(self, request):
         selected_portfolio = SessionManager.get_selected_portfolio(request)

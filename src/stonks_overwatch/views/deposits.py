@@ -9,7 +9,7 @@ from stonks_overwatch.utils.core.logger import StonksLogger
 
 
 class Deposits(View):
-    logger = StonksLogger.get_logger("stonks_overwatch.deposits.views", "VIEW|DEPOSITS")
+    logger = StonksLogger.get_logger("stonks_overwatch.deposits.views", "[VIEW|DEPOSITS]")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

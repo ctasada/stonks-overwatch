@@ -56,7 +56,7 @@ class PortfolioService(PortfolioServiceInterface):
     ):
         self.degiro_service = degiro_service
         self.currency_service = CurrencyConverterService()
-        self.base_currency = Config.default().base_currency
+        self.base_currency = Config.get_global().base_currency
         self.deposits = DepositsService(
             degiro_service=self.degiro_service,
         )
@@ -159,7 +159,10 @@ class PortfolioService(PortfolioServiceInterface):
         """Extract company profile data with defaults."""
         company_profile = CompanyProfileRepository.get_company_profile_raw(isin)
 
-        if company_profile.get("data"):
+        if not company_profile:
+            self.logger.warning(f"No company profile found for ISIN {isin}, using defaults")
+
+        if company_profile and company_profile.get("data"):
             return {
                 "sector": company_profile["data"]["sector"],
                 "industry": company_profile["data"]["industry"],

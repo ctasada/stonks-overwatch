@@ -5,7 +5,6 @@ from django.shortcuts import redirect
 from django.urls import resolve
 
 from stonks_overwatch.config.config import Config
-from stonks_overwatch.config.degiro_config import DegiroConfig
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
 from stonks_overwatch.utils.core.logger import StonksLogger
 
@@ -13,7 +12,7 @@ from stonks_overwatch.utils.core.logger import StonksLogger
 class DeGiroAuthMiddleware:
     PUBLIC_URLS = {"login", "expired"}
 
-    logger = StonksLogger.get_logger("stonks_overwatch.degiro_auth", "DEGIRO|AUTH_MIDDLEWARE")
+    logger = StonksLogger.get_logger("stonks_overwatch.degiro_auth", "[DEGIRO|AUTH_MIDDLEWARE]")
 
     def __init__(self, get_response):
         self.get_response = get_response
@@ -22,7 +21,7 @@ class DeGiroAuthMiddleware:
     def __call__(self, request):
         current_url = resolve(request.path_info).url_name
 
-        if Config.default().is_degiro_enabled() and not Config.default().is_degiro_offline():
+        if Config.get_global().is_degiro_enabled() and not Config.get_global().is_degiro_offline():
             if self._should_check_connection(request):
                 try:
                     self._authenticate_user(request)
@@ -42,7 +41,7 @@ class DeGiroAuthMiddleware:
 
     def _is_maintenance_mode_allowed(self) -> bool:
         if self.degiro_service.is_maintenance_mode:
-            credentials = DegiroConfig.default().get_credentials
+            credentials = Config.get_global().registry.get_broker_config("degiro").get_credentials
             if credentials and credentials.username and credentials.password:
                 self.logger.warning("DeGiro is in maintenance mode, but credentials are provided.")
                 return True
@@ -51,9 +50,9 @@ class DeGiroAuthMiddleware:
 
     def _should_check_connection(self, request) -> bool:
         has_default_credentials = (
-            DegiroConfig.default().credentials is not None
-            and DegiroConfig.default().get_credentials.username is not None
-            and DegiroConfig.default().get_credentials.password is not None
+            Config.get_global().registry.get_broker_config("degiro").credentials is not None
+            and Config.get_global().registry.get_broker_config("degiro").get_credentials.username is not None
+            and Config.get_global().registry.get_broker_config("degiro").get_credentials.password is not None
         )
 
         return has_default_credentials or "session_id" in request.session

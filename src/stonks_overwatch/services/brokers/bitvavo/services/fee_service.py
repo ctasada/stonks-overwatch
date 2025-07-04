@@ -7,7 +7,7 @@ from stonks_overwatch.utils.core.localization import LocalizationUtility
 class FeesService:
     def __init__(self):
         self.bitvavo_service = BitvavoService()
-        self.base_currency = Config.default().base_currency
+        self.base_currency = Config.get_global().base_currency
 
     def get_fees(self) -> list[dict]:
         transactions_history = self.bitvavo_service.account_history()

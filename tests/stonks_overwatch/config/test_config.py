@@ -2,14 +2,23 @@ import pathlib
 from datetime import datetime
 
 from stonks_overwatch.config.base_config import BaseConfig
-from stonks_overwatch.config.bitvavo_credentials import BitvavoCredentials
+from stonks_overwatch.config.bitvavo import BitvavoCredentials
 from stonks_overwatch.config.config import Config
-from stonks_overwatch.config.degiro_config import DegiroConfig
-from stonks_overwatch.config.degiro_credentials import DegiroCredentials
+from stonks_overwatch.config.config_factory import ConfigFactory
+from stonks_overwatch.config.degiro import DegiroConfig, DegiroCredentials
 from stonks_overwatch.services.models import PortfolioId
 
 import pytest
 from unittest.mock import patch
+
+
+@pytest.fixture(autouse=True)
+def disable_config_caching():
+    """Disable config caching for all tests to ensure fresh config loading."""
+    factory = ConfigFactory()
+    factory.disable_caching()
+    yield
+    factory.enable_caching()
 
 
 def test_config_init():
@@ -35,8 +44,8 @@ def test_config_init():
     config = Config(base_currency=base_currency, degiro_configuration=degiro_config)
 
     assert config.base_currency == base_currency
-    assert config.degiro_configuration.credentials == credentials
-    assert config.degiro_configuration.start_date == start_date_as_date
+    assert config.registry.get_broker_config("degiro").credentials == credentials
+    assert config.registry.get_broker_config("degiro").start_date == start_date_as_date
 
 
 def test_config_init_invalid_base_currency():
@@ -65,16 +74,16 @@ def test_config_from_dict():
     config = Config.from_dict(config_dict)
 
     assert config.base_currency == base_currency
-    assert config.degiro_configuration.credentials == DegiroCredentials.from_dict(credentials_dict)
-    assert config.degiro_configuration.start_date == start_date_as_date
+    assert config.registry.get_broker_config("degiro").credentials == DegiroCredentials.from_dict(credentials_dict)
+    assert config.registry.get_broker_config("degiro").start_date == start_date_as_date
 
 
 def test_config_from_dict_empty():
     """Test loading configuration from empty dictionary."""
     config = Config.from_dict({})
     assert config.base_currency == Config.DEFAULT_BASE_CURRENCY
-    assert config.degiro_configuration is not None
-    assert config.bitvavo_configuration is not None
+    assert config.registry.get_broker_config("degiro") is not None
+    assert config.registry.get_broker_config("bitvavo") is not None
 
 
 def test_config_from_json_file():
@@ -94,9 +103,9 @@ def test_config_from_json_file():
     config = Config.from_json_file(file)
 
     assert config.base_currency == base_currency
-    assert config.degiro_configuration.credentials == DegiroCredentials.from_dict(credentials_dict)
-    assert config.degiro_configuration.start_date == start_date_as_date
-    assert config.degiro_configuration.update_frequency_minutes == update_frequency_minutes
+    assert config.registry.get_broker_config("degiro").credentials == DegiroCredentials.from_dict(credentials_dict)
+    assert config.registry.get_broker_config("degiro").start_date == start_date_as_date
+    assert config.registry.get_broker_config("degiro").update_frequency_minutes == update_frequency_minutes
 
 
 def test_config_from_json_file_invalid():
@@ -119,28 +128,28 @@ def test_config_default():
     start_date_as_date = datetime.fromisoformat(start_date).date()
     update_frequency_minutes = 5
 
-    config = Config.default()
+    config = Config._default()
 
     assert config.base_currency == base_currency
-    assert config.degiro_configuration.credentials == DegiroCredentials.from_dict(credentials_dict)
-    assert config.degiro_configuration.start_date == start_date_as_date
-    assert config.degiro_configuration.update_frequency_minutes == update_frequency_minutes
+    assert config.registry.get_broker_config("degiro").credentials == DegiroCredentials.from_dict(credentials_dict)
+    assert config.registry.get_broker_config("degiro").start_date == start_date_as_date
+    assert config.registry.get_broker_config("degiro").update_frequency_minutes == update_frequency_minutes
 
 
 def test_config_default_without_config_file():
     BaseConfig.CONFIG_PATH = "tests/resources/stonks_overwatch/config/unexisting-config.json"
 
-    config = Config.default()
+    config = Config._default()
 
     assert config.base_currency == "EUR"
-    assert config.degiro_configuration.credentials is None
-    assert config.degiro_configuration.start_date == DegiroConfig.DEFAULT_DEGIRO_START_DATE
-    assert config.degiro_configuration.update_frequency_minutes == 5
+    assert config.registry.get_broker_config("degiro").credentials is None
+    assert config.registry.get_broker_config("degiro").start_date == DegiroConfig.DEFAULT_DEGIRO_START_DATE
+    assert config.registry.get_broker_config("degiro").update_frequency_minutes == 5
 
 
 def test_config_portfolio_status():
     """Test portfolio status checks."""
-    config = Config.default()
+    config = Config._default()
 
     # Patch DeGiroService.check_connection to avoid real connection attempts
     with patch(
@@ -153,6 +162,7 @@ def test_config_portfolio_status():
 
         # Test Bitvavo portfolio status
         assert config.is_enabled(PortfolioId.BITVAVO) == config.is_bitvavo_enabled()
+        # Bitvavo doesn't have connection checking, so it should be the same as enabled
         assert config.is_enabled_and_connected(PortfolioId.BITVAVO) == config.is_bitvavo_enabled()
 
         # Test invalid portfolio
@@ -162,7 +172,7 @@ def test_config_portfolio_status():
 
 def test_config_degiro_status():
     """Test DeGiro-specific status checks."""
-    config = Config.default()
+    config = Config._default()
 
     # Test with DeGiro portfolio
     assert config.is_degiro_enabled(PortfolioId.DEGIRO)
@@ -187,31 +197,33 @@ def test_config_degiro_status():
 
 def test_config_bitvavo_status():
     """Test Bitvavo-specific status checks."""
-    config = Config.default()
+    # Create a fresh config without loading from test file to test default behavior
+    config = Config.from_dict({})
 
-    # Test with Bitvavo portfolio
+    # Test with Bitvavo portfolio - should be disabled by default because no credentials
     assert not config.is_bitvavo_enabled(PortfolioId.BITVAVO)
     assert not config.is_bitvavo_enabled(PortfolioId.ALL)
     assert not config.is_bitvavo_enabled(PortfolioId.DEGIRO)
 
     # Test with disabled configuration
-    config.bitvavo_configuration.enabled = False
+    config.registry.get_broker_config("bitvavo").enabled = False
     assert not config.is_bitvavo_enabled()
 
     # Test with missing credentials
-    config.bitvavo_configuration.credentials = None
+    config.registry.get_broker_config("bitvavo").enabled = True
+    config.registry.get_broker_config("bitvavo").credentials = None
     assert not config.is_bitvavo_enabled()
 
     # Test with Bitvavo Credentials
-    config.bitvavo_configuration.enabled = True
-    config.bitvavo_configuration.credentials = BitvavoCredentials(apikey="key", apisecret="secret")
+    config.registry.get_broker_config("bitvavo").enabled = True
+    config.registry.get_broker_config("bitvavo").credentials = BitvavoCredentials(apikey="key", apisecret="secret")
     assert config.is_bitvavo_enabled()
 
 
 def test_config_equality():
     """Test configuration equality checks."""
-    config1 = Config.default()
-    config2 = Config.default()
+    config1 = Config._default()
+    config2 = Config._default()
     assert config1 == config2
 
     # Test with different base currency
@@ -219,14 +231,20 @@ def test_config_equality():
     assert config1 != config2
 
     # Test with different DeGiro configuration
-    config2 = Config.default()
-    config2.degiro_configuration.enabled = False
+    config2 = Config._default()
+    from stonks_overwatch.config.degiro import DegiroConfig
+
+    new_degiro_config = DegiroConfig(credentials=None, start_date=DegiroConfig.DEFAULT_DEGIRO_START_DATE, enabled=False)
+    config2.registry.set_broker_config("degiro", new_degiro_config)
     assert config1 != config2
 
     # Test with different Bitvavo configuration
-    config2 = Config.default()
-    config2.bitvavo_configuration.enabled = False
-    assert config1 != config2
+    config3 = Config._default()
+    from stonks_overwatch.config.bitvavo import BitvavoConfig
+
+    new_bitvavo_config = BitvavoConfig(credentials=None, enabled=False)
+    config3.registry.set_broker_config("bitvavo", new_bitvavo_config)
+    assert config1 != config3
 
     # Test with non-Config object
     assert config1 != "not a config"
@@ -234,7 +252,7 @@ def test_config_equality():
 
 def test_config_repr():
     """Test configuration string representation."""
-    config = Config.default()
+    config = Config._default()
     repr_str = repr(config)
     assert "Config" in repr_str
     assert "base_currency" in repr_str

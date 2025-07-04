@@ -3,7 +3,7 @@ from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
-from stonks_overwatch.config.degiro_config import DegiroConfig
+from stonks_overwatch.config.config import Config
 from stonks_overwatch.services.brokers.degiro.services.update_service import UpdateService as DegiroUpdateService
 from stonks_overwatch.utils.core.logger import StonksLogger
 
@@ -21,7 +21,13 @@ class JobsScheduler:
 
         JobsScheduler.logger.info("Starting JobsScheduler")
         JobsScheduler.scheduler = BackgroundScheduler()
-        degiro_config = DegiroConfig.default()
+
+        # Get config inside the method to avoid import-time issues
+        try:
+            degiro_config = Config.get_global().registry.get_broker_config("degiro")
+        except Exception as e:
+            JobsScheduler.logger.error(f"Failed to get DeGiro config: {e}")
+            return
 
         if degiro_config.is_enabled() and not degiro_config.offline_mode:
             JobsScheduler.scheduler.add_job(

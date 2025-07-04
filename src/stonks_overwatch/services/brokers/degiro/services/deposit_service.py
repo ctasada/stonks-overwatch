@@ -7,18 +7,22 @@ from stonks_overwatch.core.interfaces.deposit_service import DepositServiceInter
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
 from stonks_overwatch.services.brokers.degiro.repositories.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.services.models import Deposit, DepositType
+from stonks_overwatch.utils.core.logger import StonksLogger
 
 
 # FIXME: If data cannot be found in the DB, the code should get it from DeGiro, updating the DB
 class DepositsService(DepositServiceInterface):
+    logger = StonksLogger.get_logger("stonks_overwatch.portfolio_data.degiro", "[DEGIRO|DEPOSITS]")
+
     def __init__(
         self,
         degiro_service: DeGiroService,
     ):
         self.degiro_service = degiro_service
-        self.base_currency = Config.default().base_currency
+        self.base_currency = Config.get_global().base_currency
 
     def get_cash_deposits(self) -> List[Deposit]:
+        self.logger.debug("Get Cash Deposits")
         df = pd.DataFrame(CashMovementsRepository.get_cash_deposits_raw())
 
         df = df.sort_values(by="date", ascending=False)
