@@ -5,6 +5,7 @@ This module provides a singleton class that loads the configuration once
 and caches it for subsequent access, reducing redundant configuration creation.
 """
 
+from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.config import Config
 from stonks_overwatch.config.config_factory import config_factory
 from stonks_overwatch.utils.core.singleton import singleton
@@ -31,7 +32,15 @@ class GlobalConfig:
             The global configuration instance
         """
         if self._config is None:
-            self._config = Config._default()
+            # Check if a specific config path is set (e.g., in tests)
+            if hasattr(BaseConfig, "CONFIG_PATH") and BaseConfig.CONFIG_PATH:
+                try:
+                    self._config = Config.from_json_file(BaseConfig.CONFIG_PATH)
+                except Exception:
+                    # Fall back to default if file loading fails
+                    self._config = Config._default()
+            else:
+                self._config = Config._default()
         return self._config
 
     def refresh_config(self) -> Config:
@@ -44,8 +53,9 @@ class GlobalConfig:
         Returns:
             The refreshed configuration instance
         """
-        self._config = Config._default()
-        return self._config
+        # Clear the cached config to force reload
+        self._config = None
+        return self.get_config()
 
     def clear_cache(self, broker_name: str = None) -> None:
         """
@@ -57,6 +67,15 @@ class GlobalConfig:
         """
         self._factory.clear_cache(broker_name)
         # Also clear the global config instance to force refresh
+        self._config = None
+
+    def reset_for_tests(self) -> None:
+        """
+        Reset the global configuration for tests.
+
+        This method clears the cached configuration to force reload
+        from the test configuration file.
+        """
         self._config = None
 
     def refresh_broker_config(self, broker_name: str) -> None:
