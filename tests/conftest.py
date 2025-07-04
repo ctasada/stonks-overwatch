@@ -39,3 +39,13 @@ def use_temp_cache(temp_cache_path, monkeypatch):
     requests_cache.clear()
     yield
     requests_cache.clear()
+
+
+@pytest.fixture(autouse=True)
+def reset_global_config():
+    """Reset the global configuration before each test to ensure clean state."""
+    from stonks_overwatch.config.global_config import global_config
+
+    # Reset the global config to force reload
+    global_config.reset_for_tests()
+    yield

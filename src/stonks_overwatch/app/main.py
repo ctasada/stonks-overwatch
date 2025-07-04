@@ -36,6 +36,7 @@ class StonksOverwatchApp(toga.App):
 
     def web_server(self):
         self.logger.info("Configuring settings...")
+        os.environ["STONKS_OVERWATCH_APP"] = "1"
         os.environ["DJANGO_SETTINGS_MODULE"] = "stonks_overwatch.settings"
         os.environ["STONKS_OVERWATCH_DATA_DIR"] = self.paths.data.as_posix()
         os.environ["STONKS_OVERWATCH_CONFIG_DIR"] = self.paths.config.as_posix()
@@ -92,6 +93,7 @@ class StonksOverwatchApp(toga.App):
     async def on_running(self):
         await self.server_exists
         host, port = self._httpd.socket.getsockname()
+        self.logger.debug("Using server at %s:%s", host, port)
         self.web_view.url = f"http://{host}:{port}"
         self.main_window.show()
 

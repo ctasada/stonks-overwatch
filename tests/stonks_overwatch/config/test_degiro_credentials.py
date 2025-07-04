@@ -1,4 +1,4 @@
-from stonks_overwatch.config.degiro_credentials import DegiroCredentials
+from stonks_overwatch.config.degiro import DegiroCredentials
 
 
 def test_degiro_credentials_init():

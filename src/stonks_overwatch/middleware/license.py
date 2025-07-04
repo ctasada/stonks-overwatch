@@ -18,7 +18,7 @@ class LicenseMiddleware(MiddlewareMixin):
     - Provides graceful degradation with clear messaging
     """
 
-    logger = StonksLogger.get_logger("stonks_overwatch.license", "LICENSE_MIDDLEWARE")
+    logger = StonksLogger.get_logger("stonks_overwatch.license", "[LICENSE_MIDDLEWARE]")
 
     def __init__(self, get_response=None):
         super().__init__(get_response)

@@ -13,11 +13,11 @@ from stonks_overwatch.utils.domain.constants import ProductType, Sector
 
 
 class Diversification(View):
-    logger = StonksLogger.get_logger("stonks_overwatch.dashboard.views", "VIEW|DIVERSIFICATION")
+    logger = StonksLogger.get_logger("stonks_overwatch.dashboard.views", "[VIEW|DIVERSIFICATION]")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.base_currency = Config.default().base_currency
+        self.base_currency = Config.get_global().base_currency
         self.portfolio = PortfolioAggregatorService()
 
     def get(self, request):

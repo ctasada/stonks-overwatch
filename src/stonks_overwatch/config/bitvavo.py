@@ -1,7 +1,20 @@
+from dataclasses import dataclass
 from typing import Optional
 
 from stonks_overwatch.config.base_config import BaseConfig
-from stonks_overwatch.config.bitvavo_credentials import BitvavoCredentials
+from stonks_overwatch.config.base_credentials import BaseCredentials
+
+
+@dataclass
+class BitvavoCredentials(BaseCredentials):
+    apikey: str
+    apisecret: str
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "BitvavoCredentials":
+        if not data:
+            return cls("", "")
+        return cls(**data)
 
 
 class BitvavoConfig(BaseConfig):

@@ -14,7 +14,7 @@ class FeesService:
     ):
         self.currency_service = CurrencyConverterService()
         self.degiro_service = degiro_service
-        self.base_currency = Config.default().base_currency
+        self.base_currency = Config.get_global().base_currency
 
     def get_fees(self) -> list[dict]:
         transaction_fees = self.get_transaction_fees()

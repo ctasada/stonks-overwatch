@@ -31,7 +31,7 @@ class DividendsService(DividendServiceInterface):
         self.currency_service = currency_service
         self.portfolio_service = portfolio_service
         self.degiro_service = degiro_service
-        self.base_currency = Config.default().base_currency
+        self.base_currency = Config.get_global().base_currency
 
     def get_dividends(self) -> List[Dividend]:
         dividends = self._get_dividends()

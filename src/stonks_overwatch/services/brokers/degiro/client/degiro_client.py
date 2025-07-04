@@ -12,7 +12,7 @@ from degiro_connector.trading.models.agenda import AgendaRequest, CalendarType
 from degiro_connector.trading.models.credentials import Credentials
 
 import stonks_overwatch.settings
-from stonks_overwatch.config.degiro_config import DegiroConfig
+from stonks_overwatch.config.config import Config
 from stonks_overwatch.settings import TIME_ZONE
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.core.logger import StonksLogger
@@ -36,7 +36,7 @@ class CredentialsManager:
     """Manages the credentials for the DeGiro API."""
 
     def __init__(self, credentials: Optional[Credentials] = None):
-        degiro_config = DegiroConfig.default()
+        degiro_config = Config.get_global().registry.get_broker_config("degiro")
         degiro_credentials = degiro_config.credentials
 
         self.credentials = credentials or Credentials(
@@ -86,6 +86,35 @@ class CredentialsManager:
 
 @singleton
 class DeGiroService:
+    """
+    Singleton service for managing DeGiro API connections and credentials.
+
+    This class implements a singleton pattern to ensure only one instance exists
+    throughout the application lifecycle. It manages service credentials and delegates
+    global configuration updates to the appropriate GlobalConfig class.
+
+    Credential Management:
+    - When instantiated with credentials, they are stored in the service instance
+    - When instantiated without credentials, existing credentials are preserved
+    - The update_credentials() method updates both service and global config
+    - The set_credentials() method only updates if explicitly provided or if none exist
+    - Global configuration updates are delegated to GlobalConfig.update_degiro_credentials()
+
+    Usage:
+        # Initial instantiation with credentials
+        service = DeGiroService(credentials_manager=my_credentials)
+
+        # Subsequent instantiations preserve existing credentials
+        service2 = DeGiroService()  # Returns same instance with same credentials
+
+        # Update credentials (updates both service and global config)
+        service.update_credentials(new_credentials_manager)
+
+        # Update global config only (via GlobalConfig)
+        from stonks_overwatch.config.global_config import global_config
+        global_config.update_degiro_credentials(username, password, ...)
+    """
+
     logger = StonksLogger.get_logger("stonks_overwatch.degiro_service", "[DEGIRO|CLIENT]")
     api_client: TradingApi = None
     credentials_manager: Optional[CredentialsManager] = None
@@ -103,8 +132,53 @@ class DeGiroService:
         self.is_maintenance_mode = False
 
     def set_credentials(self, credentials_manager: CredentialsManager):
-        self.credentials_manager = credentials_manager or CredentialsManager()
+        # Only set credentials if explicitly provided or if no credentials manager exists yet
+        if credentials_manager is not None:
+            self.credentials_manager = credentials_manager
+            self.api_client = TradingApi(credentials=self.credentials_manager.credentials)
+        elif self.credentials_manager is None:
+            # Only create default credentials manager if none exists
+            self.credentials_manager = CredentialsManager()
+            self.api_client = TradingApi(credentials=self.credentials_manager.credentials)
+        # If credentials_manager is None but self.credentials_manager already exists,
+        # do nothing to preserve existing valid credentials
+
+    def update_credentials(self, credentials_manager: CredentialsManager):
+        """
+        Explicitly update credentials, even if credentials already exist.
+        This method should be used when new credentials are provided (e.g., via login form).
+
+        Args:
+            credentials_manager: The new credentials manager to use
+        """
+        if credentials_manager is None:
+            raise ValueError("credentials_manager cannot be None")
+
+        self.credentials_manager = credentials_manager
         self.api_client = TradingApi(credentials=self.credentials_manager.credentials)
+
+        # Also update the global configuration
+        self._update_global_config_credentials(credentials_manager.credentials)
+
+        self.logger.info("Credentials updated successfully in both service and global config")
+
+    def _update_global_config_credentials(self, credentials):
+        """
+        Update the credentials in the global configuration.
+
+        Args:
+            credentials: The new credentials to set in the global config
+        """
+        # Delegate to GlobalConfig to follow SOLID principles
+        from stonks_overwatch.config.global_config import global_config
+
+        global_config.update_degiro_credentials(
+            username=credentials.username,
+            password=credentials.password,
+            int_account=credentials.int_account,
+            totp_secret_key=credentials.totp_secret_key,
+            one_time_password=credentials.one_time_password,
+        )
 
     def connect(self):
         """Connect to the DeGiro API."""
@@ -123,7 +197,7 @@ class DeGiroService:
 
     def check_connection(self) -> bool:
         """Check if the API client is connected."""
-        if not self.force and DegiroConfig.default().offline_mode:
+        if not self.force and Config.get_global().registry.get_broker_config("degiro").offline_mode:
             raise DeGiroOfflineModeError("DEGIRO working in offline mode. No connection is allowed")
 
         is_connected = self.__check_connection__()

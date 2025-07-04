@@ -8,12 +8,12 @@ from stonks_overwatch.utils.core.logger import StonksLogger
 
 
 class AccountOverviewService:
-    logger = StonksLogger.get_logger("stonks_overwatch.account_overview_data", "BITVAVO|ACCOUNT_OVERVIEW")
+    logger = StonksLogger.get_logger("stonks_overwatch.account_overview_data", "[BITVAVO|ACCOUNT_OVERVIEW]")
     TIME_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
     def __init__(self):
         self.bitvavo_service = BitvavoService()
-        self.base_currency = Config.default().base_currency
+        self.base_currency = Config.get_global().base_currency
 
     def get_account_overview(self) -> List[AccountOverview]:
         self.logger.debug("Get Account Overview")

@@ -10,7 +10,7 @@ from stonks_overwatch.utils.core.logger import StonksLogger
 
 
 class ConfigurationView(View):
-    logger = StonksLogger.get_logger("stonks_overwatch.dashboard.views", "VIEW|CONFIGURATION")
+    logger = StonksLogger.get_logger("stonks_overwatch.dashboard.views", "[VIEW|CONFIGURATION]")
 
     def get(self, request) -> JsonResponse:
         selected_portfolio = SessionManager.get_selected_portfolio(request)
@@ -24,8 +24,10 @@ class ConfigurationView(View):
     def __get_portfolios() -> list[dict]:
         portfolios = []
         for value in PortfolioId:
+            if value == PortfolioId.ALL:
+                continue
             # Add only the enabled portfolios
-            if Config().default().is_enabled(value):
+            if Config.get_global().is_enabled(value):
                 portfolios.append(value.to_dict())
 
         # If there are more than one portfolio, add the "All" option

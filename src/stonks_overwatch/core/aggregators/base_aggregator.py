@@ -34,7 +34,7 @@ class BaseAggregator(ABC):
         """
         self._service_type = service_type
         self._service_factory = ServiceFactory()
-        self._config = Config.default()
+        self._config = Config.get_global()
         self._logger = StonksLogger.get_logger(
             f"stonks_overwatch.aggregators.{self.__class__.__name__.lower()}",
             f"[AGGREGATOR|{service_type.value.upper()}]",
@@ -87,20 +87,19 @@ class BaseAggregator(ABC):
         try:
             from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
 
+            degiro_client = DeGiroService()
+
             if self._service_type == ServiceType.PORTFOLIO:
                 from stonks_overwatch.services.brokers.degiro.services.portfolio_service import PortfolioService
 
-                degiro_client = DeGiroService()
                 return PortfolioService(degiro_service=degiro_client)
             elif self._service_type == ServiceType.TRANSACTION:
                 from stonks_overwatch.services.brokers.degiro.services.transaction_service import TransactionsService
 
-                degiro_client = DeGiroService()
                 return TransactionsService(degiro_service=degiro_client)
             elif self._service_type == ServiceType.DEPOSIT:
                 from stonks_overwatch.services.brokers.degiro.services.deposit_service import DepositsService
 
-                degiro_client = DeGiroService()
                 return DepositsService(degiro_service=degiro_client)
             elif self._service_type == ServiceType.DIVIDEND:
                 from stonks_overwatch.services.brokers.degiro.services.account_service import AccountOverviewService
@@ -108,7 +107,6 @@ class BaseAggregator(ABC):
                 from stonks_overwatch.services.brokers.degiro.services.dividend_service import DividendsService
                 from stonks_overwatch.services.brokers.degiro.services.portfolio_service import PortfolioService
 
-                degiro_client = DeGiroService()
                 account_service = AccountOverviewService()
                 currency_service = CurrencyConverterService()
                 portfolio_service = PortfolioService(degiro_service=degiro_client)
@@ -122,7 +120,6 @@ class BaseAggregator(ABC):
             elif self._service_type == ServiceType.FEE:
                 from stonks_overwatch.services.brokers.degiro.services.fee_service import FeesService
 
-                degiro_client = DeGiroService()
                 return FeesService(degiro_service=degiro_client)
             elif self._service_type == ServiceType.ACCOUNT:
                 from stonks_overwatch.services.brokers.degiro.services.account_service import AccountOverviewService
@@ -216,6 +213,9 @@ class BaseAggregator(ABC):
             DataAggregationException: If data collection fails
         """
         enabled_brokers = self._get_enabled_brokers(selected_portfolio)
+        if not enabled_brokers:
+            raise DataAggregationException("Failed to find any enabled broker")
+
         broker_data = {}
 
         for broker_name in enabled_brokers:

@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.views import View
 
-from stonks_overwatch.config.degiro_credentials import DegiroCredentials
+from stonks_overwatch.config.degiro import DegiroCredentials
 from stonks_overwatch.jobs.jobs_scheduler import JobsScheduler
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import CredentialsManager, DeGiroService
 from stonks_overwatch.utils.core.logger import StonksLogger
@@ -21,7 +21,7 @@ class Login(View):
     * Loading: The user is shown a loading indicator while the portfolio is updated.
     """
 
-    logger = StonksLogger.get_logger("stonks_overwatch.login", "VIEW|LOGIN")
+    logger = StonksLogger.get_logger("stonks_overwatch.login", "[VIEW|LOGIN]")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -83,7 +83,7 @@ class Login(View):
         credentials = Credentials(username=username, password=password, one_time_password=one_time_password)
         if not self.degiro_service:
             self.degiro_service = DeGiroService()
-        self.degiro_service.set_credentials(CredentialsManager(credentials))
+        self.degiro_service.update_credentials(CredentialsManager(credentials))
 
         self.logger.info("Attempting to connect to DeGiro...")
         self.degiro_service.connect()
