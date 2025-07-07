@@ -118,7 +118,7 @@ license-check: ## Check license compatibility
 generate-third-party: ## Generate third-party licenses file
 	@echo -e  "$(BOLD)$(BLUE)Generating third-party licenses...$(RESET)"
 	@packages=$$(poetry show --only=main | awk '{print $$1}'); \
-	poetry run pip-licenses --packages $$packages --format=markdown --output-file=THIRD_PARTY_LICENSES.md
+	poetry run pip-licenses --packages $$packages
 
 check-dependencies: ## Check for dependency issues
 	@echo -e  "$(BOLD)$(BLUE)Checking dependencies...$(RESET)"
