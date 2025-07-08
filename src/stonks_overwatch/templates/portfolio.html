@@ -4,7 +4,7 @@
 <div class="container-fluid row-gap-5">
     <div class="row align-items-center mt-2">
         <div class="col-1">
-            <h4>Portfolio</h4>
+            <p class="h5">Portfolio</p>
         </div>
         <div class="col-2">
             <div class="dropdown">
@@ -20,24 +20,24 @@
         </div>
     </div>
     <div class="row mt-2">
-        <h5 class="mb-3">Shares</h5>
+        <p class="h5 mb-3">Shares</p>
         {% include 'portfolio/table.html' with items=stocks show_columns=show_stocks_columns %}
     </div>
     {% if trackers %}
     <div class="row mt-2">
-        <h5 class="mb-3">Trackers (ETF)</h5>
+        <p class="h5 mb-3">Trackers (ETF)</p>
         {% include 'portfolio/table.html' with items=trackers show_columns=show_trackers_columns %}
     </div>
     {% endif %}
     {% if crypto %}
         <div class="row mt-2">
-            <h5 class="mb-3">Crypto</h5>
+            <p class="h5 mb-3">Crypto</p>
             {% include 'portfolio/table.html' with items=crypto show_columns=show_crypto_columns %}
         </div>
     {% endif %}
     {% if cash %}
     <div class="row mt-2">
-        <h5 class="mb-3">Cash</h5>
+        <p class="h5 mb-3">Cash</p>
         {% include 'portfolio/table.html' with items=cash show_columns=show_cash_columns %}
     </div>
     {% endif %}
