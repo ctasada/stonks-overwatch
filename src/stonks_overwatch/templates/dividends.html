@@ -6,19 +6,18 @@
 <div class="container-fluid row-gap-5">
     {% if total_net_dividends == None %}
     <div class="row mt-2 column-gap-3">
-        <h4 class="mb-1">No dividends found</h4>
+        <p class="h4 mb-1">No dividends found</p>
     </div>
     {% else %}
     <div class="row mt-2 column-gap-3">
         {% include 'components/summary_card.html' with label="Net Dividends" value=total_net_dividends tooltip="Total net dividends received." %}
         {% include 'components/summary_card.html' with label="Dividend Tax" value=total_tax_dividends tooltip="Total amount paid in dividend taxes." %}
         {% include 'components/summary_card.html' with label="Gross Dividends" value=total_gross_dividends tooltip="Gross dividend is the total amount paid out before dividend tax is deducted." %}
-        </div>
     </div>
     <div class="row border border-primary-subtle bg-light rounded mb-3">
         <div class="row mt-2">
             <div class="col">
-                <h5 class="mb-1">Dividend Cash Flow</h5>
+                <p class="h5 mb-1">Dividend Cash Flow</p>
             </div>
             <div class="col float-end text-end">
                 <div class="btn-group btn-group-sm" role="group">
@@ -38,7 +37,7 @@
     <div class="row border border-primary-subtle bg-light rounded mb-3" style="background-color:#dbf5ff">
         <div class="row my-2">
             <div class="col-auto">
-                <h5 class="my-1">Dividends Calendar</h5>
+                <p class="h5 my-1">Dividends Calendar</p>
             </div>
             <div class="col-auto">
                 <div class="dropdown btn-sm dropdown-custom" id="dividendsYearsDropdown">
