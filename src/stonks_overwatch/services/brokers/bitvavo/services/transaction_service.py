@@ -22,7 +22,7 @@ class TransactionsService(TransactionServiceInterface):
 
         # DISPLAY PRODUCTS_INFO
         my_transactions = []
-        for transaction in transactions_history["items"]:
+        for transaction in transactions_history:
             if transaction["type"] == "deposit":
                 continue
 

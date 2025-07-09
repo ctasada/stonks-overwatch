@@ -46,8 +46,25 @@ class BitvavoService:
         """Returns the transaction history for this account."""
         self.logger.debug("Retrieving account history")
         options = {"fromDate": self.START_TIMESTAMP}
-        postfix = createPostfix(options)
-        return self.client.privateRequest("/account/history", postfix, {}, "GET")
+
+        all_results = []
+        current_page = 1
+        while True:
+            options["page"] = current_page
+            postfix = createPostfix(options)
+            response = self.client.privateRequest("/account/history", postfix, {}, "GET")
+
+            if not response or "items" not in response:
+                break
+
+            all_results.extend(response["items"])
+
+            if "totalPages" in response and current_page < response["totalPages"]:
+                current_page += 1
+            else:
+                break
+
+        return all_results
 
     def assets(self, symbol: str = None) -> json:
         """Returns information on the supported assets."""

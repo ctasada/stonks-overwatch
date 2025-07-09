@@ -85,7 +85,7 @@ class DepositsService(DepositServiceInterface):
 
     def calculate_cash_account_value(self) -> dict[str, float]:
         transactions = self.bitvavo_service.account_history()
-        transactions = sorted(transactions["items"], key=lambda k: k["executedAt"], reverse=False)
+        transactions = sorted(transactions, key=lambda k: k["executedAt"], reverse=False)
         transactions = [item for item in transactions if item["type"] in ["deposit", "withdrawal", "buy", "sell"]]
 
         dataset = {}
@@ -109,7 +109,7 @@ class DepositsService(DepositServiceInterface):
         This prevents double-counting when deposits are separately tracked as cash flows in TWR calculations.
         """
         transactions = self.bitvavo_service.account_history()
-        transactions = sorted(transactions["items"], key=lambda k: k["executedAt"], reverse=False)
+        transactions = sorted(transactions, key=lambda k: k["executedAt"], reverse=False)
         transactions = [item for item in transactions if item["type"] in ["deposit", "withdrawal", "buy", "sell"]]
 
         dataset = {}
