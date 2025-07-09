@@ -10,11 +10,11 @@
                     <div class="d-flex align-items-center">
                         {% if item.product_type %}
                             {% if item.product_type == 'sector' %}
-                                <i class="fas fa-{{ item.symbol }} bg-white rounded-circle p-2"></i>
+                                <i class="fas fa-{{ item.symbol }} bg-white rounded-circle border border-primary p-2"></i>
                             {% elif item.product_type == 'cash' %}
-                                <i class="fas fa-{{ item.symbol }} bg-white rounded-circle p-2"></i>
+                                <i class="fas fa-{{ item.symbol }} bg-white rounded-circle border border-primary p-2"></i>
                             {% else %}
-                                <img class="rounded-circle bg-white" src="{% url 'asset_logo' product_type=item.product_type|lower symbol=item.symbol|lower %}" width="30" height="30" alt="{{ item.symbol }} logo" onerror="this.style.display='none'">
+                                <img class="rounded-circle bg-white border border-primary" src="{% url 'asset_logo' product_type=item.product_type|lower symbol=item.symbol|lower %}" width="30" height="30" alt="{{ item.symbol }} logo" onerror="this.style.display='none'">
                             {% endif %}
                         {% endif %}
                     </div>

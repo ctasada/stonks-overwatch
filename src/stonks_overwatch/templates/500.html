@@ -1,0 +1,95 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stonks Overwatch - Server Error</title>
+    <link rel="icon" type="image/png" href="{% static 'stonks_overwatch-32x32.png' %}" sizes="32x32">
+
+    <!-- Bootstrap CSS CDN -->
+    <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'bootstrap-icons/font/bootstrap-icons.css' %}" rel="stylesheet">
+    <!-- JavaScript Bundle with Popper -->
+    <script src="{% static 'bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+    <!-- jQuery CDN - Slim version (=without AJAX) -->
+    <script src="{% static 'jquery/dist/jquery.slim.min.js' %}"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            background-attachment: fixed;
+        }
+
+        /* Ensure the gradient works in dark mode too */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            }
+        }
+    </style>
+</head>
+<body class="min-vh-100 d-flex align-items-center justify-content-center">
+    <div class="container py-2">
+        <div class="bg-white rounded-4 shadow p-4 mx-auto" style="max-width: 600px;">
+            <img class="d-block mx-auto mb-1" src="{% static 'stonks_overwatch-512.png' %}" alt="Stonks Overwatch" width="120" height="120" />
+
+            <div class="row mb-1 align-items-center">
+                <div class="col-6 text-end fs-1">⚠️</div>
+                <div class="col-6 text-start fs-1 text-dark">Error</div>
+            </div>
+
+            {% if exception_type %}
+            <div class="bg-light rounded p-3 mb-2">
+                <div class="row mb-2">
+                    <div class="col-4 fw-semibold text-dark">Version:</div>
+                    <div class="col-8 text-secondary">{{ version }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-4 fw-semibold text-dark">Build Date:</div>
+                    <div class="col-8 text-secondary">{{ build_date|date:"M d, Y" }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-4 fw-semibold text-dark">Error Type:</div>
+                    <div class="col-8 text-secondary">{{ exception_type }}</div>
+                </div>
+                {% if exception_message %}
+                <div class="row mb-2">
+                    <div class="col-4 fw-semibold text-dark">Error Message:</div>
+                    <div class="col-8 text-secondary">
+                        <code class="small">{{ exception_message|truncatechars:120 }}</code>
+                    </div>
+                </div>
+                {% endif %}
+                <div class="row">
+                    <div class="col-4 fw-semibold text-dark">Timestamp:</div>
+                    <div class="col-8 text-secondary" id="timestamp">{{ timestamp }}</div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if traceback %}
+            <div class="alert alert-warning mb-4">
+                <strong>Technical Details:</strong>
+                <div class="mt-2">
+                    <code class="small" style="white-space: pre-wrap; max-height: 200px; overflow-y: auto; display: block;">{{ traceback }}</code>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="text-center">
+                <p class="mb-1">If this problem persists, please contact our support team.</p>
+                <p class="mb-1">We apologize for the inconvenience</p>
+                <a href="{{ support_url }}" class="btn btn-primary px-4">
+                    Report Issue <i class="bi bi-envelope"></i>
+                </a>
+                <p class="mb-0 mt-1 text-muted small">Error occurred at: <span id="timestamp-display">{{ timestamp }}</span></p>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

@@ -29,7 +29,7 @@
     <script src="{% static 'jquery/dist/jquery.slim.min.js' %}"></script>
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
 
     <style>
         body {
@@ -48,9 +48,9 @@
 <body class="min-vh-100 d-flex align-items-center justify-content-center">
     <div class="container py-2">
         <div class="bg-white rounded-4 shadow p-4 mx-auto" style="max-width: 500px;">
-            <img class="d-block mx-auto mb-4" src="/static/stonks_overwatch-512.png" alt="Stonks Overwatch" width="120" height="120" />
+            <img class="d-block mx-auto mb-4" src="{% static 'stonks_overwatch-512.png' %}" alt="Stonks Overwatch" width="120" height="120" />
 
-            <h1 class="h2 mb-3 text-dark text-center">
+            <p class="h2 mb-3 text-dark text-center">
                 {% if days_remaining is not None %}
                     {% if days_remaining <= 0 %}
                         Trial Version Expired
@@ -62,7 +62,7 @@
                 {% else %}
                     Trial Version Info
                 {% endif %}
-            </h1>
+            </p>
 
             <div class="text-secondary mb-4 text-center">
                 {% if days_remaining is not None %}
