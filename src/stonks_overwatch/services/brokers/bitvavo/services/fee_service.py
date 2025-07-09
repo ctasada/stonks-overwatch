@@ -12,7 +12,7 @@ class FeesService:
     def get_fees(self) -> list[dict]:
         transactions_history = self.bitvavo_service.account_history()
         total_fees = []
-        for transaction in transactions_history["items"]:
+        for transaction in transactions_history:
             if transaction["type"] == "deposit":
                 continue
 

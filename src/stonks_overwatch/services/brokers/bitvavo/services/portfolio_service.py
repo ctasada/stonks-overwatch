@@ -141,7 +141,7 @@ class PortfolioService(PortfolioServiceInterface):
         total_cost = 0.0
         total_quantity = 0.0
 
-        for transaction in transactions_history["items"]:
+        for transaction in transactions_history:
             if transaction["type"] == "deposit":
                 continue
 
@@ -226,7 +226,7 @@ class PortfolioService(PortfolioServiceInterface):
         self.logger.debug("Calculating Product growth")
 
         transactions = self.bitvavo_service.account_history()
-        transactions = sorted(transactions["items"], key=lambda k: k["executedAt"], reverse=False)
+        transactions = sorted(transactions, key=lambda k: k["executedAt"], reverse=False)
         transactions = [item for item in transactions if item["type"] in ["buy", "sell", "staking"]]
 
         product_growth = {}
