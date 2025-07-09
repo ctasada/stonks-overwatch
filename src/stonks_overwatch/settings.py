@@ -53,9 +53,10 @@ STONKS_OVERWATCH_SUPPORT_URL = "https://forms.gle/djPWAtLSFfRYbDwV7"
 SECRET_KEY = "django-insecure-!2@us@&-4_p0s&k@u^s2xb865+yp=6-ic1e)*9o@$f=)66^ehi"
 
 # SECURITY WARNING: don't run with debug turned on in production!
+DEBUG_MODE = os.getenv("DEBUG_MODE", False) in [True, "true", "True", "1"]
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -82,6 +83,13 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.cache.FetchFromCacheMiddleware",
 ]
+
+# Only use the custom error handler middleware in production/testing
+if not DEBUG_MODE:
+    MIDDLEWARE += [
+        "stonks_overwatch.middleware.error_handler.CustomErrorHandlerMiddleware",
+    ]
+
 # Enable the profiler middleware if the PROFILE_MODE environment variable is set
 PROFILE_MODE = os.getenv("PROFILE_MODE", False) in [True, "true", "True", "1"]
 if PROFILE_MODE:
@@ -200,7 +208,6 @@ CACHES = {
 
 # Enable DEBUG logging only if DEBUG_MODE is set
 STONKS_LOG_LEVEL = os.getenv("STONKS_LOG_LEVEL", "INFO").upper()
-DEBUG_MODE = os.getenv("DEBUG_MODE", False) in [True, "true", "True", "1"]
 if DEBUG_MODE:
     STONKS_LOG_LEVEL = "DEBUG"
 
