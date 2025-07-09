@@ -22,7 +22,7 @@ class AccountOverviewService:
 
         # DISPLAY PRODUCTS_INFO
         overview = []
-        for item in account_history["items"]:
+        for item in account_history:
             asset = self.bitvavo_service.assets(item["receivedCurrency"])
 
             if item["type"] == "deposit":
