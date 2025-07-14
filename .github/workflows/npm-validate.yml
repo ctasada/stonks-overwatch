@@ -1,0 +1,33 @@
+name: Validate npm changes
+
+on:
+  pull_request:
+    paths:
+      - 'src/package.json'
+      - 'src/package-lock.json'
+
+jobs:
+  validate-npm:
+    name: Validate npm changes
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: |
+          cd src
+          npm ci
+
+      - name: Validate package.json and package-lock.json
+        run: |
+          cd src
+          npm audit --production
+#          npm run lint
+#          npm test
