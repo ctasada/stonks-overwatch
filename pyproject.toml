@@ -35,7 +35,7 @@ requires = ["poetry-core>=2.1.3,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.12.2"
+ruff = "^0.12.3"
 pytest = "^8.4.1"
 pytest-cov = "^6.2.1"
 pytest-django = "^4.11.1"
@@ -43,11 +43,11 @@ pook = "^2.1.4"
 pyinstrument = "^5.0.3"
 licensecheck = "^2025.1.0"
 pip-licenses = "^5.0.0"
-briefcase = "^0.3.23"
+briefcase = "^0.3.24"
 deptry = "^0.23.0"
 pre-commit = "^4.2.0"
 bandit = "^1.8.6"
-pymarkdownlnt = "^0.9.30"
+pymarkdownlnt = "^0.9.31"
 
 [tool.poetry]
 include = [
@@ -204,7 +204,7 @@ test_sources = [
     "tests",
 ]
 requires = [
-    "toga (>=0.5.1,<0.6.0)",
+    "toga (>=0.5.2,<0.6.0)",
     "std-nslog (>=1.0.3,<2.0.0)",
 ]
 test_requires = [ ]
