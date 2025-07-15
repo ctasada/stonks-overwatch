@@ -12,6 +12,7 @@ from stonks_overwatch.config.config import Config
 from stonks_overwatch.core.exceptions import DataAggregationException
 from stonks_overwatch.core.factories.broker_registry import ServiceType
 from stonks_overwatch.core.factories.service_factory import ServiceFactory
+from stonks_overwatch.services.brokers.ibkr.client.ibkr_service import IbkrService
 from stonks_overwatch.services.models import PortfolioId
 from stonks_overwatch.utils.core.logger import StonksLogger
 
@@ -48,6 +49,8 @@ class BaseAggregator(ABC):
         """
         available_brokers = self._service_factory.get_available_brokers()
 
+        self._logger.debug(f"Available brokers: {available_brokers}")
+
         for broker_name in available_brokers:
             if self._service_factory.broker_supports_service(broker_name, self._service_type):
                 try:
@@ -75,6 +78,8 @@ class BaseAggregator(ABC):
                 return self._create_degiro_service()
             elif broker_name == "bitvavo":
                 return self._create_bitvavo_service()
+            elif broker_name == "ibkr":
+                return self._create_ibkr_service()
             else:
                 self._logger.error(f"{broker_name} is not supported")
                 return None
@@ -159,6 +164,36 @@ class BaseAggregator(ABC):
             self._logger.error(f"Failed to create Bitvavo {self._service_type.value} service: {e}")
             return None
 
+    def _create_ibkr_service(self) -> Optional[Any]:
+        """Create IBKR service with proper dependencies."""
+        try:
+            if self._service_type == ServiceType.PORTFOLIO:
+                from stonks_overwatch.services.brokers.ibkr.services.portfolio import PortfolioService
+
+                return PortfolioService()
+            elif self._service_type == ServiceType.TRANSACTION:
+                from stonks_overwatch.services.brokers.ibkr.services.transactions import TransactionsService
+
+                ibkr_service = IbkrService()
+                return TransactionsService(ibkr_service=ibkr_service)
+            elif self._service_type == ServiceType.DEPOSIT:
+                return None
+            elif self._service_type == ServiceType.FEE:
+                return None
+            elif self._service_type == ServiceType.ACCOUNT:
+                from stonks_overwatch.services.brokers.ibkr.services.account_overview import AccountOverviewService
+
+                return AccountOverviewService()
+            elif self._service_type == ServiceType.DIVIDEND:
+                from stonks_overwatch.services.brokers.ibkr.services.dividends import DividendsService
+
+                ibkr_service = IbkrService()
+
+                return DividendsService(ibkr_service=ibkr_service)
+        except Exception as e:
+            self._logger.error(f"Failed to create IBKR {self._service_type.value} service: {e}", exc_info=True)
+            return None
+
     def _is_broker_enabled(self, broker_name: str, selected_portfolio: PortfolioId) -> bool:
         """
         Check if a broker is enabled for the selected portfolio.
@@ -170,10 +205,14 @@ class BaseAggregator(ABC):
         Returns:
             True if broker is enabled, False otherwise
         """
+        self._logger.debug(f"Checking if {broker_name} enabled for {selected_portfolio}")
         if broker_name == "degiro":
             return self._config.is_degiro_enabled(selected_portfolio)
         elif broker_name == "bitvavo":
             return self._config.is_bitvavo_enabled(selected_portfolio)
+        elif broker_name == "ibkr":
+            self._logger.debug(f"Is {broker_name} enabled? {self._config.is_ibkr_enabled(selected_portfolio)}")
+            return self._config.is_ibkr_enabled(selected_portfolio)
         else:
             # For other brokers, assume they're enabled if they have services
             return broker_name in self._broker_services
@@ -188,6 +227,8 @@ class BaseAggregator(ABC):
         Returns:
             List of enabled broker names
         """
+        self._logger.debug(f"Getting enabled brokers for {selected_portfolio}")
+        self._logger.debug(f"Brokers: {list(self._broker_services.keys())}")
         return [
             broker_name
             for broker_name in self._broker_services.keys()

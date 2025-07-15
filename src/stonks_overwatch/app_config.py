@@ -62,3 +62,9 @@ class StonksOverwatchConfig(AppConfig):
 
         self.logger.info("Stonks Overwatch - Stopping JobsScheduler")
         JobsScheduler.stop()
+
+        self.logger.info("Stonks Overwatch - Closing connections")
+        from stonks_overwatch.services.ibkr.ibkr_service import IbkrService
+
+        IbkrService().get_client().oauth_shutdown()
+        self.logger.info("Stonks Overwatch - Connections closed")

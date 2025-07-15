@@ -51,11 +51,11 @@ class Diversification(View):
 
         for stock in portfolio:
             if stock.is_open:
-                stock_labels.append(stock.name)
+                stock_labels.append(stock.formatted_name())
                 stock_values.append(stock.base_currency_value)
                 stocks_table.append(
                     {
-                        "name": stock.name,
+                        "name": stock.formatted_name(),
                         "product_type": stock.product_type.name,
                         "symbol": stock.symbol,
                         "size": stock.portfolio_size,
