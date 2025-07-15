@@ -11,6 +11,7 @@ from stonks_overwatch.services.models import (
     PortfolioId,
     TotalPortfolio,
     dataclass_to_dict,
+    format_stock_name,
 )
 from stonks_overwatch.utils.domain.constants import ProductType, Sector
 
@@ -18,7 +19,7 @@ import pytest
 
 
 def test_portfolio_ids():
-    assert PortfolioId.values() == [PortfolioId.ALL, PortfolioId.DEGIRO, PortfolioId.BITVAVO]
+    assert PortfolioId.values() == [PortfolioId.ALL, PortfolioId.DEGIRO, PortfolioId.BITVAVO, PortfolioId.IBKR]
 
     for portfolio_id in PortfolioId.values():
         assert PortfolioId.from_id(portfolio_id.id) == portfolio_id
@@ -217,3 +218,32 @@ def test_dataclass_to_dict():
 def test_dataclass_to_dict_exception():
     with pytest.raises(ValueError):
         dataclass_to_dict("string")
+
+
+def test_format_stock_name_jpmorgan():
+    assert format_stock_name("Jpmorgan Chase") == "JPMorgan Chase"
+    assert format_stock_name("jpmorgan chase") == "JPMorgan Chase"
+    assert format_stock_name("JPMORGAN CHASE") == "JPMorgan Chase"
+
+
+def test_format_stock_name_ishares():
+    assert format_stock_name("Ishares Core") == "iShares Core"
+    assert format_stock_name("ishares core") == "iShares Core"
+    assert format_stock_name("ISHARES CORE") == "iShares Core"
+
+
+def test_format_stock_name_preserve():
+    assert format_stock_name("Empresa SA") == "Empresa SA"
+    assert format_stock_name("empresa SA.") == "Empresa SA."
+    assert format_stock_name("empresa SA-B") == "Empresa SA-B"
+
+
+def test_format_stock_name_mixed():
+    assert format_stock_name("Ishares JPMorgan SA") == "iShares JPMorgan SA"
+    assert format_stock_name("ishares jpmorgan sa.") == "iShares JPMorgan SA."
+    assert format_stock_name("ISHARES JPMORGAN SA-B") == "iShares JPMorgan SA-B"
+
+
+def test_format_stock_name_regular():
+    assert format_stock_name("apple inc") == "Apple Inc"
+    assert format_stock_name("tesla motors") == "Tesla Motors"

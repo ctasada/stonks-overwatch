@@ -48,7 +48,7 @@ CACHE_TIMEOUT = 3600
 
 
 class UpdateService:
-    logger = StonksLogger.get_logger("stonks_overwatch.update_service", "[DEGIRO|UPDATE]")
+    logger = StonksLogger.get_logger("stonks_overwatch.degiro.update_service", "[DEGIRO|UPDATE]")
 
     def __init__(self, import_folder: str = None, debug_mode: bool = None):
         """

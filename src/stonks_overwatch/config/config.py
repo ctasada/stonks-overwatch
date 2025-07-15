@@ -6,6 +6,7 @@ from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.bitvavo import BitvavoConfig
 from stonks_overwatch.config.config_factory import config_factory
 from stonks_overwatch.config.degiro import DegiroConfig
+from stonks_overwatch.config.ibkr import IbkrConfig
 from stonks_overwatch.services.models import PortfolioId
 from stonks_overwatch.utils.core.logger import StonksLogger
 
@@ -118,6 +119,8 @@ class ConfigRegistry:
             return self._is_degiro_connected(selected_portfolio)
         elif broker_name == "bitvavo":
             return self._is_bitvavo_connected(selected_portfolio)
+        elif broker_name == "ibkr":
+            return self._is_ibkr_connected(selected_portfolio)
 
         return False
 
@@ -157,6 +160,15 @@ class ConfigRegistry:
             and selected_portfolio in [PortfolioId.ALL, PortfolioId.BITVAVO]
         )
 
+    def _is_ibkr_connected(self, selected_portfolio: PortfolioId = PortfolioId.ALL) -> bool:
+        """IBKR-specific connection check."""
+        config = self.get_broker_config("ibkr")
+        return (
+            config is not None
+            and config.credentials is not None
+            and selected_portfolio in [PortfolioId.ALL, PortfolioId.IBKR]
+        )
+
 
 class Config:
     logger = StonksLogger.get_logger("stonks_overwatch.config", "[CONFIG]")
@@ -168,6 +180,7 @@ class Config:
         base_currency: Optional[str] = DEFAULT_BASE_CURRENCY,
         degiro_configuration: Optional[DegiroConfig] = None,
         bitvavo_configuration: Optional[BitvavoConfig] = None,
+        ibkr_configuration: Optional[IbkrConfig] = None,
     ) -> None:
         if base_currency and not isinstance(base_currency, str):
             raise TypeError("base_currency must be a string")
@@ -181,6 +194,8 @@ class Config:
             self.registry.set_broker_config("degiro", degiro_configuration)
         if bitvavo_configuration:
             self.registry.set_broker_config("bitvavo", bitvavo_configuration)
+        if ibkr_configuration:
+            self.registry.set_broker_config("ibkr", ibkr_configuration)
 
     def is_enabled(self, selected_portfolio: PortfolioId) -> bool:
         """
@@ -210,7 +225,6 @@ class Config:
     def is_enabled_and_connected(self, selected_portfolio: PortfolioId) -> bool:
         """
         Check if any broker is enabled and connected for the selected portfolio.
-
         Args:
             selected_portfolio: Selected portfolio filter
 
@@ -249,6 +263,9 @@ class Config:
     def is_bitvavo_enabled(self, selected_portfolio: PortfolioId = PortfolioId.ALL) -> bool:
         return self.registry.is_broker_enabled("bitvavo", selected_portfolio)
 
+    def is_ibkr_enabled(self, selected_portfolio: PortfolioId = PortfolioId.ALL) -> bool:
+        return self.registry.is_broker_enabled("ibkr", selected_portfolio)
+
     def __eq__(self, value: object) -> bool:
         if isinstance(value, Config):
             # Compare base currency
@@ -270,6 +287,7 @@ class Config:
             f"Config(base_currency={self.base_currency}, "
             f"degiro_config={self.registry.get_broker_config('degiro')}, "
             f"bitvavo_config={self.registry.get_broker_config('bitvavo')}, "
+            f"ibkr_config={self.registry.get_broker_config('ibkr')}, "
             ")"
         )
 
@@ -284,8 +302,9 @@ class Config:
         bitvavo_configuration = config_factory.create_broker_config_from_dict(
             "bitvavo", data.get(BitvavoConfig.config_key, {})
         )
+        ibkr_configuration = config_factory.create_broker_config_from_dict("ibkr", data.get(IbkrConfig.config_key, {}))
 
-        return cls(base_currency, degiro_configuration, bitvavo_configuration)
+        return cls(base_currency, degiro_configuration, bitvavo_configuration, ibkr_configuration)
 
     @classmethod
     def from_json_file(cls, file_path: str | Path) -> "Config":
@@ -310,6 +329,7 @@ class Config:
             base_currency=Config.DEFAULT_BASE_CURRENCY,
             degiro_configuration=config_factory.create_default_broker_config("degiro"),
             bitvavo_configuration=config_factory.create_default_broker_config("bitvavo"),
+            ibkr_configuration=config_factory.create_default_broker_config("ibkr"),
         )
 
     @classmethod

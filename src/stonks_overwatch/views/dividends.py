@@ -87,7 +87,9 @@ class Dividends(View):
         # Find the maximum date. Since we have upcoming payments, it can be today or some point
         # in the future
         date_as_datetime = pd.to_datetime(df["payment_date"], format="ISO8601")
-        period_start = date_as_datetime.min()
+        # Set period_start to January 1st of the minimum year in the data
+        min_year = date_as_datetime.min().year
+        period_start = pd.Timestamp(year=min_year, month=1, day=1)
         today = pd.Timestamp("today").normalize()
         period_end = max(date_as_datetime.max(), today)
         period = pd.period_range(start=period_start, end=period_end, freq="M")
@@ -114,15 +116,6 @@ class Dividends(View):
             day_entry = days.setdefault(dividend_pay.day(), {})
 
             day_entry[dividend_pay.stock_symbol] = dividend_pay
-
-            month_entry.setdefault("dividends", []).append(
-                {
-                    "day": dividend_pay.day(),
-                    "stockName": dividend_pay.stock_name,
-                    "stockSymbol": dividend_pay.stock_symbol,
-                    "formatedChange": dividend_pay.formated_change(),
-                }
-            )
 
             # Number of Payouts in the month
             payouts = month_entry.setdefault("payouts", 0)
@@ -179,7 +172,7 @@ class Dividends(View):
         max_percentage = 0.0
 
         for entry in dividends_overview:
-            dividend_name = entry.stock_name
+            dividend_name = entry.formatted_name()
             dividend_value = 0.0
             if dividend_name in dividends:
                 dividend_value = dividends[dividend_name]["value"]
