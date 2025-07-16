@@ -4,6 +4,8 @@ from typing import List
 from stonks_overwatch.config.config import Config
 from stonks_overwatch.core.interfaces.transaction_service import TransactionServiceInterface
 from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import BitvavoService
+from stonks_overwatch.services.brokers.bitvavo.repositories.assets_repository import AssetsRepository
+from stonks_overwatch.services.brokers.bitvavo.repositories.transactions_repository import TransactionsRepository
 from stonks_overwatch.services.models import Transaction
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 
@@ -18,7 +20,7 @@ class TransactionsService(TransactionServiceInterface):
 
     def get_transactions(self) -> List[Transaction]:
         # FETCH TRANSACTIONS DATA
-        transactions_history = self.bitvavo_service.account_history()
+        transactions_history = TransactionsRepository.get_transactions_raw()
 
         # DISPLAY PRODUCTS_INFO
         my_transactions = []
@@ -26,7 +28,7 @@ class TransactionsService(TransactionServiceInterface):
             if transaction["type"] == "deposit":
                 continue
 
-            asset = self.bitvavo_service.assets(transaction["receivedCurrency"])
+            asset = AssetsRepository.get_asset(transaction["receivedCurrency"])
 
             my_transactions.append(
                 Transaction(
@@ -37,21 +39,21 @@ class TransactionsService(TransactionServiceInterface):
                     buy_sell=self.__convert_buy_sell(transaction["type"]),
                     transaction_type=self.__transaction_type(transaction["type"]),
                     price=LocalizationUtility.format_money_value(
-                        transaction.get("priceAmount", 0.0),
-                        currency=transaction.get("priceCurrency", self.base_currency),
+                        transaction.get("priceAmount") or 0.0,
+                        currency=transaction.get("priceCurrency") or self.base_currency,
                     ),
                     quantity=transaction["receivedAmount"],
                     total=LocalizationUtility.format_money_value(
-                        value=transaction.get("sentAmount", 0.0),
-                        currency=transaction.get("sentCurrency", self.base_currency),
+                        value=transaction.get("sentAmount") or 0.0,
+                        currency=transaction.get("sentCurrency") or self.base_currency,
                     ),
                     total_in_base_currency=LocalizationUtility.format_money_value(
-                        value=transaction.get("sentAmount", 0.0),
-                        currency=transaction.get("sentCurrency", self.base_currency),
+                        value=transaction.get("sentAmount") or 0.0,
+                        currency=transaction.get("sentCurrency") or self.base_currency,
                     ),
                     fees=LocalizationUtility.format_money_value(
-                        value=transaction.get("feesAmount", 0.0),
-                        currency=transaction.get("feesCurrency", self.base_currency),
+                        value=transaction.get("feesAmount") or 0.0,
+                        currency=transaction.get("feesCurrency") or self.base_currency,
                     ),
                 )
             )
@@ -75,17 +77,17 @@ class TransactionsService(TransactionServiceInterface):
         return "Unknown"
 
     @staticmethod
-    def format_date(value: str) -> str:
+    def format_date(value: datetime) -> str:
         """
         Formats a date time string to date string.
         """
-        time = datetime.strptime(value, TransactionsService.TIME_DATE_FORMAT)
-        return time.strftime(LocalizationUtility.DATE_FORMAT)
+        # time = datetime.strptime(value, TransactionsService.TIME_DATE_FORMAT)
+        return value.strftime(LocalizationUtility.DATE_FORMAT)
 
     @staticmethod
-    def format_time(value: str) -> str:
+    def format_time(value: datetime) -> str:
         """
         Formats a date time string to time string.
         """
-        time = datetime.strptime(value, TransactionsService.TIME_DATE_FORMAT)
-        return time.strftime(LocalizationUtility.TIME_FORMAT)
+        # time = datetime.strptime(value, TransactionsService.TIME_DATE_FORMAT)
+        return value.strftime(LocalizationUtility.TIME_FORMAT)

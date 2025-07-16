@@ -10,6 +10,9 @@ from stonks_overwatch.services.brokers.bitvavo.services.account_service import (
     AccountOverviewService as BitvavoAccountService,
 )
 from stonks_overwatch.services.brokers.bitvavo.services.deposit_service import DepositsService as BitvavoDepositService
+from stonks_overwatch.services.brokers.bitvavo.services.dividends_service import (
+    DividendsService as BitvavoDividendsService,
+)
 from stonks_overwatch.services.brokers.bitvavo.services.fee_service import FeesService as BitvavoFeeService
 from stonks_overwatch.services.brokers.bitvavo.services.portfolio_service import (
     PortfolioService as BitvavoPortfolioService,
@@ -69,7 +72,7 @@ def register_broker_services() -> None:
         portfolio_service=BitvavoPortfolioService,
         transaction_service=BitvavoTransactionService,
         deposit_service=BitvavoDepositService,
-        dividend_service=None,  # Bitvavo doesn't support dividends
+        dividend_service=BitvavoDividendsService,
         fee_service=BitvavoFeeService,
         account_service=BitvavoAccountService,
     )

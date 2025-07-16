@@ -23,6 +23,9 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "stonks_overwatch.settings")
 django.setup()
 
 # The import is defined here, so all the Django configuration can be executed
+from stonks_overwatch.services.brokers.bitvavo.services.update_service import (  # noqa: E402
+    UpdateService as BitvavoUpdateService,
+)
 from stonks_overwatch.services.brokers.degiro.services.update_service import (  # noqa: E402
     UpdateService as DegiroUpdateService,
 )
@@ -69,15 +72,16 @@ def parse_args() -> Namespace:
 
         Supported brokers are:
             * DEGIRO
+            * BITVAVO
             * IBKR (Interactive Brokers)
         """),
     )
-    default_degiro_import_folder = os.path.join(STONKS_OVERWATCH_DATA_DIR, "import", "degiro")
+    default_import_folder = os.path.join(STONKS_OVERWATCH_DATA_DIR, "import")
     parser.add_argument(
         "--import_folder",
         type=str,
-        default=os.path.join(STONKS_OVERWATCH_DATA_DIR, "import", "degiro"),
-        help=f"Folder to import data from/to. Defaults to: '{default_degiro_import_folder}'",
+        default=os.path.join(STONKS_OVERWATCH_DATA_DIR, "import"),
+        help=f"Folder to import data from/to. Defaults to: '{default_import_folder}'",
     )
     parser.add_argument(
         "--debug",
@@ -85,17 +89,21 @@ def parse_args() -> Namespace:
         help="Enable debug mode. When using debug mode, the script will store the DeGiro data in the import folder.",
     )
 
-    parser.add_argument("--degiro", action="store_true", help="Import DeGiro")
-    parser.add_argument("--degiro_account", action="store_true", help="Import DeGiro account information")
-    parser.add_argument("--degiro_transactions", action="store_true", help="Import DeGiro transactions")
-    parser.add_argument("--degiro_products", action="store_true", help="Import DeGiro product information")
-    parser.add_argument("--degiro_companies", action="store_true", help="Import DeGiro company profiles")
-    parser.add_argument("--degiro_yfinance", action="store_true", help="Import YFinance data for DeGiro products")
-    parser.add_argument("--degiro_dividends", action="store_true", help="Import Degiro dividends data")
+    parser.add_argument("--degiro", action="store_true", help="Import DEGIRO")
+    parser.add_argument("--degiro_account", action="store_true", help="Import DEGIRO account information")
+    parser.add_argument("--degiro_transactions", action="store_true", help="Import DEGIRO transactions")
+    parser.add_argument("--degiro_products", action="store_true", help="Import DEGIRO product information")
+    parser.add_argument("--degiro_companies", action="store_true", help="Import DEGIRO company profiles")
+    parser.add_argument("--degiro_yfinance", action="store_true", help="Import YFinance data for DEGIRO products")
+    parser.add_argument("--degiro_dividends", action="store_true", help="Import DEGIRO dividends data")
 
     parser.add_argument("--ibkr", action="store_true", help="Import IBKR")
     parser.add_argument("--ibkr_portfolio", action="store_true", help="Import IBKR portfolio information")
     parser.add_argument("--ibkr_transactions", action="store_true", help="Import IBKR transactions")
+
+    parser.add_argument("--bitvavo", action="store_true", help="Import Bitvavo")
+    parser.add_argument("--bitvavo_portfolio", action="store_true", help="Import Bitvavo portfolio information")
+    parser.add_argument("--bitvavo_transactions", action="store_true", help="Import Bitvavo transactions")
 
     return parser.parse_args()
 
@@ -142,6 +150,16 @@ def ibkr_transactions(update_service: IbkrUpdateService) -> None:
     update_service.update_transactions()
 
 
+def bitvavo_portfolio(update_service: BitvavoUpdateService) -> None:
+    logging.info("Importing Bitvavo Portfolio...")
+    update_service.update_portfolio()
+
+
+def bitvavo_transactions(update_service: BitvavoUpdateService) -> None:
+    logging.info("Importing Bitvavo Transactions...")
+    update_service.update_transactions()
+
+
 def main():
     init()
     logging.info("Applying database migrations...")
@@ -149,8 +167,13 @@ def main():
 
     args = parse_args()
 
-    degiro_update_service = DegiroUpdateService(import_folder=args.import_folder, debug_mode=args.debug)
-    ibkr_update_service = IbkrUpdateService(import_folder=args.import_folder, debug_mode=args.debug)
+    degiro_import_folder = os.path.join(args.import_folder, "degiro")
+    ibkr_import_folder = os.path.join(args.import_folder, "ibkr")
+    bitvavo_import_folder = os.path.join(args.import_folder, "bitvavo")
+
+    degiro_update_service = DegiroUpdateService(import_folder=degiro_import_folder, debug_mode=args.debug)
+    ibkr_update_service = IbkrUpdateService(import_folder=ibkr_import_folder, debug_mode=args.debug)
+    bitvavo_update_service = BitvavoUpdateService(import_folder=bitvavo_import_folder, debug_mode=args.debug)
 
     actions = [
         (args.degiro_account, degiro_account_import, degiro_update_service),
@@ -161,8 +184,11 @@ def main():
         (args.degiro_dividends, degiro_dividends, degiro_update_service),
         (args.ibkr_portfolio, ibkr_portfolio, ibkr_update_service),
         (args.ibkr_transactions, ibkr_transactions, ibkr_update_service),
+        (args.bitvavo_portfolio, bitvavo_portfolio, bitvavo_update_service),
+        (args.bitvavo_transactions, bitvavo_transactions, bitvavo_update_service),
         (args.degiro, lambda svc: svc.update_all(), degiro_update_service),
         (args.ibkr, lambda svc: svc.update_all(), ibkr_update_service),
+        (args.bitvavo, lambda svc: svc.update_all(), bitvavo_update_service),
     ]
 
     for condition, func, service in actions:
@@ -173,6 +199,7 @@ def main():
         logging.info("No import option selected. Importing all data.")
         degiro_update_service.update_all()
         ibkr_update_service.update_all()
+        bitvavo_update_service.update_all()
 
 
 if __name__ == "__main__":

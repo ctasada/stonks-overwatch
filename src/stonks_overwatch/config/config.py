@@ -263,6 +263,10 @@ class Config:
     def is_bitvavo_enabled(self, selected_portfolio: PortfolioId = PortfolioId.ALL) -> bool:
         return self.registry.is_broker_enabled("bitvavo", selected_portfolio)
 
+    def is_bitvavo_offline(self):
+        config = self.registry.get_broker_config("bitvavo")
+        return config.offline_mode if config else False
+
     def is_ibkr_enabled(self, selected_portfolio: PortfolioId = PortfolioId.ALL) -> bool:
         return self.registry.is_broker_enabled("ibkr", selected_portfolio)
 

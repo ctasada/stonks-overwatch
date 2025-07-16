@@ -1,7 +1,5 @@
 from django.db import models
 
-# Create your models here.
-
 
 # This Model represents the CashMovements
 # CashMovements are obtained from the AccountOverview or AccountReport DeGiro calls

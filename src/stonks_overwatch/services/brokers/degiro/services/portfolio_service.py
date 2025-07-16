@@ -467,7 +467,7 @@ class PortfolioService(PortfolioServiceInterface):
             product["history"][stock_date] = carry_total
             product_growth[key] = product
 
-        # Cleanup 'carry_total' from result
+        # Cleanup 'carry_total' from the result
         for key in product_growth.keys():
             del product_growth[key]["carryTotal"]
 

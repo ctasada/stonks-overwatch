@@ -157,9 +157,10 @@ class BaseAggregator(ABC):
                 from stonks_overwatch.services.brokers.bitvavo.services.account_service import AccountOverviewService
 
                 return AccountOverviewService()
-            # Bitvavo doesn't support dividends
             elif self._service_type == ServiceType.DIVIDEND:
-                return None
+                from stonks_overwatch.services.brokers.bitvavo.services.dividends_service import DividendsService
+
+                return DividendsService()
         except Exception as e:
             self._logger.error(f"Failed to create Bitvavo {self._service_type.value} service: {e}")
             return None

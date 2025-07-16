@@ -5,6 +5,13 @@ from typing import List, Optional
 from stonks_overwatch.config.config import Config
 from stonks_overwatch.core.interfaces.portfolio_service import PortfolioServiceInterface
 from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import BitvavoService
+from stonks_overwatch.services.brokers.bitvavo.repositories.assets_repository import AssetsRepository
+from stonks_overwatch.services.brokers.bitvavo.repositories.balance_repository import BalanceRepository
+from stonks_overwatch.services.brokers.bitvavo.repositories.deposits_history_repository import DepositsHistoryRepository
+from stonks_overwatch.services.brokers.bitvavo.repositories.product_quotations_repository import (
+    ProductQuotationsRepository,
+)
+from stonks_overwatch.services.brokers.bitvavo.repositories.transactions_repository import TransactionsRepository
 from stonks_overwatch.services.brokers.bitvavo.services.deposit_service import DepositsService
 from stonks_overwatch.services.brokers.bitvavo.services.transaction_service import TransactionsService
 from stonks_overwatch.services.models import DailyValue, PortfolioEntry, TotalPortfolio
@@ -46,30 +53,24 @@ class PortfolioService(PortfolioServiceInterface):
 
         bitvavo_portfolio = []
 
-        balance = self.bitvavo_service.balance()
+        balance = BalanceRepository.get_balance_calculated()
 
         for item in balance:
-            if item["available"] == "0" or self.__is_currency(item["symbol"]):
+            if item["amount"] == "0" or self.__is_currency(item["symbol"]):
                 continue
 
-            ticker_json = self.bitvavo_service.ticker_price(item["symbol"] + "-" + self.base_currency)
-
-            price = float(ticker_json["price"])
-            value = float(item["available"]) * price
-            asset = self.bitvavo_service.assets(item["symbol"])
-
-            product_type = ProductType.CRYPTO
-
-            # FIXME
+            price = self._get_ticket_quotation(item["symbol"])
+            value = float(item["amount"]) * price
+            asset = AssetsRepository.get_asset(item["symbol"])
             break_even_price = self._get_break_even_price(item["symbol"])
-            unrealized_gain = (price - break_even_price) * float(item["available"])
+            unrealized_gain = (price - break_even_price) * float(item["amount"])
 
             bitvavo_portfolio.append(
                 PortfolioEntry(
                     symbol=item["symbol"],
                     name=asset["name"],
-                    shares=item["available"],
-                    product_type=product_type,
+                    shares=item["amount"],
+                    product_type=ProductType.CRYPTO,
                     product_currency=self.base_currency,
                     is_open=True,
                     price=price,
@@ -89,13 +90,13 @@ class PortfolioService(PortfolioServiceInterface):
                 PortfolioEntry(
                     symbol=item["symbol"],
                     name="Cash Balance EUR",
-                    shares=item["available"],
+                    shares=item["amount"],
                     product_type=ProductType.CASH,
                     product_currency=item["symbol"],
                     is_open=True,
-                    value=float(item["available"]),
+                    value=float(item["amount"]),
                     base_currency=self.base_currency,
-                    base_currency_value=float(item["available"]),
+                    base_currency_value=float(item["amount"]),
                 )
             )
 
@@ -114,12 +115,14 @@ class PortfolioService(PortfolioServiceInterface):
             if entry.is_open:
                 portfolio_total_value += entry.base_currency_value
 
-        total_deposit_withdrawal = sum(float(deposit["amount"]) for deposit in self.bitvavo_service.deposit_history())
+        total_deposit_withdrawal = sum(
+            float(deposit["amount"]) for deposit in DepositsHistoryRepository.get_deposits_history_raw()
+        )
 
         total_cash = 0.0
-        balance = self.bitvavo_service.balance(self.base_currency)
+        balance = BalanceRepository.get_balance_for_symbol(self.base_currency)
         if balance:
-            total_cash = balance[0]["available"]
+            total_cash = balance["available"]
 
         total_cash = float(total_cash)
 
@@ -136,7 +139,7 @@ class PortfolioService(PortfolioServiceInterface):
         )
 
     def _get_break_even_price(self, symbol: str) -> float:
-        transactions_history = self.bitvavo_service.account_history()
+        transactions_history = TransactionsRepository.get_transactions_raw()
 
         total_cost = 0.0
         total_quantity = 0.0
@@ -148,8 +151,8 @@ class PortfolioService(PortfolioServiceInterface):
             if transaction["receivedCurrency"] != symbol:
                 continue
 
-            total_cost += float(transaction.get("sentAmount", 0.0)) + float(transaction.get("feesAmount", 0.0))
-            total_quantity += float(transaction.get("receivedAmount", 0.0))
+            total_cost += float(transaction.get("sentAmount") or 0.0) + float(transaction.get("feesAmount") or 0.0)
+            total_quantity += float(transaction.get("receivedAmount") or 0.0)
 
         return total_cost / total_quantity if total_quantity > 0 else 0.0
 
@@ -294,3 +297,12 @@ class PortfolioService(PortfolioServiceInterface):
         day = datetime.strptime(date_str, "%Y-%m-%d")
         # Check if the day of the week is Saturday (5) or Sunday (6)
         return day.weekday() >= 5
+
+    def _get_ticket_quotation(self, symbol: str) -> float:
+        try:
+            ticker_json = self.bitvavo_service.ticker_price(symbol + "-" + self.base_currency)
+            return float(ticker_json["price"])
+        except Exception as e:
+            self.logger.error(f"Failed to get ticker quotation for {symbol}: {e}")
+            # Fallback to price if ticker quotation fails}
+            return ProductQuotationsRepository.get_product_price(symbol)
