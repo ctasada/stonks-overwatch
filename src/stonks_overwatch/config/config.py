@@ -79,6 +79,7 @@ class ConfigRegistry:
         """
         config = self.get_broker_config(broker_name)
         if not config:
+            self.logger.debug(f"Broker '{broker_name}' is not registered or has no configuration.")
             return False
 
         # Check if the broker matches the selected portfolio
