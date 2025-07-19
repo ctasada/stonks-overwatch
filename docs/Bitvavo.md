@@ -12,24 +12,37 @@ To log in to Bitvavo, you need to create an API key and secret. Follow these ste
 ```json
 {
     "bitvavo": {
-        "enabled": true,
+        "enabled":"BOOLEAN (true by default)",
         "credentials": {
             "apikey": "BITVAVO API KEY",
             "apisecret": "BITVAVO API SECRET"
-        }
+        },
+        "update_frequency_minutes": "How frequently the data from Bitvavo should be updated. Defaults to 5 minutes"
     }
 }
 ```
 
 Only the `credentials` section is mandatory, put your credentials in the corresponding fields. Once the `credentials`
-are provided, the integration will automatically fetch your portfolio from Bitvavo. If needed, the integration can
-be easily disabled with `"enabled": false`.
+are provided, the integration will automatically fetch your portfolio from Bitvavo.
+
+The `enabled` field is used to enable or disable the Bitvavo integration. If you set it to `false`, the application
+will not show any Bitvavo data, and it will not try to connect to Bitvavo.
 
 ## Technical details
 
-The application uses the [Python Bitvavo API](https://github.com/bitvavo/python-bitvavo-api) to connect to Bitvavo. This
+The application uses the official [Python Bitvavo API](https://github.com/bitvavo/python-bitvavo-api) to connect to Bitvavo. This
 client is a Python wrapper around [Bitvavo's public API](https://docs.bitvavo.com/).
 
-At the time of writing, **Stonks Overwatch** doesn't store any data from Bitvavo in the database. Instead, it fetches
-the data in real-time from Bitvavo's API. This means that the data is always up to date, but it also means that when
-Bitvavo is down, the application won't be able to show the data.
+**Stonks Overwatch** uses the [Python Bitvavo API](https://github.com/bitvavo/python-bitvavo-api) to fetch data from Bitvavo and store it in a local database. The application
+then uses this data to provide insights into your portfolio, including real-time access to your investments, portfolio.
+
+The DB model reflects Bitvavo API and does the best effort to normalize the data and support the different features.
+
+### DB Model
+
+The DB model is defined at [`stonks_overwatch/stonks_overwatch/services/brokers/bitvavo/repositories/models.py`](https://github.com/ctasada/stonks-overwatch/blob/main/src/stonks_overwatch/repositories/bitvavo/models.py).
+
+## Known issues
+
+- When an asset is bought using RFQ (Request for Quote), the transaction doesn't appear in the transactions returned by the API
+- When an asset uses some kind of blocking Staking, the Balance API returns only the available balance, not the total balance.

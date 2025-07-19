@@ -26,7 +26,7 @@ Copy the file `config/config.json.template` to `config/config.json`
 {
     "degiro": {
         "enabled": "BOOLEAN (true by default)",
-        "offline_mode": "BOOLEAN (false by default",
+        "offline_mode": "BOOLEAN (false by default)",
         "credentials": {
             "username": "USERNAME",
             "password": "PASSWORD",
@@ -40,7 +40,7 @@ Copy the file `config/config.json.template` to `config/config.json`
 ```
 
 Only the `credentials` section is mandatory, put your credentials in the corresponding fields, and follow the instructions
-to obtain your `totp_secret_key`. You can also skip it, and the application will ask for your OTP everytime.
+to obtain your `totp_secret_key`. You can also skip it, and the application will ask for your OTP every time.
 
 The `enabled` field is used to enable or disable the DEGIRO integration. If you set it to `false`, the application
 will not show any DEGIRO data, and it will not try to connect to DEGIRO.

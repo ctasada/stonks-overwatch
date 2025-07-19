@@ -3,7 +3,7 @@ import pathlib
 
 from stonks_overwatch.services.brokers.degiro.repositories.company_profile_repository import CompanyProfileRepository
 from stonks_overwatch.services.brokers.degiro.repositories.models import DeGiroCompanyProfile
-from tests.stonks_overwatch.repositories.base_repository_test import BaseRepositoryTest
+from tests.stonks_overwatch.base_repository_test import BaseRepositoryTest
 
 import pytest
 

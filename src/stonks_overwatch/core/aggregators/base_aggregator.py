@@ -157,9 +157,10 @@ class BaseAggregator(ABC):
                 from stonks_overwatch.services.brokers.bitvavo.services.account_service import AccountOverviewService
 
                 return AccountOverviewService()
-            # Bitvavo doesn't support dividends
             elif self._service_type == ServiceType.DIVIDEND:
-                return None
+                from stonks_overwatch.services.brokers.bitvavo.services.dividends_service import DividendsService
+
+                return DividendsService()
         except Exception as e:
             self._logger.error(f"Failed to create Bitvavo {self._service_type.value} service: {e}")
             return None
@@ -211,7 +212,6 @@ class BaseAggregator(ABC):
         elif broker_name == "bitvavo":
             return self._config.is_bitvavo_enabled(selected_portfolio)
         elif broker_name == "ibkr":
-            self._logger.debug(f"Is {broker_name} enabled? {self._config.is_ibkr_enabled(selected_portfolio)}")
             return self._config.is_ibkr_enabled(selected_portfolio)
         else:
             # For other brokers, assume they're enabled if they have services
@@ -258,6 +258,9 @@ class BaseAggregator(ABC):
             raise DataAggregationException("Failed to find any enabled broker")
 
         broker_data = {}
+        broker_errors = {}
+        first_exc = None
+        first_tb = None
 
         for broker_name in enabled_brokers:
             try:
@@ -279,10 +282,21 @@ class BaseAggregator(ABC):
                     self._logger.warning(f"{broker_name} service does not have method {method_name}")
             except Exception as e:
                 self._logger.error(f"Failed to collect data from {broker_name}: {e}")
+                broker_errors[broker_name] = str(e)
+                if first_exc is None:
+                    first_exc = e
+                    first_tb = e.__traceback__
                 # Don't raise here - continue with other brokers
 
         if not broker_data:
-            raise DataAggregationException(f"No data collected from any broker for {method_name}")
+            if first_exc is not None:
+                raise DataAggregationException(
+                    f"No data collected from any broker for {method_name}. Errors: {broker_errors}"
+                ).with_traceback(first_tb)
+            else:
+                raise DataAggregationException(
+                    f"No data collected from any broker for {method_name}. Errors: {broker_errors}"
+                )
 
         return broker_data
 

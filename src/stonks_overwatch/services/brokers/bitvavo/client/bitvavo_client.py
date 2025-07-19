@@ -8,17 +8,33 @@ from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.singleton import singleton
 
 
+class BitvavoOfflineModeError(Exception):
+    """Exception raised for data validation errors."""
+
+    def __init__(self, message):
+        """
+        Initializes the exception with a message and a structure of error details.
+
+        Args:
+            message (str): The error message.
+        """
+        super().__init__(message)
+
+
 @singleton
 class BitvavoService:
     START_TIMESTAMP = 0
 
     logger = StonksLogger.get_logger("stonks_overwatch.bitvavo_service", "[BITVAVO|CLIENT]")
     client: Bitvavo = None
+    force: bool = False
 
     def __init__(
         self,
         debugging: bool = False,
+        force: bool = False,
     ):
+        self.force = force
         self.bitvavo_config = Config.get_global().registry.get_broker_config("bitvavo")
         bitvavo_credentials = self.bitvavo_config.credentials
 
@@ -32,6 +48,9 @@ class BitvavoService:
             )
 
     def get_client(self) -> Bitvavo:
+        if not self.force and Config.get_global().registry.get_broker_config("bitvavo").offline_mode:
+            raise BitvavoOfflineModeError("Bitvavo working in offline mode. No connection is allowed")
+
         return self.client
 
     def get_remaining_limit(self) -> int:

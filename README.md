@@ -74,6 +74,9 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
 * TEAM: Growth values seem too low for what I remember, should be ~80%
 * Portfolio Growth drops to 0 when running in offline mode
 * Portfolio Growth: Zoom works, but Panning doesn't work. Needs to be fixed
+* Bitvavo - Known Bugs:
+  * When an asset is Staking, the balance value is the 'available' value, not the 'total' value
+  * Transactions done with the RFQ system are not returned by the Bitvavo Transactions API
 
 ## TODOs
 
@@ -117,25 +120,28 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
 * [ ] `make check-dependencies` needs some extra work
   * [ ] Review the usage of `polars` and `pandas` in the codebase and try to use only one of them
   * [ ] `toga` is only used for the `app`. Probably it should be moved as a full dependency
+* [ ] Bitvavo:
+  * [ ] Create a Crypto Rewards section
+  * [ ] Show asset staking blocked amount as in Bitvavo UI
 * [ ] IBKR
   * [ ] Obtain Deposits & Withdrawals (Based on ticket only possible with a FlexQuery up to 365 days old)
-  *[ ] Show closed positions
-  *[ ] Realized % Gain/Loss is not showed when merging positions
-  *[ ] Stock Category
-  *[ ] Stock Exchanges. Check "https://github.com/tanrbobanr/iso10383" to unify Exchange names
-  *[ ] Add support for Portfolio Growth
-  *[ ] Diversification: Fix sectors to be properly grouped
-  *[ ] Diversification: Remove Cash and Crypto from Holdings
-  *[ ] Fees: Add support for Fees
-  *[ ] Transactions:
+  * [ ] Show closed positions
+  * [ ] Realized % Gain/Loss is not showed when merging positions
+  * [ ] Stock Category
+  * [ ] Stock Exchanges. Check "https://github.com/tanrbobanr/iso10383" to unify Exchange names
+  * [ ] Add support for Portfolio Growth
+  * [ ] Diversification: Fix sectors to be properly grouped
+  * [ ] Diversification: Remove Cash and Crypto from Holdings
+  * [ ] Fees: Add support for Fees
+  * [ ] Transactions:
     * [ ] Add fees/taxes
-    *[ ] Review provided values: Should Dividends be included in the transactions?
-    *[ ] Web:
+    * [ ] Review provided values: Should Dividends be included in the transactions?
+    * [ ] Web:
       * Performance & Reports / Transaction History: Shows transactions for the last 2 years
-      *Flex Query: Allows to create custom reports.
+      * Flex Query: Allows creating custom reports.
   * [ ] Dividends: Implement Announced and Forecasted dividends
-  *[ ] Deposits: Implement Deposits and Withdrawals
-  *[ ] Portfolio Growth: Implement Portfolio Growth
+  * [ ] Deposits: Implement Deposits and Withdrawals
+  * [ ] Portfolio Growth: Implement Portfolio Growth
 
 ## Logos
 

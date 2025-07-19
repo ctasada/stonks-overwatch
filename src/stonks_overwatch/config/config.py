@@ -79,6 +79,7 @@ class ConfigRegistry:
         """
         config = self.get_broker_config(broker_name)
         if not config:
+            self.logger.debug(f"Broker '{broker_name}' is not registered or has no configuration.")
             return False
 
         # Check if the broker matches the selected portfolio
@@ -262,6 +263,10 @@ class Config:
 
     def is_bitvavo_enabled(self, selected_portfolio: PortfolioId = PortfolioId.ALL) -> bool:
         return self.registry.is_broker_enabled("bitvavo", selected_portfolio)
+
+    def is_bitvavo_offline(self):
+        config = self.registry.get_broker_config("bitvavo")
+        return config.offline_mode if config else False
 
     def is_ibkr_enabled(self, selected_portfolio: PortfolioId = PortfolioId.ALL) -> bool:
         return self.registry.is_broker_enabled("ibkr", selected_portfolio)

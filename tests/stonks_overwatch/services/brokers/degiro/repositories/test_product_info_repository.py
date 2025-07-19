@@ -1,6 +1,6 @@
 from stonks_overwatch.services.brokers.degiro.repositories.models import DeGiroProductInfo
 from stonks_overwatch.services.brokers.degiro.repositories.product_info_repository import ProductInfoRepository
-from tests.stonks_overwatch.repositories.base_repository_test import BaseRepositoryTest
+from tests.stonks_overwatch.base_repository_test import BaseRepositoryTest
 
 import pytest
 

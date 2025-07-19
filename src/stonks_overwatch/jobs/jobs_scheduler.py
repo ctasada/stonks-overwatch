@@ -4,6 +4,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
 from stonks_overwatch.config.config import Config
+from stonks_overwatch.services.brokers.bitvavo.services.update_service import UpdateService as BitvavoUpdateService
 from stonks_overwatch.services.brokers.degiro.services.update_service import UpdateService as DegiroUpdateService
 from stonks_overwatch.services.brokers.ibkr.services.update_service import UpdateService as IbkrUpdateService
 from stonks_overwatch.utils.core.logger import StonksLogger
@@ -26,36 +27,50 @@ class JobsScheduler:
         # Get config inside the method to avoid import-time issues
         try:
             degiro_config = Config.get_global().registry.get_broker_config("degiro")
+
+            if degiro_config.is_enabled() and not degiro_config.offline_mode:
+                JobsScheduler.scheduler.add_job(
+                    JobsScheduler.update_degiro_portfolio,
+                    id="update_degiro_portfolio",
+                    trigger=IntervalTrigger(minutes=degiro_config.update_frequency_minutes),
+                    max_instances=1,
+                    replace_existing=True,
+                    next_run_time=datetime.now(),
+                )
         except Exception as e:
-            JobsScheduler.logger.error(f"Failed to get DeGiro config: {e}")
-            return
+            JobsScheduler.logger.error(f"Failed to get DEGIRO config: {e}")
 
         # Get config inside the method to avoid import-time issues
         try:
             ibkr_config = Config.get_global().registry.get_broker_config("ibkr")
+
+            if ibkr_config.is_enabled():
+                JobsScheduler.scheduler.add_job(
+                    JobsScheduler.update_ibkr_portfolio,
+                    id="update_ibkr_portfolio",
+                    trigger=IntervalTrigger(minutes=ibkr_config.update_frequency_minutes),
+                    max_instances=1,
+                    replace_existing=True,
+                    next_run_time=datetime.now(),
+                )
         except Exception as e:
             JobsScheduler.logger.error(f"Failed to get IBKR config: {e}")
-            return
 
-        if degiro_config.is_enabled() and not degiro_config.offline_mode:
-            JobsScheduler.scheduler.add_job(
-                JobsScheduler.update_degiro_portfolio,
-                id="update_degiro_portfolio",
-                trigger=IntervalTrigger(minutes=degiro_config.update_frequency_minutes),
-                max_instances=1,
-                replace_existing=True,
-                next_run_time=datetime.now(),
-            )
+        # Get config inside the method to avoid import-time issues
+        try:
+            bitvavo_config = Config.get_global().registry.get_broker_config("bitvavo")
 
-        if ibkr_config.is_enabled():
-            JobsScheduler.scheduler.add_job(
-                JobsScheduler.update_ibkr_portfolio,
-                id="update_ibkr_portfolio",
-                trigger=IntervalTrigger(minutes=ibkr_config.update_frequency_minutes),
-                max_instances=1,
-                replace_existing=True,
-                next_run_time=datetime.now(),
-            )
+            if bitvavo_config.is_enabled() and not bitvavo_config.offline_mode:
+                JobsScheduler.scheduler.add_job(
+                    JobsScheduler.update_bitvavo_portfolio,
+                    id="update_bitvavo_portfolio",
+                    trigger=IntervalTrigger(minutes=bitvavo_config.update_frequency_minutes),
+                    max_instances=1,
+                    replace_existing=True,
+                    next_run_time=datetime.now(),
+                )
+        except Exception as e:
+            JobsScheduler.logger.error(f"Failed to get Bitvavo config: {e}")
 
         JobsScheduler.scheduler.start()
 
@@ -75,6 +90,7 @@ class JobsScheduler:
         JobsScheduler.logger.info("Updating Portfolio")
         JobsScheduler.update_degiro_portfolio()
         JobsScheduler.update_ibkr_portfolio()
+        JobsScheduler.update_bitvavo_portfolio()
 
     @staticmethod
     def update_degiro_portfolio():
@@ -93,3 +109,12 @@ class JobsScheduler:
             ibkr_update_service.update_all()
         except Exception as error:
             JobsScheduler.logger.error(f"Update IBKR failed with {error}")
+
+    @staticmethod
+    def update_bitvavo_portfolio():
+        JobsScheduler.logger.info("Updating Bitvavo Portfolio")
+        try:
+            bitvavo_update_service = BitvavoUpdateService()
+            bitvavo_update_service.update_all()
+        except Exception as error:
+            JobsScheduler.logger.error(f"Update Bitvavo failed with {error}")

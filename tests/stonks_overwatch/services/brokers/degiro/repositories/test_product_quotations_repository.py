@@ -6,7 +6,7 @@ from stonks_overwatch.services.brokers.degiro.repositories.product_quotations_re
     ProductQuotationsRepository,
 )
 from stonks_overwatch.utils.core.localization import LocalizationUtility
-from tests.stonks_overwatch.repositories.base_repository_test import BaseRepositoryTest
+from tests.stonks_overwatch.base_repository_test import BaseRepositoryTest
 
 import pytest
 
