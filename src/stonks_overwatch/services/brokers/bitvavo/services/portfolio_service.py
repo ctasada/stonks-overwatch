@@ -228,7 +228,7 @@ class PortfolioService(PortfolioServiceInterface):
     def calculate_product_growth(self) -> dict:
         self.logger.debug("Calculating Product growth")
 
-        transactions = self.bitvavo_service.account_history()
+        transactions = TransactionsRepository.get_transactions_raw()
         transactions = sorted(transactions, key=lambda k: k["executedAt"], reverse=False)
         transactions = [item for item in transactions if item["type"] in ["buy", "sell", "staking"]]
 

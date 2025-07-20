@@ -77,17 +77,29 @@ class TransactionsService(TransactionServiceInterface):
         return "Unknown"
 
     @staticmethod
-    def format_date(value: datetime) -> str:
+    def format_date(value: str | datetime) -> str:
         """
         Formats a date time string to date string.
         """
-        # time = datetime.strptime(value, TransactionsService.TIME_DATE_FORMAT)
-        return value.strftime(LocalizationUtility.DATE_FORMAT)
+        if isinstance(value, str):
+            time = datetime.strptime(value, TransactionsService.TIME_DATE_FORMAT)
+        elif isinstance(value, datetime):
+            time = value
+        else:
+            raise TypeError(f"Unsupported type: {type(value)}. Expected str or datetime.")
+
+        return time.strftime(LocalizationUtility.DATE_FORMAT)
 
     @staticmethod
-    def format_time(value: datetime) -> str:
+    def format_time(value: str | datetime) -> str:
         """
         Formats a date time string to time string.
         """
-        # time = datetime.strptime(value, TransactionsService.TIME_DATE_FORMAT)
-        return value.strftime(LocalizationUtility.TIME_FORMAT)
+        if isinstance(value, str):
+            time = datetime.strptime(value, TransactionsService.TIME_DATE_FORMAT)
+        elif isinstance(value, datetime):
+            time = value
+        else:
+            raise TypeError(f"Unsupported type: {type(value)}. Expected str or datetime.")
+
+        return time.strftime(LocalizationUtility.TIME_FORMAT)
