@@ -119,12 +119,13 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
   * [ ] Values should be stored in the keyring for security
 * [ ] `make check-dependencies` needs some extra work
   * [ ] Review the usage of `polars` and `pandas` in the codebase and try to use only one of them
-  * [ ] `toga` is only used for the `app`. Probably it should be moved as a full dependency
+  * [ ] `toga` and `asgiref` are only used for the `app`. Probably it should be moved as a full dependency
+  * [ ] `dateutil` and `pytz` can be either removed, or replace internal implementations.
 * [ ] Bitvavo:
   * [ ] Create a Crypto Rewards section
   * [ ] Show asset staking blocked amount as in Bitvavo UI
 * [ ] IBKR
-  * [ ] Obtain Deposits & Withdrawals (Based on ticket only possible with a FlexQuery up to 365 days old)
+  * [ ] Get Deposits & Withdrawals (Based on ticket only possible with a FlexQuery up to 365 days old)
   * [ ] Show closed positions
   * [ ] Realized % Gain/Loss is not showed when merging positions
   * [ ] Stock Category
