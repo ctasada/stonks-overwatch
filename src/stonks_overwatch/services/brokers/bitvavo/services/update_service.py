@@ -1,11 +1,10 @@
 import os
-import time as core_time
 from datetime import date, datetime, timedelta, timezone
 
 from degiro_connector.quotecast.models.chart import Interval
-from django.db.utils import OperationalError
 
 from stonks_overwatch.config.config import Config
+from stonks_overwatch.core.interfaces.update_service import AbstractUpdateService
 from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import BitvavoService
 from stonks_overwatch.services.brokers.bitvavo.repositories.models import (
     BitvavoAssets,
@@ -15,14 +14,13 @@ from stonks_overwatch.services.brokers.bitvavo.repositories.models import (
     BitvavoTransactions,
 )
 from stonks_overwatch.services.brokers.bitvavo.services.portfolio_service import PortfolioService
-from stonks_overwatch.settings import STONKS_OVERWATCH_DATA_DIR
 from stonks_overwatch.utils.core.datetime import DateTimeUtility
 from stonks_overwatch.utils.core.debug import save_to_json
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.core.logger import StonksLogger
 
 
-class UpdateService:
+class UpdateService(AbstractUpdateService):
     logger = StonksLogger.get_logger("stonks_overwatch.bitvavo.update_service", "[BITVAVO|UPDATE]")
 
     def __init__(self, import_folder: str = None, debug_mode: bool = True):
@@ -33,65 +31,11 @@ class UpdateService:
         :param debug_mode:
             If True, the service will store the JSON files for debugging purposes.
         """
-        self.import_folder = (
-            import_folder if import_folder is not None else os.path.join(STONKS_OVERWATCH_DATA_DIR, "import", "bitvavo")
-        )
-        self.debug_mode = (
-            debug_mode if debug_mode is not None else os.getenv("DEBUG_MODE", False) in [True, "true", "True", "1"]
-        )
-
-        if not os.path.exists(self.import_folder):
-            os.makedirs(self.import_folder)
+        super().__init__("Bitvavo", import_folder, debug_mode)
 
         self.bitvavo_service = BitvavoService()
         self.portfolio_data = PortfolioService()
         self.currency = Config.get_global().base_currency
-
-    def _log_message(self, message: str) -> None:
-        """Log a message to the console."""
-        if self.debug_mode:
-            self.logger.info(f"[Debug Mode] {message}")
-        else:
-            self.logger.info(message)
-
-    def _retry_database_operation(self, operation, *args, max_retries=3, delay=0.1, **kwargs):
-        """
-        Retry a database operation if it fails due to database lock.
-
-        Args:
-            operation: A callable that performs the database operation
-            *args: Positional arguments to pass to the operation
-            max_retries: Maximum number of retry attempts
-            delay: Initial delay between retries (will be doubled each time)
-            **kwargs: Keyword arguments to pass to the operation
-
-        Returns:
-            The result of the operation
-
-        Raises:
-            The last exception if all retries fail
-        """
-        last_exception = None
-        current_delay = delay
-
-        for attempt in range(max_retries + 1):
-            try:
-                return operation(*args, **kwargs)
-            except OperationalError as e:
-                last_exception = e
-                if "database is locked" in str(e).lower() and attempt < max_retries:
-                    self.logger.warning(
-                        "Database locked, retrying in %.2f seconds (attempt %d/%d)",
-                        current_delay,
-                        attempt + 1,
-                        max_retries,
-                    )
-                    core_time.sleep(current_delay)
-                    current_delay *= 2  # Exponential backoff
-                else:
-                    raise
-
-        raise last_exception
 
     def update_all(self):
         if not self.bitvavo_service.get_client():
