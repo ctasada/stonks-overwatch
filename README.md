@@ -129,7 +129,6 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
   * [ ] Show closed positions
   * [ ] Realized % Gain/Loss is not showed when merging positions
   * [ ] Stock Category
-  * [ ] Stock Exchanges. Check "https://github.com/tanrbobanr/iso10383" to unify Exchange names
   * [ ] Add support for Portfolio Growth
   * [ ] Diversification: Fix sectors to be properly grouped
   * [ ] Diversification: Remove Cash and Crypto from Holdings
@@ -168,6 +167,8 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
 
 ## Libraries
 
+* [Finance Database](https://github.com/JerBouma/FinanceDatabase)
+* [Finance Toolkit](https://github.com/JerBouma/FinanceToolkit)
 * [QuantStats](https://pypi.org/project/QuantStats/)
 * [quantlib](https://quantlib-python-docs.readthedocs.io/en/latest/)
 * [awesome-quant](https://github.com/wilsonfreitas/awesome-quant?tab=readme-ov-file#python)

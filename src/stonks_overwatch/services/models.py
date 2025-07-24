@@ -157,6 +157,39 @@ class Dividend:
         return self.amount
 
 
+class FeeType(Enum):
+    """
+    Enum representing different types of fees.
+    """
+
+    TRANSACTION = "Transaction"
+    FINANCE_TRANSACTION_TAX = "Finance Transaction Tax"
+    CONNECTION = "Connection"
+    ADR_GDR = "ADR/GDR"
+
+    def __str__(self):
+        return self.value
+
+
+@dataclass
+class Fee:
+    """
+    Represents a fee charged by a broker.
+    """
+
+    # FIXME: date and time can be probably merged in a single field
+    date: str
+    time: str
+    type: FeeType
+    description: str
+    fee_value: float
+    currency: str
+
+    def fee_formatted(self) -> str:
+        """Format the fee value for display."""
+        return LocalizationUtility.format_money_value(value=self.fee_value, currency=self.currency)
+
+
 @dataclass
 class PortfolioEntry:
     name: str = ""

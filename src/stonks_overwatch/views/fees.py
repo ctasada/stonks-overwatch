@@ -1,8 +1,11 @@
+import dataclasses
+
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
 
 from stonks_overwatch.services.aggregators.fees_aggregator import FeesAggregatorService
+from stonks_overwatch.services.models import FeeType
 from stonks_overwatch.services.utilities.session_manager import SessionManager
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 
@@ -22,14 +25,14 @@ class Fees(View):
         ftt_fees = 0
         adr_fees = 0
         for fee in fees:
-            if fee["type"] == "Transaction":
-                transaction_fees += fee["fee_value"]
-            elif fee["type"] == "Finance Transaction Tax":
-                ftt_fees += fee["fee_value"]
-            elif fee["type"] == "Connection":
-                exchange_fees += fee["fee_value"]
-            elif fee["type"] == "ADR/GDR":
-                adr_fees += fee["fee_value"]
+            if fee.type == FeeType.TRANSACTION:
+                transaction_fees += fee.fee_value
+            elif fee.type == FeeType.FINANCE_TRANSACTION_TAX:
+                ftt_fees += fee.fee_value
+            elif fee.type == FeeType.CONNECTION:
+                exchange_fees += fee.fee_value
+            elif fee.type == FeeType.ADR_GDR:
+                adr_fees += fee.fee_value
 
         context = {
             "transaction_fees": LocalizationUtility.format_money_value(
@@ -40,7 +43,7 @@ class Fees(View):
             ),
             "ftt_fees": LocalizationUtility.format_money_value(value=ftt_fees, currency_symbol=base_currency_symbol),
             "adr_fees": LocalizationUtility.format_money_value(value=adr_fees, currency_symbol=base_currency_symbol),
-            "fees": fees,
+            "fees": [dataclasses.asdict(fee) for fee in fees],
         }
 
         if request.headers.get("Accept") == "application/json":
