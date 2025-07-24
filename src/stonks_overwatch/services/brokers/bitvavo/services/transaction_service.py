@@ -77,12 +77,24 @@ class TransactionsService(TransactionServiceInterface):
         return "Unknown"
 
     @staticmethod
+    def parse_date(value: str) -> datetime:
+        """
+        Parses a date time string to a datetime object.
+        """
+        try:
+            return datetime.strptime(value, TransactionsService.TIME_DATE_FORMAT)
+        except ValueError as e:
+            raise ValueError(
+                f"Invalid date format: {value}. Expected format is {TransactionsService.TIME_DATE_FORMAT}."
+            ) from e
+
+    @staticmethod
     def format_date(value: str | datetime) -> str:
         """
         Formats a date time string to date string.
         """
         if isinstance(value, str):
-            time = datetime.strptime(value, TransactionsService.TIME_DATE_FORMAT)
+            time = TransactionsService.parse_date(value)
         elif isinstance(value, datetime):
             time = value
         else:
@@ -96,7 +108,7 @@ class TransactionsService(TransactionServiceInterface):
         Formats a date time string to time string.
         """
         if isinstance(value, str):
-            time = datetime.strptime(value, TransactionsService.TIME_DATE_FORMAT)
+            time = TransactionsService.parse_date(value)
         elif isinstance(value, datetime):
             time = value
         else:

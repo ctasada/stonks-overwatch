@@ -1,7 +1,7 @@
 from stonks_overwatch.config.config import Config
 from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import BitvavoService
 from stonks_overwatch.services.brokers.bitvavo.services.transaction_service import TransactionsService
-from stonks_overwatch.utils.core.localization import LocalizationUtility
+from stonks_overwatch.services.models import Fee, FeeType
 
 
 class FeesService:
@@ -24,19 +24,17 @@ class FeesService:
             description = f"{transaction_type} {transaction['receivedCurrency']} Transaction Fee"
 
             total_fees.append(
-                {
-                    "date": TransactionsService.format_date(transaction["executedAt"]),
-                    "time": TransactionsService.format_time(transaction["executedAt"]),
-                    "type": "Transaction",
-                    "description": description,
-                    "fee_value": fee_value,
-                    "fees": LocalizationUtility.format_money_value(
-                        value=fee_value, currency=transaction["feesCurrency"]
-                    ),
-                }
+                Fee(
+                    date=TransactionsService.format_date(transaction["executedAt"]),
+                    time=TransactionsService.format_time(transaction["executedAt"]),
+                    type=FeeType.TRANSACTION,
+                    description=description,
+                    fee_value=fee_value,
+                    currency=transaction["feesCurrency"],
+                )
             )
 
-        return sorted(total_fees, key=lambda k: (k["date"], k["time"]), reverse=True)
+        return sorted(total_fees, key=lambda k: k.datetime, reverse=True)
 
     def __convert_buy_sell(self, buy_sell: str) -> str:
         if buy_sell in ["buy", "staking"]:

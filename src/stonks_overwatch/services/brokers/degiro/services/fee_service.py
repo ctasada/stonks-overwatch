@@ -4,6 +4,7 @@ from stonks_overwatch.services.brokers.degiro.repositories.cash_movements_reposi
 from stonks_overwatch.services.brokers.degiro.repositories.product_info_repository import ProductInfoRepository
 from stonks_overwatch.services.brokers.degiro.repositories.transactions_repository import TransactionsRepository
 from stonks_overwatch.services.brokers.degiro.services.currency_service import CurrencyConverterService
+from stonks_overwatch.services.models import Fee, FeeType
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 
 
@@ -16,15 +17,15 @@ class FeesService:
         self.degiro_service = degiro_service
         self.base_currency = Config.get_global().base_currency
 
-    def get_fees(self) -> list[dict]:
+    def get_fees(self) -> list[Fee]:
         transaction_fees = self.get_transaction_fees()
         account_fees = self.get_account_fees()
 
         total_fees = account_fees + transaction_fees
 
-        return sorted(total_fees, key=lambda k: (k["date"], k["time"]), reverse=True)
+        return sorted(total_fees, key=lambda k: (k.date, k.time), reverse=True)
 
-    def get_account_fees(self) -> list[dict]:
+    def get_account_fees(self) -> list[Fee]:
         cash_movements = CashMovementsRepository.get_cash_movements_raw()
 
         my_fees = []
@@ -41,32 +42,32 @@ class FeesService:
                 currency_value = self.base_currency
 
             my_fees.append(
-                {
-                    "date": cash_movement["date"].strftime(LocalizationUtility.DATE_FORMAT),
-                    "time": cash_movement["date"].strftime(LocalizationUtility.TIME_FORMAT),
-                    "type": fee_type,
-                    "description": cash_movement["description"],
-                    "fee_value": fee_value,
-                    "fees": LocalizationUtility.format_money_value(value=fee_value, currency=currency_value),
-                }
+                Fee(
+                    date=cash_movement["date"].strftime(LocalizationUtility.DATE_FORMAT),
+                    time=cash_movement["date"].strftime(LocalizationUtility.TIME_FORMAT),
+                    type=fee_type,
+                    description=cash_movement["description"],
+                    fee_value=fee_value,
+                    currency=currency_value,
+                )
             )
 
         return my_fees
 
-    def __get_fee_type(self, description: str) -> str | None:
+    def __get_fee_type(self, description: str) -> FeeType | None:
         # description = "Spanish Transaction Tax" -> FTT (Finance Transaction Tax)
         # description = "ADR/GDR Externe Kosten" -> ADR/GDR
         # description = "DEGIRO Aansluitingskosten" -> Connection
         if "Transaction Tax" in description:
-            return "Finance Transaction Tax"
+            return FeeType.FINANCE_TRANSACTION_TAX
         elif "DEGIRO Aansluitingskosten" in description:
-            return "Connection"
+            return FeeType.CONNECTION
         elif "ADR/GDR Externe Kosten" in description:
-            return "ADR/GDR"
+            return FeeType.ADR_GDR
         else:
             return None
 
-    def get_transaction_fees(self) -> list[dict]:
+    def get_transaction_fees(self) -> list[Fee]:
         transactions_history = TransactionsRepository.get_transactions_raw()
 
         products_ids = []
@@ -99,14 +100,14 @@ class FeesService:
             description = f"{buy_sell} {stock_quantity}x {stock_name} @ {stock_price}"
 
             my_fees.append(
-                {
-                    "date": transaction["date"].strftime(LocalizationUtility.DATE_FORMAT),
-                    "time": transaction["date"].strftime(LocalizationUtility.TIME_FORMAT),
-                    "type": "Transaction",
-                    "description": description,
-                    "fee_value": fees,
-                    "fees": LocalizationUtility.format_money_value(value=fees, currency_symbol=base_currency_symbol),
-                }
+                Fee(
+                    date=transaction["date"].strftime(LocalizationUtility.DATE_FORMAT),
+                    time=transaction["date"].strftime(LocalizationUtility.TIME_FORMAT),
+                    type=FeeType.TRANSACTION,
+                    description=description,
+                    fee_value=fees,
+                    currency=base_currency_symbol,
+                )
             )
 
         return my_fees
