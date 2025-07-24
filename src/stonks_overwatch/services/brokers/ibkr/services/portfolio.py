@@ -33,49 +33,11 @@ class PortfolioService(PortfolioServiceInterface):
         portfolio = []
 
         for position in open_positions:
-            currency = position["currency"]
-            price = self.__get_last_quotation(position["conid"])
-            value = position["position"] * price
-            break_even_price = position["avgPrice"]
-            base_currency_price = self.ibkr_service.convert_to_default_currency(currency, price)
-            base_currency_break_even_price = self.ibkr_service.convert_to_default_currency(currency, break_even_price)
-            base_currency_value = self.ibkr_service.convert_to_default_currency(currency, value)
-
-            unrealized_gain = position["unrealizedPnl"]
-            total_realized_gains = position["realizedPnl"]
-            # FIXME: This may not be the correct way to calculate the total costs
-            avg_price = (
-                position["baseAvgPrice"]
-                if ("baseAvgPrice" in position and position["baseAvgPrice"])
-                else position["avgPrice"]
-            )
-            total_costs = position["position"] * avg_price
-
-            entry = PortfolioEntry(
-                name=position["name"],
-                symbol=position["ticker"],
-                sector=Sector.from_str(position["sector"]),
-                industry=position["group"] if position["group"] else "Others",
-                # FIXME: Add stock class category
-                exchange=self.__find_exchange(position["listingExchange"]),
-                country=Country(position["countryCode"]),
-                product_type=self.__get_product_type(position),
-                shares=position["position"],
-                product_currency=currency,
-                price=price,
-                base_currency_price=base_currency_price,
-                base_currency=base_currency,
-                break_even_price=break_even_price,
-                base_currency_break_even_price=base_currency_break_even_price,
-                value=value,
-                base_currency_value=base_currency_value,
-                is_open=True,
-                unrealized_gain=unrealized_gain,
-                realized_gain=total_realized_gains,
-                total_costs=total_costs,
-            )
-
-            portfolio.append(entry)
+            try:
+                entry = self.__create_portfolio_entry(position, base_currency)
+                portfolio.append(entry)
+            except Exception as e:
+                self.logger.error(f"Error creating portfolio entry for position {position.get('ticker', '')}: {e}")
 
         for cash_balance in account_summary["cashBalances"]:
             if cash_balance["currency"] in ["USD", "EUR"]:
@@ -96,6 +58,48 @@ class PortfolioService(PortfolioServiceInterface):
                 portfolio.append(entry)
 
         return sorted(portfolio, key=lambda k: k.symbol)
+
+    def __create_portfolio_entry(self, position: dict, base_currency: str) -> PortfolioEntry:
+        currency = position["currency"]
+        price = self.__get_last_quotation(position)
+        value = position["position"] * price
+        break_even_price = position["avgPrice"]
+        base_currency_price = self.ibkr_service.convert_to_default_currency(currency, price)
+        base_currency_break_even_price = self.ibkr_service.convert_to_default_currency(currency, break_even_price)
+        base_currency_value = self.ibkr_service.convert_to_default_currency(currency, value)
+
+        unrealized_gain = position["unrealizedPnl"]
+        total_realized_gains = position["realizedPnl"]
+        avg_price = (
+            position["baseAvgPrice"]
+            if ("baseAvgPrice" in position and position["baseAvgPrice"])
+            else position["avgPrice"]
+        )
+        total_costs = position["position"] * avg_price
+
+        return PortfolioEntry(
+            name=position["name"],
+            symbol=position["ticker"],
+            sector=Sector.from_str(position["sector"]),
+            industry=position["group"] if position["group"] else "Others",
+            # FIXME: Add stock class category
+            exchange=self.__find_exchange(position["listingExchange"]),
+            country=Country(position["countryCode"]),
+            product_type=self.__get_product_type(position),
+            shares=position["position"],
+            product_currency=currency,
+            price=price,
+            base_currency_price=base_currency_price,
+            base_currency=base_currency,
+            break_even_price=break_even_price,
+            base_currency_break_even_price=base_currency_break_even_price,
+            value=value,
+            base_currency_value=base_currency_value,
+            is_open=True,
+            unrealized_gain=unrealized_gain,
+            realized_gain=total_realized_gains,
+            total_costs=total_costs,
+        )
 
     def __find_exchange(self, acronym: str) -> MIC | None:
         # FIXME: Special Mapping for some exchanges
@@ -166,13 +170,18 @@ class PortfolioService(PortfolioServiceInterface):
 
         raise ValueError("Total cash balance not found in IBKR account summary")
 
-    def __get_last_quotation(self, conid: str) -> float:
+    def __get_last_quotation(self, position: dict) -> float:
         # FIXME: Retrieving the last 5 days to guarantee we have a value (for example on Mondays). There may be a better
         #  way to do this.
-        history = self.ibkr_service.client.marketdata_history_by_conid(
-            conid=conid, period="5d", bar="1d", outside_rth=True
-        ).data
-        return history["data"][-1]["c"]
+        try:
+            conid = position["conid"]
+            history = self.ibkr_service.client.marketdata_history_by_conid(
+                conid=conid, period="5d", bar="1d", outside_rth=True
+            ).data
+            return history["data"][-1]["c"]
+        except Exception:
+            self.logger.warning(f"Error retrieving last quotation for position {position.get('ticker', '')}")
+            return position["mktPrice"]
 
     @staticmethod
     def __get_product_type(position: dict) -> ProductType:
