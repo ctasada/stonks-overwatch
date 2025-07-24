@@ -173,7 +173,9 @@ class UpdateService(AbstractUpdateService):
                 self._retry_database_operation(
                     BitvavoBalance.objects.update_or_create,
                     symbol=row["symbol"],
-                    available=row["available"],
+                    defaults={
+                        "available": row["available"],
+                    },
                 )
             except Exception as error:
                 self.logger.error(f"Cannot import position: {row}")
@@ -187,17 +189,19 @@ class UpdateService(AbstractUpdateService):
                 self._retry_database_operation(
                     BitvavoTransactions.objects.update_or_create,
                     transaction_id=row["transactionId"],
-                    executed_at=row["executedAt"],
-                    type=row["type"],
-                    price_currency=row.get("priceCurrency", None),
-                    price_amount=row.get("priceAmount", None),
-                    sent_currency=row.get("sentCurrency", None),
-                    sent_amount=row.get("sentAmount", None),
-                    received_currency=row.get("receivedCurrency", None),
-                    received_amount=row.get("receivedAmount", None),
-                    fees_currency=row.get("feesCurrency", None),
-                    fees_amount=row.get("feesAmount", None),
-                    address=row.get("address", None),
+                    defaults={
+                        "executed_at": row["executedAt"],
+                        "type": row["type"],
+                        "price_currency": row.get("priceCurrency", None),
+                        "price_amount": row.get("priceAmount", None),
+                        "sent_currency": row.get("sentCurrency", None),
+                        "sent_amount": row.get("sentAmount", None),
+                        "received_currency": row.get("receivedCurrency", None),
+                        "received_amount": row.get("receivedAmount", None),
+                        "fees_currency": row.get("feesCurrency", None),
+                        "fees_amount": row.get("feesAmount", None),
+                        "address": row.get("address", None),
+                    },
                 )
             except Exception as error:
                 self.logger.error(f"Cannot import position: {row}")
@@ -209,13 +213,15 @@ class UpdateService(AbstractUpdateService):
                 self._retry_database_operation(
                     BitvavoDepositHistory.objects.update_or_create,
                     timestamp=datetime.fromtimestamp(row["timestamp"] / 1000.0, tz=timezone.utc),
-                    symbol=row["symbol"],
-                    amount=row["amount"],
-                    address=row.get("address", None),
-                    payment_id=row.get("paymentId", None),
-                    tx_id=row.get("txId", None),
-                    fee=row.get("fee", None),
-                    status=row["status"],
+                    defaults={
+                        "symbol": row["symbol"],
+                        "amount": row["amount"],
+                        "address": row.get("address", None),
+                        "payment_id": row.get("paymentId", None),
+                        "tx_id": row.get("txId", None),
+                        "fee": row.get("fee", None),
+                        "status": row["status"],
+                    },
                 )
             except Exception as error:
                 self.logger.error(f"Cannot import deposit: {row}")
