@@ -29,6 +29,7 @@ from stonks_overwatch.services.brokers.degiro.repositories.product_quotations_re
     ProductQuotationsRepository,
 )
 from stonks_overwatch.services.brokers.degiro.repositories.transactions_repository import TransactionsRepository
+from stonks_overwatch.services.brokers.degiro.services.helper import is_non_tradeable_product
 from stonks_overwatch.services.brokers.degiro.services.portfolio_service import PortfolioService
 from stonks_overwatch.services.brokers.yfinance.client.yfinance_client import YFinanceClient
 from stonks_overwatch.services.brokers.yfinance.repositories.models import YFinanceStockSplits, YFinanceTickerInfo
@@ -400,24 +401,6 @@ class UpdateService(AbstractUpdateService):
                 self.logger.error(f"Cannot import row: {row}")
                 self.logger.error("Exception: %s", str(error))
 
-    def __is_non_tradeable_product(self, product: dict) -> bool:
-        """Check if the product is non tradeable.
-
-        This method checks if the product is a non tradeable product.
-        Non-tradeable products are identified by the presence of "Non tradeable" in the name.
-
-        If the product is NOT tradable, we shouldn't consider it for Growth.
-
-        The 'tradable' attribute identifies old Stocks, like the ones that are
-        renamed for some reason, and it's not good enough to identify stocks
-        that are provided as dividends, for example.
-        """
-        if product["symbol"].endswith(".D"):
-            # This is a DeGiro-specific symbol, which is not tradeable
-            return True
-
-        return "Non tradeable" in product["name"]
-
     def __import_products_quotation(self) -> None:  # noqa: C901
         product_growth = self.portfolio_data.calculate_product_growth()
 
@@ -439,7 +422,7 @@ class UpdateService(AbstractUpdateService):
             product = ProductInfoRepository.get_product_info_from_id(key)
 
             # FIXME: Code copied from dashboard._create_products_quotation()
-            if self.__is_non_tradeable_product(product):
+            if is_non_tradeable_product(product):
                 delete_keys.append(key)
                 continue
 

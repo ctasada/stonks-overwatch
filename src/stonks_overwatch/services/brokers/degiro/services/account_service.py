@@ -2,6 +2,7 @@ from typing import List
 
 from stonks_overwatch.services.brokers.degiro.repositories.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.services.brokers.degiro.repositories.product_info_repository import ProductInfoRepository
+from stonks_overwatch.services.brokers.degiro.services.helper import is_non_tradeable_product
 from stonks_overwatch.services.models import AccountOverview
 from stonks_overwatch.utils.core.logger import StonksLogger
 
@@ -30,7 +31,7 @@ class AccountOverviewService:
             if cash_movement["productId"] is not None:
                 info = products_info[int(cash_movement["productId"])]
 
-                if self.__is_non_tradeable_product(info):
+                if is_non_tradeable_product(info):
                     # If the product is non-tradeable, we want to include the real product, if exists
                     info = self.__find_equivalent_tradeable_product(info, products_info)
 
@@ -65,7 +66,7 @@ class AccountOverviewService:
         products_info = ProductInfoRepository.get_products_info_raw(products_ids)
         non_tradeable_products = []
         for product in products_info.values():
-            if self.__is_non_tradeable_product(product):
+            if is_non_tradeable_product(product):
                 non_tradeable_products.append(product["symbol"].replace(".D", ""))
 
         # Retrieve the real product info for non-tradeable products
@@ -75,37 +76,19 @@ class AccountOverviewService:
 
         return products_info
 
-    def __is_non_tradeable_product(self, product: dict) -> bool:
-        """Check if the product is non-tradeable.
-
-        This method checks if the product is a non-tradeable product.
-        Non-tradeable products are identified by the presence of "Non-tradeable" in the name.
-
-        If the product is NOT tradable, we shouldn't consider it for Growth.
-
-        The 'tradable' attribute identifies old Stocks, like the ones that are
-        renamed for some reason, and it's not good enough to identify stocks
-        that are provided as dividends, for example.
-        """
-        if product["symbol"].endswith(".D"):
-            # This is a DeGiro-specific symbol, which is not-tradeable
-            return True
-
-        return "Non tradeable" in product["name"]
-
     def __filter_non_tradeable_products(self, products: dict) -> dict:
         """Filter out non-tradeable products from the list of products."""
-        return {k: v for k, v in products.items() if not self.__is_non_tradeable_product(v)}
+        return {k: v for k, v in products.items() if not is_non_tradeable_product(v)}
 
     def __find_equivalent_tradeable_product(self, product: dict, all_products: dict) -> dict:
         """Find the equivalent tradeable product for a non-tradeable product."""
-        if not self.__is_non_tradeable_product(product):
+        if not is_non_tradeable_product(product):
             return product
 
         # Remove the ".D" suffix to find the equivalent tradeable product
         tradeable_symbol = product["symbol"].replace(".D", "")
         for entry in all_products.values():
-            if entry["symbol"] == tradeable_symbol and not self.__is_non_tradeable_product(entry):
+            if entry["symbol"] == tradeable_symbol and not is_non_tradeable_product(entry):
                 return entry
 
         return product
