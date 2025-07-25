@@ -63,9 +63,6 @@ class UnifiedBrokerFactory:
         Returns:
             Configuration instance if broker is registered, None otherwise
         """
-        # Create cache key from broker name and kwargs
-        cache_key = (broker_name, tuple(sorted(kwargs.items())))
-
         # Check cache first - only cache if no custom kwargs (default config)
         if self._cache_enabled and not kwargs and broker_name in self._config_instances:
             return self._config_instances[broker_name]
@@ -155,7 +152,6 @@ class UnifiedBrokerFactory:
             Service instance if available, None otherwise
         """
         # Check cache first
-        cache_key = (broker_name, service_type)
         if (
             self._cache_enabled
             and broker_name in self._service_instances

@@ -13,7 +13,7 @@ from stonks_overwatch.services.brokers.bitvavo.services.deposit_service import D
 from stonks_overwatch.services.brokers.bitvavo.services.dividends_service import (
     DividendsService as BitvavoDividendsService,
 )
-from stonks_overwatch.services.brokers.bitvavo.services.fee_service import FeesService as BitvavoFeeService
+from stonks_overwatch.services.brokers.bitvavo.services.fee_service import FeeService as BitvavoFeeService
 from stonks_overwatch.services.brokers.bitvavo.services.portfolio_service import (
     PortfolioService as BitvavoPortfolioService,
 )

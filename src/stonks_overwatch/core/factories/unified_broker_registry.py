@@ -125,11 +125,11 @@ class UnifiedBrokerRegistry:
                 service_type = ServiceType(service_name.lower())
                 service_map[service_type] = service_class
                 capabilities.append(service_type)
-            except ValueError:
+            except ValueError as err:
                 raise BrokerRegistryValidationError(
                     f"Unknown service type '{service_name}' for broker '{broker_name}'. "
                     f"Valid types: {[st.value for st in ServiceType]}"
-                )
+                ) from err
 
         # Validate required services
         self._validate_required_services(broker_name, capabilities)
@@ -219,10 +219,10 @@ class UnifiedBrokerRegistry:
             self.register_broker_services(broker_name, **services)
             self._initialized_brokers.add(broker_name)
             self.logger.info(f"Completely registered broker: {broker_name}")
-        except Exception as e:
+        except Exception:
             # If service registration fails, rollback config registration
             self._config_classes.pop(broker_name, None)
-            raise e
+            raise
 
     def get_fully_registered_brokers(self) -> List[str]:
         """
@@ -233,7 +233,7 @@ class UnifiedBrokerRegistry:
         """
         config_brokers = set(self._config_classes.keys())
         service_brokers = set(self._service_classes.keys())
-        return sorted(list(config_brokers.intersection(service_brokers)))
+        return sorted(config_brokers.intersection(service_brokers))
 
     def is_fully_registered(self, broker_name: str) -> bool:
         """

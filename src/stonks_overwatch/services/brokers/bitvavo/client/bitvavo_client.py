@@ -1,8 +1,10 @@
 import json
 from datetime import datetime
+from typing import Optional
 
 from python_bitvavo_api.bitvavo import Bitvavo, createPostfix
 
+from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.config import Config
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.singleton import singleton
@@ -33,9 +35,16 @@ class BitvavoService:
         self,
         debugging: bool = False,
         force: bool = False,
+        config: Optional[BaseConfig] = None,
     ):
         self.force = force
-        self.bitvavo_config = Config.get_global().registry.get_broker_config("bitvavo")
+
+        # Use dependency injection if config is provided, otherwise fallback to global config
+        if config is not None:
+            self.bitvavo_config = config
+        else:
+            self.bitvavo_config = Config.get_global().registry.get_broker_config("bitvavo")
+
         bitvavo_credentials = self.bitvavo_config.credentials
 
         if bitvavo_credentials and bitvavo_credentials.apikey and bitvavo_credentials.apisecret:
@@ -48,7 +57,7 @@ class BitvavoService:
             )
 
     def get_client(self) -> Bitvavo:
-        if not self.force and Config.get_global().registry.get_broker_config("bitvavo").offline_mode:
+        if not self.force and self.bitvavo_config.offline_mode:
             raise BitvavoOfflineModeError("Bitvavo working in offline mode. No connection is allowed")
 
         return self.client

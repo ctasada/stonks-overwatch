@@ -153,7 +153,7 @@ class TestUnifiedBrokerFactory:
     def test_create_config_caching(self):
         """Test that configuration instances are cached."""
         # Ensure cache is enabled
-        assert self.factory._cache_enabled == True
+        assert self.factory._cache_enabled
 
         config1 = self.factory.create_config("test_broker")
 
@@ -247,7 +247,7 @@ class TestUnifiedBrokerFactory:
     def test_create_service_caching(self):
         """Test that service instances are cached."""
         # Ensure cache is enabled
-        assert self.factory._cache_enabled == True
+        assert self.factory._cache_enabled
 
         service1 = self.factory.create_service("test_broker", ServiceType.PORTFOLIO)
 

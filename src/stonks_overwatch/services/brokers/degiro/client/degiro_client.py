@@ -12,6 +12,7 @@ from degiro_connector.trading.models.agenda import AgendaRequest, CalendarType
 from degiro_connector.trading.models.credentials import Credentials
 
 import stonks_overwatch.settings
+from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.config import Config
 from stonks_overwatch.settings import TIME_ZONE
 from stonks_overwatch.utils.core.localization import LocalizationUtility
@@ -35,8 +36,13 @@ class DeGiroOfflineModeError(Exception):
 class CredentialsManager:
     """Manages the credentials for the DeGiro API."""
 
-    def __init__(self, credentials: Optional[Credentials] = None):
-        degiro_config = Config.get_global().registry.get_broker_config("degiro")
+    def __init__(self, credentials: Optional[Credentials] = None, config: Optional[BaseConfig] = None):
+        # Use dependency injection if config is provided, otherwise fallback to global config
+        if config is not None:
+            degiro_config = config
+        else:
+            degiro_config = Config.get_global().registry.get_broker_config("degiro")
+
         degiro_credentials = degiro_config.credentials
 
         self.credentials = credentials or Credentials(
@@ -118,7 +124,9 @@ class DeGiroService:
     logger = StonksLogger.get_logger("stonks_overwatch.degiro_service", "[DEGIRO|CLIENT]")
     api_client: TradingApi = None
     credentials_manager: Optional[CredentialsManager] = None
+    degiro_config: Optional[BaseConfig] = None
     force: bool = False
+    is_maintenance_mode: bool = False
 
     __cache_path = os.path.join(stonks_overwatch.settings.STONKS_OVERWATCH_CACHE_DIR, "http_request.cache")
 
@@ -126,7 +134,14 @@ class DeGiroService:
         self,
         credentials_manager: Optional[CredentialsManager] = None,
         force: bool = False,
+        config: Optional[BaseConfig] = None,
     ):
+        # Store config for later use in offline mode check
+        if config is not None:
+            self.degiro_config = config
+        else:
+            self.degiro_config = Config.get_global().registry.get_broker_config("degiro")
+
         self.set_credentials(credentials_manager)
         self.force = force
         self.is_maintenance_mode = False
@@ -197,7 +212,7 @@ class DeGiroService:
 
     def check_connection(self) -> bool:
         """Check if the API client is connected."""
-        if not self.force and Config.get_global().registry.get_broker_config("degiro").offline_mode:
+        if not self.force and self.degiro_config.offline_mode:
             raise DeGiroOfflineModeError("DEGIRO working in offline mode. No connection is allowed")
 
         is_connected = self.__check_connection__()

@@ -6,14 +6,13 @@ of configuration while maintaining backward compatibility with existing
 service implementations.
 """
 
-from abc import ABC
 from typing import Optional
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.config import Config
 
 
-class DependencyInjectionMixin(ABC):
+class DependencyInjectionMixin:
     """
     Mixin that provides dependency injection capabilities for services.
 

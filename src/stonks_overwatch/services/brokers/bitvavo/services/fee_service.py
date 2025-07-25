@@ -1,13 +1,17 @@
-from stonks_overwatch.config.config import Config
-from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import BitvavoService
+from typing import Optional
+
+from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.services.brokers.bitvavo.services.transaction_service import TransactionsService
+
+# Interface will be added later - using duck typing for now
 from stonks_overwatch.services.models import Fee, FeeType
 
 
-class FeesService:
-    def __init__(self):
-        self.bitvavo_service = BitvavoService()
-        self.base_currency = Config.get_global().base_currency
+class FeeService(BaseService):
+    def __init__(self, config: Optional[BaseConfig] = None):
+        super().__init__(config)
+        # Use base_currency property from BaseService which handles dependency injection
 
     def get_fees(self) -> list[dict]:
         transactions_history = self.bitvavo_service.account_history()

@@ -388,6 +388,9 @@ class TestUnifiedBrokerRegistry:
 
     def test_clear_all_registrations(self):
         """Test clearing all registrations."""
+        # Clear any existing registrations from test setup
+        self.registry.clear_all_registrations()
+
         services = {
             "portfolio": MockPortfolioService,
             "transaction": MockTransactionService,

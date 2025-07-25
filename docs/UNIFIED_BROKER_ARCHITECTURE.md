@@ -585,12 +585,28 @@ registry.register_broker_services("new_broker", portfolio=..., transaction=...)
 
 ### **Phase 3: Update Configuration Layer (Week 3)**
 
-#### Task 3.1: Migrate Config Class
+#### Task 3.1: Migrate Config Class ✅ COMPLETED
 
-- [ ] Update `Config` class to use unified factory
-- [ ] Remove direct registry usage
-- [ ] Maintain existing public API for backward compatibility
-- [ ] Update `GlobalConfig` to use new pattern
+- [x] Update `Config` class to use unified factory
+- [x] Remove direct registry usage
+- [x] Maintain existing public API for backward compatibility
+- [x] Update `GlobalConfig` to use new pattern
+
+**Task 3.1 Results:**
+- ✅ Successfully migrated `Config` class to use `UnifiedBrokerFactory` with fallback to legacy factory
+- ✅ Created unified registration setup in `core/unified_registry_setup.py`
+- ✅ Maintained full backward compatibility - all 13 config tests passing
+- ✅ Implemented lazy initialization to avoid circular imports
+- ✅ Added comprehensive broker registration for DeGiro, Bitvavo, and IBKR
+- ✅ 123/123 tests passing across all modules (factories + interfaces + config)
+
+**Key Features Implemented:**
+- **Unified Registry Integration**: Config class now uses UnifiedBrokerRegistry when available
+- **Graceful Fallback**: Automatically falls back to legacy ConfigFactory when needed
+- **Backward Compatibility**: All existing APIs work exactly as before
+- **Lazy Initialization**: Avoids circular import issues through `_ensure_unified_registry_initialized()`
+- **Complete Registration**: All broker configs and services registered automatically
+- **Legacy Method Support**: All legacy methods (e.g., `is_degiro_enabled`) still work
 
 #### Task 3.2: Update Configuration Access Patterns
 

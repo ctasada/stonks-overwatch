@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Optional
 
 from dateutil.parser import parse
 from dateutil.tz import gettz
@@ -8,6 +9,7 @@ from ibind import IbkrClient
 from ibind.oauth.oauth1a import OAuth1aConfig
 from pytz import utc
 
+from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.config import Config
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.singleton import singleton
@@ -32,11 +34,18 @@ class IbkrService:
     def __init__(
         self,
         shutdown_oauth: bool = False,
+        config: Optional[BaseConfig] = None,
     ):
         # FIXME: The shutdown_oauth parameter is a workaround to avoid OAuth shutdown due to issues
         #  in the way SIGTERM is managed.
         #  The default value should be obtained checking if the service runs inside Django or not.
-        ibkr_config = Config.get_global().registry.get_broker_config("ibkr")
+
+        # Use dependency injection if config is provided, otherwise fallback to global config
+        if config is not None:
+            ibkr_config = config
+        else:
+            ibkr_config = Config.get_global().registry.get_broker_config("ibkr")
+
         ibkr_credentials = ibkr_config.credentials
 
         if ibkr_credentials:

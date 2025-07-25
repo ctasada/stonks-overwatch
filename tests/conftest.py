@@ -48,4 +48,13 @@ def reset_global_config():
 
     # Reset the global config to force reload
     global_config.reset_for_tests()
+
+    # Initialize unified registry for tests
+    try:
+        from stonks_overwatch.core.unified_registry_setup import ensure_unified_registry_initialized
+
+        ensure_unified_registry_initialized()
+    except Exception as e:
+        print(f"Warning: Could not initialize unified registry for tests: {e}")
+
     yield
