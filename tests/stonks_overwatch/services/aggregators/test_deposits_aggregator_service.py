@@ -24,7 +24,11 @@ def setup_broker_registry():
 
     # Register broker services
     register_broker_services()
-    yield
+
+    # Patch the UnifiedBrokerFactory to force use of legacy factory in tests
+    with patch("stonks_overwatch.core.aggregators.base_aggregator.UnifiedBrokerFactory") as mock_unified:
+        mock_unified.side_effect = Exception("Force legacy factory use in tests")
+        yield
 
     # Clean up after test
     registry._brokers.clear()

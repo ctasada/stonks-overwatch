@@ -1,6 +1,6 @@
 import os
 from datetime import date, datetime, time, timezone
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import pandas as pd
 from degiro_connector.quotecast.models.chart import Interval
@@ -10,7 +10,8 @@ from django.core.cache import cache
 from django.db import connection
 from pandas import DataFrame
 
-from stonks_overwatch.config.config import Config
+from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.core.interfaces.update_service import AbstractUpdateService
 from stonks_overwatch.services.brokers.degiro.client.constants import CurrencyFX, ProductType
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
@@ -45,16 +46,22 @@ CACHE_KEY_UPDATE_YFINANCE = "yfinance_update"
 CACHE_TIMEOUT = 3600
 
 
-class UpdateService(AbstractUpdateService):
-    def __init__(self, import_folder: str = None, debug_mode: bool = None):
+class UpdateService(BaseService, AbstractUpdateService):
+    def __init__(self, import_folder: str = None, debug_mode: bool = None, config: Optional[BaseConfig] = None):
         """
         Initialize the UpdateService.
         :param import_folder:
             Folder to store the JSON files for debugging purposes.
         :param debug_mode:
             If True, the service will store the JSON files for debugging purposes.
+        :param config:
+            Optional configuration instance for dependency injection.
         """
-        super().__init__("DEGIRO", import_folder, debug_mode)
+        # Initialize AbstractUpdateService first (has no super() calls to interfere)
+        AbstractUpdateService.__init__(self, "DEGIRO", import_folder, debug_mode, config)
+        # Then manually set BaseService attributes without calling its __init__
+        self._injected_config = config
+        self._global_config = None
 
         self.degiro_service = DeGiroService()
 
@@ -73,18 +80,18 @@ class UpdateService(AbstractUpdateService):
     def _get_last_cash_movement_import(self) -> datetime:
         last_movement = CashMovementsRepository.get_last_movement()
         if last_movement is None:
-            last_movement = datetime.combine(
-                Config.get_global().registry.get_broker_config("degiro").start_date, time.min
-            )
+            # Use config via dependency injection
+            degiro_config = self.config.registry.get_broker_config("degiro")
+            last_movement = datetime.combine(degiro_config.start_date, time.min)
 
         return last_movement
 
     def _get_last_transactions_import(self) -> datetime:
         last_movement = TransactionsRepository.get_last_movement()
         if last_movement is None:
-            last_movement = datetime.combine(
-                Config.get_global().registry.get_broker_config("degiro").start_date, time.min
-            )
+            # Use config via dependency injection
+            degiro_config = self.config.registry.get_broker_config("degiro")
+            last_movement = datetime.combine(degiro_config.start_date, time.min)
 
         return last_movement
 
@@ -405,11 +412,9 @@ class UpdateService(AbstractUpdateService):
         product_growth = self.portfolio_data.calculate_product_growth()
 
         # Include Currencies in the Quotations
-        start_date = (
-            Config.get_global()
-            .registry.get_broker_config("degiro")
-            .start_date.strftime(LocalizationUtility.DATE_FORMAT)
-        )
+        # Use config via dependency injection
+        degiro_config = self.config.registry.get_broker_config("degiro")
+        start_date = degiro_config.start_date.strftime(LocalizationUtility.DATE_FORMAT)
         for currency in CurrencyFX.to_list():
             if currency not in product_growth:
                 product_growth[currency] = {"history": {}}

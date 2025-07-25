@@ -1,6 +1,5 @@
 from typing import List
 
-from stonks_overwatch.config.config import Config
 from stonks_overwatch.core.aggregators.base_aggregator import BaseAggregator
 from stonks_overwatch.core.aggregators.data_merger import DataMerger
 from stonks_overwatch.core.factories.broker_registry import ServiceType
@@ -72,7 +71,7 @@ class PortfolioAggregatorService(BaseAggregator):
             return merged_total
         else:
             # Return empty portfolio if no data
-            base_currency = Config.get_global().base_currency
+            base_currency = self._config.base_currency
             return TotalPortfolio(
                 base_currency=base_currency,
                 total_pl=0.0,

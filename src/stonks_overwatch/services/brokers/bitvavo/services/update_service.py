@@ -1,9 +1,11 @@
 import os
 from datetime import date, datetime, timedelta, timezone
+from typing import Optional
 
 from degiro_connector.quotecast.models.chart import Interval
 
-from stonks_overwatch.config.config import Config
+from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.core.interfaces.update_service import AbstractUpdateService
 from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import BitvavoService
 from stonks_overwatch.services.brokers.bitvavo.repositories.models import (
@@ -20,22 +22,29 @@ from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.core.logger import StonksLogger
 
 
-class UpdateService(AbstractUpdateService):
+class UpdateService(BaseService, AbstractUpdateService):
     logger = StonksLogger.get_logger("stonks_overwatch.bitvavo.update_service", "[BITVAVO|UPDATE]")
 
-    def __init__(self, import_folder: str = None, debug_mode: bool = True):
+    def __init__(self, import_folder: str = None, debug_mode: bool = True, config: Optional[BaseConfig] = None):
         """
         Initialize the UpdateService.
         :param import_folder:
             Folder to store the JSON files for debugging purposes.
         :param debug_mode:
             If True, the service will store the JSON files for debugging purposes.
+        :param config:
+            Optional configuration instance for dependency injection.
         """
-        super().__init__("Bitvavo", import_folder, debug_mode)
+        # Initialize AbstractUpdateService first (has no super() calls to interfere)
+        AbstractUpdateService.__init__(self, "Bitvavo", import_folder, debug_mode, config)
+        # Then manually set BaseService attributes without calling its __init__
+        self._injected_config = config
+        self._global_config = None
 
         self.bitvavo_service = BitvavoService()
         self.portfolio_data = PortfolioService()
-        self.currency = Config.get_global().base_currency
+        # Use base_currency property from BaseService which handles dependency injection
+        self.currency = self.base_currency
 
     def update_all(self):
         if not self.bitvavo_service.get_client():

@@ -203,14 +203,24 @@ class TestUnifiedBrokerRegistry:
     def test_register_broker_services_missing_required_raises_error(self):
         """Test that missing required services raises error."""
         incomplete_services = [
-            {"portfolio": MockPortfolioService},  # Missing transaction and deposit
-            {"portfolio": MockPortfolioService, "transaction": MockTransactionService},  # Missing deposit
             {"transaction": MockTransactionService, "deposit": MockDepositService},  # Missing portfolio
         ]
 
         for services in incomplete_services:
             with pytest.raises(BrokerRegistryValidationError, match="missing required services"):
                 self.registry.register_broker_services("test_broker", **services)
+
+    def test_register_broker_services_portfolio_only_succeeds(self):
+        """Test that portfolio-only service registration succeeds (like IBKR)."""
+        # This should succeed with new flexible validation
+        services = {"portfolio": MockPortfolioService}
+        self.registry.register_broker_services("test_broker_minimal", **services)
+
+        # Verify it was registered
+        assert self.registry.is_service_registered("test_broker_minimal")
+        capabilities = self.registry.get_broker_capabilities("test_broker_minimal")
+        assert ServiceType.PORTFOLIO in capabilities
+        assert len(capabilities) == 1
 
     def test_register_broker_services_invalid_service_type_raises_error(self):
         """Test that invalid service types raise errors."""

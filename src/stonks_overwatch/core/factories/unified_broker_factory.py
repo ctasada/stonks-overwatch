@@ -73,7 +73,11 @@ class UnifiedBrokerFactory:
             return None
 
         try:
-            config = config_class(**kwargs)
+            # If no custom kwargs provided, try to use default() method if available
+            if not kwargs and hasattr(config_class, "default"):
+                config = config_class.default()
+            else:
+                config = config_class(**kwargs)
 
             # Cache the instance only if no custom kwargs (default config)
             if self._cache_enabled and not kwargs:

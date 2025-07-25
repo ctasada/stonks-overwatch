@@ -1,4 +1,7 @@
-from stonks_overwatch.config.config import Config
+from typing import Optional
+
+from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
 from stonks_overwatch.services.brokers.degiro.repositories.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.services.brokers.degiro.repositories.product_info_repository import ProductInfoRepository
@@ -8,14 +11,18 @@ from stonks_overwatch.services.models import Fee, FeeType
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 
 
-class FeesService:
+class FeesService(BaseService):
     def __init__(
         self,
-        degiro_service: DeGiroService,
+        degiro_service: Optional[DeGiroService] = None,
+        config: Optional[BaseConfig] = None,
     ):
+        super().__init__(config)
         self.currency_service = CurrencyConverterService()
-        self.degiro_service = degiro_service
-        self.base_currency = Config.get_global().base_currency
+        self.degiro_service = degiro_service or DeGiroService()
+
+    # Note: base_currency property is inherited from BaseService and handles
+    # dependency injection automatically
 
     def get_fees(self) -> list[Fee]:
         transaction_fees = self.get_transaction_fees()

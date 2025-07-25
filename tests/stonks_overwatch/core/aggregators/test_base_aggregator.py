@@ -35,17 +35,17 @@ class TestBaseAggregator:
         if hasattr(BrokerRegistry, "_instance"):
             BrokerRegistry._instance = None
 
-    @patch("stonks_overwatch.core.aggregators.base_aggregator.ServiceFactory")
+    @patch("stonks_overwatch.core.aggregators.base_aggregator.UnifiedBrokerFactory")
     @patch("stonks_overwatch.core.aggregators.base_aggregator.Config")
-    def test_initialization(self, mock_config, mock_service_factory_class):
-        """Test aggregator initialization."""
-        # Mock the factory instance
+    def test_initialization(self, mock_config, mock_unified_factory_class):
+        """Test aggregator initialization with unified factory."""
+        # Mock the unified factory instance
         mock_factory = MagicMock()
-        mock_service_factory_class.return_value = mock_factory
+        mock_unified_factory_class.return_value = mock_factory
         mock_factory.get_available_brokers.return_value = []
 
         # Mock config
-        mock_config.default.return_value = MagicMock()
+        mock_config.get_global.return_value = MagicMock()
 
         # Create aggregator
         aggregator = ConcreteAggregator(ServiceType.PORTFOLIO)
@@ -53,6 +53,7 @@ class TestBaseAggregator:
         # Verify initialization
         assert aggregator.service_type == ServiceType.PORTFOLIO
         assert aggregator._service_type == ServiceType.PORTFOLIO
+        assert aggregator._use_unified_factory
         mock_factory.get_available_brokers.assert_called_once()
 
     @patch("stonks_overwatch.core.aggregators.base_aggregator.ServiceFactory")

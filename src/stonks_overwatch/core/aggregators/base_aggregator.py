@@ -12,6 +12,7 @@ from stonks_overwatch.config.config import Config
 from stonks_overwatch.core.exceptions import DataAggregationException
 from stonks_overwatch.core.factories.broker_registry import ServiceType
 from stonks_overwatch.core.factories.service_factory import ServiceFactory
+from stonks_overwatch.core.factories.unified_broker_factory import UnifiedBrokerFactory
 from stonks_overwatch.services.brokers.ibkr.client.ibkr_service import IbkrService
 from stonks_overwatch.services.models import PortfolioId
 from stonks_overwatch.utils.core.logger import StonksLogger
@@ -34,12 +35,23 @@ class BaseAggregator(ABC):
             service_type: The type of service this aggregator works with
         """
         self._service_type = service_type
-        self._service_factory = ServiceFactory()
         self._config = Config.get_global()
         self._logger = StonksLogger.get_logger(
             f"stonks_overwatch.aggregators.{self.__class__.__name__.lower()}",
             f"[AGGREGATOR|{service_type.value.upper()}]",
         )
+
+        # Try to use unified factory first, fallback to legacy factory
+        try:
+            self._unified_factory = UnifiedBrokerFactory()
+            self._use_unified_factory = True
+            self._logger.debug("Using unified broker factory")
+        except Exception as e:
+            self._unified_factory = None
+            self._service_factory = ServiceFactory()
+            self._use_unified_factory = False
+            self._logger.debug(f"Using legacy service factory: {e}")
+
         self._broker_services: Dict[str, Any] = {}
         self._initialize_broker_services()
 
@@ -47,12 +59,15 @@ class BaseAggregator(ABC):
         """
         Initialize broker services based on available brokers and service type.
         """
-        available_brokers = self._service_factory.get_available_brokers()
+        if self._use_unified_factory:
+            available_brokers = self._unified_factory.get_available_brokers()
+        else:
+            available_brokers = self._service_factory.get_available_brokers()
 
         self._logger.debug(f"Available brokers: {available_brokers}")
 
         for broker_name in available_brokers:
-            if self._service_factory.broker_supports_service(broker_name, self._service_type):
+            if self._broker_supports_service(broker_name, self._service_type):
                 try:
                     service = self._get_broker_service(broker_name)
                     if service:
@@ -60,6 +75,22 @@ class BaseAggregator(ABC):
                         self._logger.debug(f"Initialized {broker_name} {self._service_type.value} service")
                 except Exception as e:
                     self._logger.warning(f"Failed to initialize {broker_name} service: {e}")
+
+    def _broker_supports_service(self, broker_name: str, service_type: ServiceType) -> bool:
+        """
+        Check if a broker supports a specific service type.
+
+        Args:
+            broker_name: Name of the broker
+            service_type: Type of service to check
+
+        Returns:
+            True if broker supports the service, False otherwise
+        """
+        if self._use_unified_factory:
+            return self._unified_factory.broker_supports_service(broker_name, service_type)
+        else:
+            return self._service_factory.broker_supports_service(broker_name, service_type)
 
     def _get_broker_service(self, broker_name: str) -> Optional[Any]:
         """
@@ -72,17 +103,20 @@ class BaseAggregator(ABC):
             Service instance if available, None otherwise
         """
         try:
-            # For now, create services with proper dependencies manually
-            # until we improve the service factory to handle dependencies
-            if broker_name == "degiro":
-                return self._create_degiro_service()
-            elif broker_name == "bitvavo":
-                return self._create_bitvavo_service()
-            elif broker_name == "ibkr":
-                return self._create_ibkr_service()
+            if self._use_unified_factory:
+                # Use unified factory with automatic dependency injection
+                return self._unified_factory.create_service(broker_name, self._service_type)
             else:
-                self._logger.error(f"{broker_name} is not supported")
-                return None
+                # Fallback to manual service creation
+                if broker_name == "degiro":
+                    return self._create_degiro_service()
+                elif broker_name == "bitvavo":
+                    return self._create_bitvavo_service()
+                elif broker_name == "ibkr":
+                    return self._create_ibkr_service()
+                else:
+                    self._logger.error(f"{broker_name} is not supported")
+                    return None
         except Exception as e:
             self._logger.error(f"Failed to create {self._service_type.value} service for {broker_name}: {e}")
             return None

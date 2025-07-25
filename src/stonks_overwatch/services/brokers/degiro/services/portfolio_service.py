@@ -54,11 +54,11 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
 
     def __init__(
         self,
-        degiro_service: DeGiroService,
+        degiro_service: Optional[DeGiroService] = None,
         config: Optional[BaseConfig] = None,
     ):
         super().__init__(config)
-        self.degiro_service = degiro_service
+        self.degiro_service = degiro_service or DeGiroService()
         self.currency_service = CurrencyConverterService()
         # Use base_currency property from BaseService which handles dependency injection
         self.deposits = DepositsService(

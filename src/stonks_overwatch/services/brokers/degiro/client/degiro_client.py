@@ -41,7 +41,18 @@ class CredentialsManager:
         if config is not None:
             degiro_config = config
         else:
-            degiro_config = Config.get_global().registry.get_broker_config("degiro")
+            # Try unified factory first, fallback to legacy config
+            try:
+                from stonks_overwatch.core.factories.unified_broker_factory import UnifiedBrokerFactory
+
+                unified_factory = UnifiedBrokerFactory()
+                degiro_config = unified_factory.create_config("degiro")
+                if degiro_config is None:
+                    # Fallback to legacy config access
+                    degiro_config = Config.get_global().registry.get_broker_config("degiro")
+            except ImportError:
+                # Fallback to legacy config access if unified factory not available
+                degiro_config = Config.get_global().registry.get_broker_config("degiro")
 
         degiro_credentials = degiro_config.credentials
 
@@ -140,7 +151,18 @@ class DeGiroService:
         if config is not None:
             self.degiro_config = config
         else:
-            self.degiro_config = Config.get_global().registry.get_broker_config("degiro")
+            # Try unified factory first, fallback to legacy config
+            try:
+                from stonks_overwatch.core.factories.unified_broker_factory import UnifiedBrokerFactory
+
+                unified_factory = UnifiedBrokerFactory()
+                self.degiro_config = unified_factory.create_config("degiro")
+                if self.degiro_config is None:
+                    # Fallback to legacy config access
+                    self.degiro_config = Config.get_global().registry.get_broker_config("degiro")
+            except ImportError:
+                # Fallback to legacy config access if unified factory not available
+                self.degiro_config = Config.get_global().registry.get_broker_config("degiro")
 
         self.set_credentials(credentials_manager)
         self.force = force

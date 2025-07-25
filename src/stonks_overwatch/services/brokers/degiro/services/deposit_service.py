@@ -1,8 +1,9 @@
-from typing import List
+from typing import List, Optional
 
 import pandas as pd
 
-from stonks_overwatch.config.config import Config
+from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.core.interfaces.deposit_service import DepositServiceInterface
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
 from stonks_overwatch.services.brokers.degiro.repositories.cash_movements_repository import CashMovementsRepository
@@ -11,15 +12,19 @@ from stonks_overwatch.utils.core.logger import StonksLogger
 
 
 # FIXME: If data cannot be found in the DB, the code should get it from DeGiro, updating the DB
-class DepositsService(DepositServiceInterface):
+class DepositsService(BaseService, DepositServiceInterface):
     logger = StonksLogger.get_logger("stonks_overwatch.portfolio_data.degiro", "[DEGIRO|DEPOSITS]")
 
     def __init__(
         self,
-        degiro_service: DeGiroService,
+        degiro_service: Optional[DeGiroService] = None,
+        config: Optional[BaseConfig] = None,
     ):
-        self.degiro_service = degiro_service
-        self.base_currency = Config.get_global().base_currency
+        super().__init__(config)
+        self.degiro_service = degiro_service or DeGiroService()
+
+    # Note: base_currency property is inherited from BaseService and handles
+    # dependency injection automatically
 
     def get_cash_deposits(self) -> List[Deposit]:
         self.logger.debug("Get Cash Deposits")

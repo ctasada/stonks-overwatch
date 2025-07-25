@@ -1,7 +1,8 @@
 from datetime import datetime, time
-from typing import List
+from typing import List, Optional
 
-from stonks_overwatch.config.config import Config
+from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.core.interfaces.dividend_service import DividendServiceInterface
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
 from stonks_overwatch.services.brokers.degiro.repositories.dividends_repository import DividendsRepository
@@ -14,7 +15,7 @@ from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.domain.constants import ProductType
 
 
-class DividendsService(DividendServiceInterface):
+class DividendsService(BaseService, DividendServiceInterface):
     logger = StonksLogger.get_logger("stonks_overwatch.dividends_service", "[DEGIRO|DIVIDENDS]")
 
     # Constants for dividend transaction descriptions
@@ -22,16 +23,22 @@ class DividendsService(DividendServiceInterface):
 
     def __init__(
         self,
-        account_overview: AccountOverviewService,
-        currency_service: CurrencyConverterService,
-        degiro_service: DeGiroService,
-        portfolio_service: PortfolioService,
+        account_overview: Optional[AccountOverviewService] = None,
+        currency_service: Optional[CurrencyConverterService] = None,
+        degiro_service: Optional[DeGiroService] = None,
+        portfolio_service: Optional[PortfolioService] = None,
+        config: Optional[BaseConfig] = None,
     ):
-        self.account_overview = account_overview
-        self.currency_service = currency_service
-        self.portfolio_service = portfolio_service
-        self.degiro_service = degiro_service
-        self.base_currency = Config.get_global().base_currency
+        super().__init__(config)
+        # Auto-create dependencies if not provided
+        degiro_svc = degiro_service or DeGiroService()
+        self.account_overview = account_overview or AccountOverviewService()
+        self.currency_service = currency_service or CurrencyConverterService()
+        self.degiro_service = degiro_svc
+        self.portfolio_service = portfolio_service or PortfolioService(degiro_service=degiro_svc)
+
+    # Note: base_currency property is inherited from BaseService and handles
+    # dependency injection automatically
 
     def get_dividends(self) -> List[Dividend]:
         dividends = self._get_dividends()

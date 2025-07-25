@@ -357,11 +357,19 @@ class UnifiedBrokerRegistry:
                 )
 
     def _validate_required_services(self, broker_name: str, capabilities: List[ServiceType]) -> None:
-        """Validate that required services are provided."""
-        required_services = {ServiceType.PORTFOLIO, ServiceType.TRANSACTION, ServiceType.DEPOSIT}
+        """
+        Validate that minimum required services are provided.
+
+        Note: Only portfolio service is truly required. Other services (transaction, deposit, etc.)
+        are optional and depend on what the broker actually supports.
+        """
+        required_services = {ServiceType.PORTFOLIO}  # Only portfolio is truly required
         provided_services = set(capabilities)
 
         missing_services = required_services - provided_services
         if missing_services:
             missing_names = [service.value for service in missing_services]
             raise BrokerRegistryValidationError(f"Broker '{broker_name}' is missing required services: {missing_names}")
+
+        # Log what services are actually provided for debugging
+        self.logger.debug(f"Broker '{broker_name}' registered with services: {[s.value for s in capabilities]}")
