@@ -11,7 +11,6 @@ from typing import Any, Dict, List, Optional, Union
 from stonks_overwatch.config.config import Config
 from stonks_overwatch.core.exceptions import DataAggregationException
 from stonks_overwatch.core.factories.broker_registry import ServiceType
-from stonks_overwatch.core.factories.service_factory import ServiceFactory
 from stonks_overwatch.core.factories.unified_broker_factory import UnifiedBrokerFactory
 from stonks_overwatch.services.models import PortfolioId
 from stonks_overwatch.utils.core.logger import StonksLogger
@@ -40,16 +39,9 @@ class BaseAggregator(ABC):
             f"[AGGREGATOR|{service_type.value.upper()}]",
         )
 
-        # Try to use unified factory first, fallback to legacy factory
-        try:
-            self._unified_factory = UnifiedBrokerFactory()
-            self._use_unified_factory = True
-            self._logger.debug("Using unified broker factory")
-        except Exception as e:
-            self._unified_factory = None
-            self._service_factory = ServiceFactory()
-            self._use_unified_factory = False
-            self._logger.debug(f"Using legacy service factory: {e}")
+        # Use unified factory (should always be available in Phase 5)
+        self._unified_factory = UnifiedBrokerFactory()
+        self._logger.debug("Using unified broker factory")
 
         self._broker_services: Dict[str, Any] = {}
         self._initialize_broker_services()
@@ -58,10 +50,7 @@ class BaseAggregator(ABC):
         """
         Initialize broker services based on available brokers and service type.
         """
-        if self._use_unified_factory:
-            available_brokers = self._unified_factory.get_available_brokers()
-        else:
-            available_brokers = self._service_factory.get_available_brokers()
+        available_brokers = self._unified_factory.get_available_brokers()
 
         self._logger.debug(f"Available brokers: {available_brokers}")
 
@@ -86,10 +75,7 @@ class BaseAggregator(ABC):
         Returns:
             True if broker supports the service, False otherwise
         """
-        if self._use_unified_factory:
-            return self._unified_factory.broker_supports_service(broker_name, service_type)
-        else:
-            return self._service_factory.broker_supports_service(broker_name, service_type)
+        return self._unified_factory.broker_supports_service(broker_name, service_type)
 
     def _get_broker_service(self, broker_name: str) -> Optional[Any]:
         """
@@ -102,18 +88,13 @@ class BaseAggregator(ABC):
             Service instance if available, None otherwise
         """
         try:
-            if self._use_unified_factory:
-                # Use unified factory with automatic dependency injection
-                service = self._unified_factory.create_service(broker_name, self._service_type)
-                if service is None:
-                    self._logger.warning(
-                        f"Unified factory could not create {self._service_type.value} service for {broker_name}"
-                    )
-                return service
-            else:
-                # Legacy factory fallback - use specific service creation methods
-                self._logger.warning(f"Unified factory not available, using legacy factory for {broker_name}")
-                return self._create_service_using_legacy_factory(broker_name)
+            # Use unified factory with automatic dependency injection
+            service = self._unified_factory.create_service(broker_name, self._service_type)
+            if service is None:
+                self._logger.warning(
+                    f"Unified factory could not create {self._service_type.value} service for {broker_name}"
+                )
+            return service
         except Exception as e:
             self._logger.error(f"Failed to create {self._service_type.value} service for {broker_name}: {e}")
             return None
@@ -140,11 +121,10 @@ class BaseAggregator(ABC):
 
         # Check if the broker is enabled
         try:
-            if self._use_unified_factory:
-                # Use unified factory to get config
-                config = self._unified_factory.create_config(broker_name)
-                if config and hasattr(config, "is_enabled"):
-                    return config.is_enabled()
+            # Use unified factory to get config
+            config = self._unified_factory.create_config(broker_name)
+            if config and hasattr(config, "is_enabled"):
+                return config.is_enabled()
 
             # Fallback to legacy config method using dynamic method names
             legacy_method_name = f"is_{broker_name}_enabled"
@@ -159,38 +139,6 @@ class BaseAggregator(ABC):
             self._logger.warning(f"Failed to check if {broker_name} is enabled: {e}")
             # Fallback: assume enabled if broker has services
             return broker_name in self._broker_services
-
-    def _create_service_using_legacy_factory(self, broker_name: str) -> Optional[Any]:
-        """
-        Create a service using the legacy ServiceFactory.
-
-        Args:
-            broker_name: Name of the broker
-
-        Returns:
-            Service instance if available, None otherwise
-        """
-        try:
-            if self._service_type == ServiceType.PORTFOLIO:
-                return self._service_factory.create_portfolio_service(broker_name)
-            elif self._service_type == ServiceType.TRANSACTION:
-                return self._service_factory.create_transaction_service(broker_name)
-            elif self._service_type == ServiceType.DEPOSIT:
-                return self._service_factory.create_deposit_service(broker_name)
-            elif self._service_type == ServiceType.DIVIDEND:
-                return self._service_factory.create_dividend_service(broker_name)
-            elif self._service_type == ServiceType.FEE:
-                return self._service_factory.create_fee_service(broker_name)
-            elif self._service_type == ServiceType.ACCOUNT:
-                return self._service_factory.create_account_service(broker_name)
-            else:
-                self._logger.error(f"Unknown service type: {self._service_type}")
-                return None
-        except Exception as e:
-            self._logger.error(
-                f"Legacy factory failed to create {self._service_type.value} service for {broker_name}: {e}"
-            )
-            return None
 
     def _get_enabled_brokers(self, selected_portfolio: PortfolioId) -> List[str]:
         """

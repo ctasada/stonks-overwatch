@@ -4,7 +4,6 @@ from typing import Dict, Optional, Type
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.bitvavo import BitvavoConfig
-from stonks_overwatch.config.config_factory import config_factory
 from stonks_overwatch.config.degiro import DegiroConfig
 from stonks_overwatch.config.ibkr import IbkrConfig
 from stonks_overwatch.core.factories.unified_broker_factory import UnifiedBrokerFactory
@@ -420,37 +419,16 @@ class Config:
         """
         base_currency = data.get("base_currency", Config.DEFAULT_BASE_CURRENCY)
 
-        if use_unified_factory:
-            # Try to use unified factory first
-            try:
-                _ensure_unified_registry_initialized()
-                unified_factory = UnifiedBrokerFactory()
-                degiro_configuration = unified_factory.create_config_from_dict(
-                    "degiro", data.get(DegiroConfig.config_key, {})
-                )
-                bitvavo_configuration = unified_factory.create_config_from_dict(
-                    "bitvavo", data.get(BitvavoConfig.config_key, {})
-                )
-                ibkr_configuration = unified_factory.create_config_from_dict(
-                    "ibkr", data.get(IbkrConfig.config_key, {})
-                )
-            except Exception as e:
-                cls.logger.debug(f"Unified factory not available, falling back to legacy factory: {e}")
-                use_unified_factory = False
+        # Use unified factory (should always be available in Phase 5)
+        _ensure_unified_registry_initialized()
+        unified_factory = UnifiedBrokerFactory()
+        degiro_configuration = unified_factory.create_config_from_dict("degiro", data.get(DegiroConfig.config_key, {}))
+        bitvavo_configuration = unified_factory.create_config_from_dict(
+            "bitvavo", data.get(BitvavoConfig.config_key, {})
+        )
+        ibkr_configuration = unified_factory.create_config_from_dict("ibkr", data.get(IbkrConfig.config_key, {}))
 
-        if not use_unified_factory:
-            # Fallback to legacy factory
-            degiro_configuration = config_factory.create_broker_config_from_dict(
-                "degiro", data.get(DegiroConfig.config_key, {})
-            )
-            bitvavo_configuration = config_factory.create_broker_config_from_dict(
-                "bitvavo", data.get(BitvavoConfig.config_key, {})
-            )
-            ibkr_configuration = config_factory.create_broker_config_from_dict(
-                "ibkr", data.get(IbkrConfig.config_key, {})
-            )
-
-        return cls(base_currency, degiro_configuration, bitvavo_configuration, ibkr_configuration, use_unified_factory)
+        return cls(base_currency, degiro_configuration, bitvavo_configuration, ibkr_configuration, True)
 
     @classmethod
     def from_json_file(cls, file_path: str | Path, use_unified_factory: bool = True) -> "Config":
@@ -483,27 +461,15 @@ class Config:
         Returns:
             A fresh configuration instance with default values
         """
-        if use_unified_factory:
-            try:
-                _ensure_unified_registry_initialized()
-                unified_factory = UnifiedBrokerFactory()
-                return Config(
-                    base_currency=Config.DEFAULT_BASE_CURRENCY,
-                    degiro_configuration=unified_factory.create_default_config("degiro"),
-                    bitvavo_configuration=unified_factory.create_default_config("bitvavo"),
-                    ibkr_configuration=unified_factory.create_default_config("ibkr"),
-                    use_unified_factory=True,
-                )
-            except Exception as e:
-                cls.logger.debug(f"Unified factory not available for default config, falling back: {e}")
-
-        # Fallback to legacy factory
+        # Use unified factory (should always be available in Phase 5)
+        _ensure_unified_registry_initialized()
+        unified_factory = UnifiedBrokerFactory()
         return Config(
             base_currency=Config.DEFAULT_BASE_CURRENCY,
-            degiro_configuration=config_factory.create_default_broker_config("degiro"),
-            bitvavo_configuration=config_factory.create_default_broker_config("bitvavo"),
-            ibkr_configuration=config_factory.create_default_broker_config("ibkr"),
-            use_unified_factory=False,
+            degiro_configuration=unified_factory.create_default_config("degiro"),
+            bitvavo_configuration=unified_factory.create_default_config("bitvavo"),
+            ibkr_configuration=unified_factory.create_default_config("ibkr"),
+            use_unified_factory=True,
         )
 
     @classmethod

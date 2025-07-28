@@ -6,9 +6,7 @@ instances, including the service registry and service builders.
 """
 
 from .broker_registry import BrokerRegistry
-from .service_factory import ServiceFactory
 
 __all__ = [
     "BrokerRegistry",
-    "ServiceFactory",
 ]

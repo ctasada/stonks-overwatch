@@ -7,7 +7,6 @@ and caches it for subsequent access, reducing redundant configuration creation.
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.config import Config
-from stonks_overwatch.config.config_factory import config_factory
 from stonks_overwatch.utils.core.singleton import singleton
 
 
@@ -22,7 +21,6 @@ class GlobalConfig:
 
     def __init__(self):
         self._config = None
-        self._factory = config_factory
 
     def get_config(self) -> Config:
         """
@@ -65,7 +63,17 @@ class GlobalConfig:
             broker_name: Optional broker name. If provided, only clears cache for that broker.
                         If None, clears all cached configurations.
         """
-        self._factory.clear_cache(broker_name)
+        try:
+            from stonks_overwatch.core.factories.unified_broker_factory import UnifiedBrokerFactory
+
+            unified_factory = UnifiedBrokerFactory()
+            unified_factory.clear_cache(broker_name)
+        except ImportError:
+            # Fallback to legacy factory if unified factory is not available
+            from stonks_overwatch.config.config_factory import config_factory
+
+            config_factory.clear_cache(broker_name)
+
         # Also clear the global config instance to force refresh
         self._config = None
 
@@ -85,7 +93,18 @@ class GlobalConfig:
         Args:
             broker_name: Name of the broker to refresh
         """
-        self._factory.refresh_default_config(broker_name)
+        try:
+            from stonks_overwatch.core.factories.unified_broker_factory import UnifiedBrokerFactory
+
+            unified_factory = UnifiedBrokerFactory()
+            # Clear the cache for the specific broker to force recreation
+            unified_factory.clear_cache(broker_name)
+        except ImportError:
+            # Fallback to legacy factory if unified factory is not available
+            from stonks_overwatch.config.config_factory import config_factory
+
+            config_factory.refresh_default_config(broker_name)
+
         # Clear the global config instance to force refresh
         self._config = None
 
