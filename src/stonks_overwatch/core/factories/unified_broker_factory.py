@@ -39,6 +39,12 @@ class UnifiedBrokerFactory:
     """
 
     def __init__(self):
+        """
+        Initialize the unified broker factory.
+
+        Sets up the factory with access to the unified registry and initializes
+        caching systems for both configurations and services.
+        """
         self.logger = StonksLogger.get_logger("stonks_overwatch.core", "[UNIFIED_FACTORY]")
         self._registry = UnifiedBrokerRegistry()
 

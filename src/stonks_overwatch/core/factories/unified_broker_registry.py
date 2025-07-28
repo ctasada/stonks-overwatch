@@ -6,7 +6,7 @@ and services in a single, consistent interface, eliminating the need for
 separate registry systems.
 """
 
-from typing import Dict, List, Optional, Set, Type
+from typing import Any, Dict, List, Optional, Set, Type
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.core.exceptions import ServiceRegistryException
@@ -32,6 +32,12 @@ class UnifiedBrokerRegistry:
     """
 
     def __init__(self):
+        """
+        Initialize the unified broker registry.
+
+        Sets up empty dictionaries for managing broker configurations and services,
+        and initializes logging for registry operations.
+        """
         self.logger = StonksLogger.get_logger("stonks_overwatch.core", "[UNIFIED_REGISTRY]")
 
         # Configuration management
@@ -283,6 +289,50 @@ class UnifiedBrokerRegistry:
                 issues["incomplete_registrations"].append(broker_name)
 
         return issues
+
+    def validate_broker_service_compatibility(self, broker_name: str) -> Dict[str, Any]:
+        """
+        Validate that a broker's services are compatible with its configuration.
+
+        Args:
+            broker_name: Name of the broker to validate
+
+        Returns:
+            Dictionary with validation results including any issues found
+        """
+        validation_result = {
+            "broker_name": broker_name,
+            "is_valid": True,
+            "issues": [],
+            "config_class": None,
+            "service_types": [],
+        }
+
+        # Check if broker is registered
+        if broker_name not in self._config_classes:
+            validation_result["is_valid"] = False
+            validation_result["issues"].append(f"No configuration class registered for {broker_name}")
+            return validation_result
+
+        if broker_name not in self._service_classes:
+            validation_result["is_valid"] = False
+            validation_result["issues"].append(f"No services registered for {broker_name}")
+            return validation_result
+
+        validation_result["config_class"] = self._config_classes[broker_name].__name__
+        validation_result["service_types"] = list(self._service_classes[broker_name].keys())
+
+        # Validate required services are present
+        required_services = {ServiceType.PORTFOLIO}  # Portfolio is always required
+        registered_services = set(self._service_classes[broker_name].keys())
+
+        missing_required = required_services - registered_services
+        if missing_required:
+            validation_result["is_valid"] = False
+            validation_result["issues"].append(f"Missing required services: {missing_required}")
+
+        self.logger.debug(f"Validated {broker_name}: {validation_result}")
+        return validation_result
 
     # Cleanup methods
     def unregister_broker(self, broker_name: str) -> None:
