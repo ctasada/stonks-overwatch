@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional, Set, Type
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.core.exceptions import ServiceRegistryException
-from stonks_overwatch.core.factories.broker_registry import ServiceType
+from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.singleton import singleton
 

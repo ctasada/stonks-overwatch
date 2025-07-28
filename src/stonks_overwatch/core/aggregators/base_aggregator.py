@@ -10,8 +10,8 @@ from typing import Any, Dict, List, Optional, Union
 
 from stonks_overwatch.config.config import Config
 from stonks_overwatch.core.exceptions import DataAggregationException
-from stonks_overwatch.core.factories.broker_registry import ServiceType
 from stonks_overwatch.core.factories.unified_broker_factory import UnifiedBrokerFactory
+from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.services.models import PortfolioId
 from stonks_overwatch.utils.core.logger import StonksLogger
 

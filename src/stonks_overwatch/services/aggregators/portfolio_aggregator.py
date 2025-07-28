@@ -2,7 +2,7 @@ from typing import List
 
 from stonks_overwatch.core.aggregators.base_aggregator import BaseAggregator
 from stonks_overwatch.core.aggregators.data_merger import DataMerger
-from stonks_overwatch.core.factories.broker_registry import ServiceType
+from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.services.brokers.yfinance.services.market_data_service import YFinance
 from stonks_overwatch.services.models import DailyValue, PortfolioEntry, PortfolioId, TotalPortfolio
 from stonks_overwatch.utils.domain.constants import ProductType, Sector

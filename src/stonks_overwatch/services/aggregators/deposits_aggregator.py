@@ -4,7 +4,7 @@ from typing import List
 import pandas as pd
 
 from stonks_overwatch.core.aggregators.base_aggregator import BaseAggregator
-from stonks_overwatch.core.factories.broker_registry import ServiceType
+from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.services.models import Deposit, PortfolioId
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 

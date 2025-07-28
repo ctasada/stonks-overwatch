@@ -8,14 +8,15 @@ and error handling.
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.base_credentials import BaseCredentials
-from stonks_overwatch.core.factories.broker_registry import ServiceType
 from stonks_overwatch.core.factories.unified_broker_registry import (
     BrokerRegistryValidationError,
     UnifiedBrokerRegistry,
 )
 from stonks_overwatch.core.interfaces.deposit_service import DepositServiceInterface
+from stonks_overwatch.core.interfaces.dividend_service import DividendServiceInterface
 from stonks_overwatch.core.interfaces.portfolio_service import PortfolioServiceInterface
 from stonks_overwatch.core.interfaces.transaction_service import TransactionServiceInterface
+from stonks_overwatch.core.service_types import ServiceType
 
 import pytest
 
@@ -68,7 +69,7 @@ class MockDepositService(DepositServiceInterface):
     pass
 
 
-class MockDividendService:
+class MockDividendService(DividendServiceInterface):
     """Mock dividend service for testing."""
 
     pass

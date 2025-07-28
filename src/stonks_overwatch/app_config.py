@@ -26,19 +26,24 @@ class StonksOverwatchConfig(AppConfig):
 
             # Register broker services with the unified framework
             try:
+                from stonks_overwatch.core.factories.unified_broker_registry import UnifiedBrokerRegistry
                 from stonks_overwatch.core.unified_registry_setup import register_all_brokers
 
-                register_all_brokers()
-                self.logger.info("Unified broker services registered successfully")
+                # Check if brokers are already registered to avoid duplicates
+                registry = UnifiedBrokerRegistry()
+                registered_brokers = registry.get_fully_registered_brokers()
+
+                if not registered_brokers:
+                    # No brokers registered yet, proceed with registration
+                    register_all_brokers()
+                    self.logger.info("Unified broker services registered successfully")
+                else:
+                    # Brokers already registered (likely through automatic initialization)
+                    self.logger.info(f"Unified broker services already registered: {registered_brokers}")
             except Exception as e:
                 self.logger.error("Failed to register unified broker services: %s", e)
-                # Fallback to legacy registration for backward compatibility
-                # try:
-                #     from stonks_overwatch.core.registry_setup import register_broker_services
-                #     register_broker_services()
-                #     self.logger.info("Legacy broker services registered as fallback")
-                # except Exception as fallback_e:
-                #     self.logger.error("Failed to register legacy broker services: %s", fallback_e)
+                # Legacy fallback removed - unified registry setup is now the only option
+                raise e
 
             # Schedule automatic tasks
             from stonks_overwatch.jobs.jobs_scheduler import JobsScheduler

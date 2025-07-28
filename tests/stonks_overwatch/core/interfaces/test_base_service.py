@@ -47,24 +47,24 @@ class MockGlobalConfig:
 
 
 # Test implementation classes
-class TestServiceWithMixin(DependencyInjectionMixin):
-    """Test service using the mixin directly."""
+class MockServiceWithMixin(DependencyInjectionMixin):
+    """Mock service using the mixin directly."""
 
     def __init__(self, config=None, custom_param="default"):
         super().__init__(config)
         self.custom_param = custom_param
 
 
-class TestServiceWithBaseService(BaseService):
-    """Test service using BaseService."""
+class MockServiceWithBaseService(BaseService):
+    """Mock service using BaseService."""
 
     def __init__(self, config=None, another_param=42):
         super().__init__(config)
         self.another_param = another_param
 
 
-class TestServiceWithMultipleArgs(BaseService):
-    """Test service with multiple arguments."""
+class MockServiceWithMultipleArgs(BaseService):
+    """Mock service with multiple arguments."""
 
     def __init__(self, required_arg, config=None, optional_arg="optional"):
         self.required_arg = required_arg
@@ -78,7 +78,7 @@ class TestDependencyInjectionMixin:
     def test_mixin_with_injected_config(self):
         """Test mixin with injected configuration."""
         config = MockConfig(base_currency="GBP")
-        service = TestServiceWithMixin(config=config)
+        service = MockServiceWithMixin(config=config)
 
         assert service.config is config
         assert service.base_currency == "GBP"
@@ -90,7 +90,7 @@ class TestDependencyInjectionMixin:
         global_config = MockGlobalConfig(base_currency="USD")
         mock_get_global.return_value = global_config
 
-        service = TestServiceWithMixin()
+        service = MockServiceWithMixin()
 
         assert service.config is global_config
         assert service.base_currency == "USD"
@@ -103,7 +103,7 @@ class TestDependencyInjectionMixin:
         global_config = MockGlobalConfig()
         mock_get_global.return_value = global_config
 
-        service = TestServiceWithMixin()
+        service = MockServiceWithMixin()
 
         # Access config multiple times
         config1 = service.config
@@ -115,7 +115,7 @@ class TestDependencyInjectionMixin:
     def test_mixin_with_config_having_base_currency(self):
         """Test mixin with config that has base_currency attribute."""
         config = MockConfig(base_currency="JPY")
-        service = TestServiceWithMixin(config=config)
+        service = MockServiceWithMixin(config=config)
 
         assert service.base_currency == "JPY"
 
@@ -129,7 +129,7 @@ class TestDependencyInjectionMixin:
             global_config = MockGlobalConfig(base_currency="CHF")
             mock_get_global.return_value = global_config
 
-            service = TestServiceWithMixin(config=config)
+            service = MockServiceWithMixin(config=config)
 
             # Should fall back to global config for base_currency
             assert service.base_currency == "CHF"
@@ -137,7 +137,7 @@ class TestDependencyInjectionMixin:
     def test_mixin_custom_parameters_preserved(self):
         """Test that custom parameters are preserved during initialization."""
         config = MockConfig()
-        service = TestServiceWithMixin(config=config, custom_param="custom_value")
+        service = MockServiceWithMixin(config=config, custom_param="custom_value")
 
         assert service.config is config
         assert service.custom_param == "custom_value"
@@ -149,7 +149,7 @@ class TestBaseService:
     def test_base_service_with_injected_config(self):
         """Test BaseService with injected configuration."""
         config = MockConfig(base_currency="CAD")
-        service = TestServiceWithBaseService(config=config)
+        service = MockServiceWithBaseService(config=config)
 
         assert service.config is config
         assert service.base_currency == "CAD"
@@ -161,7 +161,7 @@ class TestBaseService:
         global_config = MockGlobalConfig(base_currency="AUD")
         mock_get_global.return_value = global_config
 
-        service = TestServiceWithBaseService()
+        service = MockServiceWithBaseService()
 
         assert service.config is global_config
         assert service.base_currency == "AUD"
@@ -170,7 +170,7 @@ class TestBaseService:
     def test_base_service_custom_parameters(self):
         """Test BaseService preserves custom parameters."""
         config = MockConfig()
-        service = TestServiceWithBaseService(config=config, another_param=100)
+        service = MockServiceWithBaseService(config=config, another_param=100)
 
         assert service.config is config
         assert service.another_param == 100
@@ -178,7 +178,7 @@ class TestBaseService:
     def test_base_service_multiple_args(self):
         """Test BaseService with multiple arguments."""
         config = MockConfig()
-        service = TestServiceWithMultipleArgs("required", config=config, optional_arg="custom")
+        service = MockServiceWithMultipleArgs("required", config=config, optional_arg="custom")
 
         assert service.required_arg == "required"
         assert service.config is config
@@ -190,7 +190,7 @@ class TestBaseService:
         global_config = MockGlobalConfig()
         mock_get_global.return_value = global_config
 
-        service = TestServiceWithMultipleArgs("required")
+        service = MockServiceWithMultipleArgs("required")
 
         assert service.required_arg == "required"
         assert service.config is global_config
@@ -207,7 +207,7 @@ class TestBackwardCompatibility:
         mock_get_global.return_value = global_config
 
         # Simulate existing service that doesn't use dependency injection
-        service = TestServiceWithBaseService()
+        service = MockServiceWithBaseService()
 
         # Should work exactly as before
         assert service.base_currency == "SEK"
@@ -221,7 +221,7 @@ class TestBackwardCompatibility:
             global_config = MockGlobalConfig(base_currency="DKK")
             mock_get_global.return_value = global_config
 
-            service = TestServiceWithBaseService(config=injected_config)
+            service = MockServiceWithBaseService(config=injected_config)
 
             # Should use injected config, not global
             assert service.base_currency == "NOK"
@@ -238,7 +238,7 @@ class TestEdgeCases:
             global_config = MockGlobalConfig()
             mock_get_global.return_value = global_config
 
-            service = TestServiceWithBaseService(config=None)
+            service = MockServiceWithBaseService(config=None)
 
             # Should fall back to global config
             assert service.config is global_config
@@ -253,7 +253,7 @@ class TestEdgeCases:
             global_config = MockGlobalConfig(base_currency="DEFAULT")
             mock_get_global.return_value = global_config
 
-            service = TestServiceWithBaseService(config=config)
+            service = MockServiceWithBaseService(config=config)
 
             # Should fall back to global config for base_currency
             assert service.base_currency == "DEFAULT"
@@ -261,7 +261,7 @@ class TestEdgeCases:
     def test_empty_string_base_currency(self):
         """Test config with empty string base_currency."""
         config = MockConfig(base_currency="")
-        service = TestServiceWithBaseService(config=config)
+        service = MockServiceWithBaseService(config=config)
 
         # Should return empty string as specified
         assert service.base_currency == ""
@@ -271,8 +271,8 @@ class TestEdgeCases:
         config1 = MockConfig(base_currency="EUR")
         config2 = MockConfig(base_currency="USD")
 
-        service1 = TestServiceWithBaseService(config=config1)
-        service2 = TestServiceWithBaseService(config=config2)
+        service1 = MockServiceWithBaseService(config=config1)
+        service2 = MockServiceWithBaseService(config=config2)
 
         assert service1.config is config1
         assert service2.config is config2

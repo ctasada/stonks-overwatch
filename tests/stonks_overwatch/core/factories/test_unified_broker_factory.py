@@ -8,7 +8,6 @@ dependency injection, caching, and error handling.
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.base_credentials import BaseCredentials
-from stonks_overwatch.core.factories.broker_registry import ServiceType
 from stonks_overwatch.core.factories.unified_broker_factory import (
     UnifiedBrokerFactory,
     UnifiedBrokerFactoryError,
@@ -16,6 +15,7 @@ from stonks_overwatch.core.factories.unified_broker_factory import (
 from stonks_overwatch.core.factories.unified_broker_registry import (
     UnifiedBrokerRegistry,
 )
+from stonks_overwatch.core.service_types import ServiceType
 
 import pytest
 

@@ -10,7 +10,6 @@ from typing import Any, Dict, Optional
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.core.exceptions import ServiceFactoryException
-from stonks_overwatch.core.factories.broker_registry import ServiceType
 from stonks_overwatch.core.factories.unified_broker_registry import (
     UnifiedBrokerRegistry,
 )
@@ -18,6 +17,7 @@ from stonks_overwatch.core.interfaces.deposit_service import DepositServiceInter
 from stonks_overwatch.core.interfaces.dividend_service import DividendServiceInterface
 from stonks_overwatch.core.interfaces.portfolio_service import PortfolioServiceInterface
 from stonks_overwatch.core.interfaces.transaction_service import TransactionServiceInterface
+from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.singleton import singleton
 

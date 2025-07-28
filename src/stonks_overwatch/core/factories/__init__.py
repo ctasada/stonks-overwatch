@@ -1,12 +1,13 @@
 """
-Service factories and builders for creating broker service instances.
-
-This package contains factories for creating and managing broker service
-instances, including the service registry and service builders.
+Core factories for unified broker architecture.
 """
 
-from .broker_registry import BrokerRegistry
+from .unified_broker_factory import UnifiedBrokerFactory
+from .unified_broker_registry import UnifiedBrokerRegistry
+from ..service_types import ServiceType
 
 __all__ = [
-    "BrokerRegistry",
+    "UnifiedBrokerFactory",
+    "UnifiedBrokerRegistry",
+    "ServiceType",
 ]
