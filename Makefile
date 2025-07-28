@@ -202,14 +202,19 @@ docker-clean: ## Clean Docker images and containers
 _create-wheels: ## Internal: Create wheel files for Briefcase
 	@echo -e  "$(BOLD)$(BLUE)Creating wheel files...$(RESET)"
 	rm -rf $(WHEEL_DIR)
-	poetry run pip wheel "peewee>=3.16.2" --wheel-dir $(WHEEL_DIR)
-	@for f in $(WHEEL_DIR)/peewee-*-cp*-*.whl; do \
-		if [ -f "$$f" ]; then \
-			version=$$(echo $$f | sed -E 's|.*peewee-([0-9.]+)-cp[0-9]+.*\.whl|\1|'); \
-			new_name="peewee-$${version}-py3-none-any.whl"; \
-			echo -e "$(YELLOW)Renaming $$(basename $$f) to $$new_name$(RESET)"; \
-			mv "$$f" "$(WHEEL_DIR)/$$new_name"; \
-		fi; \
+	@packages="peewee>=3.18.2 ibind>=0.1.18"; \
+	for pkg in $$packages; do \
+	  poetry run pip wheel "$$pkg" --wheel-dir $(WHEEL_DIR); \
+	done; \
+	for pkg in peewee ibind; do \
+	  for f in $(WHEEL_DIR)/$$pkg-*-cp*-*.whl; do \
+	    if [ -f "$$f" ]; then \
+	      version=$$(echo $$f | sed -E "s|.*$$pkg-([0-9.]+)-cp[0-9]+.*\\.whl|\\1|"); \
+	      new_name="$$pkg-$${version}-py3-none-any.whl"; \
+	      echo -e "$(YELLOW)Renaming $$(basename $$f) to $$new_name$(RESET)"; \
+	      mv "$$f" "$(WHEEL_DIR)/$$new_name"; \
+	    fi; \
+	  done; \
 	done
 
 briefcase-create: install collectstatic _create-wheels ## Create Briefcase project
