@@ -15,7 +15,14 @@ from stonks_overwatch.core.factories.broker_factory import (
 from stonks_overwatch.core.factories.broker_registry import (
     BrokerRegistry,
 )
+from stonks_overwatch.core.interfaces import (
+    DepositServiceInterface,
+    FeeServiceInterface,
+    PortfolioServiceInterface,
+    TransactionServiceInterface,
+)
 from stonks_overwatch.core.service_types import ServiceType
+from stonks_overwatch.services.models import TotalPortfolio
 
 import pytest
 
@@ -92,34 +99,47 @@ class MockBrokerConfig(BaseConfig):
         return cls(credentials=MockCredentials(), enabled=True)
 
 
-class MockPortfolioService:
+class MockPortfolioService(PortfolioServiceInterface):
     """Mock portfolio service for testing."""
 
     def __init__(self, config: MockBrokerConfig = None):
         self.config = config
 
+    @property
     def get_portfolio(self):
-        return {"holdings": []}
+        return []
+
+    def get_portfolio_total(self, portfolio=None):
+        return TotalPortfolio()
+
+    def calculate_historical_value(self):
+        return []
+
+    def calculate_product_growth(self):
+        return {}
 
 
-class MockTransactionService:
+class MockTransactionService(TransactionServiceInterface):
     """Mock transaction service for testing."""
 
     def __init__(self, config: MockBrokerConfig = None):
         self.config = config
 
     def get_transactions(self):
-        return {"transactions": []}
+        return []
 
 
-class MockDepositService:
+class MockDepositService(DepositServiceInterface):
     """Mock deposit service for testing."""
 
     def __init__(self, config: MockBrokerConfig = None):
         self.config = config
 
-    def get_deposits(self):
-        return {"deposits": []}
+    def get_cash_deposits(self):
+        return []
+
+    def calculate_cash_account_value(self):
+        return {}
 
 
 @pytest.fixture(autouse=True)
@@ -314,10 +334,13 @@ class TestBrokerFactory:
     def test_create_service_error_handling(self):
         """Test error handling in service creation."""
 
-        # Create a service class that raises an exception
-        class FailingService:
+        # Create a service class that raises an exception but implements the interface
+        class FailingService(FeeServiceInterface):
             def __init__(self, **kwargs):
                 raise ValueError("Service creation failed")
+
+            def get_fees(self):
+                return []
 
         # Register a new broker with failing service
         self.registry.register_broker_config("failingservice", MockBrokerConfig)

@@ -2,6 +2,7 @@ from typing import Optional
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.core.interfaces.base_service import BaseService
+from stonks_overwatch.core.interfaces.fee_service import FeeServiceInterface
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
 from stonks_overwatch.services.brokers.degiro.repositories.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.services.brokers.degiro.repositories.product_info_repository import ProductInfoRepository
@@ -11,7 +12,7 @@ from stonks_overwatch.services.models import Fee, FeeType
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 
 
-class FeesService(BaseService):
+class FeesService(FeeServiceInterface, BaseService):
     def __init__(
         self,
         degiro_service: Optional[DeGiroService] = None,

@@ -10,6 +10,14 @@ from typing import Any, Dict, List, Optional, Type
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.core.exceptions import ServiceFactoryException
+from stonks_overwatch.core.interfaces import (
+    AccountServiceInterface,
+    DepositServiceInterface,
+    DividendServiceInterface,
+    FeeServiceInterface,
+    PortfolioServiceInterface,
+    TransactionServiceInterface,
+)
 from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.singleton import singleton
@@ -31,6 +39,16 @@ class BrokerRegistry:
     This registry provides a unified way to manage broker configurations and
     service classes, supporting registration, validation, and retrieval operations.
     """
+
+    # Mapping from ServiceType to expected interface
+    SERVICE_INTERFACES = {
+        ServiceType.PORTFOLIO: PortfolioServiceInterface,
+        ServiceType.TRANSACTION: TransactionServiceInterface,
+        ServiceType.DEPOSIT: DepositServiceInterface,
+        ServiceType.DIVIDEND: DividendServiceInterface,
+        ServiceType.FEE: FeeServiceInterface,
+        ServiceType.ACCOUNT: AccountServiceInterface,
+    }
 
     def __init__(self):
         """
@@ -116,6 +134,7 @@ class BrokerRegistry:
             for service_name, service_class in services.items():
                 service_type = self._validate_service_type(service_name)
                 self._validate_service_class(service_class)
+                self._validate_service_interface(service_class, service_type)
                 service_dict[service_type] = service_class
 
             # Validate required services (portfolio is always required)
@@ -324,6 +343,55 @@ class BrokerRegistry:
 
         return result
 
+    def validate_all_service_interfaces(self, broker_name: str) -> Dict[str, Any]:
+        """
+        Validate that all services for a broker implement their required interfaces.
+
+        Args:
+            broker_name: Name of the broker to validate
+
+        Returns:
+            Dictionary with validation results including any interface violations found
+        """
+        result = {"valid": True, "issues": [], "validated_services": []}
+
+        if broker_name not in self._service_classes:
+            result["valid"] = False
+            result["issues"].append(f"No services registered for broker '{broker_name}'")
+            return result
+
+        # Validate each service's interface
+        broker_services = self._service_classes[broker_name]
+        for service_type, service_class in broker_services.items():
+            try:
+                self._validate_service_interface(service_class, service_type)
+                result["validated_services"].append(
+                    {
+                        "service_type": service_type.value,
+                        "service_class": service_class.__name__,
+                        "interface": self.SERVICE_INTERFACES.get(service_type).__name__
+                        if self.SERVICE_INTERFACES.get(service_type)
+                        else "No interface required",
+                        "status": "valid",
+                    }
+                )
+            except BrokerRegistryValidationError as e:
+                result["valid"] = False
+                result["issues"].append(str(e))
+                result["validated_services"].append(
+                    {
+                        "service_type": service_type.value,
+                        "service_class": service_class.__name__,
+                        "interface": self.SERVICE_INTERFACES.get(service_type).__name__
+                        if self.SERVICE_INTERFACES.get(service_type)
+                        else "No interface required",
+                        "status": "invalid",
+                        "error": str(e),
+                    }
+                )
+
+        return result
+
     def _validate_broker_name(self, broker_name: str) -> None:
         """Validate broker name."""
         if not broker_name or not isinstance(broker_name, str):
@@ -356,3 +424,30 @@ class BrokerRegistry:
             raise BrokerRegistryValidationError(
                 f"Service '{service_class}' must be a class type, got {type(service_class)}"
             )
+
+    def _validate_service_interface(self, service_class: Type, service_type: ServiceType) -> None:
+        """
+        Validate that service class implements the correct interface.
+
+        Args:
+            service_class: The service class to validate
+            service_type: The type of service being registered
+
+        Raises:
+            BrokerRegistryValidationError: If service doesn't implement expected interface
+        """
+        expected_interface = self.SERVICE_INTERFACES.get(service_type)
+        if expected_interface is None:
+            # No interface defined for this service type - skip validation
+            return
+
+        if not issubclass(service_class, expected_interface):
+            raise BrokerRegistryValidationError(
+                f"Service '{service_class.__name__}' for service type '{service_type.value}' "
+                f"does not implement the required interface '{expected_interface.__name__}'. "
+                f"Please ensure your service class inherits from '{expected_interface.__name__}'."
+            )
+
+        self.logger.debug(
+            f"Service interface validation passed: {service_class.__name__} implements {expected_interface.__name__}"
+        )

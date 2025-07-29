@@ -2,15 +2,14 @@ from datetime import datetime
 from typing import List, Optional
 
 from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.core.interfaces.account_service import AccountServiceInterface
 from stonks_overwatch.core.interfaces.base_service import BaseService
-
-# Interface will be added later - using duck typing for now
 from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import BitvavoService
 from stonks_overwatch.services.models import AccountOverview
 from stonks_overwatch.utils.core.logger import StonksLogger
 
 
-class AccountOverviewService(BaseService):
+class AccountOverviewService(AccountServiceInterface, BaseService):
     logger = StonksLogger.get_logger("stonks_overwatch.account_overview_data", "[BITVAVO|ACCOUNT_OVERVIEW]")
     TIME_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
