@@ -1,13 +1,18 @@
 """
-Core factories for unified broker architecture.
+Factories module exports.
+
+Provides access to the broker factories and registries.
 """
 
-from .unified_broker_factory import UnifiedBrokerFactory
-from .unified_broker_registry import UnifiedBrokerRegistry
-from ..service_types import ServiceType
+from .broker_factory import (
+    BrokerFactory,
+    BrokerFactoryError,
+)
+from .broker_registry import BrokerRegistry, BrokerRegistryValidationError
 
 __all__ = [
-    "UnifiedBrokerFactory",
-    "UnifiedBrokerRegistry",
-    "ServiceType",
+    "BrokerFactory",
+    "BrokerFactoryError",
+    "BrokerRegistry",
+    "BrokerRegistryValidationError",
 ]

@@ -11,7 +11,7 @@ from typing import Any, Dict, Optional
 from stonks_overwatch.config.bitvavo import BitvavoConfig
 from stonks_overwatch.config.degiro import DegiroConfig
 from stonks_overwatch.config.ibkr import IbkrConfig
-from stonks_overwatch.core.factories.unified_broker_registry import UnifiedBrokerRegistry
+from stonks_overwatch.core.factories.broker_registry import BrokerRegistry
 from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.services.brokers.bitvavo.services.account_service import (
     AccountOverviewService as BitvavoAccountService,
@@ -53,7 +53,7 @@ from stonks_overwatch.services.brokers.ibkr.services.transactions import (
 )
 from stonks_overwatch.utils.core.logger import StonksLogger
 
-logger = StonksLogger.get_logger("stonks_overwatch.core", "[UNIFIED_REGISTRY_SETUP]")
+logger = StonksLogger.get_logger("stonks_overwatch.core", "[REGISTRY_SETUP]")
 
 
 # Configuration-driven broker definitions
@@ -126,7 +126,7 @@ def register_all_brokers() -> None:
     This function uses the BROKER_CONFIGS dictionary to register all brokers
     in a configuration-driven manner, eliminating code duplication.
     """
-    registry = UnifiedBrokerRegistry()
+    registry = BrokerRegistry()
 
     logger.info("Starting configuration-driven broker registration...")
 
@@ -190,7 +190,7 @@ def ensure_unified_registry_initialized() -> None:
     This function can be called multiple times safely - it will only register
     brokers if they haven't been registered yet. Uses configuration-driven approach.
     """
-    registry = UnifiedBrokerRegistry()
+    registry = BrokerRegistry()
 
     # Check if any brokers are missing registration
     missing_brokers = []

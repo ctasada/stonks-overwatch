@@ -206,7 +206,7 @@ class TestNewBrokerAdditionSimulation:
         }
 
         new_approach_metrics = {
-            "files_to_modify": 1,  # Only unified_registry_setup.py
+            "files_to_modify": 1,  # Only registry_setup.py
             "hardcoded_logic_locations": 0,  # Dynamic registration
             "import_statements_to_add": 0,  # Already in BROKER_CONFIGS
             "registration_code_lines": 5,  # Single config entry

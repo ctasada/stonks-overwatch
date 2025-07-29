@@ -64,10 +64,10 @@ class GlobalConfig:
                         If None, clears all cached configurations.
         """
         try:
-            from stonks_overwatch.core.factories.unified_broker_factory import UnifiedBrokerFactory
+            from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 
-            unified_factory = UnifiedBrokerFactory()
-            unified_factory.clear_cache(broker_name)
+            broker_factory = BrokerFactory()
+            broker_factory.clear_cache(broker_name)
         except ImportError:
             # Fallback to legacy factory if unified factory is not available
             from stonks_overwatch.config.config_factory import config_factory
@@ -77,36 +77,56 @@ class GlobalConfig:
         # Also clear the global config instance to force refresh
         self._config = None
 
-    def reset_for_tests(self) -> None:
+    def clear_broker_cache(self, broker_name: str) -> None:
         """
-        Reset the global configuration for tests.
-
-        This method clears the cached configuration to force reload
-        from the test configuration file.
-        """
-        self._config = None
-
-    def refresh_broker_config(self, broker_name: str) -> None:
-        """
-        Refresh configuration for a specific broker.
+        Clear all cached configurations for a specific broker.
 
         Args:
-            broker_name: Name of the broker to refresh
+            broker_name: Name of the broker to clear cache for
         """
         try:
-            from stonks_overwatch.core.factories.unified_broker_factory import UnifiedBrokerFactory
+            from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 
-            unified_factory = UnifiedBrokerFactory()
-            # Clear the cache for the specific broker to force recreation
-            unified_factory.clear_cache(broker_name)
+            broker_factory = BrokerFactory()
+            broker_factory.clear_cache(broker_name)
         except ImportError:
             # Fallback to legacy factory if unified factory is not available
             from stonks_overwatch.config.config_factory import config_factory
 
-            config_factory.refresh_default_config(broker_name)
+            config_factory.clear_cache(broker_name)
 
-        # Clear the global config instance to force refresh
-        self._config = None
+        # Also clear the global config instance if it exists
+        if hasattr(self, "_config") and self._config is not None:
+            try:
+                if hasattr(self._config.registry, "clear_broker_config"):
+                    self._config.registry.clear_broker_config(broker_name)
+            except AttributeError:
+                # Registry doesn't support clearing specific brokers
+                pass
+
+    def reset_broker_config(self, broker_name: str) -> None:
+        """
+        Reset broker configuration to defaults.
+
+        Args:
+            broker_name: Name of the broker to reset
+        """
+        # Clear existing cache first
+        self.clear_broker_cache(broker_name)
+
+        try:
+            from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+
+            broker_factory = BrokerFactory()
+            # Clear any existing cached config
+            broker_factory.clear_cache(broker_name)
+        except ImportError:
+            # Fallback for legacy systems
+            pass
+
+        # Reset the global config instance
+        if hasattr(self, "_config"):
+            self._config = None
 
     def update_degiro_credentials(
         self,
@@ -160,6 +180,24 @@ class GlobalConfig:
 
             logger = StonksLogger.get_logger("stonks_overwatch.config", "[GLOBAL_CONFIG]")
             logger.error(f"Failed to update DeGiro credentials in global configuration: {e}")
+
+    def reset_for_tests(self) -> None:
+        """
+        Reset the global configuration for tests.
+
+        This method clears the cached configuration to force reload
+        from the test configuration file.
+        """
+        self._config = None
+
+        try:
+            from stonks_overwatch.utils.core.logger import StonksLogger
+
+            logger = StonksLogger.get_logger("stonks_overwatch.config", "[GLOBAL_CONFIG]")
+            logger.info("Reset global configuration for tests")
+        except ImportError:
+            # If logger is not available, silently continue
+            pass
 
 
 # Global instance

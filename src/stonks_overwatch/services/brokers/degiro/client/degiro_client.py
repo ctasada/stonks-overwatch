@@ -43,10 +43,10 @@ class CredentialsManager:
         else:
             # Try unified factory first, fallback to legacy config
             try:
-                from stonks_overwatch.core.factories.unified_broker_factory import UnifiedBrokerFactory
+                from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 
-                unified_factory = UnifiedBrokerFactory()
-                degiro_config = unified_factory.create_config("degiro")
+                broker_factory = BrokerFactory()
+                degiro_config = broker_factory.create_config("degiro")
                 if degiro_config is None:
                     # Fallback to legacy config access
                     degiro_config = Config.get_global().registry.get_broker_config("degiro")
@@ -147,22 +147,15 @@ class DeGiroService:
         force: bool = False,
         config: Optional[BaseConfig] = None,
     ):
-        # Store config for later use in offline mode check
-        if config is not None:
-            self.degiro_config = config
-        else:
-            # Try unified factory first, fallback to legacy config
-            try:
-                from stonks_overwatch.core.factories.unified_broker_factory import UnifiedBrokerFactory
+        # Get DeGiro configuration using BrokerFactory for auto-refresh
+        try:
+            from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 
-                unified_factory = UnifiedBrokerFactory()
-                self.degiro_config = unified_factory.create_config("degiro")
-                if self.degiro_config is None:
-                    # Fallback to legacy config access
-                    self.degiro_config = Config.get_global().registry.get_broker_config("degiro")
-            except ImportError:
-                # Fallback to legacy config access if unified factory not available
-                self.degiro_config = Config.get_global().registry.get_broker_config("degiro")
+            broker_factory = BrokerFactory()
+            self.degiro_config = broker_factory.create_config("degiro")
+        except ImportError:
+            # Fallback to legacy config access if unified factory not available
+            self.degiro_config = Config.get_global().registry.get_broker_config("degiro")
 
         self.set_credentials(credentials_manager)
         self.force = force

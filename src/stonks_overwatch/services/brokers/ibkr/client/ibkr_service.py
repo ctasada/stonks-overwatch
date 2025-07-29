@@ -46,10 +46,11 @@ class IbkrService:
         else:
             # Try unified factory first, fallback to legacy config
             try:
-                from stonks_overwatch.core.factories.unified_broker_factory import UnifiedBrokerFactory
+                from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 
-                unified_factory = UnifiedBrokerFactory()
-                ibkr_config = unified_factory.create_config("ibkr")
+                # Get IBKR configuration using BrokerFactory
+                broker_factory = BrokerFactory()
+                ibkr_config = broker_factory.create_config("ibkr")
                 if ibkr_config is None:
                     # Fallback to legacy config access
                     ibkr_config = Config.get_global().registry.get_broker_config("ibkr")

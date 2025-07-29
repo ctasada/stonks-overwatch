@@ -1,5 +1,5 @@
 """
-Unified broker factory for creating both configurations and services.
+Broker factory for creating both configurations and services.
 
 This module provides a unified factory that handles both broker configuration
 and service creation in a single interface with automatic dependency injection,
@@ -10,8 +10,8 @@ from typing import Any, Dict, Optional
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.core.exceptions import ServiceFactoryException
-from stonks_overwatch.core.factories.unified_broker_registry import (
-    UnifiedBrokerRegistry,
+from stonks_overwatch.core.factories.broker_registry import (
+    BrokerRegistry,
 )
 from stonks_overwatch.core.interfaces.deposit_service import DepositServiceInterface
 from stonks_overwatch.core.interfaces.dividend_service import DividendServiceInterface
@@ -22,31 +22,31 @@ from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.singleton import singleton
 
 
-class UnifiedBrokerFactoryError(ServiceFactoryException):
-    """Exception raised for unified broker factory errors."""
+class BrokerFactoryError(ServiceFactoryException):
+    """Exception raised for broker factory errors."""
 
     pass
 
 
 @singleton
-class UnifiedBrokerFactory:
+class BrokerFactory:
     """
     Unified factory for creating both configurations and services with dependency injection.
 
-    This singleton factory uses the unified broker registry to create instances of both
+    This singleton factory uses the broker registry to create instances of both
     broker configurations and services, with automatic dependency injection of
     configurations into services.
     """
 
     def __init__(self):
         """
-        Initialize the unified broker factory.
+        Initialize the broker factory.
 
-        Sets up the factory with access to the unified registry and initializes
+        Sets up the factory with access to the broker registry and initializes
         caching systems for both configurations and services.
         """
-        self.logger = StonksLogger.get_logger("stonks_overwatch.core", "[UNIFIED_FACTORY]")
-        self._registry = UnifiedBrokerRegistry()
+        self.logger = StonksLogger.get_logger("stonks_overwatch.core", "[BROKER_FACTORY]")
+        self._registry = BrokerRegistry()
 
         # Configuration caching
         self._config_instances: Dict[str, BaseConfig] = {}
@@ -95,7 +95,7 @@ class UnifiedBrokerFactory:
             return config
         except Exception as e:
             self.logger.error(f"Failed to create configuration for broker {broker_name}: {e}")
-            raise UnifiedBrokerFactoryError(f"Failed to create configuration for broker '{broker_name}': {e}") from e
+            raise BrokerFactoryError(f"Failed to create configuration for broker '{broker_name}': {e}") from e
 
     def create_default_config(self, broker_name: str) -> Optional[BaseConfig]:
         """
@@ -118,9 +118,7 @@ class UnifiedBrokerFactory:
             return config
         except Exception as e:
             self.logger.error(f"Failed to create default configuration for broker {broker_name}: {e}")
-            raise UnifiedBrokerFactoryError(
-                f"Failed to create default configuration for broker '{broker_name}': {e}"
-            ) from e
+            raise BrokerFactoryError(f"Failed to create default configuration for broker '{broker_name}': {e}") from e
 
     def create_config_from_dict(self, broker_name: str, data: dict) -> Optional[BaseConfig]:
         """
@@ -144,9 +142,7 @@ class UnifiedBrokerFactory:
             return config
         except Exception as e:
             self.logger.error(f"Failed to create configuration from dict for broker {broker_name}: {e}")
-            raise UnifiedBrokerFactoryError(
-                f"Failed to create configuration from dict for broker '{broker_name}': {e}"
-            ) from e
+            raise BrokerFactoryError(f"Failed to create configuration from dict for broker '{broker_name}': {e}") from e
 
     # Service creation methods with dependency injection
     def create_service(self, broker_name: str, service_type: ServiceType, **kwargs) -> Optional[Any]:
@@ -197,7 +193,7 @@ class UnifiedBrokerFactory:
             return service
         except Exception as e:
             self.logger.error(f"Failed to create {service_type.value} service for broker {broker_name}: {e}")
-            raise UnifiedBrokerFactoryError(
+            raise BrokerFactoryError(
                 f"Failed to create {service_type.value} service for broker '{broker_name}': {e}"
             ) from e
 
@@ -214,7 +210,7 @@ class UnifiedBrokerFactory:
             Portfolio service instance if available, None otherwise
         """
         if not self._registry.broker_supports_service(broker_name, ServiceType.PORTFOLIO):
-            raise UnifiedBrokerFactoryError(f"Broker '{broker_name}' does not support portfolio service")
+            raise BrokerFactoryError(f"Broker '{broker_name}' does not support portfolio service")
 
         return self.create_service(broker_name, ServiceType.PORTFOLIO, **kwargs)
 
@@ -230,7 +226,7 @@ class UnifiedBrokerFactory:
             Transaction service instance if available, None otherwise
         """
         if not self._registry.broker_supports_service(broker_name, ServiceType.TRANSACTION):
-            raise UnifiedBrokerFactoryError(f"Broker '{broker_name}' does not support transaction service")
+            raise BrokerFactoryError(f"Broker '{broker_name}' does not support transaction service")
 
         return self.create_service(broker_name, ServiceType.TRANSACTION, **kwargs)
 
@@ -246,7 +242,7 @@ class UnifiedBrokerFactory:
             Deposit service instance if available, None otherwise
         """
         if not self._registry.broker_supports_service(broker_name, ServiceType.DEPOSIT):
-            raise UnifiedBrokerFactoryError(f"Broker '{broker_name}' does not support deposit service")
+            raise BrokerFactoryError(f"Broker '{broker_name}' does not support deposit service")
 
         return self.create_service(broker_name, ServiceType.DEPOSIT, **kwargs)
 
@@ -342,7 +338,7 @@ class UnifiedBrokerFactory:
         Returns:
             True if broker is fully available, False otherwise
         """
-        return self._registry.is_fully_registered(broker_name)
+        return broker_name in self._registry.get_fully_registered_brokers()
 
     def get_broker_capabilities(self, broker_name: str) -> list[ServiceType]:
         """

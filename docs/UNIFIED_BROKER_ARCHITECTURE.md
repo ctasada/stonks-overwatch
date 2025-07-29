@@ -291,7 +291,7 @@ Create a unified broker management system that handles both configurations and s
 
 ```python
 @singleton
-class UnifiedBrokerRegistry:
+class BrokerRegistry:
     """
     Single registry for managing all broker components (configs + services).
     """
@@ -334,12 +334,12 @@ class UnifiedBrokerRegistry:
 
 ```python
 @singleton
-class UnifiedBrokerFactory:
+class BrokerFactory:
     """
     Single factory for creating both configurations and services with dependency injection.
     """
     def __init__(self):
-        self._registry = UnifiedBrokerRegistry()
+        self._registry = BrokerRegistry()
         self._config_instances: Dict[str, BaseConfig] = {}
         self._service_instances: Dict[str, Dict[ServiceType, Any]] = {}
 
@@ -397,7 +397,7 @@ class Config:
     """
     def __init__(self, base_currency: str = "EUR"):
         self.base_currency = base_currency
-        self._factory = UnifiedBrokerFactory()
+        self._factory = BrokerFactory()
 
     def get_broker_config(self, broker_name: str) -> Optional[BaseConfig]:
         """Get broker configuration using unified factory."""
@@ -424,7 +424,7 @@ def register_all_brokers() -> None:
     Single function to register all broker configurations and services.
     Called during application initialization.
     """
-    registry = UnifiedBrokerRegistry()
+    registry = BrokerRegistry()
 
     # Register DeGiro
     registry.register_broker_config("degiro", DegiroConfig)
@@ -471,7 +471,7 @@ def register_all_brokers() -> None:
 class BaseAggregator(ABC):
     def __init__(self, service_type: ServiceType):
         self._service_type = service_type
-        self._factory = UnifiedBrokerFactory()
+        self._factory = BrokerFactory()
         self._config = Config.get_global()
 
     def _get_broker_service(self, broker_name: str) -> Optional[Any]:
@@ -507,7 +507,7 @@ class BaseAggregator(ABC):
 ```bash
 # 1. Create config file: src/stonks_overwatch/config/new_broker.py
 # 2. Create service directory structure
-# 3. Add registration to unified_registry_setup.py:
+# 3. Add registration to registry_setup.py:
 registry.register_complete_broker(
     "new_broker",
     NewBrokerConfig,
@@ -518,7 +518,7 @@ registry.register_complete_broker(
 
 # Benefits achieved in Phase 4:
 # ✅ Automatic dependency injection in services
-# ✅ Works with BaseAggregator via UnifiedBrokerFactory
+# ✅ Works with BaseAggregator via BrokerFactory
 # ✅ Full application integration completed
 # ✅ App startup uses unified registration
 # ✅ Portfolio filtering works correctly
@@ -564,7 +564,7 @@ registry.register_complete_broker(
 
 ### **Phase 1: Create Unified Registry (Week 1)** ✅ COMPLETED
 
-#### Task 1.1: Create UnifiedBrokerRegistry ✅ COMPLETED
+#### Task 1.1: Create BrokerRegistry ✅ COMPLETED
 
 - [x] Create `core/factories/unified_broker_registry.py`
 - [x] Implement configuration registration methods
@@ -585,7 +585,7 @@ registry.register_complete_broker(
 - Conclusion: No updates needed - enum is complete
 
 **Phase 1 Results:**
-- ✅ Created `UnifiedBrokerRegistry` with 26 comprehensive tests
+- ✅ Created `BrokerRegistry` with 26 comprehensive tests
 - ✅ All validation features implemented (broker names, config classes, required services)
 - ✅ Rollback support and comprehensive error handling
 - ✅ ServiceType enum verified complete - no updates needed
@@ -593,7 +593,7 @@ registry.register_complete_broker(
 
 ### **Phase 2: Create Unified Factory (Week 2)**
 
-#### Task 2.1: Create UnifiedBrokerFactory ✅ COMPLETED
+#### Task 2.1: Create BrokerFactory ✅ COMPLETED
 
 - [x] Create `core/factories/unified_broker_factory.py`
 - [x] Implement configuration creation methods
@@ -602,7 +602,7 @@ registry.register_complete_broker(
 - [x] Write comprehensive unit tests
 
 **Task 2.1 Results:**
-- ✅ Created `UnifiedBrokerFactory` with 38 comprehensive tests
+- ✅ Created `BrokerFactory` with 38 comprehensive tests
 - ✅ Automatic dependency injection of configurations into services
 - ✅ Full caching support for both configs and services
 - ✅ Error handling and rollback support
@@ -639,15 +639,15 @@ registry.register_complete_broker(
 - [x] Update `GlobalConfig` to use new pattern
 
 **Task 3.1 Results:**
-- ✅ Successfully migrated `Config` class to use `UnifiedBrokerFactory` with fallback to legacy factory
-- ✅ Created unified registration setup in `core/unified_registry_setup.py`
+- ✅ Successfully migrated `Config` class to use `BrokerFactory` with fallback to legacy factory
+- ✅ Created unified registration setup in `core/registry_setup.py`
 - ✅ Maintained full backward compatibility - all 13 config tests passing
 - ✅ Implemented lazy initialization to avoid circular imports
 - ✅ Added comprehensive broker registration for DeGiro, Bitvavo, and IBKR
 - ✅ 123/123 tests passing across all modules (factories + interfaces + config)
 
 **Key Features Implemented:**
-- **Unified Registry Integration**: Config class now uses UnifiedBrokerRegistry when available
+- **Unified Registry Integration**: Config class now uses BrokerRegistry when available
 - **Graceful Fallback**: Automatically falls back to legacy ConfigFactory when needed
 - **Backward Compatibility**: All existing APIs work exactly as before
 - **Lazy Initialization**: Avoids circular import issues through `_ensure_unified_registry_initialized()`
@@ -658,7 +658,7 @@ registry.register_complete_broker(
 
 - [x] Update client services to use unified factory for config fallback
 - [x] Update business services to accept config parameter and use dependency injection
-- [x] Update BaseAggregator to use UnifiedBrokerFactory instead of manual service creation
+- [x] Update BaseAggregator to use BrokerFactory instead of manual service creation
 - [x] Update BaseService to handle config injection gracefully
 - [x] Run tests to validate all changes work correctly
 
@@ -666,7 +666,7 @@ registry.register_complete_broker(
 - ✅ **297/297 tests passing** (up from 286/297 at start)
 - ✅ **Client Services Updated**: DeGiro, Bitvavo, IBKR clients use unified factory with graceful fallback
 - ✅ **Business Services Enhanced**: All services accept optional `config` parameter with dependency injection
-- ✅ **BaseAggregator Integration**: Uses UnifiedBrokerFactory with automatic dependency injection
+- ✅ **BaseAggregator Integration**: Uses BrokerFactory with automatic dependency injection
 - ✅ **Property Delegation**: Services use `@property base_currency` for seamless config access
 - ✅ **Test Compatibility**: Maintained test compatibility with legacy factory fallback
 - ✅ **Clean Imports**: Removed unused Config imports throughout codebase
@@ -745,7 +745,7 @@ elif broker_name == "bitvavo":
 ```python
 # BaseAggregator now uses unified factory - elegant and dynamic
 def _get_broker_service(self, broker_name: str) -> Optional[Any]:
-    return self._unified_factory.create_service(broker_name, self._service_type)
+    return self._broker_factory.create_service(broker_name, self._service_type)
     # Automatic dependency injection, supports any registered broker!
 
 # Dynamic portfolio filtering - works for any broker
@@ -770,7 +770,7 @@ if selected_portfolio != PortfolioId.ALL:
 - [x] Ensure all tests pass throughout migration
 
 **Task 5.1 Results:**
-- ✅ **GlobalConfig migrated** to use UnifiedBrokerFactory with graceful legacy fallback
+- ✅ **GlobalConfig migrated** to use BrokerFactory with graceful legacy fallback
 - ✅ **Config class updated** - Removed config_factory fallbacks from `from_dict()` and `_default()` methods
 - ✅ **All consumers migrated** - Every component now uses unified factory exclusively
 - ✅ **Tests maintained** - All 293 tests passing throughout migration
@@ -797,7 +797,7 @@ if selected_portfolio != PortfolioId.ALL:
 - [x] Validate zero breaking changes
 
 **Task 5.3 Results:**
-- ✅ **Test fixtures modernized** - Updated config tests to use UnifiedBrokerFactory instead of ConfigFactory
+- ✅ **Test fixtures modernized** - Updated config tests to use BrokerFactory instead of ConfigFactory
 - ✅ **Legacy test setup removed** - Eliminated BrokerRegistry setup from aggregator tests
 - ✅ **Test assertions fixed** - Updated expectations to match unified system behavior
 - ✅ **All tests passing** - 293/293 tests pass with unified system exclusively
@@ -813,7 +813,7 @@ if selected_portfolio != PortfolioId.ALL:
 
 **Architecture Simplification:**
 
-- **Single factory pattern**: Only UnifiedBrokerFactory remains
+- **Single factory pattern**: Only BrokerFactory remains
 - **Consistent service creation**: All components use the same patterns
 - **Simplified testing**: Unified mocking and setup approaches
 - **Reduced complexity**: No more conditional factory logic
@@ -824,11 +824,11 @@ if selected_portfolio != PortfolioId.ALL:
 # Multiple factory systems
 config = config_factory.create_default_broker_config("degiro")  # Legacy
 service = self._service_factory.create_portfolio_service("degiro")  # Legacy
-unified_service = self._unified_factory.create_service("degiro", ServiceType.PORTFOLIO)  # New
+unified_service = self._broker_factory.create_service("degiro", ServiceType.PORTFOLIO)  # New
 
 # Conditional logic everywhere
-if self._use_unified_factory:
-    return self._unified_factory.create_service(...)
+if self._use_broker_factory:
+    return self._broker_factory.create_service(...)
 else:
     return self._legacy_factory.create_service(...)
 ```
@@ -837,11 +837,11 @@ else:
 
 ```python
 # Single unified system
-config = unified_factory.create_default_config("degiro")  # Only unified
-service = unified_factory.create_service("degiro", ServiceType.PORTFOLIO)  # Only unified
+config = broker_factory.create_default_config("degiro")  # Only unified
+service = broker_factory.create_service("degiro", ServiceType.PORTFOLIO)  # Only unified
 
 # Clean, simple logic
-return self._unified_factory.create_service(broker_name, self._service_type)
+return self._broker_factory.create_service(broker_name, self._service_type)
 ```
 
 ### **Phase 6: Testing and Validation (Week 6)** ✅ COMPLETED
@@ -855,8 +855,8 @@ return self._unified_factory.create_service(broker_name, self._service_type)
 
 **Task 6.1 Results:**
 - ✅ **81/81 Core Tests Passing** - All unified architecture components working perfectly
-- ✅ **UnifiedBrokerRegistry**: 26 comprehensive tests - complete functionality validated
-- ✅ **UnifiedBrokerFactory**: 38 comprehensive tests - dependency injection and caching working
+- ✅ **BrokerRegistry**: 26 comprehensive tests - complete functionality validated
+- ✅ **BrokerFactory**: 38 comprehensive tests - dependency injection and caching working
 - ✅ **Legacy BrokerRegistry**: 16 tests - backward compatibility maintained
 - ✅ **BaseService Interface**: 17 tests - dependency injection framework operational
 
@@ -963,7 +963,7 @@ The architectural review analyzed the following areas:
 
 #### **2. Naming & Consistency - Very Good**
 
-- ✅ **Unified Pattern**: `UnifiedBrokerRegistry`, `UnifiedBrokerFactory`
+- ✅ **Unified Pattern**: `BrokerRegistry`, `BrokerFactory`
 - ✅ **Clear Service Types**: `ServiceType` enum with consistent values
 - ✅ **Logical Method Names**: `register_complete_broker()`, `create_service()`
 - ✅ **File Organization**: All unified components properly grouped in `core/factories/`
@@ -982,7 +982,7 @@ The architectural review analyzed the following areas:
 class NewBrokerConfig(BaseConfig):
     pass
 
-# Step 2: Add registration (src/stonks_overwatch/core/unified_registry_setup.py)
+# Step 2: Add registration (src/stonks_overwatch/core/registry_setup.py)
 registry.register_complete_broker(
     "newbroker",
     NewBrokerConfig,
@@ -1006,7 +1006,7 @@ registry.register_complete_broker(
 
 ```python
 # Added missing constructor docstrings:
-class UnifiedBrokerRegistry:
+class BrokerRegistry:
     def __init__(self):
         """
         Initialize the unified broker registry.
@@ -1015,7 +1015,7 @@ class UnifiedBrokerRegistry:
         and initializes logging for registry operations.
         """
 
-class UnifiedBrokerFactory:
+class BrokerFactory:
     def __init__(self):
         """
         Initialize the unified broker factory.
@@ -1044,7 +1044,7 @@ def validate_broker_service_compatibility(self, broker_name: str) -> Dict[str, A
 # Removed legacy fallback in app_config.py:
 def initialize_broker_services():
     try:
-        from stonks_overwatch.core.unified_registry_setup import register_all_brokers
+        from stonks_overwatch.core.registry_setup import register_all_brokers
         register_all_brokers()
         # Legacy fallback removed - unified system is primary
     except Exception as e:
@@ -1092,7 +1092,7 @@ def initialize_broker_services():
 #### **Priority: Low - Configuration-Driven Registration** ✅ COMPLETED
 
 ```python
-# IMPLEMENTED: Enhanced unified_registry_setup.py:
+# IMPLEMENTED: Enhanced registry_setup.py:
 BROKER_CONFIGS = {
     "degiro": {
         "config": DegiroConfig,
@@ -1131,7 +1131,7 @@ BROKER_CONFIGS = {
 }
 
 def register_all_brokers():
-    registry = UnifiedBrokerRegistry()
+    registry = BrokerRegistry()
     for broker_name, broker_config in BROKER_CONFIGS.items():
         config_class = broker_config["config"]
         services = broker_config["services"]
@@ -1207,7 +1207,7 @@ def setup_django_for_tests():
         django.setup()
 
     # Initialize unified registry after Django setup
-    from stonks_overwatch.core.unified_registry_setup import ensure_unified_registry_initialized
+    from stonks_overwatch.core.registry_setup import ensure_unified_registry_initialized
     ensure_unified_registry_initialized()
 
 # Benefits:
@@ -1220,12 +1220,12 @@ def setup_django_for_tests():
 
 ```python
 # Problem: Brokers were being registered twice:
-# 1. Automatic initialization when unified_registry_setup.py imported
+# 1. Automatic initialization when registry_setup.py imported
 # 2. Explicit call in app_config.py during Django startup
 # Result: "Configuration for broker 'degiro' is already registered" error
 
 # Solution: Check if brokers already registered before attempting registration
-registry = UnifiedBrokerRegistry()
+registry = BrokerRegistry()
 registered_brokers = registry.get_fully_registered_brokers()
 
 if not registered_brokers:

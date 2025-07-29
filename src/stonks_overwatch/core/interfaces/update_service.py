@@ -16,7 +16,7 @@ class AbstractUpdateService(ABC):
 
     **Dependency Injection Support:**
 
-    To support dependency injection with the UnifiedBrokerFactory, service
+    To support dependency injection with the BrokerFactory, service
     implementations should:
 
     1. Accept an optional `config` parameter in their constructor and pass it to super():

@@ -40,7 +40,7 @@ def mock_bitvavo_deposits():
     with patch.object(BitvavoDepositsService, "get_cash_deposits") as mock_method:
         mock_method.return_value = [
             Deposit(
-                datetime=LocalizationUtility.convert_string_to_datetime("2024-09-16 18:46:52"),
+                datetime=LocalizationUtility.convert_string_to_datetime("2024-09-16 18:46:51"),
                 description="Deposit",
                 type=DepositType.DEPOSIT,
                 currency="EUR",
@@ -70,9 +70,9 @@ def test_get_deposit_aggregator_service(mock_bitvavo_deposits, mock_degiro_depos
     assert deposits[1].type == DepositType.WITHDRAWAL
     assert deposits[1].change == -100.0
     assert deposits[2].type == DepositType.DEPOSIT
-    assert deposits[2].change == 1000.0
+    assert deposits[2].change == 10000.0  # DeGiro deposit (2024-09-16 18:46:52)
     assert deposits[3].type == DepositType.DEPOSIT
-    assert deposits[3].change == 10000.0
+    assert deposits[3].change == 1000.0  # Bitvavo deposit (2024-09-16 18:46:51)
 
 
 def test_get_deposit_aggregator_service_only_degiro(mock_degiro_deposits):

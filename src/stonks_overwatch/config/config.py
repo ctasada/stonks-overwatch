@@ -1,12 +1,12 @@
 import json
 from pathlib import Path
-from typing import Dict, Optional, Type
+from typing import Dict, Optional, Set, Type
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.bitvavo import BitvavoConfig
 from stonks_overwatch.config.degiro import DegiroConfig
 from stonks_overwatch.config.ibkr import IbkrConfig
-from stonks_overwatch.core.factories.unified_broker_factory import UnifiedBrokerFactory
+from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 from stonks_overwatch.services.models import PortfolioId
 from stonks_overwatch.utils.core.logger import StonksLogger
 
@@ -19,7 +19,7 @@ def _ensure_unified_registry_initialized():
     avoiding circular import issues during module loading.
     """
     try:
-        from stonks_overwatch.core.unified_registry_setup import ensure_unified_registry_initialized
+        from stonks_overwatch.core.registry_setup import ensure_unified_registry_initialized
 
         ensure_unified_registry_initialized()
     except ImportError as e:
@@ -41,28 +41,31 @@ class ConfigRegistry:
     This class maintains a registry of broker configurations
     and provides a centralized way to manage them.
 
-    **Updated to use UnifiedBrokerFactory for configuration access.**
+    **Updated to use BrokerFactory for configuration access.**
     """
 
     logger = StonksLogger.get_logger("stonks_overwatch.config", "[CONFIG_REGISTRY]")
 
-    def __init__(self, use_unified_factory: bool = True):
+    def __init__(self, use_broker_factory: bool = True):
         """
-        Initialize the configuration registry.
+        Initialize configuration registry.
 
         Args:
-            use_unified_factory: Whether to use the new UnifiedBrokerFactory.
-                               If False, falls back to legacy behavior for backward compatibility.
+            use_broker_factory: Whether to use the new BrokerFactory.
+                When True, uses the new unified architecture.
+                When False, falls back to legacy patterns.
         """
         self._broker_configs: Dict[str, BaseConfig] = {}
         self._broker_config_classes: Dict[str, Type[BaseConfig]] = {}
-        self._use_unified_factory = use_unified_factory
-        self._unified_factory = None
+        self._use_broker_factory = use_broker_factory
+        self._factory = None
 
-        if self._use_unified_factory:
-            # Ensure unified registry is initialized before using the factory
-            _ensure_unified_registry_initialized()
-            self._unified_factory = UnifiedBrokerFactory()
+        if self._use_broker_factory:
+            # Initialize with unified broker factory
+            try:
+                self._factory = BrokerFactory()
+            except Exception as e:
+                StonksLogger.get_logger("stonks_overwatch.config").warning(f"Failed to initialize BrokerFactory: {e}")
 
     def register_broker_config(self, broker_name: str, config_class: Type[BaseConfig]) -> None:
         """
@@ -86,52 +89,41 @@ class ConfigRegistry:
 
     def get_broker_config(self, broker_name: str) -> Optional[BaseConfig]:
         """
-        Get a broker configuration instance.
-
-        Uses UnifiedBrokerFactory if available, falls back to local storage.
+        Get broker configuration with fallback.
 
         Args:
             broker_name: Name of the broker
 
         Returns:
-            Configuration instance if available, None otherwise
+            Broker configuration instance or None
         """
-        # First check local storage (for backward compatibility)
+        # First check if a specific configuration was manually set
         if broker_name in self._broker_configs:
             return self._broker_configs[broker_name]
 
-        # If using unified factory, try to get config from there
-        if self._use_unified_factory and self._unified_factory:
-            try:
-                config = self._unified_factory.create_default_config(broker_name)
-                if config:
-                    # Cache locally for future access
-                    self._broker_configs[broker_name] = config
-                    return config
-            except Exception as e:
-                self.logger.debug(f"Could not get config for {broker_name} from unified factory: {e}")
+        # Fallback to factory for default configurations
+        if self._use_broker_factory and self._factory:
+            config = self._factory.create_default_config(broker_name)
+            if config:
+                return config
 
         return None
 
-    def get_available_brokers(self) -> list[str]:
+    def get_available_brokers(self) -> Set[str]:
         """
-        Get the list of all registered brokers.
-
-        Includes brokers from both local storage and unified factory.
+        Get set of all available broker names.
 
         Returns:
-            List of broker names
+            Set of broker names that have configurations available
         """
-        local_brokers = set(self._broker_configs.keys())
+        brokers = set(self._broker_configs.keys())
 
-        if self._use_unified_factory and self._unified_factory:
-            try:
-                unified_brokers = set(self._unified_factory.get_available_brokers())
-                return list(local_brokers.union(unified_brokers))
-            except Exception as e:
-                self.logger.debug(f"Could not get available brokers from unified factory: {e}")
+        if self._use_broker_factory and self._factory:
+            # Include brokers from unified factory
+            broker_brokers = set(self._factory.get_available_brokers())
+            brokers.update(broker_brokers)
 
-        return list(local_brokers)
+        return brokers
 
     def is_broker_enabled(self, broker_name: str, selected_portfolio: PortfolioId = PortfolioId.ALL) -> bool:
         """
@@ -240,9 +232,11 @@ class ConfigRegistry:
 
 class Config:
     """
-    Main configuration class providing access to all broker configurations.
+    Main configuration class that provides access to all broker configurations.
 
-    **Updated to use UnifiedBrokerFactory while maintaining backward compatibility.**
+    This class serves as the central configuration manager for the application,
+    providing access to broker-specific configurations while maintaining
+    backward compatibility.
     """
 
     logger = StonksLogger.get_logger("stonks_overwatch.config", "[CONFIG]")
@@ -255,37 +249,41 @@ class Config:
         degiro_configuration: Optional[DegiroConfig] = None,
         bitvavo_configuration: Optional[BitvavoConfig] = None,
         ibkr_configuration: Optional[IbkrConfig] = None,
-        use_unified_factory: bool = True,
+        use_broker_factory: bool = True,
     ) -> None:
         """
-        Initialize configuration.
+        Initialize configuration with broker-specific settings.
 
         Args:
-            base_currency: Base currency for calculations
+            base_currency: The base currency for calculations
             degiro_configuration: DeGiro broker configuration
             bitvavo_configuration: Bitvavo broker configuration
             ibkr_configuration: IBKR broker configuration
-            use_unified_factory: Whether to use the new UnifiedBrokerFactory
+            use_broker_factory: Whether to use the new BrokerFactory
+                               for additional functionality and consistency
         """
         if base_currency and not isinstance(base_currency, str):
             raise TypeError("base_currency must be a string")
-        self.base_currency = base_currency
 
-        # Initialize registry with unified factory support
-        self.registry = ConfigRegistry(use_unified_factory=use_unified_factory)
-        self._use_unified_factory = use_unified_factory
-        self._unified_factory = None
+        self.base_currency = base_currency or self.DEFAULT_BASE_CURRENCY
+        self.registry = ConfigRegistry(use_broker_factory=use_broker_factory)
+        self._use_broker_factory = use_broker_factory
+        self._factory = None
 
-        if self._use_unified_factory:
-            # Ensure unified registry is initialized before using the factory
-            _ensure_unified_registry_initialized()
-            self._unified_factory = UnifiedBrokerFactory()
+        if self._use_broker_factory:
+            # Initialize broker factory for enhanced functionality
+            try:
+                self._factory = BrokerFactory()
+            except Exception as e:
+                StonksLogger.get_logger("stonks_overwatch.config").warning(f"Failed to initialize BrokerFactory: {e}")
 
-        # Set broker configurations using the registry
+        # Set configurations if provided
         if degiro_configuration:
             self.registry.set_broker_config("degiro", degiro_configuration)
+
         if bitvavo_configuration:
             self.registry.set_broker_config("bitvavo", bitvavo_configuration)
+
         if ibkr_configuration:
             self.registry.set_broker_config("ibkr", ibkr_configuration)
 
@@ -406,70 +404,66 @@ class Config:
         )
 
     @classmethod
-    def from_dict(cls, data: dict, use_unified_factory: bool = True) -> "Config":
+    def from_dict(cls, data: dict, use_broker_factory: bool = True) -> "Config":
         """
         Create configuration from dictionary data.
 
         Args:
-            data: Configuration data dictionary
-            use_unified_factory: Whether to use the new UnifiedBrokerFactory
+            data: Dictionary containing configuration data
+            use_broker_factory: Whether to use the new BrokerFactory
 
         Returns:
-            Config instance
+            Config instance created from the data
         """
-        base_currency = data.get("base_currency", Config.DEFAULT_BASE_CURRENCY)
+        base_currency = data.get("base_currency", cls.DEFAULT_BASE_CURRENCY)
 
-        # Use unified factory (should always be available in Phase 5)
-        _ensure_unified_registry_initialized()
-        unified_factory = UnifiedBrokerFactory()
-        degiro_configuration = unified_factory.create_config_from_dict("degiro", data.get(DegiroConfig.config_key, {}))
-        bitvavo_configuration = unified_factory.create_config_from_dict(
+        broker_factory = BrokerFactory()
+        degiro_configuration = broker_factory.create_config_from_dict("degiro", data.get(DegiroConfig.config_key, {}))
+        bitvavo_configuration = broker_factory.create_config_from_dict(
             "bitvavo", data.get(BitvavoConfig.config_key, {})
         )
-        ibkr_configuration = unified_factory.create_config_from_dict("ibkr", data.get(IbkrConfig.config_key, {}))
+        ibkr_configuration = broker_factory.create_config_from_dict("ibkr", data.get(IbkrConfig.config_key, {}))
 
-        return cls(base_currency, degiro_configuration, bitvavo_configuration, ibkr_configuration, True)
+        return cls(base_currency, degiro_configuration, bitvavo_configuration, ibkr_configuration)
 
     @classmethod
-    def from_json_file(cls, file_path: str | Path, use_unified_factory: bool = True) -> "Config":
+    def from_json_file(cls, file_path: str | Path, use_broker_factory: bool = True) -> "Config":
         """
-        Loads the configuration from a JSON file.
+        Create configuration from JSON file.
 
         Args:
             file_path: Path to the JSON configuration file
-            use_unified_factory: Whether to use the new UnifiedBrokerFactory
+            use_broker_factory: Whether to use the new BrokerFactory
 
         Returns:
-            Config instance
+            Config instance loaded from the file
         """
-        data = {}
         with open(file_path, "r") as f:
             data = json.load(f)
-        return cls.from_dict(data, use_unified_factory)
+
+        return cls.from_dict(data, use_broker_factory)
 
     @classmethod
-    def _default(cls, use_unified_factory: bool = True) -> "Config":
+    def _default(cls, use_broker_factory: bool = True) -> "Config":
         """
-        Create a fresh default configuration instance.
+        Create default configuration with all brokers initialized to defaults.
 
-        This is an internal method used by GlobalConfig and tests.
-        For production code, use Config.get_global() for cached access.
+        This method creates a Config instance with default configurations
+        for all supported brokers using the BrokerFactory.
 
         Args:
-            use_unified_factory: Whether to use the new UnifiedBrokerFactory
+            use_broker_factory: Whether to use the new BrokerFactory
 
         Returns:
-            A fresh configuration instance with default values
+            Config instance with default broker configurations
         """
-        # Use unified factory (should always be available in Phase 5)
-        _ensure_unified_registry_initialized()
-        unified_factory = UnifiedBrokerFactory()
-        return Config(
-            base_currency=Config.DEFAULT_BASE_CURRENCY,
-            degiro_configuration=unified_factory.create_default_config("degiro"),
-            bitvavo_configuration=unified_factory.create_default_config("bitvavo"),
-            ibkr_configuration=unified_factory.create_default_config("ibkr"),
-            use_unified_factory=True,
+        broker_factory = BrokerFactory()
+
+        return cls(
+            degiro_configuration=broker_factory.create_default_config("degiro"),
+            bitvavo_configuration=broker_factory.create_default_config("bitvavo"),
+            ibkr_configuration=broker_factory.create_default_config("ibkr"),
+            use_broker_factory=True,
         )
 
     @classmethod

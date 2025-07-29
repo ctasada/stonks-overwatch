@@ -45,10 +45,11 @@ class BitvavoService:
         else:
             # Try unified factory first, fallback to legacy config
             try:
-                from stonks_overwatch.core.factories.unified_broker_factory import UnifiedBrokerFactory
+                from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 
-                unified_factory = UnifiedBrokerFactory()
-                self.bitvavo_config = unified_factory.create_config("bitvavo")
+                # Get Bitvavo configuration using BrokerFactory
+                broker_factory = BrokerFactory()
+                self.bitvavo_config = broker_factory.create_config("bitvavo")
                 if self.bitvavo_config is None:
                     # Fallback to legacy config access
                     self.bitvavo_config = Config.get_global().registry.get_broker_config("bitvavo")

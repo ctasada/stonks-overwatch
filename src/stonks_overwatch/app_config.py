@@ -26,11 +26,11 @@ class StonksOverwatchConfig(AppConfig):
 
             # Register broker services with the unified framework
             try:
-                from stonks_overwatch.core.factories.unified_broker_registry import UnifiedBrokerRegistry
-                from stonks_overwatch.core.unified_registry_setup import register_all_brokers
+                from stonks_overwatch.core.factories.broker_registry import BrokerRegistry
+                from stonks_overwatch.core.registry_setup import register_all_brokers
 
                 # Check if brokers are already registered to avoid duplicates
-                registry = UnifiedBrokerRegistry()
+                registry = BrokerRegistry()
                 registered_brokers = registry.get_fully_registered_brokers()
 
                 if not registered_brokers:

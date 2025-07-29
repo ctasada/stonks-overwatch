@@ -28,35 +28,28 @@ class TestBaseAggregator:
         """Set up test fixtures before each test method."""
         # Clear any singleton instances (legacy BrokerRegistry removed - using unified system)
 
-    @patch("stonks_overwatch.core.aggregators.base_aggregator.UnifiedBrokerFactory")
+    @patch("stonks_overwatch.core.aggregators.base_aggregator.BrokerFactory")
     @patch("stonks_overwatch.core.aggregators.base_aggregator.Config")
-    def test_initialization(self, mock_config, mock_unified_factory_class):
-        """Test aggregator initialization with unified factory."""
-        # Mock the unified factory instance
+    def test_initialization(self, mock_config, mock_factory_class):
+        """Test aggregator initialization."""
+        # Setup
         mock_factory = MagicMock()
-        mock_unified_factory_class.return_value = mock_factory
-        mock_factory.get_available_brokers.return_value = []
+        mock_factory_class.return_value = mock_factory
 
-        # Mock config
-        mock_config.get_global.return_value = MagicMock()
-
-        # Create aggregator
+        # Test
         aggregator = ConcreteAggregator(ServiceType.PORTFOLIO)
 
-        # Verify initialization
-        assert aggregator.service_type == ServiceType.PORTFOLIO
+        # Verify
         assert aggregator._service_type == ServiceType.PORTFOLIO
-        assert aggregator._unified_factory is not None
-        mock_factory.get_available_brokers.assert_called_once()
+        assert aggregator._factory is not None
 
-    @patch("stonks_overwatch.core.aggregators.base_aggregator.UnifiedBrokerFactory")
     @patch("stonks_overwatch.core.aggregators.base_aggregator.Config")
-    def test_collect_broker_data_success(self, mock_config, mock_unified_factory_class):
-        """Test successful data collection from brokers."""
-        # Mock setup
+    @patch("stonks_overwatch.core.aggregators.base_aggregator.BrokerFactory")
+    def test_collect_broker_data_success(self, mock_config, mock_factory_class):
+        """Test successful data collection from multiple brokers."""
+        # Setup
         mock_factory = MagicMock()
-        mock_unified_factory_class.return_value = mock_factory
-        mock_factory.get_available_brokers.return_value = []
+        mock_factory_class.return_value = mock_factory
         mock_config.get_global.return_value = MagicMock()
 
         # Create aggregator
@@ -83,14 +76,13 @@ class TestBaseAggregator:
             assert result["broker1"] == ["data1", "data2"]
             assert result["broker2"] == ["data3", "data4"]
 
-    @patch("stonks_overwatch.core.aggregators.base_aggregator.UnifiedBrokerFactory")
     @patch("stonks_overwatch.core.aggregators.base_aggregator.Config")
-    def test_collect_and_merge_lists(self, mock_config, mock_unified_factory_class):
-        """Test the _collect_and_merge_lists helper method."""
-        # Mock setup
+    @patch("stonks_overwatch.core.aggregators.base_aggregator.BrokerFactory")
+    def test_collect_and_merge_lists(self, mock_config, mock_factory_class):
+        """Test collecting and merging data from multiple brokers."""
+        # Setup
         mock_factory = MagicMock()
-        mock_unified_factory_class.return_value = mock_factory
-        mock_factory.get_available_brokers.return_value = []
+        mock_factory_class.return_value = mock_factory
         mock_config.get_global.return_value = MagicMock()
 
         # Create aggregator

@@ -190,14 +190,14 @@ def _register_mock_services(registry, mock_services_dict):
 def reset_global_config():
     """Reset the global configuration before each test to ensure clean state."""
     from stonks_overwatch.config.global_config import global_config
-    from stonks_overwatch.core.factories.unified_broker_registry import UnifiedBrokerRegistry
+    from stonks_overwatch.core.factories.broker_registry import BrokerRegistry
 
     # Reset the global config to force reload
     global_config.reset_for_tests()
 
     # Initialize unified registry for tests
     try:
-        registry = UnifiedBrokerRegistry()
+        registry = BrokerRegistry()
         _register_config_classes(registry)
 
         # Try to register real service classes for proper test mocking

@@ -5,7 +5,7 @@ from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.bitvavo import BitvavoCredentials
 from stonks_overwatch.config.config import Config
 from stonks_overwatch.config.degiro import DegiroConfig, DegiroCredentials
-from stonks_overwatch.core.factories.unified_broker_factory import UnifiedBrokerFactory
+from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 from stonks_overwatch.services.models import PortfolioId
 
 import pytest
@@ -15,7 +15,7 @@ from unittest.mock import patch
 @pytest.fixture(autouse=True)
 def disable_config_caching():
     """Disable config caching for all tests to ensure fresh config loading."""
-    factory = UnifiedBrokerFactory()
+    factory = BrokerFactory()
     factory.disable_caching()
     yield
     factory.enable_caching()
