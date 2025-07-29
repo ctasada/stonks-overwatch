@@ -1,8 +1,20 @@
 """poetry run python ./scripts/ibkr/ibkr.py"""
 
 import json
+import os
 
-from stonks_overwatch.services.brokers.ibkr.client.ibkr_service import IbkrService
+import django
+
+# Set up Django
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "stonks_overwatch.settings")
+django.setup()
+
+# Initialize broker registry for standalone script usage
+from stonks_overwatch.core.registry_setup import ensure_unified_registry_initialized  # noqa: E402
+
+ensure_unified_registry_initialized()
+
+from stonks_overwatch.services.brokers.ibkr.client.ibkr_service import IbkrService  # noqa: E402
 
 ibkr_service = IbkrService(shutdown_oauth=True)
 client = ibkr_service.get_client()
@@ -18,12 +30,12 @@ account_id = portfolio_accounts[0]["accountId"]
 # print(json.dumps(summary, indent=4))
 
 # Positions
-# positions = ibkr_service.get_open_positions()
-# print(json.dumps(positions, indent=4))
+positions = ibkr_service.get_open_positions()
+print(json.dumps(positions, indent=4))
 
 # Performance
-performance = client.account_performance(account_id, "YTD").data
-print(json.dumps(performance, indent=4))
+# performance = client.account_performance(account_id, "YTD").data
+# print(json.dumps(performance, indent=4))
 
 # Exchange
 # exchange = client.currency_exchange_rate("USD", "EUR").data

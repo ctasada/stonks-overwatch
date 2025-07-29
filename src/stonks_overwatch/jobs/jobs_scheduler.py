@@ -3,7 +3,6 @@ from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
-from stonks_overwatch.config.config import Config
 from stonks_overwatch.services.brokers.bitvavo.services.update_service import UpdateService as BitvavoUpdateService
 from stonks_overwatch.services.brokers.degiro.services.update_service import UpdateService as DegiroUpdateService
 from stonks_overwatch.services.brokers.ibkr.services.update_service import UpdateService as IbkrUpdateService
@@ -24,11 +23,14 @@ class JobsScheduler:
         JobsScheduler.logger.info("Starting JobsScheduler")
         JobsScheduler.scheduler = BackgroundScheduler()
 
-        # Get config inside the method to avoid import-time issues
+        # Get config using unified BrokerFactory
         try:
-            degiro_config = Config.get_global().registry.get_broker_config("degiro")
+            from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 
-            if degiro_config.is_enabled() and not degiro_config.offline_mode:
+            broker_factory = BrokerFactory()
+            degiro_config = broker_factory.create_config("degiro")
+
+            if degiro_config and degiro_config.is_enabled() and not degiro_config.offline_mode:
                 JobsScheduler.scheduler.add_job(
                     JobsScheduler.update_degiro_portfolio,
                     id="update_degiro_portfolio",
@@ -40,11 +42,11 @@ class JobsScheduler:
         except Exception as e:
             JobsScheduler.logger.error(f"Failed to get DEGIRO config: {e}")
 
-        # Get config inside the method to avoid import-time issues
+        # Get IBKR config using unified BrokerFactory
         try:
-            ibkr_config = Config.get_global().registry.get_broker_config("ibkr")
+            ibkr_config = broker_factory.create_config("ibkr")
 
-            if ibkr_config.is_enabled():
+            if ibkr_config and ibkr_config.is_enabled():
                 JobsScheduler.scheduler.add_job(
                     JobsScheduler.update_ibkr_portfolio,
                     id="update_ibkr_portfolio",
@@ -56,11 +58,11 @@ class JobsScheduler:
         except Exception as e:
             JobsScheduler.logger.error(f"Failed to get IBKR config: {e}")
 
-        # Get config inside the method to avoid import-time issues
+        # Get Bitvavo config using unified BrokerFactory
         try:
-            bitvavo_config = Config.get_global().registry.get_broker_config("bitvavo")
+            bitvavo_config = broker_factory.create_config("bitvavo")
 
-            if bitvavo_config.is_enabled() and not bitvavo_config.offline_mode:
+            if bitvavo_config and bitvavo_config.is_enabled() and not bitvavo_config.offline_mode:
                 JobsScheduler.scheduler.add_job(
                     JobsScheduler.update_bitvavo_portfolio,
                     id="update_bitvavo_portfolio",

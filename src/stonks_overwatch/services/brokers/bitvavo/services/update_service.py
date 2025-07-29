@@ -52,7 +52,7 @@ class UpdateService(BaseService, AbstractUpdateService):
             return
 
         if self.debug_mode:
-            self.logger.warning("Storing JSON files at %s", self.import_folder)
+            self.logger.info("Storing JSON files at %s", self.import_folder)
 
         try:
             self.update_transactions()

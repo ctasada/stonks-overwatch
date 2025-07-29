@@ -22,6 +22,11 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "stonks_overwatch.settings")
 django.setup()
 
+# Initialize broker registry for standalone script usage
+from stonks_overwatch.core.registry_setup import ensure_unified_registry_initialized  # noqa: E402
+
+ensure_unified_registry_initialized()
+
 # The import is defined here, so all the Django configuration can be executed
 from stonks_overwatch.services.brokers.bitvavo.services.update_service import (  # noqa: E402
     UpdateService as BitvavoUpdateService,
@@ -171,9 +176,22 @@ def main():
     ibkr_import_folder = os.path.join(args.import_folder, "ibkr")
     bitvavo_import_folder = os.path.join(args.import_folder, "bitvavo")
 
-    degiro_update_service = DegiroUpdateService(import_folder=degiro_import_folder, debug_mode=args.debug)
-    ibkr_update_service = IbkrUpdateService(import_folder=ibkr_import_folder, debug_mode=args.debug)
-    bitvavo_update_service = BitvavoUpdateService(import_folder=bitvavo_import_folder, debug_mode=args.debug)
+    # Get broker configurations via unified factory for proper credential injection
+    from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+
+    broker_factory = BrokerFactory()
+
+    degiro_config = broker_factory.create_config("degiro")
+    ibkr_config = broker_factory.create_config("ibkr")
+    bitvavo_config = broker_factory.create_config("bitvavo")
+
+    degiro_update_service = DegiroUpdateService(
+        import_folder=degiro_import_folder, debug_mode=args.debug, config=degiro_config
+    )
+    ibkr_update_service = IbkrUpdateService(import_folder=ibkr_import_folder, debug_mode=args.debug, config=ibkr_config)
+    bitvavo_update_service = BitvavoUpdateService(
+        import_folder=bitvavo_import_folder, debug_mode=args.debug, config=bitvavo_config
+    )
 
     actions = [
         (args.degiro_account, degiro_account_import, degiro_update_service),

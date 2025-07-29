@@ -10,7 +10,6 @@ from ibind.oauth.oauth1a import OAuth1aConfig
 from pytz import utc
 
 from stonks_overwatch.config.base_config import BaseConfig
-from stonks_overwatch.config.config import Config
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.singleton import singleton
 
@@ -41,22 +40,29 @@ class IbkrService:
         #  The default value should be obtained checking if the service runs inside Django or not.
 
         # Use dependency injection if config is provided, otherwise fallback to global config
-        if config is not None:
+        if config:
             ibkr_config = config
         else:
-            # Try unified factory first, fallback to legacy config
+            # Get IBKR configuration using unified BrokerFactory
             try:
                 from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 
-                # Get IBKR configuration using BrokerFactory
                 broker_factory = BrokerFactory()
                 ibkr_config = broker_factory.create_config("ibkr")
+
                 if ibkr_config is None:
-                    # Fallback to legacy config access
-                    ibkr_config = Config.get_global().registry.get_broker_config("ibkr")
-            except ImportError:
-                # Fallback to legacy config access if unified factory not available
-                ibkr_config = Config.get_global().registry.get_broker_config("ibkr")
+                    raise RuntimeError(
+                        "IBKR configuration not available. This usually means:\n"
+                        "1. The broker registry hasn't been initialized (call django.setup() for scripts)\n"
+                        "2. IBKR broker registration is missing from registry setup\n"
+                        "3. No valid IBKR configuration file exists\n"
+                        "Please ensure Django is properly initialized before using broker services."
+                    )
+            except ImportError as e:
+                raise ImportError(f"Failed to import BrokerFactory: {e}") from e
+
+        if ibkr_config is None:
+            raise RuntimeError("IBKR configuration is None - broker registry not properly initialized")
 
         ibkr_credentials = ibkr_config.credentials
 

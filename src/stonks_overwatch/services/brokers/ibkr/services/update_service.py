@@ -27,8 +27,13 @@ class UpdateService(DependencyInjectionMixin, AbstractUpdateService):
         :param config:
             Optional configuration for dependency injection.
         """
-        super().__init__(config)
-        AbstractUpdateService.__init__(self, "IBKR", import_folder, debug_mode)
+        # Initialize AbstractUpdateService first
+        AbstractUpdateService.__init__(
+            self, broker_name="ibkr", import_folder=import_folder, debug_mode=debug_mode, config=config
+        )
+        # Set up dependency injection attributes manually to avoid super() chain conflicts
+        self._injected_config = config
+        self._global_config = None
 
         self.ibkr_service = IbkrService()
         # Use base_currency property from DependencyInjectionMixin which handles dependency injection
@@ -40,7 +45,7 @@ class UpdateService(DependencyInjectionMixin, AbstractUpdateService):
             return
 
         if self.debug_mode:
-            self.logger.warning("Storing JSON files at %s", self.import_folder)
+            self.logger.info("Storing JSON files at %s", self.import_folder)
 
         try:
             self.update_portfolio()

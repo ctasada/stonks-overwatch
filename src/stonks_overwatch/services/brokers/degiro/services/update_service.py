@@ -1,5 +1,5 @@
 import os
-from datetime import date, datetime, time, timezone
+from datetime import date, datetime, time, timedelta, timezone
 from typing import Dict, List, Optional
 
 import pandas as pd
@@ -63,7 +63,8 @@ class UpdateService(BaseService, AbstractUpdateService):
         self._injected_config = config
         self._global_config = None
 
-        self.degiro_service = DeGiroService()
+        # Pass injected config to DeGiro service for proper credential access
+        self.degiro_service = DeGiroService(config=config)
 
         self.portfolio_data = PortfolioService(
             degiro_service=self.degiro_service,
@@ -80,18 +81,40 @@ class UpdateService(BaseService, AbstractUpdateService):
     def _get_last_cash_movement_import(self) -> datetime:
         last_movement = CashMovementsRepository.get_last_movement()
         if last_movement is None:
-            # Use config via dependency injection
-            degiro_config = self.config.registry.get_broker_config("degiro")
-            last_movement = datetime.combine(degiro_config.start_date, time.min)
+            # Use injected config or get via unified factory
+            if self._injected_config:
+                degiro_config = self._injected_config
+            else:
+                from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+
+                broker_factory = BrokerFactory()
+                degiro_config = broker_factory.create_config("degiro")
+
+            if degiro_config:
+                last_movement = datetime.combine(degiro_config.start_date, time.min)
+            else:
+                # Fallback to a reasonable default if no config available
+                last_movement = datetime.now() - timedelta(days=365)
 
         return last_movement
 
     def _get_last_transactions_import(self) -> datetime:
         last_movement = TransactionsRepository.get_last_movement()
         if last_movement is None:
-            # Use config via dependency injection
-            degiro_config = self.config.registry.get_broker_config("degiro")
-            last_movement = datetime.combine(degiro_config.start_date, time.min)
+            # Use injected config or get via unified factory
+            if self._injected_config:
+                degiro_config = self._injected_config
+            else:
+                from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+
+                broker_factory = BrokerFactory()
+                degiro_config = broker_factory.create_config("degiro")
+
+            if degiro_config:
+                last_movement = datetime.combine(degiro_config.start_date, time.min)
+            else:
+                # Fallback to a reasonable default if no config available
+                last_movement = datetime.now() - timedelta(days=365)
 
         return last_movement
 
@@ -101,7 +124,7 @@ class UpdateService(BaseService, AbstractUpdateService):
             return
 
         if self.debug_mode:
-            self.logger.warning("Storing JSON files at %s", self.import_folder)
+            self.logger.info("Storing JSON files at %s", self.import_folder)
 
         try:
             self.update_account()
@@ -412,9 +435,23 @@ class UpdateService(BaseService, AbstractUpdateService):
         product_growth = self.portfolio_data.calculate_product_growth()
 
         # Include Currencies in the Quotations
-        # Use config via dependency injection
-        degiro_config = self.config.registry.get_broker_config("degiro")
-        start_date = degiro_config.start_date.strftime(LocalizationUtility.DATE_FORMAT)
+        # Use injected config or get via unified factory
+        if self._injected_config:
+            degiro_config = self._injected_config
+        else:
+            from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+
+            broker_factory = BrokerFactory()
+            degiro_config = broker_factory.create_config("degiro")
+
+        if degiro_config and hasattr(degiro_config, "start_date"):
+            start_date = degiro_config.start_date.strftime(LocalizationUtility.DATE_FORMAT)
+        else:
+            # Fallback to a reasonable default date if config is unavailable
+            from datetime import datetime, timedelta
+
+            default_start = datetime.now() - timedelta(days=365)  # 1 year ago
+            start_date = default_start.strftime(LocalizationUtility.DATE_FORMAT)
         for currency in CurrencyFX.to_list():
             if currency not in product_growth:
                 product_growth[currency] = {"history": {}}

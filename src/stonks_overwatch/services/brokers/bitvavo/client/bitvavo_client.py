@@ -5,7 +5,6 @@ from typing import Optional
 from python_bitvavo_api.bitvavo import Bitvavo, createPostfix
 
 from stonks_overwatch.config.base_config import BaseConfig
-from stonks_overwatch.config.config import Config
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.singleton import singleton
 
@@ -43,19 +42,27 @@ class BitvavoService:
         if config is not None:
             self.bitvavo_config = config
         else:
-            # Try unified factory first, fallback to legacy config
+            # Get Bitvavo configuration using unified BrokerFactory
             try:
                 from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 
                 # Get Bitvavo configuration using BrokerFactory
                 broker_factory = BrokerFactory()
                 self.bitvavo_config = broker_factory.create_config("bitvavo")
+
                 if self.bitvavo_config is None:
-                    # Fallback to legacy config access
-                    self.bitvavo_config = Config.get_global().registry.get_broker_config("bitvavo")
-            except ImportError:
-                # Fallback to legacy config access if unified factory not available
-                self.bitvavo_config = Config.get_global().registry.get_broker_config("bitvavo")
+                    raise RuntimeError(
+                        "Bitvavo configuration not available. This usually means:\n"
+                        "1. The broker registry hasn't been initialized (call django.setup() for scripts)\n"
+                        "2. Bitvavo broker registration is missing from registry setup\n"
+                        "3. No valid Bitvavo configuration file exists\n"
+                        "Please ensure Django is properly initialized before using broker services."
+                    )
+            except ImportError as e:
+                raise ImportError(f"Failed to import BrokerFactory: {e}") from e
+
+        if self.bitvavo_config is None:
+            raise RuntimeError("Bitvavo configuration is None - broker registry not properly initialized")
 
         bitvavo_credentials = self.bitvavo_config.credentials
 
