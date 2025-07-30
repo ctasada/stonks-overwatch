@@ -24,14 +24,26 @@ class StonksOverwatchConfig(AppConfig):
                 signal.signal(signal.SIGINT, self.handle_shutdown)
                 signal.signal(signal.SIGTERM, self.handle_shutdown)
 
-            # Register broker services with the core framework
+            # Register broker services with the unified framework
             try:
-                from stonks_overwatch.core.registry_setup import register_broker_services
+                from stonks_overwatch.core.factories.broker_registry import BrokerRegistry
+                from stonks_overwatch.core.registry_setup import register_all_brokers
 
-                register_broker_services()
-                self.logger.info("Broker services registered successfully")
+                # Check if brokers are already registered to avoid duplicates
+                registry = BrokerRegistry()
+                registered_brokers = registry.get_fully_registered_brokers()
+
+                if not registered_brokers:
+                    # No brokers registered yet, proceed with registration
+                    register_all_brokers()
+                    self.logger.info("Unified broker services registered successfully")
+                else:
+                    # Brokers already registered (likely through automatic initialization)
+                    self.logger.info(f"Unified broker services already registered: {registered_brokers}")
             except Exception as e:
-                self.logger.error("Failed to register broker services: %s", e)
+                self.logger.error("Failed to register unified broker services: %s", e)
+                # Legacy fallback removed - unified registry setup is now the only option
+                raise e
 
             # Schedule automatic tasks
             from stonks_overwatch.jobs.jobs_scheduler import JobsScheduler

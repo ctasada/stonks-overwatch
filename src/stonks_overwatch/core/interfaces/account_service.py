@@ -1,23 +1,24 @@
 """
-Transaction service interface.
+Account service interface.
 
-This module defines the interface for transaction service implementations.
-All broker transaction services should implement this interface.
+This module defines the interface for account service implementations.
+This interface is optional - only brokers that support account overview
+functionality need to implement this interface.
 """
 
 from abc import ABC, abstractmethod
 from typing import List
 
-from stonks_overwatch.services.models import Transaction
+from stonks_overwatch.services.models import AccountOverview
 
 
-class TransactionServiceInterface(ABC):
+class AccountServiceInterface(ABC):
     """
-    Interface for transaction service implementations.
+    Interface for account service implementations.
 
-    This interface defines the common operations that all transaction services
-    should support, such as retrieving transaction history and processing
-    transaction data.
+    This interface defines the common operations that account services
+    should support, such as retrieving account overview data including
+    transaction history, account changes, and portfolio movements.
 
     **Dependency Injection Support:**
 
@@ -35,7 +36,7 @@ class TransactionServiceInterface(ABC):
        ```python
        from stonks_overwatch.core.interfaces.base_service import BaseService
 
-       class MyTransactionService(TransactionServiceInterface, BaseService):
+       class MyAccountService(AccountServiceInterface, BaseService):
            def __init__(self, config: Optional[BaseConfig] = None, **kwargs):
                super().__init__(config, **kwargs)
                # Now you can use self.config and self.base_currency
@@ -46,11 +47,11 @@ class TransactionServiceInterface(ABC):
     """
 
     @abstractmethod
-    def get_transactions(self) -> List[Transaction]:
+    def get_account_overview(self) -> List[AccountOverview]:
         """
-        Retrieves the transaction history.
+        Retrieves the account overview including transaction history and account movements.
 
         Returns:
-            List[Transaction]: List of transactions sorted by date (newest first)
+            List[AccountOverview]: List of account overview entries sorted by date (newest first)
         """
         pass

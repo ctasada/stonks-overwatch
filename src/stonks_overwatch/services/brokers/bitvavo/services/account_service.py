@@ -1,19 +1,22 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
-from stonks_overwatch.config.config import Config
+from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.core.interfaces.account_service import AccountServiceInterface
+from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import BitvavoService
 from stonks_overwatch.services.models import AccountOverview
 from stonks_overwatch.utils.core.logger import StonksLogger
 
 
-class AccountOverviewService:
+class AccountOverviewService(AccountServiceInterface, BaseService):
     logger = StonksLogger.get_logger("stonks_overwatch.account_overview_data", "[BITVAVO|ACCOUNT_OVERVIEW]")
     TIME_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
-    def __init__(self):
+    def __init__(self, config: Optional[BaseConfig] = None):
+        super().__init__(config)
         self.bitvavo_service = BitvavoService()
-        self.base_currency = Config.get_global().base_currency
+        # Use base_currency property from BaseService which handles dependency injection
 
     def get_account_overview(self) -> List[AccountOverview]:
         self.logger.debug("Get Account Overview")

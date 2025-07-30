@@ -3,8 +3,9 @@ from typing import List, Optional
 from django.utils.functional import cached_property
 from iso10383 import MIC
 
-from stonks_overwatch.config.config import Config
+from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.core.interfaces import PortfolioServiceInterface
+from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.services.brokers.ibkr.client.constants import AssetClass
 from stonks_overwatch.services.brokers.ibkr.client.ibkr_service import IbkrService
 from stonks_overwatch.services.brokers.ibkr.repositories.positions_repository import PositionsRepository
@@ -13,13 +14,15 @@ from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.domain.constants import ProductType, Sector
 
 
-class PortfolioService(PortfolioServiceInterface):
+class PortfolioService(BaseService, PortfolioServiceInterface):
     logger = StonksLogger.get_logger("stonks_overwatch.portfolio_data.ibkr", "[IBKR|PORTFOLIO]")
 
-    def __init__(self):
+    def __init__(self, config: Optional[BaseConfig] = None):
+        super().__init__(config)
         self.positions_repository = PositionsRepository()
         self.ibkr_service = IbkrService()
-        self.base_currency = Config.get_global().base_currency
+        # Use base_currency property from BaseService which handles dependency injection
+        # self.base_currency = self.base_currency  # This will use the property from BaseService
 
     @cached_property
     def get_portfolio(self) -> List[PortfolioEntry]:

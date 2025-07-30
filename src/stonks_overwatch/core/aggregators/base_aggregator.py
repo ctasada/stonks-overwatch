@@ -10,9 +10,8 @@ from typing import Any, Dict, List, Optional, Union
 
 from stonks_overwatch.config.config import Config
 from stonks_overwatch.core.exceptions import DataAggregationException
-from stonks_overwatch.core.factories.broker_registry import ServiceType
-from stonks_overwatch.core.factories.service_factory import ServiceFactory
-from stonks_overwatch.services.brokers.ibkr.client.ibkr_service import IbkrService
+from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.services.models import PortfolioId
 from stonks_overwatch.utils.core.logger import StonksLogger
 
@@ -34,12 +33,16 @@ class BaseAggregator(ABC):
             service_type: The type of service this aggregator works with
         """
         self._service_type = service_type
-        self._service_factory = ServiceFactory()
+        self._factory = BrokerFactory()
         self._config = Config.get_global()
         self._logger = StonksLogger.get_logger(
             f"stonks_overwatch.aggregators.{self.__class__.__name__.lower()}",
             f"[AGGREGATOR|{service_type.value.upper()}]",
         )
+
+        # Use unified factory (should always be available in Phase 5)
+        self._logger.debug("Using unified broker factory")
+
         self._broker_services: Dict[str, Any] = {}
         self._initialize_broker_services()
 
@@ -47,12 +50,12 @@ class BaseAggregator(ABC):
         """
         Initialize broker services based on available brokers and service type.
         """
-        available_brokers = self._service_factory.get_available_brokers()
+        available_brokers = self._factory.get_available_brokers()
 
         self._logger.debug(f"Available brokers: {available_brokers}")
 
         for broker_name in available_brokers:
-            if self._service_factory.broker_supports_service(broker_name, self._service_type):
+            if self._broker_supports_service(broker_name):
                 try:
                     service = self._get_broker_service(broker_name)
                     if service:
@@ -60,6 +63,19 @@ class BaseAggregator(ABC):
                         self._logger.debug(f"Initialized {broker_name} {self._service_type.value} service")
                 except Exception as e:
                     self._logger.warning(f"Failed to initialize {broker_name} service: {e}")
+
+    def _broker_supports_service(self, broker_name: str) -> bool:
+        """
+        Check if a broker supports a specific service type.
+
+        Args:
+            broker_name: Name of the broker
+            service_type: Type of service to check
+
+        Returns:
+            True if broker supports the service, False otherwise
+        """
+        return self._factory.broker_supports_service(broker_name, self._service_type)
 
     def _get_broker_service(self, broker_name: str) -> Optional[Any]:
         """
@@ -72,127 +88,15 @@ class BaseAggregator(ABC):
             Service instance if available, None otherwise
         """
         try:
-            # For now, create services with proper dependencies manually
-            # until we improve the service factory to handle dependencies
-            if broker_name == "degiro":
-                return self._create_degiro_service()
-            elif broker_name == "bitvavo":
-                return self._create_bitvavo_service()
-            elif broker_name == "ibkr":
-                return self._create_ibkr_service()
-            else:
-                self._logger.error(f"{broker_name} is not supported")
-                return None
+            # Use unified factory with automatic dependency injection
+            service = self._factory.create_service(broker_name, self._service_type)
+            if service is None:
+                self._logger.warning(
+                    f"Unified factory could not create {self._service_type.value} service for {broker_name}"
+                )
+            return service
         except Exception as e:
             self._logger.error(f"Failed to create {self._service_type.value} service for {broker_name}: {e}")
-            return None
-
-    def _create_degiro_service(self) -> Optional[Any]:
-        """Create DeGiro service with proper dependencies."""
-        try:
-            from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
-
-            degiro_client = DeGiroService()
-
-            if self._service_type == ServiceType.PORTFOLIO:
-                from stonks_overwatch.services.brokers.degiro.services.portfolio_service import PortfolioService
-
-                return PortfolioService(degiro_service=degiro_client)
-            elif self._service_type == ServiceType.TRANSACTION:
-                from stonks_overwatch.services.brokers.degiro.services.transaction_service import TransactionsService
-
-                return TransactionsService(degiro_service=degiro_client)
-            elif self._service_type == ServiceType.DEPOSIT:
-                from stonks_overwatch.services.brokers.degiro.services.deposit_service import DepositsService
-
-                return DepositsService(degiro_service=degiro_client)
-            elif self._service_type == ServiceType.DIVIDEND:
-                from stonks_overwatch.services.brokers.degiro.services.account_service import AccountOverviewService
-                from stonks_overwatch.services.brokers.degiro.services.currency_service import CurrencyConverterService
-                from stonks_overwatch.services.brokers.degiro.services.dividend_service import DividendsService
-                from stonks_overwatch.services.brokers.degiro.services.portfolio_service import PortfolioService
-
-                account_service = AccountOverviewService()
-                currency_service = CurrencyConverterService()
-                portfolio_service = PortfolioService(degiro_service=degiro_client)
-
-                return DividendsService(
-                    account_overview=account_service,
-                    currency_service=currency_service,
-                    degiro_service=degiro_client,
-                    portfolio_service=portfolio_service,
-                )
-            elif self._service_type == ServiceType.FEE:
-                from stonks_overwatch.services.brokers.degiro.services.fee_service import FeesService
-
-                return FeesService(degiro_service=degiro_client)
-            elif self._service_type == ServiceType.ACCOUNT:
-                from stonks_overwatch.services.brokers.degiro.services.account_service import AccountOverviewService
-
-                return AccountOverviewService()
-        except Exception as e:
-            self._logger.error(f"Failed to create DeGiro {self._service_type.value} service: {e}")
-            return None
-
-    def _create_bitvavo_service(self) -> Optional[Any]:
-        """Create Bitvavo service with proper dependencies."""
-        try:
-            if self._service_type == ServiceType.PORTFOLIO:
-                from stonks_overwatch.services.brokers.bitvavo.services.portfolio_service import PortfolioService
-
-                return PortfolioService()
-            elif self._service_type == ServiceType.TRANSACTION:
-                from stonks_overwatch.services.brokers.bitvavo.services.transaction_service import TransactionsService
-
-                return TransactionsService()
-            elif self._service_type == ServiceType.DEPOSIT:
-                from stonks_overwatch.services.brokers.bitvavo.services.deposit_service import DepositsService
-
-                return DepositsService()
-            elif self._service_type == ServiceType.FEE:
-                from stonks_overwatch.services.brokers.bitvavo.services.fee_service import FeesService
-
-                return FeesService()
-            elif self._service_type == ServiceType.ACCOUNT:
-                from stonks_overwatch.services.brokers.bitvavo.services.account_service import AccountOverviewService
-
-                return AccountOverviewService()
-            elif self._service_type == ServiceType.DIVIDEND:
-                from stonks_overwatch.services.brokers.bitvavo.services.dividends_service import DividendsService
-
-                return DividendsService()
-        except Exception as e:
-            self._logger.error(f"Failed to create Bitvavo {self._service_type.value} service: {e}")
-            return None
-
-    def _create_ibkr_service(self) -> Optional[Any]:
-        """Create IBKR service with proper dependencies."""
-        try:
-            if self._service_type == ServiceType.PORTFOLIO:
-                from stonks_overwatch.services.brokers.ibkr.services.portfolio import PortfolioService
-
-                return PortfolioService()
-            elif self._service_type == ServiceType.TRANSACTION:
-                from stonks_overwatch.services.brokers.ibkr.services.transactions import TransactionsService
-
-                ibkr_service = IbkrService()
-                return TransactionsService(ibkr_service=ibkr_service)
-            elif self._service_type == ServiceType.DEPOSIT:
-                return None
-            elif self._service_type == ServiceType.FEE:
-                return None
-            elif self._service_type == ServiceType.ACCOUNT:
-                from stonks_overwatch.services.brokers.ibkr.services.account_overview import AccountOverviewService
-
-                return AccountOverviewService()
-            elif self._service_type == ServiceType.DIVIDEND:
-                from stonks_overwatch.services.brokers.ibkr.services.dividends import DividendsService
-
-                ibkr_service = IbkrService()
-
-                return DividendsService(ibkr_service=ibkr_service)
-        except Exception as e:
-            self._logger.error(f"Failed to create IBKR {self._service_type.value} service: {e}", exc_info=True)
             return None
 
     def _is_broker_enabled(self, broker_name: str, selected_portfolio: PortfolioId) -> bool:
@@ -207,14 +111,33 @@ class BaseAggregator(ABC):
             True if broker is enabled, False otherwise
         """
         self._logger.debug(f"Checking if {broker_name} enabled for {selected_portfolio}")
-        if broker_name == "degiro":
-            return self._config.is_degiro_enabled(selected_portfolio)
-        elif broker_name == "bitvavo":
-            return self._config.is_bitvavo_enabled(selected_portfolio)
-        elif broker_name == "ibkr":
-            return self._config.is_ibkr_enabled(selected_portfolio)
-        else:
-            # For other brokers, assume they're enabled if they have services
+
+        # First check if the broker matches the selected portfolio
+        if selected_portfolio != PortfolioId.ALL:
+            broker_portfolio = PortfolioId.from_id(broker_name)
+            if selected_portfolio != broker_portfolio:
+                self._logger.debug(f"Broker {broker_name} does not match selected portfolio {selected_portfolio}")
+                return False
+
+        # Check if the broker is enabled
+        try:
+            # Use unified factory to get config
+            config = self._factory.create_config(broker_name)
+            if config and hasattr(config, "is_enabled"):
+                return config.is_enabled()
+
+            # Fallback to legacy config method using dynamic method names
+            legacy_method_name = f"is_{broker_name}_enabled"
+            if hasattr(self._config, legacy_method_name):
+                legacy_method = getattr(self._config, legacy_method_name)
+                return legacy_method(selected_portfolio)
+
+            # Final fallback: assume enabled if broker has services
+            return broker_name in self._broker_services
+
+        except Exception as e:
+            self._logger.warning(f"Failed to check if {broker_name} is enabled: {e}")
+            # Fallback: assume enabled if broker has services
             return broker_name in self._broker_services
 
     def _get_enabled_brokers(self, selected_portfolio: PortfolioId) -> List[str]:

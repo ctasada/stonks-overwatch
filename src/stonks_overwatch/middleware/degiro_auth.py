@@ -4,7 +4,6 @@ from django.http import HttpRequest
 from django.shortcuts import redirect
 from django.urls import resolve
 
-from stonks_overwatch.config.config import Config
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
 from stonks_overwatch.utils.core.logger import StonksLogger
 
@@ -21,39 +20,70 @@ class DeGiroAuthMiddleware:
     def __call__(self, request):
         current_url = resolve(request.path_info).url_name
 
-        if Config.get_global().is_degiro_enabled() and not Config.get_global().is_degiro_offline():
-            if self._should_check_connection(request):
-                try:
-                    self._authenticate_user(request)
-                except ConnectionError:
-                    pass
+        # Check if DeGiro is enabled using unified factory
+        try:
+            from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 
-            if (
-                not self._is_authenticated(request)
-                and not self._is_public_url(current_url)
-                and not self._is_maintenance_mode_allowed()
-            ):
-                self.logger.warning("User not authenticated, redirecting to Login page...")
-                request.session["is_authenticated"] = False
-                return redirect("login")
+            broker_factory = BrokerFactory()
+            degiro_config = broker_factory.create_config("degiro")
+
+            is_degiro_enabled = degiro_config and degiro_config.is_enabled()
+            is_degiro_offline = degiro_config and degiro_config.offline_mode
+
+            if is_degiro_enabled and not is_degiro_offline:
+                if self._should_check_connection(request):
+                    try:
+                        self._authenticate_user(request)
+                    except ConnectionError:
+                        pass
+        except Exception as e:
+            self.logger.error(f"Failed to check DeGiro status: {e}")
+
+        if (
+            not self._is_authenticated(request)
+            and not self._is_public_url(current_url)
+            and not self._is_maintenance_mode_allowed()
+        ):
+            self.logger.warning("User not authenticated, redirecting to Login page...")
+            request.session["is_authenticated"] = False
+            return redirect("login")
 
         return self.get_response(request)
 
     def _is_maintenance_mode_allowed(self) -> bool:
         if self.degiro_service.is_maintenance_mode:
-            credentials = Config.get_global().registry.get_broker_config("degiro").get_credentials
-            if credentials and credentials.username and credentials.password:
-                self.logger.warning("DeGiro is in maintenance mode, but credentials are provided.")
-                return True
+            try:
+                from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+
+                broker_factory = BrokerFactory()
+                degiro_config = broker_factory.create_config("degiro")
+
+                if degiro_config:
+                    credentials = degiro_config.get_credentials
+                    if credentials and credentials.username and credentials.password:
+                        self.logger.warning("DeGiro is in maintenance mode, but credentials are provided.")
+                        return True
+            except Exception as e:
+                self.logger.error(f"Failed to get DeGiro config: {e}")
 
         return False
 
     def _should_check_connection(self, request) -> bool:
-        has_default_credentials = (
-            Config.get_global().registry.get_broker_config("degiro").credentials is not None
-            and Config.get_global().registry.get_broker_config("degiro").get_credentials.username is not None
-            and Config.get_global().registry.get_broker_config("degiro").get_credentials.password is not None
-        )
+        try:
+            from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+
+            broker_factory = BrokerFactory()
+            degiro_config = broker_factory.create_config("degiro")
+
+            has_default_credentials = (
+                degiro_config is not None
+                and degiro_config.credentials is not None
+                and degiro_config.get_credentials.username is not None
+                and degiro_config.get_credentials.password is not None
+            )
+        except Exception as e:
+            self.logger.error(f"Failed to get DeGiro config: {e}")
+            has_default_credentials = False
 
         return has_default_credentials or "session_id" in request.session
 

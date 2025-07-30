@@ -1,272 +1,483 @@
 """
-Tests for BrokerRegistry.
+Tests for the BrokerRegistry.
 
-This module contains comprehensive tests for the broker service registry,
-covering registration, capabilities management, and service lookup.
+This module contains comprehensive tests for the broker registry
+functionality, including configuration and service registration, validation,
+and error handling.
 """
 
-from stonks_overwatch.core.exceptions import ServiceRegistryException
-from stonks_overwatch.core.factories.broker_registry import BrokerRegistry, ServiceType
+from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.config.base_credentials import BaseCredentials
+from stonks_overwatch.core.factories.broker_registry import (
+    BrokerRegistry,
+    BrokerRegistryValidationError,
+)
 from stonks_overwatch.core.interfaces.deposit_service import DepositServiceInterface
 from stonks_overwatch.core.interfaces.dividend_service import DividendServiceInterface
 from stonks_overwatch.core.interfaces.portfolio_service import PortfolioServiceInterface
 from stonks_overwatch.core.interfaces.transaction_service import TransactionServiceInterface
+from stonks_overwatch.core.service_types import ServiceType
 
 import pytest
-from unittest.mock import MagicMock
+
+
+# Test fixtures
+class MockCredentials(BaseCredentials):
+    """Mock credentials for testing."""
+
+    def __init__(self, username: str = "test", password: str = "pass"):
+        self.username = username
+        self.password = password
+
+    def is_valid(self) -> bool:
+        """Check if credentials are valid."""
+        return self.username and self.password
+
+    def to_dict(self) -> dict:
+        """Convert credentials to dictionary."""
+        return {
+            "username": self.username,
+            "password": self.password,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "MockCredentials":
+        """Create credentials from dictionary."""
+        return cls(
+            username=data.get("username", "test"),
+            password=data.get("password", "pass"),
+        )
+
+
+class MockBrokerConfig(BaseConfig):
+    """Mock broker configuration for testing."""
+
+    config_key = "testbroker"
+
+    def __init__(self, credentials: MockCredentials = None, enabled: bool = True):
+        credentials = credentials or MockCredentials()
+        super().__init__(credentials, enabled)
+
+    def is_enabled(self) -> bool:
+        """Check if the broker is enabled."""
+        return self.enabled
+
+    def is_valid(self) -> bool:
+        """Check if the configuration is valid."""
+        return self.enabled and self.credentials and self.credentials.is_valid()
+
+    def get_credentials(self) -> MockCredentials:
+        """Get the broker credentials."""
+        return self.credentials
+
+    def to_dict(self) -> dict:
+        """Convert configuration to dictionary."""
+        return {
+            "enabled": self.enabled,
+            "credentials": self.credentials.to_dict() if self.credentials else None,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "MockBrokerConfig":
+        """Create configuration from dictionary."""
+        credentials_data = data.get("credentials", {})
+        credentials = MockCredentials.from_dict(credentials_data) if credentials_data else None
+        return cls(
+            credentials=credentials,
+            enabled=data.get("enabled", True),
+        )
+
+    @classmethod
+    def default(cls) -> "MockBrokerConfig":
+        """Create default configuration."""
+        return cls(credentials=MockCredentials(), enabled=True)
+
+
+class MockPortfolioService(PortfolioServiceInterface):
+    """Mock portfolio service for testing."""
+
+    def __init__(self, config: MockBrokerConfig = None):
+        self.config = config
+
+    def get_portfolio(self):
+        return {"holdings": []}
+
+
+class MockTransactionService(TransactionServiceInterface):
+    """Mock transaction service for testing."""
+
+    def __init__(self, config: MockBrokerConfig = None):
+        self.config = config
+
+    def get_transactions(self):
+        return {"transactions": []}
+
+
+class MockDepositService(DepositServiceInterface):
+    """Mock deposit service for testing."""
+
+    def __init__(self, config: MockBrokerConfig = None):
+        self.config = config
+
+    def get_deposits(self):
+        return {"deposits": []}
+
+
+class MockDividendService(DividendServiceInterface):
+    """Mock dividend service for testing."""
+
+    def __init__(self, config: MockBrokerConfig = None):
+        self.config = config
+
+    def get_dividends(self):
+        return {"dividends": []}
+
+
+@pytest.fixture(autouse=True)
+def clear_singletons():
+    """Clear singleton instances before each test."""
+    # Clear singleton instances
+    if hasattr(BrokerRegistry, "_instances"):
+        BrokerRegistry._instances.clear()
 
 
 class TestBrokerRegistry:
     """Test cases for BrokerRegistry."""
 
     def setup_method(self):
-        """Set up test fixtures before each test method."""
-        # Clear singleton instance for clean state
-        if hasattr(BrokerRegistry, "_instance"):
-            BrokerRegistry._instance = None
-
+        """Set up test environment."""
+        # Clear singleton instances
+        if hasattr(BrokerRegistry, "_instances"):
+            BrokerRegistry._instances.clear()
         self.registry = BrokerRegistry()
+        # Clear any existing registrations
+        self.registry.clear_all_registrations()
 
-        # Create mock service classes
-        self.mock_portfolio_service = MagicMock(spec=PortfolioServiceInterface)
-        self.mock_transaction_service = MagicMock(spec=TransactionServiceInterface)
-        self.mock_deposit_service = MagicMock(spec=DepositServiceInterface)
-        self.mock_dividend_service = MagicMock(spec=DividendServiceInterface)
-        self.mock_fee_service = MagicMock()
-        self.mock_account_service = MagicMock()
-
-    def teardown_method(self):
-        """Clean up after each test method."""
-        # Clear registry state
-        self.registry._brokers.clear()
-        self.registry._broker_capabilities.clear()
-
-        # Clear singleton instance
-        if hasattr(BrokerRegistry, "_instance"):
-            BrokerRegistry._instance = None
-
-    def test_singleton_behavior(self):
-        """Test that BrokerRegistry is a singleton."""
+    def test_registry_is_singleton(self):
+        """Test that registry follows singleton pattern."""
         registry1 = BrokerRegistry()
         registry2 = BrokerRegistry()
-
         assert registry1 is registry2
-        assert id(registry1) == id(registry2)
 
-    def test_register_broker_with_required_services(self):
-        """Test registering a broker with only required services."""
-        self.registry.register_broker(
-            broker_name="test_broker",
-            portfolio_service=self.mock_portfolio_service,
-            transaction_service=self.mock_transaction_service,
-            deposit_service=self.mock_deposit_service,
+    def test_register_broker_config_success(self):
+        """Test successful broker configuration registration."""
+        self.registry.register_broker_config("testbroker", MockBrokerConfig)
+
+        assert self.registry.is_config_registered("testbroker")
+        assert self.registry.get_config_class("testbroker") == MockBrokerConfig
+
+    def test_register_broker_config_invalid_name(self):
+        """Test broker configuration registration with invalid name."""
+        with pytest.raises(BrokerRegistryValidationError, match="Broker name must be a non-empty string"):
+            self.registry.register_broker_config("", MockBrokerConfig)
+
+        with pytest.raises(
+            BrokerRegistryValidationError, match="Broker name must contain only alphanumeric characters"
+        ):
+            self.registry.register_broker_config("test-broker", MockBrokerConfig)
+
+    def test_register_broker_config_invalid_class(self):
+        """Test broker configuration registration with invalid config class."""
+        with pytest.raises(BrokerRegistryValidationError, match="config_class must be a class type"):
+            self.registry.register_broker_config("testbroker", "not_a_class")
+
+        with pytest.raises(BrokerRegistryValidationError, match="config_class must be a subclass of BaseConfig"):
+            self.registry.register_broker_config("testbroker", str)
+
+    def test_register_broker_config_duplicate(self):
+        """Test duplicate broker configuration registration."""
+        self.registry.register_broker_config("testbroker", MockBrokerConfig)
+
+        with pytest.raises(
+            BrokerRegistryValidationError, match="Configuration for broker 'testbroker' is already registered"
+        ):
+            self.registry.register_broker_config("testbroker", MockBrokerConfig)
+
+    def test_get_config_class_nonexistent(self):
+        """Test getting configuration class for non-existent broker."""
+        config_class = self.registry.get_config_class("nonexistent")
+        assert config_class is None
+
+    def test_register_broker_services_success(self):
+        """Test successful broker services registration."""
+        self.registry.register_broker_services(
+            "testbroker",
+            portfolio=MockPortfolioService,
+            transaction=MockTransactionService,
+            deposit=MockDepositService,
+            dividend=MockDividendService,
         )
 
-        # Check broker is registered
-        assert "test_broker" in self.registry.get_available_brokers()
+        assert self.registry.get_service_class("testbroker", ServiceType.PORTFOLIO) == MockPortfolioService
+        assert self.registry.get_service_class("testbroker", ServiceType.TRANSACTION) == MockTransactionService
+        assert self.registry.get_service_class("testbroker", ServiceType.DEPOSIT) == MockDepositService
+        assert self.registry.get_service_class("testbroker", ServiceType.DIVIDEND) == MockDividendService
 
-        # Check required services are available
-        assert self.registry.get_broker_service("test_broker", ServiceType.PORTFOLIO) == self.mock_portfolio_service
-        assert self.registry.get_broker_service("test_broker", ServiceType.TRANSACTION) == self.mock_transaction_service
-        assert self.registry.get_broker_service("test_broker", ServiceType.DEPOSIT) == self.mock_deposit_service
-
-        # Check capabilities include required services
-        capabilities = self.registry.get_broker_capabilities("test_broker")
-        assert ServiceType.PORTFOLIO in capabilities
-        assert ServiceType.TRANSACTION in capabilities
-        assert ServiceType.DEPOSIT in capabilities
-        assert len(capabilities) == 3
-
-    def test_register_broker_with_all_services(self):
-        """Test registering a broker with all services."""
-        self.registry.register_broker(
-            broker_name="full_broker",
-            portfolio_service=self.mock_portfolio_service,
-            transaction_service=self.mock_transaction_service,
-            deposit_service=self.mock_deposit_service,
-            dividend_service=self.mock_dividend_service,
-            fee_service=self.mock_fee_service,
-            account_service=self.mock_account_service,
-        )
-
-        # Check all services are available
-        assert self.registry.get_broker_service("full_broker", ServiceType.PORTFOLIO) == self.mock_portfolio_service
-        assert self.registry.get_broker_service("full_broker", ServiceType.TRANSACTION) == self.mock_transaction_service
-        assert self.registry.get_broker_service("full_broker", ServiceType.DEPOSIT) == self.mock_deposit_service
-        assert self.registry.get_broker_service("full_broker", ServiceType.DIVIDEND) == self.mock_dividend_service
-        assert self.registry.get_broker_service("full_broker", ServiceType.FEE) == self.mock_fee_service
-        assert self.registry.get_broker_service("full_broker", ServiceType.ACCOUNT) == self.mock_account_service
-
-        # Check capabilities include all services
-        capabilities = self.registry.get_broker_capabilities("full_broker")
-        assert len(capabilities) == 6
-        assert all(service_type in capabilities for service_type in ServiceType)
-
-    def test_register_duplicate_broker_raises_exception(self):
-        """Test that registering a duplicate broker raises an exception."""
-        # Register broker first time
-        self.registry.register_broker(
-            broker_name="duplicate_broker",
-            portfolio_service=self.mock_portfolio_service,
-            transaction_service=self.mock_transaction_service,
-            deposit_service=self.mock_deposit_service,
-        )
-
-        # Try to register same broker again
-        with pytest.raises(ServiceRegistryException) as exc_info:
-            self.registry.register_broker(
-                broker_name="duplicate_broker",
-                portfolio_service=self.mock_portfolio_service,
-                transaction_service=self.mock_transaction_service,
-                deposit_service=self.mock_deposit_service,
+    def test_register_broker_services_missing_required(self):
+        """Test broker services registration missing required services."""
+        with pytest.raises(BrokerRegistryValidationError, match="Missing required services"):
+            self.registry.register_broker_services(
+                "testbroker",
+                transaction=MockTransactionService,
+                deposit=MockDepositService,
             )
 
-        assert "Broker 'duplicate_broker' is already registered" in str(exc_info.value)
+    def test_register_broker_services_invalid_service_type(self):
+        """Test broker services registration with invalid service type."""
+        with pytest.raises(BrokerRegistryValidationError, match="Invalid service type"):
+            self.registry.register_broker_services(
+                "testbroker",
+                portfolio=MockPortfolioService,
+                invalid_service=MockTransactionService,
+            )
 
-    def test_get_broker_service_nonexistent_broker(self):
-        """Test getting service from non-existent broker returns None."""
-        result = self.registry.get_broker_service("nonexistent", ServiceType.PORTFOLIO)
-        assert result is None
+    def test_register_broker_services_invalid_service_class(self):
+        """Test broker services registration with invalid service class."""
+        with pytest.raises(BrokerRegistryValidationError, match="Service .* must be a class type"):
+            self.registry.register_broker_services(
+                "testbroker",
+                portfolio="not_a_class",
+            )
 
-    def test_get_broker_service_unsupported_service(self):
-        """Test getting unsupported service returns None."""
-        # Register broker without dividend service
-        self.registry.register_broker(
-            broker_name="limited_broker",
-            portfolio_service=self.mock_portfolio_service,
-            transaction_service=self.mock_transaction_service,
-            deposit_service=self.mock_deposit_service,
+    def test_register_broker_services_no_services(self):
+        """Test broker services registration with no services."""
+        with pytest.raises(BrokerRegistryValidationError, match="At least one service must be provided"):
+            self.registry.register_broker_services("testbroker")
+
+    def test_register_broker_services_duplicate(self):
+        """Test duplicate broker services registration."""
+        self.registry.register_broker_services("testbroker", portfolio=MockPortfolioService)
+
+        with pytest.raises(
+            BrokerRegistryValidationError, match="Services for broker 'testbroker' are already registered"
+        ):
+            self.registry.register_broker_services("testbroker", portfolio=MockPortfolioService)
+
+    def test_get_service_class_nonexistent_broker(self):
+        """Test getting service class for non-existent broker."""
+        service_class = self.registry.get_service_class("nonexistent", ServiceType.PORTFOLIO)
+        assert service_class is None
+
+    def test_get_service_class_nonexistent_service(self):
+        """Test getting non-existent service class for broker."""
+        self.registry.register_broker_services("testbroker", portfolio=MockPortfolioService)
+
+        service_class = self.registry.get_service_class("testbroker", ServiceType.DIVIDEND)
+        assert service_class is None
+
+    def test_broker_supports_service(self):
+        """Test checking if broker supports specific service."""
+        self.registry.register_broker_services(
+            "testbroker",
+            portfolio=MockPortfolioService,
+            transaction=MockTransactionService,
         )
 
-        result = self.registry.get_broker_service("limited_broker", ServiceType.DIVIDEND)
-        assert result is None
+        assert self.registry.broker_supports_service("testbroker", ServiceType.PORTFOLIO)
+        assert self.registry.broker_supports_service("testbroker", ServiceType.TRANSACTION)
+        assert not self.registry.broker_supports_service("testbroker", ServiceType.DIVIDEND)
+        assert not self.registry.broker_supports_service("nonexistent", ServiceType.PORTFOLIO)
 
-    def test_get_available_brokers_empty(self):
-        """Test getting available brokers when none are registered."""
-        brokers = self.registry.get_available_brokers()
-        assert brokers == []
-
-    def test_get_available_brokers_with_registrations(self):
-        """Test getting available brokers after registrations."""
-        # Register two brokers
-        self.registry.register_broker(
-            broker_name="broker1",
-            portfolio_service=self.mock_portfolio_service,
-            transaction_service=self.mock_transaction_service,
-            deposit_service=self.mock_deposit_service,
+    def test_get_broker_capabilities(self):
+        """Test getting broker capabilities."""
+        self.registry.register_broker_services(
+            "testbroker",
+            portfolio=MockPortfolioService,
+            transaction=MockTransactionService,
         )
 
-        self.registry.register_broker(
-            broker_name="broker2",
-            portfolio_service=self.mock_portfolio_service,
-            transaction_service=self.mock_transaction_service,
-            deposit_service=self.mock_deposit_service,
+        capabilities = self.registry.get_broker_capabilities("testbroker")
+        assert ServiceType.PORTFOLIO in capabilities
+        assert ServiceType.TRANSACTION in capabilities
+        assert ServiceType.DIVIDEND not in capabilities
+
+        # Test non-existent broker
+        empty_capabilities = self.registry.get_broker_capabilities("nonexistent")
+        assert empty_capabilities == []
+
+    def test_test_register_complete_broker_success(self):
+        """Test successful complete broker registration."""
+        self.registry.register_complete_broker(
+            "testbroker",
+            MockBrokerConfig,
+            portfolio=MockPortfolioService,
+            transaction=MockTransactionService,
+            deposit=MockDepositService,
         )
 
-        brokers = self.registry.get_available_brokers()
-        assert len(brokers) == 2
+        assert self.registry.is_config_registered("testbroker")
+        assert self.registry.get_config_class("testbroker") == MockBrokerConfig
+        assert self.registry.get_service_class("testbroker", ServiceType.PORTFOLIO) == MockPortfolioService
+        assert self.registry.get_service_class("testbroker", ServiceType.TRANSACTION) == MockTransactionService
+        assert self.registry.get_service_class("testbroker", ServiceType.DEPOSIT) == MockDepositService
+
+    def test_test_register_complete_broker_rollback_on_service_failure(self):
+        """Test rollback of config registration when service registration fails."""
+        with pytest.raises(BrokerRegistryValidationError, match="Missing required services"):
+            self.registry.register_complete_broker(
+                "testbroker",
+                MockBrokerConfig,
+                transaction=MockTransactionService,  # Missing required portfolio service
+            )
+
+        # Configuration should not be registered due to rollback
+        assert not self.registry.is_config_registered("testbroker")
+
+    def test_get_registered_brokers(self):
+        """Test getting list of registered brokers."""
+        self.registry.register_broker_config("broker1", MockBrokerConfig)
+        self.registry.register_broker_config("broker2", MockBrokerConfig)
+
+        brokers = self.registry.get_registered_brokers()
         assert "broker1" in brokers
         assert "broker2" in brokers
+        assert len(brokers) == 2
 
-    def test_get_broker_capabilities_nonexistent_broker(self):
-        """Test getting capabilities for non-existent broker."""
-        capabilities = self.registry.get_broker_capabilities("nonexistent")
-        assert capabilities == []
+    def test_get_fully_registered_brokers(self):
+        """Test getting brokers with both config and services."""
+        # Register config only
+        self.registry.register_broker_config("broker1", MockBrokerConfig)
 
-    def test_broker_supports_service_supported(self):
-        """Test checking if broker supports a service it has."""
-        self.registry.register_broker(
-            broker_name="test_broker",
-            portfolio_service=self.mock_portfolio_service,
-            transaction_service=self.mock_transaction_service,
-            deposit_service=self.mock_deposit_service,
-            dividend_service=self.mock_dividend_service,
+        # Register complete broker
+        self.registry.register_complete_broker(
+            "broker2",
+            MockBrokerConfig,
+            portfolio=MockPortfolioService,
         )
 
-        assert self.registry.broker_supports_service("test_broker", ServiceType.PORTFOLIO) is True
-        assert self.registry.broker_supports_service("test_broker", ServiceType.DIVIDEND) is True
+        fully_registered = self.registry.get_fully_registered_brokers()
+        assert "broker1" not in fully_registered
+        assert "broker2" in fully_registered
+        assert len(fully_registered) == 1
 
-    def test_broker_supports_service_unsupported(self):
-        """Test checking if broker supports a service it doesn't have."""
-        # Register broker without fee service
-        self.registry.register_broker(
-            broker_name="test_broker",
-            portfolio_service=self.mock_portfolio_service,
-            transaction_service=self.mock_transaction_service,
-            deposit_service=self.mock_deposit_service,
+    def test_get_registration_status(self):
+        """Test getting registration status for all brokers."""
+        # Register config only
+        self.registry.register_broker_config("broker1", MockBrokerConfig)
+
+        # Register complete broker
+        self.registry.register_complete_broker(
+            "broker2",
+            MockBrokerConfig,
+            portfolio=MockPortfolioService,
         )
 
-        assert self.registry.broker_supports_service("test_broker", ServiceType.FEE) is False
+        status = self.registry.get_registration_status()
 
-    def test_broker_supports_service_nonexistent_broker(self):
-        """Test checking if non-existent broker supports a service."""
-        assert self.registry.broker_supports_service("nonexistent", ServiceType.PORTFOLIO) is False
+        assert status["broker1"]["config_registered"] is True
+        assert status["broker1"]["services_registered"] is False
+
+        assert status["broker2"]["config_registered"] is True
+        assert status["broker2"]["services_registered"] is True
+
+    def test_validate_all_registrations(self):
+        """Test validation of all broker registrations."""
+        # Register complete valid broker
+        self.registry.register_complete_broker(
+            "validbroker",
+            MockBrokerConfig,
+            portfolio=MockPortfolioService,
+        )
+
+        # Register config without services
+        self.registry.register_broker_config("incompletebroker", MockBrokerConfig)
+
+        validation = self.registry.validate_all_registrations()
+
+        assert validation["all_valid"] is False
+        assert validation["brokers"]["validbroker"]["valid"] is True
+        assert validation["brokers"]["incompletebroker"]["valid"] is False
+        assert "No services registered" in validation["brokers"]["incompletebroker"]["issues"]
 
     def test_unregister_broker(self):
         """Test unregistering a broker."""
-        # Register broker
-        self.registry.register_broker(
-            broker_name="test_broker",
-            portfolio_service=self.mock_portfolio_service,
-            transaction_service=self.mock_transaction_service,
-            deposit_service=self.mock_deposit_service,
+        # Register complete broker
+        self.registry.register_complete_broker(
+            "testbroker",
+            MockBrokerConfig,
+            portfolio=MockPortfolioService,
         )
 
-        # Verify broker is registered
-        assert "test_broker" in self.registry.get_available_brokers()
-        assert self.registry.broker_supports_service("test_broker", ServiceType.PORTFOLIO) is True
+        assert self.registry.is_config_registered("testbroker")
 
         # Unregister broker
-        self.registry.unregister_broker("test_broker")
+        result = self.registry.unregister_broker("testbroker")
 
-        # Verify broker is no longer available
-        assert "test_broker" not in self.registry.get_available_brokers()
-        assert self.registry.broker_supports_service("test_broker", ServiceType.PORTFOLIO) is False
-        assert self.registry.get_broker_service("test_broker", ServiceType.PORTFOLIO) is None
+        assert result is True
+        assert not self.registry.is_config_registered("testbroker")
+        assert self.registry.get_service_class("testbroker", ServiceType.PORTFOLIO) is None
 
-    def test_unregister_nonexistent_broker(self):
-        """Test unregistering a non-existent broker (should not raise exception)."""
-        # Should not raise exception
-        self.registry.unregister_broker("nonexistent")
+        # Try unregistering non-existent broker
+        result = self.registry.unregister_broker("nonexistent")
+        assert result is False
 
-        # Registry should still be empty
-        assert self.registry.get_available_brokers() == []
-
-    def test_service_type_enum_values(self):
-        """Test that ServiceType enum has expected values."""
-        expected_values = ["portfolio", "transaction", "deposit", "dividend", "fee", "account"]
-        actual_values = [service_type.value for service_type in ServiceType]
-
-        assert len(actual_values) == len(expected_values)
-        for expected in expected_values:
-            assert expected in actual_values
-
-    def test_multiple_brokers_independent_capabilities(self):
-        """Test that multiple brokers can have different capabilities."""
-        # Register broker with basic services
-        self.registry.register_broker(
-            broker_name="basic_broker",
-            portfolio_service=self.mock_portfolio_service,
-            transaction_service=self.mock_transaction_service,
-            deposit_service=self.mock_deposit_service,
+    def test_clear_all_registrations(self):
+        """Test clearing all registrations."""
+        self.registry.register_complete_broker(
+            "testbroker",
+            MockBrokerConfig,
+            portfolio=MockPortfolioService,
         )
 
-        # Register broker with extended services
-        self.registry.register_broker(
-            broker_name="extended_broker",
-            portfolio_service=self.mock_portfolio_service,
-            transaction_service=self.mock_transaction_service,
-            deposit_service=self.mock_deposit_service,
-            dividend_service=self.mock_dividend_service,
-            fee_service=self.mock_fee_service,
+        assert len(self.registry.get_registered_brokers()) > 0
+
+        self.registry.clear_all_registrations()
+
+        assert len(self.registry.get_registered_brokers()) == 0
+        assert len(self.registry.get_fully_registered_brokers()) == 0
+
+    def test_validate_broker_service_compatibility(self):
+        """Test validation of broker service compatibility."""
+        # Register complete broker
+        self.registry.register_complete_broker(
+            "validbroker",
+            MockBrokerConfig,
+            portfolio=MockPortfolioService,
         )
 
-        # Check capabilities are independent
-        basic_capabilities = self.registry.get_broker_capabilities("basic_broker")
-        extended_capabilities = self.registry.get_broker_capabilities("extended_broker")
+        # Test valid broker
+        result = self.registry.validate_broker_service_compatibility("validbroker")
+        assert result["valid"] is True
+        assert len(result["issues"]) == 0
 
-        assert len(basic_capabilities) == 3
-        assert len(extended_capabilities) == 5
+        # Test broker with no config
+        result = self.registry.validate_broker_service_compatibility("nonexistent")
+        assert result["valid"] is False
+        assert "No configuration registered" in result["issues"]
 
-        assert self.registry.broker_supports_service("basic_broker", ServiceType.DIVIDEND) is False
-        assert self.registry.broker_supports_service("extended_broker", ServiceType.DIVIDEND) is True
+        # Test broker with config but no services
+        self.registry.register_broker_config("incompletebroker", MockBrokerConfig)
+        result = self.registry.validate_broker_service_compatibility("incompletebroker")
+        assert result["valid"] is False
+        assert "No services registered" in result["issues"]
+
+    def test_thread_safety(self):
+        """Test thread safety of registry operations."""
+        import time
+        from concurrent.futures import ThreadPoolExecutor
+
+        def register_broker(brokerid):
+            """Register a broker in a thread."""
+            try:
+                time.sleep(0.01)  # Simulate some work
+                self.registry.register_broker_config(f"broker{brokerid}", MockBrokerConfig)
+                self.registry.register_broker_services(f"broker{brokerid}", portfolio=MockPortfolioService)
+                return True
+            except Exception:
+                return False
+
+        # Register brokers concurrently
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            futures = [executor.submit(register_broker, i) for i in range(50)]
+            results = [future.result() for future in futures]
+
+        # All registrations should succeed
+        assert all(results)
+        assert len(self.registry.get_registered_brokers()) == 50
+        assert len(self.registry.get_fully_registered_brokers()) == 50
+
+    def test_singleton_behavior(self):
+        """Test that multiple registry instances are the same object."""
+        registry1 = BrokerRegistry()
+        registry2 = BrokerRegistry()
+        assert registry1 is registry2

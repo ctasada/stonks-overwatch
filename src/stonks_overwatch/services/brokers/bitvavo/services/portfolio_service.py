@@ -2,8 +2,9 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import List, Optional
 
-from stonks_overwatch.config.config import Config
-from stonks_overwatch.core.interfaces.portfolio_service import PortfolioServiceInterface
+from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.core.interfaces import PortfolioServiceInterface
+from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import BitvavoService
 from stonks_overwatch.services.brokers.bitvavo.repositories.assets_repository import AssetsRepository
 from stonks_overwatch.services.brokers.bitvavo.repositories.balance_repository import BalanceRepository
@@ -21,12 +22,25 @@ from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.domain.constants import ProductType
 
 
-class PortfolioService(PortfolioServiceInterface):
+class PortfolioService(BaseService, PortfolioServiceInterface):
     @dataclass
     class Quotation:
         from_date: Optional[str]
         to_date: Optional[str]
         interval: Optional[str]
+        quotes: Optional[dict]
+
+    @dataclass
+    class Balance:
+        symbol: str
+        available: str
+        in_order: str
+
+    @dataclass
+    class Symbol:
+        symbol: str
+        market: str
+        base: str
         quotes: Optional[dict]
 
     @dataclass
@@ -37,12 +51,11 @@ class PortfolioService(PortfolioServiceInterface):
 
     logger = StonksLogger.get_logger("stonks_overwatch.portfolio_data.bitvavo", "[BITVAVO|PORTFOLIO]")
 
-    def __init__(
-        self,
-    ):
+    def __init__(self, config: Optional[BaseConfig] = None):
+        super().__init__(config)
         self.bitvavo_service = BitvavoService()
         self.deposits = DepositsService()
-        self.base_currency = Config.get_global().base_currency
+        # Use base_currency property from BaseService which handles dependency injection
 
     @staticmethod
     def __is_currency(symbol: str) -> bool:

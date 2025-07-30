@@ -1,11 +1,23 @@
 """poetry run python ./scripts/bitvavo/bitvavo.py"""
 
 import json
+import os
 import time
 from datetime import datetime
 from pprint import pprint
 
-from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import BitvavoService
+import django
+
+# Set up Django
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "stonks_overwatch.settings")
+django.setup()
+
+# Initialize broker registry for standalone script usage
+from stonks_overwatch.core.registry_setup import ensure_unified_registry_initialized  # noqa: E402
+
+ensure_unified_registry_initialized()
+
+from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import BitvavoService  # noqa: E402
 
 
 # Use this class to connect to Bitvavo and make your first calls.
