@@ -5,16 +5,38 @@ from typing import Optional
 
 from django.db.utils import OperationalError
 
+from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.settings import STONKS_OVERWATCH_DATA_DIR
 from stonks_overwatch.utils.core.logger import StonksLogger
 
 
 class AbstractUpdateService(ABC):
+    """
+    Base class for update services that handle data updates for brokers.
+
+    **Dependency Injection Support:**
+
+    To support dependency injection with the BrokerFactory, service
+    implementations should:
+
+    1. Accept an optional `config` parameter in their constructor and pass it to super():
+       ```python
+       def __init__(self, broker_name: str, config: Optional[BaseConfig] = None, **kwargs):
+           super().__init__(broker_name, config=config, **kwargs)
+       ```
+
+    2. Use the inherited configuration handling methods for accessing config.
+
+    3. This maintains backward compatibility while enabling automatic
+       configuration injection from the unified factory.
+    """
+
     def __init__(
         self,
         broker_name: str,
         import_folder: Optional[str] = None,
         debug_mode: Optional[bool] = None,
+        config: Optional[BaseConfig] = None,
     ):
         """
         Initialize the UpdateService.
@@ -23,8 +45,10 @@ class AbstractUpdateService(ABC):
             broker_name: Name of the broker (e.g., 'bitvavo', 'ibkr', 'degiro')
             import_folder: Folder to store JSON files for debugging purposes
             debug_mode: If True, the service will store JSON files for debugging
+            config: Optional broker-specific configuration for dependency injection
         """
         self.broker_name = broker_name.lower()
+        self._injected_config = config
         self.import_folder = (
             import_folder
             if import_folder is not None
@@ -42,6 +66,25 @@ class AbstractUpdateService(ABC):
         logger_name = f"stonks_overwatch.{self.broker_name}.update_service"
         logger_prefix = f"[{self.broker_name.upper()}|UPDATE]"
         self.logger = StonksLogger.get_logger(logger_name, logger_prefix)
+
+    @property
+    def config(self) -> Optional[BaseConfig]:
+        """
+        Get the injected configuration if available.
+
+        Returns:
+            Optional[BaseConfig]: The injected configuration or None
+        """
+        return self._injected_config
+
+    def is_dependency_injection_enabled(self) -> bool:
+        """
+        Check if dependency injection is being used.
+
+        Returns:
+            bool: True if configuration was injected, False otherwise
+        """
+        return self._injected_config is not None
 
     def _log_message(self, message: str) -> None:
         """Log a message to the console."""

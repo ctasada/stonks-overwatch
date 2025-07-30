@@ -1,9 +1,10 @@
 import json
 from datetime import datetime
+from typing import Optional
 
 from python_bitvavo_api.bitvavo import Bitvavo, createPostfix
 
-from stonks_overwatch.config.config import Config
+from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.singleton import singleton
 
@@ -33,9 +34,36 @@ class BitvavoService:
         self,
         debugging: bool = False,
         force: bool = False,
+        config: Optional[BaseConfig] = None,
     ):
         self.force = force
-        self.bitvavo_config = Config.get_global().registry.get_broker_config("bitvavo")
+
+        # Use dependency injection if config is provided, otherwise fallback to global config
+        if config is not None:
+            self.bitvavo_config = config
+        else:
+            # Get Bitvavo configuration using unified BrokerFactory
+            try:
+                from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+
+                # Get Bitvavo configuration using BrokerFactory
+                broker_factory = BrokerFactory()
+                self.bitvavo_config = broker_factory.create_config("bitvavo")
+
+                if self.bitvavo_config is None:
+                    raise RuntimeError(
+                        "Bitvavo configuration not available. This usually means:\n"
+                        "1. The broker registry hasn't been initialized (call django.setup() for scripts)\n"
+                        "2. Bitvavo broker registration is missing from registry setup\n"
+                        "3. No valid Bitvavo configuration file exists\n"
+                        "Please ensure Django is properly initialized before using broker services."
+                    )
+            except ImportError as e:
+                raise ImportError(f"Failed to import BrokerFactory: {e}") from e
+
+        if self.bitvavo_config is None:
+            raise RuntimeError("Bitvavo configuration is None - broker registry not properly initialized")
+
         bitvavo_credentials = self.bitvavo_config.credentials
 
         if bitvavo_credentials and bitvavo_credentials.apikey and bitvavo_credentials.apisecret:
@@ -48,7 +76,7 @@ class BitvavoService:
             )
 
     def get_client(self) -> Bitvavo:
-        if not self.force and Config.get_global().registry.get_broker_config("bitvavo").offline_mode:
+        if not self.force and self.bitvavo_config.offline_mode:
             raise BitvavoOfflineModeError("Bitvavo working in offline mode. No connection is allowed")
 
         return self.client

@@ -1,6 +1,6 @@
 import os
-from datetime import date, datetime, time, timezone
-from typing import Dict, List
+from datetime import date, datetime, time, timedelta, timezone
+from typing import Dict, List, Optional
 
 import pandas as pd
 from degiro_connector.quotecast.models.chart import Interval
@@ -10,7 +10,8 @@ from django.core.cache import cache
 from django.db import connection
 from pandas import DataFrame
 
-from stonks_overwatch.config.config import Config
+from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.core.interfaces.update_service import AbstractUpdateService
 from stonks_overwatch.services.brokers.degiro.client.constants import CurrencyFX, ProductType
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
@@ -45,18 +46,25 @@ CACHE_KEY_UPDATE_YFINANCE = "yfinance_update"
 CACHE_TIMEOUT = 3600
 
 
-class UpdateService(AbstractUpdateService):
-    def __init__(self, import_folder: str = None, debug_mode: bool = None):
+class UpdateService(BaseService, AbstractUpdateService):
+    def __init__(self, import_folder: str = None, debug_mode: bool = None, config: Optional[BaseConfig] = None):
         """
         Initialize the UpdateService.
         :param import_folder:
             Folder to store the JSON files for debugging purposes.
         :param debug_mode:
             If True, the service will store the JSON files for debugging purposes.
+        :param config:
+            Optional configuration instance for dependency injection.
         """
-        super().__init__("DEGIRO", import_folder, debug_mode)
+        # Initialize AbstractUpdateService first (has no super() calls to interfere)
+        AbstractUpdateService.__init__(self, "DEGIRO", import_folder, debug_mode, config)
+        # Then manually set BaseService attributes without calling its __init__
+        self._injected_config = config
+        self._global_config = None
 
-        self.degiro_service = DeGiroService()
+        # Pass injected config to DeGiro service for proper credential access
+        self.degiro_service = DeGiroService(config=config)
 
         self.portfolio_data = PortfolioService(
             degiro_service=self.degiro_service,
@@ -73,18 +81,40 @@ class UpdateService(AbstractUpdateService):
     def _get_last_cash_movement_import(self) -> datetime:
         last_movement = CashMovementsRepository.get_last_movement()
         if last_movement is None:
-            last_movement = datetime.combine(
-                Config.get_global().registry.get_broker_config("degiro").start_date, time.min
-            )
+            # Use injected config or get via unified factory
+            if self._injected_config:
+                degiro_config = self._injected_config
+            else:
+                from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+
+                broker_factory = BrokerFactory()
+                degiro_config = broker_factory.create_config("degiro")
+
+            if degiro_config:
+                last_movement = datetime.combine(degiro_config.start_date, time.min)
+            else:
+                # Fallback to a reasonable default if no config available
+                last_movement = datetime.now() - timedelta(days=365)
 
         return last_movement
 
     def _get_last_transactions_import(self) -> datetime:
         last_movement = TransactionsRepository.get_last_movement()
         if last_movement is None:
-            last_movement = datetime.combine(
-                Config.get_global().registry.get_broker_config("degiro").start_date, time.min
-            )
+            # Use injected config or get via unified factory
+            if self._injected_config:
+                degiro_config = self._injected_config
+            else:
+                from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+
+                broker_factory = BrokerFactory()
+                degiro_config = broker_factory.create_config("degiro")
+
+            if degiro_config:
+                last_movement = datetime.combine(degiro_config.start_date, time.min)
+            else:
+                # Fallback to a reasonable default if no config available
+                last_movement = datetime.now() - timedelta(days=365)
 
         return last_movement
 
@@ -94,7 +124,7 @@ class UpdateService(AbstractUpdateService):
             return
 
         if self.debug_mode:
-            self.logger.warning("Storing JSON files at %s", self.import_folder)
+            self.logger.info("Storing JSON files at %s", self.import_folder)
 
         try:
             self.update_account()
@@ -405,11 +435,23 @@ class UpdateService(AbstractUpdateService):
         product_growth = self.portfolio_data.calculate_product_growth()
 
         # Include Currencies in the Quotations
-        start_date = (
-            Config.get_global()
-            .registry.get_broker_config("degiro")
-            .start_date.strftime(LocalizationUtility.DATE_FORMAT)
-        )
+        # Use injected config or get via unified factory
+        if self._injected_config:
+            degiro_config = self._injected_config
+        else:
+            from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+
+            broker_factory = BrokerFactory()
+            degiro_config = broker_factory.create_config("degiro")
+
+        if degiro_config and hasattr(degiro_config, "start_date"):
+            start_date = degiro_config.start_date.strftime(LocalizationUtility.DATE_FORMAT)
+        else:
+            # Fallback to a reasonable default date if config is unavailable
+            from datetime import datetime, timedelta
+
+            default_start = datetime.now() - timedelta(days=365)  # 1 year ago
+            start_date = default_start.strftime(LocalizationUtility.DATE_FORMAT)
         for currency in CurrencyFX.to_list():
             if currency not in product_growth:
                 product_growth[currency] = {"history": {}}

@@ -1,8 +1,10 @@
 import os
+from typing import Optional
 
 from django.core.cache import cache
 
-from stonks_overwatch.config.config import Config
+from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.core.interfaces.base_service import DependencyInjectionMixin
 from stonks_overwatch.core.interfaces.update_service import AbstractUpdateService
 from stonks_overwatch.services.brokers.ibkr.client.ibkr_service import IbkrService
 from stonks_overwatch.services.brokers.ibkr.repositories.models import IBKRPosition, IBKRTransactions
@@ -14,19 +16,28 @@ CACHE_KEY_UPDATE_PORTFOLIO = "portfolio_data_update_from_ibkr"
 CACHE_TIMEOUT = 3600
 
 
-class UpdateService(AbstractUpdateService):
-    def __init__(self, import_folder: str = None, debug_mode: bool = True):
+class UpdateService(DependencyInjectionMixin, AbstractUpdateService):
+    def __init__(self, import_folder: str = None, debug_mode: bool = True, config: Optional[BaseConfig] = None):
         """
         Initialize the UpdateService.
         :param import_folder:
             Folder to store the JSON files for debugging purposes.
         :param debug_mode:
             If True, the service will store the JSON files for debugging purposes.
+        :param config:
+            Optional configuration for dependency injection.
         """
-        super().__init__("IBKR", import_folder, debug_mode)
+        # Initialize AbstractUpdateService first
+        AbstractUpdateService.__init__(
+            self, broker_name="ibkr", import_folder=import_folder, debug_mode=debug_mode, config=config
+        )
+        # Set up dependency injection attributes manually to avoid super() chain conflicts
+        self._injected_config = config
+        self._global_config = None
 
         self.ibkr_service = IbkrService()
-        self.currency = Config.get_global().base_currency
+        # Use base_currency property from DependencyInjectionMixin which handles dependency injection
+        # self.currency = self.base_currency
 
     def update_all(self):
         if not self.ibkr_service.get_client():
@@ -34,7 +45,7 @@ class UpdateService(AbstractUpdateService):
             return
 
         if self.debug_mode:
-            self.logger.warning("Storing JSON files at %s", self.import_folder)
+            self.logger.info("Storing JSON files at %s", self.import_folder)
 
         try:
             self.update_portfolio()
@@ -70,7 +81,7 @@ class UpdateService(AbstractUpdateService):
         transactions = {}
         for position in PositionsRepository.get_all_positions():
             self._log_message(f"Updating transactions for '{position['contractDesc']}' position '{position['conid']}'")
-            history = self.ibkr_service.transaction_history(position["conid"], self.currency)
+            history = self.ibkr_service.transaction_history(position["conid"], self.base_currency)
 
             transactions[position["conid"]] = history.get("transactions", {})
             for transaction in history.get("transactions", {}):

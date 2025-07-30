@@ -2,7 +2,6 @@ from django import template
 from django.template import RequestContext
 from django.utils import timezone
 
-from stonks_overwatch.config.config import Config
 from stonks_overwatch.services.aggregators.portfolio_aggregator import PortfolioAggregatorService
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroOfflineModeError, DeGiroService
 from stonks_overwatch.services.brokers.degiro.services.update_service import UpdateService
@@ -31,7 +30,13 @@ def show_total_portfolio(context: RequestContext) -> dict:
 @register.simple_tag
 def is_connected_to_degiro() -> bool:
     try:
-        if Config.get_global().is_degiro_enabled():
+        # Check if DeGiro is enabled using unified factory
+        from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+
+        broker_factory = BrokerFactory()
+        degiro_config = broker_factory.create_config("degiro")
+
+        if degiro_config and degiro_config.is_enabled():
             degiro_client = DeGiroService()
             is_connected = degiro_client.check_connection()
             if is_connected and degiro_client.is_maintenance_mode:

@@ -1,5 +1,8 @@
-from typing import List
+from typing import List, Optional
 
+from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.core.interfaces.account_service import AccountServiceInterface
+from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.services.brokers.ibkr.client.constants import TransactionType
 from stonks_overwatch.services.brokers.ibkr.repositories.positions_repository import PositionsRepository
 from stonks_overwatch.services.brokers.ibkr.repositories.transactions_repository import TransactionsRepository
@@ -7,8 +10,11 @@ from stonks_overwatch.services.models import AccountOverview
 from stonks_overwatch.utils.core.logger import StonksLogger
 
 
-class AccountOverviewService:
+class AccountOverviewService(AccountServiceInterface, BaseService):
     logger = StonksLogger.get_logger("stonks_overwatch.account_overview_data", "IBKR|ACCOUNT_OVERVIEW")
+
+    def __init__(self, config: Optional[BaseConfig] = None):
+        super().__init__(config)
 
     def get_account_overview(self) -> List[AccountOverview]:
         self.logger.debug("Get Account Overview")

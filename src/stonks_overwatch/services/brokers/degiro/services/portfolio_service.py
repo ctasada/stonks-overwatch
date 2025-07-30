@@ -6,8 +6,9 @@ from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
 from django.utils.functional import cached_property
 from iso10383 import MIC
 
-from stonks_overwatch.config.config import Config
-from stonks_overwatch.core.interfaces.portfolio_service import PortfolioServiceInterface
+from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.core.interfaces import PortfolioServiceInterface
+from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroOfflineModeError, DeGiroService
 from stonks_overwatch.services.brokers.degiro.repositories.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.services.brokers.degiro.repositories.company_profile_repository import CompanyProfileRepository
@@ -28,7 +29,7 @@ from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.domain.constants import ProductType, Sector
 
 
-class PortfolioService(PortfolioServiceInterface):
+class PortfolioService(BaseService, PortfolioServiceInterface):
     logger = StonksLogger.get_logger("stonks_overwatch.portfolio_data.degiro", "[DEGIRO|PORTFOLIO]")
 
     # Configuration constants
@@ -53,11 +54,13 @@ class PortfolioService(PortfolioServiceInterface):
 
     def __init__(
         self,
-        degiro_service: DeGiroService,
+        degiro_service: Optional[DeGiroService] = None,
+        config: Optional[BaseConfig] = None,
     ):
-        self.degiro_service = degiro_service
+        super().__init__(config)
+        self.degiro_service = degiro_service or DeGiroService()
         self.currency_service = CurrencyConverterService()
-        self.base_currency = Config.get_global().base_currency
+        # Use base_currency property from BaseService which handles dependency injection
         self.deposits = DepositsService(
             degiro_service=self.degiro_service,
         )

@@ -1,14 +1,18 @@
 """
-Service factories and builders for creating broker service instances.
+Factories module exports.
 
-This package contains factories for creating and managing broker service
-instances, including the service registry and service builders.
+Provides access to the broker factories and registries.
 """
 
-from .broker_registry import BrokerRegistry
-from .service_factory import ServiceFactory
+from .broker_factory import (
+    BrokerFactory,
+    BrokerFactoryError,
+)
+from .broker_registry import BrokerRegistry, BrokerRegistryValidationError
 
 __all__ = [
+    "BrokerFactory",
+    "BrokerFactoryError",
     "BrokerRegistry",
-    "ServiceFactory",
+    "BrokerRegistryValidationError",
 ]

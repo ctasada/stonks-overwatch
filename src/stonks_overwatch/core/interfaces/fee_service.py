@@ -1,23 +1,24 @@
 """
-Transaction service interface.
+Fee service interface.
 
-This module defines the interface for transaction service implementations.
-All broker transaction services should implement this interface.
+This module defines the interface for fee service implementations.
+This interface is optional - only brokers that support fee tracking
+need to implement this interface.
 """
 
 from abc import ABC, abstractmethod
 from typing import List
 
-from stonks_overwatch.services.models import Transaction
+from stonks_overwatch.services.models import Fee
 
 
-class TransactionServiceInterface(ABC):
+class FeeServiceInterface(ABC):
     """
-    Interface for transaction service implementations.
+    Interface for fee service implementations.
 
-    This interface defines the common operations that all transaction services
-    should support, such as retrieving transaction history and processing
-    transaction data.
+    This interface defines the common operations that fee services
+    should support. This is an optional interface - only brokers that
+    support fee tracking need to implement it.
 
     **Dependency Injection Support:**
 
@@ -35,7 +36,7 @@ class TransactionServiceInterface(ABC):
        ```python
        from stonks_overwatch.core.interfaces.base_service import BaseService
 
-       class MyTransactionService(TransactionServiceInterface, BaseService):
+       class MyFeeService(FeeServiceInterface, BaseService):
            def __init__(self, config: Optional[BaseConfig] = None, **kwargs):
                super().__init__(config, **kwargs)
                # Now you can use self.config and self.base_currency
@@ -46,11 +47,11 @@ class TransactionServiceInterface(ABC):
     """
 
     @abstractmethod
-    def get_transactions(self) -> List[Transaction]:
+    def get_fees(self) -> List[Fee]:
         """
-        Retrieves the transaction history.
+        Retrieves the fee history including transaction fees, account fees, and other charges.
 
         Returns:
-            List[Transaction]: List of transactions sorted by date (newest first)
+            List[Fee]: List of fees sorted by date and time (newest first)
         """
         pass

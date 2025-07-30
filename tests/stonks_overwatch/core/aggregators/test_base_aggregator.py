@@ -6,7 +6,7 @@ covering initialization, broker service management, data collection, and helper 
 """
 
 from stonks_overwatch.core.aggregators.base_aggregator import BaseAggregator
-from stonks_overwatch.core.factories.broker_registry import ServiceType
+from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.services.models import PortfolioId
 
 import pytest
@@ -26,44 +26,31 @@ class TestBaseAggregator:
 
     def setup_method(self):
         """Set up test fixtures before each test method."""
-        # Clear any singleton instances
-        from stonks_overwatch.core.factories.broker_registry import BrokerRegistry
-        from stonks_overwatch.core.factories.service_factory import ServiceFactory
+        # Clear any singleton instances (legacy BrokerRegistry removed - using unified system)
 
-        if hasattr(ServiceFactory, "_instance"):
-            ServiceFactory._instance = None
-        if hasattr(BrokerRegistry, "_instance"):
-            BrokerRegistry._instance = None
-
-    @patch("stonks_overwatch.core.aggregators.base_aggregator.ServiceFactory")
+    @patch("stonks_overwatch.core.aggregators.base_aggregator.BrokerFactory")
     @patch("stonks_overwatch.core.aggregators.base_aggregator.Config")
-    def test_initialization(self, mock_config, mock_service_factory_class):
+    def test_initialization(self, mock_config, mock_factory_class):
         """Test aggregator initialization."""
-        # Mock the factory instance
+        # Setup
         mock_factory = MagicMock()
-        mock_service_factory_class.return_value = mock_factory
-        mock_factory.get_available_brokers.return_value = []
+        mock_factory_class.return_value = mock_factory
 
-        # Mock config
-        mock_config.default.return_value = MagicMock()
-
-        # Create aggregator
+        # Test
         aggregator = ConcreteAggregator(ServiceType.PORTFOLIO)
 
-        # Verify initialization
-        assert aggregator.service_type == ServiceType.PORTFOLIO
+        # Verify
         assert aggregator._service_type == ServiceType.PORTFOLIO
-        mock_factory.get_available_brokers.assert_called_once()
+        assert aggregator._factory is not None
 
-    @patch("stonks_overwatch.core.aggregators.base_aggregator.ServiceFactory")
     @patch("stonks_overwatch.core.aggregators.base_aggregator.Config")
-    def test_collect_broker_data_success(self, mock_config, mock_service_factory_class):
-        """Test successful data collection from brokers."""
-        # Mock setup
+    @patch("stonks_overwatch.core.aggregators.base_aggregator.BrokerFactory")
+    def test_collect_broker_data_success(self, mock_config, mock_factory_class):
+        """Test successful data collection from multiple brokers."""
+        # Setup
         mock_factory = MagicMock()
-        mock_service_factory_class.return_value = mock_factory
-        mock_factory.get_available_brokers.return_value = []
-        mock_config.default.return_value = MagicMock()
+        mock_factory_class.return_value = mock_factory
+        mock_config.get_global.return_value = MagicMock()
 
         # Create aggregator
         aggregator = ConcreteAggregator(ServiceType.PORTFOLIO)
@@ -89,15 +76,14 @@ class TestBaseAggregator:
             assert result["broker1"] == ["data1", "data2"]
             assert result["broker2"] == ["data3", "data4"]
 
-    @patch("stonks_overwatch.core.aggregators.base_aggregator.ServiceFactory")
     @patch("stonks_overwatch.core.aggregators.base_aggregator.Config")
-    def test_collect_and_merge_lists(self, mock_config, mock_service_factory_class):
-        """Test the _collect_and_merge_lists helper method."""
-        # Mock setup
+    @patch("stonks_overwatch.core.aggregators.base_aggregator.BrokerFactory")
+    def test_collect_and_merge_lists(self, mock_config, mock_factory_class):
+        """Test collecting and merging data from multiple brokers."""
+        # Setup
         mock_factory = MagicMock()
-        mock_service_factory_class.return_value = mock_factory
-        mock_factory.get_available_brokers.return_value = []
-        mock_config.default.return_value = MagicMock()
+        mock_factory_class.return_value = mock_factory
+        mock_config.get_global.return_value = MagicMock()
 
         # Create aggregator
         aggregator = ConcreteAggregator(ServiceType.PORTFOLIO)

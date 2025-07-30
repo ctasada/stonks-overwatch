@@ -1,7 +1,7 @@
 from typing import List
 
 from stonks_overwatch.core.aggregators.base_aggregator import BaseAggregator
-from stonks_overwatch.core.factories.broker_registry import ServiceType
+from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.services.models import Dividend, PortfolioId
 
 
