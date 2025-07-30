@@ -4,7 +4,47 @@ from functools import wraps
 
 import requests_cache
 
+from stonks_overwatch.core.interfaces.account_service import AccountServiceInterface
+from stonks_overwatch.core.interfaces.deposit_service import DepositServiceInterface
+from stonks_overwatch.core.interfaces.dividend_service import DividendServiceInterface
+from stonks_overwatch.core.interfaces.fee_service import FeeServiceInterface
+from stonks_overwatch.core.interfaces.portfolio_service import PortfolioServiceInterface
+from stonks_overwatch.core.interfaces.transaction_service import TransactionServiceInterface
+
 import pytest
+
+
+# Django setup for test environment - must be done before any Django model imports
+def setup_django_for_tests():
+    """Properly initialize Django settings for unified architecture tests."""
+    import django
+    from django.conf import settings
+
+    if not settings.configured:
+        # Configure Django with minimal settings for testing
+        settings.configure(
+            DEBUG=True,
+            SECRET_KEY="test-secret-key-for-testing-only",
+            INSTALLED_APPS=[
+                "django.contrib.contenttypes",
+                "django.contrib.sessions",
+                "django.contrib.messages",
+                "stonks_overwatch.app_config.StonksOverwatchConfig",
+            ],
+            DATABASES={
+                "default": {
+                    "ENGINE": "django.db.backends.sqlite3",
+                    "NAME": ":memory:",
+                }
+            },
+            USE_TZ=True,
+            DEFAULT_AUTO_FIELD="django.db.models.BigAutoField",
+        )
+        django.setup()
+
+
+# Initialize Django before any imports that might reference Django models
+setup_django_for_tests()
 
 
 @pytest.fixture(scope="session")
@@ -139,43 +179,99 @@ def _register_real_services(registry, services_dict):
         registry.register_broker_services(broker_name, **services)
 
 
-class MockBrokerService:
-    """Generic mock service class that passes registry validation."""
+class MockPortfolioService(PortfolioServiceInterface):
+    """Mock portfolio service that implements the required interface."""
 
     def __init__(self, config=None):
-        from unittest.mock import MagicMock
-
+        super().__init__()
         self.config = config
-        self._mock = MagicMock()
 
-    def __getattr__(self, name):
-        return getattr(self._mock, name)
+    def get_portfolio(self):
+        return []
+
+
+class MockTransactionService(TransactionServiceInterface):
+    """Mock transaction service that implements the required interface."""
+
+    def __init__(self, config=None):
+        super().__init__()
+        self.config = config
+
+    def get_transactions(self, start_date=None, end_date=None):
+        return []
+
+
+class MockDepositService(DepositServiceInterface):
+    """Mock deposit service that implements the required interface."""
+
+    def __init__(self, config=None):
+        super().__init__()
+        self.config = config
+
+    def get_deposits(self):
+        return []
+
+    def calculate_cash_account_value(self):
+        return {}
+
+
+class MockDividendService(DividendServiceInterface):
+    """Mock dividend service that implements the required interface."""
+
+    def __init__(self, config=None):
+        super().__init__()
+        self.config = config
+
+    def get_dividends(self):
+        return []
+
+
+class MockFeeService(FeeServiceInterface):
+    """Mock fee service that implements the required interface."""
+
+    def __init__(self, config=None):
+        super().__init__()
+        self.config = config
+
+    def get_fees(self):
+        return []
+
+
+class MockAccountService(AccountServiceInterface):
+    """Mock account service that implements the required interface."""
+
+    def __init__(self, config=None):
+        super().__init__()
+        self.config = config
+
+    def get_account_overview(self):
+        return {}
 
 
 def _create_mock_services():
     """Create mock service classes that pass registry validation."""
     return {
         "degiro": {
-            "portfolio": MockBrokerService,
-            "transaction": MockBrokerService,
-            "deposit": MockBrokerService,
-            "dividend": MockBrokerService,
-            "fee": MockBrokerService,
-            "account": MockBrokerService,
+            "portfolio": MockPortfolioService,
+            "transaction": MockTransactionService,
+            "deposit": MockDepositService,
+            "dividend": MockDividendService,
+            "fee": MockFeeService,
+            "account": MockAccountService,
         },
         "bitvavo": {
-            "portfolio": MockBrokerService,
-            "transaction": MockBrokerService,
-            "deposit": MockBrokerService,
-            "dividend": MockBrokerService,
-            "fee": MockBrokerService,
-            "account": MockBrokerService,
+            "portfolio": MockPortfolioService,
+            "transaction": MockTransactionService,
+            "deposit": MockDepositService,
+            "dividend": MockDividendService,
+            "fee": MockFeeService,
+            "account": MockAccountService,
         },
         "ibkr": {
-            "portfolio": MockBrokerService,
-            "transaction": MockBrokerService,
-            "dividend": MockBrokerService,
-            "account": MockBrokerService,
+            "portfolio": MockPortfolioService,
+            "transaction": MockTransactionService,
+            "dividend": MockDividendService,
+            "account": MockAccountService,
         },
     }
 
@@ -195,9 +291,14 @@ def reset_global_config():
     # Reset the global config to force reload
     global_config.reset_for_tests()
 
-    # Initialize unified registry for tests
+    # Clear singleton instances to ensure clean test state
+    if hasattr(BrokerRegistry, "_instances"):
+        BrokerRegistry._instances.clear()
+
+    # Initialize unified registry for tests (Django is already configured at this point)
     try:
         registry = BrokerRegistry()
+        registry.clear_all_registrations()  # Clear any existing registrations
         _register_config_classes(registry)
 
         # Try to register real service classes for proper test mocking
