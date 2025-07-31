@@ -15,6 +15,16 @@ class MenuManager:
         self.log_window = None
         self.license_manager = LicenseManager()
 
+    def setup_preferences_menu(self):
+        preferences_cmd = Command.standard(
+            self.app,
+            Command.PREFERENCES,
+            action=self._preferences_dialog,
+        )
+
+        # Add commands to the app
+        self.app.commands.add(preferences_cmd)
+
     def setup_debug_menu(self):
         tools_group = Group.COMMANDS
         download_db_cmd = Command(
@@ -85,6 +95,9 @@ class MenuManager:
         from stonks_overwatch.settings import STONKS_OVERWATCH_SUPPORT_URL
 
         webbrowser.open_new_tab(STONKS_OVERWATCH_SUPPORT_URL)
+
+    async def _preferences_dialog(self, widget):
+        await self.app.dialog_manager.preferences(widget)
 
     async def _open_license_info(self, widget):
         await self.app.dialog_manager.license_info(widget)

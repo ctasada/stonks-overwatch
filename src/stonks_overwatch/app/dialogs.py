@@ -4,6 +4,7 @@ from asgiref.sync import sync_to_async
 from toga.dialogs import ConfirmDialog, ErrorDialog, InfoDialog, SaveFileDialog
 
 from stonks_overwatch.app.expired_dialog import ExpiredDialog
+from stonks_overwatch.app.preferences_dialog import PreferencesDialog
 from stonks_overwatch.services.utilities.license_manager import LicenseManager
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.database.db_utils import dump_database
@@ -11,6 +12,7 @@ from stonks_overwatch.utils.database.db_utils import dump_database
 
 class DialogManager:
     _expired_dialog_instance = None
+    _preferences_dialog_instance = None
 
     def __init__(self, app, license_manager: LicenseManager):
         self.app = app
@@ -80,3 +82,21 @@ class DialogManager:
         except Exception as e:
             self.logger.error(f"Failed to retrieve license info: {str(e)}")
             await self.app.main_window.dialog(ErrorDialog("License", f"Failed to retrieve license info: {str(e)}"))
+
+    async def preferences(self, widget):
+        if DialogManager._preferences_dialog_instance is not None:
+            self.logger.debug("PreferencesDialog already open, focusing window.")
+            DialogManager._preferences_dialog_instance.show()
+            return
+
+        dialog = PreferencesDialog(title="Preferences", app=self.app)
+        await dialog.async_init()  # Initialize the dialog asynchronously
+        DialogManager._preferences_dialog_instance = dialog
+
+        def on_close(widget):
+            self.logger.debug("PreferencesDialog close handler called")
+            DialogManager._preferences_dialog_instance = None
+            dialog.close()
+
+        dialog.on_close = on_close
+        dialog.show()
