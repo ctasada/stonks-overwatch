@@ -16,9 +16,9 @@ def _ensure_unified_registry_initialized():
     avoiding circular import issues during module loading.
     """
     try:
-        from stonks_overwatch.core.registry_setup import ensure_unified_registry_initialized
+        from stonks_overwatch.core.registry_setup import ensure_registry_initialized
 
-        ensure_unified_registry_initialized()
+        ensure_registry_initialized()
     except ImportError as e:
         # Log warning but don't fail - fall back to legacy behavior
         StonksLogger.get_logger("stonks_overwatch.config", "[CONFIG]").debug(
