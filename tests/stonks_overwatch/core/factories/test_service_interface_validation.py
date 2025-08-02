@@ -34,7 +34,19 @@ import pytest
 class MockConfig(BaseConfig):
     """Mock configuration class for testing."""
 
-    pass
+    config_key = "mock"
+
+    def __init__(self, credentials=None, enabled=True):
+        super().__init__(credentials, enabled)
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "MockConfig":
+        """Create MockConfig from dictionary data."""
+        return cls()
+
+    @property
+    def get_credentials(self):
+        return self.credentials
 
 
 # Valid service implementations that implement the correct interfaces

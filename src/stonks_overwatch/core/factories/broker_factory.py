@@ -79,9 +79,13 @@ class BrokerFactory:
             return None
 
         try:
-            # If no custom kwargs provided, try to use default() method if available
-            if not kwargs and hasattr(config_class, "default"):
-                config = config_class.default()
+            # If no custom kwargs provided, try to use new DB+JSON loading method first
+            if not kwargs:
+                if hasattr(config_class, "from_db_with_json_override"):
+                    config = config_class.from_db_with_json_override(broker_name)
+                elif hasattr(config_class, "default"):
+                    # Fallback to legacy default method
+                    config = config_class.default()
             else:
                 config = config_class(**kwargs)
 

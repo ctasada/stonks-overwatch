@@ -23,6 +23,19 @@ class JobsScheduler:
         JobsScheduler.logger.info("Starting JobsScheduler")
         JobsScheduler.scheduler = BackgroundScheduler()
 
+        JobsScheduler.scheduler.start()
+
+        JobsScheduler.scheduler.add_job(
+            JobsScheduler._configure_jobs,
+            id="configure_jobs",
+            trigger="date",
+            run_date=datetime.now(),
+            max_instances=1,
+            replace_existing=True,
+        )
+
+    @staticmethod
+    def _configure_jobs():
         # Get config using unified BrokerFactory
         try:
             from stonks_overwatch.core.factories.broker_factory import BrokerFactory
@@ -73,8 +86,6 @@ class JobsScheduler:
                 )
         except Exception as e:
             JobsScheduler.logger.error(f"Failed to get IBKR config: {e}")
-
-        JobsScheduler.scheduler.start()
 
     @staticmethod
     def scheduler_info():

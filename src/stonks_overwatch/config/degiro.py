@@ -87,7 +87,7 @@ class DegiroConfig(BaseConfig):
     @classmethod
     def default(cls) -> "DegiroConfig":
         try:
-            return cls.from_json_file(cls.CONFIG_PATH)
+            return cls.from_db_with_json_override("degiro")
         except Exception:
             cls.logger.debug("Cannot find DEGIRO configuration file. Using default values")
             return DegiroConfig(

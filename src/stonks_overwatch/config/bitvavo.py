@@ -68,7 +68,7 @@ class BitvavoConfig(BaseConfig):
     @classmethod
     def default(cls) -> "BitvavoConfig":
         try:
-            return cls.from_json_file(cls.CONFIG_PATH)
+            return cls.from_db_with_json_override("bitvavo")
         except Exception:
             cls.logger.debug("Cannot find BITVAVO configuration file. Using default values")
             return BitvavoConfig(

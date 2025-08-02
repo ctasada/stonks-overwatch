@@ -35,6 +35,15 @@ class MockConfig(BaseConfig):
         return self.credentials
 
     @classmethod
+    def from_dict(cls, data: dict) -> "MockConfig":
+        """Create MockConfig from dictionary data."""
+        enabled = data.get("enabled", True)
+        base_currency = data.get("base_currency", "EUR")
+        credentials_data = data.get("credentials")
+        credentials = MockCredentials() if credentials_data else None
+        return cls(credentials, enabled, base_currency)
+
+    @classmethod
     def default(cls):
         return cls(MockCredentials(), True, "EUR")
 
