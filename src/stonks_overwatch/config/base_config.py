@@ -7,10 +7,11 @@ from typing import Any, Dict, Optional
 from stonks_overwatch.config.base_credentials import BaseCredentials
 from stonks_overwatch.settings import PROJECT_PATH
 from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.utils.core.logger_constants import LOGGER_CONFIG, TAG_BASE_CONFIG
 
 
 class BaseConfig(ABC):
-    logger = StonksLogger.get_logger("stonks_overwatch.config", "[BASE_CONFIG]")
+    logger = StonksLogger.get_logger(LOGGER_CONFIG, TAG_BASE_CONFIG)
     CONFIG_PATH = os.path.join(PROJECT_PATH, "config", "config.json")
 
     def __init__(

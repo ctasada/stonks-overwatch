@@ -134,9 +134,10 @@ class DeGiroService:
         # Update credentials (updates both service and global config)
         service.update_credentials(new_credentials_manager)
 
-        # Update global config only (via GlobalConfig)
-        from stonks_overwatch.config.global_config import global_config
-        global_config.update_degiro_credentials(username, password, ...)
+        # Update global config only (via BrokerFactory)
+        from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+        factory = BrokerFactory()
+        factory.update_degiro_credentials(username, password, ...)
     """
 
     logger = StonksLogger.get_logger("stonks_overwatch.degiro_service", "[DEGIRO|CLIENT]")
@@ -217,10 +218,11 @@ class DeGiroService:
         Args:
             credentials: The new credentials to set in the global config
         """
-        # Delegate to GlobalConfig to follow SOLID principles
-        from stonks_overwatch.config.global_config import global_config
+        # Delegate to BrokerFactory to follow SOLID principles
+        from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 
-        global_config.update_degiro_credentials(
+        factory = BrokerFactory()
+        factory.update_degiro_credentials(
             username=credentials.username,
             password=credentials.password,
             int_account=credentials.int_account,

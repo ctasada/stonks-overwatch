@@ -4,14 +4,22 @@
 
 This guide provides step-by-step instructions for integrating a new broker into the Stonks Overwatch unified architecture. The system uses a unified broker registry and factory pattern that dramatically simplifies the broker addition process.
 
+## Recent Architecture Improvements (2025)
+
+- ✅ **Removed GlobalConfig**: Eliminated redundant singleton configuration layer
+- ✅ **Simplified BrokerFactory**: Dynamic credential handling with automatic class mapping
+- ✅ **Logger Constants**: Centralized logging patterns for consistency across modules
+- ✅ **Enhanced Testing**: Improved reset mechanisms for better test isolation
+
 ## Architecture Summary
 
 The unified broker architecture consists of:
 
 - **BrokerRegistry**: Central registry for broker configurations and services
-- **BrokerFactory**: Factory for creating broker configurations and services with automatic dependency injection
+- **BrokerFactory**: Simplified factory for creating broker configurations and services with automatic dependency injection
 - **Configuration-Driven Registration**: Declarative broker definitions in a single location
 - **Service Interfaces**: Type-safe contracts that all broker services must implement
+- **Logger Constants**: Centralized logging patterns for consistent debugging across modules
 
 ## Architecture Diagram
 
@@ -172,6 +180,7 @@ Create a new configuration file in `src/stonks_overwatch/config/`:
 # src/stonks_overwatch/config/newbroker.py
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.base_credentials import BaseCredentials
+from stonks_overwatch.utils.core.logger_constants import LOGGER_CONFIG, TAG_BASE_CONFIG
 
 class NewBrokerCredentials(BaseCredentials):
     def __init__(self, username: str, password: str, api_key: str = None):
@@ -180,10 +189,10 @@ class NewBrokerCredentials(BaseCredentials):
 
 class NewBrokerConfig(BaseConfig):
     config_key = "newbroker"
+    logger = StonksLogger.get_logger(LOGGER_CONFIG, TAG_BASE_CONFIG)
 
     def __init__(self, credentials: NewBrokerCredentials = None, enabled: bool = True):
-        super().__init__(enabled)
-        self.credentials = credentials or NewBrokerCredentials("", "")
+        super().__init__(credentials, enabled)
 
     @classmethod
     def from_dict(cls, data: dict) -> "NewBrokerConfig":
@@ -196,6 +205,14 @@ class NewBrokerConfig(BaseConfig):
         return cls(
             credentials=credentials,
             enabled=data.get("enabled", True)
+        )
+
+    @classmethod
+    def default(cls) -> "NewBrokerConfig":
+        """Create default configuration."""
+        return cls(
+            credentials=NewBrokerCredentials("", ""),
+            enabled=False
         )
 ```
 
@@ -216,14 +233,17 @@ Create service implementations that inherit from the required interfaces:
 ```python
 # src/stonks_overwatch/services/brokers/newbroker/services/portfolio_service.py
 from stonks_overwatch.core.interfaces.portfolio_service import PortfolioServiceInterface
+from stonks_overwatch.core.interfaces.base_service import DependencyInjectionMixin
+from stonks_overwatch.utils.core.logger_constants import LOGGER_SERVICES
 
-class PortfolioService(PortfolioServiceInterface):
+class PortfolioService(DependencyInjectionMixin, PortfolioServiceInterface):
     def __init__(self, config=None):
-        super().__init__()
-        self.config = config
+        super().__init__(config)
+        self.logger = StonksLogger.get_logger(LOGGER_SERVICES, "[NEWBROKER|PORTFOLIO]")
 
     def get_portfolio(self):
         """Return portfolio data for this broker."""
+        self.logger.debug("Fetching portfolio data")
         # Implement your portfolio retrieval logic
         return []
 ```
@@ -298,6 +318,22 @@ BROKER_CONFIGS = {
     },
 }
 ```
+
+### 5. Add Credential Support (Optional)
+
+If your broker needs credential update functionality, add it to the BrokerFactory mapping:
+
+```python
+# In BrokerFactory.update_broker_credentials() method
+credential_classes = {
+    "degiro": "stonks_overwatch.config.degiro.DegiroCredentials",
+    "bitvavo": "stonks_overwatch.config.bitvavo.BitvavoCredentials",
+    "ibkr": "stonks_overwatch.config.ibkr.IbkrCredentials",
+    "newbroker": "stonks_overwatch.config.newbroker.NewBrokerCredentials",  # Add this
+}
+```
+
+**Note**: The system will automatically handle credential creation and updates for your broker.
 
 ## Service Interfaces
 
@@ -398,6 +434,9 @@ Once registered, your broker will automatically:
 - ✅ Work with the portfolio filtering system
 - ✅ Be included in the unified factory system
 - ✅ Pass interface validation checks
+- ✅ Appear in Config.__repr__ output dynamically
+- ✅ Support credential updates if mapping is added
+- ✅ Use consistent logging patterns via logger constants
 
 ## Benefits of the Unified Architecture
 
@@ -410,12 +449,15 @@ Once registered, your broker will automatically:
 
 ### After (Unified System)
 
-- **2 steps** to add a new broker:
-  1. Create configuration and services
+- **2-3 steps** to add a new broker:
+  1. Create configuration and services using logger constants
   2. Add one entry to `BROKER_CONFIGS`
+  3. (Optional) Add credential mapping for update support
 - **Automatic integration** with all system components
 - **Type-safe interfaces** with runtime validation
 - **Centralized registration** in single location
+- **Consistent logging** via shared constants
+- **Dynamic adaptation** - no hardcoded broker lists
 
 ## Testing Your Broker
 
@@ -463,17 +505,23 @@ Create a dedicated client for API interactions:
 
 ```python
 # src/stonks_overwatch/services/brokers/newbroker/client/newbroker_client.py
+from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.utils.core.logger_constants import LOGGER_SERVICES
+
 class NewBrokerClient:
     def __init__(self, config):
         self.config = config
         self.base_url = "https://api.newbroker.com"
+        self.logger = StonksLogger.get_logger(LOGGER_SERVICES, "[NEWBROKER|CLIENT]")
 
     def authenticate(self):
         """Handle authentication with broker API."""
+        self.logger.debug("Authenticating with NewBroker API")
         pass
 
     def make_request(self, endpoint, params=None):
         """Make authenticated request to broker API."""
+        self.logger.debug(f"Making request to {endpoint}")
         pass
 ```
 
@@ -492,4 +540,16 @@ class PortfolioRepository:
         return self.client.make_request("/portfolio/holdings")
 ```
 
+## Summary
+
 This completes the broker integration guide. The unified architecture ensures that adding new brokers is straightforward, type-safe, and automatically integrated with the entire system.
+
+### Key Benefits of Recent Improvements
+
+- **Simplified Architecture**: Removed GlobalConfig redundancy while maintaining all functionality
+- **Dynamic Credential Handling**: Automatic credential class mapping without hardcoded imports
+- **Consistent Logging**: Centralized logger constants reduce duplication and improve debugging
+- **Better Testing**: Improved reset mechanisms for better test isolation
+- **Future-Proof**: Dynamic adaptation means less maintenance as new brokers are added
+
+The unified architecture ensures that adding new brokers is straightforward, type-safe, and automatically integrated with the entire system.

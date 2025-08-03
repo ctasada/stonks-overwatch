@@ -285,11 +285,11 @@ def _register_mock_services(registry, mock_services_dict):
 @pytest.fixture(autouse=True)
 def reset_global_config():
     """Reset the global configuration before each test to ensure clean state."""
-    from stonks_overwatch.config.global_config import global_config
+    from stonks_overwatch.config.config import Config
     from stonks_overwatch.core.factories.broker_registry import BrokerRegistry
 
     # Reset the global config to force reload
-    global_config.reset_for_tests()
+    Config.reset_global_for_tests()
 
     # Clear singleton instances to ensure clean test state
     if hasattr(BrokerRegistry, "_instances"):
