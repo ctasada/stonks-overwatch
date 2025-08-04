@@ -14,6 +14,7 @@ class DegiroCredentials(BaseCredentials):
     int_account: Optional[int] = None
     totp_secret_key: Optional[str] = None
     one_time_password: Optional[int] = None
+    remember_me: Optional[bool] = None
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "DegiroCredentials":

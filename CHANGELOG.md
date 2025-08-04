@@ -24,7 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 * Added support to remember DEGIRO login credentials
-  * Added "Settings" dialog to store DEGIRO credentials
+  * Added "Settings" dialog to store DEGIRO credentials, including 2FA token
+  * Added "Remember me" checkbox to the DEGIRO login dialog
 
 ### Changed
 

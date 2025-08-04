@@ -65,7 +65,7 @@ class PreferencesDialog(toga.Window):
 
     async def async_init(self):
         """Initialize the dialog with async database calls."""
-        self.degiro_configuration = await self.brokers_configuration_repository.get_broker_by_name("degiro")
+        self.degiro_configuration = await self.brokers_configuration_repository.get_broker_by_name_async("degiro")
         self.logger.debug("Brokers configuration loaded")
         if self.degiro_configuration:
             # Ensure credentials is a dictionary (initialize if None)
@@ -182,7 +182,7 @@ class PreferencesDialog(toga.Window):
     async def _save_configuration(self):
         """Async helper to save the configuration."""
         try:
-            await self.brokers_configuration_repository.save_broker_configuration(self.degiro_configuration)
+            await self.brokers_configuration_repository.save_broker_configuration_async(self.degiro_configuration)
             self.logger.info("DEGIRO configuration saved successfully")
         except Exception as e:
             self.logger.error(f"Failed to save DEGIRO configuration: {e}")

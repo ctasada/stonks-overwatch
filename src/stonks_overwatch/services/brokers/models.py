@@ -25,6 +25,10 @@ class BrokersConfigurationRepository:
 
     @staticmethod
     @sync_to_async
+    def get_broker_by_name_async(broker_name) -> BrokersConfiguration | None:
+        return BrokersConfigurationRepository.get_broker_by_name(broker_name)
+
+    @staticmethod
     def get_broker_by_name(broker_name) -> BrokersConfiguration | None:
         try:
             return BrokersConfiguration.objects.get(broker_name=broker_name)
@@ -33,6 +37,10 @@ class BrokersConfigurationRepository:
 
     @staticmethod
     @sync_to_async
+    def save_broker_configuration_async(broker_config: BrokersConfiguration) -> None:
+        return BrokersConfigurationRepository.save_broker_configuration(broker_config)
+
+    @staticmethod
     def save_broker_configuration(broker_config: BrokersConfiguration) -> None:
         # FIXME: Encrypt the credentials before saving it to the database.
         broker_config.save()
