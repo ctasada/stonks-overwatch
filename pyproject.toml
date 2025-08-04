@@ -1,6 +1,6 @@
 [project]
 name = "stonks-overwatch"
-version = "0.1.0"
+version = "0.1.1"
 description = "Stonks Overwatch"
 authors = [{name = "Carlos Tasada", email = "carlos.tasada@gmail.com"}]
 license = "MIT"
@@ -255,3 +255,4 @@ exclude_dirs = ["build", ".venv"]
 
 [tool.pymarkdown]
 plugins.md013.enabled = false
+plugins.md024.siblings_only = true
