@@ -83,7 +83,7 @@ class BrokerRegistry:
                 raise BrokerRegistryValidationError(f"Configuration for broker '{broker_name}' is already registered")
 
             self._config_classes[broker_name] = config_class
-            self.logger.info(f"Registered configuration for broker: {broker_name}")
+            self.logger.debug(f"Registered configuration for broker: {broker_name}")
 
     def get_config_class(self, broker_name: str) -> Optional[Type[BaseConfig]]:
         """
@@ -151,7 +151,7 @@ class BrokerRegistry:
             self._broker_capabilities[broker_name] = list(service_dict.keys())
 
             service_list = [service_type.value for service_type in service_dict.keys()]
-            self.logger.info(f"Registered services for broker: {broker_name} - {service_list}")
+            self.logger.debug(f"Registered services for broker: {broker_name} - {service_list}")
 
     def get_service_class(self, broker_name: str, service_type: ServiceType) -> Optional[Type]:
         """

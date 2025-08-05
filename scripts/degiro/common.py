@@ -13,9 +13,9 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "stonks_overwatch.settings")
 django.setup()
 
 # Initialize broker registry for standalone script usage
-from stonks_overwatch.core.registry_setup import ensure_unified_registry_initialized  # noqa: E402
+from stonks_overwatch.core.registry_setup import ensure_registry_initialized  # noqa: E402
 
-ensure_unified_registry_initialized()
+ensure_registry_initialized()
 
 # SETUP LOGGING LEVEL
 logging.basicConfig(level=logging.DEBUG)

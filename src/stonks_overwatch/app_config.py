@@ -36,12 +36,12 @@ class StonksOverwatchConfig(AppConfig):
                 if not registered_brokers:
                     # No brokers registered yet, proceed with registration
                     register_all_brokers()
-                    self.logger.info("Unified broker services registered successfully")
+                    self.logger.info("Broker services registered successfully")
                 else:
                     # Brokers already registered (likely through automatic initialization)
-                    self.logger.info(f"Unified broker services already registered: {registered_brokers}")
+                    self.logger.info(f"Broker services already registered: {registered_brokers}")
             except Exception as e:
-                self.logger.error("Failed to register unified broker services: %s", e)
+                self.logger.error("Failed to register broker services: %s", e)
                 # Legacy fallback removed - unified registry setup is now the only option
                 raise e
 

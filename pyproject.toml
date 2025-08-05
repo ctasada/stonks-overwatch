@@ -1,6 +1,6 @@
 [project]
 name = "stonks-overwatch"
-version = "0.1.0"
+version = "0.1.1"
 description = "Stonks Overwatch"
 authors = [{name = "Carlos Tasada", email = "carlos.tasada@gmail.com"}]
 license = "MIT"
@@ -14,7 +14,7 @@ dependencies = [
     "pandas >= 2.3.1",
     "requests-cache >= 1.2.1",
     "django-extensions >= 4.1.0",
-    "currencyconverter >= 0.18.8",
+    "currencyconverter >= 0.18.9",
     "django-node-assets >= 0.9.15",
     "apscheduler >= 3.11.0",
     "tzlocal >= 5.3.1",
@@ -36,7 +36,7 @@ requires = ["poetry-core>=2.1.3,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.12.5"
+ruff = "^0.12.7"
 pytest = "^8.4.1"
 pytest-cov = "^6.2.1"
 pytest-django = "^4.11.1"
@@ -255,3 +255,4 @@ exclude_dirs = ["build", ".venv"]
 
 [tool.pymarkdown]
 plugins.md013.enabled = false
+plugins.md024.siblings_only = true

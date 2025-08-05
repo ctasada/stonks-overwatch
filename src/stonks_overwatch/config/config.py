@@ -6,29 +6,7 @@ from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 from stonks_overwatch.services.models import PortfolioId
 from stonks_overwatch.utils.core.logger import StonksLogger
-
-
-def _ensure_unified_registry_initialized():
-    """
-    Lazy initialization of unified registry to avoid circular imports.
-
-    This function imports and initializes the unified registry only when needed,
-    avoiding circular import issues during module loading.
-    """
-    try:
-        from stonks_overwatch.core.registry_setup import ensure_unified_registry_initialized
-
-        ensure_unified_registry_initialized()
-    except ImportError as e:
-        # Log warning but don't fail - fall back to legacy behavior
-        StonksLogger.get_logger("stonks_overwatch.config", "[CONFIG]").debug(
-            f"Could not initialize unified registry due to import error: {e}"
-        )
-    except Exception as e:
-        # Log warning but don't fail - fall back to legacy behavior
-        StonksLogger.get_logger("stonks_overwatch.config", "[CONFIG]").debug(
-            f"Could not initialize unified registry: {e}"
-        )
+from stonks_overwatch.utils.core.logger_constants import LOGGER_CONFIG, TAG_CONFIG
 
 
 class Config:
@@ -39,7 +17,7 @@ class Config:
     using the unified BrokerFactory for all broker operations.
     """
 
-    logger = StonksLogger.get_logger("stonks_overwatch.config", "[CONFIG]")
+    logger = StonksLogger.get_logger(LOGGER_CONFIG, TAG_CONFIG)
 
     DEFAULT_BASE_CURRENCY: str = "EUR"
 
@@ -79,42 +57,28 @@ class Config:
             True if any broker is enabled, False otherwise
         """
         if selected_portfolio == PortfolioId.ALL:
-            return any(
-                self._is_broker_enabled(broker_name, selected_portfolio)
-                for broker_name in self._factory.get_available_brokers()
-            )
-        else:
-            # Handle case where selected_portfolio might be a string or invalid PortfolioId
-            if isinstance(selected_portfolio, str):
-                return False
-            try:
-                broker_name = selected_portfolio.id
-                return self._is_broker_enabled(broker_name, selected_portfolio)
-            except AttributeError:
-                return False
+            # Check if any broker is enabled
+            return any(self._is_broker_enabled(broker_name) for broker_name in self._factory.get_available_brokers())
 
-    def _is_broker_enabled(self, broker_name: str, selected_portfolio: PortfolioId = PortfolioId.ALL) -> bool:
+        # For specific portfolio, check the corresponding broker
+        try:
+            broker_name = selected_portfolio.id if hasattr(selected_portfolio, "id") else str(selected_portfolio)
+            return self._is_broker_enabled(broker_name)
+        except (AttributeError, TypeError):
+            return False
+
+    def _is_broker_enabled(self, broker_name: str) -> bool:
         """
-        Check if a specific broker is enabled for the selected portfolio.
+        Check if a specific broker is enabled.
 
         Args:
             broker_name: Name of the broker
-            selected_portfolio: Selected portfolio filter
 
         Returns:
             True if broker is enabled, False otherwise
         """
         config = self.get_broker_config(broker_name)
-        if not config:
-            return False
-
-        # Check if the broker matches the selected portfolio
-        if selected_portfolio != PortfolioId.ALL:
-            broker_portfolio = PortfolioId.from_id(broker_name)
-            if selected_portfolio != broker_portfolio:
-                return False
-
-        return config.is_enabled()
+        return config.is_enabled() if config else False
 
     def __eq__(self, value: object) -> bool:
         if isinstance(value, Config):
@@ -131,13 +95,13 @@ class Config:
         return False
 
     def __repr__(self) -> str:
-        return (
-            f"Config(base_currency={self.base_currency}, "
-            f"degiro_config={self.get_broker_config('degiro')}, "
-            f"bitvavo_config={self.get_broker_config('bitvavo')}, "
-            f"ibkr_config={self.get_broker_config('ibkr')}, "
-            ")"
-        )
+        # Get available brokers dynamically
+        available_brokers = self._factory.get_available_brokers()
+        broker_configs = {broker: self.get_broker_config(broker) for broker in available_brokers}
+
+        broker_repr = ", ".join(f"{broker}_config={config}" for broker, config in broker_configs.items())
+
+        return f"Config(base_currency={self.base_currency}, {broker_repr})"
 
     @classmethod
     def from_dict(cls, data: dict) -> "Config":
@@ -197,6 +161,24 @@ class Config:
         Returns:
             The global configuration instance
         """
-        from stonks_overwatch.config.global_config import global_config
+        # Use the singleton pattern with lazy initialization
+        if not hasattr(cls, "_global_instance"):
+            cls._global_instance = cls._default()
+        return cls._global_instance
 
-        return global_config.get_config()
+    @classmethod
+    def reset_global_for_tests(cls) -> None:
+        """
+        Reset the global configuration instance for tests.
+
+        This clears the cached global instance to force recreation
+        from test configuration.
+        """
+        if hasattr(cls, "_global_instance"):
+            delattr(cls, "_global_instance")
+
+        # Also clear BrokerFactory cache
+        from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+
+        factory = BrokerFactory()
+        factory.clear_cache()

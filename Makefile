@@ -43,7 +43,7 @@ RESET := \033[0m
 .PHONY: lint lint-check lint-fix markdown-check markdown-fix license-check generate-third-party check-dependencies scan
 .PHONY: migrate collectstatic runserver start run test coverage
 .PHONY: docker-build docker-run docker-shell docker-clean
-.PHONY: briefcase-create briefcase-update briefcase-run briefcase-package
+.PHONY: briefcase-create briefcase-update briefcase-run briefcase-package briefcase-clean
 .PHONY: generate-images cicd pre-commit-install pre-commit-run pre-commit-update
 
 #==============================================================================
@@ -235,6 +235,18 @@ briefcase-run: ## Run Briefcase project (supports debug=true, profile=true, demo
 briefcase-package: briefcase-create ## Package Briefcase project
 	@echo -e  "$(BOLD)$(BLUE)Packaging Briefcase project...$(RESET)"
 	poetry run briefcase package --update --adhoc-sign --no-input
+
+briefcase-clean: ## Clean Briefcase build artifacts
+	@echo -e  "$(BOLD)$(YELLOW)Cleaning Briefcase build artifacts...$(RESET)"
+	rm -rf build logs wheels
+	@if [ "$$(uname)" == "Darwin" ]; then \
+		rm -rf "/Users/$(USER)/Library/Application Support/com.caribay.stonks_overwatch"; \
+		rm -rf "/Users/$(USER)/Library/Preferences/com.caribay.stonks_overwatch"; \
+		rm -rf "/Users/$(USER)/Library/Logs/com.caribay.stonks_overwatch"; \
+		rm -rf "/Users/$(USER)/Library/Caches/com.caribay.stonks_overwatch"; \
+	else \
+		echo -e "$(RED)Some files are not deleted. This target doesn't support this OS.$(RESET)"; \
+	fi
 
 #==============================================================================
 ##@ Asset Generation

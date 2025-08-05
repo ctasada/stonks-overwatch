@@ -128,7 +128,7 @@ def register_all_brokers() -> None:
     """
     registry = BrokerRegistry()
 
-    logger.info("Starting configuration-driven broker registration...")
+    logger.debug("Starting configuration-driven broker registration...")
 
     successfully_registered = []
     failed_registrations = []
@@ -146,7 +146,7 @@ def register_all_brokers() -> None:
                     config_class,
                     **{service_type.value: service_class for service_type, service_class in services.items()},
                 )
-                logger.info(f"Registered {broker_name} broker using complete registration")
+                logger.debug(f"Registered {broker_name} broker using complete registration")
             else:
                 # Use separate registration for brokers missing required services
                 registry.register_broker_config(broker_name, config_class)
@@ -154,7 +154,7 @@ def register_all_brokers() -> None:
                     broker_name,
                     **{service_type.value: service_class for service_type, service_class in services.items()},
                 )
-                logger.info(f"Registered {broker_name} broker using separate registration")
+                logger.debug(f"Registered {broker_name} broker using separate registration")
 
             successfully_registered.append(broker_name)
 
@@ -164,7 +164,7 @@ def register_all_brokers() -> None:
 
     # Report results
     if successfully_registered:
-        logger.info(f"Successfully registered {len(successfully_registered)} brokers: {successfully_registered}")
+        logger.debug(f"Successfully registered {len(successfully_registered)} brokers: {successfully_registered}")
 
     if failed_registrations:
         logger.warning(
@@ -175,15 +175,15 @@ def register_all_brokers() -> None:
     try:
         validation_status = registry.validate_all_registrations()
         if validation_status["all_valid"]:
-            logger.info("All broker registrations validated successfully")
-            logger.info(f"Fully registered brokers: {registry.get_fully_registered_brokers()}")
+            logger.debug("All broker registrations validated successfully")
+            logger.debug(f"Fully registered brokers: {registry.get_fully_registered_brokers()}")
         else:
             logger.warning(f"Some broker registrations have validation issues: {validation_status}")
     except Exception as e:
         logger.error(f"Failed to validate broker registrations: {e}")
 
 
-def ensure_unified_registry_initialized() -> None:
+def ensure_registry_initialized() -> None:
     """
     Ensure the unified registry is initialized with all broker registrations.
 
@@ -204,7 +204,7 @@ def ensure_unified_registry_initialized() -> None:
         logger.debug(f"Unified registry already initialized with brokers: {registered_brokers}")
         return
 
-    logger.info(f"Initializing missing brokers: {missing_brokers}")
+    logger.debug(f"Initializing missing brokers: {missing_brokers}")
 
     # Register missing brokers using configuration-driven approach
     for broker_name in missing_brokers:
@@ -224,14 +224,14 @@ def ensure_unified_registry_initialized() -> None:
                     config_class,
                     **{service_type.value: service_class for service_type, service_class in services.items()},
                 )
-                logger.info(f"Registered {broker_name} broker successfully")
+                logger.debug(f"Registered {broker_name} broker successfully")
             else:
                 registry.register_broker_config(broker_name, config_class)
                 registry.register_broker_services(
                     broker_name,
                     **{service_type.value: service_class for service_type, service_class in services.items()},
                 )
-                logger.info(f"Registered {broker_name} broker successfully (separate registration)")
+                logger.debug(f"Registered {broker_name} broker successfully (separate registration)")
 
         except Exception as e:
             logger.warning(f"Failed to register {broker_name}: {e}")
@@ -255,7 +255,7 @@ def ensure_unified_registry_initialized() -> None:
 
 # Automatically initialize when this module is imported
 try:
-    ensure_unified_registry_initialized()
+    ensure_registry_initialized()
 except Exception as e:
     logger.warning(f"Could not automatically initialize unified registry: {e}")
-    logger.info("Unified registry will be initialized on first use")
+    logger.debug("Unified registry will be initialized on first use")

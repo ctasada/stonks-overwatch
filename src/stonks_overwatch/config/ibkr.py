@@ -36,7 +36,7 @@ class IbkrConfig(BaseConfig):
         credentials: Optional[IbkrCredentials],
         start_date: date,
         update_frequency_minutes: int = DEFAULT_IBKR_UPDATE_FREQUENCY,
-        enabled: bool = True,
+        enabled: bool = False,
     ) -> None:
         super().__init__(credentials, enabled)
         if update_frequency_minutes < 1:
@@ -80,7 +80,7 @@ class IbkrConfig(BaseConfig):
     @classmethod
     def default(cls) -> "IbkrConfig":
         try:
-            return cls.from_json_file(cls.CONFIG_PATH)
+            return cls.from_db_with_json_override("ibkr")
         except Exception:
             cls.logger.debug("Cannot find IBKR configuration file. Using default values")
             return IbkrConfig(
