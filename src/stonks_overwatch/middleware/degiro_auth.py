@@ -1,10 +1,13 @@
 from typing import Optional
 
+from degiro_connector.core.exceptions import DeGiroConnectionError
 from django.http import HttpRequest
 from django.shortcuts import redirect
 from django.urls import resolve
 
+from stonks_overwatch.config.degiro import DegiroCredentials
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
+from stonks_overwatch.services.brokers.degiro.client.degiro_helper import DegiroHelper
 from stonks_overwatch.utils.core.logger import StonksLogger
 
 
@@ -34,10 +37,26 @@ class DeGiroAuthMiddleware:
                 if self._should_check_connection(request):
                     try:
                         self._authenticate_user(request)
+                    except DeGiroConnectionError as error:
+                        if error.error_details.status_text == "totpNeeded":
+                            credentials = DegiroCredentials.from_request(request)
+                            DegiroHelper.store_credentials_in_session(
+                                request,
+                                credentials.username or degiro_config.get_credentials.username,
+                                credentials.password or degiro_config.get_credentials.password,
+                                (
+                                    True
+                                    if credentials.remember_me is None
+                                    and credentials.username is None
+                                    and degiro_config.get_credentials.username is not None
+                                    else credentials.remember_me
+                                ),
+                            )
+                            request.session["show_otp"] = True
                     except ConnectionError:
                         pass
         except Exception as e:
-            self.logger.error(f"Failed to check DeGiro status: {e}")
+            self.logger.error(f"Failed to check DeGiro status: {e}", exc_info=True)
 
         if (
             not self._is_authenticated(request)

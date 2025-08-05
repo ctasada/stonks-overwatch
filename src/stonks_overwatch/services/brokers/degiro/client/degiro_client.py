@@ -4,7 +4,7 @@ from typing import Any, List, Optional
 
 import polars as pl
 import requests_cache
-from degiro_connector.core.exceptions import MaintenanceError
+from degiro_connector.core.exceptions import DeGiroConnectionError, MaintenanceError
 from degiro_connector.quotecast.models.chart import Chart, ChartRequest, Interval
 from degiro_connector.quotecast.tools.chart_fetcher import ChartFetcher
 from degiro_connector.trading.api import API as TradingApi  # noqa: N811
@@ -260,6 +260,8 @@ class DeGiroService:
                 # but we will not be able to get any data.
                 self.logger.warning("DeGiro is in maintenance mode. Connection will not be established.")
                 self.is_maintenance_mode = True
+            except DeGiroConnectionError as error:
+                raise error
             except ConnectionError:
                 # Try to connect and validate the connection.
                 # If we want more details, we can always call the connect method

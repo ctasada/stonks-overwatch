@@ -123,7 +123,7 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
   * [ ] `dateutil` and `pytz` can be either removed, or replace internal implementations.
 * [ ] DEGIRO:
   * [ ] Login Dialog:
-    * [ ] Improve error message when credentials are wrong
+  * [ ] Improve error message when credentials are wrong: 'Your username and/or password is incorrect'
 * [ ] Bitvavo:
   * [ ] Create a Crypto Rewards section
   * [ ] Show asset staking blocked amount as in Bitvavo UI

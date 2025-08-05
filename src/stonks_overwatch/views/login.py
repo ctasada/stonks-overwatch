@@ -7,6 +7,7 @@ from django.views import View
 from stonks_overwatch.config.degiro import DegiroCredentials
 from stonks_overwatch.jobs.jobs_scheduler import JobsScheduler
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import CredentialsManager, DeGiroService
+from stonks_overwatch.services.brokers.degiro.client.degiro_helper import DegiroHelper
 from stonks_overwatch.services.brokers.models import BrokersConfigurationRepository
 from stonks_overwatch.utils.core.logger import StonksLogger
 
@@ -29,7 +30,7 @@ class Login(View):
         self.degiro_service = None
 
     def get(self, request):
-        show_otp = False
+        show_otp = request.session.get("show_otp", False)
         show_loading = False
 
         if request.session.get("is_authenticated"):
@@ -86,7 +87,7 @@ class Login(View):
     def _authenticate_and_connect(
         self, request, username: str, password: str, one_time_password: int, remember_me: bool
     ):
-        self._store_credentials_in_session(request, username, password, remember_me)
+        DegiroHelper.store_credentials_in_session(request, username, password, remember_me)
         credentials = Credentials(username=username, password=password, one_time_password=one_time_password)
         if not self.degiro_service:
             self.degiro_service = DeGiroService()
@@ -99,20 +100,13 @@ class Login(View):
 
     def _handle_degiro_error(self, request, error, username: str, password: str, remember_me: bool):
         if error.error_details.status_text == "totpNeeded":
-            self._store_credentials_in_session(request, username, password, remember_me)
+            DegiroHelper.store_credentials_in_session(request, username, password, remember_me)
             self.logger.info("TOTP required. Prompting user for 2FA code.")
             return True
         else:
             self.logger.error(f"DeGiro connection error: {error.error_details.status_text}")
             messages.error(request, error.error_details.status_text)
             return False
-
-    def _store_credentials_in_session(self, request, username: str, password: str, remember_me: bool):
-        """Helper function to store credentials in the session"""
-        credentials = DegiroCredentials(username=username, password=password, remember_me=remember_me)
-        request.session["credentials"] = credentials.to_dict()
-        request.session.modified = True
-        request.session.save()
 
     def _store_credentials_in_db(self, username, password):
         """Store the credentials in the database for future use."""
