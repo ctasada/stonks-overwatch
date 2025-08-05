@@ -36,7 +36,7 @@ class IbkrConfig(BaseConfig):
         credentials: Optional[IbkrCredentials],
         start_date: date,
         update_frequency_minutes: int = DEFAULT_IBKR_UPDATE_FREQUENCY,
-        enabled: bool = True,
+        enabled: bool = False,
     ) -> None:
         super().__init__(credentials, enabled)
         if update_frequency_minutes < 1:

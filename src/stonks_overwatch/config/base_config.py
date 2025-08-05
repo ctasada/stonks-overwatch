@@ -17,7 +17,7 @@ class BaseConfig(ABC):
     def __init__(
         self,
         credentials: Optional[BaseCredentials],
-        enabled: bool = True,
+        enabled: bool = False,
     ) -> None:
         self.enabled = enabled
         self.credentials = credentials

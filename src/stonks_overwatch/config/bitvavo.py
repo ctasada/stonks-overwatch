@@ -25,7 +25,7 @@ class BitvavoConfig(BaseConfig):
         self,
         credentials: Optional[BitvavoCredentials],
         update_frequency_minutes: int = DEFAULT_BITVAVO_UPDATE_FREQUENCY,
-        enabled: bool = True,
+        enabled: bool = False,
         offline_mode: bool = False,
     ) -> None:
         super().__init__(credentials, enabled)
