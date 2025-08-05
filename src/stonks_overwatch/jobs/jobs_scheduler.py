@@ -23,6 +23,19 @@ class JobsScheduler:
         JobsScheduler.logger.info("Starting JobsScheduler")
         JobsScheduler.scheduler = BackgroundScheduler()
 
+        JobsScheduler.scheduler.start()
+
+        JobsScheduler.scheduler.add_job(
+            JobsScheduler._configure_jobs,
+            id="configure_jobs",
+            trigger="date",
+            run_date=datetime.now(),
+            max_instances=1,
+            replace_existing=True,
+        )
+
+    @staticmethod
+    def _configure_jobs():
         # Get config using unified BrokerFactory
         try:
             from stonks_overwatch.core.factories.broker_factory import BrokerFactory
@@ -42,22 +55,6 @@ class JobsScheduler:
         except Exception as e:
             JobsScheduler.logger.error(f"Failed to get DEGIRO config: {e}")
 
-        # Get IBKR config using unified BrokerFactory
-        try:
-            ibkr_config = broker_factory.create_config("ibkr")
-
-            if ibkr_config and ibkr_config.is_enabled():
-                JobsScheduler.scheduler.add_job(
-                    JobsScheduler.update_ibkr_portfolio,
-                    id="update_ibkr_portfolio",
-                    trigger=IntervalTrigger(minutes=ibkr_config.update_frequency_minutes),
-                    max_instances=1,
-                    replace_existing=True,
-                    next_run_time=datetime.now(),
-                )
-        except Exception as e:
-            JobsScheduler.logger.error(f"Failed to get IBKR config: {e}")
-
         # Get Bitvavo config using unified BrokerFactory
         try:
             bitvavo_config = broker_factory.create_config("bitvavo")
@@ -74,7 +71,21 @@ class JobsScheduler:
         except Exception as e:
             JobsScheduler.logger.error(f"Failed to get Bitvavo config: {e}")
 
-        JobsScheduler.scheduler.start()
+        # Get IBKR config using unified BrokerFactory
+        try:
+            ibkr_config = broker_factory.create_config("ibkr")
+
+            if ibkr_config and ibkr_config.is_enabled():
+                JobsScheduler.scheduler.add_job(
+                    JobsScheduler.update_ibkr_portfolio,
+                    id="update_ibkr_portfolio",
+                    trigger=IntervalTrigger(minutes=ibkr_config.update_frequency_minutes),
+                    max_instances=1,
+                    replace_existing=True,
+                    next_run_time=datetime.now(),
+                )
+        except Exception as e:
+            JobsScheduler.logger.error(f"Failed to get IBKR config: {e}")
 
     @staticmethod
     def scheduler_info():

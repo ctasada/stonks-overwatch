@@ -121,6 +121,9 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
   * [ ] Review the usage of `polars` and `pandas` in the codebase and try to use only one of them
   * [ ] `toga` and `asgiref` are only used for the `app`. Probably it should be moved as a full dependency
   * [ ] `dateutil` and `pytz` can be either removed, or replace internal implementations.
+* [ ] DEGIRO:
+  * [ ] Login Dialog:
+  * [ ] Improve error message when credentials are wrong: 'Your username and/or password is incorrect'
 * [ ] Bitvavo:
   * [ ] Create a Crypto Rewards section
   * [ ] Show asset staking blocked amount as in Bitvavo UI

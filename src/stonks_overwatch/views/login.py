@@ -7,6 +7,8 @@ from django.views import View
 from stonks_overwatch.config.degiro import DegiroCredentials
 from stonks_overwatch.jobs.jobs_scheduler import JobsScheduler
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import CredentialsManager, DeGiroService
+from stonks_overwatch.services.brokers.degiro.client.degiro_helper import DegiroHelper
+from stonks_overwatch.services.brokers.models import BrokersConfigurationRepository
 from stonks_overwatch.utils.core.logger import StonksLogger
 
 
@@ -28,7 +30,7 @@ class Login(View):
         self.degiro_service = None
 
     def get(self, request):
-        show_otp = False
+        show_otp = request.session.get("show_otp", False)
         show_loading = False
 
         if request.session.get("is_authenticated"):
@@ -50,6 +52,8 @@ class Login(View):
         username = request.POST.get("username") or credentials.username
         password = request.POST.get("password") or credentials.password
         one_time_password = request.POST.get("2fa_code") or credentials.one_time_password
+        remember_me = request.POST.get("remember_me") == "true" or credentials.remember_me
+
         show_otp = False
         show_loading = False
 
@@ -58,11 +62,11 @@ class Login(View):
             return render(request, "login.html", context={"show_otp": show_otp}, status=400)
 
         try:
-            self._authenticate_and_connect(request, username, password, one_time_password)
+            self._authenticate_and_connect(request, username, password, one_time_password, remember_me)
         except MaintenanceError as maintenance_error:
             messages.error(request, maintenance_error.error_details.error)
         except DeGiroConnectionError as degiro_error:
-            show_otp = self._handle_degiro_error(request, degiro_error, username, password)
+            show_otp = self._handle_degiro_error(request, degiro_error, username, password, remember_me)
         except ConnectionError as connection_error:
             self.logger.error(f"Connection error: {connection_error}")
             messages.error(request, "A connection error occurred. Please try again.")
@@ -71,6 +75,8 @@ class Login(View):
             messages.error(request, "An unexpected error occurred. Please contact support.")
 
         if request.session.get("is_authenticated"):
+            if remember_me:
+                self._store_credentials_in_db(username, password)
             request.session["session_id"] = self.degiro_service.get_session_id()
             show_loading = True
 
@@ -78,8 +84,10 @@ class Login(View):
 
         return render(request, "login.html", context=context, status=200)
 
-    def _authenticate_and_connect(self, request, username, password, one_time_password):
-        self._store_credentials_in_session(request, username, password)
+    def _authenticate_and_connect(
+        self, request, username: str, password: str, one_time_password: int, remember_me: bool
+    ):
+        DegiroHelper.store_credentials_in_session(request, username, password, remember_me)
         credentials = Credentials(username=username, password=password, one_time_password=one_time_password)
         if not self.degiro_service:
             self.degiro_service = DeGiroService()
@@ -90,9 +98,9 @@ class Login(View):
         request.session["is_authenticated"] = True
         self.logger.info("Login successful.")
 
-    def _handle_degiro_error(self, request, error, username, password):
+    def _handle_degiro_error(self, request, error, username: str, password: str, remember_me: bool):
         if error.error_details.status_text == "totpNeeded":
-            self._store_credentials_in_session(request, username, password)
+            DegiroHelper.store_credentials_in_session(request, username, password, remember_me)
             self.logger.info("TOTP required. Prompting user for 2FA code.")
             return True
         else:
@@ -100,9 +108,14 @@ class Login(View):
             messages.error(request, error.error_details.status_text)
             return False
 
-    def _store_credentials_in_session(self, request, username, password):
-        """Helper function to store credentials in the session"""
-        credentials = DegiroCredentials(username=username, password=password)
-        request.session["credentials"] = credentials.to_dict()
-        request.session.modified = True
-        request.session.save()
+    def _store_credentials_in_db(self, username, password):
+        """Store the credentials in the database for future use."""
+        try:
+            degiro_configuration = BrokersConfigurationRepository.get_broker_by_name("degiro")
+            if degiro_configuration.credentials is None:
+                degiro_configuration.credentials = {}
+            degiro_configuration.credentials["username"] = username
+            degiro_configuration.credentials["password"] = password
+            BrokersConfigurationRepository.save_broker_configuration(degiro_configuration)
+        except Exception as e:
+            self.logger.error(f"Failed to store credentials in the database: {e}")

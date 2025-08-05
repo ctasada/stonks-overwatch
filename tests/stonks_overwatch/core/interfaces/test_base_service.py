@@ -35,15 +35,17 @@ class MockConfig(BaseConfig):
         return self.credentials
 
     @classmethod
+    def from_dict(cls, data: dict) -> "MockConfig":
+        """Create MockConfig from dictionary data."""
+        enabled = data.get("enabled", True)
+        base_currency = data.get("base_currency", "EUR")
+        credentials_data = data.get("credentials")
+        credentials = MockCredentials() if credentials_data else None
+        return cls(credentials, enabled, base_currency)
+
+    @classmethod
     def default(cls):
         return cls(MockCredentials(), True, "EUR")
-
-
-class MockGlobalConfig:
-    """Mock global configuration for testing."""
-
-    def __init__(self, base_currency="USD"):
-        self.base_currency = base_currency
 
 
 # Test implementation classes
@@ -87,12 +89,12 @@ class TestDependencyInjectionMixin:
     @patch("stonks_overwatch.core.interfaces.base_service.Config.get_global")
     def test_mixin_without_injected_config(self, mock_get_global):
         """Test mixin falls back to global config when no config injected."""
-        global_config = MockGlobalConfig(base_currency="USD")
-        mock_get_global.return_value = global_config
+        mock_config = MockConfig(base_currency="USD")
+        mock_get_global.return_value = mock_config
 
         service = MockServiceWithMixin()
 
-        assert service.config is global_config
+        assert service.config is mock_config
         assert service.base_currency == "USD"
         assert service.is_dependency_injection_enabled() is False
         mock_get_global.assert_called_once()
@@ -100,8 +102,8 @@ class TestDependencyInjectionMixin:
     @patch("stonks_overwatch.core.interfaces.base_service.Config.get_global")
     def test_mixin_global_config_caching(self, mock_get_global):
         """Test that global config is cached to avoid multiple calls."""
-        global_config = MockGlobalConfig()
-        mock_get_global.return_value = global_config
+        mock_config = MockConfig()
+        mock_get_global.return_value = mock_config
 
         service = MockServiceWithMixin()
 
@@ -126,8 +128,8 @@ class TestDependencyInjectionMixin:
         delattr(config, "base_currency")
 
         with patch("stonks_overwatch.core.interfaces.base_service.Config.get_global") as mock_get_global:
-            global_config = MockGlobalConfig(base_currency="CHF")
-            mock_get_global.return_value = global_config
+            mock_config = MockConfig(base_currency="CHF")
+            mock_get_global.return_value = mock_config
 
             service = MockServiceWithMixin(config=config)
 
@@ -158,12 +160,12 @@ class TestBaseService:
     @patch("stonks_overwatch.core.interfaces.base_service.Config.get_global")
     def test_base_service_without_injected_config(self, mock_get_global):
         """Test BaseService falls back to global config."""
-        global_config = MockGlobalConfig(base_currency="AUD")
-        mock_get_global.return_value = global_config
+        mock_config = MockConfig(base_currency="AUD")
+        mock_get_global.return_value = mock_config
 
         service = MockServiceWithBaseService()
 
-        assert service.config is global_config
+        assert service.config is mock_config
         assert service.base_currency == "AUD"
         assert service.is_dependency_injection_enabled() is False
 
@@ -187,13 +189,13 @@ class TestBaseService:
     @patch("stonks_overwatch.core.interfaces.base_service.Config.get_global")
     def test_base_service_multiple_args_no_config(self, mock_get_global):
         """Test BaseService with multiple arguments but no injected config."""
-        global_config = MockGlobalConfig()
-        mock_get_global.return_value = global_config
+        mock_config = MockConfig()
+        mock_get_global.return_value = mock_config
 
         service = MockServiceWithMultipleArgs("required")
 
         assert service.required_arg == "required"
-        assert service.config is global_config
+        assert service.config is mock_config
         assert service.optional_arg == "optional"
 
 
@@ -203,8 +205,8 @@ class TestBackwardCompatibility:
     @patch("stonks_overwatch.core.interfaces.base_service.Config.get_global")
     def test_existing_service_still_works(self, mock_get_global):
         """Test that services without dependency injection still work."""
-        global_config = MockGlobalConfig(base_currency="SEK")
-        mock_get_global.return_value = global_config
+        mock_config = MockConfig(base_currency="SEK")
+        mock_get_global.return_value = mock_config
 
         # Simulate existing service that doesn't use dependency injection
         service = MockServiceWithBaseService()
@@ -218,8 +220,8 @@ class TestBackwardCompatibility:
         injected_config = MockConfig(base_currency="NOK")
 
         with patch("stonks_overwatch.core.interfaces.base_service.Config.get_global") as mock_get_global:
-            global_config = MockGlobalConfig(base_currency="DKK")
-            mock_get_global.return_value = global_config
+            mock_config = MockConfig(base_currency="DKK")
+            mock_get_global.return_value = mock_config
 
             service = MockServiceWithBaseService(config=injected_config)
 
@@ -235,13 +237,13 @@ class TestEdgeCases:
     def test_none_config_injection(self):
         """Test explicitly passing None as config."""
         with patch("stonks_overwatch.core.interfaces.base_service.Config.get_global") as mock_get_global:
-            global_config = MockGlobalConfig()
-            mock_get_global.return_value = global_config
+            mock_config = MockConfig()
+            mock_get_global.return_value = mock_config
 
             service = MockServiceWithBaseService(config=None)
 
             # Should fall back to global config
-            assert service.config is global_config
+            assert service.config is mock_config
             assert service.is_dependency_injection_enabled() is False
 
     def test_config_with_none_base_currency(self):
@@ -250,8 +252,8 @@ class TestEdgeCases:
         config.base_currency = None
 
         with patch("stonks_overwatch.core.interfaces.base_service.Config.get_global") as mock_get_global:
-            global_config = MockGlobalConfig(base_currency="DEFAULT")
-            mock_get_global.return_value = global_config
+            mock_config = MockConfig(base_currency="DEFAULT")
+            mock_get_global.return_value = mock_config
 
             service = MockServiceWithBaseService(config=config)
 

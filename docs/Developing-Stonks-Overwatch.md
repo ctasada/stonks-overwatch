@@ -175,3 +175,15 @@ Now it's possible to run the application in offline mode, without needing to con
 ```
 
 This parameter can be use together with `demo=true` to load the demo database and run the application in offline mode.
+
+## Working with the Native App
+
+While working with the Native App, both while running from code with `make briefcase-run` or with the installed application,
+the code will create files in the next paths:
+
+- STONKS_OVERWATCH_DATA_DIR: `/Users/$USER/Library/Application\ Support/com.caribay.stonks_overwatch`
+- STONKS_OVERWATCH_CONFIG_DIR: `/Users/$USER/Library/Preferences/com.caribay.stonks_overwatch`
+- STONKS_OVERWATCH_LOGS_DIR: `/Users/$USER/Library/Logs/com.caribay.stonks_overwatch`
+- STONKS_OVERWATCH_CACHE_DIR: `/Users/$USER/Library/Caches/com.caribay.stonks_overwatch`
+
+It's possible to easily delete them with `make briefcase-clean`

@@ -19,6 +19,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+## [0.1.1] - 2025-08-05
+
+### Added
+
+* Added support to remember DEGIRO login credentials
+  * Added "Settings" dialog to store DEGIRO credentials, including 2FA token
+  * Added "Remember me" checkbox to the DEGIRO login dialog
+
+### Changed
+
+* Internal refactor to allow adding more brokers
+
+### Security
+
+* Updated internal dependencies
+
 ## [0.1.0] - 2025-07-15
 
 * Initial release

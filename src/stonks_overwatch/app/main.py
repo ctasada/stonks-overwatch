@@ -44,8 +44,15 @@ class StonksOverwatchApp(toga.App):
         os.environ["STONKS_OVERWATCH_CACHE_DIR"] = self.paths.cache.as_posix()
         django.setup(set_prefix=False)
 
+        self.logger.debug(f"STONKS_OVERWATCH_DATA_DIR= {os.environ['STONKS_OVERWATCH_DATA_DIR']}")
+        self.logger.debug(f"STONKS_OVERWATCH_CONFIG_DIR= {os.environ['STONKS_OVERWATCH_CONFIG_DIR']}")
+        self.logger.debug(f"STONKS_OVERWATCH_LOGS_DIR= {os.environ['STONKS_OVERWATCH_LOGS_DIR']}")
+        self.logger.debug(f"STONKS_OVERWATCH_CACHE_DIR= {os.environ['STONKS_OVERWATCH_CACHE_DIR']}")
+
         self.logger.info("Applying database migrations...")
         call_command("migrate")
+
+        # toga.Widget.DEBUG_LAYOUT_ENABLED = True
 
         self.logger.info("Starting server...")
         # Use port 0 to let the server select an available port.
@@ -82,8 +89,9 @@ class StonksOverwatchApp(toga.App):
         self.server_thread.start()
         self.on_exit = self.exit_handler
         self.main_window = toga.MainWindow()
-        self.main_window.size = (1024, 768)
+        self.main_window.size = (1440, 900)
         self.main_window.content = self.web_view
+        self.menu_manager.setup_preferences_menu()
         self.menu_manager.setup_debug_menu()
         self.menu_manager.setup_help_menu()
         for command in self.commands:

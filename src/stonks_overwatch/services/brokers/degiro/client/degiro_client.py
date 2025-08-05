@@ -4,7 +4,7 @@ from typing import Any, List, Optional
 
 import polars as pl
 import requests_cache
-from degiro_connector.core.exceptions import MaintenanceError
+from degiro_connector.core.exceptions import DeGiroConnectionError, MaintenanceError
 from degiro_connector.quotecast.models.chart import Chart, ChartRequest, Interval
 from degiro_connector.quotecast.tools.chart_fetcher import ChartFetcher
 from degiro_connector.trading.api import API as TradingApi  # noqa: N811
@@ -134,9 +134,10 @@ class DeGiroService:
         # Update credentials (updates both service and global config)
         service.update_credentials(new_credentials_manager)
 
-        # Update global config only (via GlobalConfig)
-        from stonks_overwatch.config.global_config import global_config
-        global_config.update_degiro_credentials(username, password, ...)
+        # Update global config only (via BrokerFactory)
+        from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+        factory = BrokerFactory()
+        factory.update_degiro_credentials(username, password, ...)
     """
 
     logger = StonksLogger.get_logger("stonks_overwatch.degiro_service", "[DEGIRO|CLIENT]")
@@ -217,10 +218,11 @@ class DeGiroService:
         Args:
             credentials: The new credentials to set in the global config
         """
-        # Delegate to GlobalConfig to follow SOLID principles
-        from stonks_overwatch.config.global_config import global_config
+        # Delegate to BrokerFactory to follow SOLID principles
+        from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 
-        global_config.update_degiro_credentials(
+        factory = BrokerFactory()
+        factory.update_degiro_credentials(
             username=credentials.username,
             password=credentials.password,
             int_account=credentials.int_account,
@@ -258,6 +260,8 @@ class DeGiroService:
                 # but we will not be able to get any data.
                 self.logger.warning("DeGiro is in maintenance mode. Connection will not be established.")
                 self.is_maintenance_mode = True
+            except DeGiroConnectionError as error:
+                raise error
             except ConnectionError:
                 # Try to connect and validate the connection.
                 # If we want more details, we can always call the connect method

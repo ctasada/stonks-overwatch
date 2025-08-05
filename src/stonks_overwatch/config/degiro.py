@@ -14,6 +14,7 @@ class DegiroCredentials(BaseCredentials):
     int_account: Optional[int] = None
     totp_secret_key: Optional[str] = None
     one_time_password: Optional[int] = None
+    remember_me: Optional[bool] = None
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "DegiroCredentials":
@@ -87,7 +88,7 @@ class DegiroConfig(BaseConfig):
     @classmethod
     def default(cls) -> "DegiroConfig":
         try:
-            return cls.from_json_file(cls.CONFIG_PATH)
+            return cls.from_db_with_json_override("degiro")
         except Exception:
             cls.logger.debug("Cannot find DEGIRO configuration file. Using default values")
             return DegiroConfig(

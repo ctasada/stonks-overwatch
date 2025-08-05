@@ -135,7 +135,7 @@ class UpdateService(BaseService, AbstractUpdateService):
             self.update_dividends()
         except Exception as error:
             self.logger.error("Cannot Update Portfolio!")
-            self.logger.error("Exception: %s", str(error))
+            self.logger.error("Exception: %s", str(error), exc_info=True)
 
     def update_account(self):
         """Update the Account DB data. Only does it if the data is older than today."""

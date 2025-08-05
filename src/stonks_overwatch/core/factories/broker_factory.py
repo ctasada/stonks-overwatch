@@ -79,9 +79,13 @@ class BrokerFactory:
             return None
 
         try:
-            # If no custom kwargs provided, try to use default() method if available
-            if not kwargs and hasattr(config_class, "default"):
-                config = config_class.default()
+            # If no custom kwargs provided, try to use new DB+JSON loading method first
+            if not kwargs:
+                if hasattr(config_class, "from_db_with_json_override"):
+                    config = config_class.from_db_with_json_override(broker_name)
+                elif hasattr(config_class, "default"):
+                    # Fallback to legacy default method
+                    config = config_class.default()
             else:
                 config = config_class(**kwargs)
 
@@ -382,6 +386,100 @@ class BrokerFactory:
             self._config_instances.clear()
             self._service_instances.clear()
             self.logger.debug("Cleared all cached instances")
+
+    def update_broker_credentials(self, broker_name: str, **credentials) -> None:
+        """
+        Update credentials for a specific broker.
+
+        Args:
+            broker_name: Name of the broker to update credentials for
+            **credentials: Credential fields to update
+
+        Raises:
+            BrokerFactoryError: If the broker is not registered or credential update fails
+        """
+        config = self.create_config(broker_name)
+        if not config:
+            raise BrokerFactoryError(f"No configuration found for broker: {broker_name}")
+
+        try:
+            # Handle case where no existing credentials exist
+            if config.credentials is None:
+                # Use a simple mapping for credential classes to avoid complexity
+                credential_classes = {
+                    "degiro": "stonks_overwatch.config.degiro.DegiroCredentials",
+                    "bitvavo": "stonks_overwatch.config.bitvavo.BitvavoCredentials",
+                    "ibkr": "stonks_overwatch.config.ibkr.IbkrCredentials",
+                }
+
+                credential_class_path = credential_classes.get(broker_name.lower())
+                if not credential_class_path:
+                    raise BrokerFactoryError(f"No credential class mapping for broker: {broker_name}")
+
+                # Dynamically import the credential class
+                module_path, class_name = credential_class_path.rsplit(".", 1)
+                module = __import__(module_path, fromlist=[class_name])
+                credential_class = getattr(module, class_name)
+
+                # Create new credentials from scratch
+                updated_credentials = credential_class(**credentials)
+            else:
+                # Get the credential class from existing credentials
+                credential_class = config.credentials.__class__
+
+                # Merge existing credentials with new ones
+                current_credentials_dict = config.credentials.__dict__
+                updated_credentials = credential_class(**{**current_credentials_dict, **credentials})
+
+            # Update the configuration
+            config.credentials = updated_credentials
+
+            # Clear cache to force refresh on next access
+            self.clear_cache(broker_name)
+
+            self.logger.info(f"Updated credentials for broker: {broker_name}")
+
+        except Exception as e:
+            self.logger.error(f"Failed to update credentials for broker {broker_name}: {e}")
+            raise BrokerFactoryError(f"Failed to update credentials for broker '{broker_name}': {e}") from e
+
+    def update_degiro_credentials(
+        self,
+        username: str,
+        password: str,
+        int_account: int = None,
+        totp_secret_key: str = None,
+        one_time_password: int = None,
+    ) -> None:
+        """
+        Update DeGiro credentials in the configuration.
+
+        This method provides a centralized way to update DeGiro credentials,
+        following the Single Responsibility Principle.
+
+        Args:
+            username: The username
+            password: The password
+            int_account: Optional internal account number
+            totp_secret_key: Optional TOTP secret key
+            one_time_password: Optional one-time password
+
+        Raises:
+            BrokerFactoryError: If DeGiro configuration is not found or update fails
+        """
+        try:
+            self.update_broker_credentials(
+                "degiro",
+                username=username,
+                password=password,
+                int_account=int_account,
+                totp_secret_key=totp_secret_key,
+                one_time_password=one_time_password,
+            )
+            self.logger.info("DeGiro credentials updated successfully")
+        except Exception as e:
+            self.logger.error(f"Failed to update DeGiro credentials: {e}")
+            raise BrokerFactoryError(f"Failed to update DeGiro credentials: {e}") from e
 
     def disable_caching(self) -> None:
         """

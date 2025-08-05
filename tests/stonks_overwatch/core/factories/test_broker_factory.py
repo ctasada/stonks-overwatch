@@ -98,6 +98,11 @@ class MockBrokerConfig(BaseConfig):
         """Create default configuration."""
         return cls(credentials=MockCredentials(), enabled=True)
 
+    @classmethod
+    def from_db_with_json_override(cls, broker_name: str) -> "MockBrokerConfig":
+        """Override to avoid LazyConfig wrapper in tests."""
+        return cls.default()
+
 
 class MockPortfolioService(PortfolioServiceInterface):
     """Mock portfolio service for testing."""
@@ -224,15 +229,28 @@ class TestBrokerFactory:
     def test_create_config_error_handling(self):
         """Test error handling in config creation."""
 
-        # Create a config class that raises an exception
+        # Create a config class that raises an exception and doesn't have from_db_with_json_override
         class FailingConfig(BaseConfig):
             def __init__(self, **kwargs):
                 raise ValueError("Config creation failed")
 
+            @classmethod
+            def default(cls):
+                raise ValueError("Config creation failed")
+
+            @classmethod
+            def from_dict(cls, data: dict):
+                raise ValueError("Config creation failed")
+
+            @property
+            def get_credentials(self):
+                raise ValueError("Config creation failed")
+
         self.registry.register_broker_config("failingbroker", FailingConfig)
 
+        # Use custom kwargs to bypass from_db_with_json_override and trigger direct construction
         with pytest.raises(BrokerFactoryError, match="Failed to create configuration"):
-            self.factory.create_config("failingbroker")
+            self.factory.create_config("failingbroker", enabled=True)
 
     def test_create_default_config(self):
         """Test creating default configuration."""
@@ -253,7 +271,16 @@ class TestBrokerFactory:
         # Create a config class without default method
         class NoDefaultConfig(BaseConfig):
             def __init__(self):
+                # Empty init for testing purposes - missing required default() method
                 pass
+
+            @classmethod
+            def from_dict(cls, data: dict):
+                return cls()
+
+            @property
+            def get_credentials(self):
+                return None
 
         self.registry.register_broker_config("nodefaultbroker", NoDefaultConfig)
 
@@ -287,6 +314,10 @@ class TestBrokerFactory:
             @classmethod
             def from_dict(cls, data: dict):
                 raise ValueError("Failed to parse dict")
+
+            @property
+            def get_credentials(self):
+                raise ValueError("Failed to get credentials")
 
         self.registry.register_broker_config("failingconfig", FailingConfig)
 
@@ -461,7 +492,7 @@ class TestBrokerFactory:
         assert ServiceType.TRANSACTION in capabilities
         assert ServiceType.DEPOSIT in capabilities
 
-    def testbroker_supports_service(self):
+    def test_broker_supports_service(self):
         """Test checking if broker supports specific service."""
         assert self.factory.broker_supports_service("testbroker", ServiceType.PORTFOLIO)
         assert self.factory.broker_supports_service("testbroker", ServiceType.TRANSACTION)
