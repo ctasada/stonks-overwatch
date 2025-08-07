@@ -111,33 +111,29 @@ class CredentialsManager:
 @singleton
 class DeGiroService:
     """
-    Singleton service for managing DeGiro API connections and credentials.
+    Singleton service for DeGiro API operations and data access.
 
     This class implements a singleton pattern to ensure only one instance exists
-    throughout the application lifecycle. It manages service credentials and delegates
-    global configuration updates to the appropriate GlobalConfig class.
+    throughout the application lifecycle. It focuses purely on API operations
+    such as data retrieval, portfolio operations, and trading functionality.
 
-    Credential Management:
-    - When instantiated with credentials, they are stored in the service instance
-    - When instantiated without credentials, existing credentials are preserved
-    - The update_credentials() method updates both service and global config
-    - The set_credentials() method only updates if explicitly provided or if none exist
-    - Global configuration updates are delegated to GlobalConfig.update_degiro_credentials()
+    Authentication Coordination:
+    - Authentication flow is handled by AuthenticationService
+    - This service receives credentials and manages the API client
+    - No longer responsible for global configuration updates
+    - Focused on API operations and data access
 
     Usage:
-        # Initial instantiation with credentials
-        service = DeGiroService(credentials_manager=my_credentials)
+        # Set credentials for API operations (typically called by AuthenticationService)
+        service = DeGiroService()
+        service.set_credentials(credentials_manager)
 
-        # Subsequent instantiations preserve existing credentials
-        service2 = DeGiroService()  # Returns same instance with same credentials
+        # Use for API operations
+        client = service.get_client()
+        portfolio_data = service.get_portfolio()
 
-        # Update credentials (updates both service and global config)
-        service.update_credentials(new_credentials_manager)
-
-        # Update global config only (via BrokerFactory)
-        from stonks_overwatch.core.factories.broker_factory import BrokerFactory
-        factory = BrokerFactory()
-        factory.update_degiro_credentials(username, password, ...)
+        # Check API connection status
+        is_connected = service.is_connected()
     """
 
     logger = StonksLogger.get_logger("stonks_overwatch.degiro_service", "[DEGIRO|CLIENT]")
@@ -155,80 +151,37 @@ class DeGiroService:
         force: bool = False,
         config: Optional[BaseConfig] = None,
     ):
-        # Get DeGiro configuration using unified BrokerFactory
-        try:
-            from stonks_overwatch.core.factories.broker_factory import BrokerFactory
-
-            broker_factory = BrokerFactory()
-            self.degiro_config = broker_factory.create_config("degiro")
-
-            if self.degiro_config is None:
-                raise RuntimeError(
-                    "DeGiro configuration not available. This usually means:\n"
-                    "1. The broker registry hasn't been initialized (call django.setup() for scripts)\n"
-                    "2. DeGiro broker registration is missing from registry setup\n"
-                    "3. No valid DeGiro configuration file exists\n"
-                    "Please ensure Django is properly initialized before using broker services."
-                )
-        except ImportError as e:
-            raise ImportError(f"Failed to import BrokerFactory: {e}") from e
-
+        # Initialize configuration - this will be provided by AuthenticationService
+        self.degiro_config = config
         if self.degiro_config is None:
-            raise RuntimeError("DeGiro configuration is None - broker registry not properly initialized")
+            # Fallback to BrokerFactory for backward compatibility
+            try:
+                from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+
+                broker_factory = BrokerFactory()
+                self.degiro_config = broker_factory.create_config("degiro")
+            except ImportError:
+                # If BrokerFactory is not available, AuthenticationService should provide config
+                pass
 
         self.set_credentials(credentials_manager)
         self.force = force
         self.is_maintenance_mode = False
 
     def set_credentials(self, credentials_manager: CredentialsManager):
-        # Only set credentials if explicitly provided or if no credentials manager exists yet
+        """
+        Set credentials for API operations.
+        This method is typically called by AuthenticationService.
+        """
         if credentials_manager is not None:
             self.credentials_manager = credentials_manager
             self.api_client = TradingApi(credentials=self.credentials_manager.credentials)
+            self.logger.debug("Credentials set for API client")
         elif self.credentials_manager is None:
-            # Only create default credentials manager if none exists
+            # Initialize with empty credentials if none provided
             self.credentials_manager = CredentialsManager()
             self.api_client = TradingApi(credentials=self.credentials_manager.credentials)
-        # If credentials_manager is None but self.credentials_manager already exists,
-        # do nothing to preserve existing valid credentials
-
-    def update_credentials(self, credentials_manager: CredentialsManager):
-        """
-        Explicitly update credentials, even if credentials already exist.
-        This method should be used when new credentials are provided (e.g., via login form).
-
-        Args:
-            credentials_manager: The new credentials manager to use
-        """
-        if credentials_manager is None:
-            raise ValueError("credentials_manager cannot be None")
-
-        self.credentials_manager = credentials_manager
-        self.api_client = TradingApi(credentials=self.credentials_manager.credentials)
-
-        # Also update the global configuration
-        self._update_global_config_credentials(credentials_manager.credentials)
-
-        self.logger.info("Credentials updated successfully in both service and global config")
-
-    def _update_global_config_credentials(self, credentials):
-        """
-        Update the credentials in the global configuration.
-
-        Args:
-            credentials: The new credentials to set in the global config
-        """
-        # Delegate to BrokerFactory to follow SOLID principles
-        from stonks_overwatch.core.factories.broker_factory import BrokerFactory
-
-        factory = BrokerFactory()
-        factory.update_degiro_credentials(
-            username=credentials.username,
-            password=credentials.password,
-            int_account=credentials.int_account,
-            totp_secret_key=credentials.totp_secret_key,
-            one_time_password=credentials.one_time_password,
-        )
+            self.logger.debug("Default credentials manager initialized")
 
     def connect(self):
         """Connect to the DeGiro API."""
@@ -272,11 +225,21 @@ class DeGiroService:
 
         return self.__check_connection__()
 
-    def __check_connection__(self) -> bool:
+    def is_connected(self) -> bool:
+        """Check if the API client is currently connected."""
         return self.api_client.connection_storage and self.api_client.connection_storage.connected.is_set()
 
+    def __check_connection__(self) -> bool:
+        """Internal connection check method."""
+        return self.is_connected()
+
     def get_client(self) -> TradingApi:
-        self.check_connection()
+        """
+        Get the DeGiro API client for operations.
+        Note: Connection should be established by AuthenticationService before calling this.
+        """
+        if not self.is_connected():
+            self.logger.warning("API client is not connected. Ensure authentication is completed first.")
         return self.api_client
 
     def get_account_info(self) -> Any:
