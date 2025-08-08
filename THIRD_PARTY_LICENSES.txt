@@ -229,7 +229,7 @@ Apache License
 
 
 Django
-5.2.4
+5.2.5
 BSD License
 The MIT License (MIT)
 
@@ -391,7 +391,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 
 certifi
-2025.7.14
+2025.8.3
 Mozilla Public License 2.0 (MPL 2.0)
 This package contains a modified version of ca-bundle.crt:
 
@@ -473,7 +473,7 @@ SOFTWARE.
 
 
 curl_cffi
-0.12.0
+0.13.0
 MIT License
 MIT License
 
