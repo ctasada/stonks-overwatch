@@ -84,17 +84,24 @@ class DialogManager:
             await self.app.main_window.dialog(ErrorDialog("License", f"Failed to retrieve license info: {str(e)}"))
 
     async def preferences(self, widget):
+        # If a dialog is open and not closed, focus it
         if DialogManager._preferences_dialog_instance is not None:
-            self.logger.debug("PreferencesDialog already open, focusing window.")
-            DialogManager._preferences_dialog_instance.show()
-            return
+            if not getattr(DialogManager._preferences_dialog_instance, "_closed", False):
+                self.logger.debug("PreferencesDialog already open, focusing window.")
+                DialogManager._preferences_dialog_instance.show()
+                return
+            else:
+                # Previous instance is closed, reset
+                DialogManager._preferences_dialog_instance = None
 
         dialog = PreferencesDialog(title="Preferences", app=self.app)
         await dialog.async_init()  # Initialize the dialog asynchronously
+        dialog._closed = False  # Track closed state
         DialogManager._preferences_dialog_instance = dialog
 
         def on_close(widget):
             self.logger.debug("PreferencesDialog close handler called")
+            dialog._closed = True
             DialogManager._preferences_dialog_instance = None
             dialog.close()
 

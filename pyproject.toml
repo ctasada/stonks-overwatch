@@ -25,7 +25,8 @@ dependencies = [
     "fontawesomefree >= 6.6.0",
     # `toml` is used to parse the `pyproject.toml` file for the license information.
     "toml >=0.10.2",
-    "ibind[oauth] (>=0.1.18,<1.0.0)",
+    "ibind[oauth] >=0.1.18",
+    "cryptography >=45.0.6",
 ]
 
 [tool.poetry.dependencies]

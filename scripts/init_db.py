@@ -37,6 +37,7 @@ from stonks_overwatch.services.brokers.degiro.services.update_service import (  
 from stonks_overwatch.services.brokers.ibkr.services.update_service import (  # noqa: E402
     UpdateService as IbkrUpdateService,
 )
+from stonks_overwatch.services.brokers.models import BrokersConfigurationRepository  # noqa: E402
 
 
 def init() -> None:
@@ -110,6 +111,8 @@ def parse_args() -> Namespace:
     parser.add_argument("--bitvavo_portfolio", action="store_true", help="Import Bitvavo portfolio information")
     parser.add_argument("--bitvavo_transactions", action="store_true", help="Import Bitvavo transactions")
 
+    parser.add_argument("--update_credentials", action="store_true", help="Update credentials for supported brokers")
+
     return parser.parse_args()
 
 
@@ -117,6 +120,39 @@ def degiro_account_import(update_service: DegiroUpdateService) -> None:
     """Import DeGiro Account information."""
     logging.info("Importing DEGIRO Account Information...")
     update_service.update_account()
+
+
+def update_credentials():
+    """Update credentials for supported services from config.json."""
+    import json
+    import os
+
+    from stonks_overwatch.config.config import Config
+
+    config_path = os.path.join(os.path.dirname(__file__), "..", "config", "config.json")
+    if not os.path.exists(config_path):
+        logging.error(f"Config file not found: {config_path}")
+        return
+
+    with open(config_path, "r") as f:
+        config_data = json.load(f)
+
+    config = Config()
+    for broker_name in config._factory.get_available_brokers():
+        broker_config = config.get_broker_config(broker_name)
+        if broker_config is not None:
+            broker_config_db = BrokersConfigurationRepository.get_broker_by_name(broker_name)
+            if broker_config_db is None:
+                logging.warning(f"No configuration found for broker: {broker_name}")
+                continue
+            credentials = config_data.get(broker_name, {}).get("credentials", {})
+            # Here you would update the credentials in your system
+            logging.info(f"Updating credentials for {broker_name}: {credentials}")
+            broker_config_db.credentials = credentials
+
+            BrokersConfigurationRepository.save_broker_configuration(broker_config_db)
+
+    logging.info("Credentials update completed.")
 
 
 def degiro_transactions_import(update_service: DegiroUpdateService) -> None:
@@ -207,17 +243,22 @@ def main():
         (args.degiro, lambda svc: svc.update_all(), degiro_update_service),
         (args.ibkr, lambda svc: svc.update_all(), ibkr_update_service),
         (args.bitvavo, lambda svc: svc.update_all(), bitvavo_update_service),
+        (args.update_credentials, update_credentials, None),
     ]
 
     for condition, func, service in actions:
         if condition:
-            func(service)
+            if service is None:
+                func()
+            else:
+                func(service)
             break
     else:
         logging.info("No import option selected. Importing all data.")
         degiro_update_service.update_all()
         ibkr_update_service.update_all()
         bitvavo_update_service.update_all()
+        update_credentials()
 
 
 if __name__ == "__main__":
