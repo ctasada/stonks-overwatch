@@ -47,7 +47,6 @@ class StonksOverwatchConfig(AppConfig):
 
             # Register authentication services with dependency injection
             try:
-                from stonks_overwatch.core.authentication_locator import AuthenticationServiceLocator
                 from stonks_overwatch.core.authentication_setup import register_authentication_services
                 from stonks_overwatch.core.factories.authentication_factory import AuthenticationFactory
 
@@ -63,10 +62,7 @@ class StonksOverwatchConfig(AppConfig):
                     registered_services = auth_factory.get_registered_services()
                     self.logger.info(f"Authentication services already registered: {registered_services}")
 
-                # Warm up authentication service cache for optimal performance
-                AuthenticationServiceLocator.warmup_cache()
-                cache_status = AuthenticationServiceLocator.get_cache_status()
-                self.logger.info(f"Authentication service cache warmed up: {cache_status}")
+                # Defer authentication service warmup to first access to avoid DB access during app initialization
 
             except Exception as e:
                 self.logger.error("Failed to register authentication services: %s", e)

@@ -167,30 +167,4 @@ class Migration(migrations.Migration):
                 "db_table": '"bitvavo_assets"',
             },
         ),
-        migrations.CreateModel(
-            name="BitvavoDepositHistory",
-            fields=[
-                ("id", models.AutoField(primary_key=True, serialize=False)),
-                ("timestamp", models.DateTimeField()),
-                ("symbol", models.CharField(max_length=25)),
-                ("amount", models.DecimalField(decimal_places=10, max_digits=20)),
-                (
-                    "address",
-                    models.CharField(blank=True, default=None, max_length=100, null=True),
-                ),
-                (
-                    "payment_id",
-                    models.CharField(blank=True, default=None, max_length=50, null=True, unique=True),
-                ),
-                (
-                    "tx_id",
-                    models.CharField(blank=True, default=None, max_length=50, null=True, unique=True),
-                ),
-                ("fee", models.DecimalField(decimal_places=10, max_digits=20)),
-                ("status", models.CharField(max_length=20)),
-            ],
-            options={
-                "db_table": '"bitvavo_deposit_history"',
-            },
-        ),
     ]

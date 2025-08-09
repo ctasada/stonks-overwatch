@@ -14,3 +14,15 @@ class TransactionsRepository:
                 """
             )
             return dictfetchall(cursor)
+
+    @staticmethod
+    def get_deposits_history_raw() -> list[dict]:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT *
+                FROM bitvavo_transactions
+                WHERE type = 'deposit'
+                """
+            )
+            return dictfetchall(cursor)

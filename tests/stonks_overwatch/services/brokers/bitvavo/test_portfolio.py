@@ -4,7 +4,6 @@ from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.services.brokers.bitvavo.repositories.models import (
     BitvavoAssets,
     BitvavoBalance,
-    BitvavoDepositHistory,
     BitvavoTransactions,
 )
 from stonks_overwatch.services.brokers.bitvavo.services.portfolio_service import PortfolioService
@@ -22,7 +21,6 @@ class TestPortfolioService(TestCase):
         self.fixture_balance_repository()
         self.fixture_transactions_repository()
         self.fixture_assets_repository()
-        self.fixture_deposit_history_repository()
 
     def fixture_balance_repository(self):
         data = [
@@ -57,6 +55,16 @@ class TestPortfolioService(TestCase):
                 "fees_amount": "0.7486213800000314",
                 "address": "null",
             },
+            {
+                "transaction_id": "5ea21d49-b9db-44c5-9d67-be20a5b0aa9d",
+                "executed_at": "2025-02-08T14:26:45.000Z",
+                "type": "deposit",
+                "received_currency": "EUR",
+                "received_amount": "400",
+                "fees_currency": "EUR",
+                "fees_amount": "0",
+                "address": "NL42ABNA1234567891",
+            },
         ]
 
         for value in data:
@@ -86,24 +94,6 @@ class TestPortfolioService(TestCase):
         for value in data:
             # Create and save the CashMovements object
             obj = BitvavoAssets.objects.create(**value)
-            self.created_objects[value["symbol"]] = obj
-
-    def fixture_deposit_history_repository(self):
-        data = [
-            {
-                "timestamp": "2025-02-08T14:26:45.000Z",
-                "symbol": "EUR",
-                "amount": "400",
-                "fee": "0",
-                "status": "completed",
-                "address": "NL42ABNA1234567891",
-            },
-        ]
-
-        for value in data:
-            value["timestamp"] = parse_datetime(value["timestamp"])
-            # Create and save the CashMovements object
-            obj = BitvavoDepositHistory.objects.create(**value)
             self.created_objects[value["symbol"]] = obj
 
     @pook.on

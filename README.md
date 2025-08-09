@@ -86,7 +86,6 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
 * [ ] Review ALL BUGS and TODOs and move them to their corresponding Github issues
 * [ ] Replace all the Tables with "https://bootstrap-table.com"
 * [ ] Evaluate the migration from Poetry to Uv
-* [ ] DEGIRO Client: Stop using Totp and request 2FA for each connection
 * [ ] Provide support for both Unrealized and Realized Gain/Loss
   * Onger. W/V € - Gain/Loss Unrealized - unrealizedPl
   * Totale W/V € - Gain/Loss Total (Realized + unrealized) - totalPl
@@ -112,7 +111,6 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
   * Tiingo: "https://www.tiingo.com/products/end-of-day-stock-price-data"
     * "https://www.tiingo.com/documentation/end-of-day"
   * Alpaca: "https://alpaca.markets"
-* [ ] DEGIRO Risk Category is a local term: "https://www.degiro.ie/helpdesk/trading-platform/what-are-risk-categories"
 * [ ] Improve code quality. Check "https://pyre-check.org/docs/pysa-quickstart/"
 * [ ] Enable usage of Demo DB in the application (running natively)
 * [ ] Provide support to configure the settings (API Key, etc.) in the application.
@@ -122,8 +120,8 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
   * [ ] `toga` and `asgiref` are only used for the `app`. Probably it should be moved as a full dependency
   * [ ] `dateutil` and `pytz` can be either removed, or replace internal implementations.
 * [ ] DEGIRO:
-  * [ ] Login Dialog:
-  * [ ] Improve error message when credentials are wrong: 'Your username and/or password is incorrect'
+  * [ ] DEGIRO Risk Category is a local term: "https://www.degiro.ie/helpdesk/trading-platform/what-are-risk-categories"
+  * [ ] DEGIRO Client: Stop using Totp and request 2FA for each connection
 * [ ] Bitvavo:
   * [ ] Create a Crypto Rewards section
   * [ ] Show asset staking blocked amount as in Bitvavo UI

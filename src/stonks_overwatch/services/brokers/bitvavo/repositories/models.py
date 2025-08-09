@@ -53,18 +53,3 @@ class BitvavoAssets(models.Model):
     withdrawal_status = models.CharField(max_length=20)
     networks = models.JSONField(default=list, blank=True, null=True)
     message = models.CharField(max_length=255, default=None, blank=True, null=True)
-
-
-class BitvavoDepositHistory(models.Model):
-    class Meta:
-        db_table = '"bitvavo_deposit_history"'
-
-    id = models.AutoField(primary_key=True)
-    timestamp = models.DateTimeField()
-    symbol = models.CharField(max_length=25)
-    amount = models.DecimalField(max_digits=20, decimal_places=10)
-    address = models.CharField(max_length=100, default=None, blank=True, null=True)
-    payment_id = models.CharField(max_length=50, unique=True, default=None, blank=True, null=True)
-    tx_id = models.CharField(max_length=50, unique=True, default=None, blank=True, null=True)
-    fee = models.DecimalField(max_digits=20, decimal_places=10)
-    status = models.CharField(max_length=20)
