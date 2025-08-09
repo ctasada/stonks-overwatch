@@ -8,8 +8,8 @@ from django.core.handlers.wsgi import WSGIHandler
 from django.core.management import call_command
 from django.core.servers.basehttp import WSGIRequestHandler
 
-from stonks_overwatch.app.dialogs import DialogManager
-from stonks_overwatch.app.menu import MenuManager
+from stonks_overwatch.app.dialogs.dialogs import DialogManager
+from stonks_overwatch.app.ui.menu import MenuManager
 from stonks_overwatch.app.webserver import StaticFilesMiddleware, ThreadedWSGIServer
 from stonks_overwatch.services.utilities.license_manager import LicenseManager
 from stonks_overwatch.utils.core.logger import StonksLogger

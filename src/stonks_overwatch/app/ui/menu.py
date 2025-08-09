@@ -4,7 +4,7 @@ from datetime import datetime
 
 from toga.command import Command, Group
 
-from stonks_overwatch.app.logs_window import LogStreamWindow
+from stonks_overwatch.app.ui.logs_window import LogStreamWindow
 from stonks_overwatch.services.utilities.license_manager import LicenseManager
 
 

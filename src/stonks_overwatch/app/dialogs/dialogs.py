@@ -3,8 +3,8 @@ import os
 from asgiref.sync import sync_to_async
 from toga.dialogs import ConfirmDialog, ErrorDialog, InfoDialog, SaveFileDialog
 
-from stonks_overwatch.app.expired_dialog import ExpiredDialog
-from stonks_overwatch.app.preferences_dialog import PreferencesDialog
+from stonks_overwatch.app.dialogs.expired_dialog import ExpiredDialog
+from stonks_overwatch.app.dialogs.preferences_dialog import PreferencesDialog
 from stonks_overwatch.services.utilities.license_manager import LicenseManager
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.database.db_utils import dump_database
