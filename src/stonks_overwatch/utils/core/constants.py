@@ -12,7 +12,7 @@ class UserErrorMessages:
 
     # Login form validation errors
     CREDENTIALS_REQUIRED = "Username and password are required."
-    INVALID_CREDENTIALS = "Invalid username or password. Please try again."
+    INVALID_CREDENTIALS = "Invalid username or password."
     CONNECTION_ERROR = "Unable to connect to the authentication service. Please check your connection and try again."
     MAINTENANCE_MODE = "The system is temporarily unavailable for maintenance. Please try again later."
     UNEXPECTED_ERROR = "An unexpected error occurred. Please contact support if the problem persists."
