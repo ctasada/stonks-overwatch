@@ -1,5 +1,5 @@
 import os
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, timedelta
 from typing import Optional
 
 from degiro_connector.quotecast.models.chart import Interval
@@ -11,7 +11,6 @@ from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import Bitv
 from stonks_overwatch.services.brokers.bitvavo.repositories.models import (
     BitvavoAssets,
     BitvavoBalance,
-    BitvavoDepositHistory,
     BitvavoProductQuotation,
     BitvavoTransactions,
 )
@@ -56,7 +55,6 @@ class UpdateService(BaseService, AbstractUpdateService):
 
         try:
             self.update_transactions()
-            self.update_deposits()
             self.update_portfolio()
             self.update_assets()
         except Exception as error:
@@ -99,19 +97,6 @@ class UpdateService(BaseService, AbstractUpdateService):
             save_to_json(transactions, transactions_file)
 
         self.__import_transactions(transactions)
-
-    def update_deposits(self):
-        """Update the Account DB data. Only does it if the data is older than today."""
-        self._log_message("Updating Deposits Data....")
-
-        # Bitvavo does not have a separate deposit history endpoint, so we use the account history
-        deposits = self.bitvavo_service.deposit_history()
-
-        if self.debug_mode:
-            deposits_file = os.path.join(self.import_folder, "deposits.json")
-            save_to_json(deposits, deposits_file)
-
-        self.__import_deposits(deposits)
 
     def __import_quotation(self) -> None:  # noqa: C901
         product_growth = self.portfolio_data.calculate_product_growth()
@@ -214,26 +199,6 @@ class UpdateService(BaseService, AbstractUpdateService):
                 )
             except Exception as error:
                 self.logger.error(f"Cannot import position: {row}")
-                self.logger.error("Exception: %s", str(error), exc_info=True)
-
-    def __import_deposits(self, deposits: list[dict]) -> None:
-        for row in deposits:
-            try:
-                self._retry_database_operation(
-                    BitvavoDepositHistory.objects.update_or_create,
-                    timestamp=datetime.fromtimestamp(row["timestamp"] / 1000.0, tz=timezone.utc),
-                    defaults={
-                        "symbol": row["symbol"],
-                        "amount": row["amount"],
-                        "address": row.get("address", None),
-                        "payment_id": row.get("paymentId", None),
-                        "tx_id": row.get("txId", None),
-                        "fee": row.get("fee", None),
-                        "status": row["status"],
-                    },
-                )
-            except Exception as error:
-                self.logger.error(f"Cannot import deposit: {row}")
                 self.logger.error("Exception: %s", str(error), exc_info=True)
 
     def __import_assets(self, assets: list[dict]) -> None:

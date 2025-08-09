@@ -8,7 +8,6 @@ from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import BitvavoService
 from stonks_overwatch.services.brokers.bitvavo.repositories.assets_repository import AssetsRepository
 from stonks_overwatch.services.brokers.bitvavo.repositories.balance_repository import BalanceRepository
-from stonks_overwatch.services.brokers.bitvavo.repositories.deposits_history_repository import DepositsHistoryRepository
 from stonks_overwatch.services.brokers.bitvavo.repositories.product_quotations_repository import (
     ProductQuotationsRepository,
 )
@@ -129,7 +128,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
                 portfolio_total_value += entry.base_currency_value
 
         total_deposit_withdrawal = sum(
-            float(deposit["amount"]) for deposit in DepositsHistoryRepository.get_deposits_history_raw()
+            float(deposit["receivedAmount"]) for deposit in TransactionsRepository.get_deposits_history_raw()
         )
 
         total_cash = 0.0
