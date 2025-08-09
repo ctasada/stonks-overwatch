@@ -1,8 +1,14 @@
 from asgiref.sync import sync_to_async
 from django.db import models
 
+from stonks_overwatch.utils.core.logger import StonksLogger
+
+from .encryption_utils import decrypt_dict, encrypt_dict
+
 
 class BrokersConfiguration(models.Model):
+    logger = StonksLogger.get_logger("stonks_overwatch.brokers.models", "[BROKER_CONFIGURATION|MODEL]")
+
     class Meta:
         db_table = '"brokers_configuration"'
 
@@ -12,11 +18,35 @@ class BrokersConfiguration(models.Model):
     update_frequency = models.IntegerField(help_text="Update frequency in minutes", default=5)
     credentials = models.JSONField()
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.credentials:
+            try:
+                self.credentials = decrypt_dict(self.credentials)
+            except Exception as e:
+                self.logger.error(f"Failed to decrypt credentials for broker '{self.broker_name}': {e}")
+
+    def save(self, *args, **kwargs):
+        if self.credentials:
+            try:
+                self.credentials = encrypt_dict(self.credentials)
+            except Exception as e:
+                self.logger.error(f"Failed to encrypt credentials for broker '{self.broker_name}': {e}")
+        super().save(*args, **kwargs)
+        # After saving, decrypt again for in-memory usage
+        if self.credentials:
+            try:
+                self.credentials = decrypt_dict(self.credentials)
+            except Exception as e:
+                self.logger.error(f"Failed to decrypt credentials after save for broker '{self.broker_name}': {e}")
+
 
 class BrokersConfigurationRepository:
     """
     Repository for managing BrokersConfiguration model instances.
     """
+
+    logger = StonksLogger.get_logger("stonks_overwatch.brokers.models", "[BROKER_CONFIGURATION|REPOSITORY]")
 
     @staticmethod
     @sync_to_async
@@ -33,6 +63,9 @@ class BrokersConfigurationRepository:
         try:
             return BrokersConfiguration.objects.get(broker_name=broker_name)
         except BrokersConfiguration.DoesNotExist:
+            BrokersConfigurationRepository.logger.warning(
+                f"BrokersConfiguration with name '{broker_name}' does not exist."
+            )
             return None
 
     @staticmethod
@@ -42,5 +75,4 @@ class BrokersConfigurationRepository:
 
     @staticmethod
     def save_broker_configuration(broker_config: BrokersConfiguration) -> None:
-        # FIXME: Encrypt the credentials before saving it to the database.
         broker_config.save()

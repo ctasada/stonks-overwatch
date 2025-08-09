@@ -184,7 +184,7 @@ class PreferencesDialog(toga.Window):
         totp_key_label = toga.Label(
             "TOTP Secret Key", style=Pack(width=self.LABEL_WIDTH, margin_right=self.LABEL_MARGIN_RIGHT, align_items=END)
         )
-        totp_key = toga.TextInput(value=existing_totp_key, style=Pack(flex=1), on_change=on_degiro_topt_change)
+        totp_key = toga.PasswordInput(value=existing_totp_key, style=Pack(flex=1), on_change=on_degiro_topt_change)
         totp_key_row.add(totp_key_label)
         totp_key_row.add(totp_key)
         fields_box.add(totp_key_row)
@@ -279,12 +279,6 @@ class PreferencesDialog(toga.Window):
         self._add_degiro_update_frequency_row(fields_box)
 
         self.main_section.add(fields_box)
-
-    def __set_visibility(self, widget: toga.Widget, visibility: str) -> None:
-        if widget.style.visibility != visibility:
-            widget.style.visibility = visibility
-            if widget.parent:
-                widget.parent.refresh()
 
     def on_ok(self, widget: toga.Widget) -> None:
         """Save the configuration and close the dialog."""
