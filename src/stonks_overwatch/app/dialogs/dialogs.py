@@ -13,6 +13,7 @@ from stonks_overwatch.utils.database.db_utils import dump_database
 class DialogManager:
     _expired_dialog_instance = None
     _preferences_dialog_instance = None
+    _check_for_updates_dialog_instance = None
 
     def __init__(self, app, license_manager: LicenseManager):
         self.app = app
@@ -107,3 +108,19 @@ class DialogManager:
 
         dialog.on_close = on_close
         dialog.show()
+
+    async def check_for_updates(self, widget):
+        # If a dialog is open and not closed, focus it
+        if DialogManager._check_for_updates_dialog_instance is not None:
+            if not getattr(DialogManager._check_for_updates_dialog_instance, "_closed", False):
+                return
+            else:
+                # Previous instance is closed, reset
+                DialogManager._check_for_updates_dialog_instance = None
+
+        dialog = InfoDialog("There are currently no updates available.", "")
+        DialogManager._check_for_updates_dialog_instance = dialog
+
+        await self.app.main_window.dialog(dialog)
+
+        DialogManager._check_for_updates_dialog_instance = None

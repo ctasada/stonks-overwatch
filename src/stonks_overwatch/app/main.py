@@ -91,7 +91,7 @@ class StonksOverwatchApp(toga.App):
         self.main_window = toga.MainWindow()
         self.main_window.size = (1440, 900)
         self.main_window.content = self.web_view
-        self.menu_manager.setup_preferences_menu()
+        self.menu_manager.setup_main_menu()
         self.menu_manager.setup_debug_menu()
         self.menu_manager.setup_help_menu()
         for command in self.commands:
