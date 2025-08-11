@@ -139,3 +139,35 @@ class TestGoogleDriveService:
         )
         result = GoogleDriveService.download_file(file_id, str(output_path))
         assert result is False
+
+    def test_get_platform_for_os(self, monkeypatch):
+        # Test for macOS
+        monkeypatch.setattr("platform.system", lambda: "Darwin")
+        assert GoogleDriveService.get_platform_for_os() == "dmg"
+        # Test for Windows
+        monkeypatch.setattr("platform.system", lambda: "Windows")
+        assert GoogleDriveService.get_platform_for_os() == "msi"
+        # Test for Linux
+        monkeypatch.setattr("platform.system", lambda: "Linux")
+        assert GoogleDriveService.get_platform_for_os() == "flatpak"
+        # Test for unknown OS
+        monkeypatch.setattr("platform.system", lambda: "Solaris")
+        with pytest.raises(RuntimeError):
+            GoogleDriveService.get_platform_for_os()
+
+    def test_is_file_newer_than_version(self):
+        # Newer version
+        file_info_newer = self.make_file("Stonks.Overwatch-0.2.0.dmg", "1")
+        assert GoogleDriveService.is_file_newer_than_version(file_info_newer, "0.1.0") is True
+        # Same version
+        file_info_same = self.make_file("Stonks.Overwatch-0.1.0.dmg", "2")
+        assert GoogleDriveService.is_file_newer_than_version(file_info_same, "0.1.0") is False
+        # Older version
+        file_info_older = self.make_file("Stonks.Overwatch-0.1.0.dmg", "3")
+        assert GoogleDriveService.is_file_newer_than_version(file_info_older, "0.2.0") is False
+        # Invalid filename (no version)
+        file_info_invalid = self.make_file("randomfile.txt", "4")
+        assert GoogleDriveService.is_file_newer_than_version(file_info_invalid, "0.1.0") is False
+        # Invalid version string
+        file_info_valid = self.make_file("Stonks.Overwatch-0.2.0.dmg", "5")
+        assert GoogleDriveService.is_file_newer_than_version(file_info_valid, "not_a_version") is False

@@ -6,7 +6,7 @@ from toga.style.pack import CENTER, COLUMN, ROW
 
 
 class ExpiredDialog(toga.Window):
-    def __init__(self, title, license_info, main_window=None):
+    def __init__(self, title: str, license_info: dict, main_window: toga.Window | None = None):
         super().__init__(
             title=title,
             minimizable=False,

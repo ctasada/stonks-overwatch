@@ -27,6 +27,7 @@ dependencies = [
     "toml >=0.10.2",
     "ibind[oauth] >=0.1.18",
     "cryptography >=45.0.6",
+    "packaging >=25.0",
 ]
 
 [tool.poetry.dependencies]

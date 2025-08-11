@@ -1,10 +1,13 @@
 import os
 
+import toga
 from asgiref.sync import sync_to_async
 from toga.dialogs import ConfirmDialog, ErrorDialog, InfoDialog, SaveFileDialog
 
+from stonks_overwatch.app.dialogs.download_dialog import DownloadDialog
 from stonks_overwatch.app.dialogs.expired_dialog import ExpiredDialog
 from stonks_overwatch.app.dialogs.preferences_dialog import PreferencesDialog
+from stonks_overwatch.services.utilities.google_drive_service import GoogleDriveService
 from stonks_overwatch.services.utilities.license_manager import LicenseManager
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.database.db_utils import dump_database
@@ -15,7 +18,7 @@ class DialogManager:
     _preferences_dialog_instance = None
     _check_for_updates_dialog_instance = None
 
-    def __init__(self, app, license_manager: LicenseManager):
+    def __init__(self, app: toga.App, license_manager: LicenseManager):
         self.app = app
         self.license_manager = license_manager
         self.logger = StonksLogger.get_logger("stonks_overwatch.app", "[DIALOG_MANAGER]")
@@ -118,9 +121,42 @@ class DialogManager:
                 # Previous instance is closed, reset
                 DialogManager._check_for_updates_dialog_instance = None
 
-        dialog = InfoDialog("There are currently no updates available.", "")
-        DialogManager._check_for_updates_dialog_instance = dialog
+        is_update_available = False
+        newest_version_file = None
 
-        await self.app.main_window.dialog(dialog)
+        # Get list of available updates
+        update_files = GoogleDriveService.list_files()
+        if update_files:
+            platform = GoogleDriveService.get_platform_for_os()
+            newest_version_file = GoogleDriveService.get_latest_for_platform(update_files, platform)
+            is_update_available = GoogleDriveService.is_file_newer_than_version(newest_version_file, self.app.version)
 
-        DialogManager._check_for_updates_dialog_instance = None
+        if is_update_available:
+            confirmed = await self.app.main_window.dialog(
+                ConfirmDialog(
+                    "Update Available",
+                    f"Update to version {newest_version_file.version} available. Do you want to download it?",
+                )
+            )
+            if not confirmed:
+                return
+
+            dialog = DownloadDialog(newest_version_file, main_window=self.app.main_window)
+            dialog._closed = False
+            DialogManager._check_for_updates_dialog_instance = dialog
+
+            def on_close(widget):
+                self.logger.debug("DownloadDialog close handler called")
+                dialog._closed = True
+                DialogManager._check_for_updates_dialog_instance = None
+                dialog.close()
+
+            dialog.on_close = on_close
+            dialog.show()
+        else:
+            dialog = InfoDialog("There are currently no updates available.", "")
+            DialogManager._check_for_updates_dialog_instance = dialog
+
+            await self.app.main_window.dialog(dialog)
+
+            DialogManager._check_for_updates_dialog_instance = None
