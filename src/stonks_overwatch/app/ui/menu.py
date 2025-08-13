@@ -4,7 +4,7 @@ from datetime import datetime
 
 from toga.command import Command, Group
 
-from stonks_overwatch.app.logs_window import LogStreamWindow
+from stonks_overwatch.app.ui.logs_window import LogStreamWindow
 from stonks_overwatch.services.utilities.license_manager import LicenseManager
 
 
@@ -15,7 +15,15 @@ class MenuManager:
         self.log_window = None
         self.license_manager = LicenseManager()
 
-    def setup_preferences_menu(self):
+    def setup_main_menu(self):
+        app_group = Group.APP
+        check_update_cmd = Command(
+            self._check_for_updates,
+            text="Check for Updates...",
+            group=app_group,
+            section=0,
+            order=1,
+        )
         preferences_cmd = Command.standard(
             self.app,
             Command.PREFERENCES,
@@ -23,6 +31,7 @@ class MenuManager:
         )
 
         # Add commands to the app
+        self.app.commands.add(check_update_cmd)
         self.app.commands.add(preferences_cmd)
 
     def setup_debug_menu(self):
@@ -107,6 +116,9 @@ class MenuManager:
 
     async def _clear_cache(self, widget):
         await self.app.dialog_manager.clear_cache(widget)
+
+    async def _check_for_updates(self, widget):
+        await self.app.dialog_manager.check_for_updates(widget)
 
     def _get_log_file_path(self):
         """Get the path to the log file."""

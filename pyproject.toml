@@ -27,6 +27,7 @@ dependencies = [
     "toml >=0.10.2",
     "ibind[oauth] >=0.1.18",
     "cryptography >=45.0.6",
+    "packaging >=25.0",
 ]
 
 [tool.poetry.dependencies]
@@ -42,12 +43,12 @@ pytest = "^8.4.1"
 pytest-cov = "^6.2.1"
 pytest-django = "^4.11.1"
 pook = "^2.1.4"
-pyinstrument = "^5.0.3"
+pyinstrument = "^5.1.1"
 licensecheck = "^2025.1.0"
 pip-licenses = "^5.0.0"
 briefcase = "^0.3.24"
 deptry = "^0.23.0"
-pre-commit = "^4.2.0"
+pre-commit = "^4.3.0"
 bandit = "^1.8.6"
 pymarkdownlnt = "^0.9.31"
 
