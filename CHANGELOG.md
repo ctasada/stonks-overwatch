@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
-## [0.1.1] - 2025-08-10
+## [0.1.1] - 2025-08-13
 
 ### Added
 
@@ -27,6 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Added "Settings" dialog to store DEGIRO credentials, including 2FA token
   * Added "Remember me" checkbox to the DEGIRO login dialog
   * Credentials are stored securely using a locally generated AES-128 key
+* Added support to check for updates
+  * Added "Check for updates" menu item to the main menu
+  * Added "Update available" notification when a new version is detected
 
 ### Changed
 

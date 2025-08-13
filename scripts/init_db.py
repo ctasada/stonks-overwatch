@@ -13,6 +13,7 @@ import textwrap
 from argparse import Namespace
 
 import django
+from common import init_logger
 from django.core.management import call_command
 
 # Add the src directory to the Python path
@@ -38,28 +39,6 @@ from stonks_overwatch.services.brokers.ibkr.services.update_service import (  # 
     UpdateService as IbkrUpdateService,
 )
 from stonks_overwatch.services.brokers.models import BrokersConfigurationRepository  # noqa: E402
-
-
-def init() -> None:
-    """Execute the necessary initializations for the scripts.
-    ### Returns:
-        None
-    """
-    # Configure logging for the stonks_overwatch module
-    stonks_overwatch_logger = logging.getLogger("stonks_overwatch")
-    stonks_overwatch_logger.setLevel(logging.INFO)
-
-    # Create a console handler
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-
-    # Create a formatter and add it to the console handler
-    _format = "%(levelname)s %(asctime)s %(module)s %(message)s"
-    formatter = logging.Formatter(_format)
-    console_handler.setFormatter(formatter)
-
-    # Configure logging
-    logging.basicConfig(level=logging.INFO, format=_format)
 
 
 def parse_args() -> Namespace:
@@ -202,7 +181,7 @@ def bitvavo_transactions(update_service: BitvavoUpdateService) -> None:
 
 
 def main():
-    init()
+    init_logger()
     logging.info("Applying database migrations...")
     call_command("migrate")
 

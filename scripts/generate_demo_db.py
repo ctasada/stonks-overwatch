@@ -18,6 +18,7 @@ from zoneinfo import ZoneInfo
 
 import django
 import pandas as pd
+from common import init_logger
 from degiro_connector.quotecast.models.chart import Interval
 from django.core.management import call_command
 
@@ -513,25 +514,6 @@ class DBDemoGenerator:
         self.create_dividend_payments()
 
 
-def init() -> None:
-    """Execute the necessary initializations for the scripts."""
-    # Configure logging for the stonks_overwatch module
-    stonks_overwatch_logger = logging.getLogger("stonks_overwatch")
-    stonks_overwatch_logger.setLevel(logging.INFO)
-
-    # Create a console handler
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-
-    # Create a formatter and add it to the console handler
-    _format = "%(levelname)s %(asctime)s %(module)s %(message)s"
-    formatter = logging.Formatter(_format)
-    console_handler.setFormatter(formatter)
-
-    # Configure logging
-    logging.basicConfig(level=logging.INFO, format=_format)
-
-
 def parse_args() -> Namespace:
     """Parse command line arguments.
     ### Returns:
@@ -581,7 +563,7 @@ def parse_args() -> Namespace:
 
 
 def main():
-    init()
+    init_logger()
     args = parse_args()
 
     if os.path.exists(Path(STONKS_OVERWATCH_DATA_DIR).resolve().joinpath(STONKS_OVERWATCH_DB_NAME)):
