@@ -23,7 +23,7 @@ class DialogManager:
         self.license_manager = license_manager
         self.logger = StonksLogger.get_logger("stonks_overwatch.app", "[DIALOG_MANAGER]")
 
-    async def download_database(self, widget):
+    async def download_database(self):
         try:
             confirmed = await self.app.main_window.dialog(
                 ConfirmDialog(
@@ -50,7 +50,7 @@ class DialogManager:
             raise FileNotFoundError(f"Database not found at {source_db_path}")
         return await sync_to_async(dump_database)(destination_path)
 
-    async def clear_cache(self, widget):
+    async def clear_cache(self):
         confirmed = await self.app.main_window.dialog(
             ConfirmDialog("Clear Cache", "This will clear all cached data. Continue?")
         )
@@ -63,7 +63,7 @@ class DialogManager:
                 InfoDialog("Cache Cleared", "Application cache has been cleared successfully.")
             )
 
-    async def license_info(self, widget):
+    async def license_info(self):
         """Show the license information dialog."""
         try:
             if DialogManager._expired_dialog_instance is not None:
@@ -87,7 +87,7 @@ class DialogManager:
             self.logger.error(f"Failed to retrieve license info: {str(e)}")
             await self.app.main_window.dialog(ErrorDialog("License", f"Failed to retrieve license info: {str(e)}"))
 
-    async def preferences(self, widget):
+    async def preferences(self):
         # If a dialog is open and not closed, focus it
         if DialogManager._preferences_dialog_instance is not None:
             if not getattr(DialogManager._preferences_dialog_instance, "_closed", False):
@@ -112,7 +112,7 @@ class DialogManager:
         dialog.on_close = on_close
         dialog.show()
 
-    async def check_for_updates(self, widget):
+    async def check_for_updates(self, show_no_updates: bool = True):
         # If a dialog is open and not closed, focus it
         if DialogManager._check_for_updates_dialog_instance is not None:
             if not getattr(DialogManager._check_for_updates_dialog_instance, "_closed", False):
@@ -153,7 +153,7 @@ class DialogManager:
 
             dialog.on_close = on_close
             dialog.show()
-        else:
+        elif show_no_updates:
             dialog = InfoDialog("There are currently no updates available.", "")
             DialogManager._check_for_updates_dialog_instance = dialog
 

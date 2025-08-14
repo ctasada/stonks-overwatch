@@ -108,6 +108,9 @@ class StonksOverwatchApp(toga.App):
         # Check license status
         await self.check_license()
 
+        # Check for updates
+        await self.check_update()
+
     async def check_license(self):
         """Check the license status and show dialog at specific thresholds."""
         try:
@@ -120,6 +123,10 @@ class StonksOverwatchApp(toga.App):
                     # Show for: 15, 10, 5, 2, 1. Once expired, the application blocks itself
                     if days_remaining in [15, 10, 5, 2, 1]:
                         self._license_dialog_shown = True
-                        await self.dialog_manager.license_info(None)
+                        await self.dialog_manager.license_info()
         except Exception as e:
             self.logger.error(f"Failed to check license status: {str(e)}")
+
+    async def check_update(self):
+        """Check the update status and show download dialog if needed."""
+        await self.dialog_manager.check_for_updates(False)
