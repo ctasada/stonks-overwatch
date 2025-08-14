@@ -25,7 +25,7 @@ dependencies = [
     "fontawesomefree >= 6.6.0",
     # `toml` is used to parse the `pyproject.toml` file for the license information.
     "toml >=0.10.2",
-    "ibind[oauth] >=0.1.18",
+    "ibind[oauth] >=0.1.19",
     "cryptography >=45.0.6",
     "packaging >=25.0",
 ]
@@ -50,7 +50,7 @@ briefcase = "^0.3.24"
 deptry = "^0.23.0"
 pre-commit = "^4.3.0"
 bandit = "^1.8.6"
-pymarkdownlnt = "^0.9.31"
+pymarkdownlnt = "^0.9.32"
 
 [tool.poetry]
 include = [
