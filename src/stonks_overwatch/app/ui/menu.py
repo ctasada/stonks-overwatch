@@ -106,19 +106,19 @@ class MenuManager:
         webbrowser.open_new_tab(STONKS_OVERWATCH_SUPPORT_URL)
 
     async def _preferences_dialog(self, widget):
-        await self.app.dialog_manager.preferences(widget)
+        await self.app.dialog_manager.preferences()
 
     async def _open_license_info(self, widget):
-        await self.app.dialog_manager.license_info(widget)
+        await self.app.dialog_manager.license_info()
 
     async def _download_database(self, widget):
-        await self.app.dialog_manager.download_database(widget)
+        await self.app.dialog_manager.download_database()
 
     async def _clear_cache(self, widget):
-        await self.app.dialog_manager.clear_cache(widget)
+        await self.app.dialog_manager.clear_cache()
 
     async def _check_for_updates(self, widget):
-        await self.app.dialog_manager.check_for_updates(widget)
+        await self.app.dialog_manager.check_for_updates()
 
     def _get_log_file_path(self):
         """Get the path to the log file."""
