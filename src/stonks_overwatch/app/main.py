@@ -27,9 +27,11 @@ class StonksOverwatchApp(toga.App):
         self.web_view = None
         self._httpd = None
         self.server_exists = None
+        self.host = None
+        self.port = None
         self.license_manager = LicenseManager()
         self.menu_manager = MenuManager(self)
-        self.dialog_manager = DialogManager(self, self.license_manager)
+        self.dialog_manager = DialogManager(self)
 
         # Track if we've shown the license dialog
         self._license_dialog_shown = False
@@ -100,9 +102,9 @@ class StonksOverwatchApp(toga.App):
 
     async def on_running(self):
         await self.server_exists
-        host, port = self._httpd.socket.getsockname()
-        self.logger.debug("Using server at %s:%s", host, port)
-        self.web_view.url = f"http://{host}:{port}"
+        self.host, self.port = self._httpd.socket.getsockname()
+        self.logger.debug("Using server at %s:%s", self.host, self.port)
+        self.web_view.url = f"http://{self.host}:{self.port}"
         self.main_window.show()
 
         # Check license status
@@ -123,7 +125,7 @@ class StonksOverwatchApp(toga.App):
                     # Show for: 15, 10, 5, 2, 1. Once expired, the application blocks itself
                     if days_remaining in [15, 10, 5, 2, 1]:
                         self._license_dialog_shown = True
-                        await self.dialog_manager.license_info()
+                        await self.dialog_manager.license_info(self.web_view.url)
         except Exception as e:
             self.logger.error(f"Failed to check license status: {str(e)}")
 

@@ -8,7 +8,6 @@ from stonks_overwatch.app.dialogs.download_dialog import DownloadDialog
 from stonks_overwatch.app.dialogs.expired_dialog import ExpiredDialog
 from stonks_overwatch.app.dialogs.preferences_dialog import PreferencesDialog
 from stonks_overwatch.services.utilities.google_drive_service import GoogleDriveService
-from stonks_overwatch.services.utilities.license_manager import LicenseManager
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.database.db_utils import dump_database
 
@@ -18,9 +17,8 @@ class DialogManager:
     _preferences_dialog_instance = None
     _check_for_updates_dialog_instance = None
 
-    def __init__(self, app: toga.App, license_manager: LicenseManager):
+    def __init__(self, app: toga.App):
         self.app = app
-        self.license_manager = license_manager
         self.logger = StonksLogger.get_logger("stonks_overwatch.app", "[DIALOG_MANAGER]")
 
     async def download_database(self):
@@ -63,7 +61,7 @@ class DialogManager:
                 InfoDialog("Cache Cleared", "Application cache has been cleared successfully.")
             )
 
-    async def license_info(self):
+    async def license_info(self, base_url: str):
         """Show the license information dialog."""
         try:
             if DialogManager._expired_dialog_instance is not None:
@@ -71,8 +69,7 @@ class DialogManager:
                 DialogManager._expired_dialog_instance.show()
                 return
 
-            license_info = self.license_manager.get_license_info()
-            dialog = ExpiredDialog("License Information", license_info, main_window=self.app.main_window)
+            dialog = ExpiredDialog("License Information", base_url, main_window=self.app.main_window)
             DialogManager._expired_dialog_instance = dialog
 
             def on_close(widget):
