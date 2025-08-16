@@ -6,6 +6,7 @@ import threading
 import toga
 from toga.style import Pack
 
+from stonks_overwatch.app.utils.dialog_utils import center_window_on_parent
 from stonks_overwatch.services.utilities.google_drive_service import GoogleDriveService
 from stonks_overwatch.utils.core.logger import StonksLogger
 
@@ -56,17 +57,8 @@ class DownloadDialog(toga.Window):
         self.logger.debug("Closing download dialog.")
         self.app.loop.call_soon_threadsafe(self.close)
 
-    def _center_dialog(self):
-        if self._main_window and self._main_window.position and self._main_window.size:
-            main_x, main_y = self._main_window.position
-            main_width, main_height = self._main_window.size
-            dialog_width, dialog_height = self.size
-            x = main_x + (main_width - dialog_width) // 2
-            y = main_y + (main_height - dialog_height) // 2
-            self.position = (x, y)
-
     def show(self):
-        self._center_dialog()
+        center_window_on_parent(self, self._main_window)
         super().show()
         self.start_download()
 
