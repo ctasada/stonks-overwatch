@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -31,6 +31,7 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'style.css' %}">
 
+    {% if full %}
     <style>
         body {
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
@@ -44,13 +45,18 @@
             }
         }
     </style>
+    {% endif %}
 </head>
 <body class="min-vh-100 d-flex align-items-center justify-content-center">
-    <div class="container py-2">
-        <div class="bg-white rounded-4 shadow p-4 mx-auto" style="max-width: 500px;">
-            <img class="d-block mx-auto mb-4" src="{% static 'stonks_overwatch-512.png' %}" alt="Stonks Overwatch" width="120" height="120" />
+    <div class="container">
+        {% if full %}
+        <div class="bg-white rounded-4 shadow p-3 mx-auto" style="max-width: 500px;">
+        {% else %}
+        <div class="p-4 mx-auto" style="max-width: 500px;">
+        {% endif %}
+            <img class="d-block mx-auto mb-1" src="{% static 'stonks_overwatch-512.png' %}" alt="Stonks Overwatch" width="100" height="100" />
 
-            <p class="h2 mb-3 text-dark text-center">
+            <p class="h2 mb-2 text-dark text-center">
                 {% if days_remaining is not None %}
                     {% if days_remaining <= 0 %}
                         Trial Version Expired
@@ -64,7 +70,7 @@
                 {% endif %}
             </p>
 
-            <div class="text-secondary mb-4 text-center">
+            <div class="text-secondary mb-2 text-center">
                 {% if days_remaining is not None %}
                     {% if days_remaining <= 0 %}
                         This trial version of the application has expired. To continue testing,
@@ -80,16 +86,16 @@
                 {% endif %}
             </div>
 
-            <div class="bg-light rounded p-4 mb-4">
-                <div class="row mb-2">
+            <div class="bg-light rounded p-2">
+                <div class="row mb-1">
                     <div class="col-6 fw-semibold text-dark">Version:</div>
                     <div class="col-6 text-secondary">{{ version }}</div>
                 </div>
-                <div class="row mb-2">
+                <div class="row mb-1">
                     <div class="col-6 fw-semibold text-dark">Build Date:</div>
                     <div class="col-6 text-secondary">{{ build_date|date:"M d, Y" }}</div>
                 </div>
-                <div class="row mb-2">
+                <div class="row mb-1">
                     <div class="col-6 fw-semibold text-dark">Expired On:</div>
                     <div class="col-6 text-secondary">{{ expiration_date|date:"M d, Y" }}</div>
                 </div>
@@ -99,13 +105,13 @@
                 </div>
             </div>
 
-            <div class="text-center">
+            <div class="text-center mt-2 mb-2">
                 <a href="{{ support_url }}" class="btn btn-primary px-4">
                     Request New Build
                 </a>
             </div>
 
-            <div class="text-center mt-4 text-muted small">
+            <div class="text-center text-muted small">
                 Thank you for participating in our testing program!<br>
                 <a href="{{ support_url }}" class="link-primary">Your feedback helps us improve the application.</a>
             </div>
