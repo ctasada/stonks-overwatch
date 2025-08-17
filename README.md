@@ -77,6 +77,8 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
 * Bitvavo - Known Bugs:
   * When an asset is Staking, the balance value is the 'available' value, not the 'total' value
   * Transactions done with the RFQ system are not returned by the Bitvavo Transactions API
+* Pyarmor:
+  * Logs show an odd `<frozen stonks_overwatch.utils.core` in the logs.
 
 ## TODOs
 
