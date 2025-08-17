@@ -217,7 +217,11 @@ _create-wheels: ## Internal: Create wheel files for Briefcase
 	  done; \
 	done
 
-briefcase-create: install collectstatic _create-wheels ## Create Briefcase project
+obfuscate: ## Obfuscate code for Briefcase packaging
+	@echo -e  "$(BOLD)$(BLUE)Obfuscating code for Briefcase...$(RESET)"
+	bash scripts/obfuscate.sh
+
+briefcase-create: install collectstatic _create-wheels obfuscate ## Create Briefcase project
 	@echo -e  "$(BOLD)$(GREEN)Creating Briefcase project...$(RESET)"
 	rm -rf build
 	poetry run briefcase create

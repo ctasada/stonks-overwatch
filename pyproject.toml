@@ -38,7 +38,7 @@ requires = ["poetry-core>=2.1.3,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.12.8"
+ruff = "^0.12.9"
 pytest = "^8.4.1"
 pytest-cov = "^6.2.1"
 pytest-django = "^4.11.1"
@@ -51,6 +51,7 @@ deptry = "^0.23.0"
 pre-commit = "^4.3.0"
 bandit = "^1.8.6"
 pymarkdownlnt = "^0.9.32"
+pyarmor = "^9.1.8"
 
 [tool.poetry]
 include = [
@@ -201,7 +202,8 @@ Stonks Overwatch runs locally and doesn't share your data with anyone. Your data
 """
 icon = "src/icons/stonks_overwatch"
 sources = [
-    "src/stonks_overwatch",
+    "src/obfuscated/pyarmor_runtime_000000",
+    "src/obfuscated/stonks_overwatch",
 ]
 test_sources = [
     "tests",
