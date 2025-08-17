@@ -15,7 +15,7 @@ class AccountOverviewAggregatorService(BaseAggregator):
             selected_portfolio, "get_account_overview", sort_key=lambda k: k.datetime, reverse=True
         )
 
-    def aggregate_data(self, selected_portfolio: PortfolioId, **kwargs) -> List[AccountOverview]:
+    def aggregate_data(self, selected_portfolio: PortfolioId) -> List[AccountOverview]:
         """
         Aggregate account overview data from all enabled brokers.
 

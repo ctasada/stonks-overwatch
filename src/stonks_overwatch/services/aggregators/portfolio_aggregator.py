@@ -89,7 +89,7 @@ class PortfolioAggregatorService(BaseAggregator):
             selected_portfolio, "calculate_historical_value", merger_func=DataMerger.merge_historical_values
         )
 
-    def aggregate_data(self, selected_portfolio: PortfolioId, **kwargs) -> List[PortfolioEntry]:
+    def aggregate_data(self, selected_portfolio: PortfolioId) -> List[PortfolioEntry]:
         """
         Aggregate portfolio data from all enabled brokers.
 
