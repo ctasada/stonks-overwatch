@@ -133,10 +133,10 @@ class PreferencesDialog(toga.Window):
                     "icon": self._get_broker_logo("degiro"),
                     "title": "DEGIRO",
                 },
-                {
-                    "icon": self._get_broker_logo("bitvavo"),
-                    "title": "Bitvavo",
-                },
+                # {
+                #     "icon": self._get_broker_logo("bitvavo"),
+                #     "title": "Bitvavo",
+                # },
             ],
             style=Pack(flex=1, font_size=10, margin_bottom=10),
             on_select=self._on_broker_select,
@@ -169,6 +169,40 @@ class PreferencesDialog(toga.Window):
             self.logger.warning(f"Logo not found for broker: {broker_name}")
             return toga.Image()
 
+    def _add_labeled_input_row(self, fields_box, label_text, input_cls, value, on_change, **input_kwargs):
+        row = toga.Box(style=Pack(direction=ROW, margin_bottom=10, align_items=START))
+        label = toga.Label(
+            label_text, style=Pack(width=self.LABEL_WIDTH, margin_right=self.LABEL_MARGIN_RIGHT, align_items=END)
+        )
+        input_widget = input_cls(value=value, style=Pack(flex=1), on_change=on_change, **input_kwargs)
+        row.add(label)
+        row.add(input_widget)
+        fields_box.add(row)
+        return input_widget
+
+    def _add_update_frequency_row(self, fields_box, value, on_change_handler):
+        update_frequency_row = toga.Box(style=Pack(direction=ROW, margin_bottom=10, align_items=START))
+        update_frequency_label = toga.Label(
+            "Update Frequency",
+            style=Pack(width=self.UPDATE_FREQ_LABEL_WIDTH, margin_right=self.LABEL_MARGIN_RIGHT, align_items=END),
+        )
+        update_frequency_input = toga.NumberInput(
+            value=value,
+            style=Pack(width=self.UPDATE_FREQ_INPUT_WIDTH),
+            min=self.UPDATE_FREQ_MIN,
+            max=self.UPDATE_FREQ_MAX,
+            step=self.UPDATE_FREQ_STEP,
+            on_change=on_change_handler,
+        )
+        update_frequency_unit = toga.Label(
+            "minutes",
+            style=Pack(width=self.UPDATE_FREQ_UNIT_WIDTH, margin_left=self.LABEL_MARGIN_RIGHT, align_items=END),
+        )
+        update_frequency_row.add(update_frequency_label)
+        update_frequency_row.add(update_frequency_input)
+        update_frequency_row.add(update_frequency_unit)
+        fields_box.add(update_frequency_row)
+
     def _add_degiro_credentials_fields(self, fields_box: toga.Box) -> toga.TextInput:
         def on_degiro_username_change(widget):
             if self.degiro_configuration:
@@ -193,37 +227,15 @@ class PreferencesDialog(toga.Window):
         existing_password = credentials.get("password", "")
         existing_totp_key = credentials.get("totp_secret_key", "")
 
-        username_row = toga.Box(style=Pack(direction=ROW, margin_bottom=10, align_items=START))
-        username_label = toga.Label(
-            "Username", style=Pack(width=self.LABEL_WIDTH, margin_right=self.LABEL_MARGIN_RIGHT, align_items=END)
+        self._add_labeled_input_row(
+            fields_box, "Username", toga.TextInput, existing_username, on_degiro_username_change
         )
-        username_input = toga.TextInput(
-            value=existing_username, style=Pack(flex=1), on_change=on_degiro_username_change
+        self._add_labeled_input_row(
+            fields_box, "Password", toga.PasswordInput, existing_password, on_degiro_password_change
         )
-        username_row.add(username_label)
-        username_row.add(username_input)
-        fields_box.add(username_row)
-
-        password_row = toga.Box(style=Pack(direction=ROW, margin_bottom=10, align_items=START))
-        password_label = toga.Label(
-            "Password", style=Pack(width=self.LABEL_WIDTH, margin_right=self.LABEL_MARGIN_RIGHT, align_items=END)
+        totp_key = self._add_labeled_input_row(
+            fields_box, "TOTP Secret Key", toga.PasswordInput, existing_totp_key, on_degiro_topt_change
         )
-        password_input = toga.PasswordInput(
-            value=existing_password, style=Pack(flex=1), on_change=on_degiro_password_change
-        )
-        password_row.add(password_label)
-        password_row.add(password_input)
-        fields_box.add(password_row)
-
-        totp_key_row = toga.Box(style=Pack(direction=ROW, margin_bottom=10, align_items=START))
-        totp_key_label = toga.Label(
-            "TOTP Secret Key", style=Pack(width=self.LABEL_WIDTH, margin_right=self.LABEL_MARGIN_RIGHT, align_items=END)
-        )
-        totp_key = toga.PasswordInput(value=existing_totp_key, style=Pack(flex=1), on_change=on_degiro_topt_change)
-        totp_key_row.add(totp_key_label)
-        totp_key_row.add(totp_key)
-        fields_box.add(totp_key_row)
-
         return totp_key
 
     def _add_degiro_verification_row(self, fields_box: toga.Box, totp_key: toga.TextInput) -> None:
@@ -269,32 +281,43 @@ class PreferencesDialog(toga.Window):
 
     def _add_degiro_update_frequency_row(self, fields_box: toga.Box) -> None:
         update_frequency = self.degiro_configuration.update_frequency
-        update_frequency_row = toga.Box(style=Pack(direction=ROW, margin_bottom=10, align_items=START))
-        update_frequency_label = toga.Label(
-            "Update Frequency",
-            style=Pack(width=self.UPDATE_FREQ_LABEL_WIDTH, margin_right=self.LABEL_MARGIN_RIGHT, align_items=END),
-        )
 
         def on_degiro_update_change(widget):
             if self.degiro_configuration and widget.value:
                 self.degiro_configuration.update_frequency = widget.value
 
-        update_frequency_input = toga.NumberInput(
-            value=update_frequency,
-            style=Pack(width=self.UPDATE_FREQ_INPUT_WIDTH),
-            min=self.UPDATE_FREQ_MIN,
-            max=self.UPDATE_FREQ_MAX,
-            step=self.UPDATE_FREQ_STEP,
-            on_change=on_degiro_update_change,
+        self._add_update_frequency_row(fields_box, update_frequency, on_degiro_update_change)
+
+    def _add_bitvavo_credentials_fields(self, fields_box: toga.Box) -> None:
+        def on_bitvavo_apikey_change(widget):
+            if self.bitvavo_configuration:
+                if self.bitvavo_configuration.credentials is None:
+                    self.bitvavo_configuration.credentials = {}
+                self.bitvavo_configuration.credentials["apikey"] = widget.value
+
+        def on_bitvavo_apisecret_change(widget):
+            if self.bitvavo_configuration:
+                if self.bitvavo_configuration.credentials is None:
+                    self.bitvavo_configuration.credentials = {}
+                self.bitvavo_configuration.credentials["apisecret"] = widget.value
+
+        credentials = self.bitvavo_configuration.credentials if self.bitvavo_configuration else {}
+        existing_apikey = credentials.get("apikey", "")
+        existing_apisecret = credentials.get("apisecret", "")
+
+        self._add_labeled_input_row(fields_box, "API Key", toga.TextInput, existing_apikey, on_bitvavo_apikey_change)
+        self._add_labeled_input_row(
+            fields_box, "API Secret", toga.PasswordInput, existing_apisecret, on_bitvavo_apisecret_change
         )
-        update_frequency_unit = toga.Label(
-            "minutes",
-            style=Pack(width=self.UPDATE_FREQ_UNIT_WIDTH, margin_left=self.LABEL_MARGIN_RIGHT, align_items=END),
-        )
-        update_frequency_row.add(update_frequency_label)
-        update_frequency_row.add(update_frequency_input)
-        update_frequency_row.add(update_frequency_unit)
-        fields_box.add(update_frequency_row)
+
+    def _add_bitvavo_update_frequency_row(self, fields_box: toga.Box) -> None:
+        update_frequency = self.bitvavo_configuration.update_frequency
+
+        def on_bitvavo_update_change(widget):
+            if self.bitvavo_configuration and widget.value:
+                self.bitvavo_configuration.update_frequency = widget.value
+
+        self._add_update_frequency_row(fields_box, update_frequency, on_bitvavo_update_change)
 
     def _create_degiro(self) -> None:
         self.main_section.clear()
@@ -364,6 +387,8 @@ class PreferencesDialog(toga.Window):
         self.main_section.add(toga.Divider(style=Pack(margin_top=5, margin_bottom=10)))
 
         self._add_bitvavo_credentials_fields(fields_box)
+        fields_box.add(toga.Divider(style=Pack(margin_top=5, margin_bottom=10)))
+        self._add_bitvavo_update_frequency_row(fields_box)
 
         self.main_section.add(fields_box)
 
