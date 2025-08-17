@@ -187,3 +187,5 @@ the code will create files in the next paths:
 - STONKS_OVERWATCH_CACHE_DIR: `/Users/$USER/Library/Caches/com.caribay.stonks_overwatch`
 
 It's possible to easily delete them with `make briefcase-clean`
+
+The Briefcase application is obfuscated with Pyarmor by default, if needed, you can disable it with `make briefcase-package obfuscate=false`

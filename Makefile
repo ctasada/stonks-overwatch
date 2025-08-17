@@ -22,8 +22,11 @@ DEBUG_MODE := $(if $(debug),true,false)
 PROFILE_MODE := $(if $(profile),true,false)
 DEMO_MODE := $(if $(demo),true,false)
 
+# Obfuscation flag (default: true, can be overridden with obfuscate=false)
+OBFUSCATE_MODE := $(if $(obfuscate),$(obfuscate),true)
+
 # Export variables for child processes
-export DEBUG_MODE PROFILE_MODE DEMO_MODE
+export DEBUG_MODE PROFILE_MODE DEMO_MODE OBFUSCATE_MODE
 
 # Color codes for output
 BOLD := \033[1m
@@ -217,8 +220,9 @@ _create-wheels: ## Internal: Create wheel files for Briefcase
 	  done; \
 	done
 
-obfuscate: ## Obfuscate code for Briefcase packaging
+obfuscate: ## Obfuscate code for Briefcase packaging (use obfuscate=false to disable)
 	@echo -e  "$(BOLD)$(BLUE)Obfuscating code for Briefcase...$(RESET)"
+	@echo -e  "$(YELLOW)Obfuscate Code: $(OBFUSCATE_MODE)$(RESET)"
 	bash scripts/obfuscate.sh
 
 briefcase-create: install collectstatic _create-wheels obfuscate ## Create Briefcase project
