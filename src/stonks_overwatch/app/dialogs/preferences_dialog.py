@@ -8,6 +8,7 @@ import toga.platform
 from toga.style import Pack
 from toga.style.pack import COLUMN, END, ROW, START
 
+from stonks_overwatch.app.utils.dialog_utils import center_window_on_parent
 from stonks_overwatch.utils.core.logger import StonksLogger
 
 
@@ -49,6 +50,7 @@ class PreferencesDialog(toga.Window):
         self.brokers_configuration_repository = BrokersConfigurationRepository()
         # Database configuration will be loaded in async_init()
         self.degiro_configuration: BrokersConfiguration | None = None
+        self.bitvavo_configuration: BrokersConfiguration | None = None
 
         self._app = app
         self._main_window = app.main_window
@@ -71,7 +73,6 @@ class PreferencesDialog(toga.Window):
         self.ok_button = toga.Button("OK", on_press=self.on_ok, style=Pack(width=100, margin_right=10))
         self.cancel_button = toga.Button("Cancel", on_press=self.on_cancel, style=Pack(width=100, margin_right=10))
         platform = toga.platform.current_platform
-        # FIXME: This is hack to force the buttons to the right-side. There should be a better approach
         self.button_box.add(toga.Box(style=Pack(direction=ROW, flex=1.0, align_items=START, justify_content=START)))
         if platform == "macOS":
             # macOS: Cancel (left), OK (right), right-aligned
@@ -90,6 +91,7 @@ class PreferencesDialog(toga.Window):
     async def async_init(self):
         """Initialize the dialog with async database calls."""
         self.degiro_configuration = await self.brokers_configuration_repository.get_broker_by_name_async("degiro")
+        self.bitvavo_configuration = await self.brokers_configuration_repository.get_broker_by_name_async("bitvavo")
         self.logger.debug("Brokers configuration loaded")
         if self.degiro_configuration:
             # Ensure credentials is a dictionary (initialize if None)
@@ -97,16 +99,49 @@ class PreferencesDialog(toga.Window):
                 self.degiro_configuration.credentials = {}
         else:
             self.logger.warning("No DEGIRO configuration found in database")
+        if self.bitvavo_configuration:
+            # Ensure credentials is a dictionary (initialize if None)
+            if self.bitvavo_configuration.credentials is None:
+                self.bitvavo_configuration.credentials = {}
+        else:
+            self.logger.warning("No Bitvavo configuration found in database")
         # Now create the UI with the loaded data
-        self._create_degiro()
+        # Simulate selecting the first item (DEGIRO) by default
+        if self.broker_list.data:
+            self._on_broker_select(self.broker_list)
+
+    def _on_broker_select(self, widget, **kwargs):
+        row = widget.selection
+        if row is None:
+            self._create_degiro()
+        else:
+            broker = row.title
+            if broker == "DEGIRO":
+                self._create_degiro()
+            elif broker == "Bitvavo":
+                self._create_bitvavo()
+            # Add more brokers here as needed
 
     def _create_sidebar(self) -> toga.Box:
         sidebar = toga.Box(style=Pack(direction=COLUMN, width=self.SIDEBAR_WIDTH, margin_right=self.MAIN_BOX_MARGIN))
         sidebar.add(toga.Label("Brokers", style=Pack(margin_bottom=10, font_weight="bold")))
         sidebar.add(toga.Divider(style=Pack(margin_bottom=10)))
 
-        # Add DEGIRO as a sidebar item
-        sidebar.add(self._get_broker_entry("DEGIRO", "degiro"))
+        self.broker_list = toga.DetailedList(
+            data=[
+                {
+                    "icon": self._get_broker_logo("degiro"),
+                    "title": "DEGIRO",
+                },
+                {
+                    "icon": self._get_broker_logo("bitvavo"),
+                    "title": "Bitvavo",
+                },
+            ],
+            style=Pack(flex=1, font_size=10, margin_bottom=10),
+            on_select=self._on_broker_select,
+        )
+        sidebar.add(self.broker_list)
 
         # Add more sidebar items here
         return sidebar
@@ -262,7 +297,7 @@ class PreferencesDialog(toga.Window):
         fields_box.add(update_frequency_row)
 
     def _create_degiro(self) -> None:
-        self.main_section.children.clear()
+        self.main_section.clear()
         # Add icon and label in a horizontal box
         self.main_section.add(self._get_broker_entry("DEGIRO", "degiro", is_header=True))
 
@@ -280,9 +315,61 @@ class PreferencesDialog(toga.Window):
 
         self.main_section.add(fields_box)
 
+    def _add_bitvavo_credentials_fields(self, fields_box: toga.Box) -> None:
+        def on_bitvavo_apikey_change(widget):
+            if self.bitvavo_configuration:
+                if self.bitvavo_configuration.credentials is None:
+                    self.bitvavo_configuration.credentials = {}
+                self.bitvavo_configuration.credentials["apikey"] = widget.value
+
+        def on_bitvavo_apisecret_change(widget):
+            if self.bitvavo_configuration:
+                if self.bitvavo_configuration.credentials is None:
+                    self.bitvavo_configuration.credentials = {}
+                self.bitvavo_configuration.credentials["apisecret"] = widget.value
+
+        credentials = self.bitvavo_configuration.credentials if self.bitvavo_configuration else {}
+        existing_apikey = credentials.get("apikey", "")
+        existing_apisecret = credentials.get("apisecret", "")
+
+        apikey_row = toga.Box(style=Pack(direction=ROW, margin_bottom=10, align_items=START))
+        apikey_label = toga.Label(
+            "API Key", style=Pack(width=self.LABEL_WIDTH, margin_right=self.LABEL_MARGIN_RIGHT, align_items=END)
+        )
+        apikey_input = toga.TextInput(value=existing_apikey, style=Pack(flex=1), on_change=on_bitvavo_apikey_change)
+        apikey_row.add(apikey_label)
+        apikey_row.add(apikey_input)
+        fields_box.add(apikey_row)
+
+        apisecret_row = toga.Box(style=Pack(direction=ROW, margin_bottom=10, align_items=START))
+        apisecret_label = toga.Label(
+            "API Secret", style=Pack(width=self.LABEL_WIDTH, margin_right=self.LABEL_MARGIN_RIGHT, align_items=END)
+        )
+        apisecret_input = toga.PasswordInput(
+            value=existing_apisecret, style=Pack(flex=1), on_change=on_bitvavo_apisecret_change
+        )
+        apisecret_row.add(apisecret_label)
+        apisecret_row.add(apisecret_input)
+        fields_box.add(apisecret_row)
+
+    def _create_bitvavo(self) -> None:
+        self.main_section.clear()
+        # Add icon and label in a horizontal box
+        self.main_section.add(self._get_broker_entry("Bitvavo", "bitvavo", is_header=True))
+        fields_box = toga.Box(style=Pack(direction=COLUMN, flex=1, margin_bottom=self.MAIN_BOX_MARGIN))
+        enabled_value = self.bitvavo_configuration.enabled if self.bitvavo_configuration else False
+        enabled_switch = toga.Switch(text="Enabled", value=enabled_value, enabled=True, style=Pack(margin_bottom=10))
+        self.main_section.add(enabled_switch)
+        self.main_section.add(toga.Label("Credentials:", style=Pack(font_weight="bold", margin_top=5, margin_bottom=5)))
+        self.main_section.add(toga.Divider(style=Pack(margin_top=5, margin_bottom=10)))
+
+        self._add_bitvavo_credentials_fields(fields_box)
+
+        self.main_section.add(fields_box)
+
     def on_ok(self, widget: toga.Widget) -> None:
         """Save the configuration and close the dialog."""
-        if self.degiro_configuration:
+        if self.degiro_configuration or self.bitvavo_configuration:
             # Run the async save operation in a task
             asyncio.create_task(self._save_configuration())
         self.close()
@@ -291,11 +378,16 @@ class PreferencesDialog(toga.Window):
         """Async helper to save the configuration."""
         try:
             await self.brokers_configuration_repository.save_broker_configuration_async(self.degiro_configuration)
-            self.logger.info("DEGIRO configuration saved successfully")
+            await self.brokers_configuration_repository.save_broker_configuration_async(self.bitvavo_configuration)
+            self.logger.info("Configuration saved successfully")
         except Exception as e:
-            self.logger.error(f"Failed to save DEGIRO configuration: {e}")
+            self.logger.error(f"Failed to save configuration: {e}")
             # You might want to show an error dialog here
 
     def on_cancel(self, widget: toga.Widget) -> None:
         # Placeholder for Cancel action
         self.close()
+
+    def show(self):
+        center_window_on_parent(self, self._main_window)
+        super().show()
