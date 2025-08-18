@@ -7,6 +7,7 @@ web server management, and license checking functionality.
 
 import asyncio
 import os
+import warnings
 from threading import Thread
 
 from stonks_overwatch.app.main import StonksOverwatchApp
@@ -15,6 +16,7 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
 
+@pytest.mark.django_db
 class TestStonksOverwatchApp:
     """Test cases for the StonksOverwatchApp class."""
 
@@ -94,34 +96,35 @@ class TestStonksOverwatchApp:
         assert app_instance.port is None
         assert app_instance._license_dialog_shown is False
 
-    @patch.dict(os.environ, {}, clear=True)
     def test_web_server_environment_setup(self, app_instance, mock_toga_deps):
         """Test that web_server method sets up environment variables correctly."""
-        # Mock paths using property override
-        mock_paths = MagicMock()
-        mock_paths.data.as_posix.return_value = "/test/data"
-        mock_paths.config.as_posix.return_value = "/test/config"
-        mock_paths.logs.as_posix.return_value = "/test/logs"
-        mock_paths.cache.as_posix.return_value = "/test/cache"
+        # Use context manager for os.environ patching to ensure proper cleanup
+        with patch.dict(os.environ, {}, clear=True):
+            # Mock paths using property override
+            mock_paths = MagicMock()
+            mock_paths.data.as_posix.return_value = "/test/data"
+            mock_paths.config.as_posix.return_value = "/test/config"
+            mock_paths.logs.as_posix.return_value = "/test/logs"
+            mock_paths.cache.as_posix.return_value = "/test/cache"
 
-        with patch.object(type(app_instance), "paths", new_callable=lambda: mock_paths):
-            # Mock the server components
-            mock_server = MagicMock()
-            mock_toga_deps["ThreadedWSGIServer"].return_value = mock_server
-            with patch.object(type(app_instance), "loop", new_callable=lambda: MagicMock()):
-                app_instance.server_exists = MagicMock()
+            with patch.object(type(app_instance), "paths", new_callable=lambda: mock_paths):
+                # Mock the server components
+                mock_server = MagicMock()
+                mock_toga_deps["ThreadedWSGIServer"].return_value = mock_server
+                with patch.object(type(app_instance), "loop", new_callable=lambda: MagicMock()):
+                    app_instance.server_exists = MagicMock()
 
-                # Mock STATIC_ROOT import
-                with patch("stonks_overwatch.settings.STATIC_ROOT", "/test/static"):
-                    app_instance.web_server()
+                    # Mock STATIC_ROOT import
+                    with patch("stonks_overwatch.settings.STATIC_ROOT", "/test/static"):
+                        app_instance.web_server()
 
-        # Verify environment variables are set
-        assert os.environ["STONKS_OVERWATCH_APP"] == "1"
-        assert os.environ["DJANGO_SETTINGS_MODULE"] == "stonks_overwatch.settings"
-        assert os.environ["STONKS_OVERWATCH_DATA_DIR"] == "/test/data"
-        assert os.environ["STONKS_OVERWATCH_CONFIG_DIR"] == "/test/config"
-        assert os.environ["STONKS_OVERWATCH_LOGS_DIR"] == "/test/logs"
-        assert os.environ["STONKS_OVERWATCH_CACHE_DIR"] == "/test/cache"
+            # Verify environment variables are set
+            assert os.environ["STONKS_OVERWATCH_APP"] == "1"
+            assert os.environ["DJANGO_SETTINGS_MODULE"] == "stonks_overwatch.settings"
+            assert os.environ["STONKS_OVERWATCH_DATA_DIR"] == "/test/data"
+            assert os.environ["STONKS_OVERWATCH_CONFIG_DIR"] == "/test/config"
+            assert os.environ["STONKS_OVERWATCH_LOGS_DIR"] == "/test/logs"
+            assert os.environ["STONKS_OVERWATCH_CACHE_DIR"] == "/test/cache"
 
         # Verify Django setup is called
         mock_toga_deps["django"].setup.assert_called_once_with(set_prefix=False)
@@ -143,7 +146,10 @@ class TestStonksOverwatchApp:
 
         # Mock the main_window property to avoid Toga validation
         with patch.object(type(app_instance), "main_window", new_callable=lambda: mock_main_window):
-            app_instance.startup()
+            # Suppress the deprecation warning about no event loop for this test
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", DeprecationWarning)
+                app_instance.startup()
 
         # Verify components are initialized
         assert isinstance(app_instance.server_exists, asyncio.Future)
@@ -332,7 +338,10 @@ class TestStonksOverwatchApp:
             patch.object(type(app_instance), "commands", new_callable=lambda: mock_commands_collection),
             patch.object(type(app_instance), "main_window", new_callable=lambda: mock_main_window),
         ):
-            app_instance.startup()
+            # Suppress the deprecation warning about no event loop for this test
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", DeprecationWarning)
+                app_instance.startup()
 
             # Verify 'Close All' command was removed
             assert close_all_command not in mock_commands
