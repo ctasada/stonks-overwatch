@@ -5,10 +5,21 @@ This module tests utility functions used by dialogs in the Toga app,
 particularly window positioning and centering functionality.
 """
 
-from stonks_overwatch.app.utils.dialog_utils import center_window_on_parent
+# Check if toga is available using importlib
+import importlib.util
 
 import pytest
 from unittest.mock import MagicMock, patch
+
+TOGA_AVAILABLE = importlib.util.find_spec("toga") is not None
+
+# Skip all tests in this module if toga is not available
+pytestmark = pytest.mark.skipif(not TOGA_AVAILABLE, reason="toga not available")
+
+if TOGA_AVAILABLE:
+    from stonks_overwatch.app.utils.dialog_utils import center_window_on_parent
+else:
+    center_window_on_parent = None
 
 
 class TestCenterWindowOnParent:

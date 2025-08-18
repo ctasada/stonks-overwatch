@@ -5,13 +5,24 @@ This module tests the StaticFilesMiddleware and ThreadedWSGIServer classes
 that handle static file serving for the embedded web application.
 """
 
+# Check if toga is available using importlib
+import importlib.util
 import os
 import tempfile
 
-from stonks_overwatch.app.webserver import StaticFilesMiddleware, ThreadedWSGIServer
-
 import pytest
 from unittest.mock import Mock, patch
+
+TOGA_AVAILABLE = importlib.util.find_spec("toga") is not None
+
+# Skip all tests in this module if toga is not available
+pytestmark = pytest.mark.skipif(not TOGA_AVAILABLE, reason="toga not available")
+
+if TOGA_AVAILABLE:
+    from stonks_overwatch.app.webserver import StaticFilesMiddleware, ThreadedWSGIServer
+else:
+    StaticFilesMiddleware = None
+    ThreadedWSGIServer = None
 
 
 class TestStaticFilesMiddleware:

@@ -53,7 +53,6 @@ bandit = "^1.8.6"
 pymarkdownlnt = "^0.9.32"
 pyarmor = "^9.1.8"
 pytest-asyncio = "^1.1.0"
-toga = "^0.5.2"
 
 [tool.poetry]
 include = [
