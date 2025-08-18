@@ -55,7 +55,7 @@ class DepositsAggregatorService(BaseAggregator):
             selected_portfolio, "get_cash_deposits", sort_key=lambda x: x.datetime, reverse=True
         )
 
-    def aggregate_data(self, selected_portfolio: PortfolioId, **kwargs) -> List[Deposit]:
+    def aggregate_data(self, selected_portfolio: PortfolioId) -> List[Deposit]:
         """
         Aggregate deposit data from all enabled brokers.
 

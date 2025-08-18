@@ -13,7 +13,7 @@ class DividendsAggregatorService(BaseAggregator):
         # Use the new helper method to collect and sort dividend data
         return self._collect_and_sort(selected_portfolio, "get_dividends", sort_key=lambda k: k.payment_date)
 
-    def aggregate_data(self, selected_portfolio: PortfolioId, **kwargs) -> List[Dividend]:
+    def aggregate_data(self, selected_portfolio: PortfolioId) -> List[Dividend]:
         """
         Aggregate dividend data from all enabled brokers.
 

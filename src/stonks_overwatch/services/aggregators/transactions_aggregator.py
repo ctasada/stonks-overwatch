@@ -18,7 +18,7 @@ class TransactionsAggregatorService(BaseAggregator):
             reverse=True,
         )
 
-    def aggregate_data(self, selected_portfolio: PortfolioId, **kwargs) -> List[Transaction]:
+    def aggregate_data(self, selected_portfolio: PortfolioId) -> List[Transaction]:
         """
         Aggregate transaction data from all enabled brokers.
 

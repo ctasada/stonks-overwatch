@@ -16,7 +16,7 @@ from unittest.mock import MagicMock, patch
 class ConcreteAggregator(BaseAggregator):
     """Concrete implementation of BaseAggregator for testing."""
 
-    def aggregate_data(self, selected_portfolio: PortfolioId, **kwargs):
+    def aggregate_data(self, selected_portfolio: PortfolioId):
         """Simple implementation for testing."""
         return self._collect_and_merge_lists(selected_portfolio, "get_data")
 

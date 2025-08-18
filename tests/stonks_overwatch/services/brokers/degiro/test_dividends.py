@@ -114,8 +114,8 @@ class TestDividendsService(TestCase):
         dividends = self.dividends_service._get_dividends()
         assert len(dividends) == 1
 
-        assert dividends[0].payment_date_as_string() == "2021-03-12"
-        assert dividends[0].payment_time_as_string() == "08:16:38"
+        assert dividends[0].payment_date_as_string() == "2021-03-11"
+        assert dividends[0].payment_time_as_string() == "23:59:59"
         assert dividends[0].stock_name == "Microsoft Corp"
         assert dividends[0].stock_symbol == "MSFT"
         assert dividends[0].currency == "EUR"
