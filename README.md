@@ -128,13 +128,13 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
   * [ ] Create a Crypto Rewards section
   * [ ] Show asset staking blocked amount as in Bitvavo UI
 * [ ] IBKR
-  * [ ] Get Deposits & Withdrawals (Based on ticket only possible with a FlexQuery up to 365 days old)
   * [ ] Show closed positions
   * [ ] Realized % Gain/Loss is not showed when merging positions
   * [ ] Stock Category
   * [ ] Add support for Portfolio Growth
-  * [ ] Diversification: Fix sectors to be properly grouped
-  * [ ] Diversification: Remove Cash and Crypto from Holdings
+  * [ ] Diversification:
+    * [ ] Fix sectors to be properly grouped
+    * [ ] Remove Cash and Crypto from Holdings
   * [ ] Fees: Add support for Fees
   * [ ] Transactions:
     * [ ] Add fees/taxes
@@ -142,8 +142,10 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
     * [ ] Web:
       * Performance & Reports / Transaction History: Shows transactions for the last 2 years
       * Flex Query: Allows creating custom reports.
-  * [ ] Dividends: Implement Announced and Forecasted dividends
-  * [ ] Deposits: Implement Deposits and Withdrawals
+  * [ ] Dividends:
+    * [ ] Taxes are not included in the dividends (See Fees)
+    * [ ] Implement Announced and Forecasted dividends
+  * [ ] Deposits: Implement Deposits and Withdrawals (As per support ticket it's only possible with a FlexQuery up to 365 days old)
   * [ ] Portfolio Growth: Implement Portfolio Growth
 
 ## Logos
