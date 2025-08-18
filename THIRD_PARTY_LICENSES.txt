@@ -4171,7 +4171,7 @@ SOFTWARE.
 
 
 protobuf
-6.31.1
+6.32.0
 3-Clause BSD License
 Copyright 2008 Google Inc.  All rights reserved.
 

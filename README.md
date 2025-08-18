@@ -51,9 +51,9 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
 
 ## Other interesting projects
 
-* "https://github.com/leo-pfeiffer/portfolio_dashboard"
-* "https://github.com/lucalaringe/degiro_portfolio_analytics" <<< CHECK!!!!
-* "https://github.com/CNugteren/DGPC"
+* [Portfolio Dashboard](https://github.com/leo-pfeiffer/portfolio_dashboard)
+* [Degiro Portfolio Analytics](https://github.com/lucalaringe/degiro_portfolio_analytics) <<< CHECK!!!!
+* [DGPC](https://github.com/CNugteren/DGPC)
 * [Portfolio Dividend Tracker](https://app.portfoliodividendtracker.com/p/jongbeleggen?locale=en) (Has some interesting diagrams and data)
 * [DivvyDiary](https://divvydiary.com/en/p/24094?tab=depot)
 * [Capitalyse](https://capitalyse.app/app/degiro/) → Seems to have some errors, but data and graphs are interesting
