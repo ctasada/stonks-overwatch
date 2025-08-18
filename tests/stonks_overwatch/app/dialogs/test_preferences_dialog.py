@@ -5,21 +5,16 @@ This module tests the preferences dialog functionality including
 initialization, layout creation, and user interactions.
 """
 
-# Check if toga is available using importlib
-import importlib.util
+from ..toga_test_utils import conditional_import, skip_if_toga_unavailable
 
 import pytest
 from unittest.mock import MagicMock, patch
 
-TOGA_AVAILABLE = importlib.util.find_spec("toga") is not None
-
 # Skip all tests in this module if toga is not available
-pytestmark = pytest.mark.skipif(not TOGA_AVAILABLE, reason="toga not available")
+pytestmark = skip_if_toga_unavailable
 
-if TOGA_AVAILABLE:
-    from stonks_overwatch.app.dialogs.preferences_dialog import PreferencesDialog
-else:
-    PreferencesDialog = None
+# Conditionally import PreferencesDialog only if toga is available
+PreferencesDialog = conditional_import("PreferencesDialog", "stonks_overwatch.app.dialogs.preferences_dialog")
 
 
 class TestPreferencesDialog:

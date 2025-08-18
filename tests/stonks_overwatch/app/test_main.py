@@ -6,25 +6,20 @@ web server management, and license checking functionality.
 """
 
 import asyncio
-
-# Check if toga is available using importlib
-import importlib.util
 import os
 import warnings
 from threading import Thread
 
+from .toga_test_utils import conditional_import, skip_if_toga_unavailable
+
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-TOGA_AVAILABLE = importlib.util.find_spec("toga") is not None
-
 # Skip all tests in this module if toga is not available
-pytestmark = pytest.mark.skipif(not TOGA_AVAILABLE, reason="toga not available")
+pytestmark = skip_if_toga_unavailable
 
-if TOGA_AVAILABLE:
-    from stonks_overwatch.app.main import StonksOverwatchApp
-else:
-    StonksOverwatchApp = None
+# Conditionally import StonksOverwatchApp only if toga is available
+StonksOverwatchApp = conditional_import("StonksOverwatchApp", "stonks_overwatch.app.main")
 
 
 @pytest.mark.django_db

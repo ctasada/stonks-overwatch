@@ -5,23 +5,19 @@ This module tests the menu management functionality of the Toga app,
 including main menu, debug menu, and help menu setup and interactions.
 """
 
-# Check if toga is available using importlib
-import importlib.util
 import os
 from datetime import datetime, timezone
+
+from ..toga_test_utils import conditional_import, skip_if_toga_unavailable
 
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-TOGA_AVAILABLE = importlib.util.find_spec("toga") is not None
-
 # Skip all tests in this module if toga is not available
-pytestmark = pytest.mark.skipif(not TOGA_AVAILABLE, reason="toga not available")
+pytestmark = skip_if_toga_unavailable
 
-if TOGA_AVAILABLE:
-    from stonks_overwatch.app.ui.menu import MenuManager
-else:
-    MenuManager = None
+# Conditionally import MenuManager only if toga is available
+MenuManager = conditional_import("MenuManager", "stonks_overwatch.app.ui.menu")
 
 
 class TestMenuManager:

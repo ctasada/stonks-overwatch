@@ -5,21 +5,16 @@ This module tests the dialog management functionality of the Toga app,
 including database export, cache clearing, license info, preferences, and update checking.
 """
 
-# Check if toga is available using importlib
-import importlib.util
+from ..toga_test_utils import conditional_import, skip_if_toga_unavailable
 
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-TOGA_AVAILABLE = importlib.util.find_spec("toga") is not None
-
 # Skip all tests in this module if toga is not available
-pytestmark = pytest.mark.skipif(not TOGA_AVAILABLE, reason="toga not available")
+pytestmark = skip_if_toga_unavailable
 
-if TOGA_AVAILABLE:
-    from stonks_overwatch.app.dialogs.dialogs import DialogManager
-else:
-    DialogManager = None
+# Conditionally import DialogManager only if toga is available
+DialogManager = conditional_import("DialogManager", "stonks_overwatch.app.dialogs.dialogs")
 
 
 class TestDialogManager:
