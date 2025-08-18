@@ -233,14 +233,16 @@ Create service implementations that inherit from the required interfaces:
 ```python
 # src/stonks_overwatch/services/brokers/newbroker/services/portfolio_service.py
 from stonks_overwatch.core.interfaces.portfolio_service import PortfolioServiceInterface
-from stonks_overwatch.core.interfaces.base_service import DependencyInjectionMixin
+from stonks_overwatch.core.interfaces.base_service import BaseService
+from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.logger_constants import LOGGER_SERVICES
 
-class PortfolioService(DependencyInjectionMixin, PortfolioServiceInterface):
+class PortfolioService(BaseService, PortfolioServiceInterface):
     def __init__(self, config=None):
         super().__init__(config)
         self.logger = StonksLogger.get_logger(LOGGER_SERVICES, "[NEWBROKER|PORTFOLIO]")
 
+    @property
     def get_portfolio(self):
         """Return portfolio data for this broker."""
         self.logger.debug("Fetching portfolio data")
@@ -253,14 +255,18 @@ class PortfolioService(DependencyInjectionMixin, PortfolioServiceInterface):
 ```python
 # src/stonks_overwatch/services/brokers/newbroker/services/transaction_service.py
 from stonks_overwatch.core.interfaces.transaction_service import TransactionServiceInterface
+from stonks_overwatch.core.interfaces.base_service import BaseService
+from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.utils.core.logger_constants import LOGGER_SERVICES
 
-class TransactionService(TransactionServiceInterface):
+class TransactionService(BaseService, TransactionServiceInterface):
     def __init__(self, config=None):
-        super().__init__()
-        self.config = config
+        super().__init__(config)
+        self.logger = StonksLogger.get_logger(LOGGER_SERVICES, "[NEWBROKER|TRANSACTION]")
 
-    def get_transactions(self, start_date=None, end_date=None):
+    def get_transactions(self):
         """Return transaction data for this broker."""
+        self.logger.debug("Fetching transaction data")
         # Implement your transaction retrieval logic
         return []
 ```
@@ -270,14 +276,18 @@ class TransactionService(TransactionServiceInterface):
 ```python
 # src/stonks_overwatch/services/brokers/newbroker/services/account_service.py
 from stonks_overwatch.core.interfaces.account_service import AccountServiceInterface
+from stonks_overwatch.core.interfaces.base_service import BaseService
+from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.utils.core.logger_constants import LOGGER_SERVICES
 
-class AccountService(AccountServiceInterface):
+class AccountService(BaseService, AccountServiceInterface):
     def __init__(self, config=None):
-        super().__init__()
-        self.config = config
+        super().__init__(config)
+        self.logger = StonksLogger.get_logger(LOGGER_SERVICES, "[NEWBROKER|ACCOUNT]")
 
     def get_account_overview(self):
         """Return account overview data for this broker."""
+        self.logger.debug("Fetching account overview")
         # Implement your account overview logic
         return {}
 ```
@@ -345,9 +355,16 @@ All broker services must implement the appropriate interface:
 
 ```python
 class PortfolioServiceInterface(ABC):
+    @property
     @abstractmethod
-    def get_portfolio(self):
-        """Get portfolio holdings for this broker."""
+    def get_portfolio(self) -> List[PortfolioEntry]:
+        """
+        Retrieves the current portfolio entries.
+
+        Returns:
+            List[PortfolioEntry]: List of portfolio entries including stocks,
+                ETFs, crypto assets, and cash balances
+        """
         pass
 ```
 
@@ -356,8 +373,13 @@ class PortfolioServiceInterface(ABC):
 ```python
 class TransactionServiceInterface(ABC):
     @abstractmethod
-    def get_transactions(self, start_date=None, end_date=None):
-        """Get transaction history for this broker."""
+    def get_transactions(self) -> List[Transaction]:
+        """
+        Retrieves the transaction history.
+
+        Returns:
+            List[Transaction]: List of transactions sorted by date (newest first)
+        """
         pass
 ```
 
