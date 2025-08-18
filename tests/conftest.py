@@ -282,6 +282,29 @@ def _register_mock_services(registry, mock_services_dict):
         registry.register_broker_services(broker_name, **services)
 
 
+def _register_authentication_services():
+    """Register authentication services for tests."""
+    try:
+        from stonks_overwatch.core.authentication_setup import register_authentication_services
+        from stonks_overwatch.core.factories.authentication_factory import AuthenticationFactory
+
+        # Clear any existing authentication factory instances
+        if hasattr(AuthenticationFactory, "_instances"):
+            AuthenticationFactory._instances.clear()
+
+        # Register authentication services
+        auth_factory = AuthenticationFactory()
+
+        if not auth_factory.is_fully_registered():
+            register_authentication_services()
+            print("Successfully registered authentication services for tests")
+        else:
+            print("Authentication services already registered for tests")
+
+    except Exception as e:
+        print(f"Warning: Could not register authentication services for tests: {e}")
+
+
 @pytest.fixture(autouse=True)
 def reset_global_config():
     """Reset the global configuration before each test to ensure clean state."""
@@ -314,5 +337,8 @@ def reset_global_config():
 
     except Exception as e:
         print(f"Warning: Could not initialize unified registry for tests: {e}")
+
+    # Ensure authentication services are registered for tests
+    _register_authentication_services()
 
     yield

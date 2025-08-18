@@ -174,7 +174,7 @@ test: ## Run tests
 
 coverage: ## Run tests with coverage report
 	@echo -e  "$(BOLD)$(GREEN)Running tests with coverage...$(RESET)"
-	poetry run pytest --cov=. --cov-report=html --cov-report=term-missing
+	poetry run pytest --cov=src/stonks_overwatch --cov-report=html --cov-report=term-missing
 	@echo -e  "$(BOLD)$(GREEN)Coverage report generated in htmlcov/index.html$(RESET)"
 
 #==============================================================================
