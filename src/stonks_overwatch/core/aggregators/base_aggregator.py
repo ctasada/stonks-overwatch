@@ -6,7 +6,7 @@ offering common patterns for broker service management and data aggregation.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from stonks_overwatch.config.config import Config
 from stonks_overwatch.core.exceptions import DataAggregationException
@@ -158,17 +158,13 @@ class BaseAggregator(ABC):
             if self._is_broker_enabled(broker_name, selected_portfolio)
         ]
 
-    def _collect_broker_data(
-        self, selected_portfolio: PortfolioId, method_name: str, *args, **kwargs
-    ) -> Dict[str, Any]:
+    def _collect_broker_data(self, selected_portfolio: PortfolioId, method_name: str) -> Dict[str, Any]:
         """
         Collect data from all enabled brokers using the specified method.
 
         Args:
             selected_portfolio: Selected portfolio configuration
             method_name: Name of the method to call on each broker service
-            *args: Arguments to pass to the method
-            **kwargs: Keyword arguments to pass to the method
 
         Returns:
             Dictionary mapping broker names to their data
@@ -193,8 +189,8 @@ class BaseAggregator(ABC):
 
                     # Check if it's a property or callable
                     if callable(attr):
-                        # It's a method, call it with arguments
-                        data = attr(*args, **kwargs)
+                        # It's a method, call it with no arguments
+                        data = attr()
                     else:
                         # It's a property, just use the value
                         data = attr
@@ -223,34 +219,6 @@ class BaseAggregator(ABC):
 
         return broker_data
 
-    def _merge_lists(self, data_lists: List[List[Any]]) -> List[Any]:
-        """
-        Merge multiple lists into a single list.
-
-        Args:
-            data_lists: List of lists to merge
-
-        Returns:
-            Merged list containing all items
-        """
-        merged = []
-        for data_list in data_lists:
-            if data_list:
-                merged.extend(data_list)
-        return merged
-
-    def _sum_numeric_values(self, values: List[Union[int, float]]) -> float:
-        """
-        Sum numeric values with error handling.
-
-        Args:
-            values: List of numeric values to sum
-
-        Returns:
-            Sum of all values
-        """
-        return sum(float(value) for value in values if value is not None)
-
     @property
     def supported_brokers(self) -> List[str]:
         """
@@ -272,7 +240,7 @@ class BaseAggregator(ABC):
         return self._service_type
 
     @abstractmethod
-    def aggregate_data(self, selected_portfolio: PortfolioId, **kwargs) -> Any:
+    def aggregate_data(self, selected_portfolio: PortfolioId) -> Any:
         """
         Aggregate data from all enabled brokers.
 
@@ -306,7 +274,7 @@ class BaseAggregator(ABC):
         Returns:
             Combined (and optionally merged) list of data
         """
-        broker_data = self._collect_broker_data(selected_portfolio, method_name, *args, **kwargs)
+        broker_data = self._collect_broker_data(selected_portfolio, method_name)
 
         # Combine all data into a single list
         combined_data = []
@@ -345,7 +313,7 @@ class BaseAggregator(ABC):
         Returns:
             Merged object or list of objects
         """
-        broker_data = self._collect_broker_data(selected_portfolio, method_name, *args, **kwargs)
+        broker_data = self._collect_broker_data(selected_portfolio, method_name)
 
         # Collect objects of the expected type
         typed_objects = []

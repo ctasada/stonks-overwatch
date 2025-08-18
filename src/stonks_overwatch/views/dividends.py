@@ -115,7 +115,11 @@ class Dividends(View):
             days = month_entry.setdefault("days", {})
             day_entry = days.setdefault(dividend_pay.day(), {})
 
-            day_entry[dividend_pay.stock_symbol] = dividend_pay
+            if not day_entry.get(dividend_pay.stock_symbol):
+                day_entry[dividend_pay.stock_symbol] = dividend_pay
+            else:
+                day_entry[dividend_pay.stock_symbol].amount += dividend_pay.amount
+                day_entry[dividend_pay.stock_symbol].taxes += dividend_pay.taxes
 
             # Number of Payouts in the month
             payouts = month_entry.setdefault("payouts", 0)

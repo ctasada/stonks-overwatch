@@ -58,7 +58,7 @@ class DividendsService(BaseService, DividendServiceInterface):
         for transaction in overview:
             if transaction.description in self.DIVIDEND_DESCRIPTIONS:
                 # Create a key to group by date and stock symbol
-                key = (transaction.datetime.date(), transaction.stock_symbol)
+                key = (transaction.value_datetime.date(), transaction.stock_symbol)
 
                 transaction_change = transaction.change
                 currency = transaction.currency
@@ -72,7 +72,7 @@ class DividendsService(BaseService, DividendServiceInterface):
 
                 if key not in dividend_groups:
                     dividend_groups[key] = {
-                        "payment_date": transaction.datetime,
+                        "payment_date": transaction.value_datetime,
                         "stock_name": transaction.stock_name,
                         "stock_symbol": transaction.stock_symbol,
                         "currency": currency,
