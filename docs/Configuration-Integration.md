@@ -1,16 +1,111 @@
 # Configuration Integration Guide
 
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Quick Start](#quick-start)
+3. [File Structure](#file-structure)
+4. [Architecture Features](#architecture-features)
+5. [Architecture Diagram](#architecture-diagram)
+6. [Key Components](#key-components)
+7. [API Reference](#api-reference)
+8. [How to Add a New Broker Configuration](#how-to-add-a-new-broker-configuration)
+9. [Configuration File Format](#configuration-file-format)
+10. [Testing Your Integration](#testing-your-integration)
+11. [Performance Features](#performance-features)
+12. [Best Practices](#best-practices)
+13. [Troubleshooting](#troubleshooting)
+14. [Benefits](#benefits)
+15. [Future Enhancements](#future-enhancements)
+16. [Conclusion](#conclusion)
+
 ## Overview
 
-The configuration module implements a **simplified unified architecture with intelligent caching** that eliminates hardcoded broker references, provides high performance through caching, and makes the system highly extensible for new brokers.
+The configuration module implements a **unified factory architecture with intelligent caching** that uses configuration-driven broker registration, provides high performance through caching, and makes the system highly extensible for new brokers through the `BROKER_CONFIGS` dictionary approach.
 
-## Recent Improvements (2025)
+## Quick Start
 
-- ✅ **Removed GlobalConfig**: Eliminated redundant singleton layer
-- ✅ **Simplified BrokerFactory**: Streamlined credential handling with dynamic mapping
-- ✅ **Added Logger Constants**: Centralized logging patterns for consistency
-- ✅ **Dynamic Configuration**: Config.__repr__ and broker detection now adapt automatically
-- ✅ **Cleaner Logic**: Simplified Config.is_enabled() method
+### Basic Usage
+
+```python
+# Get the global configuration instance
+from stonks_overwatch.config.config import Config
+
+config = Config.get_global()
+
+# Access broker configurations
+degiro_config = config.get_broker_config("degiro")
+bitvavo_config = config.get_broker_config("bitvavo")
+
+# Check if broker is enabled
+if degiro_config and degiro_config.is_enabled():
+    credentials = degiro_config.credentials
+    # Use credentials for API calls
+```
+
+### Common Operations
+
+```python
+# Load configuration from JSON file
+config = Config.from_json_file("config/config.json")
+
+# Check if any broker is enabled for a portfolio
+if config.is_enabled(PortfolioId.ALL):
+    print("At least one broker is enabled")
+
+# Reset configuration in tests
+Config.reset_global_for_tests()
+```
+
+## File Structure
+
+### Core Configuration Files
+
+```shell
+src/stonks_overwatch/
+├── config/
+│   ├── __init__.py
+│   ├── config.py              # Main Config class
+│   ├── base_config.py         # BaseConfig abstract class
+│   ├── base_credentials.py    # BaseCredentials class
+│   ├── degiro.py             # DeGiro configuration
+│   ├── bitvavo.py            # Bitvavo configuration
+│   └── ibkr.py               # IBKR configuration
+├── core/
+│   ├── factories/
+│   │   ├── broker_factory.py  # Unified BrokerFactory
+│   │   └── broker_registry.py # BrokerRegistry
+│   └── registry_setup.py      # BROKER_CONFIGS definition
+└── utils/
+    └── core/
+        ├── logger.py          # StonksLogger implementation
+        ├── logger_constants.py # Centralized logging constants
+        └── singleton.py       # Singleton decorator
+```
+
+### Configuration Files
+
+```shell
+config/
+└── config.json               # JSON configuration file
+```
+
+### Key Files for Broker Integration
+
+| File | Purpose | When to Modify |
+|------|---------|----------------|
+| `config/your_broker.py` | New broker config & credentials | When adding new broker |
+| `core/registry_setup.py` | Broker registration | When adding new broker |
+| `core/factories/broker_factory.py` | Credential mapping | When adding credential updates |
+| `config/config.json` | Runtime configuration | When configuring brokers |
+
+## Architecture Features
+
+- ✅ **Unified BrokerFactory**: Single factory for both configurations and services
+- ✅ **Configuration-Driven Registration**: Brokers registered via `BROKER_CONFIGS` dictionary
+- ✅ **Intelligent Caching**: Configurations and services cached for performance
+- ✅ **Dynamic Configuration**: Config automatically adapts to registered brokers
+- ✅ **Centralized Logging**: Consistent logger constants across all modules
 
 ## Architecture Diagram
 
@@ -25,9 +120,11 @@ graph TB
     subgraph "Unified Factory & Caching Layer"
         BrokerFactory[BrokerFactory Singleton<br/>🏭 Unified Management]
         BrokerRegistry[BrokerRegistry<br/>📋 Broker Registration]
+        RegistrySetup[Registry Setup<br/>🔧 Config-Driven Registration]
         BrokerFactory --> |uses| BrokerRegistry
         BrokerFactory --> |manages| ConfigCache
         BrokerFactory --> |manages| ServiceCache
+        RegistrySetup --> |configures| BrokerRegistry
     end
 
     subgraph "Configuration Layer"
@@ -84,9 +181,9 @@ The main `Config` class provides the public interface for configuration access:
 
 ```python
 class Config:
-    def __init__(self, base_currency, degiro_configuration, bitvavo_configuration):
-        self.base_currency = base_currency
-        self.registry = ConfigRegistry()  # Instance-based registry
+    def __init__(self, base_currency: Optional[str] = DEFAULT_BASE_CURRENCY) -> None:
+        self.base_currency = base_currency or self.DEFAULT_BASE_CURRENCY
+        self._factory = BrokerFactory()
 
     @classmethod
     def get_global(cls) -> "Config":
@@ -98,7 +195,7 @@ class Config:
     @classmethod
     def _default(cls) -> "Config":
         """Create fresh configuration (internal use only)"""
-        # Creates new instance with default broker configs
+        return cls()
 ```
 
 **Key Methods:**
@@ -107,7 +204,7 @@ class Config:
 - `_default()`: Create fresh configuration (internal/tests)
 - `from_dict()`: Create from dictionary
 - `from_json_file()`: Load from JSON file
-- `is_enabled()`: Check if any broker is enabled (simplified logic)
+- `is_enabled()`: Check if any broker is enabled for selected portfolio
 - `get_broker_config()`: Get specific broker configuration via BrokerFactory
 - `reset_global_for_tests()`: Reset global instance for testing
 
@@ -137,8 +234,11 @@ class BrokerFactory:
         if not kwargs:
             if hasattr(config_class, "from_db_with_json_override"):
                 config = config_class.from_db_with_json_override(broker_name)
-            else:
+            elif hasattr(config_class, "default"):
                 config = config_class.default()
+            else:
+                # Fallback if no default method exists
+                config = config_class(credentials=None, enabled=False)
         else:
             config = config_class(**kwargs)
 
@@ -148,12 +248,24 @@ class BrokerFactory:
 
     def update_broker_credentials(self, broker_name: str, **credentials) -> None:
         """Update credentials with dynamic credential class mapping"""
-        credential_classes = {
-            "degiro": "stonks_overwatch.config.degiro.DegiroCredentials",
-            "bitvavo": "stonks_overwatch.config.bitvavo.BitvavoCredentials",
-            "ibkr": "stonks_overwatch.config.ibkr.IbkrCredentials",
-        }
-        # Dynamic import and credential creation logic
+        config = self.create_config(broker_name)
+        if not config:
+            raise BrokerFactoryError(f"No configuration found for broker: {broker_name}")
+
+        # Handle case where no existing credentials exist
+        if config.credentials is None:
+            credential_classes = {
+                "degiro": "stonks_overwatch.config.degiro.DegiroCredentials",
+                "bitvavo": "stonks_overwatch.config.bitvavo.BitvavoCredentials",
+                "ibkr": "stonks_overwatch.config.ibkr.IbkrCredentials",
+            }
+            # Dynamic import and credential creation logic
+            credential_class_path = credential_classes.get(broker_name.lower())
+            if credential_class_path:
+                module_path, class_name = credential_class_path.rsplit(".", 1)
+                module = __import__(module_path, fromlist=[class_name])
+                credential_class = getattr(module, class_name)
+                config.credentials = credential_class(**credentials)
 
     def clear_cache(self, broker_name: str = None) -> None:
         """Clear configuration and service cache"""
@@ -186,6 +298,37 @@ from stonks_overwatch.utils.core.logger_constants import LOGGER_CONFIG, TAG_CONF
 class Config:
     logger = StonksLogger.get_logger(LOGGER_CONFIG, TAG_CONFIG)
 ```
+
+## API Reference
+
+### Config Class Methods
+
+| Method | Description | Parameters | Returns |
+|--------|-------------|------------|---------|
+| `get_global()` | Get cached global configuration instance (recommended for production) | None | `Config` |
+| `from_dict(data)` | Create configuration from dictionary | `data: dict` | `Config` |
+| `from_json_file(file_path)` | Load configuration from JSON file | `file_path: str \| Path` | `Config` |
+| `get_broker_config(broker_name)` | Get specific broker configuration | `broker_name: str` | `Optional[BaseConfig]` |
+| `is_enabled(portfolio_id)` | Check if broker is enabled for portfolio | `portfolio_id: PortfolioId` | `bool` |
+| `reset_global_for_tests()` | Reset global instance for testing | None | `None` |
+
+### BrokerFactory Methods
+
+| Method | Description | Parameters | Returns |
+|--------|-------------|------------|---------|
+| `create_config(broker_name, **kwargs)` | Create/get cached broker configuration | `broker_name: str, **kwargs` | `Optional[BaseConfig]` |
+| `update_broker_credentials(broker_name, **credentials)` | Update broker credentials | `broker_name: str, **credentials` | `None` |
+| `clear_cache(broker_name)` | Clear configuration/service cache | `broker_name: Optional[str]` | `None` |
+| `get_available_brokers()` | Get list of registered brokers | None | `List[str]` |
+
+### BaseConfig Methods
+
+| Method | Description | Parameters | Returns |
+|--------|-------------|------------|---------|
+| `is_enabled()` | Check if configuration is enabled | None | `bool` |
+| `from_dict(data)` | Create config from dictionary (abstract) | `data: dict` | `BaseConfig` |
+| `default()` | Create default configuration (abstract) | None | `BaseConfig` |
+| `load_config(broker_name, json_override_path)` | Load config from DB with JSON override | `broker_name: str, json_override_path: str` | `BaseConfig` |
 
 ## How to Add a New Broker Configuration
 
@@ -251,16 +394,38 @@ class YourBrokerConfig(BaseConfig):
         )
 ```
 
-### Step 2: Register with Factory
+### Step 2: Register with Registry
 
-Add the registration to `src/stonks_overwatch/config/config_factory.py`:
+Add the registration to `src/stonks_overwatch/core/registry_setup.py` in the `BROKER_CONFIGS` dictionary:
 
 ```python
-def _register_default_brokers(self) -> None:
-    """Register the default broker configurations."""
-    self.register_broker_config("degiro", DegiroConfig)
-    self.register_broker_config("bitvavo", BitvavoConfig)
-    self.register_broker_config("your_broker", YourBrokerConfig)  # Add this line
+BROKER_CONFIGS = {
+    "degiro": {
+        "config": DegiroConfig,
+        "services": {
+            ServiceType.PORTFOLIO: DegiroPortfolioService,
+            ServiceType.TRANSACTION: DegiroTransactionService,
+            # ... other services
+        },
+        "supports_complete_registration": True,
+    },
+    "bitvavo": {
+        "config": BitvavoConfig,
+        "services": {
+            ServiceType.PORTFOLIO: BitvavoPortfolioService,
+            # ... other services
+        },
+        "supports_complete_registration": False,
+    },
+    "your_broker": {  # Add this section
+        "config": YourBrokerConfig,
+        "services": {
+            ServiceType.PORTFOLIO: YourBrokerPortfolioService,
+            # Add other services as needed
+        },
+        "supports_complete_registration": False,
+    },
+}
 ```
 
 And add the import at the top:
@@ -269,62 +434,23 @@ And add the import at the top:
 from stonks_overwatch.config.your_broker import YourBrokerConfig
 ```
 
-### Step 3: Update Config Class
+### Step 3: No Config Class Changes Needed
 
-Add the new broker to the `Config` class constructor in `src/stonks_overwatch/config/config.py`:
+The `Config` class automatically adapts to new brokers through the unified BrokerFactory system. No changes are needed to the Config class itself - it will automatically discover and use your new broker configuration through the registry.
 
-```python
-def __init__(
-    self,
-    base_currency: Optional[str] = DEFAULT_BASE_CURRENCY,
-    degiro_configuration: Optional[DegiroConfig] = None,
-    bitvavo_configuration: Optional[BitvavoConfig] = None,
-    your_broker_configuration: Optional[YourBrokerConfig] = None,  # Add this
-) -> None:
-    # ... existing code ...
+### Step 4: Optional Convenience Methods
 
-    # Set broker configurations using the factory
-    if degiro_configuration:
-        self.registry.set_broker_config("degiro", degiro_configuration)
-    if bitvavo_configuration:
-        self.registry.set_broker_config("bitvavo", bitvavo_configuration)
-    if your_broker_configuration:  # Add this
-        self.registry.set_broker_config("your_broker", your_broker_configuration)
-```
-
-And update the `from_dict` method:
+For convenience, you can add helper methods to the `Config` class (optional):
 
 ```python
-@classmethod
-def from_dict(cls, data: dict) -> "Config":
-    base_currency = data.get("base_currency", Config.DEFAULT_BASE_CURRENCY)
-
-    # Use factory to create broker configurations
-    degiro_configuration = config_factory.create_broker_config_from_dict(
-        "degiro", data.get(DegiroConfig.config_key, {})
-    )
-    bitvavo_configuration = config_factory.create_broker_config_from_dict(
-        "bitvavo", data.get(BitvavoConfig.config_key, {})
-    )
-    your_broker_configuration = config_factory.create_broker_config_from_dict(  # Add this
-        "your_broker", data.get(YourBrokerConfig.config_key, {})
-    )
-
-    return cls(base_currency, degiro_configuration, bitvavo_configuration, your_broker_configuration)
-```
-
-### Step 4: Add Legacy Methods (Optional)
-
-For backward compatibility, you can add legacy methods to the `Config` class:
-
-```python
-def is_your_broker_enabled(self, selected_portfolio: PortfolioId = PortfolioId.ALL) -> bool:
+def is_your_broker_enabled(self) -> bool:
     """Check if YourBroker is enabled."""
-    return self.registry.is_broker_enabled("your_broker", selected_portfolio)
+    config = self.get_broker_config("your_broker")
+    return config.is_enabled() if config else False
 
-def is_your_broker_connected(self, selected_portfolio: PortfolioId = PortfolioId.ALL) -> bool:
-    """Check if YourBroker is connected."""
-    return self.registry.is_broker_connected("your_broker", selected_portfolio)
+def get_your_broker_config(self) -> Optional[YourBrokerConfig]:
+    """Get YourBroker configuration."""
+    return self.get_broker_config("your_broker")
 ```
 
 ### Step 5: Use in Application
@@ -335,16 +461,20 @@ Your new broker is now automatically integrated:
 # Get configuration
 config = Config.get_global()
 
-# Check if enabled
-if config.is_enabled(PortfolioId.YOUR_BROKER):
+# Check if enabled using generic method
+if config.is_enabled(PortfolioId.YOUR_BROKER):  # Requires corresponding PortfolioId enum
     # Your broker is enabled
     pass
 
-# Access configuration
-your_broker_config = config.registry.get_broker_config("your_broker")
+# Access configuration directly
+your_broker_config = config.get_broker_config("your_broker")
 if your_broker_config and your_broker_config.enabled:
     credentials = your_broker_config.credentials
     # Use credentials for API calls
+
+# Or use convenience method if you added one
+if config.is_your_broker_enabled():
+    credentials = config.get_your_broker_config().credentials
 ```
 
 ## Configuration File Format
@@ -396,18 +526,22 @@ def test_your_broker_config():
     # Create test configuration
     config = Config._default()
 
-    # Test default state
-    assert not config.registry.is_broker_enabled("your_broker")
+    # Test configuration access
+    your_broker_config = config.get_broker_config("your_broker")
 
-    # Test with enabled configuration
-    test_config = YourBrokerConfig(
+    # Test with BrokerFactory directly if needed
+    from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+    factory = BrokerFactory()
+
+    # Create test configuration with custom credentials
+    test_config = factory.create_config(
+        "your_broker",
         credentials=YourBrokerCredentials("test", "test", "key", "secret"),
         enabled=True
     )
-    config.registry.set_broker_config("your_broker", test_config)
 
-    assert config.registry.is_broker_enabled("your_broker")
-    assert config.is_enabled(PortfolioId.YOUR_BROKER)
+    assert test_config.is_enabled()
+    assert test_config.credentials.username == "test"
 ```
 
 ## Performance Features
@@ -448,16 +582,99 @@ def test_your_broker_config():
 
 ### 3. **Integration**
 
-- Register your broker in `src/stonks_overwatch/core/registry_setup.py`
-- Add your credential class to the BrokerFactory mapping (if using credential updates)
-- No need to modify the `Config` class - it adapts automatically
-- Test your integration thoroughly
+- Register your broker in `src/stonks_overwatch/core/registry_setup.py` using the `BROKER_CONFIGS` dictionary
+- Add your credential class to the BrokerFactory mapping in `update_broker_credentials()` method if using credential updates
+- No need to modify the `Config` class - it adapts automatically through the BrokerFactory
+- Test your integration thoroughly using the unified factory approach
 
 ### 4. **Error Handling**
 
 - Handle missing or invalid configuration gracefully
 - Provide meaningful error messages
 - Use type hints for better IDE support
+
+## Troubleshooting
+
+### Common Issues
+
+#### 1. **Configuration Not Found**
+
+**Problem**: `get_broker_config()` returns `None`
+
+**Solutions**:
+- Verify broker is registered in `BROKER_CONFIGS` dictionary
+- Check broker name spelling (case-sensitive)
+- Ensure `register_all_brokers()` was called during initialization
+
+```python
+# Debug: List available brokers
+from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+factory = BrokerFactory()
+print("Available brokers:", factory.get_available_brokers())
+```
+
+#### 2. **Import Errors When Adding New Broker**
+
+**Problem**: `ImportError` when registering new broker
+
+**Solutions**:
+- Verify import path in `registry_setup.py` is correct
+- Ensure all required methods are implemented in config class
+- Check for circular import dependencies
+
+#### 3. **Credentials Not Loading**
+
+**Problem**: Configuration loads but credentials are `None`
+
+**Solutions**:
+- Check JSON file format matches expected structure
+- Verify `config_key` matches JSON key
+- Ensure `from_dict()` method handles missing data correctly
+
+```python
+# Debug: Check raw configuration data
+config = YourBrokerConfig.load_config("your_broker")
+print("Config loaded:", config)
+print("Credentials:", config.credentials)
+```
+
+#### 4. **Cache Issues in Tests**
+
+**Problem**: Test configurations persist between tests
+
+**Solutions**:
+- Always call `Config.reset_global_for_tests()` in test setup
+- Clear BrokerFactory cache: `factory.clear_cache()`
+- Use fresh Config instances: `Config._default()`
+
+#### 5. **Database Access Errors**
+
+**Problem**: `LazyConfig` fails to load from database
+
+**Solutions**:
+- Ensure Django is properly initialized
+- Check database connectivity
+- Verify broker configuration exists in database
+- Use JSON-only loading as fallback: `YourBrokerConfig.from_json_file()`
+
+### Debug Mode
+
+Enable debug logging to troubleshoot configuration issues:
+
+```python
+import logging
+logging.getLogger("stonks_overwatch.config").setLevel(logging.DEBUG)
+logging.getLogger("stonks_overwatch.core").setLevel(logging.DEBUG)
+```
+
+### Performance Issues
+
+If experiencing slow configuration loading:
+
+1. **Check Cache Usage**: Ensure you're using `Config.get_global()` in production
+2. **Database Optimization**: Index broker configuration tables
+3. **JSON File Size**: Keep configuration files small and focused
+4. **Lazy Loading**: Use `from_db_with_json_override()` for deferred loading
 
 ## Benefits
 
@@ -490,29 +707,66 @@ def test_your_broker_config():
 
 ## Future Enhancements
 
-1. **Dynamic Configuration Loading**: Load broker configurations from plugins
-2. **Configuration Validation**: Add schema validation for broker configurations
-3. **Hot Reloading**: Support for configuration changes without a restart
-4. **Configuration Encryption**: Encrypt sensitive configuration data
-5. **Cache Monitoring**: Add metrics for cache hit rates and performance
+### High Priority
+
+1. **Configuration Validation**: Add schema validation for broker configurations
+   - JSON schema validation for configuration files
+   - Runtime validation of configuration objects
+   - Better error messages for invalid configurations
+
+2. **Enhanced Security**: Encrypt sensitive configuration data at rest
+   - Credential encryption in database storage
+   - Secure key management system
+   - Audit logging for configuration access
+
+### Medium Priority
+
+1. **Hot Reloading**: Support for configuration changes without application restart
+   - File system monitoring for JSON configuration changes
+   - Dynamic broker registration/deregistration
+   - Configuration reload API endpoints
+
+2. **Performance Monitoring**: Add metrics for cache hit rates and factory performance
+   - Cache hit/miss ratio tracking
+   - Configuration loading time metrics
+   - Factory operation performance monitoring
+
+### Low Priority
+
+1. **Plugin System**: Load broker configurations from external plugins
+   - External plugin discovery mechanism
+   - Plugin configuration validation
+   - Plugin lifecycle management
+
+2. **Configuration Versioning**: Support for configuration migration and versioning
+   - Configuration schema versioning
+   - Automatic migration scripts
+   - Backward compatibility handling
+
+### Research Items
+
+1. **Distributed Configuration**: Support for distributed configuration management
+   - Configuration synchronization across multiple instances
+   - Centralized configuration management
+   - Configuration distribution mechanisms
 
 ## Conclusion
 
-The simplified unified configuration architecture with intelligent caching provides a robust foundation for adding new broker integrations. Recent improvements have eliminated redundant layers while maintaining all functionality.
+The simplified unified configuration architecture with intelligent caching provides a robust foundation for adding new broker integrations. The system uses a configuration-driven approach for broker registration through the `BROKER_CONFIGS` dictionary.
 
 **Key advantages:**
 - **High Performance**: Cached access eliminates redundant creation
-- **Simplified Architecture**: Removed GlobalConfig redundancy, streamlined BrokerFactory
-- **Extensibility**: Easy to add new brokers with dynamic credential handling
-- **Maintainability**: Centralized logger constants, reduced code duplication
-- **Testability**: Excellent testing support with clear reset methods
-- **Clean API**: Clear separation between public and internal methods
-- **Type Safety**: Full type hints and validation
-- **Dynamic Adaptation**: Configuration automatically adapts to available brokers
+- **Simplified Architecture**: Single BrokerFactory handles both configs and services
+- **Extensibility**: Easy to add new brokers through registry configuration
+- **Maintainability**: Configuration-driven registration reduces code duplication
+- **Testability**: Excellent testing support with factory isolation
+- **Clean API**: Config class provides simple interface via `get_broker_config()`
+- **Type Safety**: Full type hints and validation throughout
+- **Dynamic Adaptation**: Configuration automatically adapts to registered brokers
 
-**Recent improvements (2025):**
-- ✅ **25+ lines** of unnecessary code removed
-- ✅ **50% reduction** in conditional logic complexity
-- ✅ **Dynamic broker handling** - no hardcoded lists
-- ✅ **Centralized logging patterns** for consistency
-- ✅ **100% test coverage maintained** through all changes
+**Key features:**
+- ✅ **Configuration-driven registration** - brokers added via `BROKER_CONFIGS`
+- ✅ **Unified factory pattern** - single point for config and service creation
+- ✅ **Intelligent caching** - configs and services cached by broker name
+- ✅ **Lazy loading** - database access deferred until needed
+- ✅ **Centralized logging** - consistent patterns across all components
