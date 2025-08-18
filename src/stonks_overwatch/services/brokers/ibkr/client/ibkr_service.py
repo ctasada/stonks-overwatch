@@ -9,7 +9,7 @@ from ibind import IbkrClient
 from ibind.oauth.oauth1a import OAuth1aConfig
 from pytz import utc
 
-from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.config.ibkr import IbkrConfig
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.singleton import singleton
 
@@ -33,7 +33,7 @@ class IbkrService:
     def __init__(
         self,
         shutdown_oauth: bool = False,
-        config: Optional[BaseConfig] = None,
+        config: Optional[IbkrConfig] = None,
     ):
         # FIXME: The shutdown_oauth parameter is a workaround to avoid OAuth shutdown due to issues
         #  in the way SIGTERM is managed.
@@ -45,26 +45,14 @@ class IbkrService:
         else:
             # Get IBKR configuration using unified BrokerFactory
             try:
-                from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+                from stonks_overwatch.config.base_config import resolve_config_from_factory
 
-                broker_factory = BrokerFactory()
-                ibkr_config = broker_factory.create_config("ibkr")
-
-                if ibkr_config is None:
-                    raise RuntimeError(
-                        "IBKR configuration not available. This usually means:\n"
-                        "1. The broker registry hasn't been initialized (call django.setup() for scripts)\n"
-                        "2. IBKR broker registration is missing from registry setup\n"
-                        "3. No valid IBKR configuration file exists\n"
-                        "Please ensure Django is properly initialized before using broker services."
-                    )
+                # Get and resolve IBKR configuration
+                ibkr_config = resolve_config_from_factory("ibkr", IbkrConfig)
             except ImportError as e:
                 raise ImportError(f"Failed to import BrokerFactory: {e}") from e
 
-        if ibkr_config is None:
-            raise RuntimeError("IBKR configuration is None - broker registry not properly initialized")
-
-        ibkr_credentials = ibkr_config.credentials
+        ibkr_credentials = ibkr_config.get_credentials
 
         if ibkr_credentials:
             self.client = IbkrClient(
