@@ -2,7 +2,7 @@ import json
 import os
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Type, TypeVar, cast
 
 from stonks_overwatch.config.base_credentials import BaseCredentials
 from stonks_overwatch.settings import PROJECT_PATH
@@ -224,6 +224,19 @@ class LazyConfig(BaseConfig):
         self._ensure_loaded()
         return self._loaded_config.get_credentials
 
+    def get_loaded_config(self):
+        """
+        Get the actual loaded configuration instance.
+
+        This method provides a public interface to access the underlying
+        configuration without exposing protected members.
+
+        Returns:
+            The actual configuration instance after ensuring it's loaded
+        """
+        self._ensure_loaded()
+        return self._loaded_config
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "BaseConfig":
         """LazyConfig doesn't support direct construction from dict."""
@@ -254,3 +267,78 @@ class LazyConfig(BaseConfig):
             return f"LazyConfig(loaded={self._loaded_config})"
         else:
             return f"LazyConfig(class={self._config_class.__name__}, broker={self._broker_name}, not_loaded=True)"
+
+
+# Configuration resolution utilities
+
+# Type variable for configuration classes
+ConfigType = TypeVar("ConfigType", bound=BaseConfig)
+
+
+def resolve_config(config: BaseConfig, expected_type: Type[ConfigType]) -> ConfigType:
+    """
+    Resolve a configuration instance that may be wrapped in LazyConfig.
+
+    This function handles both LazyConfig wrapper instances and direct config instances,
+    ensuring the returned configuration is of the expected type.
+
+    Args:
+        config: Configuration instance that may be a LazyConfig wrapper
+        expected_type: Expected configuration class type
+
+    Returns:
+        Resolved configuration instance of the expected type
+
+    Raises:
+        TypeError: If the resolved configuration is not of the expected type
+    """
+    if isinstance(config, LazyConfig):
+        # Use the public method to get the loaded configuration
+        actual_config = config.get_loaded_config()
+        if not isinstance(actual_config, expected_type):
+            raise TypeError(f"Expected {expected_type.__name__}, got {type(actual_config).__name__}")
+        return cast(ConfigType, actual_config)
+    elif isinstance(config, expected_type):
+        return cast(ConfigType, config)
+    else:
+        raise TypeError(f"Expected {expected_type.__name__} or LazyConfig, got {type(config).__name__}")
+
+
+def resolve_config_from_factory(broker_name: str, expected_type: Type[ConfigType]) -> ConfigType:
+    """
+    Create and resolve a configuration from BrokerFactory.
+
+    This is a convenience function that combines broker factory usage with
+    configuration resolution, handling the common pattern used in broker clients.
+
+    Args:
+        broker_name: Name of the broker to create configuration for
+        expected_type: Expected configuration class type
+
+    Returns:
+        Resolved configuration instance of the expected type
+
+    Raises:
+        ImportError: If BrokerFactory cannot be imported
+        TypeError: If the resolved configuration is not of the expected type
+        RuntimeError: If configuration creation fails
+    """
+    try:
+        from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+
+        broker_factory = BrokerFactory()
+        config = broker_factory.create_config(broker_name)
+
+        if config is None:
+            raise RuntimeError(
+                f"{expected_type.__name__} configuration not available. This usually means:\n"
+                f"1. The broker registry hasn't been initialized (call django.setup() for scripts)\n"
+                f"2. {broker_name.title()} broker registration is missing from registry setup\n"
+                f"3. No valid {broker_name.title()} configuration file exists\n"
+                "Please ensure Django is properly initialized before using broker services."
+            )
+
+        return resolve_config(config, expected_type)
+
+    except ImportError as e:
+        raise ImportError(f"Failed to import BrokerFactory: {e}") from e

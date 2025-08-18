@@ -1,10 +1,9 @@
-import json
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
 from python_bitvavo_api.bitvavo import Bitvavo, createPostfix
 
-from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.config.bitvavo import BitvavoConfig
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.singleton import singleton
 
@@ -34,7 +33,7 @@ class BitvavoService:
         self,
         debugging: bool = False,
         force: bool = False,
-        config: Optional[BaseConfig] = None,
+        config: Optional[BitvavoConfig] = None,
     ):
         self.force = force
 
@@ -44,27 +43,14 @@ class BitvavoService:
         else:
             # Get Bitvavo configuration using unified BrokerFactory
             try:
-                from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+                from stonks_overwatch.config.base_config import resolve_config_from_factory
 
-                # Get Bitvavo configuration using BrokerFactory
-                broker_factory = BrokerFactory()
-                self.bitvavo_config = broker_factory.create_config("bitvavo")
-
-                if self.bitvavo_config is None:
-                    raise RuntimeError(
-                        "Bitvavo configuration not available. This usually means:\n"
-                        "1. The broker registry hasn't been initialized (call django.setup() for scripts)\n"
-                        "2. Bitvavo broker registration is missing from registry setup\n"
-                        "3. No valid Bitvavo configuration file exists\n"
-                        "Please ensure Django is properly initialized before using broker services."
-                    )
+                # Get and resolve Bitvavo configuration
+                self.bitvavo_config = resolve_config_from_factory("bitvavo", BitvavoConfig)
             except ImportError as e:
                 raise ImportError(f"Failed to import BrokerFactory: {e}") from e
 
-        if self.bitvavo_config is None:
-            raise RuntimeError("Bitvavo configuration is None - broker registry not properly initialized")
-
-        bitvavo_credentials = self.bitvavo_config.credentials
+        bitvavo_credentials = self.bitvavo_config.get_credentials
 
         if bitvavo_credentials and bitvavo_credentials.apikey and bitvavo_credentials.apisecret:
             self.client = Bitvavo(
@@ -84,12 +70,12 @@ class BitvavoService:
     def get_remaining_limit(self) -> int:
         return self.client.getRemainingLimit()
 
-    def account(self) -> json:
+    def account(self) -> Any:
         """Returns the current fees for this account."""
         self.logger.debug("Retrieving account")
         return self.client.account()
 
-    def account_history(self) -> json:
+    def account_history(self) -> Any:
         """Returns the transaction history for this account."""
         self.logger.debug("Retrieving account history")
         options = {"fromDate": self.START_TIMESTAMP}
@@ -113,7 +99,7 @@ class BitvavoService:
 
         return all_results
 
-    def assets(self, symbol: str = None) -> json:
+    def assets(self, symbol: str = None) -> Any:
         """Returns information on the supported assets."""
         self.logger.debug(f"Retrieving assets for symbol {symbol}")
         options = {}
@@ -121,7 +107,7 @@ class BitvavoService:
             options["symbol"] = symbol
         return self.client.assets(options)
 
-    def balance(self, symbol: str = None) -> json:
+    def balance(self, symbol: str = None) -> Any:
         """Returns the current balance for this account."""
         self.logger.debug(f"Retrieving balance for symbol {symbol}")
         options = {}
@@ -155,12 +141,12 @@ class BitvavoService:
             )
         return sorted(result, key=lambda k: k["timestamp"])
 
-    def deposit_history(self) -> json:
+    def deposit_history(self) -> Any:
         """Returns the deposit history of the account."""
         self.logger.debug("Retrieving deposit history")
         return self.client.depositHistory()
 
-    def ticker_price(self, market: str = None) -> json:
+    def ticker_price(self, market: str = None) -> Any:
         """Retrieve the price of the latest trades on Bitvavo for all markets or a single market."""
         self.logger.debug(f"Retrieving ticker price for market {market}")
         options = {}
@@ -168,7 +154,7 @@ class BitvavoService:
             options["market"] = market
         return self.client.tickerPrice(options)
 
-    def withdrawal_history(self) -> json:
+    def withdrawal_history(self) -> Any:
         """Returns the withdrawal history."""
         self.logger.debug("Retrieving withdrawal history")
         return self.client.withdrawalHistory()

@@ -13,6 +13,7 @@ from degiro_connector.trading.models.credentials import Credentials
 
 import stonks_overwatch.settings
 from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.config.degiro import DegiroConfig, DegiroCredentials
 from stonks_overwatch.settings import TIME_ZONE
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.core.logger import StonksLogger
@@ -35,31 +36,19 @@ class DeGiroOfflineModeError(Exception):
 class CredentialsManager:
     """Manages the credentials for the DeGiro API."""
 
-    def __init__(self, credentials: Optional[Credentials] = None, config: Optional[BaseConfig] = None):
+    def __init__(self, credentials: Optional[DegiroCredentials] = None, config: Optional[DegiroConfig] = None):
         # Use dependency injection if config is provided, otherwise fallback to global config
         if config is not None:
             degiro_config = config
         else:
             # Get DeGiro configuration using unified BrokerFactory
             try:
-                from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+                from stonks_overwatch.config.base_config import resolve_config_from_factory
 
-                broker_factory = BrokerFactory()
-                degiro_config = broker_factory.create_config("degiro")
-
-                if degiro_config is None:
-                    raise RuntimeError(
-                        "DeGiro configuration not available. This usually means:\n"
-                        "1. The broker registry hasn't been initialized (call django.setup() for scripts)\n"
-                        "2. DeGiro broker registration is missing from registry setup\n"
-                        "3. No valid DeGiro configuration file exists\n"
-                        "Please ensure Django is properly initialized before using broker services."
-                    )
+                # Get and resolve DeGiro configuration
+                degiro_config = resolve_config_from_factory("degiro", DegiroConfig)
             except ImportError as e:
                 raise ImportError(f"Failed to import BrokerFactory: {e}") from e
-
-        if degiro_config is None:
-            raise RuntimeError("DeGiro configuration is None - broker registry not properly initialized")
 
         degiro_credentials = degiro_config.credentials
 
@@ -139,7 +128,7 @@ class DeGiroService:
     logger = StonksLogger.get_logger("stonks_overwatch.degiro_service", "[DEGIRO|CLIENT]")
     api_client: TradingApi = None
     credentials_manager: Optional[CredentialsManager] = None
-    degiro_config: Optional[BaseConfig] = None
+    degiro_config: Optional[DegiroConfig] = None
     force: bool = False
     is_maintenance_mode: bool = False
 
@@ -156,10 +145,10 @@ class DeGiroService:
         if self.degiro_config is None:
             # Fallback to BrokerFactory for backward compatibility
             try:
-                from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+                from stonks_overwatch.config.base_config import resolve_config_from_factory
 
-                broker_factory = BrokerFactory()
-                self.degiro_config = broker_factory.create_config("degiro")
+                # Get and resolve DeGiro configuration
+                self.degiro_config = resolve_config_from_factory("degiro", DegiroConfig)
             except ImportError:
                 # If BrokerFactory is not available, AuthenticationService should provide config
                 pass
