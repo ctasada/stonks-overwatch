@@ -2,35 +2,72 @@
 
 ## Overview
 
-This document describes the authentication architecture for DeGiro integration in Stonks Overwatch. The system was refactored to eliminate coupling between components and provide a clean, maintainable authentication flow.
+This document describes the authentication architecture for DeGiro integration in Stonks Overwatch. The system underwent **major modernization in 2025**, featuring unified factory patterns, dependency injection, interface-based design, and performance optimizations while maintaining DeGiro-specific authentication flows.
+
+## 2025 Architecture Modernization
+
+✅ **Factory Pattern with DI**: Unified AuthenticationFactory with automatic dependency injection
+✅ **Interface-Based Design**: Type-safe contracts for all authentication services
+✅ **Service Locator Optimization**: High-performance caching and access patterns
+✅ **Centralized Registration**: Single-point service registration and configuration
+✅ **Enhanced Error Handling**: Professional exception hierarchy and recovery mechanisms
 
 ## Architecture
 
-### Core Components
+### Modern Factory Architecture (2025)
 
-The authentication system consists of three main services:
-
-1. **AuthenticationService**: Main orchestrator for authentication flows
-2. **AuthenticationSessionManager**: Session state management
-3. **AuthenticationCredentialService**: Credential validation and storage
+The authentication system now uses a sophisticated factory pattern with dependency injection:
 
 ```mermaid
 graph TD
-    subgraph "Authentication Architecture"
-        MW["DeGiroAuthMiddleware"] --> AS["AuthenticationService"]
-        LV["Login View"] --> AS
+    subgraph "Modern Authentication Architecture"
+        AL["AuthenticationLocator<br/>🎯 Service Access"] --> AF["AuthenticationFactory<br/>🏭 Dependency Injection"]
+        AS_SETUP["AuthenticationSetup<br/>⚙️ Service Registration"] --> AF
 
-        AS --> ASM["AuthenticationSessionManager"]
-        AS --> ACS["AuthenticationCredentialService"]
-        AS --> DS["DeGiroService"]
+        AF --> ASM_I["SessionManagerInterface<br/>📄 Contract"]
+        AF --> ACS_I["CredentialServiceInterface<br/>📄 Contract"]
+        AF --> AS_I["AuthenticationServiceInterface<br/>📄 Contract"]
 
-        ASM --> SS["Session Storage"]
-        ACS --> DB["Database (BrokersConfiguration)"]
-        ACS --> CFG["Configuration Files"]
+        ASM_I -.-> ASM["AuthenticationSessionManager<br/>💾 Implementation"]
+        ACS_I -.-> ACS["AuthenticationCredentialService<br/>🔐 Implementation"]
+        AS_I -.-> AS["AuthenticationService<br/>🎪 Implementation"]
 
-        DS --> API["DeGiro API"]
+        MW["DeGiroAuthMiddleware"] --> AL
+        LV["Login View"] --> AL
+
+        AS --> DS["DeGiroService<br/>🌐 API Client"]
+
+        ASM --> SS["Session Storage<br/>💾 Django Sessions"]
+        ACS --> DB["Database<br/>🗄️ BrokersConfiguration"]
+        ACS --> CFG["Configuration Files<br/>📁 JSON/YAML"]
+
+        DS --> API["DeGiro API<br/>🌍 External Service"]
     end
+
+    classDef modern fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef interface fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef implementation fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef external fill:#fff3e0,stroke:#e65100,stroke-width:2px
+
+    class AL,AF,AS_SETUP modern
+    class ASM_I,ACS_I,AS_I interface
+    class ASM,ACS,AS,MW,LV implementation
+    class DS,API,SS,DB,CFG external
 ```
+
+### Core Components
+
+The authentication system consists of three main service layers:
+
+1. **Service Factory Layer**: AuthenticationFactory with dependency injection
+2. **Interface Layer**: Type-safe contracts for all services
+3. **Implementation Layer**: Concrete service implementations
+
+#### Service Interfaces
+
+- **AuthenticationServiceInterface**: Main authentication contract
+- **SessionManagerInterface**: Session management contract
+- **CredentialServiceInterface**: Credential handling contract
 
 ### Service Responsibilities
 
@@ -63,15 +100,47 @@ graph TD
   - `get_effective_credentials()`: Resolve credentials from multiple sources
   - `store_credentials_in_database()`: Handle "remember me" functionality
 
-### Service Access Pattern
+### Modern Service Access Patterns
 
-Services are accessed through a service locator for performance optimization:
+#### Service Locator Pattern (Recommended)
+
+The optimized service locator provides high-performance access with caching:
 
 ```python
 from stonks_overwatch.core.authentication_locator import get_authentication_service
 
-# Get optimized service instance
+# Get cached service instance (optimal performance)
 auth_service = get_authentication_service()
+```
+
+#### Factory Pattern (Advanced Usage)
+
+Direct factory access for custom configurations or dependency injection:
+
+```python
+from stonks_overwatch.core.factories.authentication_factory import AuthenticationFactory
+
+# Create factory instance (singleton)
+factory = AuthenticationFactory()
+
+# Get service with automatic dependency injection
+auth_service = factory.get_authentication_service()
+
+# Custom configuration injection
+auth_service = factory.get_authentication_service(config=custom_config)
+```
+
+#### Interface-Based Usage (Type Safety)
+
+All services implement interfaces for type safety and testing:
+
+```python
+from stonks_overwatch.core.interfaces.authentication_service import AuthenticationServiceInterface
+
+def process_authentication(auth_service: AuthenticationServiceInterface):
+    # Guaranteed to have all required methods
+    result = auth_service.authenticate_user(request, username, password)
+    return result
 ```
 
 ## Authentication Flows
@@ -123,6 +192,42 @@ class AuthenticationResult(Enum):
     CONFIGURATION_ERROR = "configuration_error"
 ```
 
+## Modern Service Registration
+
+### Authentication Service Setup
+
+The modern architecture uses centralized service registration:
+
+```python
+# From: src/stonks_overwatch/core/authentication_setup.py
+from stonks_overwatch.core.authentication_setup import register_authentication_services
+
+def register_authentication_services():
+    """Register all authentication services with dependency injection."""
+    auth_factory = AuthenticationFactory()
+
+    # Register service implementations with interfaces
+    auth_factory.register_session_manager(AuthenticationSessionManager)
+    auth_factory.register_credential_service(AuthenticationCredentialService)
+    auth_factory.register_authentication_service(AuthenticationService)
+```
+
+### Factory Benefits
+
+✅ **Automatic Dependency Injection**: Services receive dependencies automatically
+✅ **Interface Compliance**: Type-safe service contracts enforced
+✅ **Performance Caching**: Service instances cached for optimal performance
+✅ **Memory Management**: Efficient cache management and cleanup
+✅ **Configuration Support**: Optional configuration injection for customization
+
+### Service Lifecycle
+
+1. **Registration**: Services registered with factory at startup
+2. **Creation**: Services created with automatic dependency injection
+3. **Caching**: Instances cached for performance optimization
+4. **Access**: High-performance access through service locator
+5. **Cleanup**: Automatic cache management and memory optimization
+
 ## Configuration
 
 ### Credential Sources (Priority Order)
@@ -173,19 +278,49 @@ class BrokersConfiguration(models.Model):
 
 ## Migration Notes
 
-### From Legacy System
+### 2025 Modern Architecture Migration
 
-The refactored system maintains backward compatibility while providing:
-- Centralized authentication logic
-- Improved error handling
-- Better session management
-- Enhanced security
+The 2025 modernization represents a **major architectural upgrade** while maintaining full backward compatibility:
 
-### Breaking Changes
+#### What's New
 
-- `DegiroHelper` class was removed (functionality moved to services)
-- Direct `DeGiroService` access for authentication is deprecated
-- Session management APIs have changed
+✅ **Factory Pattern**: Unified AuthenticationFactory replaces manual service instantiation
+✅ **Dependency Injection**: Automatic configuration and service injection
+✅ **Interface Contracts**: Type-safe service interfaces for better development experience
+✅ **Service Locator**: High-performance caching and optimized access patterns
+✅ **Error Handling**: Professional exception hierarchy and recovery mechanisms
+
+#### Migration Path
+
+**Old Pattern (Pre-2025)**:
+
+```python
+# Manual service creation
+session_manager = AuthenticationSessionManager()
+credential_service = AuthenticationCredentialService()
+auth_service = AuthenticationService(session_manager, credential_service)
+```
+
+**New Pattern (2025+)**:
+
+```python
+# Optimized service locator (recommended)
+from stonks_overwatch.core.authentication_locator import get_authentication_service
+auth_service = get_authentication_service()  # All dependencies injected automatically
+```
+
+#### Breaking Changes
+
+- ❌ **Manual Service Instantiation**: Deprecated in favor of factory pattern
+- ❌ **Direct Service Dependencies**: Services now auto-inject dependencies
+- ⚠️ **API Changes**: Some method signatures updated for better type safety
+
+#### Backward Compatibility
+
+✅ **Core APIs**: All main authentication methods remain unchanged
+✅ **DeGiro Flows**: TOTP and authentication flows work identically
+✅ **Session Management**: Session APIs maintain compatibility
+✅ **Error Handling**: Enhanced but backward-compatible error responses
 
 ## Troubleshooting
 
@@ -199,13 +334,24 @@ The refactored system maintains backward compatibility while providing:
 ### Debug Commands
 
 ```python
+from stonks_overwatch.core.authentication_locator import get_authentication_service, get_authentication_cache_status
+
 # Check authentication status
 auth_service = get_authentication_service()
 status = auth_service.get_authentication_status(request)
+print(f"Auth Status: {status}")
 
-# Inspect session
+# Inspect session data (passwords masked for security)
 session_data = auth_service.session_manager.get_session_data(request)
+print(f"Session authenticated: {session_data.get('is_authenticated')}")
+print(f"TOTP required: {session_data.get('totp_required')}")
+print(f"Session ID: {session_data.get('session_id')}")  # Partially masked
 
-# Check credential sources
-sources = auth_service.credential_service.get_credential_sources(request)
+# Check credential sources (returns tuple)
+has_session, has_database, has_config = auth_service.credential_service.get_credential_sources(request)
+print(f"Credential sources - Session: {has_session}, Database: {has_database}, Config: {has_config}")
+
+# Monitor service locator performance
+cache_status = get_authentication_cache_status()
+print(f"Cache performance: {cache_status}")
 ```

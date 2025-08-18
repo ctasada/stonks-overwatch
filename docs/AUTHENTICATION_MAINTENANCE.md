@@ -1,5 +1,13 @@
 # Authentication System Maintenance Guide
 
+## Recent Architecture Updates (2025)
+
+✅ **Modern Service Architecture**: Unified factory pattern with dependency injection
+✅ **Professional Error Handling**: Comprehensive exception hierarchy and recovery
+✅ **Performance Optimizations**: Service locator with intelligent caching
+✅ **Interface-Based Design**: Type-safe contracts and abstractions
+✅ **Enhanced Security**: Proper credential masking and session management
+
 ## Quick Reference
 
 ### Service Access
@@ -35,17 +43,18 @@ print(status)  # Shows complete auth state
 ```python
 session_data = auth_service.session_manager.get_session_data(request)
 print(f"Authenticated: {session_data.get('is_authenticated')}")
-print(f"TOTP Required: {session_data.get('show_otp')}")
-print(f"Session ID: {session_data.get('session_id')}")
+print(f"TOTP Required: {session_data.get('totp_required')}")
+print(f"Session ID: {session_data.get('session_id')}")  # Partially masked for security
+print(f"Credentials: {session_data.get('credentials')}")  # Password masked
 ```
 
 **Check credential sources:**
 
 ```python
-sources = auth_service.credential_service.get_credential_sources(request)
-print(f"Has session credentials: {sources['has_session']}")
-print(f"Has database credentials: {sources['has_database']}")
-print(f"Has config credentials: {sources['has_config']}")
+has_session, has_database, has_config = auth_service.credential_service.get_credential_sources(request)
+print(f"Has session credentials: {has_session}")
+print(f"Has database credentials: {has_database}")
+print(f"Has config credentials: {has_config}")
 ```
 
 ### 2. Common Issues and Solutions
@@ -113,19 +122,32 @@ print(f"Message: {result.message}")
 **Check service locator performance:**
 
 ```python
-from stonks_overwatch.core.authentication_locator import get_cache_status
-status = get_cache_status()
-print(f"Cache hits: {status['cache_access_count']}")
-print(f"Is cached: {status['is_cached']}")
+from stonks_overwatch.core.authentication_locator import get_authentication_cache_status
+status = get_authentication_cache_status()
+print(f"Access count: {status['access_count']}")
+print(f"Factory cached: {status['factory_cached']}")
+print(f"Auth service cached: {status['auth_service_cached']}")
+print(f"Services registered: {status['factory_services_registered']}")
 ```
 
 ## Security Checklist
 
-- [ ] Passwords are never logged in plain text
+✅ **Credential Protection:**
+- [ ] Passwords are never logged in plain text (enforced by masked logging)
 - [ ] Session credentials are cleared on logout
-- [ ] Database credentials are encrypted
+- [ ] Database credentials are encrypted (BrokersConfiguration model)
 - [ ] TOTP codes are not persisted
-- [ ] Error messages don't expose sensitive data
+- [ ] Session IDs are partially masked in logs
+
+✅ **Error Handling:**
+- [ ] Error messages don't expose sensitive data (structured error classes)
+- [ ] Authentication failures are logged with context
+- [ ] Exception handling follows proper hierarchy
+
+✅ **Architecture Security:**
+- [ ] Service interfaces prevent unauthorized access
+- [ ] Dependency injection maintains secure boundaries
+- [ ] Cache status doesn't expose sensitive information
 
 ## Integration Points
 
@@ -159,7 +181,7 @@ auth_service.session_manager.clear_session(request)
 auth_service.logout_user(request)
 
 # Clear stored credentials
-auth_service.credential_service.clear_stored_credentials("degiro")
+auth_service.credential_service.clear_stored_credentials()
 ```
 
 ### Bypass Authentication (Development Only)
@@ -182,6 +204,35 @@ WHERE broker_name = 'degiro';
 UPDATE stonks_overwatch_brokersconfiguration
 SET credentials = '{}'
 WHERE broker_name = 'degiro';
+```
+
+## Modern Architecture Patterns
+
+### Service Locator Pattern
+
+```python
+# Optimized access with caching
+from stonks_overwatch.core.authentication_locator import get_authentication_service
+auth_service = get_authentication_service()  # Uses cached instance
+```
+
+### Dependency Injection Pattern
+
+```python
+# Services receive configurations automatically
+from stonks_overwatch.core.factories.authentication_factory import AuthenticationFactory
+factory = AuthenticationFactory()
+auth_service = factory.get_authentication_service()  # Auto-injection
+```
+
+### Interface-Based Architecture
+
+```python
+# Type-safe service contracts
+from stonks_overwatch.core.interfaces.authentication_service import AuthenticationServiceInterface
+def process_auth(auth_service: AuthenticationServiceInterface):
+    # Guaranteed to have all required methods
+    return auth_service.authenticate_user(request, username, password)
 ```
 
 ## Code Patterns
