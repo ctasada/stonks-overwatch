@@ -24,7 +24,7 @@ generate_rounded_icon() {
 #    \( -size "$size" gradient:"#5cacee-#3b5998" \) \
 #    \( -background none "$ICON_DIR/stonks_overwatch.svg" -density 300 -resize "$size" \) \
 #    -compose over -composite "$ICON_DIR/original.png"
-  magick "$ICON_DIR/original.png" -resize "$size"
+  magick "$ICON_DIR/original.png" -resize "$size" "$ICON_DIR/original.png"
   magick -size "$size" xc:none -draw "roundrectangle $margin_w,$margin_h,$rect_x2,$rect_y2,$radius,$radius" png:- | \
   magick "$ICON_DIR/original.png" -alpha Set - -compose DstIn -composite "$ICON_PATH"
 #  rm -f "$ICON_DIR/original.png"
@@ -62,10 +62,16 @@ generate_linux_icons() {
   done
 }
 
+generate_windows_icons() {
+  echo "Generate Windows icons..."
+  magick "$ICON_PATH" -define png:format=png32 -define icon:auto-resize=256,64,48,32,16 "$ICON_DIR/stonks_overflow.ico" >/dev/null 2>&1
+}
+
 generate_rounded_icon
 generate_icns
 generate_ico
 generate_apple_icons
 generate_linux_icons
+generate_windows_icons
 
 echo "Icon generation completed."
