@@ -224,6 +224,9 @@ flatpak_runtime = "org.freedesktop.Platform"
 flatpak_runtime_version = "24.08"
 flatpak_sdk = "org.freedesktop.Sdk"
 
+[tool.briefcase.app.stonks-overwatch.windows]
+use_full_install_path = false
+
 [tool.pip-licenses]
 format = "plain-vertical"
 with-license-file = true
