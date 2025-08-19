@@ -1,12 +1,10 @@
 version: 2
 updates:
-#  - package-ecosystem: "poetry"
-#    directory: "/"
-#    schedule:
-#      interval: "daily"
-#    commit-message:
-#      prefix: "deps"
-#    open-pull-requests-limit: 10
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
   - package-ecosystem: "npm"
     directory: "/src"
     schedule:
@@ -14,7 +12,28 @@ updates:
     commit-message:
       prefix: "deps"
     open-pull-requests-limit: 10
-  - package-ecosystem: "github-actions"
+
+  - package-ecosystem: "poetry"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "deps"
+    open-pull-requests-limit: 10
+
+  # FIXME: Remove pip once migration to 'poetry' is complete
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "deps"
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "deps"
+    open-pull-requests-limit: 5
