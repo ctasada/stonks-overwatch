@@ -21,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 * Updates are automatically checked
+* Windows Installer:
+  * Fixed issue with the installation path
+  * Fixed issue showing the application icon
 
 ### Security
 
