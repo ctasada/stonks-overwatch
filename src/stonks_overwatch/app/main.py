@@ -97,6 +97,8 @@ class StonksOverwatchApp(toga.App):
         self.menu_manager.setup_debug_menu()
         self.menu_manager.setup_help_menu()
         for command in self.commands:
+            if isinstance(command, toga.Separator):
+                continue
             if command.group.text == "File" and command.text == "Close All":
                 self.commands.remove(command)
 
