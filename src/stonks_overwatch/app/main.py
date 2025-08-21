@@ -7,6 +7,7 @@ import toga
 from django.core.handlers.wsgi import WSGIHandler
 from django.core.management import call_command
 from django.core.servers.basehttp import WSGIRequestHandler
+from toga.command import Separator
 
 from stonks_overwatch.app.dialogs.dialogs import DialogManager
 from stonks_overwatch.app.ui.menu import MenuManager
@@ -97,7 +98,7 @@ class StonksOverwatchApp(toga.App):
         self.menu_manager.setup_debug_menu()
         self.menu_manager.setup_help_menu()
         for command in self.commands:
-            if isinstance(command, toga.Separator):
+            if isinstance(command, Separator):
                 continue
             if command.group.text == "File" and command.text == "Close All":
                 self.commands.remove(command)

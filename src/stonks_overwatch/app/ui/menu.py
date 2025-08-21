@@ -1,4 +1,5 @@
 import os
+import platform
 import webbrowser
 from datetime import datetime
 
@@ -17,13 +18,19 @@ class MenuManager:
 
     def setup_main_menu(self):
         app_group = Group.APP
-        check_update_cmd = Command(
-            self._check_for_updates,
-            text="Check for Updates...",
-            group=app_group,
-            section=0,
-            order=1,
-        )
+
+        if platform.system() == "Darwin":
+            # On macOS, the "Check for Updates" command is added to the app menu,
+            #    but other OSes will have it in the Help menu
+            check_update_cmd = Command(
+                self._check_for_updates,
+                text="Check for Updates...",
+                group=app_group,
+                section=0,
+                order=1,
+            )
+            self.app.commands.add(check_update_cmd)
+
         preferences_cmd = Command.standard(
             self.app,
             Command.PREFERENCES,
@@ -31,7 +38,6 @@ class MenuManager:
         )
 
         # Add commands to the app
-        self.app.commands.add(check_update_cmd)
         self.app.commands.add(preferences_cmd)
 
     def setup_debug_menu(self):
@@ -64,22 +70,37 @@ class MenuManager:
         self.app.commands.add(show_logs_cmd)
 
     def setup_help_menu(self):
+        help_group = Group.HELP
+
         bug_report_cmd = Command(
             self.open_bug_report,
             text="Bug Report / Feedback",
             tooltip="Report a bug or send feedback",
-            group=Group.HELP,
+            group=help_group,
             section=0,
         )
+        self.app.commands.add(bug_report_cmd)
+
+        license_section = 1
+        if platform.system() != "Darwin":
+            # On non-macOS systems, the "Check for Updates" command is added to the Help menu
+            check_update_cmd = Command(
+                self._check_for_updates,
+                text="Check for Updates...",
+                group=help_group,
+                section=1,
+            )
+            license_section = 2
+            self.app.commands.add(check_update_cmd)
+
         license_cmd = Command(
             self._open_license_info,
             text=self.__license_label(),
             tooltip="License information",
             enabled=not self.license_manager.is_license_expired(),
-            group=Group.HELP,
-            section=1,
+            group=help_group,
+            section=license_section,
         )
-        self.app.commands.add(bug_report_cmd)
         self.app.commands.add(license_cmd)
 
     def __license_label(self) -> str:
