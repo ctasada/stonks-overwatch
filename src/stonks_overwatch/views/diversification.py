@@ -25,6 +25,7 @@ class Diversification(View):
         portfolio = self.portfolio.get_portfolio(selected_portfolio)
         product_types = self._get_product_types(portfolio)
         positions = self._get_positions(portfolio)
+        crypto = self._get_crypto(portfolio)
         sectors = self._get_sectors(portfolio)
         currencies = self._get_currencies(portfolio)
         countries = self._get_countries(portfolio)
@@ -32,6 +33,7 @@ class Diversification(View):
         context = {
             "productTypes": product_types,
             "positions": positions,
+            "crypto": crypto,
             "sectors": sectors,
             "currencies": currencies,
             "countries": countries,
@@ -50,7 +52,7 @@ class Diversification(View):
         max_percentage = portfolio[0].portfolio_size
 
         for stock in portfolio:
-            if stock.is_open:
+            if stock.is_open and stock.product_type in [ProductType.STOCK, ProductType.ETF]:
                 stock_labels.append(stock.formatted_name())
                 stock_values.append(stock.base_currency_value)
                 stocks_table.append(
@@ -71,6 +73,39 @@ class Diversification(View):
                 "values": stock_values,
             },
             "table": stocks_table,
+        }
+
+    @staticmethod
+    def _get_crypto(portfolio: List[PortfolioEntry]) -> dict:
+        crypto_labels = []
+        crypto_values = []
+        crypto_table = []
+        portfolio = sorted(portfolio, key=lambda k: k.value, reverse=True)
+
+        max_percentage = portfolio[0].portfolio_size
+
+        for stock in portfolio:
+            if stock.is_open and stock.product_type in [ProductType.CRYPTO]:
+                crypto_labels.append(stock.formatted_name())
+                crypto_values.append(stock.base_currency_value)
+                crypto_table.append(
+                    {
+                        "name": stock.formatted_name(),
+                        "product_type": stock.product_type.name,
+                        "symbol": stock.symbol,
+                        "size": stock.portfolio_size,
+                        "formatted_size": stock.formatted_portfolio_size,
+                        "weight": (stock.portfolio_size / max_percentage) * 100,
+                        "formatted_value": stock.formatted_base_currency_value(),
+                    }
+                )
+
+        return {
+            "chart": {
+                "labels": crypto_labels,
+                "values": crypto_values,
+            },
+            "table": crypto_table,
         }
 
     def _get_product_types(self, portfolio: List[PortfolioEntry]) -> dict:
