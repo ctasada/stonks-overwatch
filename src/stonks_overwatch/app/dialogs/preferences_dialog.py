@@ -130,11 +130,11 @@ class PreferencesDialog(toga.Window):
         self.broker_list = toga.DetailedList(
             data=[
                 {
-                    "icon": self._get_broker_logo("degiro"),
+                    "icon": self._get_broker_logo_as_icon("degiro"),
                     "title": "DEGIRO",
                 },
                 # {
-                #     "icon": self._get_broker_logo("bitvavo"),
+                #     "icon": self._get_broker_logo_as_icon("bitvavo"),
                 #     "title": "Bitvavo",
                 # },
             ],
@@ -155,12 +155,21 @@ class PreferencesDialog(toga.Window):
             label_style = Pack(margin_bottom=10)
 
         entry = toga.Box(style=Pack(direction=ROW, align_items=START, margin_bottom=10))
-        entry.add(toga.ImageView(self._get_broker_logo(icon_name), style=icon_style))
+        entry.add(toga.ImageView(self._get_broker_logo_as_image(icon_name), style=icon_style))
         entry.add(toga.Label(broker_name, style=label_style))
 
         return entry
 
-    def _get_broker_logo(self, broker_name: str) -> toga.Image:
+    def _get_broker_logo_as_icon(self, broker_name: str) -> toga.Icon:
+        """Get the logo for a given broker."""
+        logo_path = os.path.join(self._app.paths.app, "..", "static", "brokers", f"{broker_name}.png")
+        if os.path.exists(logo_path):
+            return toga.Icon(logo_path)
+        else:
+            self.logger.warning(f"Logo not found for broker: {broker_name}")
+            return toga.Icon.APP_ICON
+
+    def _get_broker_logo_as_image(self, broker_name: str) -> toga.Image:
         """Get the logo for a given broker."""
         logo_path = os.path.join(self._app.paths.app, "..", "static", "brokers", f"{broker_name}.png")
         if os.path.exists(logo_path):
@@ -337,43 +346,6 @@ class PreferencesDialog(toga.Window):
         self._add_degiro_update_frequency_row(fields_box)
 
         self.main_section.add(fields_box)
-
-    def _add_bitvavo_credentials_fields(self, fields_box: toga.Box) -> None:
-        def on_bitvavo_apikey_change(widget):
-            if self.bitvavo_configuration:
-                if self.bitvavo_configuration.credentials is None:
-                    self.bitvavo_configuration.credentials = {}
-                self.bitvavo_configuration.credentials["apikey"] = widget.value
-
-        def on_bitvavo_apisecret_change(widget):
-            if self.bitvavo_configuration:
-                if self.bitvavo_configuration.credentials is None:
-                    self.bitvavo_configuration.credentials = {}
-                self.bitvavo_configuration.credentials["apisecret"] = widget.value
-
-        credentials = self.bitvavo_configuration.credentials if self.bitvavo_configuration else {}
-        existing_apikey = credentials.get("apikey", "")
-        existing_apisecret = credentials.get("apisecret", "")
-
-        apikey_row = toga.Box(style=Pack(direction=ROW, margin_bottom=10, align_items=START))
-        apikey_label = toga.Label(
-            "API Key", style=Pack(width=self.LABEL_WIDTH, margin_right=self.LABEL_MARGIN_RIGHT, align_items=END)
-        )
-        apikey_input = toga.TextInput(value=existing_apikey, style=Pack(flex=1), on_change=on_bitvavo_apikey_change)
-        apikey_row.add(apikey_label)
-        apikey_row.add(apikey_input)
-        fields_box.add(apikey_row)
-
-        apisecret_row = toga.Box(style=Pack(direction=ROW, margin_bottom=10, align_items=START))
-        apisecret_label = toga.Label(
-            "API Secret", style=Pack(width=self.LABEL_WIDTH, margin_right=self.LABEL_MARGIN_RIGHT, align_items=END)
-        )
-        apisecret_input = toga.PasswordInput(
-            value=existing_apisecret, style=Pack(flex=1), on_change=on_bitvavo_apisecret_change
-        )
-        apisecret_row.add(apisecret_label)
-        apisecret_row.add(apisecret_input)
-        fields_box.add(apisecret_row)
 
     def _create_bitvavo(self) -> None:
         self.main_section.clear()

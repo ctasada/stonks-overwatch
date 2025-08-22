@@ -151,7 +151,10 @@ class DialogManager:
             dialog.on_close = on_close
             dialog.show()
         elif show_no_updates:
-            dialog = InfoDialog("There are currently no updates available.", "")
+            dialog = InfoDialog(
+                "You're up-to-date!",
+                f"Stonks Overwatch {self.app.version} is currently at the newest version available.",
+            )
             DialogManager._check_for_updates_dialog_instance = dialog
 
             await self.app.main_window.dialog(dialog)

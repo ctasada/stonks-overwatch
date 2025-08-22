@@ -1,5 +1,6 @@
 import asyncio
 import os
+import platform
 from threading import Thread
 
 import django
@@ -7,6 +8,7 @@ import toga
 from django.core.handlers.wsgi import WSGIHandler
 from django.core.management import call_command
 from django.core.servers.basehttp import WSGIRequestHandler
+from toga.command import Separator
 
 from stonks_overwatch.app.dialogs.dialogs import DialogManager
 from stonks_overwatch.app.ui.menu import MenuManager
@@ -97,6 +99,8 @@ class StonksOverwatchApp(toga.App):
         self.menu_manager.setup_debug_menu()
         self.menu_manager.setup_help_menu()
         for command in self.commands:
+            if isinstance(command, Separator):
+                continue
             if command.group.text == "File" and command.text == "Close All":
                 self.commands.remove(command)
 
@@ -106,6 +110,13 @@ class StonksOverwatchApp(toga.App):
         self.logger.debug("Using server at %s:%s", self.host, self.port)
         self.web_view.url = f"http://{self.host}:{self.port}"
         self.main_window.show()
+
+        # Force layout refresh workaround for Windows
+        if platform.system() == "Windows":
+            # If refresh is not available, resize the window slightly
+            w, h = self.main_window.size
+            self.main_window.size = (w + 1, h)
+            self.main_window.size = (w, h)
 
         # Check license status
         await self.check_license()
