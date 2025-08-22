@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Windows:
   * Fixed crash while opening the application
   * Properly show the application icon
+  * Properly show the main menu
   * Installer: Fixed issue with the installation path
 
 ### Security

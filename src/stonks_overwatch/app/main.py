@@ -110,6 +110,13 @@ class StonksOverwatchApp(toga.App):
         self.web_view.url = f"http://{self.host}:{self.port}"
         self.main_window.show()
 
+        # Force layout refresh workaround for Windows
+        if platform.system() == "Windows":
+            # If refresh is not available, resize the window slightly
+            w, h = self.main_window.size
+            self.main_window.size = (w + 1, h)
+            self.main_window.size = (w, h)
+
         # Check license status
         await self.check_license()
 
