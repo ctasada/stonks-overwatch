@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* Updates are automatically checked
+
 ### Changed
 
 * Improved License dialog
@@ -20,9 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-* Updates are automatically checked
 * Windows:
   * Fixed crash while opening the application
+  * Properly show the application icon
   * Installer: Fixed issue with the installation path
 
 ### Security

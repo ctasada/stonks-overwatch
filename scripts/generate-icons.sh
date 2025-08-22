@@ -64,7 +64,7 @@ generate_linux_icons() {
 
 generate_windows_icons() {
   echo "Generate Windows icons..."
-  magick "$ICON_PATH" -define png:format=png32 -define icon:auto-resize=256,64,48,32,16 "$ICON_DIR/stonks_overflow.ico" >/dev/null 2>&1
+  magick "$ICON_PATH" -define png:format=png32 -define icon:auto-resize=256,64,48,32,16 "$ICON_DIR/${ICON_NAME}.ico" >/dev/null 2>&1
 }
 
 generate_rounded_icon
