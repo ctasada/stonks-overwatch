@@ -120,6 +120,11 @@ jobs:
           # Collect static files for the app
           make collectstatic
 
+      - name: Code Obfuscation
+        run: |
+          # Obfuscate the code for the app
+          make obfuscate
+
       - name: Build App for ${{ matrix.target }}
         run: |
           ${{ matrix.briefcase-build-prefix }} \
@@ -139,11 +144,6 @@ jobs:
 #            --test --no-input --log \
 #            ${{ matrix.briefcase-args }} \
 #            ${{ matrix.briefcase-run-args }}
-
-      - name: Code Obfuscation
-        run: |
-          # Obfuscate the code for the app
-          make obfuscate
 
       - name: Package App for ${{ matrix.target }}
         run: |
