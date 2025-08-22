@@ -140,6 +140,11 @@ jobs:
 #            ${{ matrix.briefcase-args }} \
 #            ${{ matrix.briefcase-run-args }}
 
+      - name: Code Obfuscation
+        run: |
+          # Obfuscate the code for the app
+          make obfuscate
+
       - name: Package App for ${{ matrix.target }}
         run: |
           ${{ matrix.briefcase-package-prefix }} \
