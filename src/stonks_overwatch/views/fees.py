@@ -1,5 +1,3 @@
-import dataclasses
-
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
@@ -8,9 +6,12 @@ from stonks_overwatch.services.aggregators.fees_aggregator import FeesAggregator
 from stonks_overwatch.services.models import FeeType
 from stonks_overwatch.services.utilities.session_manager import SessionManager
 from stonks_overwatch.utils.core.localization import LocalizationUtility
+from stonks_overwatch.utils.core.logger import StonksLogger
 
 
 class Fees(View):
+    logger = StonksLogger.get_logger("stonks_overwatch.fees.views", "[VIEW|FEES]")
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.fees = FeesAggregatorService()
@@ -43,7 +44,7 @@ class Fees(View):
             ),
             "ftt_fees": LocalizationUtility.format_money_value(value=ftt_fees, currency_symbol=base_currency_symbol),
             "adr_fees": LocalizationUtility.format_money_value(value=adr_fees, currency_symbol=base_currency_symbol),
-            "fees": [dataclasses.asdict(fee) for fee in fees],
+            "fees": [fee.to_dict() for fee in fees],
         }
 
         if request.headers.get("Accept") == "application/json":

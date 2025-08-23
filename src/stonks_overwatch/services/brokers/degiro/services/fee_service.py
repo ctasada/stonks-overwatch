@@ -88,9 +88,6 @@ class FeesService(FeeServiceInterface, BaseService):
         products_ids = list(set(products_ids))
         products_info = ProductInfoRepository.get_products_info_raw(products_ids)
 
-        # Get user's base currency
-        base_currency_symbol = LocalizationUtility.get_currency_symbol(self.base_currency)
-
         my_fees = []
         for transaction in transactions_history:
             info = products_info[transaction["productId"]]
@@ -114,7 +111,7 @@ class FeesService(FeeServiceInterface, BaseService):
                     type=FeeType.TRANSACTION,
                     description=description,
                     fee_value=fees,
-                    currency=base_currency_symbol,
+                    currency=self.base_currency,
                 )
             )
 

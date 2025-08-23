@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+* Fixed some default values in the Broker configurations
+* Fixed bug showing the Fee amount
+
 ### Security
 
 ## [0.1.2] - 2025-08-22
