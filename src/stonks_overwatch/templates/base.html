@@ -1,7 +1,7 @@
 {% load static %}
 {% load custom_tags %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="utf-8">
@@ -28,95 +28,101 @@
 <body>
     <div class="container-fluid">
         <div class="row flex-nowrap">
-            <div class="col-1 px-0 sticky-top" id="sidebar">
-                <!-- Sidebar  -->
-                <div class="d-flex flex-sm-column flex-row flex-nowrap align-items-center sticky-top min-vh-100">
-                    <div class="d-block pt-2 pb-2 text-decoration-none text-white text-center border-bottom">
-                        <p class="fw-semibold d-inline text-white fs-5">Stonks Overwatch</p>
+            <!-- Sidebar Navigation -->
+            <div class="col-auto px-0 sticky-top" id="sidebar">
+                <nav class="navbar navbar-expand-sm navbar-dark bg-primary flex-column sticky-top min-vh-100 py-0" aria-label="Sidebar navigation">
+                    <!-- Brand/Title -->
+                    <div class="navbar-brand d-flex flex-column align-items-center text-center py-3 border-bottom border-light border-opacity-25 w-100">
+                        <i class="bi bi-graph-up-arrow fs-3 mb-2"></i>
+                        <span class="fw-semibold fs-6">Stonks Overwatch</span>
                     </div>
-                    <div class="dropdown"  id="sidebar-portfolio-selector">
-                        <button class="btn dropdown-toggle border-0 text-white text-decoration-none" id="selectPortfolio" data-bs-toggle="dropdown" aria-expanded="false">
-                            <!-- The JScript block injects the selected portfolio via a GET Request -->
-                        </button>
-                        <ul class="dropdown-menu text-small shadow" id="sidebar-portfolio-menu">
-                            <!-- The JScript block injects the list of portfolios via a GET Request -->
-                        </ul>
+
+                    <!-- Portfolio Selector -->
+                    <div class="px-3 py-3 border-bottom border-light border-opacity-25 w-100">
+                        <div class="dropdown" id="sidebar-portfolio-selector">
+                            <button class="btn btn-outline-light dropdown-toggle w-100 text-start d-flex align-items-center" id="selectPortfolio" data-bs-toggle="dropdown" aria-expanded="false">
+                                <!-- The JScript block injects the selected portfolio via a GET Request -->
+                            </button>
+                            <ul class="dropdown-menu w-100 shadow" id="sidebar-portfolio-menu">
+                                <!-- The JScript block injects the list of portfolios via a GET Request -->
+                            </ul>
+                        </div>
                     </div>
-                    <ul class="nav flex-column mb-auto text-center w-100">
+
+                    <!-- Navigation Links -->
+                    <div class="navbar-nav flex-column w-100 px-2 py-2">
                         {% url 'dashboard' as url %}
-                        <li class="nav-item">
-                            <a href="{{ url }}" class="nav-link active py-3 px-2 border-top border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-title="Dashboard">
-                                <i class="bi bi-graph-up"></i>
-                            </a>
-                        </li>
+                        <a href="{{ url }}" class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white" data-page="dashboard">
+                            <i class="bi bi-graph-up me-3 fs-5"></i>
+                            <span>Dashboard</span>
+                        </a>
 
                         {% url 'portfolio' as url %}
-                        <li class="nav-item">
-                            <a href="{{ url }}" class="nav-link active py-3 px-2 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-title="Portfolio">
-                                <i class="bi bi-briefcase-fill"></i>
-                            </a>
-                        </li>
+                        <a href="{{ url }}" class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white" data-page="portfolio">
+                            <i class="bi bi-briefcase-fill me-3 fs-5"></i>
+                            <span>Portfolio</span>
+                        </a>
 
                         {% url 'diversification' as url %}
-                        <li class="nav-item">
-                            <a href="{{ url }}" class="nav-link active py-3 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-original-title="Diversification">
-                                <i class="bi bi-pie-chart-fill"></i>
-                            </a>
-                        </li>
+                        <a href="{{ url }}" class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white" data-page="diversification">
+                            <i class="bi bi-pie-chart-fill me-3 fs-5"></i>
+                            <span>Diversification</span>
+                        </a>
 
                         {% url 'dividends' as url %}
-                        <li class="nav-item">
-                            <a href="{{ url }}" class="nav-link active py-3 px-2 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-title="Dividends">
-                                <i class="bi bi-cash-coin"></i>
-                            </a>
-                        </li>
+                        <a href="{{ url }}" class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white" data-page="dividends">
+                            <i class="bi bi-cash-coin me-3 fs-5"></i>
+                            <span>Dividends</span>
+                        </a>
 
                         {% url 'fees' as url %}
-                        <li class="nav-item">
-                            <a href="{{ url }}" class="nav-link active py-3 px-2 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-title="Fees">
-                                <i class="bi bi-receipt"></i>
-                            </a>
-                        </li>
+                        <a href="{{ url }}" class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white" data-page="fees">
+                            <i class="bi bi-receipt me-3 fs-5"></i>
+                            <span>Fees</span>
+                        </a>
 
                         {% url 'deposits' as url %}
-                        <li class="nav-item">
-                            <a href="{{ url }}" class="nav-link active py-3 px-2 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-original-title="Deposits">
-                                <i class="bi bi-piggy-bank-fill"></i>
-                            </a>
-                        </li>
+                        <a href="{{ url }}" class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white" data-page="deposits">
+                            <i class="bi bi-piggy-bank-fill me-3 fs-5"></i>
+                            <span>Deposits</span>
+                        </a>
 
                         {% url 'transactions' as url %}
-                        <li class="nav-item">
-                            <a href="{{ url }}" class="nav-link active py-3 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-original-title="Transactions">
-                                <i class="bi bi-arrow-left-right"></i>
-                            </a>
-                        </li>
+                        <a href="{{ url }}" class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white" data-page="transactions">
+                            <i class="bi bi-arrow-left-right me-3 fs-5"></i>
+                            <span>Transactions</span>
+                        </a>
+
                         {% url 'account_overview' as url %}
-                        <li class="nav-item">
-                            <a href="{{ url }}" class="nav-link active py-3 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-original-title="Account Statement">
-                                <i class="bi bi-bank"></i>
-                            </a>
-                        </li>
-                    </ul>
-                    <div class="pb-2">
-                        {% is_connected_to_degiro as is_degiro_connected %}
-                        {% get_connected_tooltip as get_connected_tooltip %}
-                        <a class="d-flex align-items-center text-white text-decoration-none w-100 text-center fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-html="true" data-bs-original-title="{{ get_connected_tooltip }}">
-                            {%  if is_degiro_connected %}
-                                <i class="bi-cloud-check-fill"></i>
-                            {% else %}
-                                <i class="bi-cloud-slash-fill"></i>
-                            {% endif %}
+                        <a href="{{ url }}" class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white" data-page="account_overview">
+                            <i class="bi bi-bank me-3 fs-5"></i>
+                            <span>Account Statement</span>
                         </a>
                     </div>
-                </div>
+
+                    <!-- Connection Status -->
+                    <div class="mt-auto px-3 py-3 border-top border-light border-opacity-25 w-100">
+                        {% is_connected_to_degiro as is_degiro_connected %}
+                        {% get_connected_tooltip as get_connected_tooltip %}
+                        <div class="d-flex align-items-center text-white" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-html="true" title="{{ get_connected_tooltip }}">
+                            {%  if is_degiro_connected %}
+                                <i class="bi-cloud-check-fill me-3 fs-5 text-success"></i>
+                                <span class="small">Connected</span>
+                            {% else %}
+                                <i class="bi-cloud-slash-fill me-3 fs-5 text-warning"></i>
+                                <span class="small">Disconnected</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </nav>
             </div>
-            <div class="col-11 py-3" id="content">
-                <!-- Page Content  -->
-                <!-- Top Navigation Bar  -->
-                <nav class="navbar navbar-expand-lg navbar-light bg-light">
+
+            <!-- Main Content -->
+            <div class="col py-3" id="content">
+                <!-- Top Navigation Bar -->
+                <nav class="navbar navbar-expand-lg navbar-light bg-light" aria-label="Top navigation">
                     <div class="container-fluid justify-content-start">
-                        <!-- Shows Total Portfolio  -->
+                        <!-- Shows Total Portfolio -->
                         {% show_total_portfolio %}
                     </div>
                 </nav>
@@ -151,7 +157,7 @@
             .then(response => response.json())
             .then(data => {
                 const selectedPortfolio = document.getElementById("selectPortfolio");
-                selectedPortfolio.innerHTML = `<img src="${data.selected_portfolio.logo}" alt="${data.selected_portfolio.id}" width="25" height="25" class="rounded-circle m-2">${data.selected_portfolio.name}`;
+                selectedPortfolio.innerHTML = `<img src="${data.selected_portfolio.logo}" alt="${data.selected_portfolio.id}" width="25" height="25" class="rounded-circle me-2">${data.selected_portfolio.name}`;
 
                 const portfolioMenu = document.getElementById("sidebar-portfolio-menu");
                 portfolioMenu.innerHTML = ""; // Clear existing menu items
@@ -164,7 +170,7 @@
                     // Show the portfolio selector dropdown only when there are multiple portfolios
                     data.available_portfolios.forEach(portfolio => {
                         const menuItem = document.createElement("li");
-                        menuItem.innerHTML = `<li><a class="dropdown-item portfolio-link-filter" href="#" data-value="${portfolio.id}"><img src="${portfolio.logo}" alt="${portfolio.id}" width="30" height="30" class="rounded-circle m-1">${portfolio.name}</a></li>`;
+                        menuItem.innerHTML = `<a class="dropdown-item portfolio-link-filter" href="#" data-value="${portfolio.id}"><img src="${portfolio.logo}" alt="${portfolio.id}" width="25" height="25" class="rounded-circle me-2">${portfolio.name}</a>`;
 
                         // Add click event listener to menuItem
                         menuItem.querySelector("a").addEventListener("click", function(event) {
@@ -190,6 +196,22 @@
                     });
                 }
             });
+
+        // Set active navigation state
+        function setActiveNavigation() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.sidebar-nav-link');
+
+            navLinks.forEach(link => {
+                link.classList.remove('active', 'bg-light', 'bg-opacity-25');
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active', 'bg-light', 'bg-opacity-25');
+                }
+            });
+        }
+
+        // Set active navigation on page load
+        setActiveNavigation();
     </script>
 </body>
 
