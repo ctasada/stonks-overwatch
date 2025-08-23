@@ -7,6 +7,40 @@
     --primary-dark: #6D7FCC;
     --primary-light: #A6B9FF;
     --primary-lighter: #D0E0FF;
+
+    /* Sidebar dimensions */
+    --sidebar-width-desktop: 185px;
+    --sidebar-width-tablet: 180px;
+    --sidebar-width-mobile: 165px;
+    --sidebar-collapsed-desktop: 80px;
+    --sidebar-collapsed-tablet: 75px;
+    --sidebar-collapsed-mobile: 70px;
+
+    /* Common transitions */
+    --transition-standard: all 0.3s ease;
+
+    /* Common border radius */
+    --border-radius-standard: 0.5rem;
+    --border-radius-large: 8px;
+
+    /* Sidebar spacing */
+    --sidebar-margin: 0.25rem;
+
+    /* Sidebar colors */
+    --sidebar-text-color: rgba(255, 255, 255, 0.8);
+    --sidebar-hover-bg: rgba(255, 255, 255, 0.1);
+    --sidebar-active-bg: rgba(255, 255, 255, 0.2);
+    --sidebar-border-color: rgba(255, 255, 255, 0.3);
+
+    /* Toggle button positioning */
+    --toggle-position-desktop: -21px;
+    --toggle-position-tablet: -17px;
+    --toggle-position-mobile: -16px;
+
+    /* Common box shadows */
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.15);
+    --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.2);
+    --shadow-dark: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 /* Base Styles */
@@ -30,7 +64,7 @@ a:hover,
 a:focus {
     color: inherit;
     text-decoration: none;
-    transition: all 0.3s;
+    transition: var(--transition-standard);
 }
 
 .navbar {
@@ -67,8 +101,128 @@ span {
 /* Sidebar Container */
 #sidebar {
     background: var(--primary-color);
-    min-width: 185px;
-    max-width: 185px;
+    min-width: var(--sidebar-width-desktop);
+    max-width: var(--sidebar-width-desktop);
+    transition: var(--transition-standard);
+}
+
+/* Immediate collapsed state from localStorage (prevents flash) */
+:root:has([--sidebar-immediate-state="sidebar-collapsed"]) #sidebar,
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar {
+    min-width: var(--sidebar-collapsed-desktop);
+    max-width: var(--sidebar-collapsed-desktop);
+}
+
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .sidebar-text {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    margin: 0 !important;
+}
+
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .sidebar-logo {
+    margin: 0 auto !important;
+    max-width: 40px;
+}
+
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .sidebar-nav-link {
+    justify-content: center;
+    margin: 0 var(--sidebar-margin);
+    padding: 0.4rem 1rem !important;
+}
+
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .navbar-brand {
+    padding: 1rem 0.5rem !important;
+    justify-content: center;
+}
+
+/* Note: Toggle button icon is handled by JavaScript since we use different icon classes */
+
+/* Immediate collapsed state - responsive breakpoints */
+@media (max-width: 768px) {
+    html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar {
+        min-width: var(--sidebar-collapsed-tablet);
+        max-width: var(--sidebar-collapsed-tablet);
+    }
+
+    html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .sidebar-logo {
+        max-width: 32px;
+    }
+
+    html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .sidebar-nav-link {
+        padding: 0.35rem 0.85rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar {
+        min-width: var(--sidebar-collapsed-mobile);
+        max-width: var(--sidebar-collapsed-mobile);
+    }
+
+    html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .sidebar-logo {
+        max-width: 28px;
+    }
+
+    html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .sidebar-nav-link {
+        padding: 0.3rem 0.75rem !important;
+    }
+}
+
+/* Collapsed Sidebar */
+#sidebar.sidebar-collapsed {
+    min-width: var(--sidebar-collapsed-desktop);
+    max-width: var(--sidebar-collapsed-desktop);
+}
+
+/* Hide text elements when collapsed */
+#sidebar.sidebar-collapsed .sidebar-text {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    margin: 0 !important;
+    transition: var(--transition-standard);
+}
+
+/* Keep logo visible when collapsed, but center it */
+#sidebar.sidebar-collapsed .sidebar-logo {
+    margin: 0 auto !important;
+    max-width: 40px;
+}
+
+/* Style portfolio selector when collapsed - show only logo centered */
+#sidebar.sidebar-collapsed #sidebar-portfolio-selector .sidebar-nav-link {
+    justify-content: center;
+    margin: 0 var(--sidebar-margin);
+    padding: 0.4rem 1rem !important;
+    border-radius: var(--border-radius-standard);
+}
+
+#sidebar.sidebar-collapsed #sidebar-portfolio-selector .dropdown-toggle::after {
+    display: none;
+}
+
+/* Center icons when collapsed and adjust padding for square highlights */
+#sidebar.sidebar-collapsed .sidebar-nav-link {
+    justify-content: center;
+    margin: 0 var(--sidebar-margin);
+    padding: 0.4rem 1rem !important;
+    border-radius: var(--border-radius-standard);
+}
+
+#sidebar.sidebar-collapsed .sidebar-icon {
+    margin: 0 !important;
+}
+
+/* Adjust brand section when collapsed */
+#sidebar.sidebar-collapsed .navbar-brand {
+    padding: 1rem 0.5rem !important;
+    justify-content: center;
+}
+
+/* Keep toggle button position consistent when collapsed */
+#sidebar.sidebar-collapsed .sidebar-toggle {
+    right: var(--toggle-position-desktop);
 }
 
 #sidebar .navbar {
@@ -85,21 +239,84 @@ span {
 
 /* Sidebar Navigation Links */
 .sidebar-nav-link {
-    border-radius: 0.5rem;
-    transition: all 0.3s ease;
-    color: rgba(255, 255, 255, 0.8) !important;
-    margin: 0 0.25rem;
+    border-radius: var(--border-radius-standard);
+    transition: var(--transition-standard);
+    color: var(--sidebar-text-color) !important;
+    margin: 0 var(--sidebar-margin);
+    position: relative;
+}
+
+/* Smooth transition for text elements */
+.sidebar-text {
+    transition: var(--transition-standard);
+    white-space: nowrap;
+}
+
+/* Sidebar logo styling */
+.sidebar-logo {
+    transition: var(--transition-standard);
+    border-radius: var(--border-radius-large);
+    max-width: 48px;
+    height: auto;
+    flex-shrink: 0;
+}
+
+/* Two-line navigation text */
+.sidebar-text:has(.d-block) {
+    white-space: normal;
+}
+
+/* Two-line brand text */
+.navbar-brand .sidebar-text {
+    white-space: normal;
+}
+
+.sidebar-text .d-block {
+    line-height: 1.1;
+}
+
+/* Align icon to top for multi-line text */
+.sidebar-nav-link .align-self-start {
+    margin-top: 2px;
+}
+
+/* Sidebar toggle button */
+.sidebar-toggle {
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-standard);
+    background-color: white !important;
+    border: none !important;
+    box-shadow: var(--shadow-light);
+    top: 15px;
+    right: var(--toggle-position-desktop);
+    z-index: 1000;
+}
+
+.sidebar-toggle:hover {
+    background-color: #f8f9fa !important;
+    box-shadow: var(--shadow-medium);
+    transform: scale(1.05);
 }
 
 .sidebar-nav-link:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important;
+    background-color: var(--sidebar-hover-bg) !important;
     color: #fff !important;
     transform: translateX(5px);
 }
 
 .sidebar-nav-link.active {
-    background-color: rgba(255, 255, 255, 0.2) !important;
+    background-color: var(--sidebar-active-bg) !important;
     color: #fff !important;
+}
+
+/* Disable transform when collapsed */
+#sidebar.sidebar-collapsed .sidebar-nav-link:hover {
+    transform: none;
 }
 
 .sidebar-nav-link i {
@@ -112,18 +329,36 @@ span {
     --bs-tooltip-bg: var(--primary-dark);
 }
 
-/* Remove old unused styles - they've been replaced by Bootstrap offcanvas styles */
-
 /* Portfolio Selector Styling */
+#sidebar-portfolio-selector .sidebar-nav-link {
+    border: none !important;
+    background: none !important;
+    box-shadow: none !important;
+    border-radius: var(--border-radius-standard);
+    color: var(--sidebar-text-color) !important;
+    margin: 0 var(--sidebar-margin);
+}
+
+#sidebar-portfolio-selector .sidebar-nav-link:hover {
+    background-color: var(--sidebar-hover-bg) !important;
+    color: #fff !important;
+}
+
+#sidebar-portfolio-selector .sidebar-nav-link:focus {
+    background-color: var(--sidebar-hover-bg) !important;
+    color: #fff !important;
+    box-shadow: none !important;
+}
+
 #sidebar-portfolio-selector button img {
     background: white;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid var(--sidebar-border-color);
 }
 
 #sidebar-portfolio-menu {
     background: var(--primary-dark);
     border: none;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-dark);
 }
 
 #sidebar-portfolio-menu .dropdown-item {
@@ -139,7 +374,7 @@ span {
 
 #sidebar-portfolio-menu .dropdown-item img {
     background: white;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid var(--sidebar-border-color);
 }
 
 /* ---------------------------------------------------
@@ -149,7 +384,7 @@ span {
 #content {
     padding: 5px 10px;
     min-height: 100vh;
-    transition: all 0.3s;
+    transition: var(--transition-standard);
 }
 
 .scrollable-area {
@@ -164,23 +399,79 @@ span {
 /* Mobile responsiveness */
 @media (max-width: 768px) {
     #sidebar {
-        min-width: 180px;
-        max-width: 180px;
+        min-width: var(--sidebar-width-tablet);
+        max-width: var(--sidebar-width-tablet);
     }
 
-    #sidebar .navbar-brand span {
+    #sidebar.sidebar-collapsed {
+        min-width: var(--sidebar-collapsed-tablet);
+        max-width: var(--sidebar-collapsed-tablet);
+    }
+
+    #sidebar.sidebar-collapsed .sidebar-toggle {
+        right: var(--toggle-position-tablet);
+    }
+
+    #sidebar.sidebar-collapsed .sidebar-logo {
+        max-width: 32px;
+    }
+
+    #sidebar.sidebar-collapsed .sidebar-nav-link {
+        padding: 0.35rem 0.85rem !important;
+    }
+
+    #sidebar.sidebar-collapsed #sidebar-portfolio-selector .sidebar-nav-link {
+        padding: 0.35rem 0.85rem !important;
+        margin: 0 var(--sidebar-margin);
+        border-radius: var(--border-radius-standard);
+    }
+
+        #sidebar .navbar-brand span {
         font-size: 0.9rem;
     }
 
     .sidebar-nav-link span {
         font-size: 0.9rem;
     }
+
+    .sidebar-logo {
+        max-width: 40px;
+    }
+
+    .sidebar-toggle {
+        width: 28px;
+        height: 28px;
+        right: var(--toggle-position-tablet);
+    }
 }
 
 @media (max-width: 576px) {
     #sidebar {
-        min-width: 165px;
-        max-width: 165px;
+        min-width: var(--sidebar-width-mobile);
+        max-width: var(--sidebar-width-mobile);
+    }
+
+    #sidebar.sidebar-collapsed {
+        min-width: var(--sidebar-collapsed-mobile);
+        max-width: var(--sidebar-collapsed-mobile);
+    }
+
+    #sidebar.sidebar-collapsed .sidebar-toggle {
+        right: var(--toggle-position-mobile);
+    }
+
+    #sidebar.sidebar-collapsed .sidebar-logo {
+        max-width: 28px;
+    }
+
+    #sidebar.sidebar-collapsed .sidebar-nav-link {
+        padding: 0.3rem 0.75rem !important;
+    }
+
+    #sidebar.sidebar-collapsed #sidebar-portfolio-selector .sidebar-nav-link {
+        padding: 0.3rem 0.75rem !important;
+        margin: 0 var(--sidebar-margin);
+        border-radius: var(--border-radius-standard);
     }
 
     #sidebar .navbar-brand {
@@ -201,6 +492,16 @@ span {
 
     .sidebar-nav-link i {
         font-size: 1rem;
+    }
+
+    .sidebar-logo {
+        max-width: 36px;
+    }
+
+    .sidebar-toggle {
+        width: 26px;
+        height: 26px;
+        right: var(--toggle-position-mobile);
     }
 }
 
@@ -230,8 +531,6 @@ span {
     background-color: var(--primary-light);
     z-index: 0;
 }
-
-
 
 .diversification-chart-container {
     position: relative;
