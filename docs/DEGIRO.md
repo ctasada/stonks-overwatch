@@ -81,3 +81,13 @@ If you want to test a new version of the DEGIRO connector, you can do it by foll
 ```bash
    poetry add path/to/your/degiro-connector/dist/degiro_connector-3.0.29.dev1-py3-none-any.whl
 ```
+
+### Use DEGIRO fork
+
+The official DEGIRO connector project has slowed down its development. If you want to use a fork of the DEGIRO
+connector, you can do it by following these steps:
+
+```toml
+[tool.poetry]
+"degiro-connector @ git+https://github.com/ctasada/degiro-connector.git@main",
+```

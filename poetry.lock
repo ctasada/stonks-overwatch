@@ -795,21 +795,25 @@ name = "degiro-connector"
 version = "3.0.29"
 description = "This is yet another library to access Degiro's API."
 optional = false
-python-versions = "<4.0,>=3.10"
+python-versions = "^3.10"
 groups = ["main"]
-files = [
-    {file = "degiro_connector-3.0.29-py3-none-any.whl", hash = "sha256:5276f29d8aa129ff08aca01c048d569968f931d715509c13fa6b1aa4c5a0be69"},
-    {file = "degiro_connector-3.0.29.tar.gz", hash = "sha256:76a4b91b9cbbfbba9d7ccda28cabffdc7a100b5d25dab6eef4bfcdd1fcf06993"},
-]
+files = []
+develop = false
 
 [package.dependencies]
-isodate = ">=0.6.1,<0.7.0"
-orjson = ">=3.9.10,<4.0.0"
-polars = ">=0.20.2,<0.21.0"
-pydantic = ">=2.0.3,<3.0.0"
-pyotp = ">=2.9.0,<3.0.0"
-requests = ">=2.31.0,<3.0.0"
-wrapt = ">=1.14.1,<2.0.0"
+isodate = "^0.6.1"
+orjson = "^3.9.10"
+polars = "^0.20.2"
+pydantic = "^2.0.3"
+pyotp = "^2.9.0"
+requests = "^2.31.0"
+wrapt = "^1.14.1"
+
+[package.source]
+type = "git"
+url = "https://github.com/ctasada/degiro-connector.git"
+reference = "main"
+resolved_reference = "8892d7d84a8d4b8db2b8656ca0663a38d058f0e2"
 
 [[package]]
 name = "deptry"
@@ -3742,4 +3746,4 @@ repair = ["scipy (>=1.6.3)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "8fe2e439c754fd994e5971592e0761f1be45240be80cbacde4401d6a91c0a829"
+content-hash = "6aff7d7e974fae58b63d68cc6e7e632206975fda741e3cd37592362400d0368f"
