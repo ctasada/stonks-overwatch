@@ -62,7 +62,7 @@ Create the minimum required services (portfolio, transaction, deposit):
 # services/portfolio_service.py
 from typing import List
 from stonks_overwatch.core.interfaces.portfolio_service import PortfolioServiceInterface
-from stonks_overwatch.services.models import PortfolioEntry, TotalPortfolio
+from stonks_overwatch.services.models import PortfolioEntry, TotalPortfolio, DailyValue
 
 class PortfolioService(PortfolioServiceInterface):
     def get_portfolio(self) -> List[PortfolioEntry]:
@@ -73,11 +73,11 @@ class PortfolioService(PortfolioServiceInterface):
         # Implementation here
         pass
 
-    def calculate_historical_value(self, days: int) -> dict:
+    def calculate_historical_value(self) -> List[DailyValue]:
         # Implementation here
         pass
 
-    def calculate_product_growth(self, days: int) -> dict:
+    def calculate_product_growth(self) -> dict:
         # Implementation here
         pass
 ```
