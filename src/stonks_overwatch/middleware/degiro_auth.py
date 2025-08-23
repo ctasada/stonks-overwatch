@@ -53,11 +53,11 @@ class DeGiroAuthMiddleware:
             return True, connection_reason, preserve_session
 
         # Check basic session authentication
-        if not self.auth_service.is_user_authenticated(request):
+        if not self.auth_service.is_user_authenticated(request) and not self.auth_service.is_offline_mode():
             return True, AuthenticationErrorMessages.SESSION_NOT_AUTHENTICATED, False
 
         # Check maintenance mode access
-        if not self.auth_service.is_maintenance_mode_allowed():
+        if not self.auth_service.is_maintenance_mode_allowed() and not self.auth_service.is_offline_mode():
             return False, AuthenticationErrorMessages.MAINTENANCE_MODE_ACCESS_DENIED, False
 
         return False, "", False
@@ -72,6 +72,8 @@ class DeGiroAuthMiddleware:
         try:
             is_degiro_enabled = self.auth_service.is_degiro_enabled()
             is_degiro_offline = self.auth_service.is_offline_mode()
+
+            self.logger.debug(f"DeGiro Enabled: {is_degiro_enabled}, Offline Mode: {is_degiro_offline}")
 
             if not is_degiro_enabled or is_degiro_offline:
                 return False, "", False
