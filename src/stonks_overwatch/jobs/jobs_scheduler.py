@@ -6,6 +6,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 from stonks_overwatch.services.brokers.bitvavo.services.update_service import UpdateService as BitvavoUpdateService
 from stonks_overwatch.services.brokers.degiro.services.update_service import UpdateService as DegiroUpdateService
 from stonks_overwatch.services.brokers.ibkr.services.update_service import UpdateService as IbkrUpdateService
+from stonks_overwatch.settings import DEBUG_MODE
 from stonks_overwatch.utils.core.logger import StonksLogger
 
 
@@ -112,7 +113,7 @@ class JobsScheduler:
             degiro_update_service = DegiroUpdateService()
             degiro_update_service.update_all()
         except Exception as error:
-            JobsScheduler.logger.error(f"Update DEGIRO failed with {error}")
+            JobsScheduler.logger.error(f"Update DEGIRO failed with {error}", exc_info=DEBUG_MODE)
 
     @staticmethod
     def update_ibkr_portfolio():
@@ -121,7 +122,7 @@ class JobsScheduler:
             ibkr_update_service = IbkrUpdateService()
             ibkr_update_service.update_all()
         except Exception as error:
-            JobsScheduler.logger.error(f"Update IBKR failed with {error}")
+            JobsScheduler.logger.error(f"Update IBKR failed with {error}", exc_info=DEBUG_MODE)
 
     @staticmethod
     def update_bitvavo_portfolio():
@@ -130,4 +131,4 @@ class JobsScheduler:
             bitvavo_update_service = BitvavoUpdateService()
             bitvavo_update_service.update_all()
         except Exception as error:
-            JobsScheduler.logger.error(f"Update Bitvavo failed with {error}")
+            JobsScheduler.logger.error(f"Update Bitvavo failed with {error}", exc_info=DEBUG_MODE)

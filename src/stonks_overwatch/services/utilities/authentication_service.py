@@ -24,6 +24,7 @@ from stonks_overwatch.core.interfaces.session_manager import SessionManagerInter
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import CredentialsManager, DeGiroService
 from stonks_overwatch.services.utilities.authentication_credential_service import AuthenticationCredentialService
 from stonks_overwatch.services.utilities.authentication_session_manager import AuthenticationSessionManager
+from stonks_overwatch.settings import DEBUG_MODE
 from stonks_overwatch.utils.core.constants import (
     LogMessages,
     TechnicalErrorMessages,
@@ -270,7 +271,7 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
                     )
 
         except Exception as e:
-            self.logger.error(f"Error checking DeGiro connection: {str(e)}")
+            self.logger.error(f"Error checking DeGiro connection: {str(e)}", exc_info=DEBUG_MODE)
             return self._create_error_response(
                 AuthenticationResult.CONNECTION_ERROR, f"Connection check failed: {str(e)}"
             )
