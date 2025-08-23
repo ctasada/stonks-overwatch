@@ -9,7 +9,7 @@ from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.services.brokers.ibkr.client.constants import AssetClass
 from stonks_overwatch.services.brokers.ibkr.client.ibkr_service import IbkrService
 from stonks_overwatch.services.brokers.ibkr.repositories.positions_repository import PositionsRepository
-from stonks_overwatch.services.models import Country, PortfolioEntry, TotalPortfolio
+from stonks_overwatch.services.models import Country, DailyValue, PortfolioEntry, TotalPortfolio
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.domain.constants import ProductType, Sector
 
@@ -197,10 +197,10 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
 
         raise ValueError(f"Unknown product type: {position['type']} / {position['assetClass']}")
 
-    def calculate_historical_value(self, days: int) -> dict:
+    def calculate_historical_value(self) -> List[DailyValue]:
         # TODO: Implement historical value calculation
         pass
 
-    def calculate_product_growth(self, days: int) -> dict:
+    def calculate_product_growth(self) -> dict:
         # TODO: Implement product growth calculation
         pass

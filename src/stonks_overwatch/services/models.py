@@ -189,6 +189,12 @@ class Fee:
         """Format the fee value for display."""
         return LocalizationUtility.format_money_value(value=self.fee_value, currency=self.currency)
 
+    def to_dict(self) -> Dict[str, Any]:
+        # Convert to dict and handle enum specifically
+        result = asdict(self)
+        result["fee_formatted"] = self.fee_formatted()
+        return result
+
 
 @dataclass
 class PortfolioEntry:
