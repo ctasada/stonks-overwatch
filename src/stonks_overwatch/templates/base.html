@@ -1,7 +1,7 @@
 {% load static %}
 {% load custom_tags %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="utf-8">
@@ -23,100 +23,127 @@
     <link href="{% static 'bootstrap-table/dist/themes/bootstrap-table/bootstrap-table.min.css' %}" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/static/style.css">
+
+    <!-- Inline script to prevent sidebar flash - runs before DOM is rendered -->
+    <script>
+        (function() {
+            // Check localStorage immediately when head loads
+            if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                // Add CSS to immediately apply collapsed state before page renders
+                document.documentElement.style.setProperty('--sidebar-immediate-state', 'sidebar-collapsed');
+            }
+        })();
+    </script>
 </head>
 
 <body>
     <div class="container-fluid">
         <div class="row flex-nowrap">
-            <div class="col-1 px-0 sticky-top" id="sidebar">
-                <!-- Sidebar  -->
-                <div class="d-flex flex-sm-column flex-row flex-nowrap align-items-center sticky-top min-vh-100">
-                    <div class="d-block pt-2 pb-2 text-decoration-none text-white text-center border-bottom">
-                        <p class="fw-semibold d-inline text-white fs-5">Stonks Overwatch</p>
-                    </div>
-                    <div class="dropdown"  id="sidebar-portfolio-selector">
-                        <button class="btn dropdown-toggle border-0 text-white text-decoration-none" id="selectPortfolio" data-bs-toggle="dropdown" aria-expanded="false">
-                            <!-- The JScript block injects the selected portfolio via a GET Request -->
+            <!-- Sidebar Navigation -->
+            <div class="col-auto px-0 sticky-top" id="sidebar">
+                <nav class="navbar navbar-expand-sm navbar-dark bg-primary flex-column sticky-top min-vh-100 py-0" aria-label="Sidebar navigation">
+                    <!-- Brand/Title with Toggle -->
+                    <div class="navbar-brand d-flex align-items-center py-3 border-bottom border-light border-opacity-25 w-100 position-relative">
+                        <!-- Toggle Button -->
+                        <button class="btn btn-sm btn-light position-absolute sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
+                            <i class="bi bi-chevron-left text-primary"></i>
                         </button>
-                        <ul class="dropdown-menu text-small shadow" id="sidebar-portfolio-menu">
-                            <!-- The JScript block injects the list of portfolios via a GET Request -->
-                        </ul>
+                        <img src="{% static 'stonks_overwatch.png' %}" alt="Stonks Overwatch Logo" class="me-3 sidebar-icon sidebar-logo" width="48" height="48">
+                        <div class="sidebar-text fw-semibold">
+                            <div class="fs-6 lh-1">Stonks</div>
+                            <div class="fs-6 lh-1">Overwatch</div>
+                        </div>
                     </div>
-                    <ul class="nav flex-column mb-auto text-center w-100">
+
+                    <!-- Portfolio Selector -->
+                    <div class="px-1 py-1 border-bottom border-light border-opacity-25 w-100">
+                        <div class="dropdown" id="sidebar-portfolio-selector">
+                            <button class="sidebar-nav-link dropdown-toggle w-100 text-start d-flex align-items-center py-2" id="selectPortfolio" data-bs-toggle="dropdown" aria-expanded="false" data-bs-placement="right" title="Select Portfolio" data-tooltip-text="Select Portfolio">
+                                <!-- The JScript block injects the selected portfolio via a GET Request -->
+                            </button>
+                            <ul class="dropdown-menu w-100 shadow" id="sidebar-portfolio-menu">
+                                <!-- The JScript block injects the list of portfolios via a GET Request -->
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Links -->
+                    <div class="navbar-nav flex-column w-100 px-2 py-2">
                         {% url 'dashboard' as url %}
-                        <li class="nav-item">
-                            <a href="{{ url }}" class="nav-link active py-3 px-2 border-top border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-title="Dashboard">
-                                <i class="bi bi-graph-up"></i>
-                            </a>
-                        </li>
+                        <a href="{{ url }}" class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white" data-page="dashboard" data-bs-toggle="tooltip" data-bs-placement="right" title="Dashboard">
+                            <i class="bi bi-graph-up me-3 fs-5 sidebar-icon"></i>
+                            <span class="sidebar-text">Dashboard</span>
+                        </a>
 
                         {% url 'portfolio' as url %}
-                        <li class="nav-item">
-                            <a href="{{ url }}" class="nav-link active py-3 px-2 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-title="Portfolio">
-                                <i class="bi bi-briefcase-fill"></i>
-                            </a>
-                        </li>
+                        <a href="{{ url }}" class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white" data-page="portfolio" data-bs-toggle="tooltip" data-bs-placement="right" title="Portfolio">
+                            <i class="bi bi-briefcase-fill me-3 fs-5 sidebar-icon"></i>
+                            <span class="sidebar-text">Portfolio</span>
+                        </a>
 
                         {% url 'diversification' as url %}
-                        <li class="nav-item">
-                            <a href="{{ url }}" class="nav-link active py-3 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-original-title="Diversification">
-                                <i class="bi bi-pie-chart-fill"></i>
-                            </a>
-                        </li>
+                        <a href="{{ url }}" class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white" data-page="diversification" data-bs-toggle="tooltip" data-bs-placement="right" title="Diversification">
+                            <i class="bi bi-pie-chart-fill me-3 fs-5 sidebar-icon"></i>
+                            <span class="sidebar-text">Diversification</span>
+                        </a>
 
                         {% url 'dividends' as url %}
-                        <li class="nav-item">
-                            <a href="{{ url }}" class="nav-link active py-3 px-2 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-title="Dividends">
-                                <i class="bi bi-cash-coin"></i>
-                            </a>
-                        </li>
+                        <a href="{{ url }}" class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white" data-page="dividends" data-bs-toggle="tooltip" data-bs-placement="right" title="Dividends">
+                            <i class="bi bi-cash-coin me-3 fs-5 sidebar-icon"></i>
+                            <span class="sidebar-text">Dividends</span>
+                        </a>
 
                         {% url 'fees' as url %}
-                        <li class="nav-item">
-                            <a href="{{ url }}" class="nav-link active py-3 px-2 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-title="Fees">
-                                <i class="bi bi-receipt"></i>
-                            </a>
-                        </li>
+                        <a href="{{ url }}" class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white" data-page="fees" data-bs-toggle="tooltip" data-bs-placement="right" title="Fees">
+                            <i class="bi bi-receipt me-3 fs-5 sidebar-icon"></i>
+                            <span class="sidebar-text">Fees</span>
+                        </a>
 
                         {% url 'deposits' as url %}
-                        <li class="nav-item">
-                            <a href="{{ url }}" class="nav-link active py-3 px-2 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-original-title="Deposits">
-                                <i class="bi bi-piggy-bank-fill"></i>
-                            </a>
-                        </li>
+                        <a href="{{ url }}" class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white" data-page="deposits" data-bs-toggle="tooltip" data-bs-placement="right" title="Deposits">
+                            <i class="bi bi-piggy-bank-fill me-3 fs-5 sidebar-icon"></i>
+                            <span class="sidebar-text">Deposits</span>
+                        </a>
 
                         {% url 'transactions' as url %}
-                        <li class="nav-item">
-                            <a href="{{ url }}" class="nav-link active py-3 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-original-title="Transactions">
-                                <i class="bi bi-arrow-left-right"></i>
-                            </a>
-                        </li>
+                        <a href="{{ url }}" class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white" data-page="transactions" data-bs-toggle="tooltip" data-bs-placement="right" title="Transactions">
+                            <i class="bi bi-arrow-left-right me-3 fs-5 sidebar-icon"></i>
+                            <span class="sidebar-text">Transactions</span>
+                        </a>
+
                         {% url 'account_overview' as url %}
-                        <li class="nav-item">
-                            <a href="{{ url }}" class="nav-link active py-3 border-bottom fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-original-title="Account Statement">
-                                <i class="bi bi-bank"></i>
-                            </a>
-                        </li>
-                    </ul>
-                    <div class="pb-2">
-                        {% is_connected_to_degiro as is_degiro_connected %}
-                        {% get_connected_tooltip as get_connected_tooltip %}
-                        <a class="d-flex align-items-center text-white text-decoration-none w-100 text-center fs-4" title data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="sidebar-tooltip" data-bs-html="true" data-bs-original-title="{{ get_connected_tooltip }}">
-                            {%  if is_degiro_connected %}
-                                <i class="bi-cloud-check-fill"></i>
-                            {% else %}
-                                <i class="bi-cloud-slash-fill"></i>
-                            {% endif %}
+                        <a href="{{ url }}" class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white" data-page="account_overview" data-bs-toggle="tooltip" data-bs-placement="right" title="Account Statement">
+                            <i class="bi bi-bank me-3 fs-5 sidebar-icon align-self-start"></i>
+                            <span class="sidebar-text">
+                                <span class="d-block">Account</span>
+                                <span class="d-block">Statement</span>
+                            </span>
                         </a>
                     </div>
-                </div>
+
+                    <!-- Connection Status -->
+                    <div class="mt-auto px-3 py-3 border-top border-light border-opacity-25 w-100">
+                        {% is_connected_to_degiro as is_degiro_connected %}
+                        {% get_connected_tooltip as get_connected_tooltip %}
+                        <div class="d-flex align-items-center text-white" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-html="true" title="{{ get_connected_tooltip }}">
+                            {%  if is_degiro_connected %}
+                                <i class="bi-cloud-check-fill me-3 fs-5 text-success sidebar-icon"></i>
+                                <span class="small sidebar-text">Connected</span>
+                            {% else %}
+                                <i class="bi-cloud-slash-fill me-3 fs-5 text-warning sidebar-icon"></i>
+                                <span class="small sidebar-text">Disconnected</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </nav>
             </div>
-            <div class="col-11 py-3" id="content">
-                <!-- Page Content  -->
-                <!-- Top Navigation Bar  -->
-                <nav class="navbar navbar-expand-lg navbar-light bg-light">
+
+            <!-- Main Content -->
+            <div class="col py-3" id="content">
+                <!-- Top Navigation Bar -->
+                <nav class="navbar navbar-expand-lg navbar-light bg-light" aria-label="Top navigation">
                     <div class="container-fluid justify-content-start">
-                        <!-- Shows Total Portfolio  -->
+                        <!-- Shows Total Portfolio -->
                         {% show_total_portfolio %}
                     </div>
                 </nav>
@@ -138,7 +165,12 @@
     <script type="text/javascript">
         let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
+            const tooltip = new bootstrap.Tooltip(tooltipTriggerEl);
+            // Disable navigation tooltips initially (sidebar starts expanded)
+            if (tooltipTriggerEl.classList.contains('sidebar-nav-link')) {
+                tooltip.disable();
+            }
+            return tooltip;
         });
 
         // Fetch configuration data
@@ -151,7 +183,7 @@
             .then(response => response.json())
             .then(data => {
                 const selectedPortfolio = document.getElementById("selectPortfolio");
-                selectedPortfolio.innerHTML = `<img src="${data.selected_portfolio.logo}" alt="${data.selected_portfolio.id}" width="25" height="25" class="rounded-circle m-2">${data.selected_portfolio.name}`;
+                selectedPortfolio.innerHTML = `<img src="${data.selected_portfolio.logo}" alt="${data.selected_portfolio.id}" width="25" height="25" class="rounded-circle me-2 sidebar-icon flex-shrink-0"><span class="sidebar-text">${data.selected_portfolio.name}</span>`;
 
                 const portfolioMenu = document.getElementById("sidebar-portfolio-menu");
                 portfolioMenu.innerHTML = ""; // Clear existing menu items
@@ -164,7 +196,7 @@
                     // Show the portfolio selector dropdown only when there are multiple portfolios
                     data.available_portfolios.forEach(portfolio => {
                         const menuItem = document.createElement("li");
-                        menuItem.innerHTML = `<li><a class="dropdown-item portfolio-link-filter" href="#" data-value="${portfolio.id}"><img src="${portfolio.logo}" alt="${portfolio.id}" width="30" height="30" class="rounded-circle m-1">${portfolio.name}</a></li>`;
+                        menuItem.innerHTML = `<a class="dropdown-item portfolio-link-filter" href="#" data-value="${portfolio.id}"><img src="${portfolio.logo}" alt="${portfolio.id}" width="25" height="25" class="rounded-circle me-2">${portfolio.name}</a>`;
 
                         // Add click event listener to menuItem
                         menuItem.querySelector("a").addEventListener("click", function(event) {
@@ -189,7 +221,139 @@
                         portfolioMenu.appendChild(menuItem);
                     });
                 }
+
+                // Restore sidebar state after portfolio data is loaded
+                restoreSidebarState();
             });
+
+        // Set active navigation state
+        function setActiveNavigation() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.sidebar-nav-link');
+
+            navLinks.forEach(link => {
+                link.classList.remove('active', 'bg-light', 'bg-opacity-25');
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active', 'bg-light', 'bg-opacity-25');
+                }
+            });
+        }
+
+        // Set active navigation on page load
+        setActiveNavigation();
+
+        // Restore sidebar state immediately (DOM is already ready since script is at bottom)
+        // This ensures sidebar state is restored even if portfolio fetch fails
+        restoreSidebarState();
+
+        // Sidebar collapse/expand functionality
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const toggleButton = document.getElementById('sidebarToggle');
+            const toggleIcon = toggleButton.querySelector('i');
+            const portfolioButton = document.getElementById('selectPortfolio');
+
+            sidebar.classList.toggle('sidebar-collapsed');
+
+            // Save sidebar state to localStorage
+            const isCollapsed = sidebar.classList.contains('sidebar-collapsed');
+            localStorage.setItem('sidebarCollapsed', isCollapsed.toString());
+
+            // Change toggle button icon
+            if (isCollapsed) {
+                toggleIcon.className = 'bi bi-chevron-right text-primary';
+
+                // Enable tooltips for collapsed state
+                enableTooltipsForCollapsedSidebar();
+
+                // Handle portfolio selector tooltip
+                if (portfolioButton && portfolioButton.getAttribute('data-tooltip-text')) {
+                    portfolioButton.setAttribute('data-bs-toggle-tooltip', 'tooltip');
+                    portfolioButton.setAttribute('data-bs-placement', 'right');
+                    portfolioButton.setAttribute('title', portfolioButton.getAttribute('data-tooltip-text'));
+                    // Initialize tooltip for portfolio button
+                    const portfolioTooltip = new bootstrap.Tooltip(portfolioButton);
+                    portfolioButton._tooltip = portfolioTooltip; // Store reference for later cleanup
+                }
+            } else {
+                toggleIcon.className = 'bi bi-chevron-left text-primary';
+
+                // Disable tooltips for expanded state
+                disableTooltipsForExpandedSidebar();
+
+                // Remove portfolio selector tooltip
+                if (portfolioButton) {
+                    const tooltipInstance = portfolioButton._tooltip || bootstrap.Tooltip.getInstance(portfolioButton);
+                    if (tooltipInstance) {
+                        tooltipInstance.dispose();
+                        portfolioButton._tooltip = null;
+                    }
+                    portfolioButton.removeAttribute('data-bs-toggle-tooltip');
+                    portfolioButton.removeAttribute('title');
+                }
+            }
+        }
+
+        // Restore sidebar state from localStorage
+        function restoreSidebarState() {
+            const sidebarCollapsed = localStorage.getItem('sidebarCollapsed');
+            const sidebar = document.getElementById('sidebar');
+
+            // Clean up the immediate state CSS custom property since JavaScript is now handling it
+            if (document.documentElement.style.getPropertyValue('--sidebar-immediate-state')) {
+                document.documentElement.style.removeProperty('--sidebar-immediate-state');
+            }
+
+            // Apply collapsed state if needed
+            if (sidebarCollapsed === 'true') {
+                const toggleButton = document.getElementById('sidebarToggle');
+                const toggleIcon = toggleButton?.querySelector('i');
+                const portfolioButton = document.getElementById('selectPortfolio');
+
+                if (sidebar && !sidebar.classList.contains('sidebar-collapsed')) {
+                    sidebar.classList.add('sidebar-collapsed');
+                }
+                if (toggleIcon) toggleIcon.className = 'bi bi-chevron-right text-primary';
+
+                // Enable tooltips for collapsed state
+                enableTooltipsForCollapsedSidebar();
+
+                // Handle portfolio selector tooltip
+                if (portfolioButton && portfolioButton.getAttribute('data-tooltip-text')) {
+                    portfolioButton.setAttribute('data-bs-toggle-tooltip', 'tooltip');
+                    portfolioButton.setAttribute('data-bs-placement', 'right');
+                    portfolioButton.setAttribute('title', portfolioButton.getAttribute('data-tooltip-text'));
+                    // Initialize tooltip for portfolio button
+                    const portfolioTooltip = new bootstrap.Tooltip(portfolioButton);
+                    portfolioButton._tooltip = portfolioTooltip; // Store reference for later cleanup
+                }
+            }
+        }
+
+        // Enable tooltips when sidebar is collapsed
+        function enableTooltipsForCollapsedSidebar() {
+            const navLinks = document.querySelectorAll('.sidebar-nav-link[data-bs-toggle="tooltip"]');
+            navLinks.forEach(link => {
+                const tooltipInstance = bootstrap.Tooltip.getInstance(link);
+                if (tooltipInstance) {
+                    tooltipInstance.enable();
+                }
+            });
+        }
+
+        // Disable tooltips when sidebar is expanded
+        function disableTooltipsForExpandedSidebar() {
+            const navLinks = document.querySelectorAll('.sidebar-nav-link[data-bs-toggle="tooltip"]');
+            navLinks.forEach(link => {
+                const tooltipInstance = bootstrap.Tooltip.getInstance(link);
+                if (tooltipInstance) {
+                    tooltipInstance.disable();
+                }
+            });
+        }
+
+        // Add event listener to toggle button
+        document.getElementById('sidebarToggle').addEventListener('click', toggleSidebar);
     </script>
 </body>
 
