@@ -22,19 +22,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [ "Windows", "macOS", "Flatpak"]
+        target: [ "windows", "macos", "flatpak"]
         include:
-          - target: "Windows"
+          - target: "windows"
             output-format: "app"
             runs-on: "windows-latest"
 
-          - target: "macOS"
+          - target: "macos"
             output-format: "app"
             runs-on: "macos-latest"
             pre-command: "make _create-wheels"
             run-target: True
 
-          - target: "Flatpak"
+          - target: "flatpak"
             platform: "Linux"
             output-format: "Flatpak"
             runs-on: "ubuntu-latest"
@@ -134,16 +134,16 @@ jobs:
             --test --no-input --log \
             ${{ matrix.briefcase-args }} \
             ${{ matrix.briefcase-build-args }}
-#
-#      - name: Test App
-#        run: |
-#          ${{ matrix.briefcase-run-prefix }} \
-#          briefcase run \
-#            ${{ matrix.platform || matrix.target }} \
-#            ${{ matrix.output-format }} \
-#            --test --no-input --log \
-#            ${{ matrix.briefcase-args }} \
-#            ${{ matrix.briefcase-run-args }}
+      #
+      #      - name: Test App
+      #        run: |
+      #          ${{ matrix.briefcase-run-prefix }} \
+      #          briefcase run \
+      #            ${{ matrix.platform || matrix.target }} \
+      #            ${{ matrix.output-format }} \
+      #            --test --no-input --log \
+      #            ${{ matrix.briefcase-args }} \
+      #            ${{ matrix.briefcase-run-args }}
 
       - name: Package App for ${{ matrix.target }}
         run: |
