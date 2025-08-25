@@ -4,7 +4,7 @@ from typing import Optional
 
 from degiro_connector.quotecast.models.chart import Interval
 
-from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.config.bitvavo import BitvavoConfig
 from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.core.interfaces.update_service import AbstractUpdateService
 from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import BitvavoService
@@ -24,7 +24,7 @@ from stonks_overwatch.utils.core.logger import StonksLogger
 class UpdateService(BaseService, AbstractUpdateService):
     logger = StonksLogger.get_logger("stonks_overwatch.bitvavo.update_service", "[BITVAVO|UPDATE]")
 
-    def __init__(self, import_folder: str = None, debug_mode: bool = True, config: Optional[BaseConfig] = None):
+    def __init__(self, import_folder: str = None, debug_mode: bool = True, config: Optional[BitvavoConfig] = None):
         """
         Initialize the UpdateService.
         :param import_folder:

@@ -10,7 +10,8 @@ from django.core.cache import cache
 from django.db import connection
 from pandas import DataFrame
 
-from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.config.degiro import DegiroConfig
+from stonks_overwatch.core.exceptions import CredentialsException
 from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.core.interfaces.update_service import AbstractUpdateService
 from stonks_overwatch.services.brokers.degiro.client.constants import CurrencyFX, ProductType
@@ -47,7 +48,7 @@ CACHE_TIMEOUT = 3600
 
 
 class UpdateService(BaseService, AbstractUpdateService):
-    def __init__(self, import_folder: str = None, debug_mode: bool = None, config: Optional[BaseConfig] = None):
+    def __init__(self, import_folder: str = None, debug_mode: bool = None, config: Optional[DegiroConfig] = None):
         """
         Initialize the UpdateService.
         :param import_folder:
@@ -60,11 +61,23 @@ class UpdateService(BaseService, AbstractUpdateService):
         # Initialize AbstractUpdateService first (has no super() calls to interfere)
         AbstractUpdateService.__init__(self, "DEGIRO", import_folder, debug_mode, config)
         # Then manually set BaseService attributes without calling its __init__
-        self._injected_config = config
         self._global_config = None
+        self._injected_config = config
+        if self._injected_config is None:
+            from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+
+            broker_factory = BrokerFactory()
+            self._injected_config = broker_factory.create_config("degiro")
+
+        # Check that the available config is enough to proceed
+        if (
+            self._injected_config.get_credentials is None
+            or not self._injected_config.get_credentials.has_minimal_credentials()
+        ):
+            raise CredentialsException("Not enough credentials to connect to DeGiro")
 
         # Pass injected config to DeGiro service for proper credential access
-        self.degiro_service = DeGiroService(config=config)
+        self.degiro_service = DeGiroService(config=self._injected_config)
 
         self.portfolio_data = PortfolioService(
             degiro_service=self.degiro_service,
@@ -81,14 +94,7 @@ class UpdateService(BaseService, AbstractUpdateService):
     def _get_last_cash_movement_import(self) -> datetime:
         last_movement = CashMovementsRepository.get_last_movement()
         if last_movement is None:
-            # Use injected config or get via unified factory
-            if self._injected_config:
-                degiro_config = self._injected_config
-            else:
-                from stonks_overwatch.core.factories.broker_factory import BrokerFactory
-
-                broker_factory = BrokerFactory()
-                degiro_config = broker_factory.create_config("degiro")
+            degiro_config = self._injected_config
 
             if degiro_config:
                 last_movement = datetime.combine(degiro_config.start_date, time.min)
@@ -101,14 +107,7 @@ class UpdateService(BaseService, AbstractUpdateService):
     def _get_last_transactions_import(self) -> datetime:
         last_movement = TransactionsRepository.get_last_movement()
         if last_movement is None:
-            # Use injected config or get via unified factory
-            if self._injected_config:
-                degiro_config = self._injected_config
-            else:
-                from stonks_overwatch.core.factories.broker_factory import BrokerFactory
-
-                broker_factory = BrokerFactory()
-                degiro_config = broker_factory.create_config("degiro")
+            degiro_config = self._injected_config
 
             if degiro_config:
                 last_movement = datetime.combine(degiro_config.start_date, time.min)
@@ -434,15 +433,7 @@ class UpdateService(BaseService, AbstractUpdateService):
     def __import_products_quotation(self) -> None:  # noqa: C901
         product_growth = self.portfolio_data.calculate_product_growth()
 
-        # Include Currencies in the Quotations
-        # Use injected config or get via unified factory
-        if self._injected_config:
-            degiro_config = self._injected_config
-        else:
-            from stonks_overwatch.core.factories.broker_factory import BrokerFactory
-
-            broker_factory = BrokerFactory()
-            degiro_config = broker_factory.create_config("degiro")
+        degiro_config = self._injected_config
 
         if degiro_config and hasattr(degiro_config, "start_date"):
             start_date = degiro_config.start_date.strftime(LocalizationUtility.DATE_FORMAT)

@@ -8,6 +8,7 @@ for broker services.
 
 from typing import Dict, Optional, Type
 
+from stonks_overwatch.core.exceptions import StonksOverwatchException
 from stonks_overwatch.core.interfaces.authentication_service import AuthenticationServiceInterface
 from stonks_overwatch.core.interfaces.credential_service import CredentialServiceInterface
 from stonks_overwatch.core.interfaces.session_manager import SessionManagerInterface
@@ -15,7 +16,7 @@ from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.singleton import singleton
 
 
-class AuthenticationFactoryError(Exception):
+class AuthenticationFactoryError(StonksOverwatchException):
     """Exception raised for authentication factory errors."""
 
     pass
