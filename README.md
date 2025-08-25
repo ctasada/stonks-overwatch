@@ -82,6 +82,7 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
 
 ## TODOs
 
+* [ ] Migrate FontAwesome to use a [Kit](https://docs.fontawesome.com/web/use-with/python-django)
 * [ ] Add information about the sectors. Maybe a tooltip in the places where sectors are used.
 * [ ] Tables should allow choosing the number of rows to show.
 * [ ] Portfolio Tables would be migrated to "http://bootstrap-table.com/"

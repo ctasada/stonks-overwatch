@@ -3,7 +3,7 @@ from typing import Optional
 
 from django.core.cache import cache
 
-from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.config.ibkr import IbkrConfig
 from stonks_overwatch.core.interfaces.base_service import DependencyInjectionMixin
 from stonks_overwatch.core.interfaces.update_service import AbstractUpdateService
 from stonks_overwatch.services.brokers.ibkr.client.ibkr_service import IbkrService
@@ -17,7 +17,7 @@ CACHE_TIMEOUT = 3600
 
 
 class UpdateService(DependencyInjectionMixin, AbstractUpdateService):
-    def __init__(self, import_folder: str = None, debug_mode: bool = True, config: Optional[BaseConfig] = None):
+    def __init__(self, import_folder: str = None, debug_mode: bool = True, config: Optional[IbkrConfig] = None):
         """
         Initialize the UpdateService.
         :param import_folder:

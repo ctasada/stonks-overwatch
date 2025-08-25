@@ -27,6 +27,9 @@ class DegiroCredentials(BaseCredentials):
         session_credentials = request.session.get("credentials", {})
         return cls.from_dict(session_credentials)
 
+    def has_minimal_credentials(self) -> bool:
+        return bool(self.username and self.password and (self.totp_secret_key or self.one_time_password))
+
 
 class DegiroConfig(BaseConfig):
     config_key = "degiro"
