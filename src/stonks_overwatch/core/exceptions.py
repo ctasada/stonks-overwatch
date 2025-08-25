@@ -58,3 +58,9 @@ class DataAggregationException(StonksOverwatchException):
     """Exception raised for data aggregation errors."""
 
     pass
+
+
+class CredentialsException(StonksOverwatchException):
+    """Exception raised for credential related errors."""
+
+    pass

@@ -3,6 +3,7 @@ from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
+from stonks_overwatch.core.exceptions import CredentialsException
 from stonks_overwatch.services.brokers.bitvavo.services.update_service import UpdateService as BitvavoUpdateService
 from stonks_overwatch.services.brokers.degiro.services.update_service import UpdateService as DegiroUpdateService
 from stonks_overwatch.services.brokers.ibkr.services.update_service import UpdateService as IbkrUpdateService
@@ -112,6 +113,8 @@ class JobsScheduler:
         try:
             degiro_update_service = DegiroUpdateService()
             degiro_update_service.update_all()
+        except CredentialsException as error:
+            JobsScheduler.logger.error(f"{error}", exc_info=DEBUG_MODE)
         except Exception as error:
             JobsScheduler.logger.error(f"Update DEGIRO failed with {error}", exc_info=DEBUG_MODE)
 

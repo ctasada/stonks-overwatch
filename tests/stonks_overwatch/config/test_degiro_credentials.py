@@ -81,3 +81,37 @@ def test_degiro_credentials_from_minimum_dict():
     assert credentials.int_account is None
     assert credentials.totp_secret_key is None
     assert credentials.one_time_password is None
+
+
+def test_has_minimal_credentials():
+    # All required fields present, totp_secret_key used
+    credentials = DegiroCredentials(username="user", password="pass", totp_secret_key="secret")
+    assert credentials.has_minimal_credentials() is True
+
+    # All required fields present, one_time_password used
+    credentials = DegiroCredentials(username="user", password="pass", one_time_password=123456)
+    assert credentials.has_minimal_credentials() is True
+
+    # Missing username
+    credentials = DegiroCredentials(username="", password="pass", totp_secret_key="secret")
+    assert credentials.has_minimal_credentials() is False
+
+    # Missing password
+    credentials = DegiroCredentials(username="user", password="", totp_secret_key="secret")
+    assert credentials.has_minimal_credentials() is False
+
+    # Missing both totp_secret_key and one_time_password
+    credentials = DegiroCredentials(username="user", password="pass")
+    assert credentials.has_minimal_credentials() is False
+
+    # All fields empty
+    credentials = DegiroCredentials(username="", password="", totp_secret_key=None, one_time_password=None)
+    assert credentials.has_minimal_credentials() is False
+
+    # totp_secret_key is empty string, one_time_password is None
+    credentials = DegiroCredentials(username="user", password="pass", totp_secret_key="", one_time_password=None)
+    assert credentials.has_minimal_credentials() is False
+
+    # totp_secret_key is None, one_time_password is 0 (should be falsy)
+    credentials = DegiroCredentials(username="user", password="pass", totp_secret_key=None, one_time_password=0)
+    assert credentials.has_minimal_credentials() is False
