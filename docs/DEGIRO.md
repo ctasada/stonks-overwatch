@@ -73,11 +73,17 @@ If you want to test a new version of the DEGIRO connector, you can do it by foll
 
    ```toml
    [tool.poetry]
-      version = "3.0.29.dev1"  # Update this to the new version
+      version = "3.0.30.dev1"  # Update this to the new version
    ```
 
-4. Use the new version in your project by running:
+4. Build the package by running:
 
-```bash
-   poetry add path/to/your/degiro-connector/dist/degiro_connector-3.0.29.dev1-py3-none-any.whl
-```
+    ```bash
+       poetry build
+    ```
+
+5. Use the new version in your project by running:
+
+    ```bash
+       poetry add path/to/your/degiro-connector/dist/degiro_connector-3.0.30.dev1-py3-none-any.whl
+    ```

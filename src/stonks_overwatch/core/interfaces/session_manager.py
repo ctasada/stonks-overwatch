@@ -153,6 +153,30 @@ class SessionManagerInterface(ABC):
         pass
 
     @abstractmethod
+    def set_in_app_auth_required(self, request: HttpRequest, required: bool = True) -> None:
+        """
+        Set whether in-app authentication is required for authentication.
+
+        Args:
+            request: The HTTP request containing session data
+            required: Whether in-app authentication is required
+        """
+        pass
+
+    @abstractmethod
+    def is_in_app_auth_required(self, request: HttpRequest) -> bool:
+        """
+        Check if in-app authentication is required.
+
+        Args:
+            request: The HTTP request containing session data
+
+        Returns:
+            bool: True if in-app authentication is required, False otherwise
+        """
+        pass
+
+    @abstractmethod
     def clear_session(self, request: HttpRequest) -> None:
         """
         Clear all authentication-related session data.

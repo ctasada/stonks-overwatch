@@ -106,11 +106,18 @@ class DeGiroAuthMiddleware:
             self.auth_service.session_manager.set_totp_required(request, True)
             self.logger.info(LogMessages.TOTP_REQUIRED_PRESERVING)
             return True, AuthenticationErrorMessages.TOTP_AUTHENTICATION_REQUIRED, True
+        elif connection_result.result == AuthenticationResult.IN_APP_AUTHENTICATION_REQUIRED:
+            # In-app authentication required means credentials are valid, just need mobile app authentication
+            # Set session flag so login page shows in-app authentication message
+            self.auth_service.session_manager.set_in_app_auth_required(request, True)
+            self.logger.info(LogMessages.IN_APP_AUTH_REQUIRED_PRESERVING)
+            return True, AuthenticationErrorMessages.IN_APP_AUTHENTICATION_REQUIRED, True
         elif connection_result.result in [
             AuthenticationResult.CONNECTION_ERROR,
             AuthenticationResult.CONFIGURATION_ERROR,
             AuthenticationResult.INVALID_CREDENTIALS,
             AuthenticationResult.MAINTENANCE_MODE,
+            AuthenticationResult.ACCOUNT_BLOCKED,
         ]:
             # Authentication failures - clear session and start over
             return (

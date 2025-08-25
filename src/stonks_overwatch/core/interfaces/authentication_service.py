@@ -23,6 +23,8 @@ class AuthenticationResult(Enum):
 
     SUCCESS = "success"
     TOTP_REQUIRED = "totp_required"
+    IN_APP_AUTHENTICATION_REQUIRED = "in_app_authentication_required"
+    ACCOUNT_BLOCKED = "account_blocked"
     INVALID_CREDENTIALS = "invalid_credentials"
     CONNECTION_ERROR = "connection_error"
     MAINTENANCE_MODE = "maintenance_mode"
@@ -55,7 +57,11 @@ class AuthenticationResponse:
     @property
     def is_error(self) -> bool:
         """Check if authentication resulted in an error."""
-        return self.result not in [AuthenticationResult.SUCCESS, AuthenticationResult.TOTP_REQUIRED]
+        return self.result not in [
+            AuthenticationResult.SUCCESS,
+            AuthenticationResult.TOTP_REQUIRED,
+            AuthenticationResult.IN_APP_AUTHENTICATION_REQUIRED,
+        ]
 
 
 class AuthenticationServiceInterface(ABC):

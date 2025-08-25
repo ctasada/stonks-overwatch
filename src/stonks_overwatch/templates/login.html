@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -18,6 +18,19 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/static/style.css">
+
+    <!-- Ensure links in alerts are properly styled -->
+    <style>
+        .alert a {
+            color: #0d6efd !important;
+            text-decoration: underline !important;
+            font-weight: 500;
+        }
+        .alert a:hover {
+            color: #0a58ca !important;
+            text-decoration: underline !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -26,6 +39,8 @@
             <img src="/static/logos/degiro.svg" alt="DeGiro" width="25" height="25" class="card-img-top rounded-circle m-2">
             {% if show_otp %}
                 <p class="h4 text-center mb-4">Please enter your 2FA code</p>
+            {% elif show_in_app_auth %}
+                <p class="h4 text-center mb-4">Open the DEGIRO app</p>
             {% else %}
                 <h3 class="text-center mb-4">Login - DEGIRO</h3>
             {% endif %}
@@ -36,15 +51,15 @@
                         {% for message in messages %}
                             <div class="alert {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}alert-danger{% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}alert-warning{% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}alert-success{% else %}alert-info{% endif %} d-flex align-items-start py-2 mb-2" role="alert" style="word-break: break-word;">
                                 {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
-                                    <i class="bi bi-exclamation-triangle-fill me-2 mt-1"></i>
+                                    <i class="bi-exclamation-triangle-fill me-2 mt-1"></i>
                                 {% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
-                                    <i class="bi bi-exclamation-circle-fill me-2 mt-1"></i>
+                                    <i class="bi-exclamation-circle-fill me-2 mt-1"></i>
                                 {% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
-                                    <i class="bi bi-check-circle-fill me-2 mt-1"></i>
+                                    <i class="bi-check-circle-fill me-2 mt-1"></i>
                                 {% else %}
-                                    <i class="bi bi-info-circle-fill me-2 mt-1"></i>
+                                    <i class="bi-info-circle-fill me-2 mt-1"></i>
                                 {% endif %}
-                                <div class="flex-grow-1">{{ message }}</div>
+                                <div class="flex-grow-1">{{ message|safe }}</div>
                             </div>
                         {% endfor %}
                     </div>
@@ -57,6 +72,26 @@
                                placeholder="123456" aria-label="2FA code" required autofocus>
                     </div>
                     <button type="submit" class="btn btn-primary btn-block w-100">Confirm</button>
+                {% elif show_in_app_auth %}
+                    <div class="d-flex align-items-center py-3 mb-4">
+                        <i class="bi-phone me-3" style="font-size: 2rem; color: #0d6efd;"></i>
+                        <div class="flex-grow-1">
+                            <p class="mb-0">To verify your login attempt, open the DEGIRO app and tap 'Yes' to approve it.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Waiting...</span>
+                        </div>
+                    </div>
+                    <!-- Submit form indicating that should update the portfolio -->
+                    <input type="hidden" name="in_app_auth" id="in_app_auth" value="true">
+                    <script>
+                        $(document).ready(function() {
+                            <!-- In this scenario we want to submit the form automatically -->
+                            document.getElementById("login-form").submit();
+                        });
+                    </script>
                 {% elif show_loading %}
                     <div class="d-flex justify-content-center">
                         <div class="spinner-border text-primary" role="status">
@@ -83,7 +118,7 @@
                         <div class="input-group">
                             <input type="password" class="form-control" id="password" name="password"
                                    placeholder="Enter password" required>
-                            <i class="bi bi-eye-slash-fill" id="togglePassword"></i>
+                            <i class="bi-eye-slash-fill" id="togglePassword"></i>
                         </div>
                     </div>
                     <div class="form-group mb-3">

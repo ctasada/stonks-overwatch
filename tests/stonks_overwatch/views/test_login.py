@@ -38,6 +38,7 @@ class TestLoginViewRefactored(TestCase):
 
         # Mock authenticated user
         self.mock_auth_service.session_manager.is_totp_required.return_value = False
+        self.mock_auth_service.session_manager.is_in_app_auth_required.return_value = False
         self.mock_auth_service.is_user_authenticated.return_value = True
 
         response = self.view.get(request)
@@ -54,6 +55,7 @@ class TestLoginViewRefactored(TestCase):
 
         # Mock unauthenticated user
         self.mock_auth_service.session_manager.is_totp_required.return_value = False
+        self.mock_auth_service.session_manager.is_in_app_auth_required.return_value = False
         self.mock_auth_service.is_user_authenticated.return_value = False
 
         response = self.view.get(request)
@@ -70,6 +72,7 @@ class TestLoginViewRefactored(TestCase):
 
         # Mock TOTP required
         self.mock_auth_service.session_manager.is_totp_required.return_value = True
+        self.mock_auth_service.session_manager.is_in_app_auth_required.return_value = False
         self.mock_auth_service.is_user_authenticated.return_value = False
 
         response = self.view.get(request)
@@ -305,20 +308,72 @@ class TestLoginViewRefactored(TestCase):
         request = self.factory.post("/login/")
         auth_result = AuthenticationResponse(result=AuthenticationResult.SUCCESS)
 
-        show_otp, show_loading = self.view._handle_auth_result(request, auth_result)
+        show_otp, show_loading, show_in_app_auth = self.view._handle_auth_result(request, auth_result)
 
         assert show_otp is False
         assert show_loading is True
+        assert show_in_app_auth is False
 
     def test_handle_auth_result_totp_required(self):
         """Test _handle_auth_result for TOTP required."""
         request = self.factory.post("/login/")
         auth_result = AuthenticationResponse(result=AuthenticationResult.TOTP_REQUIRED)
 
-        show_otp, show_loading = self.view._handle_auth_result(request, auth_result)
+        show_otp, show_loading, show_in_app_auth = self.view._handle_auth_result(request, auth_result)
 
         assert show_otp is True
         assert show_loading is False
+        assert show_in_app_auth is False
+
+    def test_get_in_app_auth_required_shows_dialog(self):
+        """Test GET request when in-app authentication is required shows dialog."""
+        request = self.factory.get("/login/")
+        request.session = self.session
+
+        # Mock in-app auth required
+        self.mock_auth_service.session_manager.is_totp_required.return_value = False
+        self.mock_auth_service.session_manager.is_in_app_auth_required.return_value = True
+        self.mock_auth_service.is_user_authenticated.return_value = False
+
+        response = self.view.get(request)
+
+        assert response.status_code == 200
+        # Check response content - should show in-app auth dialog
+        content = response.content.decode("utf-8")
+        assert "open the degiro app" in content.lower() or "service desk" in content.lower()
+
+    def test_handle_auth_result_in_app_auth_required(self):
+        """Test _handle_auth_result for in-app authentication required."""
+        request = self.factory.post("/login/")
+        auth_result = AuthenticationResponse(result=AuthenticationResult.IN_APP_AUTHENTICATION_REQUIRED)
+
+        show_otp, show_loading, show_in_app_auth = self.view._handle_auth_result(request, auth_result)
+
+        assert show_otp is False
+        assert show_loading is False
+        assert show_in_app_auth is True
+
+    def test_post_account_blocked_shows_error(self):
+        """Test POST request with account blocked shows error message."""
+        request = self.factory.post("/login/", {"username": "testuser", "password": "testpass"})
+        request.session = self.session
+
+        # Mock account blocked
+        auth_response = AuthenticationResponse(
+            result=AuthenticationResult.ACCOUNT_BLOCKED,
+            message="Your account has been blocked because the maximum of login attempts has been exceeded",
+        )
+        self.mock_auth_service.authenticate_user.return_value = auth_response
+
+        with patch("django.contrib.messages.error") as mock_messages:
+            response = self.view.post(request)
+
+        assert response.status_code == 200
+        # Check that the account blocked message is shown
+        mock_messages.assert_called_once()
+        call_args = mock_messages.call_args[0]
+        assert "blocked" in call_args[1].lower()
+        assert "service desk" in call_args[1].lower()
 
     def test_render_login_error(self):
         """Test _render_login_error method."""

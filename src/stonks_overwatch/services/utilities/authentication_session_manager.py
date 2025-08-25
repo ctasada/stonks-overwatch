@@ -33,6 +33,7 @@ class AuthenticationSessionManager(SessionManagerInterface, BaseService):
     SESSION_ID_KEY = "session_id"
     SESSION_CREDENTIALS_KEY = "credentials"
     SESSION_SHOW_OTP_KEY = "show_otp"
+    SESSION_IN_APP_AUTH_KEY = "in_app_auth_required"
 
     logger = StonksLogger.get_logger("stonks_overwatch.auth_session_manager", "[AUTH|SESSION_MANAGER]")
 
@@ -203,6 +204,39 @@ class AuthenticationSessionManager(SessionManagerInterface, BaseService):
             self.logger.error(f"Error checking TOTP required: {str(e)}")
             return False
 
+    def set_in_app_auth_required(self, request: HttpRequest, required: bool = True) -> None:
+        """
+        Set whether in-app authentication is required for authentication.
+
+        Args:
+            request: The HTTP request containing session data
+            required: Whether in-app authentication is required
+        """
+        try:
+            request.session[self.SESSION_IN_APP_AUTH_KEY] = required
+            request.session.modified = True
+            self.logger.debug(f"Set in-app authentication required to: {required}")
+        except Exception as e:
+            self.logger.error(f"Error setting in-app authentication required: {str(e)}")
+
+    def is_in_app_auth_required(self, request: HttpRequest) -> bool:
+        """
+        Check if in-app authentication is required.
+
+        Args:
+            request: The HTTP request containing session data
+
+        Returns:
+            bool: True if in-app authentication is required, False otherwise
+        """
+        try:
+            in_app_auth_required = request.session.get(self.SESSION_IN_APP_AUTH_KEY, False)
+            self.logger.debug(f"In-app authentication required: {in_app_auth_required}")
+            return in_app_auth_required
+        except Exception as e:
+            self.logger.error(f"Error checking in-app authentication required: {str(e)}")
+            return False
+
     def clear_session(self, request: HttpRequest) -> None:
         """
         Clear all authentication-related session data.
@@ -220,6 +254,7 @@ class AuthenticationSessionManager(SessionManagerInterface, BaseService):
                 self.SESSION_ID_KEY,
                 self.SESSION_CREDENTIALS_KEY,
                 self.SESSION_SHOW_OTP_KEY,
+                self.SESSION_IN_APP_AUTH_KEY,
             ]
 
             for key in auth_keys:
@@ -270,6 +305,9 @@ class AuthenticationSessionManager(SessionManagerInterface, BaseService):
 
             # Get TOTP status
             session_data["totp_required"] = request.session.get(self.SESSION_SHOW_OTP_KEY, False)
+
+            # Get in-app authentication status
+            session_data["in_app_auth_required"] = request.session.get(self.SESSION_IN_APP_AUTH_KEY, False)
 
             return session_data
 

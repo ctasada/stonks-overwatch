@@ -14,9 +14,10 @@ class Login(View):
     View for the login page.
     Handles user authentication and connection to DeGiro.
 
-    The view has 3 states:
+    The view has 4 states:
     * Initial state: The user is prompted to enter their username and password.
     * TOTP required: The user is prompted to enter their 2FA code.
+    * In-app authentication required: The user is prompted to complete authentication in their mobile app.
     * Loading: The user is shown a loading indicator while the portfolio is updated.
     """
 
@@ -29,15 +30,16 @@ class Login(View):
         self.auth_service = get_authentication_service()
 
     def get(self, request):
-        # Use AuthenticationService to check TOTP requirement and authentication status
+        # Use AuthenticationService to check TOTP requirement, in-app auth requirement, and authentication status
         show_otp = self.auth_service.session_manager.is_totp_required(request)
+        show_in_app_auth = self.auth_service.session_manager.is_in_app_auth_required(request)
         show_loading = False
 
         if self.auth_service.is_user_authenticated(request):
             self.logger.info(LogMessages.USER_ALREADY_AUTHENTICATED)
             show_loading = True
 
-        context = {"show_otp": show_otp, "show_loading": show_loading}
+        context = {"show_otp": show_otp, "show_loading": show_loading, "show_in_app_auth": show_in_app_auth}
         return render(request, self.TEMPLATE_NAME, context=context, status=200)
 
     def post(self, request):
@@ -45,6 +47,12 @@ class Login(View):
         if update_portfolio:
             # Update portfolio data before loading the dashboard
             JobsScheduler.update_portfolio()
+            return redirect("dashboard")
+
+        in_app_auth = request.POST.get("in_app_auth") or False
+        if in_app_auth:
+            # For in-app authentication, wait until the user is authenticated using DEGIRO app
+            # FIXME: Implement waiting code
             return redirect("dashboard")
 
         # Extract and validate credentials
@@ -56,9 +64,9 @@ class Login(View):
         auth_result = self._perform_authentication(request, credentials)
 
         # Handle result and render response
-        show_otp, show_loading = self._handle_auth_result(request, auth_result)
+        show_otp, show_loading, show_in_app_auth = self._handle_auth_result(request, auth_result)
 
-        context = {"show_otp": show_otp, "show_loading": show_loading}
+        context = {"show_otp": show_otp, "show_loading": show_loading, "show_in_app_auth": show_in_app_auth}
         return render(request, self.TEMPLATE_NAME, context=context, status=200)
 
     def _extract_credentials(self, request):
@@ -112,6 +120,7 @@ class Login(View):
         """Handle authentication result and set UI state."""
         show_otp = False
         show_loading = False
+        show_in_app_auth = False
 
         if auth_result.is_success:
             self.logger.info(LogMessages.LOGIN_SUCCESSFUL)
@@ -119,6 +128,12 @@ class Login(View):
         elif auth_result.result == AuthenticationResult.TOTP_REQUIRED:
             self.logger.info(LogMessages.TOTP_REQUIRED_USER)
             show_otp = True
+        elif auth_result.result == AuthenticationResult.IN_APP_AUTHENTICATION_REQUIRED:
+            self.logger.info(LogMessages.IN_APP_AUTH_REQUIRED_USER)
+            show_in_app_auth = True
+        elif auth_result.result == AuthenticationResult.ACCOUNT_BLOCKED:
+            self.logger.warning(LogMessages.ACCOUNT_BLOCKED_USER)
+            messages.error(request, AuthenticationErrorMessages.ACCOUNT_BLOCKED)
         elif auth_result.result == AuthenticationResult.INVALID_CREDENTIALS:
             messages.error(request, auth_result.message or AuthenticationErrorMessages.INVALID_CREDENTIALS)
         elif auth_result.result == AuthenticationResult.MAINTENANCE_MODE:
@@ -130,9 +145,9 @@ class Login(View):
             self.logger.error(f"Authentication failed: {auth_result.message}")
             messages.error(request, auth_result.message or AuthenticationErrorMessages.UNEXPECTED_ERROR)
 
-        return show_otp, show_loading
+        return show_otp, show_loading, show_in_app_auth
 
     def _render_login_error(self, request, error_message):
         """Render login page with error message."""
         messages.error(request, error_message)
-        return render(request, self.TEMPLATE_NAME, context={"show_otp": False}, status=400)
+        return render(request, self.TEMPLATE_NAME, context={"show_otp": False, "show_in_app_auth": False}, status=400)

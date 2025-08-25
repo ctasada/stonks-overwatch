@@ -22,6 +22,18 @@ class UserErrorMessages:
     TOTP_INVALID = "Invalid two-factor authentication code. Please try again."
     TOTP_AUTHENTICATION_REQUIRED = "Two-factor authentication is required to continue."
 
+    # In-app authentication
+    IN_APP_AUTHENTICATION_REQUIRED = (
+        "Open the DEGIRO app. To verify your login attempt, open the DEGIRO app and tap 'Yes' to approve it."
+    )
+
+    # Account status errors
+    ACCOUNT_BLOCKED = (
+        "Your account has been blocked because the maximum of <b>login attempts</b> has been exceeded."
+        " To unblock your account, you can contact DEGIRO "
+        '<a href="https://www.degiro.nl/helpdesk/account-en-personal-gegevens/'
+        'access-to-your-degiro-account/my-account-blocked-how-can-I-contact" target="_blank">Service Desk</a>.'
+    )
     # Session and access errors
     SESSION_EXPIRED = "Your session has expired. Please log in again."
     ACCESS_DENIED = "Access denied. Please log in to continue."
@@ -83,6 +95,16 @@ class LogMessages:
     TOTP_AUTHENTICATION_FAILED = "TOTP authentication failed"
     TOTP_REQUIRED_PRESERVING = "TOTP required - preserving session for 2FA flow"
 
+    # In-app authentication logs
+    IN_APP_AUTH_REQUIRED_USER = "In-app authentication required - prompting user for mobile app authentication"
+    IN_APP_AUTH_REQUIRED_PRESERVING = (
+        "In-app authentication required - preserving session for mobile app authentication flow"
+    )
+
+    # Account status logs
+    ACCOUNT_BLOCKED_USER = "Account blocked - showing blocked account message to user"
+    ACCOUNT_BLOCKED_CLEARING_SESSION = "Account blocked - clearing session and redirecting to login"
+
     # Session management logs
     SESSION_CREATED = "User session created"
     SESSION_UPDATED = "User session updated"
@@ -121,11 +143,13 @@ class ErrorCodes:
     AUTH_MAINTENANCE_MODE = "AUTH_1003"
     AUTH_CONFIGURATION_ERROR = "AUTH_1004"
     AUTH_UNKNOWN_ERROR = "AUTH_1005"
+    AUTH_ACCOUNT_BLOCKED = "AUTH_1006"
 
     # Two-factor authentication errors (1100-1199)
     TOTP_REQUIRED = "AUTH_1101"
     TOTP_INVALID = "AUTH_1102"
     TOTP_TIMEOUT = "AUTH_1103"
+    IN_APP_AUTHENTICATION_REQUIRED = "AUTH_1104"
 
     # Session errors (1200-1299)
     SESSION_EXPIRED = "AUTH_1201"
@@ -157,5 +181,7 @@ class AuthenticationErrorMessages:
     SESSION_NOT_AUTHENTICATED = UserErrorMessages.ACCESS_DENIED
     MAINTENANCE_MODE_ACCESS_DENIED = UserErrorMessages.MAINTENANCE_MODE_ACCESS_DENIED
     TOTP_AUTHENTICATION_REQUIRED = UserErrorMessages.TOTP_AUTHENTICATION_REQUIRED
+    IN_APP_AUTHENTICATION_REQUIRED = UserErrorMessages.IN_APP_AUTHENTICATION_REQUIRED
+    ACCOUNT_BLOCKED = UserErrorMessages.ACCOUNT_BLOCKED
     AUTHENTICATION_FAILED_PREFIX = "Authentication failed"
     AUTHENTICATION_ISSUE_PREFIX = "Authentication issue"
