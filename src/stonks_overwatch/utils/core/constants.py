@@ -177,6 +177,9 @@ class AuthenticationErrorMessages:
     MAINTENANCE_MODE = UserErrorMessages.MAINTENANCE_MODE
     UNEXPECTED_ERROR = UserErrorMessages.UNEXPECTED_ERROR
 
+    # Configuration and service errors
+    CONFIGURATION_ERROR = UserErrorMessages.CONFIGURATION_ERROR
+
     # Middleware specific messages
     SESSION_NOT_AUTHENTICATED = UserErrorMessages.ACCESS_DENIED
     MAINTENANCE_MODE_ACCESS_DENIED = UserErrorMessages.MAINTENANCE_MODE_ACCESS_DENIED

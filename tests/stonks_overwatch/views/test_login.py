@@ -16,15 +16,17 @@ from unittest.mock import Mock, patch
 
 
 @pytest.mark.django_db
-class TestLoginViewRefactored(TestCase):
+class TestLoginView(TestCase):
     """Test cases for refactored Login view."""
 
-    @patch("stonks_overwatch.views.login.get_authentication_service")
-    def setUp(self, mock_get_auth_service):
+    def setUp(self):
         """Set up test fixtures."""
         self.factory = RequestFactory()
+        patcher = patch("stonks_overwatch.views.login.get_authentication_service")
+        self.addCleanup(patcher.stop)
+        self.mock_get_auth_service = patcher.start()
         self.mock_auth_service = Mock()
-        mock_get_auth_service.return_value = self.mock_auth_service
+        self.mock_get_auth_service.return_value = self.mock_auth_service
 
         self.view = Login()
         self.view.setup(request=Mock())
@@ -91,7 +93,7 @@ class TestLoginViewRefactored(TestCase):
         response = self.view.post(request)
 
         assert response.status_code == 302
-        assert response.url == "/dashboard"
+        assert response["Location"] == "/dashboard"
         mock_update.assert_called_once()
 
     def test_post_successful_authentication_shows_loading(self):
@@ -118,7 +120,7 @@ class TestLoginViewRefactored(TestCase):
         content = response.content.decode("utf-8")
         assert "Loading..." in content or "spinner-border" in content
         self.mock_auth_service.authenticate_user.assert_called_once_with(
-            request, "testuser", "testpass", None, remember_me
+            request=request, username="testuser", password="testpass", one_time_password=None, remember_me=remember_me
         )
 
     def test_post_totp_required_shows_otp_form(self):
@@ -283,7 +285,9 @@ class TestLoginViewRefactored(TestCase):
         result = self.view._perform_authentication(request, credentials)
 
         assert result == expected_response
-        self.mock_auth_service.authenticate_user.assert_called_once_with(request, "testuser", "testpass", None, False)
+        self.mock_auth_service.authenticate_user.assert_called_once_with(
+            request=request, username="testuser", password="testpass", one_time_password=None, remember_me=False
+        )
 
     def test_perform_authentication_totp_flow(self):
         """Test _perform_authentication for TOTP flow."""

@@ -4,12 +4,42 @@ DEGIRO is the main tracker supported by **Stonks Overwatch**. It provides real-t
 
 ## How to login to DEGIRO
 
-You can log in to DEGIRO in two different ways
+You can log in to DEGIRO using different authentication methods that DEGIRO supports. The application automatically detects which method your account requires and guides you through the appropriate flow.
+
+### Authentication Methods
+
+DEGIRO supports three authentication methods, which the application handles automatically:
+
+1. **Username/Password Only**: Basic authentication (less common)
+2. **TOTP (Two-Factor Authentication)**: Requires 6-digit code from authenticator app
+3. **In-App Authentication**: Requires confirmation through DEGIRO mobile app (New 2025)
 
 ### Use the Login form
 
-When you open your browser at [http://127.0.0.1:8000](http://127.0.0.1:8000) you will see a login form. Introduce
-your credentials, including the OTP (One-Time-Password).
+When you open your browser at [http://127.0.0.1:8000](http://127.0.0.1:8000) you will see a login form. The login process varies based on your DEGIRO account security settings:
+
+#### Basic Login Flow
+
+1. Enter your DEGIRO username and password
+2. Click "Login"
+3. The application will automatically detect which additional authentication is required
+
+#### TOTP (2FA) Flow
+
+If your account has traditional 2FA enabled:
+1. Enter username and password
+2. You'll be redirected to a 2FA code input screen
+3. Enter the 6-digit code from your authenticator app
+4. Authentication completes and portfolio loads
+
+#### In-App Authentication Flow (New 2025)
+
+If your account uses In-App authentication (automatically enabled when 2FA is not configured):
+1. Enter username and password
+2. You'll see "Open the DEGIRO app" message with a loading spinner
+3. Open the DEGIRO mobile app on your phone
+4. Approve the login notification in the app
+5. The browser will automatically detect approval and proceed to the dashboard
 
 The first time, the application will retrieve all your portfolio from DEGIRO, and you are good to go
 
@@ -48,6 +78,47 @@ will not show any DEGIRO data, and it will not try to connect to DEGIRO.
 The `offline_mode` field is used to enable or disable the offline mode. If you set it to `true`, the application will
 not try to connect to DEGIRO, and it will only use the data stored in the database. This is useful if you want to
 work with the application without an internet connection or if you want to avoid hitting the DEGIRO API.
+
+## Authentication Troubleshooting
+
+### Common Authentication Issues
+
+#### In-App Authentication Issues
+
+- **Stuck on "Open the DEGIRO app" screen**:
+  - Check that you have the official DEGIRO mobile app installed
+  - Look for a notification in the app about approving the login
+  - Make sure you're logged into the correct account in the mobile app
+  - Try refreshing the browser page if the notification was missed
+
+- **No notification in mobile app**:
+  - Ensure your mobile app is updated to the latest version
+  - Check notification settings are enabled for the DEGIRO app
+  - Try logging out and back into the mobile app
+
+#### TOTP (2FA) Issues
+
+- **Invalid 2FA code errors**:
+  - Ensure your authenticator app's time is synchronized
+  - Try generating a new code and entering it quickly
+  - Verify you're using the correct account in your authenticator app
+
+#### General Login Issues
+
+- **Wrong authentication method shown**:
+  - The application auto-detects your account's security settings
+  - If you recently changed your DEGIRO security settings, it may take time to reflect
+  - Try clearing browser cache and cookies for the application
+
+### Authentication Method Detection
+
+The application automatically detects which authentication method your DEGIRO account requires:
+
+- **Basic Login**: No additional security configured
+- **TOTP Required**: Traditional 2FA with authenticator app is enabled
+- **In-App Authentication**: Automatically enabled when 2FA is not configured (DEGIRO's newer security method)
+
+You cannot manually choose the authentication method - it's determined by your DEGIRO account security configuration.
 
 ## Technical details
 

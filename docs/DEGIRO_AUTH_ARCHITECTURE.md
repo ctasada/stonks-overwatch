@@ -162,12 +162,150 @@ def process_authentication(auth_service: AuthenticationServiceInterface):
 5. **Retrieve stored credentials** → Session Manager
 6. **Complete authentication** → DeGiroService
 
+### In-App Authentication Flow (New 2025)
+
+When 2FA is not enabled, DEGIRO automatically triggers In-App authentication requiring mobile app confirmation:
+
+1. **DeGiro returns In-App auth required** → AuthenticationService detects `status == 12` or `inAppTOTPNeeded`
+2. **Store credentials with in_app_token** → Session Manager stores token from error details
+3. **Set in_app_auth_required flag** → Session Manager sets UI state
+4. **Redirect to login with In-App UI** → Middleware preserves session
+5. **User sees "Open DEGIRO app" message** → Login template shows waiting UI
+6. **JavaScript auto-submits form** → Browser automatically posts `in_app_auth=true`
+7. **Enter waiting loop** → Login View calls `_handle_in_app_authentication()`
+8. **Create TradingAPI with token** → Initialize API client with stored `in_app_token`
+9. **Continuous polling** → Call `trading_api.connect()` every 5 seconds
+10. **Check connection status** → Handle different error statuses:
+    - `status == 3`: Continue waiting (user hasn't confirmed yet)
+    - Success: Authentication completed
+    - Other errors: Unrecoverable, show error
+11. **On success** → Clear session flags, set authenticated, redirect to dashboard
+12. **On error** → Clear session state, show error message
+
 ### Connection Check Flow (Middleware)
 
 1. **Check if authenticated** → Session Manager
 2. **If not authenticated, check DeGiro** → AuthenticationService
-3. **Handle TOTP/errors** → Preserve or clear session
+3. **Handle TOTP/In-App/errors** → Preserve or clear session
 4. **Allow or redirect** → Based on result
+
+## In-App Authentication Implementation Details (2025)
+
+### Overview
+
+In-App authentication is DEGIRO's newer security mechanism that requires users to confirm login attempts through their mobile app. This feature is automatically enabled when traditional 2FA (TOTP) is not configured on the account.
+
+### Technical Architecture
+
+#### Error Detection
+
+The system detects In-App authentication requirements through DeGiro API responses:
+- **Status Code**: `error_details.status == 12`
+- **Status Text**: `error_details.status_text == "inAppTOTPNeeded"`
+- **In-App Token**: `error_details.in_app_token` contains the authentication token
+
+#### Session Management
+
+```python
+# Storing In-App authentication state
+self.session_manager.store_credentials(
+    request=request,
+    username=username,
+    password=password,
+    in_app_token=degiro_error.error_details.in_app_token,
+    remember_me=remember_me
+)
+self.session_manager.set_in_app_auth_required(request, True)
+```
+
+#### UI State Management
+
+The login template supports four states:
+- **Initial**: Username/password form
+- **TOTP**: 2FA code input
+- **In-App**: Waiting for mobile app confirmation
+- **Loading**: Portfolio update in progress
+
+#### Waiting Loop Implementation
+
+```python
+def _wait_for_in_app_confirmation(self, credentials) -> bool:
+    """Wait for user confirmation in DEGIRO mobile app."""
+    trading_api = TradingApi(credentials=api_credentials)
+
+    while True:
+        sleep(5)  # Wait 5 seconds between attempts
+        try:
+            trading_api.connect()
+            return True  # Success
+        except DeGiroConnectionError as retry_error:
+            if retry_error.error_details.status == 3:
+                continue  # Still waiting for confirmation
+            else:
+                raise retry_error  # Unrecoverable error
+```
+
+### Error Status Codes
+
+| Status | Meaning | Action |
+|--------|---------|---------|
+| `3` | Waiting for user confirmation | Continue polling |
+| `12` | In-App authentication required | Start In-App flow |
+| `4` | Account blocked | Show error, stop |
+| Other | Various authentication errors | Show error, stop |
+
+### User Experience Flow
+
+1. **Login Form**: User enters username/password
+2. **API Response**: DEGIRO returns In-App auth required
+3. **UI Update**: Page shows "Open the DEGIRO app" message with spinner
+4. **Auto-Submit**: JavaScript automatically submits form with `in_app_auth=true`
+5. **Backend Polling**: Server starts 5-second polling loop
+6. **Mobile Confirmation**: User approves login in DEGIRO mobile app
+7. **Success**: Automatic redirect to dashboard with portfolio update
+
+### Implementation Files
+
+- **Login View**: `src/stonks_overwatch/views/login.py`
+  - `_handle_in_app_authentication()`: Main handler method
+  - `_wait_for_in_app_confirmation()`: Polling loop implementation
+- **Session Manager**: `src/stonks_overwatch/services/utilities/authentication_session_manager.py`
+  - `set_in_app_auth_required()`: Set UI state flag
+  - `is_in_app_auth_required()`: Check UI state flag
+  - `store_credentials()`: Store token with credentials
+- **Authentication Service**: `src/stonks_overwatch/services/utilities/authentication_service.py`
+  - `_handle_in_app_auth_required_error()`: Error handler
+- **Template**: `src/stonks_overwatch/templates/login.html`
+  - In-App UI section with spinner and auto-submit logic
+- **Middleware**: `src/stonks_overwatch/middleware/degiro_auth.py`
+  - Handles In-App auth redirects and session preservation
+
+### Security Considerations
+
+- **Token Storage**: In-App tokens are stored temporarily in session only
+- **Session Cleanup**: Tokens are cleared on successful authentication or errors
+- **Timeout Handling**: No explicit timeout - relies on DEGIRO API timeout behavior
+- **Error Recovery**: Unrecoverable errors clear session and return to login form
+
+### Troubleshooting
+
+#### Common Issues
+
+1. **"No in-app token found"**: Check that In-App auth was properly triggered and token stored
+2. **Infinite waiting**: User may need to check DEGIRO mobile app for notification
+3. **Connection timeouts**: Network issues or DEGIRO API problems
+
+#### Debug Commands
+
+```python
+# Check In-App session state
+session_data = auth_service.session_manager.get_session_data(request)
+print(f"In-App required: {session_data.get('in_app_auth_required')}")
+
+# Check stored credentials include token
+credentials = auth_service.session_manager.get_credentials(request)
+print(f"Has in-app token: {bool(credentials and credentials.in_app_token)}")
+```
 
 ## Error Handling
 

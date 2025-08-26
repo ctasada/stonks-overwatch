@@ -65,6 +65,82 @@ print(f"Has config credentials: {has_config}")
 | **Session cleared unexpectedly** | User logged out after TOTP | Verify `preserve_session=True` for TOTP in middleware |
 | **Login form not showing 2FA** | Username/password form shown instead of TOTP | Check if `set_totp_required(request, True)` is called |
 | **Remember me not working** | Credentials not saved in database | Verify `store_credentials_in_database()` is called after successful auth |
+| **In-App auth not triggered** | Username/password form instead of "Open DEGIRO app" | Check if `set_in_app_auth_required(request, True)` is called |
+| **In-App waiting loop stuck** | Spinner shows indefinitely | Check DEGIRO mobile app for notification; verify token stored in session |
+| **In-App token missing** | "No in-app token found" error | Verify `in_app_token` is stored during `store_credentials()` call |
+| **In-App auth clearing unexpectedly** | Back to login form during wait | Check error handling in `_wait_for_in_app_confirmation()` |
+
+### 2.1. In-App Authentication Debugging (New 2025)
+
+**Check In-App authentication status:**
+
+```python
+# Check if In-App auth is required
+auth_service = get_authentication_service()
+in_app_required = auth_service.session_manager.is_in_app_auth_required(request)
+print(f"In-App auth required: {in_app_required}")
+```
+
+**Check In-App token in session:**
+
+```python
+# Check stored credentials include in_app_token
+credentials = auth_service.session_manager.get_credentials(request)
+has_token = bool(credentials and credentials.in_app_token)
+print(f"Has in-app token: {has_token}")
+if credentials and credentials.in_app_token:
+    print(f"Token preview: {credentials.in_app_token[:8]}...")
+```
+
+**Debug In-App waiting loop:**
+
+```python
+# Monitor waiting loop status (add to login view for debugging)
+self.logger.info(f"Starting in-app wait for user: {credentials.username}")
+self.logger.info(f"Token: {credentials.in_app_token[:8]}...")
+
+# In _wait_for_in_app_confirmation method
+while True:
+    sleep(5)
+    try:
+        trading_api.connect()
+        self.logger.info("In-app authentication successful")
+        return True
+    except DeGiroConnectionError as retry_error:
+        self.logger.debug(f"Retry error status: {retry_error.error_details.status}")
+        if retry_error.error_details.status == 3:
+            self.logger.debug("Still waiting for user confirmation...")
+            continue
+```
+
+**Test In-App flow manually:**
+
+```python
+# In Django shell - simulate In-App authentication
+from django.test import RequestFactory
+from stonks_overwatch.core.authentication_locator import get_authentication_service
+
+factory = RequestFactory()
+request = factory.post('/login')
+
+auth_service = get_authentication_service()
+
+# Store test credentials with in_app_token
+auth_service.session_manager.store_credentials(
+    request=request,
+    username='test_user',
+    password='test_pass',
+    in_app_token='test_token_12345',
+    remember_me=False
+)
+
+# Set In-App required flag
+auth_service.session_manager.set_in_app_auth_required(request, True)
+
+# Check session state
+session_data = auth_service.session_manager.get_session_data(request)
+print(f"Session data: {session_data}")
+```
 
 ### 3. Configuration Management
 
@@ -92,10 +168,16 @@ auth_service.credential_service.store_credentials_in_database(creds.username, cr
 - `[AUTH|SESSION_MANAGER]`: Session state changes
 - `[AUTH|CREDENTIAL_SERVICE]`: Credential operations
 - `[DEGIRO|AUTH_MIDDLEWARE]`: Middleware authentication checks
+- `[VIEW|LOGIN]`: Login view operations including In-App auth
 
 **Important log messages:**
 - `"TOTP required during connection check"`: TOTP flow initiated
-- `"Stored credentials in session"`: Credentials cached for TOTP
+- `"In-app authentication required during connection check"`: In-App flow initiated
+- `"Stored credentials in session"`: Credentials cached for TOTP/In-App
+- `"Starting in-app authentication for user"`: In-App waiting loop started
+- `"Starting in-app authentication wait loop for token"`: Polling begins
+- `"Still waiting for in-app confirmation"`: User hasn't confirmed yet
+- `"In-app authentication successful"`: Mobile app confirmation received
 - `"User logged out successfully"`: Complete logout
 - `"Authentication failed"`: General auth failure
 

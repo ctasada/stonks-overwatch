@@ -191,6 +191,23 @@ class AuthenticationServiceInterface(ABC):
         pass
 
     @abstractmethod
+    def handle_in_app_authentication(self, request: HttpRequest) -> AuthenticationResponse:
+        """
+        Handle in-app authentication when required.
+
+        This method is called when the initial authentication indicated
+        that in-app authentication is required. It waits for the user to
+        confirm authentication in their mobile app.
+
+        Args:
+            request: The HTTP request containing session data
+
+        Returns:
+            AuthenticationResponse: Result of the in-app authentication
+        """
+        pass
+
+    @abstractmethod
     def logout_user(self, request: HttpRequest) -> None:
         """
         Log out the user and clear all authentication state.

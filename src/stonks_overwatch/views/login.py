@@ -1,9 +1,12 @@
+from typing import Any
+
 from django.contrib import messages
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.views import View
 
 from stonks_overwatch.core.authentication_locator import get_authentication_service
-from stonks_overwatch.core.interfaces.authentication_service import AuthenticationResult
+from stonks_overwatch.core.interfaces.authentication_service import AuthenticationResponse, AuthenticationResult
 from stonks_overwatch.jobs.jobs_scheduler import JobsScheduler
 from stonks_overwatch.utils.core.constants import AuthenticationErrorMessages, LogMessages
 from stonks_overwatch.utils.core.logger import StonksLogger
@@ -29,7 +32,7 @@ class Login(View):
         # Use optimized service locator for authentication service
         self.auth_service = get_authentication_service()
 
-    def get(self, request):
+    def get(self, request: HttpRequest) -> HttpResponse:
         # Use AuthenticationService to check TOTP requirement, in-app auth requirement, and authentication status
         show_otp = self.auth_service.session_manager.is_totp_required(request)
         show_in_app_auth = self.auth_service.session_manager.is_in_app_auth_required(request)
@@ -42,7 +45,7 @@ class Login(View):
         context = {"show_otp": show_otp, "show_loading": show_loading, "show_in_app_auth": show_in_app_auth}
         return render(request, self.TEMPLATE_NAME, context=context, status=200)
 
-    def post(self, request):
+    def post(self, request: HttpRequest) -> HttpResponse:
         update_portfolio = request.POST.get("update_portfolio") or False
         if update_portfolio:
             # Update portfolio data before loading the dashboard
@@ -52,8 +55,7 @@ class Login(View):
         in_app_auth = request.POST.get("in_app_auth") or False
         if in_app_auth:
             # For in-app authentication, wait until the user is authenticated using DEGIRO app
-            # FIXME: Implement waiting code
-            return redirect("dashboard")
+            return self._handle_in_app_authentication(request)
 
         # Extract and validate credentials
         credentials = self._extract_credentials(request)
@@ -69,7 +71,7 @@ class Login(View):
         context = {"show_otp": show_otp, "show_loading": show_loading, "show_in_app_auth": show_in_app_auth}
         return render(request, self.TEMPLATE_NAME, context=context, status=200)
 
-    def _extract_credentials(self, request):
+    def _extract_credentials(self, request: HttpRequest) -> dict[str, Any]:
         """Extract and validate credentials from the request."""
         username = request.POST.get("username")
         password = request.POST.get("password")
@@ -103,20 +105,20 @@ class Login(View):
 
         return None
 
-    def _perform_authentication(self, request, credentials):
+    def _perform_authentication(self, request: HttpRequest, credentials: dict[str, Any]) -> AuthenticationResponse:
         """Perform authentication using AuthenticationService."""
         if credentials["one_time_password"]:
             return self.auth_service.handle_totp_authentication(request, credentials["one_time_password"])
         else:
             return self.auth_service.authenticate_user(
-                request,
-                credentials["username"],
-                credentials["password"],
-                credentials["one_time_password"],
-                credentials["remember_me"],
+                request=request,
+                username=credentials["username"],
+                password=credentials["password"],
+                one_time_password=credentials["one_time_password"],
+                remember_me=credentials["remember_me"],
             )
 
-    def _handle_auth_result(self, request, auth_result):
+    def _handle_auth_result(self, request: HttpRequest, auth_result: AuthenticationResponse):
         """Handle authentication result and set UI state."""
         show_otp = False
         show_loading = False
@@ -130,6 +132,7 @@ class Login(View):
             show_otp = True
         elif auth_result.result == AuthenticationResult.IN_APP_AUTHENTICATION_REQUIRED:
             self.logger.info(LogMessages.IN_APP_AUTH_REQUIRED_USER)
+            self.logger.info(f"_handle_auth_result: auth_results = {auth_result}")
             show_in_app_auth = True
         elif auth_result.result == AuthenticationResult.ACCOUNT_BLOCKED:
             self.logger.warning(LogMessages.ACCOUNT_BLOCKED_USER)
@@ -147,7 +150,29 @@ class Login(View):
 
         return show_otp, show_loading, show_in_app_auth
 
-    def _render_login_error(self, request, error_message):
+    def _handle_in_app_authentication(self, request: HttpRequest) -> HttpResponse:
+        """Handle in-app authentication by delegating to the authentication service."""
+        # Use the authentication service to handle in-app authentication
+        auth_result = self.auth_service.handle_in_app_authentication(request)
+
+        if auth_result.is_success:
+            self.logger.info(LogMessages.LOGIN_SUCCESSFUL)
+            # Update portfolio data before loading the dashboard
+            JobsScheduler.update_portfolio()
+            return redirect("dashboard")
+        else:
+            # Handle errors from authentication service
+            self.logger.error(f"In-app authentication failed: {auth_result.message}")
+            if auth_result.result == AuthenticationResult.CONFIGURATION_ERROR:
+                messages.error(request, AuthenticationErrorMessages.CONFIGURATION_ERROR)
+            elif auth_result.result == AuthenticationResult.CONNECTION_ERROR:
+                messages.error(request, AuthenticationErrorMessages.CONNECTION_ERROR)
+            else:
+                messages.error(request, auth_result.message or AuthenticationErrorMessages.UNEXPECTED_ERROR)
+
+            return render(request, self.TEMPLATE_NAME, context={"show_in_app_auth": False}, status=400)
+
+    def _render_login_error(self, request: HttpRequest, error_message):
         """Render login page with error message."""
         messages.error(request, error_message)
         return render(request, self.TEMPLATE_NAME, context={"show_otp": False, "show_in_app_auth": False}, status=400)
