@@ -14,6 +14,7 @@ class DegiroCredentials(BaseCredentials):
     int_account: Optional[int] = None
     totp_secret_key: Optional[str] = None
     one_time_password: Optional[int] = None
+    in_app_token: Optional[str] = None
     remember_me: Optional[bool] = None
 
     @classmethod

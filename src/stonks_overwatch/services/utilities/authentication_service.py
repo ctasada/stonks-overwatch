@@ -163,10 +163,10 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
 
             # Store credentials in session for later use
             self.session_manager.store_credentials(
-                request,
-                effective_credentials.username,
-                effective_credentials.password,
-                effective_credentials.remember_me or False,
+                request=request,
+                username=effective_credentials.username,
+                password=effective_credentials.password,
+                remember_me=effective_credentials.remember_me or False,
             )
 
             # Attempt DeGiro authentication
@@ -241,7 +241,9 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
                 AuthenticationResult.CONNECTION_ERROR, f"Connection check failed: {str(e)}"
             )
 
-    def _handle_degiro_connection_error_in_check(self, request: HttpRequest, degiro_error) -> AuthenticationResponse:
+    def _handle_degiro_connection_error_in_check(
+        self, request: HttpRequest, degiro_error: DeGiroConnectionError
+    ) -> AuthenticationResponse:
         """Handle DeGiro connection errors during connection check."""
         # Handle TOTP requirement specifically
         if hasattr(degiro_error, "error_details") and degiro_error.error_details.status_text == "totpNeeded":
@@ -283,10 +285,10 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
                 f"Storing effective credentials in session for TOTP: username={effective_credentials.username}"
             )
             self.session_manager.store_credentials(
-                request,
-                effective_credentials.username,
-                effective_credentials.password,
-                effective_credentials.remember_me or False,
+                request=request,
+                username=effective_credentials.username,
+                password=effective_credentials.password,
+                remember_me=effective_credentials.remember_me or False,
             )
 
         return AuthenticationResponse(
@@ -295,7 +297,9 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
             requires_totp=True,
         )
 
-    def _handle_in_app_auth_required_error(self, request: HttpRequest, degiro_error) -> AuthenticationResponse:
+    def _handle_in_app_auth_required_error(
+        self, request: HttpRequest, degiro_error: DeGiroConnectionError
+    ) -> AuthenticationResponse:
         """Handle in-app authentication required error specifically."""
         self.logger.info("In-app authentication required during connection check")
 
@@ -307,10 +311,11 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
                 f"username={effective_credentials.username}"
             )
             self.session_manager.store_credentials(
-                request,
-                effective_credentials.username,
-                effective_credentials.password,
-                effective_credentials.remember_me or False,
+                request=request,
+                username=effective_credentials.username,
+                password=effective_credentials.password,
+                remember_me=effective_credentials.remember_me or False,
+                in_app_token=degiro_error.error_details.in_app_token,
             )
 
         return AuthenticationResponse(
@@ -327,7 +332,10 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
         # Store credentials for TOTP flow if provided
         if credentials:
             self.session_manager.store_credentials(
-                request, credentials.username, credentials.password, credentials.remember_me or False
+                request=request,
+                username=credentials.username,
+                password=credentials.password,
+                remember_me=credentials.remember_me or False,
             )
 
         return AuthenticationResponse(
@@ -345,7 +353,10 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
         # Store credentials for in-app authentication flow if provided
         if credentials:
             self.session_manager.store_credentials(
-                request, credentials.username, credentials.password, credentials.remember_me or False
+                request=request,
+                username=credentials.username,
+                password=credentials.password,
+                remember_me=credentials.remember_me or False,
             )
 
         return AuthenticationResponse(

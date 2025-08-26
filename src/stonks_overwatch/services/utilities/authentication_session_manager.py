@@ -152,7 +152,14 @@ class AuthenticationSessionManager(SessionManagerInterface, BaseService):
             self.logger.error(f"Error getting credentials from session: {str(e)}")
             return None
 
-    def store_credentials(self, request: HttpRequest, username: str, password: str, remember_me: bool = False) -> None:
+    def store_credentials(
+        self,
+        request: HttpRequest,
+        username: str,
+        password: str,
+        in_app_token: str | None = None,
+        remember_me: bool = False,
+    ) -> None:
         """
         Store user credentials in the session.
 
@@ -160,10 +167,13 @@ class AuthenticationSessionManager(SessionManagerInterface, BaseService):
             request: The HTTP request containing session data
             username: The username to store
             password: The password to store
+            in_app_token: The in-app token to store (if applicable). Only used for in-app auth.
             remember_me: Whether the user wants to be remembered
         """
         try:
-            credentials = DegiroCredentials(username=username, password=password, remember_me=remember_me)
+            credentials = DegiroCredentials(
+                username=username, password=password, in_app_token=in_app_token, remember_me=remember_me
+            )
             request.session[self.SESSION_CREDENTIALS_KEY] = credentials.to_dict()
             request.session.modified = True
             request.session.save()
