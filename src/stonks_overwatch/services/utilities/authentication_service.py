@@ -568,14 +568,14 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
                 result=AuthenticationResult.SUCCESS, message="Authentication successful", session_id=session_id
             )
 
-        except DeGiroConnectionError as error:
-            return self._handle_degiro_connection_error(request, error, credentials)
         except MaintenanceError as error:
             return AuthenticationResponse(
                 result=AuthenticationResult.MAINTENANCE_MODE,
                 message=error.error_details.error if hasattr(error, "error_details") else str(error),
                 is_maintenance_mode=True,
             )
+        except DeGiroConnectionError as error:
+            return self._handle_degiro_connection_error(request, error, credentials)
         except Exception as e:
             self.logger.error(f"Error during DeGiro authentication: {str(e)}")
             return self._create_error_response(
