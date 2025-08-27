@@ -265,13 +265,14 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
         else:
             # Other DeGiro connection errors
             self.logger.error(f"DeGiro connection error: {degiro_error}")
+            # Split the error message construction into two lines for clarity
+            if hasattr(degiro_error, "error_details"):
+                error_status = degiro_error.error_details.status_text
+            else:
+                error_status = str(degiro_error)
             return self._create_error_response(
                 AuthenticationResult.INVALID_CREDENTIALS,
-                f"DeGiro authentication failed: {
-                    degiro_error.error_details.status_text
-                    if hasattr(degiro_error, 'error_details')
-                    else str(degiro_error)
-                }",
+                f"DeGiro authentication failed: {error_status}",
             )
 
     def _handle_totp_required_error(
