@@ -164,26 +164,27 @@ auth_service.credential_service.store_credentials_in_database(creds.username, cr
 ### 4. Monitoring and Logging
 
 **Key log markers to search for:**
-- `[AUTH|SERVICE]`: Main authentication operations
+- `[AUTH|SERVICE]`: Main authentication operations (including In-App auth processing)
 - `[AUTH|SESSION_MANAGER]`: Session state changes
 - `[AUTH|CREDENTIAL_SERVICE]`: Credential operations
 - `[DEGIRO|AUTH_MIDDLEWARE]`: Middleware authentication checks
-- `[VIEW|LOGIN]`: Login view operations including In-App auth
+- `[VIEW|LOGIN]`: Login view UI operations (In-App auth UI delegation only)
 
 **Important log messages:**
 - `"TOTP required during connection check"`: TOTP flow initiated
 - `"In-app authentication required during connection check"`: In-App flow initiated
 - `"Stored credentials in session"`: Credentials cached for TOTP/In-App
-- `"Starting in-app authentication for user"`: In-App waiting loop started
-- `"Starting in-app authentication wait loop for token"`: Polling begins
+- `"Handling in-app authentication"`: In-App auth delegated to service layer
+- `"Starting in-app authentication for user"`: In-App waiting loop started (service layer)
+- `"Starting in-app authentication wait loop for token"`: Polling begins (service layer)
 - `"Still waiting for in-app confirmation"`: User hasn't confirmed yet
-- `"In-app authentication successful"`: Mobile app confirmation received
+- `"In-app authentication successful"`: Mobile app confirmation received (service layer)
 - `"User logged out successfully"`: Complete logout
 - `"Authentication failed"`: General auth failure
 
 ### 5. Testing Authentication Locally
 
-**Test authentication flow:**
+**Test standard authentication flow:**
 
 ```python
 # In Django shell
@@ -197,6 +198,35 @@ auth_service = get_authentication_service()
 result = auth_service.authenticate_user(request, 'username', 'password', None, False)
 print(f"Result: {result.result}")
 print(f"Message: {result.message}")
+```
+
+**Test in-app authentication flow:**
+
+```python
+# In Django shell - test in-app authentication service method
+from django.test import RequestFactory
+from stonks_overwatch.core.authentication_locator import get_authentication_service
+from stonks_overwatch.config.degiro import DegiroCredentials
+
+factory = RequestFactory()
+request = factory.post('/login')
+
+# Set up session with in-app credentials (normally done by initial auth)
+auth_service = get_authentication_service()
+auth_service.session_manager.store_credentials(
+    request=request,
+    username='test_user',
+    password='test_pass',
+    in_app_token='test_token_12345',
+    remember_me=False
+)
+auth_service.session_manager.set_in_app_auth_required(request, True)
+
+# Test in-app authentication handling (service layer)
+result = auth_service.handle_in_app_authentication(request)
+print(f"In-App Result: {result.result}")
+print(f"Message: {result.message}")
+print(f"Session ID: {result.session_id}")
 ```
 
 ### 6. Performance Monitoring
@@ -242,8 +272,20 @@ print(f"Services registered: {status['factory_services_registered']}")
 ### Login View Integration
 
 - **File**: `src/stonks_overwatch/views/login.py`
-- **Purpose**: Handles user login, 2FA submission
-- **Key Method**: `_perform_authentication()`
+- **Purpose**: Handles user login UI, delegates authentication to service layer
+- **Key Methods**:
+  - `_perform_authentication()`: Delegates to AuthenticationService
+  - `_handle_in_app_authentication()`: Delegates to AuthenticationService.handle_in_app_authentication()
+
+### Authentication Service Integration
+
+- **File**: `src/stonks_overwatch/services/utilities/authentication_service.py`
+- **Purpose**: Core authentication logic including in-app authentication processing
+- **Key Methods**:
+  - `authenticate_user()`: Main authentication orchestration
+  - `handle_totp_authentication()`: TOTP processing
+  - `handle_in_app_authentication()`: In-app authentication orchestration
+  - `_wait_for_in_app_confirmation()`: In-app polling loop (uses DeGiroService)
 
 ### DeGiro Service Integration
 
