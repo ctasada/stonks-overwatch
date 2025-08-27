@@ -33,21 +33,11 @@ class BitvavoConfig(BaseConfig):
         enabled: bool = False,
         offline_mode: bool = False,
     ) -> None:
-        super().__init__(credentials, enabled)
-        if update_frequency_minutes < 1:
-            raise ValueError("Update frequency must be at least 1 minute")
-        self.start_date = start_date
-        self.update_frequency_minutes = update_frequency_minutes
-        self.offline_mode = offline_mode
+        super().__init__(credentials, start_date, enabled, offline_mode, update_frequency_minutes)
 
     def __eq__(self, value: object) -> bool:
         if isinstance(value, BitvavoConfig):
-            return (
-                super().__eq__(value)
-                and self.start_date == value.start_date
-                and self.update_frequency_minutes == value.update_frequency_minutes
-                and self.offline_mode == value.offline_mode
-            )
+            return super().__eq__(value)
         return False
 
     def __repr__(self) -> str:
