@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+* Updated internal dependencies
+
 ## [0.1.2] - 2025-08-22
 
 ### Added
