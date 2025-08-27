@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Navigation sidebar has been redesigned to improve usability
 * Navigation sidebar is now collapsible
+* Internal code improvements
 
 ### Deprecated
 
