@@ -40,9 +40,6 @@ class BaseAggregator(ABC):
             f"[AGGREGATOR|{service_type.value.upper()}]",
         )
 
-        # Use unified factory (should always be available in Phase 5)
-        self._logger.debug("Using unified broker factory")
-
         self._broker_services: Dict[str, Any] = {}
         self._initialize_broker_services()
 
@@ -249,7 +246,6 @@ class BaseAggregator(ABC):
 
         Args:
             selected_portfolio: Selected portfolio configuration
-            **kwargs: Additional arguments specific to the aggregator
 
         Returns:
             Aggregated data in the appropriate format
