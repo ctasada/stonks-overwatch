@@ -342,12 +342,14 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .navbar-bra
 #sidebar-portfolio-selector .sidebar-nav-link:hover {
     background-color: var(--sidebar-hover-bg) !important;
     color: #fff !important;
+    transform: none !important; /* Prevent rightward movement on hover */
 }
 
 #sidebar-portfolio-selector .sidebar-nav-link:focus {
     background-color: var(--sidebar-hover-bg) !important;
     color: #fff !important;
     box-shadow: none !important;
+    transform: none !important; /* Prevent rightward movement on focus */
 }
 
 #sidebar-portfolio-selector button img {
@@ -357,8 +359,9 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .navbar-bra
 
 #sidebar-portfolio-menu {
     background: var(--primary-dark);
-    border: none;
-    box-shadow: var(--shadow-dark);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(10px);
 }
 
 #sidebar-portfolio-menu .dropdown-item {
@@ -677,4 +680,13 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .navbar-bra
 .dropdown-custom + .dropdown-menu .dropdown-item:focus {
     background-color: var(--primary-light) !important;
     color: black !important;
+}
+
+/* Connection Status Icons - Better contrast against dark sidebar */
+#sidebar .text-success {
+    color: #90EE90 !important; /* Light green for better contrast */
+}
+
+#sidebar .text-warning {
+    color: #FFD700 !important; /* Gold/bright yellow for better contrast */
 }
