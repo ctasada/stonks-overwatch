@@ -11,7 +11,6 @@ from django.db import connection
 from pandas import DataFrame
 
 from stonks_overwatch.config.degiro import DegiroConfig
-from stonks_overwatch.core.exceptions import CredentialsException
 from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.core.interfaces.update_service import AbstractUpdateService
 from stonks_overwatch.services.brokers.degiro.client.constants import CurrencyFX, ProductType
@@ -33,6 +32,7 @@ from stonks_overwatch.services.brokers.degiro.repositories.product_quotations_re
 from stonks_overwatch.services.brokers.degiro.repositories.transactions_repository import TransactionsRepository
 from stonks_overwatch.services.brokers.degiro.services.helper import is_non_tradeable_product
 from stonks_overwatch.services.brokers.degiro.services.portfolio_service import PortfolioService
+from stonks_overwatch.services.brokers.degiro.services.session_checker import DeGiroSessionChecker
 from stonks_overwatch.services.brokers.yfinance.client.yfinance_client import YFinanceClient
 from stonks_overwatch.services.brokers.yfinance.repositories.models import YFinanceStockSplits, YFinanceTickerInfo
 from stonks_overwatch.utils.core.datetime import DateTimeUtility
@@ -68,13 +68,6 @@ class UpdateService(BaseService, AbstractUpdateService):
 
             broker_factory = BrokerFactory()
             self._injected_config = broker_factory.create_config("degiro")
-
-        # Check that the available config is enough to proceed
-        if (
-            self._injected_config.get_credentials is None
-            or not self._injected_config.get_credentials.has_minimal_credentials()
-        ):
-            raise CredentialsException("Not enough credentials to connect to DeGiro")
 
         # Pass injected config to DeGiro service for proper credential access
         self.degiro_service = DeGiroService(config=self._injected_config)
@@ -118,6 +111,11 @@ class UpdateService(BaseService, AbstractUpdateService):
         return last_movement
 
     def update_all(self):
+        if not DeGiroSessionChecker.has_active_session():
+            self.logger.warning("Skipping update: No active DeGiro session available")
+            self.logger.info("Please authenticate first to establish a session")
+            return
+
         if not self.degiro_service.check_connection():
             self.logger.warning("Skipping update since cannot connect to DeGiro")
             return

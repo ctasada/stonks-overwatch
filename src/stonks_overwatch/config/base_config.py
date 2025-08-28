@@ -1,6 +1,7 @@
 import json
 import os
 from abc import ABC, abstractmethod
+from datetime import date
 from pathlib import Path
 from typing import Any, Dict, Optional, Type, TypeVar, cast
 
@@ -13,18 +14,34 @@ from stonks_overwatch.utils.core.logger_constants import LOGGER_CONFIG, TAG_BASE
 class BaseConfig(ABC):
     logger = StonksLogger.get_logger(LOGGER_CONFIG, TAG_BASE_CONFIG)
     CONFIG_PATH = os.path.join(PROJECT_PATH, "config", "config.json")
+    DEFAULT_UPDATE_FREQUENCY = 5
 
     def __init__(
         self,
         credentials: Optional[BaseCredentials],
+        start_date: date,
         enabled: bool = False,
+        offline_mode: bool = False,
+        update_frequency_minutes: int = DEFAULT_UPDATE_FREQUENCY,
     ) -> None:
+        if update_frequency_minutes < 1:
+            raise ValueError("Update frequency must be at least 1 minute")
+
         self.enabled = enabled
         self.credentials = credentials
+        self.start_date = start_date
+        self.update_frequency_minutes = update_frequency_minutes
+        self.offline_mode = offline_mode
 
     def __eq__(self, value: object) -> bool:
         if isinstance(value, self.__class__):
-            return self.is_enabled() == value.is_enabled() and self.credentials == value.credentials
+            return (
+                self.is_enabled() == value.is_enabled()
+                and self.credentials == value.credentials
+                and self.offline_mode == value.offline_mode
+                and self.start_date == value.start_date
+                and self.update_frequency_minutes == value.update_frequency_minutes
+            )
         return False
 
     def __repr__(self) -> str:
@@ -193,6 +210,7 @@ class LazyConfig(BaseConfig):
     a transparent interface to the actual configuration.
     """
 
+    # noinspection PyMissingConstructor
     def __init__(self, config_class, broker_name: str):
         """
         Initialize lazy config wrapper.

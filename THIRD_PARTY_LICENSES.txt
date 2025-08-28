@@ -339,7 +339,7 @@ SOFTWARE.
 
 
 beautifulsoup4
-4.13.4
+4.13.5
 MIT License
 Beautiful Soup is made available under the MIT license:
 
@@ -2628,7 +2628,7 @@ License: LGPL-2.1-or-later
 
 
 orjson
-3.11.2
+3.11.3
 Apache Software License; MIT License
                               Apache License
                         Version 2.0, January 2004
@@ -2842,7 +2842,7 @@ under the terms of *both* these licenses.
 
 
 pandas
-2.3.1
+2.3.2
 BSD License
 BSD 3-Clause License
 
@@ -4120,7 +4120,7 @@ THE SOFTWARE.
 
 
 platformdirs
-4.3.8
+4.4.0
 MIT License
 MIT License
 
@@ -4948,7 +4948,7 @@ DEALINGS IN THE SOFTWARE.
 
 
 requests
-2.32.4
+2.32.5
 Apache Software License
 
                                  Apache License
@@ -5182,7 +5182,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 soupsieve
-2.7
+2.8
 MIT License
 MIT License
 
@@ -5295,7 +5295,7 @@ SOFTWARE.
 
 
 typing_extensions
-4.14.1
+4.15.0
 UNKNOWN
 A. HISTORY OF THE SOFTWARE
 ==========================

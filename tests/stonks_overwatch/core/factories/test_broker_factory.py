@@ -6,6 +6,8 @@ functionality, including configuration creation, service creation with
 dependency injection, caching, and error handling.
 """
 
+from datetime import date
+
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.base_credentials import BaseCredentials
 from stonks_overwatch.core.factories.broker_factory import (
@@ -37,7 +39,7 @@ class MockCredentials(BaseCredentials):
 
     def is_valid(self) -> bool:
         """Check if credentials are valid."""
-        return self.username and self.password
+        return bool(self.username and self.password)
 
     def to_dict(self) -> dict:
         """Convert credentials to dictionary."""
@@ -60,9 +62,18 @@ class MockBrokerConfig(BaseConfig):
 
     config_key = "testbroker"
 
-    def __init__(self, credentials: MockCredentials = None, enabled: bool = True):
+    def __init__(
+        self,
+        credentials: MockCredentials = None,
+        enabled: bool = True,
+        start_date: date = None,
+        offline_mode: bool = False,
+        update_frequency_minutes: int = 5,
+    ):
         credentials = credentials or MockCredentials()
-        super().__init__(credentials, enabled)
+        if start_date is None:
+            start_date = date.today()
+        super().__init__(credentials, start_date, enabled, offline_mode, update_frequency_minutes)
 
     def is_enabled(self) -> bool:
         """Check if the broker is enabled."""
@@ -70,11 +81,16 @@ class MockBrokerConfig(BaseConfig):
 
     def is_valid(self) -> bool:
         """Check if the configuration is valid."""
-        return self.enabled and self.credentials and self.credentials.is_valid()
+        return (
+            self.enabled
+            and self.credentials is not None
+            and hasattr(self.credentials, "is_valid")
+            and self.credentials.is_valid()
+        )
 
     def get_credentials(self) -> MockCredentials:
         """Get the broker credentials."""
-        return self.credentials
+        return self.credentials if isinstance(self.credentials, MockCredentials) else None
 
     def to_dict(self) -> dict:
         """Convert configuration to dictionary."""
@@ -115,7 +131,15 @@ class MockPortfolioService(PortfolioServiceInterface):
         return []
 
     def get_portfolio_total(self, portfolio=None):
-        return TotalPortfolio()
+        # Provide all required parameters for TotalPortfolio
+        return TotalPortfolio(
+            base_currency="USD",
+            total_pl=0.0,
+            total_cash=0.0,
+            current_value=0.0,
+            total_roi=0.0,
+            total_deposit_withdrawal=0.0,
+        )
 
     def calculate_historical_value(self):
         return []
@@ -195,7 +219,9 @@ class TestBrokerFactory:
         assert config is not None
         assert isinstance(config, MockBrokerConfig)
         assert config.is_enabled()
-        assert config.credentials.username == "test"
+        credentials = config.get_credentials() if hasattr(config, "get_credentials") else config.credentials
+        assert credentials is not None
+        assert getattr(credentials, "username", None) == "test"
 
     def test_create_config_with_kwargs(self):
         """Test creating configuration with custom kwargs."""
@@ -205,7 +231,9 @@ class TestBrokerFactory:
         assert config is not None
         assert isinstance(config, MockBrokerConfig)
         assert not config.is_enabled()
-        assert config.credentials.username == "custom"
+        credentials = config.get_credentials() if hasattr(config, "get_credentials") else config.credentials
+        assert credentials is not None
+        assert getattr(credentials, "username", None) == "custom"
 
     def test_create_config_caching(self):
         """Test that default configs are cached."""
@@ -232,6 +260,7 @@ class TestBrokerFactory:
         # Create a config class that raises an exception and doesn't have from_db_with_json_override
         class FailingConfig(BaseConfig):
             def __init__(self, **kwargs):
+                super().__init__(None, date.today())
                 raise ValueError("Config creation failed")
 
             @classmethod
@@ -271,12 +300,13 @@ class TestBrokerFactory:
         # Create a config class without default method
         class NoDefaultConfig(BaseConfig):
             def __init__(self):
+                super().__init__(None, date.today())
                 # Empty init for testing purposes - missing required default() method
                 pass
 
             @classmethod
             def from_dict(cls, data: dict):
-                return cls()
+                return cls(None, date.today())
 
             @property
             def get_credentials(self):
@@ -299,7 +329,9 @@ class TestBrokerFactory:
         assert config is not None
         assert isinstance(config, MockBrokerConfig)
         assert not config.is_enabled()
-        assert config.credentials.username == "dict_user"
+        credentials = config.get_credentials() if hasattr(config, "get_credentials") else config.credentials
+        assert credentials is not None
+        assert getattr(credentials, "username", None) == "dict_user"
 
     def test_create_config_from_dict_nonexistent_broker(self):
         """Test creating config from dict for non-existent broker."""
