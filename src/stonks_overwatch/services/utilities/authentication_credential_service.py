@@ -455,11 +455,11 @@ class AuthenticationCredentialService(CredentialServiceInterface, BaseService):
             self.logger.debug(
                 f"Credential sources: session={has_session}, database={has_database}, config={has_config}"
             )
-            return (has_session, has_database, has_config)
+            return has_session, has_database, has_config
 
         except Exception as e:
             self.logger.error(f"Error checking credential sources: {str(e)}")
-            return (False, False, False)
+            return False, False, False
 
     def _has_session_credentials(self, request: HttpRequest) -> bool:
         """Helper method to check if session has credentials."""

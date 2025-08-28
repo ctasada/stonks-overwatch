@@ -568,8 +568,9 @@ class TestAuthenticationService(TestCase):
 
         result = self.auth_service._authenticate_with_degiro(self.request, credentials)
 
-        # Since MaintenanceError inherits from DeGiroConnectionError, it's handled as invalid credentials
-        assert result.result == AuthenticationResult.INVALID_CREDENTIALS
+        # MaintenanceError should now result in MAINTENANCE_MODE
+        assert result.result == AuthenticationResult.MAINTENANCE_MODE
+        assert getattr(result, "is_maintenance_mode", True) is True
 
     def test_dependency_injection_defaults(self):
         """Test AuthenticationService creates default dependencies when none provided."""
