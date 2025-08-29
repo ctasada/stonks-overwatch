@@ -32,6 +32,18 @@ class Login(View):
         # Use optimized service locator for authentication service
         self.auth_service = get_authentication_service()
 
+    def _render_login_template(
+        self,
+        request: HttpRequest,
+        show_otp: bool = False,
+        show_loading: bool = False,
+        show_in_app_auth: bool = False,
+        status: int = 200,
+    ) -> HttpResponse:
+        """Centralized method to render the login template with appropriate context."""
+        context = {"show_otp": show_otp, "show_loading": show_loading, "show_in_app_auth": show_in_app_auth}
+        return render(request, self.TEMPLATE_NAME, context=context, status=status)
+
     def get(self, request: HttpRequest) -> HttpResponse:
         # Use AuthenticationService to check TOTP requirement, in-app auth requirement, and authentication status
         show_otp = self.auth_service.session_manager.is_totp_required(request)
@@ -42,8 +54,7 @@ class Login(View):
             self.logger.info(LogMessages.USER_ALREADY_AUTHENTICATED)
             show_loading = True
 
-        context = {"show_otp": show_otp, "show_loading": show_loading, "show_in_app_auth": show_in_app_auth}
-        return render(request, self.TEMPLATE_NAME, context=context, status=200)
+        return self._render_login_template(request, show_otp, show_loading, show_in_app_auth)
 
     def post(self, request: HttpRequest) -> HttpResponse:
         update_portfolio = request.POST.get("update_portfolio") or False
@@ -60,7 +71,8 @@ class Login(View):
         # Extract and validate credentials
         credentials = self._extract_credentials(request)
         if not credentials:
-            return self._render_login_error(request, AuthenticationErrorMessages.CREDENTIALS_REQUIRED)
+            messages.error(request, AuthenticationErrorMessages.CREDENTIALS_REQUIRED)
+            return self._render_login_template(request, status=400)
 
         # Perform authentication
         auth_result = self._perform_authentication(request, credentials)
@@ -68,8 +80,7 @@ class Login(View):
         # Handle result and render response
         show_otp, show_loading, show_in_app_auth = self._handle_auth_result(request, auth_result)
 
-        context = {"show_otp": show_otp, "show_loading": show_loading, "show_in_app_auth": show_in_app_auth}
-        return render(request, self.TEMPLATE_NAME, context=context, status=200)
+        return self._render_login_template(request, show_otp, show_loading, show_in_app_auth)
 
     def _extract_credentials(self, request: HttpRequest) -> dict[str, Any]:
         """Extract and validate credentials from the request."""
@@ -132,7 +143,6 @@ class Login(View):
             show_otp = True
         elif auth_result.result == AuthenticationResult.IN_APP_AUTHENTICATION_REQUIRED:
             self.logger.info(LogMessages.IN_APP_AUTH_REQUIRED_USER)
-            self.logger.info(f"_handle_auth_result: auth_results = {auth_result}")
             show_in_app_auth = True
         elif auth_result.result == AuthenticationResult.ACCOUNT_BLOCKED:
             self.logger.warning(LogMessages.ACCOUNT_BLOCKED_USER)
@@ -157,9 +167,7 @@ class Login(View):
 
         if auth_result.is_success:
             self.logger.info(LogMessages.LOGIN_SUCCESSFUL)
-            # Update portfolio data before loading the dashboard
-            JobsScheduler.update_portfolio()
-            return redirect("dashboard")
+            return self._render_login_template(request, show_loading=True)
         else:
             # Handle errors from authentication service
             self.logger.error(f"In-app authentication failed: {auth_result.message}")
@@ -170,9 +178,4 @@ class Login(View):
             else:
                 messages.error(request, auth_result.message or AuthenticationErrorMessages.UNEXPECTED_ERROR)
 
-            return render(request, self.TEMPLATE_NAME, context={"show_in_app_auth": False}, status=400)
-
-    def _render_login_error(self, request: HttpRequest, error_message):
-        """Render login page with error message."""
-        messages.error(request, error_message)
-        return render(request, self.TEMPLATE_NAME, context={"show_otp": False, "show_in_app_auth": False}, status=400)
+            return self._render_login_template(request, show_in_app_auth=False, status=400)

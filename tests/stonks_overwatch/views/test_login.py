@@ -380,11 +380,15 @@ class TestLoginView(TestCase):
         assert "service desk" in call_args[1].lower()
 
     def test_render_login_error(self):
-        """Test _render_login_error method."""
+        """Test error rendering functionality using _render_login_template."""
         request = self.factory.post("/login/")
 
         with patch("django.contrib.messages.error") as mock_messages:
-            response = self.view._render_login_error(request, "Test error message")
+            # Test the equivalent functionality: adding error message and rendering template
+            from django.contrib import messages
+
+            messages.error(request, "Test error message")
+            response = self.view._render_login_template(request, status=400)
 
         assert response.status_code == 400
         # Check that the response is rendered (contains HTML structure)
