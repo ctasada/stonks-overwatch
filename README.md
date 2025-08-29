@@ -126,6 +126,7 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
   * [ ] DEGIRO Risk Category is a local term: "https://www.degiro.ie/helpdesk/trading-platform/what-are-risk-categories"
   * [ ] DEGIRO Client: Stop using Totp and request 2FA for each connection
   * [ ] Add support for 'In App Authentication' using SMS
+  * [ ] `Bought 0x Bitcoin @ € 97,191.31` Should be `Bought 0.001x Bitcoin @ € 9,719.13`
 * [ ] Bitvavo:
   * [ ] Create a Crypto Rewards section
   * [ ] Show asset staking blocked amount as in Bitvavo UI
