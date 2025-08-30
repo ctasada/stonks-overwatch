@@ -350,7 +350,6 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
         self, request: HttpRequest, credentials: DegiroCredentials, in_app_token: str
     ) -> AuthenticationResponse:
         """Handle in-app authentication required error with credentials."""
-        self.logger.warning("_handle_in_app_auth_required_with_credentials")
         self.session_manager.set_in_app_auth_required(request, True)
 
         # Store credentials for in-app authentication flow if provided
@@ -433,8 +432,6 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
             AuthenticationResponse: Result of the in-app authentication
         """
         try:
-            self.logger.info("Handling in-app authentication")
-
             # Get stored credentials from session
             credentials = self.session_manager.get_credentials(request)
             if not credentials or not credentials.in_app_token:
@@ -442,8 +439,6 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
                     AuthenticationResult.CONFIGURATION_ERROR,
                     "No in-app token found in session for in-app authentication",
                 )
-
-            self.logger.info(f"Starting in-app authentication for user: {credentials.username}")
 
             # Wait for in-app confirmation
             session_id = self._wait_for_in_app_confirmation(credentials)
@@ -688,8 +683,6 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
         credentials_manager = CredentialsManager(degiro_credentials)
         self.degiro_service.set_credentials(credentials_manager)
 
-        self.logger.info(f"Starting in-app authentication wait loop for token: {credentials.in_app_token}...")
-
         while True:
             sleep(5)
             try:
@@ -793,14 +786,10 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
     def _handle_degiro_connection_error(
         self, request: HttpRequest, error: DeGiroConnectionError, credentials: DegiroCredentials
     ) -> AuthenticationResponse:
-        self.logger.info(f"_handle_degiro_connection_error: error = {error}")
         """Handle DeGiro connection errors."""
         if hasattr(error, "error_details") and error.error_details.status_text == "totpNeeded":
             return self._handle_totp_required_with_credentials(request, credentials)
         elif hasattr(error, "error_details") and error.error_details.status_text == "inAppTOTPNeeded":
-            self.logger.info(
-                f"_handle_in_app_auth_required_with_credentials: error = {error.error_details.in_app_token}"
-            )
             return self._handle_in_app_auth_required_with_credentials(
                 request, credentials, error.error_details.in_app_token
             )
