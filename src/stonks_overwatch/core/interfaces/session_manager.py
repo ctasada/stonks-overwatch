@@ -116,7 +116,14 @@ class SessionManagerInterface(ABC):
         pass
 
     @abstractmethod
-    def store_credentials(self, request: HttpRequest, username: str, password: str, remember_me: bool = False) -> None:
+    def store_credentials(
+        self,
+        request: HttpRequest,
+        username: str,
+        password: str,
+        in_app_token: str | None = None,
+        remember_me: bool = False,
+    ) -> None:
         """
         Store user credentials in the session.
 
@@ -124,6 +131,7 @@ class SessionManagerInterface(ABC):
             request: The HTTP request containing session data
             username: The username to store
             password: The password to store
+            in_app_token: The in-app token to store (if applicable). Only used for in-app auth.
             remember_me: Whether the user wants to be remembered
         """
         pass
@@ -149,6 +157,30 @@ class SessionManagerInterface(ABC):
 
         Returns:
             bool: True if TOTP is required, False otherwise
+        """
+        pass
+
+    @abstractmethod
+    def set_in_app_auth_required(self, request: HttpRequest, required: bool = True) -> None:
+        """
+        Set whether in-app authentication is required for authentication.
+
+        Args:
+            request: The HTTP request containing session data
+            required: Whether in-app authentication is required
+        """
+        pass
+
+    @abstractmethod
+    def is_in_app_auth_required(self, request: HttpRequest) -> bool:
+        """
+        Check if in-app authentication is required.
+
+        Args:
+            request: The HTTP request containing session data
+
+        Returns:
+            bool: True if in-app authentication is required, False otherwise
         """
         pass
 

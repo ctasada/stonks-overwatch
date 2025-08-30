@@ -508,9 +508,8 @@ class TestAuthenticationService(TestCase):
             base_credentials, username="newuser", password=None, one_time_password=123456, remember_me=True
         )
 
-    @patch("stonks_overwatch.services.utilities.authentication_service.Credentials")
     @patch("stonks_overwatch.services.utilities.authentication_service.CredentialsManager")
-    def test_authenticate_with_degiro_success(self, mock_creds_manager, mock_credentials):
+    def test_authenticate_with_degiro_success(self, mock_creds_manager):
         """Test _authenticate_with_degiro successful authentication."""
         credentials = DegiroCredentials("testuser", "testpass", one_time_password=123456)
         self.mock_degiro_service.get_session_id.return_value = "test_session_123"
@@ -519,7 +518,6 @@ class TestAuthenticationService(TestCase):
 
         assert result.result == AuthenticationResult.SUCCESS
         assert result.session_id == "test_session_123"
-        mock_credentials.assert_called_once()
         mock_creds_manager.assert_called_once()
         self.mock_degiro_service.set_credentials.assert_called_once()
         self.mock_degiro_service.connect.assert_called_once()
@@ -606,3 +604,129 @@ class TestAuthenticationService(TestCase):
         assert service.session_manager == mock_session
         assert service.credential_service == mock_cred
         assert service.degiro_service == mock_degiro
+
+    def test_handle_in_app_authentication_success(self):
+        """Test handle_in_app_authentication successful flow."""
+        # Setup mocks
+        credentials = DegiroCredentials("testuser", "testpass", in_app_token="test_token_123", remember_me=True)
+        self.mock_session_manager.get_credentials.return_value = credentials
+
+        # Mock _wait_for_in_app_confirmation to return session ID
+        with patch.object(self.auth_service, "_wait_for_in_app_confirmation") as mock_wait:
+            mock_wait.return_value = "test_session_456"
+
+            result = self.auth_service.handle_in_app_authentication(self.request)
+
+            assert result.is_success
+            assert result.session_id == "test_session_456"
+            self.mock_session_manager.set_in_app_auth_required.assert_called_once_with(self.request, False)
+            self.mock_session_manager.set_authenticated.assert_called_once_with(self.request, True)
+            self.mock_session_manager.set_session_id.assert_called_once_with(self.request, "test_session_456")
+            self.mock_credential_service.store_credentials_in_database.assert_called_once()
+
+    def test_wait_for_in_app_confirmation_success(self):
+        """Test _wait_for_in_app_confirmation successful flow."""
+        credentials = DegiroCredentials("testuser", "testpass", in_app_token="test_token_123")
+
+        # Mock DeGiro service methods
+        with patch(
+            "stonks_overwatch.services.utilities.authentication_service.CredentialsManager"
+        ) as mock_credentials_manager_class:
+            mock_credentials_manager = Mock()
+            mock_credentials_manager_class.return_value = mock_credentials_manager
+
+            # Mock degiro_service methods
+            self.mock_degiro_service.connect.return_value = None
+            self.mock_degiro_service.get_session_id.return_value = "test_session_789"
+
+            result = self.auth_service._wait_for_in_app_confirmation(credentials)
+
+            assert result == "test_session_789"
+            self.mock_degiro_service.set_credentials.assert_called_once_with(mock_credentials_manager)
+            self.mock_degiro_service.connect.assert_called_once()
+            self.mock_degiro_service.get_session_id.assert_called_once()
+
+    def test_wait_for_in_app_confirmation_with_retry(self):
+        """Test _wait_for_in_app_confirmation with status 3 retry behavior."""
+        credentials = DegiroCredentials("testuser", "testpass", in_app_token="test_token_123")
+
+        # Mock DeGiro service methods and sleep
+        with (
+            patch(
+                "stonks_overwatch.services.utilities.authentication_service.CredentialsManager"
+            ) as mock_credentials_manager_class,
+            patch("stonks_overwatch.services.utilities.authentication_service.sleep") as mock_sleep,
+        ):
+            mock_credentials_manager = Mock()
+            mock_credentials_manager_class.return_value = mock_credentials_manager
+
+            # Create error details for status 3 (waiting for confirmation)
+            error_details_waiting = Mock()
+            error_details_waiting.status = 3
+
+            # First call raises status 3 (still waiting), second call succeeds
+            self.mock_degiro_service.connect.side_effect = [
+                DeGiroConnectionError("Still waiting", error_details_waiting),
+                None,  # Success on second call
+            ]
+            self.mock_degiro_service.get_session_id.return_value = "test_session_after_retry"
+
+            result = self.auth_service._wait_for_in_app_confirmation(credentials)
+
+            assert result == "test_session_after_retry"
+            assert self.mock_degiro_service.connect.call_count == 2  # Called twice
+            self.mock_degiro_service.get_session_id.assert_called_once()  # Only called on success
+            assert mock_sleep.call_count == 2  # Called before each retry
+
+    def test_handle_in_app_authentication_no_credentials(self):
+        """Test handle_in_app_authentication when no credentials in session."""
+        self.mock_session_manager.get_credentials.return_value = None
+
+        result = self.auth_service.handle_in_app_authentication(self.request)
+
+        assert result.result == AuthenticationResult.CONFIGURATION_ERROR
+        assert "No in-app token found" in result.message
+
+    def test_handle_in_app_authentication_no_token(self):
+        """Test handle_in_app_authentication when no in_app_token in credentials."""
+        credentials = DegiroCredentials("testuser", "testpass")
+        self.mock_session_manager.get_credentials.return_value = credentials
+
+        result = self.auth_service.handle_in_app_authentication(self.request)
+
+        assert result.result == AuthenticationResult.CONFIGURATION_ERROR
+        assert "No in-app token found" in result.message
+
+    def test_handle_in_app_authentication_connection_error(self):
+        """Test handle_in_app_authentication when connection fails."""
+        credentials = DegiroCredentials("testuser", "testpass", in_app_token="test_token_123")
+        self.mock_session_manager.get_credentials.return_value = credentials
+
+        # Mock _wait_for_in_app_confirmation to raise exception
+        with patch.object(self.auth_service, "_wait_for_in_app_confirmation") as mock_wait:
+            # Create proper error_details mock for DeGiroConnectionError
+            error_details = Mock()
+            error_details.status = 5  # Some error status other than 3
+            error_details.status_text = "connectionFailed"
+
+            mock_wait.side_effect = DeGiroConnectionError("Connection failed", error_details)
+
+            result = self.auth_service.handle_in_app_authentication(self.request)
+
+            assert result.result == AuthenticationResult.CONNECTION_ERROR
+            assert "In-app authentication failed" in result.message
+            self.mock_session_manager.set_in_app_auth_required.assert_called_once_with(self.request, False)
+
+    def test_handle_in_app_authentication_without_remember_me(self):
+        """Test handle_in_app_authentication without remember_me flag."""
+        credentials = DegiroCredentials("testuser", "testpass", in_app_token="test_token_123", remember_me=False)
+        self.mock_session_manager.get_credentials.return_value = credentials
+
+        with patch.object(self.auth_service, "_wait_for_in_app_confirmation") as mock_wait:
+            mock_wait.return_value = "test_session_456"
+
+            result = self.auth_service.handle_in_app_authentication(self.request)
+
+            assert result.is_success
+            # Should not store credentials in database when remember_me is False
+            self.mock_credential_service.store_credentials_in_database.assert_not_called()

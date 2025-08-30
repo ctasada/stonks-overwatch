@@ -199,7 +199,9 @@ class TestAuthenticationSessionManager(TestCase):
         password = "testpass"
         remember_me = True
 
-        self.session_manager.store_credentials(self.request, username, password, remember_me)
+        self.session_manager.store_credentials(
+            request=self.request, username=username, password=password, remember_me=remember_me
+        )
 
         stored_credentials = self.request.session["credentials"]
         assert stored_credentials["username"] == username

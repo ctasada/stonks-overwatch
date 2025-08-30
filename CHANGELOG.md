@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* DEGIRO: Added support to use 'In App' 2FA authentication
+
 ### Changed
 
 * Navigation sidebar has been redesigned to improve usability
