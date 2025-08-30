@@ -85,6 +85,7 @@ class ProductType(Enum):
     OPTIONS = 8
     FUNDS = 13
     LEVERAGE_PRODUCTS = 14
+    CRYPTO = 15
 
     ETF = 131
     """Represents an ETF product."""
@@ -112,6 +113,7 @@ class ProductType(Enum):
             ProductType.STOCK: "Stock",
             ProductType.ETF: "ETF",
             ProductType.CASH: "Cash",
+            ProductType.CRYPTO: "Crypto",
         }
         return readable_strings.get(self, "Unknown Product Type")
 

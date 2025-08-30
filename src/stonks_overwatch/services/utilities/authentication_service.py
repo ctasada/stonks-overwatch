@@ -6,10 +6,10 @@ that orchestrates the complete authentication flow, coordinating between session
 management, credential handling, and DeGiro API operations.
 """
 
+from time import sleep
 from typing import Optional
 
 from degiro_connector.core.exceptions import DeGiroConnectionError, MaintenanceError
-from degiro_connector.trading.models.credentials import Credentials
 from django.http import HttpRequest
 
 from stonks_overwatch.config.degiro import DegiroCredentials
@@ -163,10 +163,10 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
 
             # Store credentials in session for later use
             self.session_manager.store_credentials(
-                request,
-                effective_credentials.username,
-                effective_credentials.password,
-                effective_credentials.remember_me or False,
+                request=request,
+                username=effective_credentials.username,
+                password=effective_credentials.password,
+                remember_me=effective_credentials.remember_me or False,
             )
 
             # Attempt DeGiro authentication
@@ -233,48 +233,139 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
                     is_maintenance_mode=True,
                 )
             except DeGiroConnectionError as degiro_error:
-                # Handle TOTP requirement specifically
-                if hasattr(degiro_error, "error_details") and degiro_error.error_details.status_text == "totpNeeded":
-                    self.logger.info("TOTP required during connection check")
-
-                    # Store current credentials in session for TOTP flow
-                    # Get the effective credentials (from DB/config) that were used for this connection attempt
-                    effective_credentials = self.credential_service.get_effective_credentials(request)
-                    if effective_credentials:
-                        self.logger.info(
-                            f"Storing effective credentials in session for TOTP: "
-                            f"username={effective_credentials.username}"
-                        )
-                        self.session_manager.store_credentials(
-                            request,
-                            effective_credentials.username,
-                            effective_credentials.password,
-                            effective_credentials.remember_me or False,
-                        )
-
-                    return AuthenticationResponse(
-                        result=AuthenticationResult.TOTP_REQUIRED,
-                        message="TOTP authentication required",
-                        requires_totp=True,
-                    )
-                else:
-                    # Other DeGiro connection errors
-                    self.logger.error(f"DeGiro connection error: {degiro_error}")
-                    return self._create_error_response(
-                        AuthenticationResult.INVALID_CREDENTIALS,
-                        f"DeGiro authentication failed: "
-                        f"{
-                            degiro_error.error_details.status_text
-                            if hasattr(degiro_error, 'error_details')
-                            else str(degiro_error)
-                        }",
-                    )
+                return self._handle_degiro_connection_error_in_check(request, degiro_error)
 
         except Exception as e:
             self.logger.error(f"Error checking DeGiro connection: {str(e)}", exc_info=DEBUG_MODE)
             return self._create_error_response(
                 AuthenticationResult.CONNECTION_ERROR, f"Connection check failed: {str(e)}"
             )
+
+    def _handle_degiro_connection_error_in_check(
+        self, request: HttpRequest, degiro_error: DeGiroConnectionError
+    ) -> AuthenticationResponse:
+        """Handle DeGiro connection errors during connection check."""
+        # Handle TOTP requirement specifically
+        if hasattr(degiro_error, "error_details") and degiro_error.error_details.status_text == "totpNeeded":
+            return self._handle_totp_required_error(request, degiro_error)
+
+        # Handle in-app authentication requirement specifically
+        elif hasattr(degiro_error, "error_details") and (
+            degiro_error.error_details.status_text == "inAppTOTPNeeded" or degiro_error.error_details.status == 12
+        ):
+            return self._handle_in_app_auth_required_error(request, degiro_error)
+
+        # Handle account blocked (status 4)
+        elif hasattr(degiro_error, "error_details") and degiro_error.error_details.status == 4:
+            self.logger.warning("Account is blocked during connection check")
+            return AuthenticationResponse(
+                result=AuthenticationResult.ACCOUNT_BLOCKED,
+                message="Your account has been blocked because the maximum of login attempts has been exceeded",
+            )
+        else:
+            # Other DeGiro connection errors
+            self.logger.error(f"DeGiro connection error: {degiro_error}")
+            # Split the error message construction into two lines for clarity
+            if hasattr(degiro_error, "error_details"):
+                error_status = degiro_error.error_details.status_text
+            else:
+                error_status = str(degiro_error)
+            return self._create_error_response(
+                AuthenticationResult.INVALID_CREDENTIALS,
+                f"DeGiro authentication failed: {error_status}",
+            )
+
+    def _handle_totp_required_error(
+        self, request: HttpRequest, degiro_error: DeGiroConnectionError
+    ) -> AuthenticationResponse:
+        """Handle TOTP required error specifically."""
+        self.logger.info("TOTP required during connection check")
+
+        # Store current credentials in session for TOTP flow
+        effective_credentials = self.credential_service.get_effective_credentials(request)
+        if effective_credentials:
+            self.logger.info(
+                f"Storing effective credentials in session for TOTP: username={effective_credentials.username}"
+            )
+            self.session_manager.store_credentials(
+                request=request,
+                username=effective_credentials.username,
+                password=effective_credentials.password,
+                remember_me=effective_credentials.remember_me or False,
+            )
+
+        return AuthenticationResponse(
+            result=AuthenticationResult.TOTP_REQUIRED,
+            message="TOTP authentication required",
+            requires_totp=True,
+        )
+
+    def _handle_in_app_auth_required_error(
+        self, request: HttpRequest, degiro_error: DeGiroConnectionError
+    ) -> AuthenticationResponse:
+        """Handle in-app authentication required error specifically."""
+        self.logger.info("In-app authentication required during connection check")
+
+        # Store current credentials in session for in-app authentication flow
+        effective_credentials = self.credential_service.get_effective_credentials(request)
+        if effective_credentials:
+            self.logger.info(
+                f"Storing effective credentials in session for in-app authentication: "
+                f"username={effective_credentials.username}"
+            )
+            self.session_manager.store_credentials(
+                request=request,
+                username=effective_credentials.username,
+                password=effective_credentials.password,
+                remember_me=effective_credentials.remember_me or False,
+                in_app_token=degiro_error.error_details.in_app_token,
+            )
+
+        return AuthenticationResponse(
+            result=AuthenticationResult.IN_APP_AUTHENTICATION_REQUIRED,
+            message="In-app authentication required",
+        )
+
+    def _handle_totp_required_with_credentials(
+        self, request: HttpRequest, credentials: DegiroCredentials
+    ) -> AuthenticationResponse:
+        """Handle TOTP required error with credentials."""
+        self.session_manager.set_totp_required(request, True)
+
+        # Store credentials for TOTP flow if provided
+        self.session_manager.store_credentials(
+            request=request,
+            username=credentials.username,
+            password=credentials.password,
+            remember_me=credentials.remember_me or False,
+        )
+
+        return AuthenticationResponse(
+            result=AuthenticationResult.TOTP_REQUIRED,
+            message="Two-factor authentication required",
+            requires_totp=True,
+        )
+
+    def _handle_in_app_auth_required_with_credentials(
+        self, request: HttpRequest, credentials: DegiroCredentials, in_app_token: str
+    ) -> AuthenticationResponse:
+        """Handle in-app authentication required error with credentials."""
+        self.logger.warning("_handle_in_app_auth_required_with_credentials")
+        self.session_manager.set_in_app_auth_required(request, True)
+
+        # Store credentials for in-app authentication flow if provided
+        self.session_manager.store_credentials(
+            request=request,
+            username=credentials.username,
+            password=credentials.password,
+            in_app_token=in_app_token,
+            remember_me=credentials.remember_me or False,
+        )
+
+        return AuthenticationResponse(
+            result=AuthenticationResult.IN_APP_AUTHENTICATION_REQUIRED,
+            message="In-app authentication required",
+        )
 
     def handle_totp_authentication(self, request: HttpRequest, one_time_password: int) -> AuthenticationResponse:
         """
@@ -325,6 +416,65 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
             self.logger.error(f"Error during TOTP authentication: {str(e)}")
             return self._create_error_response(
                 AuthenticationResult.UNKNOWN_ERROR, f"TOTP authentication failed: {str(e)}"
+            )
+
+    def handle_in_app_authentication(self, request: HttpRequest) -> AuthenticationResponse:
+        """
+        Handle in-app authentication when required.
+
+        This method is called when the initial authentication indicated
+        that in-app authentication is required. It waits for the user to
+        confirm authentication in their mobile app.
+
+        Args:
+            request: The HTTP request containing session data
+
+        Returns:
+            AuthenticationResponse: Result of the in-app authentication
+        """
+        try:
+            self.logger.info("Handling in-app authentication")
+
+            # Get stored credentials from session
+            credentials = self.session_manager.get_credentials(request)
+            if not credentials or not credentials.in_app_token:
+                return self._create_error_response(
+                    AuthenticationResult.CONFIGURATION_ERROR,
+                    "No in-app token found in session for in-app authentication",
+                )
+
+            self.logger.info(f"Starting in-app authentication for user: {credentials.username}")
+
+            # Wait for in-app confirmation
+            session_id = self._wait_for_in_app_confirmation(credentials)
+            if session_id:
+                # Success - clear in-app auth flag and set authenticated
+                self.session_manager.set_in_app_auth_required(request, False)
+                self.session_manager.set_authenticated(request, True)
+                self.session_manager.set_session_id(request, session_id)
+
+                # If remember_me was selected, store credentials in database
+                if credentials.remember_me:
+                    self.credential_service.store_credentials_in_database(credentials.username, credentials.password)
+                    self.logger.debug("Credentials stored in database due to remember_me selection")
+
+                return AuthenticationResponse(
+                    result=AuthenticationResult.SUCCESS,
+                    message="In-app authentication successful",
+                    session_id=session_id,
+                )
+            else:
+                # This should not happen as _wait_for_in_app_confirmation raises exceptions on failure
+                return self._create_error_response(
+                    AuthenticationResult.CONNECTION_ERROR, "In-app authentication failed without exception"
+                )
+
+        except Exception as e:
+            self.logger.error(f"Error during in-app authentication: {str(e)}")
+            # Clear in-app auth session state on error
+            self.session_manager.set_in_app_auth_required(request, False)
+            return self._create_error_response(
+                AuthenticationResult.CONNECTION_ERROR, f"In-app authentication failed: {str(e)}"
             )
 
     def logout_user(self, request: HttpRequest) -> None:
@@ -507,6 +657,64 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
                 AuthenticationResult.UNKNOWN_ERROR, "Failed to handle authentication error"
             )
 
+    def _wait_for_in_app_confirmation(self, credentials: DegiroCredentials) -> Optional[str]:
+        """
+        Waits for the user to confirm in-app and retries connection until successful or unrecoverable error.
+        Returns the session ID if confirmation succeeds, otherwise raises exception.
+
+        Uses the existing DeGiroService to maintain consistency with the rest of the authentication flow.
+
+        Args:
+            credentials: The credentials including the in_app_token
+
+        Returns:
+            Optional[str]: The session ID if successful, None otherwise
+
+        Raises:
+            DeGiroConnectionError: For unrecoverable errors or authentication failures
+            Exception: For other unexpected errors
+        """
+        # Create DeGiro credentials object with in_app_token
+        degiro_credentials = DegiroCredentials(
+            username=credentials.username,
+            password=credentials.password,
+            one_time_password=credentials.one_time_password,
+            int_account=credentials.int_account,
+            totp_secret_key=credentials.totp_secret_key,
+            in_app_token=credentials.in_app_token,
+        )
+
+        # Update DeGiro service credentials (following the same pattern as _authenticate_with_degiro)
+        credentials_manager = CredentialsManager(degiro_credentials)
+        self.degiro_service.set_credentials(credentials_manager)
+
+        self.logger.info(f"Starting in-app authentication wait loop for token: {credentials.in_app_token}...")
+
+        while True:
+            sleep(5)
+            try:
+                # Use DeGiroService connect method (same as _authenticate_with_degiro)
+                self.degiro_service.connect()
+
+                # Get session ID using DeGiroService method
+                session_id = self.degiro_service.get_session_id()
+                self.logger.info("In-app authentication successful")
+                return session_id
+            except DeGiroConnectionError as retry_error:
+                if hasattr(retry_error, "error_details") and retry_error.error_details.status == 3:
+                    # Status 3 means still waiting for user confirmation - continue waiting
+                    self.logger.debug("Still waiting for in-app confirmation...")
+                    continue
+                else:
+                    # Other error statuses are unrecoverable
+                    self.logger.error(f"Unrecoverable error during in-app authentication: {retry_error}")
+                    raise retry_error
+            except Exception as e:
+                self.logger.error(f"Unexpected error during in-app authentication wait: {str(e)}")
+                raise e
+
+        return None
+
     # Private helper methods
 
     def _get_effective_credentials(
@@ -541,7 +749,7 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
         """Perform the actual DeGiro authentication."""
         try:
             # Create DeGiro credentials object
-            degiro_credentials = Credentials(
+            degiro_credentials = DegiroCredentials(
                 username=credentials.username,
                 password=credentials.password,
                 one_time_password=credentials.one_time_password,
@@ -583,23 +791,23 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
             )
 
     def _handle_degiro_connection_error(
-        self, request: HttpRequest, error: DeGiroConnectionError, credentials: Optional[DegiroCredentials]
+        self, request: HttpRequest, error: DeGiroConnectionError, credentials: DegiroCredentials
     ) -> AuthenticationResponse:
+        self.logger.info(f"_handle_degiro_connection_error: error = {error}")
         """Handle DeGiro connection errors."""
         if hasattr(error, "error_details") and error.error_details.status_text == "totpNeeded":
-            # TOTP is required
-            self.session_manager.set_totp_required(request, True)
-
-            # Store credentials for TOTP flow if provided
-            if credentials:
-                self.session_manager.store_credentials(
-                    request, credentials.username, credentials.password, credentials.remember_me or False
-                )
-
+            return self._handle_totp_required_with_credentials(request, credentials)
+        elif hasattr(error, "error_details") and error.error_details.status_text == "inAppTOTPNeeded":
+            self.logger.info(
+                f"_handle_in_app_auth_required_with_credentials: error = {error.error_details.in_app_token}"
+            )
+            return self._handle_in_app_auth_required_with_credentials(
+                request, credentials, error.error_details.in_app_token
+            )
+        elif hasattr(error, "error_details") and error.error_details.status == 4:
             return AuthenticationResponse(
-                result=AuthenticationResult.TOTP_REQUIRED,
-                message="Two-factor authentication required",
-                requires_totp=True,
+                result=AuthenticationResult.ACCOUNT_BLOCKED,
+                message="Your account has been blocked because the maximum of login attempts has been exceeded",
             )
         else:
             error_message = (

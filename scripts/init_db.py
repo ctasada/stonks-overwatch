@@ -16,6 +16,8 @@ import django
 from common import init_logger
 from django.core.management import call_command
 
+from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+
 # Add the src directory to the Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
 
@@ -185,28 +187,42 @@ def main():
     logging.info("Applying database migrations...")
     call_command("migrate")
 
-    args = parse_args()
-
-    degiro_import_folder = os.path.join(args.import_folder, "degiro")
-    ibkr_import_folder = os.path.join(args.import_folder, "ibkr")
-    bitvavo_import_folder = os.path.join(args.import_folder, "bitvavo")
-
-    # Get broker configurations via unified factory for proper credential injection
-    from stonks_overwatch.core.factories.broker_factory import BrokerFactory
-
     broker_factory = BrokerFactory()
 
-    degiro_config = broker_factory.create_config("degiro")
-    ibkr_config = broker_factory.create_config("ibkr")
-    bitvavo_config = broker_factory.create_config("bitvavo")
+    args = parse_args()
 
-    degiro_update_service = DegiroUpdateService(
-        import_folder=degiro_import_folder, debug_mode=args.debug, config=degiro_config
-    )
-    ibkr_update_service = IbkrUpdateService(import_folder=ibkr_import_folder, debug_mode=args.debug, config=ibkr_config)
-    bitvavo_update_service = BitvavoUpdateService(
-        import_folder=bitvavo_import_folder, debug_mode=args.debug, config=bitvavo_config
-    )
+    degiro_update_service = None
+    ibkr_update_service = None
+    bitvavo_update_service = None
+
+    if (
+        args.degiro
+        or args.degiro_account
+        or args.degiro_transactions
+        or args.degiro_products
+        or args.degiro_companies
+        or args.degiro_yfinance
+        or args.degiro_dividends
+    ):
+        degiro_import_folder = os.path.join(args.import_folder, "degiro")
+        degiro_config = broker_factory.create_config("degiro")
+        degiro_update_service = DegiroUpdateService(
+            import_folder=degiro_import_folder, debug_mode=args.debug, config=degiro_config, force_connect=True
+        )
+
+    if args.ibkr or args.ibkr_portfolio or args.ibkr_transactions:
+        ibkr_import_folder = os.path.join(args.import_folder, "ibkr")
+        ibkr_config = broker_factory.create_config("ibkr")
+        ibkr_update_service = IbkrUpdateService(
+            import_folder=ibkr_import_folder, debug_mode=args.debug, config=ibkr_config
+        )
+
+    if args.bitvavo or args.bitvavo_portfolio or args.bitvavo_transactions:
+        bitvavo_import_folder = os.path.join(args.import_folder, "bitvavo")
+        bitvavo_config = broker_factory.create_config("bitvavo")
+        bitvavo_update_service = BitvavoUpdateService(
+            import_folder=bitvavo_import_folder, debug_mode=args.debug, config=bitvavo_config
+        )
 
     actions = [
         (args.degiro_account, degiro_account_import, degiro_update_service),

@@ -78,6 +78,7 @@ The authentication system consists of three main service layers:
 - **Key Methods**:
   - `authenticate_user()`: Handle username/password authentication
   - `handle_totp_authentication()`: Handle 2FA flow
+  - `handle_in_app_authentication()`: **Handle in-app authentication flow** (NEW 2025)
   - `check_degiro_connection()`: Verify DeGiro connectivity
   - `logout_user()`: Clear authentication state
 
@@ -162,12 +163,204 @@ def process_authentication(auth_service: AuthenticationServiceInterface):
 5. **Retrieve stored credentials** → Session Manager
 6. **Complete authentication** → DeGiroService
 
+### In-App Authentication Flow (Updated 2025)
+
+When 2FA is not enabled, DEGIRO automatically triggers In-App authentication requiring mobile app confirmation:
+
+1. **DeGiro returns In-App auth required** → AuthenticationService detects `status == 12` or `inAppTOTPNeeded`
+2. **Store credentials with in_app_token** → Session Manager stores token from error details
+3. **Set in_app_auth_required flag** → Session Manager sets UI state
+4. **Redirect to login with In-App UI** → Middleware preserves session
+5. **User sees "Open DEGIRO app" message** → Login template shows waiting UI
+6. **JavaScript auto-submits form** → Browser automatically posts `in_app_auth=true`
+7. **View delegates to service** → Login View calls `auth_service.handle_in_app_authentication()`
+8. **Service orchestrates authentication** → AuthenticationService handles the complete flow
+9. **Service uses DeGiroService** → Proper service layer integration with credential management
+10. **Continuous polling** → `_wait_for_in_app_confirmation()` calls `degiro_service.connect()` every 5 seconds
+11. **Check connection status** → Handle different error statuses:
+    - `status == 3`: Continue waiting (user hasn't confirmed yet)
+    - Success: Get session ID via `degiro_service.get_session_id()`
+    - Other errors: Unrecoverable, show error
+12. **On success** → Service clears session flags, sets authenticated, returns session ID
+13. **On error** → Service clears session state, returns error response
+
 ### Connection Check Flow (Middleware)
 
 1. **Check if authenticated** → Session Manager
 2. **If not authenticated, check DeGiro** → AuthenticationService
-3. **Handle TOTP/errors** → Preserve or clear session
+3. **Handle TOTP/In-App/errors** → Preserve or clear session
 4. **Allow or redirect** → Based on result
+
+## In-App Authentication Implementation Details (2025)
+
+### Overview
+
+In-App authentication is DEGIRO's newer security mechanism that requires users to confirm login attempts through their mobile app. This feature is automatically enabled when traditional 2FA (TOTP) is not configured on the account.
+
+### Technical Architecture
+
+#### Error Detection
+
+The system detects In-App authentication requirements through DeGiro API responses:
+- **Status Code**: `error_details.status == 12`
+- **Status Text**: `error_details.status_text == "inAppTOTPNeeded"`
+- **In-App Token**: `error_details.in_app_token` contains the authentication token
+
+#### Session Management
+
+```python
+# Storing In-App authentication state
+self.session_manager.store_credentials(
+    request=request,
+    username=username,
+    password=password,
+    in_app_token=degiro_error.error_details.in_app_token,
+    remember_me=remember_me
+)
+self.session_manager.set_in_app_auth_required(request, True)
+```
+
+#### UI State Management
+
+The login template supports four states:
+- **Initial**: Username/password form
+- **TOTP**: 2FA code input
+- **In-App**: Waiting for mobile app confirmation
+- **Loading**: Portfolio update in progress
+
+#### Waiting Loop Implementation
+
+```python
+def _wait_for_in_app_confirmation(self, credentials) -> Optional[str]:
+    """Wait for user confirmation in DEGIRO mobile app."""
+    # Create proper credentials with in_app_token
+    degiro_credentials = DegiroCredentials(
+        username=credentials.username,
+        password=credentials.password,
+        in_app_token=credentials.in_app_token,
+        # ... other fields
+    )
+
+    # Use existing DeGiroService (proper service layer integration)
+    credentials_manager = CredentialsManager(degiro_credentials)
+    self.degiro_service.set_credentials(credentials_manager)
+
+    while True:
+        sleep(5)  # Wait 5 seconds between attempts
+        try:
+            self.degiro_service.connect()
+            # Get session ID using service method
+            session_id = self.degiro_service.get_session_id()
+            return session_id  # Success - return session ID
+        except DeGiroConnectionError as retry_error:
+            if retry_error.error_details.status == 3:
+                continue  # Still waiting for confirmation
+            else:
+                raise retry_error  # Unrecoverable error
+```
+
+### Error Status Codes
+
+| Status | Meaning | Action |
+|--------|---------|---------|
+| `3` | Waiting for user confirmation | Continue polling |
+| `12` | In-App authentication required | Start In-App flow |
+| `4` | Account blocked | Show error, stop |
+| Other | Various authentication errors | Show error, stop |
+
+### User Experience Flow
+
+1. **Login Form**: User enters username/password
+2. **API Response**: DEGIRO returns In-App auth required
+3. **UI Update**: Page shows "Open the DEGIRO app" message with spinner
+4. **Auto-Submit**: JavaScript automatically submits form with `in_app_auth=true`
+5. **Backend Polling**: Server starts 5-second polling loop
+6. **Mobile Confirmation**: User approves login in DEGIRO mobile app
+7. **Success**: Automatic redirect to dashboard with portfolio update
+
+### Implementation Files
+
+- **Authentication Service**: `src/stonks_overwatch/services/utilities/authentication_service.py` ⭐ **Main Implementation**
+  - `handle_in_app_authentication()`: **Main orchestration method** (NEW)
+  - `_wait_for_in_app_confirmation()`: **Polling loop implementation** (MOVED from view)
+  - `_handle_in_app_auth_required_error()`: Error handler
+  - Uses `DeGiroService` for proper service layer integration
+- **Login View**: `src/stonks_overwatch/views/login.py`
+  - `_handle_in_app_authentication()`: **UI delegation method** (delegates to service)
+  - Handles UI concerns only, business logic moved to service layer
+- **Session Manager**: `src/stonks_overwatch/services/utilities/authentication_session_manager.py`
+  - `set_in_app_auth_required()`: Set UI state flag
+  - `is_in_app_auth_required()`: Check UI state flag
+  - `store_credentials()`: Store token with credentials
+- **Template**: `src/stonks_overwatch/templates/login.html`
+  - In-App UI section with spinner and auto-submit logic
+- **Middleware**: `src/stonks_overwatch/middleware/degiro_auth.py`
+  - Handles In-App auth redirects and session preservation
+
+### Security Considerations
+
+- **Token Storage**: In-App tokens are stored temporarily in session only
+- **Session Cleanup**: Tokens are cleared on successful authentication or errors
+- **Timeout Handling**: No explicit timeout - relies on DEGIRO API timeout behavior
+- **Error Recovery**: Unrecoverable errors clear session and return to login form
+
+### Testing In-App Authentication (2025)
+
+#### Unit Testing Approach
+
+The refactored architecture enables better testing by mocking service dependencies:
+
+```python
+# Test service layer method directly
+def test_handle_in_app_authentication_success(self):
+    # Setup credentials with in_app_token
+    credentials = DegiroCredentials("user", "pass", in_app_token="token123")
+    self.mock_session_manager.get_credentials.return_value = credentials
+
+    # Mock service method to return session ID
+    with patch.object(self.auth_service, "_wait_for_in_app_confirmation") as mock_wait:
+        mock_wait.return_value = "session_456"
+
+        result = self.auth_service.handle_in_app_authentication(self.request)
+
+        assert result.is_success
+        assert result.session_id == "session_456"
+
+# Test waiting loop with retry behavior
+def test_wait_for_in_app_confirmation_with_retry(self):
+    # Mock DeGiroService for proper service layer testing
+    self.mock_degiro_service.connect.side_effect = [
+        DeGiroConnectionError("Still waiting", error_status_3),
+        None  # Success on second call
+    ]
+    self.mock_degiro_service.get_session_id.return_value = "session_after_retry"
+```
+
+### Troubleshooting
+
+#### Common Issues
+
+1. **"No in-app token found"**: Check that In-App auth was properly triggered and token stored
+2. **Infinite waiting**: User may need to check DEGIRO mobile app for notification
+3. **Connection timeouts**: Network issues or DEGIRO API problems
+4. **Service layer errors**: Check that DeGiroService is properly initialized and configured
+
+#### Debug Commands
+
+```python
+# Check In-App session state
+session_data = auth_service.session_manager.get_session_data(request)
+print(f"In-App required: {session_data.get('in_app_auth_required')}")
+
+# Check stored credentials include token
+credentials = auth_service.session_manager.get_credentials(request)
+print(f"Has in-app token: {bool(credentials and credentials.in_app_token)}")
+
+# Test service layer method directly (2025)
+result = auth_service.handle_in_app_authentication(request)
+print(f"Service result: {result.result}")
+print(f"Session ID: {result.session_id}")
+```
 
 ## Error Handling
 
@@ -281,6 +474,30 @@ class BrokersConfiguration(models.Model):
 ### 2025 Modern Architecture Migration
 
 The 2025 modernization represents a **major architectural upgrade** while maintaining full backward compatibility:
+
+#### In-App Authentication Refactoring (2025)
+
+**Key architectural improvements achieved:**
+
+✅ **Service Layer Separation**: In-app authentication logic moved from view to service layer
+- Business logic properly encapsulated in `AuthenticationService`
+- View layer only handles UI concerns and delegation
+- Consistent with TOTP authentication patterns
+
+✅ **Proper API Integration**: Uses `DeGiroService` instead of direct `TradingApi`
+- Follows established service architecture patterns
+- Leverages existing credential management infrastructure
+- Consistent session ID retrieval through service layer
+
+✅ **Enhanced Testability**: Service layer methods can be unit tested independently
+- Mock service dependencies instead of low-level API calls
+- Better test coverage for retry logic and error scenarios
+- Cleaner test structure following service boundaries
+
+✅ **Improved Maintainability**: Changes centralized in service layer
+- Future DEGIRO API changes only affect service implementation
+- Authentication logic reusable across different UI components
+- Better error handling and logging consistency
 
 #### What's New
 

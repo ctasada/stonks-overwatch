@@ -48,7 +48,13 @@ CACHE_TIMEOUT = 3600
 
 
 class UpdateService(BaseService, AbstractUpdateService):
-    def __init__(self, import_folder: str = None, debug_mode: bool = None, config: Optional[DegiroConfig] = None):
+    def __init__(
+        self,
+        import_folder: str = None,
+        debug_mode: bool = None,
+        config: Optional[DegiroConfig] = None,
+        force_connect: bool = False,
+    ):
         """
         Initialize the UpdateService.
         :param import_folder:
@@ -57,6 +63,8 @@ class UpdateService(BaseService, AbstractUpdateService):
             If True, the service will store the JSON files for debugging purposes.
         :param config:
             Optional configuration instance for dependency injection.
+        :param force_connect:
+            If True, the service will attempt to connect to DeGiro upon initialization.
         """
         # Initialize AbstractUpdateService first (has no super() calls to interfere)
         AbstractUpdateService.__init__(self, "DEGIRO", import_folder, debug_mode, config)
@@ -71,6 +79,9 @@ class UpdateService(BaseService, AbstractUpdateService):
 
         # Pass injected config to DeGiro service for proper credential access
         self.degiro_service = DeGiroService(config=self._injected_config)
+
+        if force_connect:
+            self.degiro_service.connect()
 
         self.portfolio_data = PortfolioService(
             degiro_service=self.degiro_service,
