@@ -429,17 +429,23 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         return local_portfolio
 
     def __get_products_info(self, products_ids: list) -> dict:
+        # Handle offline mode immediately
+        products_info: dict | None = None
         try:
-            return self.degiro_service.get_products_info(products_ids)
+            products_info = self.degiro_service.get_products_info(products_ids)
         except DeGiroOfflineModeError:
             self.logger.info("Running in offline mode, using last known data")
-            return ProductInfoRepository.get_products_info_raw(products_ids)
         except (ConnectionError, TimeoutError) as e:
             self.logger.warning(f"Cannot connect to DeGiro: {e}, getting last known data")
-            return ProductInfoRepository.get_products_info_raw(products_ids)
         except Exception as e:
             self.logger.error(f"Unexpected error getting products info: {e}")
+
+        # Handle None result (internal failures were caught)
+        if products_info is None:
+            self.logger.warning("DeGiro service returned None, falling back to last known data")
             return ProductInfoRepository.get_products_info_raw(products_ids)
+
+        return products_info
 
     def __get_product_config(self) -> dict:
         try:
@@ -513,7 +519,6 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         dataset = []
         for day in aggregate:
             # Merges the portfolio value with the cash value to get the full picture
-            cash_value = 0.0
             if day in cash_account:
                 cash_value = cash_account[day]
             else:
