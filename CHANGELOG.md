@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.1.3] - 2025-08-30
+
+### Added
+
 * DEGIRO: Added support to use 'In App' 2FA authentication
 
 ### Changed
