@@ -47,7 +47,7 @@ def is_connected_to_degiro() -> bool:
     except DeGiroOfflineModeError:
         return False
     except Exception as error:
-        StonksLogger.get_logger("stonks_overwatch.views.templates", "[CUSTOMTAGS]").error(error)
+        StonksLogger.get_logger("stonks_overwatch.views.templates", "[CUSTOM_TAGS]").error(error)
         return False
 
 

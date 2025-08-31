@@ -11,7 +11,7 @@ from stonks_overwatch.utils.core.logger import StonksLogger
 
 
 class AccountOverviewService(AccountServiceInterface, BaseService):
-    logger = StonksLogger.get_logger("stonks_overwatch.account_overview_data", "IBKR|ACCOUNT_OVERVIEW")
+    logger = StonksLogger.get_logger("stonks_overwatch.account_overview_data", "[IBKR|ACCOUNT_OVERVIEW]")
 
     def __init__(self, config: Optional[BaseConfig] = None):
         super().__init__(config)

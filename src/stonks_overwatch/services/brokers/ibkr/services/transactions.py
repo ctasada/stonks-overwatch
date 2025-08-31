@@ -13,7 +13,7 @@ from stonks_overwatch.utils.core.logger import StonksLogger
 
 
 class TransactionsService(BaseService, TransactionServiceInterface):
-    logger = StonksLogger.get_logger("stonks_overwatch.account_overview_data", "IBKR|TRANSACTIONS")
+    logger = StonksLogger.get_logger("stonks_overwatch.account_overview_data", "[IBKR|TRANSACTIONS]")
 
     def __init__(self, ibkr_service: Optional[IbkrService] = None, config: Optional[BaseConfig] = None):
         super().__init__(config)

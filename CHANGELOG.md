@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+* Streamline logs to make them easier to read
+
 ### Security
 
 ## [0.1.3] - 2025-08-30
@@ -30,10 +32,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Navigation sidebar has been redesigned to improve usability
 * Navigation sidebar is now collapsible
 * Internal code improvements
-
-### Deprecated
-
-### Removed
 
 ### Fixed
 

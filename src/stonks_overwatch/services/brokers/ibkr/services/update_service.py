@@ -17,7 +17,7 @@ CACHE_TIMEOUT = 3600
 
 
 class UpdateService(DependencyInjectionMixin, AbstractUpdateService):
-    def __init__(self, import_folder: str = None, debug_mode: bool = True, config: Optional[IbkrConfig] = None):
+    def __init__(self, import_folder: str = None, debug_mode: bool = None, config: Optional[IbkrConfig] = None):
         """
         Initialize the UpdateService.
         :param import_folder:
