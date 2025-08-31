@@ -24,7 +24,7 @@ from stonks_overwatch.utils.core.logger import StonksLogger
 class UpdateService(BaseService, AbstractUpdateService):
     logger = StonksLogger.get_logger("stonks_overwatch.bitvavo.update_service", "[BITVAVO|UPDATE]")
 
-    def __init__(self, import_folder: str = None, debug_mode: bool = True, config: Optional[BitvavoConfig] = None):
+    def __init__(self, import_folder: str = None, debug_mode: bool = None, config: Optional[BitvavoConfig] = None):
         """
         Initialize the UpdateService.
         :param import_folder:
