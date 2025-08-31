@@ -211,12 +211,16 @@ STONKS_LOG_LEVEL = os.getenv("STONKS_LOG_LEVEL", "INFO").upper()
 if DEBUG_MODE:
     STONKS_LOG_LEVEL = "DEBUG"
 
+# Choose formatter based on environment - useful for development vs production
+STONKS_LOG_FORMATTER = os.getenv("STONKS_LOG_FORMATTER", "verbose")
+# Valid options: "verbose", "simple"
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
         "verbose": {
-            "format": "{levelname} {asctime} {module} {message}",
+            "format": "{levelname} {asctime} {message}",
             "style": "{",
         },
         "simple": {
@@ -228,13 +232,13 @@ LOGGING = {
         "console": {
             "level": "DEBUG",
             "class": "logging.StreamHandler",
-            "formatter": "verbose",
+            "formatter": STONKS_LOG_FORMATTER,
         },
         "file": {
             "level": "DEBUG",
             "class": "logging.handlers.RotatingFileHandler",
             "filename": os.path.join(STONKS_OVERWATCH_LOGS_DIR, STONKS_OVERWATCH_LOGS_FILENAME),
-            "formatter": "verbose",
+            "formatter": STONKS_LOG_FORMATTER,
             "maxBytes": 5 * 1024 * 1024,  # 5MB per file
             "backupCount": 5,  # Keeps the last 5 logs
             "encoding": "utf-8",

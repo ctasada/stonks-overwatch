@@ -19,7 +19,7 @@ class SessionRequiredError(Exception):
 class DeGiroSessionChecker:
     """Simple checker for DeGiroService session availability."""
 
-    logger = StonksLogger.get_logger("stonks_overwatch.session_checker", "[SESSION_CHECKER]")
+    logger = StonksLogger.get_logger("stonks_overwatch.session_checker", "[DEGIRO|SESSION_CHECKER]")
 
     @classmethod
     def get_active_session_id(cls) -> Optional[str]:

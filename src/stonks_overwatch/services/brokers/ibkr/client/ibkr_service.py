@@ -21,7 +21,7 @@ class IbkrService:
         account_id: str
         currency: str
 
-    logger = StonksLogger.get_logger("stocks_portfolio.ibkr_service", "[IBKR|CLIENT]")
+    logger = StonksLogger.get_logger("stonks_overwatch.ibkr_service", "[IBKR|CLIENT]")
     client: IbkrClient = None
     account: IbkrAccount = None
     tzinfos = {
