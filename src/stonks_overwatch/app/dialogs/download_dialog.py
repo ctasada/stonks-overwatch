@@ -163,15 +163,7 @@ class DownloadDialog(toga.Window):
                 subprocess.Popen([file_path])
             elif sys.platform == "darwin":
                 # For macOS, handle different installer types
-                if file_path.lower().endswith(".dmg"):
-                    # Mount DMG file
-                    subprocess.Popen(["open", file_path])
-                elif file_path.lower().endswith(".pkg"):
-                    # Install PKG file
-                    subprocess.Popen(["open", file_path])
-                else:
-                    # Try to open with default application
-                    subprocess.Popen(["open", file_path])
+                subprocess.Popen(["open", file_path])
             elif sys.platform.startswith("linux"):
                 # For Linux, handle different package types
                 if file_path.lower().endswith((".deb", ".rpm", ".AppImage")):
