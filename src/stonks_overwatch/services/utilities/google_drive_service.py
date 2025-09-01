@@ -99,8 +99,13 @@ class GoogleDriveService:
                         percent_int = int(percent)
                         # Only call progress_callback if percent changed
                         if progress_callback and percent_int != last_percent:
-                            progress_callback(percent)
+                            # Enhanced progress callback with byte information
+                            progress_callback(percent, downloaded, total_size)
                             last_percent = percent_int
+                    elif progress_callback:
+                        # Fallback when total_size is unknown
+                        percent = 0
+                        progress_callback(percent, downloaded, 0)
         GoogleDriveService.logger.info(f"\nDownloaded successfully to: {output_path}")
 
     @staticmethod
