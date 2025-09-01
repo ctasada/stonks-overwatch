@@ -2,12 +2,15 @@ name: pre-commit autoupdate
 
 on:
   schedule:
-    - cron: '0 3 * * 1' # Every Monday at 03:00 UTC
+    - cron: '0 3 * * *' # Every day at 03:00 UTC
   workflow_dispatch:
 
 jobs:
   autoupdate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -16,23 +19,19 @@ jobs:
       - name: Install pre-commit
         run: pip install pre-commit
       - name: Run pre-commit autoupdate script
-        run: bash .github/scripts/update_precommit_hooks.sh
+        run: pre-commit autoupdate
       - name: Check for changes
-        id: verify-changed-files
+        id: check-changes
         run: |
           if [ -n "$(git status --porcelain)" ]; then
-            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "Changes detected in the repository"
           else
-            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "No changes detected in the repository"
           fi
-      - name: Create or checkout pre-commit-autoupdate branch
-        if: steps.verify-changed-files.outputs.changed == 'true'
-        run: |
-          git checkout -b pre-commit-autoupdate || git checkout pre-commit-autoupdate
-          git reset --hard origin/main
-      - name: Push changes
-        if: steps.verify-changed-files.outputs.changed == 'true'
-        uses: stefanzweifel/git-auto-commit-action@v6
+      - name: Create Pull Request
+        if: steps.check-changes.outputs.changes == 'true'
+        uses: peter-evans/create-pull-request@v7
         with:
-          commit_message: 'chore: autoupdate pre-commit hooks'
-          push_options: '--force'
+          title: 'chore: autoupdate pre-commit hooks'
