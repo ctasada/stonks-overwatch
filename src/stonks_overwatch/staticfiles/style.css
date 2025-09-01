@@ -380,6 +380,25 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .navbar-bra
     border: 2px solid var(--sidebar-border-color);
 }
 
+/* Non-clickable portfolio selector styling */
+#sidebar-portfolio-selector .sidebar-nav-link.non-clickable {
+    cursor: default !important;
+    pointer-events: none;
+}
+
+#sidebar-portfolio-selector .sidebar-nav-link.non-clickable:hover {
+    background-color: transparent !important;
+    color: var(--sidebar-text-color) !important;
+    transform: none !important;
+}
+
+#sidebar-portfolio-selector .sidebar-nav-link.non-clickable:focus {
+    background-color: transparent !important;
+    color: var(--sidebar-text-color) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
 /* ---------------------------------------------------
     CONTENT STYLE
 ----------------------------------------------------- */

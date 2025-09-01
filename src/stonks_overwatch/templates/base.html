@@ -192,6 +192,7 @@
                     // Remove the dropdown toggle if there is only one portfolio
                     selectedPortfolio.removeAttribute("data-bs-toggle");
                     selectedPortfolio.classList.remove("dropdown-toggle");
+                    selectedPortfolio.classList.add("non-clickable");
                 } else {
                     // Show the portfolio selector dropdown only when there are multiple portfolios
                     data.available_portfolios.forEach(portfolio => {
