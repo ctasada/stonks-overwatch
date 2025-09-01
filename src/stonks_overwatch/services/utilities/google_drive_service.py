@@ -23,8 +23,8 @@ class GoogleDriveService:
             self.extension: Optional[str] = self.extract_extension()
 
         def extract_version(self) -> Optional[Version]:
-            # Support both Stonks.Overwatch-0.1.0 and Stonks_Overwatch-0.1.0-x86_64
-            match = re.search(r"Stonks[._]Overwatch-([0-9]+\.[0-9]+\.[0-9]+)", self.name)
+            # Support Stonks.Overwatch-0.1.0, Stonks_Overwatch-0.1.0-x86_64, Stonks.Overwatch-0.1.0-macos.dmg
+            match = re.search(r"Stonks[._]Overwatch-([0-9]+\.[0-9]+\.[0-9]+)(?:-[\w]+)?", self.name)
             if match:
                 try:
                     return Version(match.group(1))
@@ -33,8 +33,8 @@ class GoogleDriveService:
             return None
 
         def extract_extension(self) -> Optional[str]:
-            # Extract extension at the end, e.g. .dmg, .msi, .flatpak
-            match = re.search(r"\.(dmg|msi|flatpak)$", self.name)
+            # Extract extension at the end, e.g. .dmg, .msi, .flatpak, possibly after -macos, -x86_64, etc.
+            match = re.search(r"(?:-[\w]+)?\.(dmg|msi|flatpak)$", self.name)
             if match:
                 return match.group(1)
             return None
