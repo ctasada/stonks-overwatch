@@ -19,7 +19,7 @@ jobs:
       - name: Install pre-commit
         run: pip install pre-commit
       - name: Run pre-commit autoupdate script
-        uses: fuzzylabs/pre-commit-autoupdate-action@main
+        run: pre-commit autoupdate
       - name: Check for changes
         id: check-changes
         run: |
