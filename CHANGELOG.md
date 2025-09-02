@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 * Installers: Added OS name to the installer filenames
+* Improved Update Download dialog. Now shows the percentage and downloaded size
 
 ### Deprecated
 
