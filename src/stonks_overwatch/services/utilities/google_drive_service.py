@@ -23,8 +23,8 @@ class GoogleDriveService:
             self.extension: Optional[str] = self.extract_extension()
 
         def extract_version(self) -> Optional[Version]:
-            # Support both Stonks.Overwatch-0.1.0 and Stonks_Overwatch-0.1.0-x86_64
-            match = re.search(r"Stonks[._]Overwatch-([0-9]+\.[0-9]+\.[0-9]+)", self.name)
+            # Support Stonks.Overwatch-0.1.0, Stonks_Overwatch-0.1.0-x86_64, Stonks.Overwatch-0.1.0-macos.dmg
+            match = re.search(r"Stonks[._]Overwatch-([0-9]+\.[0-9]+\.[0-9]+)(?:-[\w]+)?", self.name)
             if match:
                 try:
                     return Version(match.group(1))
@@ -33,8 +33,8 @@ class GoogleDriveService:
             return None
 
         def extract_extension(self) -> Optional[str]:
-            # Extract extension at the end, e.g. .dmg, .msi, .flatpak
-            match = re.search(r"\.(dmg|msi|flatpak)$", self.name)
+            # Extract extension at the end, e.g. .dmg, .msi, .flatpak, possibly after -macos, -x86_64, etc.
+            match = re.search(r"(?:-[\w]+)?\.(dmg|msi|flatpak)$", self.name)
             if match:
                 return match.group(1)
             return None
@@ -99,8 +99,13 @@ class GoogleDriveService:
                         percent_int = int(percent)
                         # Only call progress_callback if percent changed
                         if progress_callback and percent_int != last_percent:
-                            progress_callback(percent)
+                            # Enhanced progress callback with byte information
+                            progress_callback(percent, downloaded, total_size)
                             last_percent = percent_int
+                    elif progress_callback:
+                        # Fallback when total_size is unknown
+                        percent = 0
+                        progress_callback(percent, downloaded, 0)
         GoogleDriveService.logger.info(f"\nDownloaded successfully to: {output_path}")
 
     @staticmethod

@@ -206,6 +206,36 @@ jobs:
           cat release_notes.md >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
+      - name: Rename release files to include OS by extension
+        run: |
+          find artifacts -type f \( -name '*.dmg' -o -name '*.msi' -o -name '*.flatpak' \) | while read filepath; do
+            filename=$(basename "$filepath")
+            dir=$(dirname "$filepath")
+            case "$filename" in
+              *.dmg)
+                suffix=macos
+                ;;
+              *.msi)
+                suffix=windows
+                ;;
+              *.flatpak)
+                suffix=linux
+                ;;
+              *)
+                continue
+                ;;
+            esac
+            # Only add OS if not already present
+            if [[ "$filename" =~ ^(.*)-(macos|windows|linux)\.(dmg|msi|flatpak)$ ]]; then
+              continue
+            fi
+            name_no_ext="${filename%.*}"
+            ext="${filename##*.}"
+            newname="${name_no_ext}-${suffix}.${ext}"
+            mv "$filepath" "$dir/$newname"
+            echo "Renamed $filepath to $dir/$newname"
+          done
+
       - name: Create GitHub Release
         if: ${{ !env.ACT }}
         uses: softprops/action-gh-release@v2
