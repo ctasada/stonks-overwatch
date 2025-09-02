@@ -73,6 +73,53 @@ class DownloadDialog(toga.Window):
         else:
             subprocess.Popen(["open", folder_path])
 
+    def _update_progress_bar(self, percent_int: int) -> None:
+        """Update the progress bar value and log progress."""
+        if self.progress.max is None:
+            self.progress.max = 100
+        self.progress.value = percent_int
+        if percent_int % 10 == 0:
+            self.logger.debug(f"Progress: {percent_int}%")
+        self.progress.refresh()
+
+    def _format_download_info_text(
+        self, percent_int: int, downloaded_bytes: int, total_bytes: int, file_path: str
+    ) -> str:
+        """Generate the download info text based on available data."""
+        if total_bytes > 0:
+            return self._format_full_download_info(downloaded_bytes, total_bytes, percent_int)
+
+        if file_path and os.path.exists(file_path):
+            return self._format_file_size_info(file_path, percent_int)
+
+        return f"Downloaded: {percent_int}%"
+
+    def _format_full_download_info(self, downloaded_bytes: int, total_bytes: int, percent_int: int) -> str:
+        """Format download info when both downloaded and total bytes are available."""
+        downloaded_mb = downloaded_bytes / (1024 * 1024)
+        total_mb = total_bytes / (1024 * 1024)
+        return f"{downloaded_mb:.1f} MB / {total_mb:.1f} MB ({percent_int}%)"
+
+    def _format_file_size_info(self, file_path: str, percent_int: int) -> str:
+        """Format download info using current file size."""
+        try:
+            current_size = os.path.getsize(file_path)
+            current_mb = current_size / (1024 * 1024)
+            return f"{current_mb:.1f} MB ({percent_int}%)"
+        except OSError:
+            return f"Downloaded: {percent_int}%"
+
+    def _handle_download_completion(self, folder_path: str, file_path: str) -> None:
+        """Handle actions when download is completed."""
+        self.logger.debug("Reached 100% progress, showing install confirmation.")
+        if folder_path and file_path:
+            self.show_install_confirmation(file_path, folder_path)
+        elif folder_path:
+            self.open_file_browser(folder_path)
+            self.on_cancel(self.cancel_button)
+        else:
+            self.on_cancel(self.cancel_button)
+
     def update_progress(
         self,
         percent: float | int,
@@ -83,39 +130,18 @@ class DownloadDialog(toga.Window):
     ):
         def _update():
             percent_int = int(percent)
-            if percent_int != self.progress.value:
-                if self.progress.max is None:
-                    self.progress.max = 100
-                self.progress.value = percent_int
-                if percent_int % 10 == 0:
-                    self.logger.debug(f"Progress: {percent_int}%")
-                self.progress.refresh()
+            if percent_int == self.progress.value:
+                return  # Early return reduces nesting
 
-                # Update download info label with MB and percentage
-                if total_bytes > 0:
-                    downloaded_mb = downloaded_bytes / (1024 * 1024)
-                    total_mb = total_bytes / (1024 * 1024)
-                    self.download_info_label.text = f"{downloaded_mb:.1f} MB / {total_mb:.1f} MB ({percent_int}%)"
-                else:
-                    # Try to estimate file size from current file if it exists
-                    if file_path and os.path.exists(file_path):
-                        current_size = os.path.getsize(file_path)
-                        current_mb = current_size / (1024 * 1024)
-                        self.download_info_label.text = f"{current_mb:.1f} MB ({percent_int}%)"
-                    else:
-                        self.download_info_label.text = f"Downloaded: {percent_int}%"
+            self._update_progress_bar(percent_int)
 
-                self.download_info_label.refresh()
+            # Update download info label
+            info_text = self._format_download_info_text(percent_int, downloaded_bytes, total_bytes, file_path)
+            self.download_info_label.text = info_text
+            self.download_info_label.refresh()
 
-                if percent_int >= 100:
-                    self.logger.debug("Reached 100% progress, showing install confirmation.")
-                    if folder_path and file_path:
-                        self.show_install_confirmation(file_path, folder_path)
-                    else:
-                        # Fallback to old behavior if file_path not provided
-                        if folder_path:
-                            self.open_file_browser(folder_path)
-                        self.on_cancel(self.cancel_button)
+            if percent_int >= 100:
+                self._handle_download_completion(folder_path, file_path)
 
         self.app.loop.call_soon_threadsafe(_update)
 
