@@ -28,12 +28,13 @@ class DownloadDialog(toga.Window):
         self._main_window = main_window
 
         self.label = toga.Label(f"Downloading: {file_info.name}")
-        self.progress = toga.ProgressBar(max=100, value=0)
+        self.progress = toga.ProgressBar(max=None, value=0)
+        self.download_info_label = toga.Label("Preparing download...", style=Pack(text_align="center"))
         self.cancel_button = toga.Button("Cancel", on_press=self.on_cancel)
 
-        # Create a vertical box for label and progress bar
+        # Create a vertical box for label, progress bar, and download info
         content_box = toga.Box(
-            children=[self.label, self.progress],
+            children=[self.label, self.progress, self.download_info_label],
             style=Pack(direction="column", padding_bottom=20, align_items="center", flex=1),
         )
         # Place the cancel button in its own box at the bottom
@@ -72,19 +73,75 @@ class DownloadDialog(toga.Window):
         else:
             subprocess.Popen(["open", folder_path])
 
-    def update_progress(self, percent: float | int, folder_path: str = None):
+    def _update_progress_bar(self, percent_int: int) -> None:
+        """Update the progress bar value and log progress."""
+        if self.progress.max is None:
+            self.progress.max = 100
+        self.progress.value = percent_int
+        if percent_int % 10 == 0:
+            self.logger.debug(f"Progress: {percent_int}%")
+        self.progress.refresh()
+
+    def _format_download_info_text(
+        self, percent_int: int, downloaded_bytes: int, total_bytes: int, file_path: str
+    ) -> str:
+        """Generate the download info text based on available data."""
+        if total_bytes > 0:
+            return self._format_full_download_info(downloaded_bytes, total_bytes, percent_int)
+
+        if file_path and os.path.exists(file_path):
+            return self._format_file_size_info(file_path, percent_int)
+
+        return f"Downloaded: {percent_int}%"
+
+    def _format_full_download_info(self, downloaded_bytes: int, total_bytes: int, percent_int: int) -> str:
+        """Format download info when both downloaded and total bytes are available."""
+        downloaded_mb = downloaded_bytes / (1024 * 1024)
+        total_mb = total_bytes / (1024 * 1024)
+        return f"{downloaded_mb:.1f} MB / {total_mb:.1f} MB ({percent_int}%)"
+
+    def _format_file_size_info(self, file_path: str, percent_int: int) -> str:
+        """Format download info using current file size."""
+        try:
+            current_size = os.path.getsize(file_path)
+            current_mb = current_size / (1024 * 1024)
+            return f"{current_mb:.1f} MB ({percent_int}%)"
+        except OSError:
+            return f"Downloaded: {percent_int}%"
+
+    def _handle_download_completion(self, folder_path: str, file_path: str) -> None:
+        """Handle actions when download is completed."""
+        self.logger.debug("Reached 100% progress, showing install confirmation.")
+        if folder_path and file_path:
+            self.show_install_confirmation(file_path, folder_path)
+        elif folder_path:
+            self.open_file_browser(folder_path)
+            self.on_cancel(self.cancel_button)
+        else:
+            self.on_cancel(self.cancel_button)
+
+    def update_progress(
+        self,
+        percent: float | int,
+        folder_path: str = None,
+        file_path: str = None,
+        downloaded_bytes: int = 0,
+        total_bytes: int = 0,
+    ):
         def _update():
             percent_int = int(percent)
-            if percent_int != self.progress.value:
-                self.progress.value = percent_int
-                if percent_int % 10 == 0:
-                    self.logger.debug(f"Progress: {percent_int}%")
-                self.progress.refresh()
-                if percent_int >= 100:
-                    self.logger.debug("Reached 100% progress, closing dialog.")
-                    if folder_path:
-                        self.open_file_browser(folder_path)
-                    self.on_cancel(self.cancel_button)
+            if percent_int == self.progress.value:
+                return  # Early return reduces nesting
+
+            self._update_progress_bar(percent_int)
+
+            # Update download info label
+            info_text = self._format_download_info_text(percent_int, downloaded_bytes, total_bytes, file_path)
+            self.download_info_label.text = info_text
+            self.download_info_label.refresh()
+
+            if percent_int >= 100:
+                self._handle_download_completion(folder_path, file_path)
 
         self.app.loop.call_soon_threadsafe(_update)
 
@@ -103,11 +160,11 @@ class DownloadDialog(toga.Window):
         output_path = os.path.join(downloads_folder, self.file_name.name)
 
         def download():
-            def progress_callback(percent):
+            def progress_callback(percent, downloaded_bytes=0, total_bytes=0):
                 if self._closed:
                     self.logger.info("Download cancelled by user.")
                     return
-                self.update_progress(percent, downloads_folder)
+                self.update_progress(percent, downloads_folder, output_path, downloaded_bytes, total_bytes)
 
             try:
                 GoogleDriveService.download_file(
@@ -123,3 +180,55 @@ class DownloadDialog(toga.Window):
 
         self._download_thread = threading.Thread(target=download)
         self._download_thread.start()
+
+    def install_update(self, file_path: str):
+        """Execute the installer based on the platform and file type."""
+        try:
+            if sys.platform == "win32":
+                # For Windows installers (.exe, .msi)
+                subprocess.Popen([file_path])
+            elif sys.platform == "darwin":
+                # For macOS, handle different installer types
+                subprocess.Popen(["open", file_path])
+            elif sys.platform.startswith("linux"):
+                # For Linux, handle different package types
+                if file_path.lower().endswith((".deb", ".rpm", ".AppImage")):
+                    if file_path.lower().endswith(".AppImage"):
+                        # Make AppImage executable and run it
+                        os.chmod(file_path, 0o755)
+                        subprocess.Popen([file_path])
+                    else:
+                        # Open with default application (usually package manager)
+                        subprocess.Popen(["xdg-open", file_path])
+                else:
+                    subprocess.Popen(["xdg-open", file_path])
+            else:
+                # Fallback for other platforms
+                subprocess.Popen(["open", file_path])
+
+            self.logger.info(f"Started installer for: {file_path}")
+        except Exception as e:
+            self.logger.error(f"Failed to start installer: {e}")
+
+    def show_install_confirmation(self, file_path: str, folder_path: str):
+        """Show confirmation dialog asking if user wants to install the update now."""
+
+        async def ask_install():
+            # Create and show confirmation dialog using toga.ConfirmDialog
+            dialog = toga.ConfirmDialog(
+                title="Install Update", message="Download completed! Do you want to install the update now?"
+            )
+            result = await self.app.main_window.dialog(dialog)
+
+            if result:
+                self.logger.debug("User chose to install the update.")
+                self.install_update(file_path)
+            else:
+                self.logger.debug("User chose not to install, opening file browser.")
+                self.open_file_browser(folder_path)
+
+            # Close the download dialog
+            self.on_cancel(self.cancel_button)
+
+        # Schedule the async function to run
+        self.app.loop.call_soon_threadsafe(lambda: self.app.loop.create_task(ask_install()))

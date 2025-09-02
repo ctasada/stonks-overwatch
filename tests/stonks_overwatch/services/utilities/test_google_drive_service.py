@@ -19,16 +19,22 @@ class TestGoogleDriveService:
         files = [
             self.make_file("Stonks.Overwatch-0.1.0.dmg", "1"),
             self.make_file("Stonks.Overwatch-0.2.0.dmg", "2"),
+            self.make_file("Stonks.Overwatch-0.2.0-macos.dmg", "2b"),
             self.make_file("Stonks.Overwatch-0.1.0.msi", "3"),
             self.make_file("Stonks.Overwatch-0.3.0.msi", "4"),
+            self.make_file("Stonks.Overwatch-0.3.0-windows.msi", "4b"),
             self.make_file("Stonks.Overwatch-0.2.0.flatpak", "5"),
+            self.make_file("Stonks.Overwatch-0.4.0-linux.flatpak", "6"),
         ]
         latest_dmg = GoogleDriveService.get_latest_for_platform(files, "dmg")
         latest_msi = GoogleDriveService.get_latest_for_platform(files, "msi")
         latest_flatpak = GoogleDriveService.get_latest_for_platform(files, "flatpak")
         assert latest_dmg.version == Version("0.2.0")
+        assert latest_dmg.name in ("Stonks.Overwatch-0.2.0.dmg", "Stonks.Overwatch-0.2.0-macos.dmg")
         assert latest_msi.version == Version("0.3.0")
-        assert latest_flatpak.version == Version("0.2.0")
+        assert latest_msi.name in ("Stonks.Overwatch-0.3.0.msi", "Stonks.Overwatch-0.3.0-windows.msi")
+        assert latest_flatpak.version == Version("0.4.0")
+        assert latest_flatpak.name == "Stonks.Overwatch-0.4.0-linux.flatpak"
 
     def test_get_latest_for_platform_empty(self):
         files = [self.make_file("randomfile.txt", "1")]
@@ -155,16 +161,37 @@ class TestGoogleDriveService:
         with pytest.raises(RuntimeError):
             GoogleDriveService.get_platform_for_os()
 
+    def test_fileinfo_parsing_with_os_suffix(self):
+        # Test version and extension parsing for files with OS/arch suffix
+        f1 = self.make_file("Stonks.Overwatch-1.2.3-macos.dmg", "1")
+        f2 = self.make_file("Stonks.Overwatch-2.0.0-windows.msi", "2")
+        f3 = self.make_file("Stonks.Overwatch-3.1.4-linux.flatpak", "3")
+        assert f1.version == Version("1.2.3")
+        assert f1.extension == "dmg"
+        assert f2.version == Version("2.0.0")
+        assert f2.extension == "msi"
+        assert f3.version == Version("3.1.4")
+        assert f3.extension == "flatpak"
+
     def test_is_file_newer_than_version(self):
         # Newer version
         file_info_newer = self.make_file("Stonks.Overwatch-0.2.0.dmg", "1")
         assert GoogleDriveService.is_file_newer_than_version(file_info_newer, "0.1.0") is True
+        # Newer version with OS in filename
+        file_info_newer_os = self.make_file("Stonks.Overwatch-0.2.0-macos.dmg", "1b")
+        assert GoogleDriveService.is_file_newer_than_version(file_info_newer_os, "0.1.0") is True
         # Same version
         file_info_same = self.make_file("Stonks.Overwatch-0.1.0.dmg", "2")
         assert GoogleDriveService.is_file_newer_than_version(file_info_same, "0.1.0") is False
+        # Same version with OS in filename
+        file_info_same_os = self.make_file("Stonks.Overwatch-0.1.0-windows.msi", "2b")
+        assert GoogleDriveService.is_file_newer_than_version(file_info_same_os, "0.1.0") is False
         # Older version
         file_info_older = self.make_file("Stonks.Overwatch-0.1.0.dmg", "3")
         assert GoogleDriveService.is_file_newer_than_version(file_info_older, "0.2.0") is False
+        # Older version with OS in filename
+        file_info_older_os = self.make_file("Stonks.Overwatch-0.1.0-linux.flatpak", "3b")
+        assert GoogleDriveService.is_file_newer_than_version(file_info_older_os, "0.2.0") is False
         # Invalid filename (no version)
         file_info_invalid = self.make_file("randomfile.txt", "4")
         assert GoogleDriveService.is_file_newer_than_version(file_info_invalid, "0.1.0") is False
