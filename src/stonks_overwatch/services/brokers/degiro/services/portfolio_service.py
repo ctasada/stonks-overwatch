@@ -19,7 +19,7 @@ from stonks_overwatch.services.brokers.degiro.repositories.product_quotations_re
 from stonks_overwatch.services.brokers.degiro.repositories.transactions_repository import TransactionsRepository
 from stonks_overwatch.services.brokers.degiro.services.currency_service import CurrencyConverterService
 from stonks_overwatch.services.brokers.degiro.services.deposit_service import DepositsService
-from stonks_overwatch.services.brokers.degiro.services.helper import is_non_tradeable_product
+from stonks_overwatch.services.brokers.degiro.services.helper import is_non_tradeable_product, retry_with_backoff
 from stonks_overwatch.services.brokers.yfinance.services.market_data_service import YFinance
 from stonks_overwatch.services.models import Country, DailyValue, PortfolioEntry, TotalPortfolio
 from stonks_overwatch.settings import TIME_ZONE
@@ -448,14 +448,20 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         return products_info
 
     def __get_product_config(self) -> dict:
-        try:
+        """Get product configuration with retry mechanism."""
+
+        def get_config():
             return self.degiro_service.get_client().get_products_config()
-        except (ConnectionError, TimeoutError, DeGiroOfflineModeError):
-            self.logger.warning("Cannot get product config from DeGiro")
-            return {}
-        except Exception as e:
-            self.logger.error(f"Unexpected error getting product config: {e}")
-            return {}
+
+        result = retry_with_backoff(
+            func=get_config,
+            max_retries=3,
+            delay_ms=500,
+            operation_name="product config",
+            logger=self.logger,
+        )
+
+        return result if result is not None else {}
 
     def calculate_product_growth(self) -> dict:
         self.logger.debug("Calculating Product growth")
@@ -694,7 +700,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
             split_date_obj = LocalizationUtility.convert_string_to_date(split_date_str)
 
             for i in range(1, len(sorted_positions)):
-                prev_date_str, prev_value = sorted_positions[i - 1]
+                _, prev_value = sorted_positions[i - 1]
                 curr_date_str, curr_value = sorted_positions[i]
 
                 # Skip if values are zero or negative
