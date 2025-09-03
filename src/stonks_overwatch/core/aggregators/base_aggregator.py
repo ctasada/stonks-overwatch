@@ -13,6 +13,7 @@ from stonks_overwatch.core.exceptions import DataAggregationException
 from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.services.models import PortfolioId
+from stonks_overwatch.settings import DEBUG_MODE
 from stonks_overwatch.utils.core.logger import StonksLogger
 
 
@@ -197,7 +198,7 @@ class BaseAggregator(ABC):
                 else:
                     self._logger.warning(f"{broker_name} service does not have method {method_name}")
             except Exception as e:
-                self._logger.error(f"Failed to collect data from {broker_name}: {e}")
+                self._logger.error(f"Failed to collect data from {broker_name}: {e}", exc_info=DEBUG_MODE)
                 broker_errors[broker_name] = str(e)
                 if first_exc is None:
                     first_exc = e

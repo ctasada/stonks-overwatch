@@ -120,7 +120,6 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
   * [ ] DEGIRO Client: Stop using Totp and request 2FA for each connection
   * [ ] Add support for 'In App Authentication' using SMS
 * [ ] Bitvavo:
-  * [ ] `Failed to collect data from bitvavo: 'Fee' object has no attribute 'datetime'`
   * [ ] Create a Crypto Rewards section
   * [ ] Show asset staking blocked amount as in Bitvavo UI
 * [ ] IBKR
