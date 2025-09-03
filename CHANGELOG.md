@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Streamline logs to make them easier to read
 * Sidebar: Portfolio selector is only clickable when there are multiple portfolios
+* DEGIRO: Fixed issue fetching the portfolio data
 
 ### Security
 
