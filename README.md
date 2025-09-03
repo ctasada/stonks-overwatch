@@ -117,7 +117,6 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
 * [ ] Provide support to configure the settings (API Key, etc.) in the application.
   * [ ] Values should be stored in the keyring for security
 * [ ] `make check-dependencies` needs some extra work
-  * [ ] Review the usage of `polars` and `pandas` in the codebase. Migrate to `polars` if possible.
   * [ ] `toga` and `asgiref` are only used for the `app`. Probably it should be moved as a full dependency
   * [ ] `dateutil` and `pytz` can be either removed, or replace internal implementations.
 * [ ] DEGIRO:

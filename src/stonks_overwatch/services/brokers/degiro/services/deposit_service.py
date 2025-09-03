@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-import pandas as pd
+import polars as pl
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.core.interfaces.base_service import BaseService
@@ -28,12 +28,16 @@ class DepositsService(BaseService, DepositServiceInterface):
 
     def get_cash_deposits(self) -> List[Deposit]:
         self.logger.debug("Get Cash Deposits")
-        df = pd.DataFrame(CashMovementsRepository.get_cash_deposits_raw())
+        raw_data = CashMovementsRepository.get_cash_deposits_raw()
 
-        df = df.sort_values(by="date", ascending=False)
+        if not raw_data:
+            return []
+
+        df = pl.DataFrame(raw_data)
+        df = df.sort("date", descending=True)
 
         records = []
-        for _, row in df.iterrows():
+        for row in df.iter_rows(named=True):
             records.append(
                 Deposit(
                     type=DepositType.DEPOSIT if row["change"] > 0 else DepositType.WITHDRAWAL,
@@ -55,25 +59,40 @@ class DepositsService(BaseService, DepositServiceInterface):
     def calculate_cash_account_value(self) -> dict:
         cash_balance = CashMovementsRepository.get_cash_balance_by_date()
 
+        if not cash_balance:
+            return {}
+
         # Create DataFrame from the fetched data
-        df = pd.DataFrame.from_dict(cash_balance)
+        df = pl.DataFrame(cash_balance)
 
         # Convert the 'date' column to datetime and remove the time component
-        df["date"] = pd.to_datetime(df["date"]).dt.normalize()
+        df = df.with_columns(pl.col("date").dt.date().alias("date_only"))
 
         # Group by date and take the last balance_total for each day
-        df = df.groupby("date", as_index=False).last()
+        df = df.group_by("date_only").last()
 
-        # Sort values by date (just in case)
-        df = df.sort_values(by="date")
+        # Sort values by date
+        df = df.sort("date_only")
 
-        # Set the 'date' column as the index and fill missing dates
-        df.set_index("date", inplace=True)
-        df = df.resample("D").ffill()
+        # Generate complete date range and fill missing dates
+        if len(df) > 0:
+            min_date = df.select("date_only").min().item()
+            max_date = df.select("date_only").max().item()
 
-        # Convert the DataFrame to a dictionary with date as the key (converted to string)
-        # and balance_total as the value
-        dataset = {day.strftime("%Y-%m-%d"): float(balance) for day, balance in df["balanceTotal"].items()}
+            # Create complete date range
+            date_range = pl.date_range(min_date, max_date, interval="1d", eager=True)
+            complete_dates_df = pl.DataFrame({"date_only": date_range})
+
+            # Join and forward fill
+            df = complete_dates_df.join(df, on="date_only", how="left")
+            df = df.fill_null(strategy="forward")
+
+        # Convert to dictionary
+        dataset = {}
+        for row in df.iter_rows(named=True):
+            day_str = row["date_only"].strftime("%Y-%m-%d")
+            balance = float(row["balanceTotal"]) if row["balanceTotal"] is not None else 0.0
+            dataset[day_str] = balance
 
         return dataset
 
@@ -101,17 +120,32 @@ class DepositsService(BaseService, DepositServiceInterface):
             deposits_by_date[deposit_date] = cumulative_deposits
 
         # Create DataFrame from cash balance data
-        df = pd.DataFrame.from_dict(cash_balance)
-        df["date"] = pd.to_datetime(df["date"]).dt.normalize()
-        df = df.groupby("date", as_index=False).last()
-        df = df.sort_values(by="date")
-        df.set_index("date", inplace=True)
-        df = df.resample("D").ffill()
+        if not cash_balance:
+            return {}
+
+        df = pl.DataFrame(cash_balance)
+        df = df.with_columns(pl.col("date").dt.date().alias("date_only"))
+        df = df.group_by("date_only").last()
+        df = df.sort("date_only")
+
+        # Generate complete date range and fill missing dates
+        if len(df) > 0:
+            min_date = df.select("date_only").min().item()
+            max_date = df.select("date_only").max().item()
+
+            # Create complete date range
+            date_range = pl.date_range(min_date, max_date, interval="1d", eager=True)
+            complete_dates_df = pl.DataFrame({"date_only": date_range})
+
+            # Join and forward fill
+            df = complete_dates_df.join(df, on="date_only", how="left")
+            df = df.fill_null(strategy="forward")
 
         # Calculate adjusted cash values excluding deposits
         dataset = {}
-        for day, balance in df["balanceTotal"].items():
-            day_str = day.strftime("%Y-%m-%d")
+        for row in df.iter_rows(named=True):
+            day_str = row["date_only"].strftime("%Y-%m-%d")
+            balance = float(row["balanceTotal"]) if row["balanceTotal"] is not None else 0.0
 
             # Find the cumulative deposits up to this date
             cumulative_deposits_to_date = 0.0
@@ -122,7 +156,7 @@ class DepositsService(BaseService, DepositServiceInterface):
                     break
 
             # Adjust balance by subtracting cumulative deposits
-            adjusted_balance = float(balance) - cumulative_deposits_to_date
+            adjusted_balance = balance - cumulative_deposits_to_date
             dataset[day_str] = max(0.0, adjusted_balance)  # Ensure non-negative
 
         return dataset

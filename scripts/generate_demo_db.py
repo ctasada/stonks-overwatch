@@ -17,7 +17,6 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import django
-import pandas as pd
 from common import init_logger
 from degiro_connector.quotecast.models.chart import Interval
 from django.core.management import call_command
@@ -450,8 +449,11 @@ class DBDemoGenerator:
         # Retrieve the list of products
         products_list = list(LIST_OF_PRODUCTS.keys())
 
-        # Make sure 'start_date' is a Timestamp with the same tz as the index
-        start_date = pd.Timestamp(start_date).tz_localize(tz=TIME_ZONE)
+        # Make sure 'start_date' is a datetime with the same tz as the index
+        if isinstance(start_date, str):
+            start_date = datetime.fromisoformat(start_date)
+        if start_date.tzinfo is None:
+            start_date = start_date.replace(tzinfo=ZoneInfo(TIME_ZONE))
 
         # Retrieve the dividends for those products
         yfinance_client = YFinanceClient()

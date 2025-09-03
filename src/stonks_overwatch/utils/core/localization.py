@@ -12,6 +12,7 @@ class LocalizationUtility:
     TIME_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
     DATE_FORMAT = "%Y-%m-%d"
     TIME_FORMAT = "%H:%M:%S"
+    MONTH_YEAR_FORMAT = "%B %Y"
 
     @staticmethod
     def get_currency_symbol(currency: str) -> str:
@@ -103,7 +104,7 @@ class LocalizationUtility:
         else:
             raise TypeError(f"Unsupported type: {type(value)}. Expected str or datetime.")
 
-        return time.strftime("%B %Y")
+        return time.strftime(LocalizationUtility.MONTH_YEAR_FORMAT)
 
     @staticmethod
     def get_date_day(value: str | datetime) -> str:

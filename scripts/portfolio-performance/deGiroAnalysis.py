@@ -13,8 +13,7 @@
 
 import sys
 
-import numpy as np
-import pandas as pd
+import polars as pl
 
 sepup = "\n" + 6 * "----" + " Degiro trading tracker " + 6 * "---" + "\n"
 sep = "\n" + 22 * "---" + "\n"
@@ -28,46 +27,34 @@ if len(sys.argv) <= 1:
 
 # excel loc/file setup
 csv_file = sys.argv[1]
-df = pd.read_csv(csv_file)
+df = pl.read_csv(csv_file)
 
 # define Kosten column (fee cost init)
-fc = df["Transactiekosten en/of"]
+fc = df.select("Transactiekosten en/of").to_series()
 
 # turn negative into positive
-df["AbsKosten"] = fc.abs()
+df = df.with_columns(pl.col("Transactiekosten en/of").abs().alias("AbsKosten"))
 
 # generate sum + round to 2 decimals
-fc_sum = df["AbsKosten"].sum()
+fc_sum = df.select("AbsKosten").sum().item()
 fcf = round(fc_sum, 2)
 
 # set beginning & end date
-dbeg = df["Datum"].tail(1).to_string(index=False).strip()
-dend = df["Datum"].head(1).to_string(index=False).strip()
+dbeg = df.select("Datum").tail(1).item()
+dend = df.select("Datum").head(1).item()
 
 # define Totaal column (portofolio cost init)
-pc = df["Totaal"]
+pc = df.select("Totaal").to_series()
 
-# cherry pick positives (portofolio sale init)
-ps = []
-for line in pc:
-    # if not line.startswith('-'):
-    if line > 0:
-        ps.append(line)
-
-# convert str + int to float (sales)
-ps = np.array(ps, float)
-
-ps = sum(ps)
+# cherry pick positives (portofolio sale init) and sum them
+ps = df.filter(pl.col("Totaal") > 0).select("Totaal").sum().item()
 ps = round(ps, 2)
 
-# turn str to float (portofolio costs)
-pc = pc.astype(float)
-
 # turn negatives into positive
-df["AbsTotaal"] = pc.abs()
+df = df.with_columns(pl.col("Totaal").abs().alias("AbsTotaal"))
 
 # generate sum + round to 2 decimals
-pc_sum = df["AbsTotaal"].sum()
+pc_sum = df.select("AbsTotaal").sum().item()
 pcf = pc_sum - ps
 pcf = round(pcf - ps, 2)
 

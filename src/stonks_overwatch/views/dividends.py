@@ -1,7 +1,6 @@
 from datetime import datetime
 from typing import List
 
-import pandas as pd
 from django.shortcuts import render
 from django.views import View
 
@@ -83,22 +82,10 @@ class Dividends(View):
                 "calendar": {},
             }
 
-        df = pd.DataFrame(dividends)
-        # Find the maximum date. Since we have upcoming payments, it can be today or some point
-        # in the future
-        date_as_datetime = pd.to_datetime(df["payment_date"], format="ISO8601")
-        # Set period_start to January 1st of the minimum year in the data
-        min_year = date_as_datetime.min().year
-        period_start = pd.Timestamp(year=min_year, month=1, day=1)
-        today = pd.Timestamp("today").normalize()
-        period_end = max(date_as_datetime.max(), today)
-        period = pd.period_range(start=period_start, end=period_end, freq="M")
+        period_dates, years = self._generate_monthly_periods(dividends)
 
-        # Extract unique years from the period
-        years = sorted(set(period.year), reverse=True)
-
-        for month in period:
-            month = month.strftime("%B %Y")
+        for month_date in period_dates:
+            month = month_date.strftime(LocalizationUtility.MONTH_YEAR_FORMAT)
             month_entry = dividends_calendar.setdefault(month, {})
             month_entry.setdefault("payouts", 0)
             month_entry.setdefault("total", 0)
@@ -140,8 +127,8 @@ class Dividends(View):
         dividends_growth = {}
 
         for month_year in dividends_calendar.keys():
-            month_number = int(datetime.strptime(month_year, "%B %Y").strftime("%m"))
-            year = int(datetime.strptime(month_year, "%B %Y").strftime("%Y"))
+            month_number = int(datetime.strptime(month_year, LocalizationUtility.MONTH_YEAR_FORMAT).strftime("%m"))
+            year = int(datetime.strptime(month_year, LocalizationUtility.MONTH_YEAR_FORMAT).strftime("%Y"))
 
             if year not in dividends_growth:
                 dividends_growth[year] = [0] * 12
@@ -221,3 +208,44 @@ class Dividends(View):
             },
             "table": dividends_table,
         }
+
+    def _generate_monthly_periods(self, dividends: List[Dividend]) -> tuple[list[datetime], list[int]]:
+        """
+        Generate monthly periods from dividend payment dates.
+
+        Args:
+            dividends: List of dividend objects
+
+        Returns:
+            Tuple of (period_dates, years) where:
+            - period_dates: List of datetime objects representing monthly periods
+            - years: Sorted list of unique years in descending order
+        """
+        # Extract payment dates directly from dividend objects (much more efficient)
+        payment_dates = [dividend.payment_date for dividend in dividends]
+
+        # Find min/max dates directly
+        min_date = min(payment_dates)
+        max_date = max(payment_dates)
+
+        # Set period_start to January 1st of the minimum year in the data
+        min_year = min_date.year
+        period_start = datetime(year=min_year, month=1, day=1)
+        today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        period_end = max(max_date, today)
+
+        # Generate monthly periods using simple date arithmetic
+        period_dates = []
+        current = period_start
+        while current <= period_end:
+            period_dates.append(current)
+            # Move to next month
+            if current.month == 12:
+                current = current.replace(year=current.year + 1, month=1)
+            else:
+                current = current.replace(month=current.month + 1)
+
+        # Extract unique years from the period
+        years = sorted({date.year for date in period_dates}, reverse=True)
+
+        return period_dates, years

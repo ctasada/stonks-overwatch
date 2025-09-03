@@ -2,13 +2,12 @@ import os
 from datetime import date, datetime, time, timedelta, timezone
 from typing import Dict, List, Optional
 
-import pandas as pd
+import polars as pl
 from degiro_connector.quotecast.models.chart import Interval
 from degiro_connector.trading.models.account import OverviewRequest
 from degiro_connector.trading.models.transaction import HistoryRequest
 from django.core.cache import cache
 from django.db import connection
-from pandas import DataFrame
 
 from stonks_overwatch.config.degiro import DegiroConfig
 from stonks_overwatch.core.interfaces.base_service import BaseService
@@ -305,26 +304,47 @@ class UpdateService(BaseService, AbstractUpdateService):
     def __transform_json(self, account_overview: dict) -> list[dict] | None:
         """Flattens the data from deGiro `get_account_overview`."""
 
-        def _fix_columns(dataframe: DataFrame, columns: list[str], func):
+        def _flatten_json(data: list[dict], sep: str = "_") -> list[dict]:
+            """Manually flatten nested JSON data similar to pd.json_normalize."""
+            flattened = []
+            for item in data:
+                flat_item = {}
+                for key, value in item.items():
+                    if isinstance(value, dict):
+                        # Flatten nested dictionaries
+                        for nested_key, nested_value in value.items():
+                            flat_item[f"{key}{sep}{nested_key}"] = nested_value
+                    else:
+                        flat_item[key] = value
+                flattened.append(flat_item)
+            return flattened
+
+        def _fix_columns(dataframe: pl.DataFrame, columns: list[str], func) -> pl.DataFrame:
+            """Apply a function to specified columns."""
             for col in columns:
-                if col in dataframe:
-                    dataframe[col] = df[col].apply(func)
+                if col in dataframe.columns:
+                    dataframe = dataframe.with_columns(
+                        pl.col(col).map_elements(func, return_dtype=pl.String).alias(col)
+                    )
+            return dataframe
 
         if account_overview.get("data") and account_overview["data"].get("cashMovements"):
-            # Use pd.json_normalize to convert the JSON to a DataFrame
-            df = pd.json_normalize(account_overview["data"]["cashMovements"], sep="_")
-            # Fix id values format after Pandas
-            _fix_columns(
+            # Flatten the JSON data manually
+            flattened_data = _flatten_json(account_overview["data"]["cashMovements"], sep="_")
+            df = pl.DataFrame(flattened_data)
+
+            # Fix id values format
+            df = _fix_columns(
                 df,
                 ["productId", "id", "exchangeRate", "orderId"],
-                lambda x: None if (pd.isnull(x) or pd.isna(x)) else str(x).replace(".0", ""),
+                lambda x: None if (x is None) else str(x).replace(".0", ""),
             )
-            _fix_columns(df, ["change"], lambda x: None if (pd.isnull(x) or pd.isna(x)) else str(x))
-            # Set the index explicitly
-            df.set_index("date", inplace=True)
+            df = _fix_columns(df, ["change"], lambda x: None if (x is None) else str(x))
+
             # Sort the DataFrame by the 'date' column
-            df = df.sort_values(by="date")
-            return df.reset_index().to_dict(orient="records")
+            df = df.sort("date")
+
+            return df.to_dicts()
         return None
 
     def __get_transaction_history(self, from_date: date) -> dict:
