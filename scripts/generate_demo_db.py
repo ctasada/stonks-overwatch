@@ -34,6 +34,11 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "stonks_overwatch.settings")
 os.environ["DEMO_MODE"] = "True"
 django.setup()
 
+# Initialize broker registry for standalone script usage
+from stonks_overwatch.core.registry_setup import ensure_registry_initialized  # noqa: E402
+
+ensure_registry_initialized()
+
 # The import is defined here, so all the Django configuration can be executed
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService  # noqa: E402
 from stonks_overwatch.services.brokers.degiro.repositories.models import (  # noqa: E402
@@ -157,6 +162,9 @@ class DBDemoGenerator:
 
     def __init__(self):
         self.degiro_service = DeGiroService(force=True)
+        # Ensure the DeGiro service is connected before using it
+        if not self.degiro_service.is_connected():
+            self.degiro_service.connect()
         self.currency_converter = CurrencyConverterService()
         # Products Configuration. Contains information about the products, such as exchanges, trading venues, etc.
         self.products_config = self.degiro_service.get_client().get_products_config()
@@ -379,7 +387,7 @@ class DBDemoGenerator:
                 continue
 
             interval = DateTimeUtility.calculate_interval(start_date)
-            quotes_dict = self.degiro_service.get_product_quotation(issue_id, interval, symbol)
+            quotes_dict = self.degiro_service.get_product_quotation(issue_id, row["isin"], interval, symbol)
 
             # Update the data ONLY if we get something back from DeGiro
             if quotes_dict:
