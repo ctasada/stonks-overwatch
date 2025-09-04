@@ -182,77 +182,64 @@ def bitvavo_transactions(update_service: BitvavoUpdateService) -> None:
     update_service.update_transactions()
 
 
+def get_degiro_update_service(args, broker_factory):
+    degiro_import_folder = os.path.join(args.import_folder, "degiro")
+    degiro_config = broker_factory.create_config("degiro")
+    return DegiroUpdateService(
+        import_folder=degiro_import_folder, debug_mode=args.debug, config=degiro_config, force_connect=True
+    )
+
+
+def get_ibkr_update_service(args, broker_factory):
+    ibkr_import_folder = os.path.join(args.import_folder, "ibkr")
+    ibkr_config = broker_factory.create_config("ibkr")
+    return IbkrUpdateService(import_folder=ibkr_import_folder, debug_mode=args.debug, config=ibkr_config)
+
+
+def get_bitvavo_update_service(args, broker_factory):
+    bitvavo_import_folder = os.path.join(args.import_folder, "bitvavo")
+    bitvavo_config = broker_factory.create_config("bitvavo")
+    return BitvavoUpdateService(import_folder=bitvavo_import_folder, debug_mode=args.debug, config=bitvavo_config)
+
+
 def main():
     init_logger()
     logging.info("Applying database migrations...")
     call_command("migrate")
 
     broker_factory = BrokerFactory()
-
     args = parse_args()
 
-    degiro_update_service = None
-    ibkr_update_service = None
-    bitvavo_update_service = None
-
-    if (
-        args.degiro
-        or args.degiro_account
-        or args.degiro_transactions
-        or args.degiro_products
-        or args.degiro_companies
-        or args.degiro_yfinance
-        or args.degiro_dividends
-    ):
-        degiro_import_folder = os.path.join(args.import_folder, "degiro")
-        degiro_config = broker_factory.create_config("degiro")
-        degiro_update_service = DegiroUpdateService(
-            import_folder=degiro_import_folder, debug_mode=args.debug, config=degiro_config, force_connect=True
-        )
-
-    if args.ibkr or args.ibkr_portfolio or args.ibkr_transactions:
-        ibkr_import_folder = os.path.join(args.import_folder, "ibkr")
-        ibkr_config = broker_factory.create_config("ibkr")
-        ibkr_update_service = IbkrUpdateService(
-            import_folder=ibkr_import_folder, debug_mode=args.debug, config=ibkr_config
-        )
-
-    if args.bitvavo or args.bitvavo_portfolio or args.bitvavo_transactions:
-        bitvavo_import_folder = os.path.join(args.import_folder, "bitvavo")
-        bitvavo_config = broker_factory.create_config("bitvavo")
-        bitvavo_update_service = BitvavoUpdateService(
-            import_folder=bitvavo_import_folder, debug_mode=args.debug, config=bitvavo_config
-        )
-
     actions = [
-        (args.degiro_account, degiro_account_import, degiro_update_service),
-        (args.degiro_transactions, degiro_transactions_import, degiro_update_service),
-        (args.degiro_products, degiro_products_info_import, degiro_update_service),
-        (args.degiro_companies, degiro_company_profile_import, degiro_update_service),
-        (args.degiro_yfinance, degiro_yfinance, degiro_update_service),
-        (args.degiro_dividends, degiro_dividends, degiro_update_service),
-        (args.ibkr_portfolio, ibkr_portfolio, ibkr_update_service),
-        (args.ibkr_transactions, ibkr_transactions, ibkr_update_service),
-        (args.bitvavo_portfolio, bitvavo_portfolio, bitvavo_update_service),
-        (args.bitvavo_transactions, bitvavo_transactions, bitvavo_update_service),
-        (args.degiro, lambda svc: svc.update_all(), degiro_update_service),
-        (args.ibkr, lambda svc: svc.update_all(), ibkr_update_service),
-        (args.bitvavo, lambda svc: svc.update_all(), bitvavo_update_service),
+        (args.degiro_account, degiro_account_import, lambda: get_degiro_update_service(args, broker_factory)),
+        (args.degiro_transactions, degiro_transactions_import, lambda: get_degiro_update_service(args, broker_factory)),
+        (args.degiro_products, degiro_products_info_import, lambda: get_degiro_update_service(args, broker_factory)),
+        (args.degiro_companies, degiro_company_profile_import, lambda: get_degiro_update_service(args, broker_factory)),
+        (args.degiro_yfinance, degiro_yfinance, lambda: get_degiro_update_service(args, broker_factory)),
+        (args.degiro_dividends, degiro_dividends, lambda: get_degiro_update_service(args, broker_factory)),
+        (args.ibkr_portfolio, ibkr_portfolio, lambda: get_ibkr_update_service(args, broker_factory)),
+        (args.ibkr_transactions, ibkr_transactions, lambda: get_ibkr_update_service(args, broker_factory)),
+        (args.bitvavo_portfolio, bitvavo_portfolio, lambda: get_bitvavo_update_service(args, broker_factory)),
+        (args.bitvavo_transactions, bitvavo_transactions, lambda: get_bitvavo_update_service(args, broker_factory)),
+        (args.degiro, lambda svc: svc.update_all(), lambda: get_degiro_update_service(args, broker_factory)),
+        (args.ibkr, lambda svc: svc.update_all(), lambda: get_ibkr_update_service(args, broker_factory)),
+        (args.bitvavo, lambda svc: svc.update_all(), lambda: get_bitvavo_update_service(args, broker_factory)),
         (args.update_credentials, update_credentials, None),
     ]
 
-    for condition, func, service in actions:
+    for condition, func, service_getter in actions:
         if condition:
-            if service is None:
+            if service_getter is None:
                 func()
             else:
+                service = service_getter()
                 func(service)
             break
     else:
         logging.info("No import option selected. Importing all data.")
-        degiro_update_service.update_all()
-        ibkr_update_service.update_all()
-        bitvavo_update_service.update_all()
+        get_degiro_update_service(args, broker_factory).update_all()
+        get_ibkr_update_service(args, broker_factory).update_all()
+        get_bitvavo_update_service(args, broker_factory).update_all()
         update_credentials()
 
 
