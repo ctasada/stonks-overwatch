@@ -3,7 +3,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict, List, Optional
 
-import pandas as pd
+import polars as pl
+from dateutil.relativedelta import relativedelta
 from django.core.cache import cache
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
@@ -124,21 +125,21 @@ class Dashboard(View):
             case "MTD":
                 return today.replace(day=1).strftime(LocalizationUtility.DATE_FORMAT)
             case "1D":
-                return (today - pd.DateOffset(days=1)).strftime(LocalizationUtility.DATE_FORMAT)
+                return (today - relativedelta(days=1)).strftime(LocalizationUtility.DATE_FORMAT)
             case "1W":
-                return (today - pd.DateOffset(weeks=1)).strftime(LocalizationUtility.DATE_FORMAT)
+                return (today - relativedelta(weeks=1)).strftime(LocalizationUtility.DATE_FORMAT)
             case "1M":
-                return (today - pd.DateOffset(months=1)).strftime(LocalizationUtility.DATE_FORMAT)
+                return (today - relativedelta(months=1)).strftime(LocalizationUtility.DATE_FORMAT)
             case "3M":
-                return (today - pd.DateOffset(months=3)).strftime(LocalizationUtility.DATE_FORMAT)
+                return (today - relativedelta(months=3)).strftime(LocalizationUtility.DATE_FORMAT)
             case "6M":
-                return (today - pd.DateOffset(months=6)).strftime(LocalizationUtility.DATE_FORMAT)
+                return (today - relativedelta(months=6)).strftime(LocalizationUtility.DATE_FORMAT)
             case "1Y":
-                return (today - pd.DateOffset(years=1)).strftime(LocalizationUtility.DATE_FORMAT)
+                return (today - relativedelta(years=1)).strftime(LocalizationUtility.DATE_FORMAT)
             case "3Y":
-                return (today - pd.DateOffset(years=3)).strftime(LocalizationUtility.DATE_FORMAT)
+                return (today - relativedelta(years=3)).strftime(LocalizationUtility.DATE_FORMAT)
             case "5Y":
-                return (today - pd.DateOffset(years=5)).strftime(LocalizationUtility.DATE_FORMAT)
+                return (today - relativedelta(years=5)).strftime(LocalizationUtility.DATE_FORMAT)
             case _:
                 return None
 
@@ -301,7 +302,7 @@ class Dashboard(View):
             PortfolioPerformance with TWR data for different time periods
         """
         # Prepare data once
-        deposits, cash_flows, market_value_per_day = self._prepare_performance_data(selected_portfolio, portfolio_value)
+        _, cash_flows, market_value_per_day = self._prepare_performance_data(selected_portfolio, portfolio_value)
 
         if not start_date:
             start_date = min(market_value_per_day.keys())
@@ -347,9 +348,18 @@ class Dashboard(View):
 
     @staticmethod
     def _get_business_date_range(start_date: str, end_date: str) -> list[str]:
-        """Generate business day range without pandas overhead."""
-        date_range = pd.date_range(start=start_date, end=end_date, freq="B")
-        return [date.strftime("%Y-%m-%d") for date in date_range]
+        """Generate business day range using polars."""
+        # Convert strings to datetime objects
+        start_dt = datetime.strptime(start_date, "%Y-%m-%d")
+        end_dt = datetime.strptime(end_date, "%Y-%m-%d")
+
+        # Generate business day range using polars
+        date_range = pl.date_range(start=start_dt, end=end_dt, interval="1d", eager=True)
+
+        # Filter to business days only (Monday=1, ..., Friday=5)
+        business_dates = date_range.filter(date_range.dt.weekday() <= 5)
+
+        return [date.strftime("%Y-%m-%d") for date in business_dates.to_list()]
 
     def _derive_period_returns(self, cumulative_returns: dict[datetime, float]) -> tuple[dict, dict]:
         """

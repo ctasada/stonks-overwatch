@@ -1,7 +1,7 @@
 from datetime import date
 from typing import List
 
-import pandas as pd
+import polars as pl
 
 from stonks_overwatch.core.aggregators.base_aggregator import BaseAggregator
 from stonks_overwatch.core.service_types import ServiceType
@@ -15,20 +15,33 @@ class DepositsAggregatorService(BaseAggregator):
 
     def cash_deposits_history(self, selected_portfolio: PortfolioId) -> list[dict]:
         cash_contributions = self.get_cash_deposits(selected_portfolio)
-        df = pd.DataFrame.from_dict(cash_contributions)
 
-        # Group by day, adding the values
-        df.set_index("datetime", inplace=True)
-        df = df.sort_values(by="datetime")
-        df = df.groupby(df.index.date)["change"].sum().reset_index()
-        # Rename the index column back to datetime for consistency
-        df.rename(columns={"index": "datetime"}, inplace=True)
-        # Do the cumulative sum
-        df["contributed"] = df["change"].cumsum()
+        # Convert list of Deposit objects to polars DataFrame
+        # Extract the data we need from Deposit objects
+        deposit_data = []
+        for deposit in cash_contributions:
+            deposit_data.append({"datetime": deposit.datetime, "change": deposit.change})
 
-        cash_contributions = df.to_dict("records")
+        if not deposit_data:
+            return []
+
+        df = pl.DataFrame(deposit_data)
+
+        # Convert datetime to date for grouping and sort by datetime
+        df = df.with_columns(pl.col("datetime").dt.date().alias("date"))
+        df = df.sort("datetime")
+
+        # Group by date, summing the changes
+        df = df.group_by("date").agg(pl.col("change").sum())
+        df = df.sort("date")
+
+        # Calculate cumulative sum
+        df = df.with_columns(pl.col("change").cum_sum().alias("contributed"))
+
+        # Convert to list of dictionaries and format dates
+        cash_contributions = df.to_dicts()
         for contribution in cash_contributions:
-            contribution["datetime"] = contribution["datetime"].strftime(LocalizationUtility.DATE_FORMAT)
+            contribution["datetime"] = contribution["date"].strftime(LocalizationUtility.DATE_FORMAT)
 
         dataset = []
         for contribution in cash_contributions:
@@ -40,12 +53,13 @@ class DepositsAggregatorService(BaseAggregator):
             )
 
         # Append today with the last value to draw the line properly
-        dataset.append(
-            {
-                "date": LocalizationUtility.format_date_from_date(date.today()),
-                "total_deposit": cash_contributions[-1]["contributed"],
-            }
-        )
+        if cash_contributions:
+            dataset.append(
+                {
+                    "date": LocalizationUtility.format_date_from_date(date.today()),
+                    "total_deposit": cash_contributions[-1]["contributed"],
+                }
+            )
 
         return dataset
 

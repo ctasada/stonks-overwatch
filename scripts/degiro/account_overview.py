@@ -2,10 +2,10 @@
 
 # IMPORTATIONS
 import json
-from datetime import date
+from datetime import date, datetime
 
 import common
-import pandas as pd
+import polars as pl
 from degiro_connector.trading.models.account import OverviewRequest
 
 trading_api = common.connect_to_degiro()
@@ -41,7 +41,7 @@ for cash_movement in account_overview.get("data").get("cashMovements"):
             if cash_movement["currency"] == "EUR":
                 cash_contributions.append(
                     {
-                        "date": pd.to_datetime(cash_movement["date"]).to_period("D"),
+                        "date": datetime.fromisoformat(cash_movement["date"]).date(),
                         "cash": cash_movement["change"],
                     }
                 )
@@ -49,7 +49,7 @@ for cash_movement in account_overview.get("data").get("cashMovements"):
         if "productId" in cash_movement:
             cash_contributions.append(
                 {
-                    "date": pd.to_datetime(cash_movement["date"]).to_period("D"),
+                    "date": datetime.fromisoformat(cash_movement["date"]).date(),
                     "cash": cash_movement["change"],
                 }
             )
@@ -58,21 +58,20 @@ for cash_movement in account_overview.get("data").get("cashMovements"):
 
 trading_api.logout()
 
-df = pd.DataFrame(columns=["date", "cash"])
+# Create a polars DataFrame directly from the cash_contributions list
+df = pl.DataFrame(cash_contributions)
 
-# create a DataFrame
-df = pd.concat([df, pd.DataFrame(cash_contributions)], ignore_index=True)
+if len(df) > 0:
+    # Sort the DataFrame by the 'date' column
+    df = df.sort("date")
 
-# Set the index explicitly
-df.set_index("date", inplace=True)
+    # Group by date and sum cash (in case there are multiple entries for the same date)
+    df = df.group_by("date").agg(pl.col("cash").sum())
 
-# Sort the DataFrame by the 'date' column
-df = df.sort_values(by="date")
+    # Sort again after grouping
+    df = df.sort("date")
 
-# Convert the index to datetime.date and group by day
-result = df.groupby(df.index)["cash"].sum().reset_index()
-
-# Calculate cumulative sum for the 'cash' column
-df["cumulative_cash"] = df["cash"].cumsum()
+    # Calculate cumulative sum for the 'cash' column
+    df = df.with_columns(pl.col("cash").cum_sum().alias("cumulative_cash"))
 
 print(df)
