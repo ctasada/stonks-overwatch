@@ -44,7 +44,7 @@ This project is a Python-based application that allows users to manage their inv
 - **Database:** SQLite (default), can be changed to PostgreSQL or MySQL if needed
 - **Asynchronous Tasks:** Celery (if needed for background tasks)
 - **API Requests:** `requests` for HTTP requests
-- **Data Processing:** `pandas` for data manipulation and analysis
+- **Data Processing:** `polars` for data manipulation and analysis
 - **Logging:** Use Python's built-in `logging` module for logging errors and information.
 - **Environment Variables:** Use `python-dotenv` to manage environment variables in development.
 - **Testing:** Use `pytest` for unit and integration tests.
