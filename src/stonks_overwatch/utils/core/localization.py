@@ -1,18 +1,39 @@
+import calendar
 from datetime import date, datetime, timezone
 from typing import Optional
 
 from currency_symbols import CurrencySymbols
+from dateutil import parser as dateutil_parser
 
 
 class LocalizationUtility:
     """
     A utility class for handling localization-related tasks, such as formatting dates, times, and currency values.
+
+    This implementation uses python-dateutil to allow flexible parsing of incoming
+    date/time strings (ISO, with or without timezone, or many other human formats).
     """
 
     TIME_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
     DATE_FORMAT = "%Y-%m-%d"
     TIME_FORMAT = "%H:%M:%S"
     MONTH_YEAR_FORMAT = "%B %Y"
+
+    @staticmethod
+    def _to_datetime(value: str | date | datetime) -> datetime:
+        """Normalize input into a datetime instance.
+
+        - If value is a datetime, return it as-is.
+        - If value is a date (but not datetime), return a datetime at 00:00:00.
+        - If value is a string, use dateutil.parser.parse for flexible parsing.
+        """
+        if isinstance(value, datetime):
+            return value
+        if isinstance(value, date):
+            return datetime(value.year, value.month, value.day)
+        if isinstance(value, str):
+            return dateutil_parser.parse(value)
+        raise TypeError(f"Unsupported type: {type(value)}. Expected str, date or datetime.")
 
     @staticmethod
     def get_currency_symbol(currency: str) -> str:
@@ -48,42 +69,44 @@ class LocalizationUtility:
         return f"{currency_symbol} {value:,.2f}"
 
     @staticmethod
-    def format_date_time(value: str) -> str:
+    def format_date_time(value: str | date | datetime) -> str:
         """
-        Formats a date and time string in the specified format.
+        Formats a date and time value into 'YYYY-MM-DD HH:MM:SS'.
+        Accepts a str, date or datetime. Strings are parsed with dateutil.
         """
-        time = datetime.fromisoformat(value)
-        return time.strftime(f"{LocalizationUtility.DATE_FORMAT} {LocalizationUtility.TIME_FORMAT}")
+        dt = LocalizationUtility._to_datetime(value)
+        return dt.strftime(f"{LocalizationUtility.DATE_FORMAT} {LocalizationUtility.TIME_FORMAT}")
 
     @staticmethod
-    def format_date(value: str) -> str:
+    def format_date(value: str | date | datetime) -> str:
         """
-        Formats a date time string to date string.
+        Formats a date/time value to a date string 'YYYY-MM-DD'.
         """
-        time = datetime.strptime(value, LocalizationUtility.TIME_DATE_FORMAT)
-        return time.strftime(LocalizationUtility.DATE_FORMAT)
+        dt = LocalizationUtility._to_datetime(value)
+        return dt.strftime(LocalizationUtility.DATE_FORMAT)
 
     @staticmethod
-    def format_time(value: str) -> str:
+    def format_time(value: str | date | datetime) -> str:
         """
-        Formats a date time string to time string.
+        Formats a date/time value to a time string 'HH:MM:SS'.
         """
-        time = datetime.strptime(value, LocalizationUtility.TIME_DATE_FORMAT)
-        return time.strftime(LocalizationUtility.TIME_FORMAT)
+        dt = LocalizationUtility._to_datetime(value)
+        return dt.strftime(LocalizationUtility.TIME_FORMAT)
 
     @staticmethod
     def format_date_from_date(value: date) -> str:
         """
-        Formats a datetime object to a date string.
+        Formats a datetime.date object to a date string.
         """
         return value.strftime(LocalizationUtility.DATE_FORMAT)
 
     @staticmethod
     def format_date_time_from_date(value: date | datetime) -> str:
         """
-        Formats a datetime object to a datetime string.
+        Formats a datetime or date object to a datetime string.
         """
-        return value.strftime(f"{LocalizationUtility.DATE_FORMAT} {LocalizationUtility.TIME_FORMAT}")
+        dt = LocalizationUtility._to_datetime(value)
+        return dt.strftime(f"{LocalizationUtility.DATE_FORMAT} {LocalizationUtility.TIME_FORMAT}")
 
     @staticmethod
     def format_time_from_date(value: datetime) -> str:
@@ -93,78 +116,58 @@ class LocalizationUtility:
         return value.strftime(LocalizationUtility.TIME_FORMAT)
 
     @staticmethod
-    def format_date_to_month_year(value: str | datetime) -> str:
+    def format_date_to_month_year(value: str | date | datetime) -> str:
         """
-        Formats a date string to a month and year string.
+        Formats a date value to a month and year string like 'January 2020'.
         """
-        if isinstance(value, str):
-            time = datetime.strptime(value, LocalizationUtility.DATE_FORMAT)
-        elif isinstance(value, datetime):
-            time = value
-        else:
-            raise TypeError(f"Unsupported type: {type(value)}. Expected str or datetime.")
-
-        return time.strftime(LocalizationUtility.MONTH_YEAR_FORMAT)
+        dt = LocalizationUtility._to_datetime(value)
+        return dt.strftime(LocalizationUtility.MONTH_YEAR_FORMAT)
 
     @staticmethod
-    def get_date_day(value: str | datetime) -> str:
+    def get_date_day(value: str | date | datetime) -> str:
         """
-        Returns the day of the month from a date string.
+        Returns the day of the month from a date value (zero-padded string).
         """
-        if isinstance(value, str):
-            time = datetime.strptime(value, LocalizationUtility.DATE_FORMAT)
-        elif isinstance(value, datetime):
-            time = value
-        else:
-            raise TypeError(f"Unsupported type: {type(value)}. Expected str or datetime.")
-
-        return time.strftime("%d")
+        dt = LocalizationUtility._to_datetime(value)
+        return dt.strftime("%d")
 
     @staticmethod
-    def format_date_to_month_number(value: str | datetime) -> str:
+    def format_date_to_month_number(value: str | date | datetime) -> str:
         """
-        Formats a date string to a month number string.
+        Formats a date value to a month number string (zero-padded).
         """
-        if isinstance(value, str):
-            time = datetime.strptime(value, LocalizationUtility.DATE_FORMAT)
-        elif isinstance(value, datetime):
-            time = value
-        else:
-            raise TypeError(f"Unsupported type: {type(value)}. Expected str or datetime.")
-
-        return time.strftime("%m")
+        dt = LocalizationUtility._to_datetime(value)
+        return dt.strftime("%m")
 
     @staticmethod
-    def format_date_to_year(value: str | datetime) -> str:
+    def format_date_to_year(value: str | date | datetime) -> str:
         """
-        Formats a date string to a year string.
+        Formats a date value to a year string.
         """
-        if isinstance(value, str):
-            time = datetime.strptime(value, LocalizationUtility.DATE_FORMAT)
-        elif isinstance(value, datetime):
-            time = value
-        else:
-            raise TypeError(f"Unsupported type: {type(value)}. Expected str or datetime.")
-
-        return time.strftime("%Y")
+        dt = LocalizationUtility._to_datetime(value)
+        return dt.strftime("%Y")
 
     @staticmethod
     def convert_string_to_date(value: str) -> date:
         """
-        Converts a string to a date object.
+        Converts a string to a date object using dateutil parsing.
         """
-        return datetime.fromisoformat(value).date()
+        return dateutil_parser.parse(value).date()
 
     @staticmethod
     def convert_string_to_datetime(value: str) -> datetime:
         """
-        Converts a string to a datetime object.
+        Converts a string to a datetime object using dateutil parsing.
         """
-        return datetime.fromisoformat(value)
+        return dateutil_parser.parse(value)
 
     @staticmethod
     def month_name(month_number: str | int) -> str:
-        return datetime(datetime.now().year, int(month_number), 1).strftime("%B")
+        """Return the full month name for a given month number (1-12)."""
+        num = int(month_number)
+        if not 1 <= num <= 12:
+            raise ValueError("month_number must be in 1..12")
+        return calendar.month_name[num]
 
     @staticmethod
     def now() -> datetime:

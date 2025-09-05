@@ -1,13 +1,12 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone as dt_timezone
 from typing import Optional
+from zoneinfo import ZoneInfo
 
 from dateutil.parser import parse
-from dateutil.tz import gettz
 from django.utils.timezone import is_naive, make_aware
 from ibind import IbkrClient
 from ibind.oauth.oauth1a import OAuth1aConfig
-from pytz import utc
 
 from stonks_overwatch.config.ibkr import IbkrConfig
 from stonks_overwatch.utils.core.logger import StonksLogger
@@ -25,8 +24,8 @@ class IbkrService:
     client: IbkrClient = None
     account: IbkrAccount = None
     tzinfos = {
-        "EST": gettz("America/New_York"),
-        "EDT": gettz("America/New_York"),
+        "EST": ZoneInfo("America/New_York"),
+        "EDT": ZoneInfo("America/New_York"),
         # add more if needed
     }
 
@@ -123,4 +122,4 @@ class IbkrService:
 
         if is_naive(dt):
             dt = make_aware(dt)
-        return dt.astimezone(utc)
+        return dt.astimezone(dt_timezone.utc)
