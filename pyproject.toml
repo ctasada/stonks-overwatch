@@ -28,6 +28,16 @@ dependencies = [
     "ibind[oauth] >=0.1.19",
     "cryptography >=45.0.6",
     "packaging >=25.0",
+    "python-dateutil (>=2.9.0.post0,<3.0.0)",
+]
+
+[project.optional-dependencies]
+# Keep in sync with `tool.briefcase.app.stonks-overwatch.requires`
+briefcase = [
+    "toga >=0.5.2",
+    "asgiref >= 3.9.1",
+    "pyotp >= 2.9.0",
+    "beautifulsoup4 >= 4.13.5",
 ]
 
 [tool.poetry.dependencies]
@@ -209,9 +219,13 @@ sources = [
 test_sources = [
     "tests",
 ]
+# Keep in sync with `project.optional-dependencies.briefcase`
 requires = [
-    "toga (>=0.5.2,<0.6.0)",
-    "std-nslog (>=1.0.3,<2.0.0)",
+    "toga >=0.5.2",
+    "std-nslog >=1.0.3",
+    "asgiref >= 3.9.1",
+    "pyotp >= 2.9.0",
+    "beautifulsoup4 >= 4.13.5",
 ]
 test_requires = [ ]
 requirement_installer_args = ["--find-links", "./wheels"]

@@ -114,11 +114,6 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
   * Alpaca: "https://alpaca.markets"
 * [ ] Improve code quality. Check "https://pyre-check.org/docs/pysa-quickstart/"
 * [ ] Enable usage of Demo DB in the application (running natively)
-* [ ] Provide support to configure the settings (API Key, etc.) in the application.
-  * [ ] Values should be stored in the keyring for security
-* [ ] `make check-dependencies` needs some extra work
-  * [ ] `toga` and `asgiref` are only used for the `app`. Probably it should be moved as a full dependency
-  * [ ] `dateutil` and `pytz` can be either removed, or replace internal implementations.
 * [ ] DEGIRO:
   * [ ] DEGIRO Risk Category is a local term: "https://www.degiro.ie/helpdesk/trading-platform/what-are-risk-categories"
   * [ ] DEGIRO Client: Stop using Totp and request 2FA for each connection
