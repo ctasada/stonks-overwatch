@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* Added support for DEGIRO Crypto
+  * Added proper product types to support crypto assets
+  * Modified internal database to store crypto decimals
+
 ### Changed
 
 * Installers: Added OS name to the installer filenames
