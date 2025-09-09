@@ -1,6 +1,11 @@
 # Makefile for Django project with Poetry, Docker, and Briefcase support
 # Use 'make help' to see all available targets
 
+# GNU Make check (fail early if not GNU Make)
+ifeq ($(origin MAKE_VERSION), undefined)
+$(error This Makefile requires GNU Make. Please install and use GNU Make.)
+endif
+
 # Shell configuration
 SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
@@ -26,7 +31,10 @@ DEMO_MODE := $(if $(demo),true,false)
 OBFUSCATE_MODE := $(if $(obfuscate),$(obfuscate),true)
 
 # Export variables for child processes
-export DEBUG_MODE PROFILE_MODE DEMO_MODE OBFUSCATE_MODE
+export DEBUG_MODE
+export PROFILE_MODE
+export DEMO_MODE
+export OBFUSCATE_MODE
 
 # Color codes for output
 BOLD := \033[1m
