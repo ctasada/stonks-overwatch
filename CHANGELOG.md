@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Installers: Added OS name to the installer filenames
 * Improved Update Download dialog. Now shows the percentage and downloaded size
+* Changed icons used in the Diversification section. Now all the application uses the same set of icons.
 
 ### Deprecated
 
