@@ -196,6 +196,6 @@ class Diversification(View):
     def __get_currency_logo(currency: str) -> str:
         """Returns the logo for the given currency."""
         if currency.lower() == "eur":
-            return "euro-sign"
+            return "currency-euro"
         else:
-            return "dollar-sign"
+            return "currency-dollar"

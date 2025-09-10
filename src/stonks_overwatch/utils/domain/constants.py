@@ -81,19 +81,19 @@ class Sector(Enum):
 
     def to_logo(self) -> str:  # noqa: C901
         if self == Sector.TECHNOLOGY:
-            return "microchip"
+            return "cpu"
         elif self == Sector.FINANCIAL_SERVICES:
-            return "building-columns"
+            return "bank"
         elif self == Sector.HEALTHCARE:
             return "heart-pulse"
         elif self == Sector.CONSUMER_CYCLICAL:
-            return "cart-shopping"
+            return "cart"
         elif self == Sector.COMMUNICATION_SERVICES:
-            return "tower-cell"
+            return "broadcast-pin"
         elif self == Sector.BASIC_MATERIALS:
-            return "brush"
+            return "bricks"
         elif self == Sector.INDUSTRIALS:
-            return "industry"
+            return "buildings"
         elif self == Sector.REAL_ESTATE:
             return "home"
         elif self == Sector.CONSUMER_DEFENSIVE:
@@ -101,12 +101,12 @@ class Sector(Enum):
         elif self == Sector.UTILITIES:
             return "hammer"
         elif self == Sector.ENERGY:
-            return "bolt"
+            return "lightning-charge"
         elif self == Sector.CASH:
-            return "money-bill"
+            return "cash"
         elif self == Sector.CRYPTO:
-            return "bitcoin-sign"
+            return "currency-bitcoin"
         elif self == Sector.ETF:
             return "briefcase"
         else:
-            return "question"
+            return "question-lg"

@@ -51,13 +51,13 @@
                         {% for message in messages %}
                             <div class="alert {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}alert-danger{% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}alert-warning{% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}alert-success{% else %}alert-info{% endif %} d-flex align-items-start py-2 mb-2" role="alert" style="word-break: break-word;">
                                 {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
-                                    <i class="bi-exclamation-triangle-fill me-2 mt-1"></i>
+                                    <i class="bi bi-exclamation-triangle-fill me-2 mt-1"></i>
                                 {% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
-                                    <i class="bi-exclamation-circle-fill me-2 mt-1"></i>
+                                    <i class="bi bi-exclamation-circle-fill me-2 mt-1"></i>
                                 {% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
-                                    <i class="bi-check-circle-fill me-2 mt-1"></i>
+                                    <i class="bi bi-check-circle-fill me-2 mt-1"></i>
                                 {% else %}
-                                    <i class="bi-info-circle-fill me-2 mt-1"></i>
+                                    <i class="bi bi-info-circle-fill me-2 mt-1"></i>
                                 {% endif %}
                                 <div class="flex-grow-1">{{ message|safe }}</div>
                             </div>
@@ -74,7 +74,7 @@
                     <button type="submit" class="btn btn-primary btn-block w-100">Confirm</button>
                 {% elif show_in_app_auth %}
                     <div class="d-flex align-items-center py-3 mb-4">
-                        <i class="bi-phone me-3" style="font-size: 2rem; color: #0d6efd;"></i>
+                        <i class="bi bi-phone me-3" style="font-size: 2rem; color: #0d6efd;"></i>
                         <div class="flex-grow-1">
                             <p class="mb-0">To verify your login attempt, open the DEGIRO app and tap 'Yes' to approve it.</p>
                         </div>
@@ -118,7 +118,7 @@
                         <div class="input-group">
                             <input type="password" class="form-control" id="password" name="password"
                                    placeholder="Enter password" required>
-                            <i class="bi-eye-slash-fill" id="togglePassword"></i>
+                            <i class="bi bi-eye-slash-fill" id="togglePassword"></i>
                         </div>
                     </div>
                     <div class="form-group mb-3">

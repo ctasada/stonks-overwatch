@@ -22,7 +22,6 @@ dependencies = [
     "yfinance >= 0.2.65",
     "iso10383 >=2025.2.10",
     "requests >=2.32.4",
-    "fontawesomefree >= 6.6.0",
     "ibind[oauth] >=0.1.19",
     "cryptography >=45.0.6",
     "packaging >=25.0",
@@ -266,7 +265,7 @@ known_first_party = ["stonks_overwatch"]
 [tool.deptry.per_rule_ignores]
 # django-extensions are not actively used in the codebase, but it can be useful
 # django-node-assets is used to simplify the management of NPM dependencies
-DEP002 = ["django-extensions", "django-node-assets", "fontawesomefree"]
+DEP002 = ["django-extensions", "django-node-assets"]
 
 [tool.bandit]
 exclude_dirs = ["build", ".venv"]

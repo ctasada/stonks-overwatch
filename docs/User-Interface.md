@@ -5,7 +5,6 @@ The user interface of **Stonks Overwatch** is build with the next technologies:
 - [Bootstrap](https://getbootstrap.com) for the CSS framework
 - [Bootstrap Table](https://bootstrap-table.com/) for the tables
 - [Bootstrap Icons](https://icons.getbootstrap.com/) for the icons
-- [Font Awesome](https://fontawesome.com/) for additional icons
 - [Charts.js](https://www.chartjs.org/) for the charts
 - [Toga](https://toga.readthedocs.io/en/stable/) for the native application
 

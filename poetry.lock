@@ -1019,17 +1019,6 @@ files = [
 ]
 
 [[package]]
-name = "fontawesomefree"
-version = "6.6.0"
-description = "Font Awesome Free"
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "fontawesomefree-6.6.0-py3-none-any.whl", hash = "sha256:599b574431c9bd92ed5fc054d1045a07c42335da36c17884f2b934755eef9089"},
-]
-
-[[package]]
 name = "fonttools"
 version = "4.59.2"
 description = "Tools to manipulate font files"
@@ -4206,4 +4195,4 @@ briefcase = ["asgiref", "beautifulsoup4", "pyotp", "toga"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "daa21409daa7d8ff1f98f6bd7e29da8af48aa4d39c641bb11e39a2d7bb3a49fc"
+content-hash = "66e39c30ca8743b2c5cc166e9d8e525a34c0a146d305a29b983294ca94af0d8a"
