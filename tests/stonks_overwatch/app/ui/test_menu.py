@@ -30,6 +30,8 @@ class TestMenuManager:
         app.commands = MagicMock()
         app.windows = MagicMock()
         app.dialog_manager = MagicMock()
+        # Mock web_view.url to return a valid URL string for license info tests
+        app.web_view.url = "https://example.com/app"
         return app
 
     @pytest.fixture
@@ -87,7 +89,8 @@ class TestMenuManager:
         )
 
         # Verify commands were added to app
-        assert menu_manager.app.commands.add.call_count == 2
+        #  There should be 3 commands: Check for Updates, Release Notes, Preferences
+        assert menu_manager.app.commands.add.call_count == 3
 
     def test_setup_debug_menu(self, menu_manager, mock_dependencies):
         """Test debug menu setup creates correct commands."""
@@ -222,20 +225,6 @@ class TestMenuManager:
         await menu_manager._check_for_updates(None)
 
         menu_manager.app.dialog_manager.check_for_updates.assert_called_once()
-
-    def test_get_log_file_path(self, menu_manager):
-        """Test log file path construction."""
-        logs_dir = "/test/logs"
-        logs_filename = "test.log"
-
-        with (
-            patch("stonks_overwatch.settings.STONKS_OVERWATCH_LOGS_DIR", logs_dir),
-            patch("stonks_overwatch.settings.STONKS_OVERWATCH_LOGS_FILENAME", logs_filename),
-        ):
-            result = menu_manager._get_log_file_path()
-
-        expected_path = os.path.join(logs_dir, logs_filename)
-        assert result == expected_path
 
     def test_show_logs_creates_new_window(self, menu_manager, mock_dependencies):
         """Test show logs creates new window when none exists."""

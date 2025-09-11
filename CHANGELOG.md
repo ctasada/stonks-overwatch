@@ -1,108 +1,118 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+All notable changes to this project are documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+_This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html)._
+
+---
 
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
 
-* Added support for DEGIRO Crypto
-  * Added proper product types to support crypto assets
-  * Modified internal database to store crypto decimals
+- **DEGIRO Crypto:**
+    - Support for crypto assets and product types
+    - Internal database now stores crypto decimals
+- **Application:**
+    - Added "Release Notes" information
 
 ### Changed
 
-* Installers: Added OS name to the installer filenames
-* Improved Update Download dialog. Now shows the percentage and downloaded size
-* Changed icons used in the Diversification section. Now all the application uses the same set of icons.
-
-### Deprecated
-
-### Removed
+- Installers now include OS name in filenames
+- Update Download dialog shows percentage and downloaded size
+- Unified icons in Diversification section across the application
 
 ### Fixed
 
-* Streamline logs to make them easier to read
-* Sidebar: Portfolio selector is only clickable when there are multiple portfolios
-* DEGIRO: Fixed issue fetching the portfolio data
+- Logs streamlined for readability
+- Sidebar portfolio selector only clickable with multiple portfolios
+- DEGIRO: Fixed portfolio data fetching issue
+- Application: "License Expiration" dialog now displays correctly
 
 ### Security
 
-* Updated internal dependencies
+- Updated internal dependencies
+
+---
 
 ## [0.1.3] - 2025-08-30
 
 ### Added
 
-* DEGIRO: Added support to use 'In App' 2FA authentication
+- **DEGIRO:** 'In App' 2FA authentication support
 
 ### Changed
 
-* Navigation sidebar has been redesigned to improve usability
-* Navigation sidebar is now collapsible
-* Internal code improvements
+- Redesigned and collapsible navigation sidebar for improved usability
+- Internal code improvements
 
 ### Fixed
 
-* Fixed some default values in the Broker configurations
-* Fixed bug showing the Fee amount
+- Default values in broker configurations
+- Fee amount display bug
 
 ### Security
 
-* Updated internal dependencies
+- Updated internal dependencies
+
+---
 
 ## [0.1.2] - 2025-08-22
 
 ### Added
 
-* Updates are automatically checked
+- Automatic update checks
 
 ### Changed
 
-* Improved License dialog
-* Internal code improvements
+- Improved License dialog
+- Internal code improvements
 
 ### Fixed
 
-* Windows:
-  * Fixed crash while opening the application
-  * Properly show the application icon
-  * Properly show the main menu
-  * Installer: Fixed issue with the installation path
+- **Windows:**
+    - Crash on application open
+    - Application icon display
+    - Main menu display
+    - Installer path issue
 
 ### Security
 
-* Updated internal dependencies
+- Updated internal dependencies
+
+---
 
 ## [0.1.1] - 2025-08-13
 
 ### Added
 
-* Added support to remember DEGIRO login credentials
-  * Added "Settings" dialog to store DEGIRO credentials, including 2FA token
-  * Added "Remember me" checkbox to the DEGIRO login dialog
-  * Credentials are stored securely using a locally generated AES-128 key
-* Added support to check for updates
-  * Added "Check for updates" menu item to the main menu
-  * Added "Update available" notification when a new version is detected
+- **DEGIRO Credentials:**
+    - "Settings" dialog for credentials and 2FA token
+    - "Remember me" checkbox in login dialog
+    - Credentials stored securely with AES-128 key
+- **Updates:**
+    - "Check for updates" menu item
+    - "Update available" notification
 
 ### Changed
 
-* Internal refactor to allow adding more brokers
+- Internal refactor to support more brokers
 
 ### Security
 
-* Updated internal dependencies
+- Updated internal dependencies
+
+---
 
 ## [0.1.0] - 2025-07-15
 
-* Initial release
-  * Provides support to connect to DEGIRO using login credentials and 2FA
-  * Keeps DEGIRO information automatically up to date
-  * Shows Dashboard with Portfolio growth over time
-  * Shows Portfolio, Dividends, Fees, Deposits, Transactions, and full Account Statement
-  * Shows Diversification information
-  * Provides installers for macOS, Windows, and Linux
+### Initial Release
+
+- Connect to DEGIRO with credentials and 2FA
+- Automatic DEGIRO information updates
+- Dashboard with portfolio growth
+- Portfolio, Dividends, Fees, Deposits, Transactions, and full Account Statement
+- Diversification information
+- Installers for macOS, Windows, and Linux
+
+---

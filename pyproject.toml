@@ -26,6 +26,7 @@ dependencies = [
     "cryptography >=45.0.6",
     "packaging >=25.0",
     "python-dateutil >=2.9.0.post0",
+    "markdown >=3.9",
 ]
 
 [project.optional-dependencies]
@@ -58,12 +59,14 @@ deptry = "^0.23.0"
 pre-commit = "^4.3.0"
 bandit = "^1.8.6"
 pymarkdownlnt = "^0.9.32"
-pyarmor = "^9.1.8"
+pyarmor = "^9.1.9"
 pytest-asyncio = "^1.1.0"
 
 [tool.poetry]
 include = [
     { path = "Makefile", format = ["sdist", "wheel"] },
+    { path = "LICENSE", format = ["sdist", "wheel"] },
+    { path = "THIRD_PARTY_LICENSES.txt", format = ["sdist", "wheel"] },
     { path = "package.json", format = ["sdist", "wheel"] },
     { path = "package-lock.json", format = ["sdist", "wheel"] },
     { path = "Dockerfile", format = ["sdist", "wheel"] },
@@ -191,9 +194,10 @@ addopts = [
 project_name = "Stonks Overwatch"
 bundle = "com.caribay"
 url = "https://github.com/ctasada/stonks-overwatch"
-license.file = "LICENSE"
+license = {file = "LICENSE"}
 author = "Carlos Tasada"
 author_email = "ctasada@gmail.com"
+# revision is injected during the build process: "git rev-parse --short HEAD"
 
 [tool.briefcase.app.stonks-overwatch]
 formal_name = "Stonks Overwatch"
@@ -212,6 +216,9 @@ icon = "src/icons/stonks_overwatch"
 sources = [
     "src/obfuscated/pyarmor_runtime_000000",
     "src/obfuscated/stonks_overwatch",
+    "CHANGELOG.md",
+    "LICENSE",
+    "THIRD_PARTY_LICENSES.txt",
 ]
 test_sources = [
     "tests",
@@ -273,5 +280,6 @@ exclude_dirs = ["build", ".venv"]
 #skips = ["B101", "B601"]
 
 [tool.pymarkdown]
+plugins.md007.indent = 4
 plugins.md013.enabled = false
 plugins.md024.siblings_only = true
