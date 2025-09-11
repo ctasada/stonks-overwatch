@@ -52,6 +52,7 @@ jobs:
         run: |
           python -m pip install -U pip setuptools wheel
           python -m pip install briefcase
+          python -m pip install toml-cli
 
       - name: Setup Environment
         run: |
@@ -81,6 +82,9 @@ jobs:
           fi
           echo "EXPIRATION_DATE=$EXPIRATION_DATE" >> $GITHUB_ENV
           echo "expiration_date=$EXPIRATION_DATE" >> $GITHUB_OUTPUT
+
+          # Update pyproject.toml with Briefcase build revision info
+          toml set --toml-path pyproject.toml tool.briefcase.revision "$(git rev-parse --short HEAD)"
 
           # Extract the version
           VERSION=$(poetry version -s)
