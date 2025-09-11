@@ -2,10 +2,12 @@ import os
 import platform
 import webbrowser
 from datetime import datetime
+from urllib.parse import urlparse
 
 from toga.command import Command, Group
 
 from stonks_overwatch.app.ui.logs_window import LogStreamWindow
+from stonks_overwatch.app.ui.release_notes_window import ReleaseNotesDialog
 from stonks_overwatch.services.utilities.license_manager import LicenseManager
 
 
@@ -14,6 +16,7 @@ class MenuManager:
         self.app = app
         # Track the log viewer window
         self.log_window = None
+        self.release_notes = None
         self.license_manager = LicenseManager()
 
     def setup_main_menu(self):
@@ -30,6 +33,15 @@ class MenuManager:
                 order=1,
             )
             self.app.commands.add(check_update_cmd)
+
+            release_notes_info_cmd = Command(
+                self._release_notes_info,
+                text="Release Notes",
+                tooltip="View the latest release notes",
+                group=app_group,
+                section=0,
+            )
+            self.app.commands.add(release_notes_info_cmd)
 
         preferences_cmd = Command.standard(
             self.app,
@@ -90,8 +102,18 @@ class MenuManager:
                 group=help_group,
                 section=1,
             )
-            license_section = 2
             self.app.commands.add(check_update_cmd)
+
+            release_notes_info_cmd = Command(
+                self._release_notes_info,
+                text="Release Notes",
+                tooltip="View the latest release notes",
+                group=help_group,
+                section=1,
+            )
+            self.app.commands.add(release_notes_info_cmd)
+
+            license_section = 2
 
         license_cmd = Command(
             self._open_license_info,
@@ -130,7 +152,9 @@ class MenuManager:
         await self.app.dialog_manager.preferences()
 
     async def _open_license_info(self, widget):
-        await self.app.dialog_manager.license_info()
+        parsed_url = urlparse(self.app.web_view.url)
+        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+        await self.app.dialog_manager.license_info(base_url)
 
     async def _download_database(self, widget):
         await self.app.dialog_manager.download_database()
@@ -141,16 +165,20 @@ class MenuManager:
     async def _check_for_updates(self, widget):
         await self.app.dialog_manager.check_for_updates()
 
-    def _get_log_file_path(self):
-        """Get the path to the log file."""
-        from stonks_overwatch.settings import STONKS_OVERWATCH_LOGS_DIR, STONKS_OVERWATCH_LOGS_FILENAME
+    def _release_notes_info(self, widget):
+        if self.release_notes is None:
+            self.release_notes = ReleaseNotesDialog(app=self.app)
+            self.app.windows.add(self.release_notes)
 
-        return os.path.join(STONKS_OVERWATCH_LOGS_DIR, STONKS_OVERWATCH_LOGS_FILENAME)
+        self.release_notes.show()
 
     def _show_logs(self, widget):
         # If the log window does not exist, create it
         if self.log_window is None:
-            log_path = self._get_log_file_path()
+            from stonks_overwatch.settings import STONKS_OVERWATCH_LOGS_DIR, STONKS_OVERWATCH_LOGS_FILENAME
+
+            log_path = os.path.join(STONKS_OVERWATCH_LOGS_DIR, STONKS_OVERWATCH_LOGS_FILENAME)
+
             self.log_window = LogStreamWindow("Live Logs", log_path)
             self.app.windows.add(self.log_window)
 
