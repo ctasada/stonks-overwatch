@@ -325,7 +325,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .navbar-bra
     flex-shrink: 0;
 }
 
-.sidebar-tooltip {
+.dividends-tooltip {
     --bs-tooltip-bg: var(--primary-dark);
 }
 
