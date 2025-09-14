@@ -1,7 +1,7 @@
 import dataclasses
-import datetime
 import re
 from dataclasses import asdict, dataclass
+from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, Optional, TypedDict
 
@@ -119,9 +119,15 @@ class Dividend:
     def payment_time_as_string(self) -> str:
         return LocalizationUtility.format_time_from_date(self.payment_date)
 
-    def formated_change(self) -> str:
+    def formated_net_amount(self) -> str:
         """Returns the formatted change in the dividend amount after taxes."""
         return LocalizationUtility.format_money_value(value=self.net_amount(), currency=self.currency)
+
+    def formated_gross_amount(self) -> str:
+        return LocalizationUtility.format_money_value(value=self.gross_amount(), currency=self.currency)
+
+    def formated_taxes_amount(self) -> str:
+        return LocalizationUtility.format_money_value(value=self.taxes, currency=self.currency)
 
     def is_paid(self) -> bool:
         return self.dividend_type == DividendType.PAID
@@ -152,6 +158,16 @@ class Dividend:
         Returns the gross amount before taxes.
         """
         return self.amount
+
+    def tooltip(self) -> str:
+        match self.dividend_type:
+            case DividendType.PAID:
+                return f"Gross: {self.formated_gross_amount()} <br> Taxes: {self.formated_taxes_amount()}"
+            case DividendType.ANNOUNCED:
+                return f"Gross: {self.formated_gross_amount()} <br> Taxes: {self.formated_taxes_amount()}"
+            case DividendType.FORECASTED:
+                return f"Gross: {self.formated_gross_amount()} <br> Taxes: {self.formated_taxes_amount()}"
+        return ""
 
 
 class FeeType(Enum):

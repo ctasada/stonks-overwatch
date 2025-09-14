@@ -15,6 +15,7 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
     - Internal database now stores crypto decimals
 - **Dividends:**
     - Added 'Ex-Dividend' date
+    - Added tooltip showing the Gross/Tax dividend breakdown
 - **Application:**
     - Added "Release Notes" information
 
