@@ -12,7 +12,7 @@ from django.db import connection
 from stonks_overwatch.config.degiro import DegiroConfig
 from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.core.interfaces.update_service import AbstractUpdateService
-from stonks_overwatch.services.brokers.degiro.client.constants import CurrencyFX, ProductType
+from stonks_overwatch.services.brokers.degiro.client.constants import CurrencyFX
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
 from stonks_overwatch.services.brokers.degiro.repositories.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.services.brokers.degiro.repositories.models import (
@@ -38,6 +38,7 @@ from stonks_overwatch.utils.core.datetime import DateTimeUtility
 from stonks_overwatch.utils.core.debug import save_to_json
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.database.db_utils import dictfetchall
+from stonks_overwatch.utils.domain.constants import ProductType
 
 CACHE_KEY_UPDATE_PORTFOLIO = "portfolio_data_update_from_degiro"
 CACHE_KEY_UPDATE_COMPANIES = "company_profile_update_from_degiro"

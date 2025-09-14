@@ -110,13 +110,15 @@ class Dividends(View):
 
             # Number of Payouts in the month
             payouts = month_entry.setdefault("payouts", 0)
-            if dividend_pay.amount > 0:
-                month_entry["payouts"] = payouts + 1
-            # Total payout in the month
-            month_entry["total"] = month_entry.setdefault("total", 0) + dividend_pay.net_amount()
-            month_entry["formatedTotal"] = LocalizationUtility.format_money_value(
-                value=month_entry["total"], currency=dividend_pay.currency
-            )
+
+            if dividend_pay.is_paid():
+                if dividend_pay.amount > 0:
+                    month_entry["payouts"] = payouts + 1
+                # Total payout in the month
+                month_entry["total"] = month_entry.setdefault("total", 0) + dividend_pay.net_amount()
+                month_entry["formatedTotal"] = LocalizationUtility.format_money_value(
+                    value=month_entry["total"], currency=dividend_pay.currency
+                )
 
         return {
             "years": years,
@@ -221,7 +223,6 @@ class Dividends(View):
             - period_dates: List of datetime objects representing monthly periods
             - years: Sorted list of unique years in descending order
         """
-        # Extract payment dates directly from dividend objects (much more efficient)
         payment_dates = [dividend.payment_date for dividend in dividends]
 
         # Find min/max dates directly

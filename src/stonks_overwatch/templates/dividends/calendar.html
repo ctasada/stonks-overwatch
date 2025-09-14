@@ -11,28 +11,30 @@
             {{ value.formatedTotal }}
         </div>
     </div>
-    {% if value.payouts > 0 %}
+    {% if value.payouts >= 0 %}
         {% for day, dividends in value.days.items %}
             {% for key, dividend in dividends.items %}
-                {% if dividend.change != 0 %}
-                    {% if dividend.is_announced %}
+                {% if dividend.is_announced %}
                     <div class="row m-2 border rounded-pill upcoming-dividends">
-                    {% elif dividend.is_forecasted %}
+                {% elif dividend.is_forecasted %}
                     <div class="row m-2 border rounded-pill forecasted-dividends">
-                    {% else %}
+                {% elif dividend.is_ex_dividend %}
+                    <div class="row m-2 border rounded-pill ex_dividend-dividends">
+                {% else %}
                     <div class="row m-2 border rounded-pill dividends">
-                    {% endif %}
-                        <div class="col-sm-1 text-left">
-                            {{ day }}
-                        </div>
-                        <div class="col-sm-8 text-truncate">
-                            {{ dividend.formatted_name }}
-                        </div>
-                        <div class="col-sm-3 text-right">
-                            {{ dividend.formated_change }}
-                        </div>
-                    </div>
                 {% endif %}
+                    <div class="col-sm-1 text-left">
+                        {{ day }}
+                    </div>
+                    <div class="col-sm-8 text-truncate">
+                        {{ dividend.formatted_name }}
+                    </div>
+                    {% if not dividend.is_ex_dividend %}
+                    <div class="col-sm-3 text-right">
+                        {{ dividend.formated_change }}
+                    </div>
+                    {% endif %}
+                </div>
             {% endfor %}
         {% endfor %}
     {% endif %}

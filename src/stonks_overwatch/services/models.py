@@ -97,6 +97,7 @@ class DividendType(Enum):
     PAID = 0
     ANNOUNCED = 1
     FORECASTED = 2
+    EX_DIVIDEND = 3
 
 
 @dataclass
@@ -108,7 +109,6 @@ class Dividend:
     currency: str
     amount: float = 0.0
     taxes: float = 0.0
-    ex_dividend_date: datetime = None
 
     def formatted_name(self) -> str:
         return format_stock_name(self.stock_name)
@@ -118,12 +118,6 @@ class Dividend:
 
     def payment_time_as_string(self) -> str:
         return LocalizationUtility.format_time_from_date(self.payment_date)
-
-    def ex_dividend_date_as_string(self) -> str:
-        return LocalizationUtility.format_date_from_date(self.ex_dividend_date)
-
-    def ex_dividend_time_as_string(self) -> str:
-        return LocalizationUtility.format_time_from_date(self.ex_dividend_date)
 
     def formated_change(self) -> str:
         """Returns the formatted change in the dividend amount after taxes."""
@@ -137,6 +131,9 @@ class Dividend:
 
     def is_forecasted(self) -> bool:
         return self.dividend_type == DividendType.FORECASTED
+
+    def is_ex_dividend(self) -> bool:
+        return self.dividend_type == DividendType.EX_DIVIDEND
 
     def day(self) -> str:
         return LocalizationUtility.get_date_day(self.payment_date)

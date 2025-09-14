@@ -188,7 +188,17 @@ class DividendsService(BaseService, DividendServiceInterface):
                         Dividend(
                             dividend_type=DividendType.FORECASTED,
                             payment_date=forecasted_dividends["paymentDate"],
-                            ex_dividend_date=forecasted_dividends["exDividendDate"],
+                            stock_name=entry.name,
+                            stock_symbol=entry.symbol,
+                            currency=currency,
+                            amount=amount,
+                        )
+                    )
+
+                    result.append(
+                        Dividend(
+                            dividend_type=DividendType.EX_DIVIDEND,
+                            payment_date=forecasted_dividends["exDividendDate"],
                             stock_name=entry.name,
                             stock_symbol=entry.symbol,
                             currency=currency,

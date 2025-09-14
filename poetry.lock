@@ -825,7 +825,7 @@ files = [
 
 [[package]]
 name = "degiro-connector"
-version = "3.0.32"
+version = "3.0.33"
 description = "This is yet another library to access Degiro's API."
 optional = false
 python-versions = ">=3.10"
@@ -834,10 +834,10 @@ files = []
 develop = false
 
 [package.dependencies]
-isodate = "0.6.1"
+isodate = ">=0.6.1"
 orjson = ">=3.11.3"
 polars = {version = ">=1.33.0", optional = true}
-pydantic = ">=2.0.3"
+pydantic = ">=2.11.7"
 pyotp = ">=2.9.0"
 requests = ">=2.32.5"
 wrapt = ">=1.14.1"
@@ -851,7 +851,7 @@ quotecast = ["polars (>=1.33.0)"]
 type = "git"
 url = "https://github.com/ctasada/degiro-connector.git"
 reference = "main"
-resolved_reference = "e3e50b67abb629975d896eeb8c0fad26591516d4"
+resolved_reference = "9edbf6cbfc9be00da94d7db3b5adbace59707ccf"
 
 [[package]]
 name = "deptry"
@@ -1334,18 +1334,15 @@ files = [
 
 [[package]]
 name = "isodate"
-version = "0.6.1"
+version = "0.7.2"
 description = "An ISO 8601 date/time/duration parser and formatter"
 optional = false
-python-versions = "*"
+python-versions = ">=3.7"
 groups = ["main"]
 files = [
-    {file = "isodate-0.6.1-py2.py3-none-any.whl", hash = "sha256:0751eece944162659049d35f4f549ed815792b38793f07cf73381c1c87cbed96"},
-    {file = "isodate-0.6.1.tar.gz", hash = "sha256:48c5881de7e8b0a0d648cb024c8062dc84e7b840ed81e864c7614fd3c127bde9"},
+    {file = "isodate-0.7.2-py3-none-any.whl", hash = "sha256:28009937d8031054830160fce6d409ed342816b543597cece116d966c6d99e15"},
+    {file = "isodate-0.7.2.tar.gz", hash = "sha256:4cd1aa0f43ca76f4a6c6c0292a85f40b35ec2e43e315b59f06e6d32171a953e6"},
 ]
-
-[package.dependencies]
-six = "*"
 
 [[package]]
 name = "jinja2"
@@ -2458,14 +2455,14 @@ files = [
 
 [[package]]
 name = "pydantic"
-version = "2.11.7"
+version = "2.11.9"
 description = "Data validation using Python type hints"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "pydantic-2.11.7-py3-none-any.whl", hash = "sha256:dde5df002701f6de26248661f6835bbe296a47bf73990135c7d07ce741b9623b"},
-    {file = "pydantic-2.11.7.tar.gz", hash = "sha256:d989c3c6cb79469287b1569f7447a17848c998458d49ebe294e975b9baf0f0db"},
+    {file = "pydantic-2.11.9-py3-none-any.whl", hash = "sha256:c42dd626f5cfc1c6950ce6205ea58c93efa406da65f479dcb4029d5934857da2"},
+    {file = "pydantic-2.11.9.tar.gz", hash = "sha256:6b8ffda597a14812a7975c90b82a8a2e777d9257aba3453f973acd3c032a18e2"},
 ]
 
 [package.dependencies]
@@ -2607,14 +2604,14 @@ windows-terminal = ["colorama (>=0.4.6)"]
 
 [[package]]
 name = "pygobject"
-version = "3.54.0"
+version = "3.54.2"
 description = "Python bindings for GObject Introspection"
 optional = true
 python-versions = ">=3.9"
 groups = ["main"]
 markers = "(sys_platform == \"linux\" or \"freebsd\" in sys_platform) and extra == \"briefcase\""
 files = [
-    {file = "pygobject-3.54.0.tar.gz", hash = "sha256:4652a7cc7ff950a5099d56ac61a78c144629c20f8855a1306933b46b10f3b417"},
+    {file = "pygobject-3.54.2.tar.gz", hash = "sha256:03cffeb49d8a1879b621d8f606ac904218019a0ae699b1cd3780a8ee611e696b"},
 ]
 
 [package.dependencies]
@@ -4149,14 +4146,14 @@ files = [
 
 [[package]]
 name = "xmltodict"
-version = "0.15.1"
+version = "1.0.0"
 description = "Makes working with XML feel like you are working with JSON"
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "xmltodict-0.15.1-py2.py3-none-any.whl", hash = "sha256:dcd84b52f30a15be5ac4c9099a0cb234df8758624b035411e329c5c1e7a49089"},
-    {file = "xmltodict-0.15.1.tar.gz", hash = "sha256:3d8d49127f3ce6979d40a36dbcad96f8bab106d232d24b49efdd4bd21716983c"},
+    {file = "xmltodict-1.0.0-py3-none-any.whl", hash = "sha256:64316adb5e30ca21ad5cf391f4f0f6b34f673d96b79574f1db1e32b13b43ee34"},
+    {file = "xmltodict-1.0.0.tar.gz", hash = "sha256:f50eb9020d28c673b40bbe3f43458ee165f0267c67f8ad8df0d70d9a4f3ac824"},
 ]
 
 [[package]]

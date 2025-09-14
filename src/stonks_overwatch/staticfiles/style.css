@@ -594,6 +594,10 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .navbar-bra
     background: var(--primary-lighter);
 }
 
+.ex_dividend-dividends {
+    background-color: transparent;
+}
+
 #togglePassword {
     float: right;
     margin-left: -25px;
