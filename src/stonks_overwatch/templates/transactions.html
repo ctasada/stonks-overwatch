@@ -10,15 +10,15 @@
                data-pagination="true"
                data-pagination-loop="false"
                data-page-list="[10, 25, 50, 100, 200, All]"
-               {#FIXME: pageSize doesn't work. https://bootstrap-table.com/docs/api/table-options/#paginationparts#}
-               data-pagination-parts="['pageInfo','pageList']"
+               data-pagination-parts="['pageInfo','pageList', 'pageSize']"
                data-page-size="10"
                data-sortable="true"
                data-sort-order="desc"
                data-sort-name="date"
                data-icons="icons"
                data-icons-prefix="bi"
-               data-fixed-scroll="true">
+               data-fixed-scroll="true"
+               data-classes="table table-hover">
             <thead>
                 <tr>
                     <th data-field="date" data-sortable="true" data-width="100" data-width-unit="px">Date</th>

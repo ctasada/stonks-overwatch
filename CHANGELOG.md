@@ -24,6 +24,7 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 - Installers now include OS name in filenames
 - Update Download dialog shows percentage and downloaded size
 - Unified icons in Diversification section across the application
+- Added page size selector to the Fees, Deposits, Transactions and Account Statement tables
 
 ### Fixed
 
