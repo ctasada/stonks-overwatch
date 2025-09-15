@@ -109,6 +109,8 @@ class Dividend:
     currency: str
     amount: float = 0.0
     taxes: float = 0.0
+    # Only used for EX_DIVIDEND type
+    payout_date: Optional[datetime] = None
 
     def formatted_name(self) -> str:
         return format_stock_name(self.stock_name)
@@ -118,6 +120,9 @@ class Dividend:
 
     def payment_time_as_string(self) -> str:
         return LocalizationUtility.format_time_from_date(self.payment_date)
+
+    def payout_date_as_string(self) -> str:
+        return LocalizationUtility.format_date_from_date(self.payout_date)
 
     def formated_net_amount(self) -> str:
         """Returns the formatted change in the dividend amount after taxes."""
@@ -167,6 +172,8 @@ class Dividend:
                 return f"Gross: {self.formated_gross_amount()} <br> Taxes: {self.formated_taxes_amount()}"
             case DividendType.FORECASTED:
                 return f"Gross: {self.formated_gross_amount()} <br> Taxes: {self.formated_taxes_amount()}"
+            case DividendType.EX_DIVIDEND:
+                return f"Payout Date: {self.payout_date_as_string()}"
         return ""
 
 

@@ -24,7 +24,8 @@
                          data-bs-title="{{ dividend.tooltip }}">
                 {% elif dividend.is_ex_dividend %}
                     <div class="row m-2 border rounded-pill ex_dividend-dividends"
-                         data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-custom-class="dividends-tooltip">
+                         data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-custom-class="dividends-tooltip"
+                         data-bs-title="{{ dividend.tooltip }}">
                 {% else %}
                     <div class="row m-2 border rounded-pill dividends"
                          data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-custom-class="dividends-tooltip"
