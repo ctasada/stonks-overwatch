@@ -1,7 +1,7 @@
 import dataclasses
-import datetime
 import re
 from dataclasses import asdict, dataclass
+from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, Optional, TypedDict
 
@@ -97,6 +97,7 @@ class DividendType(Enum):
     PAID = 0
     ANNOUNCED = 1
     FORECASTED = 2
+    EX_DIVIDEND = 3
 
 
 @dataclass
@@ -108,7 +109,8 @@ class Dividend:
     currency: str
     amount: float = 0.0
     taxes: float = 0.0
-    ex_dividend_date: datetime = None
+    # Only used for EX_DIVIDEND type
+    payout_date: Optional[datetime] = None
 
     def formatted_name(self) -> str:
         return format_stock_name(self.stock_name)
@@ -119,15 +121,18 @@ class Dividend:
     def payment_time_as_string(self) -> str:
         return LocalizationUtility.format_time_from_date(self.payment_date)
 
-    def ex_dividend_date_as_string(self) -> str:
-        return LocalizationUtility.format_date_from_date(self.ex_dividend_date)
+    def payout_date_as_string(self) -> str:
+        return LocalizationUtility.format_date_from_date(self.payout_date)
 
-    def ex_dividend_time_as_string(self) -> str:
-        return LocalizationUtility.format_time_from_date(self.ex_dividend_date)
-
-    def formated_change(self) -> str:
+    def formated_net_amount(self) -> str:
         """Returns the formatted change in the dividend amount after taxes."""
         return LocalizationUtility.format_money_value(value=self.net_amount(), currency=self.currency)
+
+    def formated_gross_amount(self) -> str:
+        return LocalizationUtility.format_money_value(value=self.gross_amount(), currency=self.currency)
+
+    def formated_taxes_amount(self) -> str:
+        return LocalizationUtility.format_money_value(value=self.taxes, currency=self.currency)
 
     def is_paid(self) -> bool:
         return self.dividend_type == DividendType.PAID
@@ -137,6 +142,9 @@ class Dividend:
 
     def is_forecasted(self) -> bool:
         return self.dividend_type == DividendType.FORECASTED
+
+    def is_ex_dividend(self) -> bool:
+        return self.dividend_type == DividendType.EX_DIVIDEND
 
     def day(self) -> str:
         return LocalizationUtility.get_date_day(self.payment_date)
@@ -155,6 +163,18 @@ class Dividend:
         Returns the gross amount before taxes.
         """
         return self.amount
+
+    def tooltip(self) -> str:
+        match self.dividend_type:
+            case DividendType.PAID:
+                return f"Gross: {self.formated_gross_amount()} <br> Taxes: {self.formated_taxes_amount()}"
+            case DividendType.ANNOUNCED:
+                return f"Gross: {self.formated_gross_amount()} <br> Taxes: {self.formated_taxes_amount()}"
+            case DividendType.FORECASTED:
+                return f"Gross: {self.formated_gross_amount()} <br> Taxes: {self.formated_taxes_amount()}"
+            case DividendType.EX_DIVIDEND:
+                return f"Payout Date: {self.payout_date_as_string()}"
+        return ""
 
 
 class FeeType(Enum):

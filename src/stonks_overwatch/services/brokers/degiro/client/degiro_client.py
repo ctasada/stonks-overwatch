@@ -393,7 +393,7 @@ class DeGiroService:
                 end_date=datetime.now() + timedelta(days=180),
                 offset=0,
                 limit=25,
-                company_name=company_name,
+                isin=isin,
             ),
             raw=True,
         )
