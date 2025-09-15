@@ -188,12 +188,27 @@ class DividendsService(BaseService, DividendServiceInterface):
                         Dividend(
                             dividend_type=DividendType.FORECASTED,
                             payment_date=forecasted_dividends["paymentDate"],
-                            ex_dividend_date=forecasted_dividends["exDividendDate"],
                             stock_name=entry.name,
                             stock_symbol=entry.symbol,
                             currency=currency,
                             amount=amount,
                         )
                     )
+
+                    if (
+                        forecasted_dividends["exDividendDate"]
+                        and forecasted_dividends["exDividendDate"].date() > datetime.now().date()
+                    ):
+                        result.append(
+                            Dividend(
+                                dividend_type=DividendType.EX_DIVIDEND,
+                                payment_date=forecasted_dividends["exDividendDate"],
+                                stock_name=entry.name,
+                                stock_symbol=entry.symbol,
+                                currency=currency,
+                                amount=amount,
+                                payout_date=forecasted_dividends["paymentDate"],
+                            )
+                        )
 
         return result

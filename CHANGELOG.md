@@ -13,6 +13,9 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 - **DEGIRO Crypto:**
     - Support for crypto assets and product types
     - Internal database now stores crypto decimals
+- **Dividends:**
+    - Added 'Ex-Dividend' date
+    - Added tooltip showing the Gross/Tax dividend breakdown
 - **Application:**
     - Added "Release Notes" information
 
@@ -26,7 +29,9 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 - Logs streamlined for readability
 - Sidebar portfolio selector only clickable with multiple portfolios
-- DEGIRO: Fixed portfolio data fetching issue
+- **DEGIRO**:
+    - Fixed portfolio data fetching issue
+    - Fixed bug showing forecasted dividends
 - Application: "License Expiration" dialog now displays correctly
 
 ### Security

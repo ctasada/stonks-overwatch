@@ -11,28 +11,38 @@
             {{ value.formatedTotal }}
         </div>
     </div>
-    {% if value.payouts > 0 %}
+    {% if value.payouts >= 0 %}
         {% for day, dividends in value.days.items %}
             {% for key, dividend in dividends.items %}
-                {% if dividend.change != 0 %}
-                    {% if dividend.is_announced %}
-                    <div class="row m-2 border rounded-pill upcoming-dividends">
-                    {% elif dividend.is_forecasted %}
-                    <div class="row m-2 border rounded-pill forecasted-dividends">
-                    {% else %}
-                    <div class="row m-2 border rounded-pill dividends">
-                    {% endif %}
-                        <div class="col-sm-1 text-left">
-                            {{ day }}
-                        </div>
-                        <div class="col-sm-8 text-truncate">
-                            {{ dividend.formatted_name }}
-                        </div>
-                        <div class="col-sm-3 text-right">
-                            {{ dividend.formated_change }}
-                        </div>
-                    </div>
+                {% if dividend.is_announced %}
+                    <div class="row m-2 border rounded-pill upcoming-dividends"
+                         data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-custom-class="dividends-tooltip"
+                         data-bs-title="{{ dividend.tooltip }}">
+                {% elif dividend.is_forecasted %}
+                    <div class="row m-2 border rounded-pill forecasted-dividends"
+                         data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-custom-class="dividends-tooltip"
+                         data-bs-title="{{ dividend.tooltip }}">
+                {% elif dividend.is_ex_dividend %}
+                    <div class="row m-2 border rounded-pill ex_dividend-dividends"
+                         data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-custom-class="dividends-tooltip"
+                         data-bs-title="{{ dividend.tooltip }}">
+                {% else %}
+                    <div class="row m-2 border rounded-pill dividends"
+                         data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-custom-class="dividends-tooltip"
+                         data-bs-title="{{ dividend.tooltip }}">
                 {% endif %}
+                    <div class="col-sm-1 text-left">
+                        {{ day }}
+                    </div>
+                    <div class="col-sm-8 text-truncate">
+                        {{ dividend.formatted_name }}
+                    </div>
+                    {% if not dividend.is_ex_dividend %}
+                    <div class="col-sm-3 text-right">
+                        {{ dividend.formated_net_amount }}
+                    </div>
+                    {% endif %}
+                </div>
             {% endfor %}
         {% endfor %}
     {% endif %}
