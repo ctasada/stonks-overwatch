@@ -7,6 +7,7 @@ from toga.dialogs import ConfirmDialog, ErrorDialog, InfoDialog, SaveFileDialog
 from stonks_overwatch.app.dialogs.download_dialog import DownloadDialog
 from stonks_overwatch.app.dialogs.expired_dialog import ExpiredDialog
 from stonks_overwatch.app.dialogs.preferences_dialog import PreferencesDialog
+from stonks_overwatch.app.dialogs.release_notes_dialog import ReleaseNotesDialog
 from stonks_overwatch.services.utilities.google_drive_service import GoogleDriveService
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.database.db_utils import dump_database
@@ -14,6 +15,7 @@ from stonks_overwatch.utils.database.db_utils import dump_database
 
 class DialogManager:
     _expired_dialog_instance = None
+    _release_notes_window_instance = None
     _preferences_dialog_instance = None
     _check_for_updates_dialog_instance = None
 
@@ -66,6 +68,7 @@ class DialogManager:
         try:
             if DialogManager._expired_dialog_instance is not None:
                 self.logger.debug("ExpiredDialog already open, focusing window.")
+                DialogManager._expired_dialog_instance.hide()
                 DialogManager._expired_dialog_instance.show()
                 return
 
@@ -89,6 +92,7 @@ class DialogManager:
         if DialogManager._preferences_dialog_instance is not None:
             if not getattr(DialogManager._preferences_dialog_instance, "_closed", False):
                 self.logger.debug("PreferencesDialog already open, focusing window.")
+                DialogManager._preferences_dialog_instance.hide()
                 DialogManager._preferences_dialog_instance.show()
                 return
             else:
@@ -104,6 +108,25 @@ class DialogManager:
             self.logger.debug("PreferencesDialog close handler called")
             dialog._closed = True
             DialogManager._preferences_dialog_instance = None
+            dialog.close()
+
+        dialog.on_close = on_close
+        dialog.show()
+
+    async def release_notes(self):
+        """Show the Release Notes dialog."""
+        if DialogManager._release_notes_window_instance is not None:
+            self.logger.debug("Release Notes already open, focusing window.")
+            DialogManager._release_notes_window_instance.hide()
+            DialogManager._release_notes_window_instance.show()
+            return
+
+        dialog = ReleaseNotesDialog(app=self.app)
+        DialogManager._release_notes_window_instance = dialog
+
+        def on_close(widget):
+            self.logger.debug("Release Notes close handler called")
+            DialogManager._release_notes_window_instance = None
             dialog.close()
 
         dialog.on_close = on_close

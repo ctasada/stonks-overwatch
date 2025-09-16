@@ -81,9 +81,8 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
 ## TODOs
 
 * [ ] Add information about the sectors. Maybe a tooltip in the places where sectors are used.
-* [ ] Portfolio Tables would be migrated to "http://bootstrap-table.com/"
+* [ ] Portfolio Tables should be migrated to "http://bootstrap-table.com/"
 * [ ] Review ALL BUGS and TODOs and move them to their corresponding Github issues
-* [ ] Replace all the Tables with "https://bootstrap-table.com"
 * [ ] Evaluate the migration from Poetry to Uv
 * [ ] Provide support for both Unrealized and Realized Gain/Loss
   * Onger. W/V € - Gain/Loss Unrealized - unrealizedPl
@@ -111,6 +110,10 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
     * "https://www.tiingo.com/documentation/end-of-day"
   * Alpaca: "https://alpaca.markets"
 * [ ] Improve code quality. Check "https://pyre-check.org/docs/pysa-quickstart/"
+* [ ] Add Agenda section with information about Earnings, Dividends, etc
+* [ ] Add an AI section with investment analysis using LLMs:
+  * [ ] Portfolio rebalance suggestions (see "https://www.interactivebrokers.com/en/trading/rebalance-portfolio.php")
+  * [ ] Suggest shares to sell or bay based on different strategies or trends
 * [ ] Enable usage of Demo DB in the application (running natively)
 * [ ] DEGIRO:
   * [ ] DEGIRO Risk Category is a local term: "https://www.degiro.ie/helpdesk/trading-platform/what-are-risk-categories"
