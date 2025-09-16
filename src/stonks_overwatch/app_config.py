@@ -82,7 +82,7 @@ class StonksOverwatchConfig(AppConfig):
             self.logger.info("Enabling PROFILE_MODE: %s", profile_mode)
         demo_mode = os.getenv("DEMO_MODE", False) in [True, "true", "True", "1"]
         if demo_mode:
-            self.logger.info("Using DEMO database: %s", profile_mode)
+            self.logger.info("Using DEMO database: %s", demo_mode)
 
     def handle_shutdown(self, signum, frame):
         try:
@@ -108,7 +108,7 @@ class StonksOverwatchConfig(AppConfig):
             self.logger.error(f"Failed to clear authentication cache: {e}")
 
         self.logger.info("Stonks Overwatch - Closing connections")
-        from stonks_overwatch.services.ibkr.ibkr_service import IbkrService
+        from stonks_overwatch.services.brokers.ibkr.client.ibkr_service import IbkrService
 
         IbkrService().get_client().oauth_shutdown()
         self.logger.info("Stonks Overwatch - Connections closed")

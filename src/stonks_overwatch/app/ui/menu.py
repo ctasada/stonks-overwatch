@@ -7,7 +7,6 @@ from urllib.parse import urlparse
 from toga.command import Command, Group
 
 from stonks_overwatch.app.ui.logs_window import LogStreamWindow
-from stonks_overwatch.app.ui.release_notes_window import ReleaseNotesDialog
 from stonks_overwatch.services.utilities.license_manager import LicenseManager
 
 
@@ -16,7 +15,6 @@ class MenuManager:
         self.app = app
         # Track the log viewer window
         self.log_window = None
-        self.release_notes = None
         self.license_manager = LicenseManager()
 
     def setup_main_menu(self):
@@ -165,12 +163,8 @@ class MenuManager:
     async def _check_for_updates(self, widget):
         await self.app.dialog_manager.check_for_updates()
 
-    def _release_notes_info(self, widget):
-        if self.release_notes is None:
-            self.release_notes = ReleaseNotesDialog(app=self.app)
-            self.app.windows.add(self.release_notes)
-
-        self.release_notes.show()
+    async def _release_notes_info(self, widget):
+        await self.app.dialog_manager.release_notes()
 
     def _show_logs(self, widget):
         # If the log window does not exist, create it
