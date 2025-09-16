@@ -81,7 +81,6 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
 ## TODOs
 
 * [ ] Add information about the sectors. Maybe a tooltip in the places where sectors are used.
-* [ ] Tables should allow choosing the number of rows to show.
 * [ ] Portfolio Tables would be migrated to "http://bootstrap-table.com/"
 * [ ] Review ALL BUGS and TODOs and move them to their corresponding Github issues
 * [ ] Replace all the Tables with "https://bootstrap-table.com"
