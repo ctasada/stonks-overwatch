@@ -822,6 +822,13 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .navbar-bra
     padding-right: 2.25rem !important;
 }
 
+/* Ensure Bootstrap-Table search box is always interactive and above dropdowns */
+.bootstrap-table .fixed-table-toolbar .search input {
+    position: relative;
+    z-index: 1070;
+    pointer-events: auto;
+}
+
 /* ---------------------------------------------------
     END BOOTSTRAP TABLE FIXES
 ----------------------------------------------------- */
