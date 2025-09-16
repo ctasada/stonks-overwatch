@@ -254,7 +254,10 @@ briefcase-package: briefcase-create ## Package Briefcase project
 
 briefcase-clean: ## Clean Briefcase build artifacts
 	@echo -e  "$(BOLD)$(YELLOW)Cleaning Briefcase build artifacts...$(RESET)"
-	rm -rf build logs wheels
+	find . -type d -name "__pycache__" -exec rm -rf {} +
+	rm -rf build/ dist/ *.egg-info/ logs/ wheels/
+	pip uninstall stonks-overwatch -y || true
+	pip cache purge
 	@if [ "$$(uname)" == "Darwin" ]; then \
 		rm -rf "/Users/$(USER)/Library/Application Support/com.caribay.stonks_overwatch"; \
 		rm -rf "/Users/$(USER)/Library/Preferences/com.caribay.stonks_overwatch"; \

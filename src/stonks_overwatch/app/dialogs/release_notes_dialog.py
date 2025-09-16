@@ -12,7 +12,7 @@ from stonks_overwatch.utils.core.logger import StonksLogger
 
 class ReleaseNotesDialog(toga.Window):
     def __init__(self, title="Release Notes", app: toga.App | None = None):
-        super().__init__(title=title, size=(600, 500))
+        super().__init__(title=title, minimizable=False, closable=True, size=(600, 500))
         self._app = app
         self._main_window = app.main_window
 
@@ -105,6 +105,9 @@ class ReleaseNotesDialog(toga.Window):
     img {{ max-width:100%; display:block; margin:0.75rem auto; }}
     strong {{ color:var(--text-color); }} em {{ color:#ddd; }}
 </style>
+<script>
+document.addEventListener('contextmenu', event => event.preventDefault());
+</script>
 </head>
 <body>
 {html_fragment}
