@@ -1,3 +1,5 @@
+@import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700&display=swap";
+
 /*
     Stocks Portfolio Style
     CSS Variables
@@ -44,8 +46,6 @@
 }
 
 /* Base Styles */
-@import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700&display=swap";
-
 body {
     font-family: 'Poppins', sans-serif;
     background: #fafafa;
@@ -713,3 +713,122 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .navbar-bra
 #sidebar .text-warning {
     color: #FFD700 !important; /* Gold/bright yellow for better contrast */
 }
+
+/* ---------------------------------------------------
+    BOOTSTRAP TABLE FIXES
+----------------------------------------------------- */
+
+/* Fix Bootstrap Table dropdown positioning issues */
+.bootstrap-table .fixed-table-pagination {
+    overflow: visible !important;
+    position: relative;
+    z-index: 10;
+}
+
+.bootstrap-table .fixed-table-pagination .pagination-detail {
+    overflow: visible !important;
+}
+
+.bootstrap-table .fixed-table-pagination .pagination-detail .page-list {
+    position: relative !important;
+    z-index: 1050 !important;
+}
+
+.bootstrap-table .fixed-table-pagination .pagination-detail .page-list .btn-group {
+    position: relative !important;
+}
+
+.bootstrap-table .fixed-table-pagination .pagination-detail .page-list .btn-group .dropdown-menu {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    z-index: 1055 !important;
+    transform: none !important;
+    will-change: auto !important;
+    margin-top: 2px;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Ensure table containers don't clip dropdowns */
+.bootstrap-table .fixed-table-container {
+    overflow: visible !important;
+}
+
+/* Override any conflicting overflow settings */
+.container-fluid .row {
+    overflow: visible !important;
+}
+
+/* Specific fix for scrollable areas that might clip dropdowns */
+.scrollable-area {
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+/* Ensure dropdowns appear above modals and other high z-index elements */
+.dropdown-menu {
+    z-index: 1060 !important;
+}
+
+/* Additional Bootstrap Table dropdown fixes for better compatibility */
+.bootstrap-table .fixed-table-pagination .pagination-detail .page-list .dropdown-toggle {
+    position: relative !important;
+}
+
+.bootstrap-table .fixed-table-pagination .pagination-detail .page-list .dropdown-toggle:focus {
+    box-shadow: 0 0 0 0.2rem rgba(115, 134, 213, 0.25) !important;
+}
+
+/* Fix for Bootstrap 5 dropdown positioning with Popper.js */
+.bootstrap-table .fixed-table-pagination .dropdown-menu[data-bs-popper] {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    margin-top: 2px !important;
+}
+
+/* Ensure proper stacking context for all Bootstrap Table dropdowns */
+.bootstrap-table .fixed-table-pagination {
+    position: relative;
+    z-index: 1040;
+}
+
+.bootstrap-table .fixed-table-pagination .dropdown {
+    position: static !important;
+}
+
+/* Override Bootstrap's dropdown positioning when inside Bootstrap Table */
+.bootstrap-table .dropdown-menu {
+    position: absolute !important;
+    z-index: 1055 !important;
+    display: none;
+}
+
+.bootstrap-table .dropdown.show .dropdown-menu {
+    display: block !important;
+}
+
+/* Simple fix for Bootstrap Table dropdown double arrows */
+.bootstrap-table .dropdown-toggle::after {
+    display: none !important;
+}
+
+/* Fix select elements in Bootstrap Table - remove native arrows and add single down arrow */
+.bootstrap-table select {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    background: white url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3E%3C/svg%3E") no-repeat right 0.75rem center !important;
+    background-size: 16px 12px !important;
+    padding-right: 2.25rem !important;
+}
+
+/* Ensure Bootstrap-Table search box is always interactive and above dropdowns */
+.bootstrap-table .fixed-table-toolbar .search input {
+    position: relative;
+    z-index: 1070;
+    pointer-events: auto;
+}
+
+/* ---------------------------------------------------
+    END BOOTSTRAP TABLE FIXES
+----------------------------------------------------- */
