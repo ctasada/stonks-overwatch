@@ -186,6 +186,7 @@ STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
     "django_node_assets.finders.NodeModulesFinder",
     "django_node_assets.finders.ManifestNodeModulesFinder",
+    "stonks_overwatch.utils.staticfiles_extra_finder.ExtraFilesFinder",
 ]
 
 NODE_PACKAGE_JSON = os.path.join(PROJECT_PATH, "src", "package.json")
