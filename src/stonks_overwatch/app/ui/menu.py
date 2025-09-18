@@ -164,7 +164,9 @@ class MenuManager:
         await self.app.dialog_manager.check_for_updates()
 
     async def _release_notes_info(self, widget):
-        await self.app.dialog_manager.release_notes()
+        parsed_url = urlparse(self.app.web_view.url)
+        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+        await self.app.dialog_manager.release_notes(base_url)
 
     def _show_logs(self, widget):
         # If the log window does not exist, create it

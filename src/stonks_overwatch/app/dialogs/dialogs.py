@@ -113,7 +113,7 @@ class DialogManager:
         dialog.on_close = on_close
         dialog.show()
 
-    async def release_notes(self):
+    async def release_notes(self, base_url: str):
         """Show the Release Notes dialog."""
         if DialogManager._release_notes_window_instance is not None:
             self.logger.debug("Release Notes already open, focusing window.")
@@ -121,7 +121,7 @@ class DialogManager:
             DialogManager._release_notes_window_instance.show()
             return
 
-        dialog = ReleaseNotesDialog(app=self.app)
+        dialog = ReleaseNotesDialog("Release Notes", base_url, app=self.app)
         DialogManager._release_notes_window_instance = dialog
 
         def on_close(widget):
