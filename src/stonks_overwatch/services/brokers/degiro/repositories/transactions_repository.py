@@ -1,14 +1,13 @@
 from datetime import datetime
 
-from django.db import connection
-
 from stonks_overwatch.services.brokers.degiro.repositories.models import DeGiroTransactions
-from stonks_overwatch.utils.database.db_utils import dictfetchall
+from stonks_overwatch.utils.database.db_utils import dictfetchall, get_connection_for_model
 
 
 class TransactionsRepository:
     @staticmethod
     def get_transactions_raw() -> list[dict]:
+        connection = get_connection_for_model(DeGiroTransactions)
         with connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -20,6 +19,7 @@ class TransactionsRepository:
 
     @staticmethod
     def get_products_transactions() -> list[dict]:
+        connection = get_connection_for_model(DeGiroTransactions)
         with connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -30,6 +30,7 @@ class TransactionsRepository:
 
     @staticmethod
     def get_product_transactions(product_ids: list[str]) -> list[dict]:
+        connection = get_connection_for_model(DeGiroTransactions)
         with connection.cursor() as cursor:
             # Use a parameterized query to prevent SQL injection
             placeholders = ",".join(["%s"] * len(product_ids))
@@ -44,6 +45,7 @@ class TransactionsRepository:
 
     @staticmethod
     def get_portfolio_products(only_open: bool = False) -> list[dict]:
+        connection = get_connection_for_model(DeGiroTransactions)
         with connection.cursor() as cursor:
             query = """
                     SELECT product_id,

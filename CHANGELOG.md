@@ -10,6 +10,8 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 ### Added
 
+- **Application:**
+    - Added "Demo Mode" for exploring the application without a broker connection
 - **Dividends**:
     - Added diversification filter by year
     - Added calendar navigation bars to quickly switch between years
@@ -68,6 +70,7 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
     - Added tooltip showing the Gross/Tax dividend breakdown
 - **Application:**
     - Added "Release Notes" information
+    - Added "Demo Mode" for exploring the application without a broker connection
 
 ### Changed
 

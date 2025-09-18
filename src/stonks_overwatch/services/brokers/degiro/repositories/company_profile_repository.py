@@ -1,13 +1,13 @@
 import json
 
-from django.db import connection
-
-from stonks_overwatch.utils.database.db_utils import dictfetchall
+from stonks_overwatch.services.brokers.degiro.repositories.models import DeGiroCompanyProfile
+from stonks_overwatch.utils.database.db_utils import dictfetchall, get_connection_for_model
 
 
 class CompanyProfileRepository:
     @staticmethod
     def get_company_profile_raw(isin: str) -> dict | None:
+        connection = get_connection_for_model(DeGiroCompanyProfile)
         with connection.cursor() as cursor:
             cursor.execute(
                 """

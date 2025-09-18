@@ -1,6 +1,8 @@
 # Developing Stonks Overwatch
 
-Stonks Overwatch is a portfolio tracker integrating with multiple brokers (DeGiro, Bitvavo, IBKR) using a **unified modern architecture** (2025). The system features factory patterns, dependency injection, interface-based design, and a centralized broker registry that dramatically simplifies development and maintenance.
+Stonks Overwatch is a portfolio tracker integrating with multiple brokers (DeGiro, Bitvavo, IBKR) using a
+**unified modern architecture** (2025). The system features factory patterns, dependency injection,
+interface-based design, and a centralized broker registry that dramatically simplifies development and maintenance.
 
 ## First Steps
 
@@ -151,7 +153,7 @@ for broker in ["degiro", "bitvavo", "ibkr"]:
             print(f"❌ {broker} {service_type.value}: {e}")
 ```
 
-The demo database can use used with `make run demo=true`
+The demo database can be used with `make run demo=true`. The application will automatically route all database operations to the demo database using the built-in database routing system.
 
 ```shell
 make briefcase-package
@@ -242,6 +244,63 @@ This command will create a demo database with sample data for multiple brokers. 
 
 The demo database can be used with `make run demo=true`
 
+### Demo Mode Database Routing
+
+The application features an advanced database routing system that allows seamless switching between production and demo databases without requiring server restarts.
+
+#### How It Works
+
+The application supports two database configurations:
+- **Production Database** (`db.sqlite3`): Contains real user data
+- **Demo Database** (`demo_db.sqlite3`): Contains demo/sample data for testing
+
+The `DatabaseRouter` class automatically routes all database operations to the appropriate database based on the `DEMO_MODE` environment variable:
+
+- When `DEMO_MODE=False` (or unset): Routes to the production database
+- When `DEMO_MODE=True`: Routes to the demo database
+
+#### Database Configuration
+
+Both databases are defined in `settings.py`:
+
+```python
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": Path(STONKS_OVERWATCH_DATA_DIR).resolve().joinpath("db.sqlite3"),
+        # ... production database settings
+    },
+    "demo": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": Path(STONKS_OVERWATCH_DATA_DIR).resolve().joinpath("demo_db.sqlite3"),
+        # ... demo database settings
+    },
+}
+
+DATABASE_ROUTERS = ["stonks_overwatch.utils.database.db_router.DatabaseRouter"]
+```
+
+#### Benefits of Database Routing
+
+1. **No Server Restart Required**: Database switching happens instantly
+2. **Data Isolation**: Production and demo data are completely separate
+3. **Transparent Operation**: All existing code works without modification
+4. **Consistent Schema**: Both databases maintain the same structure through migrations
+
+#### Migration Handling
+
+Both databases support migrations independently:
+
+```shell
+# Apply migrations to production database
+python manage.py migrate --database=default
+
+# Apply migrations to demo database
+python manage.py migrate --database=demo
+```
+
+The router ensures migrations can be applied to both databases as needed, maintaining schema consistency.
+
 ## Dump and Load a Database
 
 ```shell
@@ -275,7 +334,7 @@ Example configuration to enable offline mode for multiple brokers:
 }
 ```
 
-The offline mode can be used together with `demo=true` to load the demo database and run the application without any external API calls.
+The offline mode can be used together with `demo=true` to load the demo database and run the application without any external API calls. The database routing system ensures that demo data is completely isolated from production data, making it safe to experiment with different configurations.
 
 ### Broker-Specific Development
 

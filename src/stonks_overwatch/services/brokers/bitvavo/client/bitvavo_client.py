@@ -26,7 +26,7 @@ class BitvavoService:
     START_TIMESTAMP = 0
 
     logger = StonksLogger.get_logger("stonks_overwatch.bitvavo_service", "[BITVAVO|CLIENT]")
-    client: Bitvavo = None
+    _client: Bitvavo = None
     force: bool = False
 
     def __init__(
@@ -53,7 +53,7 @@ class BitvavoService:
         bitvavo_credentials = self.bitvavo_config.get_credentials
 
         if bitvavo_credentials and bitvavo_credentials.apikey and bitvavo_credentials.apisecret:
-            self.client = Bitvavo(
+            self._client = Bitvavo(
                 {
                     "APIKEY": bitvavo_credentials.apikey,
                     "APISECRET": bitvavo_credentials.apisecret,
@@ -65,15 +65,15 @@ class BitvavoService:
         if not self.force and self.bitvavo_config.offline_mode:
             raise BitvavoOfflineModeError("Bitvavo working in offline mode. No connection is allowed")
 
-        return self.client
+        return self._client
 
     def get_remaining_limit(self) -> int:
-        return self.client.getRemainingLimit()
+        return self.get_client().getRemainingLimit()
 
     def account(self) -> Any:
         """Returns the current fees for this account."""
         self.logger.debug("Retrieving account")
-        return self.client.account()
+        return self.get_client().account()
 
     def account_history(self) -> Any:
         """Returns the transaction history for this account."""
@@ -85,7 +85,7 @@ class BitvavoService:
         while True:
             options["page"] = current_page
             postfix = createPostfix(options)
-            response = self.client.privateRequest("/account/history", postfix, {}, "GET")
+            response = self.get_client().privateRequest("/account/history", postfix, {}, "GET")
 
             if not response or "items" not in response:
                 break
@@ -105,7 +105,7 @@ class BitvavoService:
         options = {}
         if symbol:
             options["symbol"] = symbol
-        return self.client.assets(options)
+        return self.get_client().assets(options)
 
     def balance(self, symbol: str = None) -> Any:
         """Returns the current balance for this account."""
@@ -113,7 +113,7 @@ class BitvavoService:
         options = {}
         if symbol:
             options["symbol"] = symbol
-        return self.client.balance(options)
+        return self.get_client().balance(options)
 
     def candles(self, market: str, interval: str, start: datetime, end: datetime = None) -> list[dict]:
         """
@@ -126,7 +126,7 @@ class BitvavoService:
         self.logger.debug(f"Retrieving candles for market {market} with interval {interval} from {start} to {end}")
         # FIXME: Return a maximum of limit candlesticks for trades made from start.
         #  If interval is longer we need to split the request in multiple requests.
-        response = self.client.candles(market, interval, {}, start=start, end=end)
+        response = self.get_client().candles(market, interval, {}, start=start, end=end)
         result = []
         for candle in response:
             result.append(
@@ -144,7 +144,7 @@ class BitvavoService:
     def deposit_history(self) -> Any:
         """Returns the deposit history of the account."""
         self.logger.debug("Retrieving deposit history")
-        return self.client.depositHistory()
+        return self.get_client().depositHistory()
 
     def ticker_price(self, market: str = None) -> Any:
         """Retrieve the price of the latest trades on Bitvavo for all markets or a single market."""
@@ -152,9 +152,9 @@ class BitvavoService:
         options = {}
         if market:
             options["market"] = market
-        return self.client.tickerPrice(options)
+        return self.get_client().tickerPrice(options)
 
     def withdrawal_history(self) -> Any:
         """Returns the withdrawal history."""
         self.logger.debug("Retrieving withdrawal history")
-        return self.client.withdrawalHistory()
+        return self.get_client().withdrawalHistory()

@@ -1,11 +1,11 @@
-from django.db import connection
-
-from stonks_overwatch.utils.database.db_utils import dictfetchall
+from stonks_overwatch.services.brokers.degiro.repositories.models import DeGiroAgendaDividend, DeGiroUpcomingPayments
+from stonks_overwatch.utils.database.db_utils import dictfetchall, get_connection_for_model
 
 
 class DividendsRepository:
     @staticmethod
     def get_upcoming_payments() -> list[dict]:
+        connection = get_connection_for_model(DeGiroUpcomingPayments)
         with connection.cursor() as cursor:
             # In case the date is the same, use the id to provide a consistent sorting
             cursor.execute(
@@ -19,6 +19,7 @@ class DividendsRepository:
 
     @staticmethod
     def get_forecasted_payments(isin: str) -> dict:
+        connection = get_connection_for_model(DeGiroAgendaDividend)
         with connection.cursor() as cursor:
             cursor.execute(
                 """

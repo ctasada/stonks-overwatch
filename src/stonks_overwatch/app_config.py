@@ -68,10 +68,13 @@ class StonksOverwatchConfig(AppConfig):
                 self.logger.error("Failed to register authentication services: %s", e)
                 raise e
 
-            # Schedule automatic tasks
-            from stonks_overwatch.jobs.jobs_scheduler import JobsScheduler
+            demo_mode = os.getenv("DEMO_MODE", False) in [True, "true", "True", "1"]
+            # In Demo mode we don't want to execute the update jobs
+            if not demo_mode:
+                # Schedule automatic tasks
+                from stonks_overwatch.jobs.jobs_scheduler import JobsScheduler
 
-            JobsScheduler.start()
+                JobsScheduler.start()
 
     def show_env_vars(self):
         debug_mode = os.getenv("DEBUG_MODE", False) in [True, "true", "True", "1"]

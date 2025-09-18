@@ -5,6 +5,7 @@ from threading import Thread
 
 import django
 import toga
+from asgiref.sync import sync_to_async
 from django.core.handlers.wsgi import WSGIHandler
 from django.core.management import call_command
 from django.core.servers.basehttp import WSGIRequestHandler
@@ -124,6 +125,8 @@ class StonksOverwatchApp(toga.App):
         # Check for updates
         await self.check_update()
 
+        await self.check_demo_mode()
+
     async def check_license(self):
         """Check the license status and show dialog at specific thresholds."""
         try:
@@ -143,3 +146,51 @@ class StonksOverwatchApp(toga.App):
     async def check_update(self):
         """Check the update status and show download dialog if needed."""
         await self.dialog_manager.check_for_updates(False)
+
+    async def switch_to_demo_mode(self):
+        """
+        Switch to demo mode by setting the DEMO_MODE environment variable.
+
+        The database router will automatically handle switching to the demo database
+        without requiring a server restart.
+        """
+        self.logger.info("Switching to demo mode...")
+        os.environ["DEMO_MODE"] = "True"
+
+        # Import async utilities
+        from asgiref.sync import sync_to_async
+        from django.core.management import call_command
+
+        from stonks_overwatch.core.registry_setup import reload_broker_configurations
+
+        # Reload broker configurations to pick up demo mode changes
+        await sync_to_async(reload_broker_configurations)()
+
+        # Apply migrations to the demo database to ensure it's up to date
+
+        await sync_to_async(call_command)("migrate", database="demo")
+
+        self.logger.info("Demo mode activated - using demo database")
+
+        # Refresh the current page to reflect the database change
+        current_url = self.web_view.url
+        self.web_view.url = current_url
+
+    async def check_demo_mode(self):
+        from stonks_overwatch.services.aggregators.portfolio_aggregator import PortfolioAggregatorService
+
+        portfolio = PortfolioAggregatorService()
+        from stonks_overwatch.services.models import PortfolioId
+
+        portfolio_entries = await sync_to_async(portfolio.get_portfolio)(PortfolioId.ALL)
+        if len(portfolio_entries) == 0:
+            demo_dialog = toga.QuestionDialog("Demo Mode", "No portfolio entries found. Do you want to load demo data?")
+
+            # Display the dialog and get the user's response
+            if await self.main_window.dialog(demo_dialog):
+                self.logger.info("User said 'Yes'!")
+                # Switch to demo mode using the new simplified approach
+                await self.switch_to_demo_mode()
+            else:
+                self.logger.info("User said 'No'!")
+                # Perform actions if the user said no

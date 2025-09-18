@@ -227,6 +227,8 @@ class DeGiroService:
         Get the DeGiro API client for operations.
         Note: Connection should be established by AuthenticationService before calling this.
         """
+        if not self.force and self.degiro_config.offline_mode:
+            raise DeGiroOfflineModeError("DEGIRO working in offline mode. No connection is allowed")
         if not self.is_connected():
             self.logger.warning("API client is not connected. Ensure authentication is completed first.")
         return self.api_client

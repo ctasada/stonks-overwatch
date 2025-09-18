@@ -1,10 +1,8 @@
 import json
 from datetime import datetime
 
-from django.db import connection
-
 from stonks_overwatch.services.brokers.degiro.repositories.models import DeGiroProductQuotation
-from stonks_overwatch.utils.database.db_utils import dictfetchone
+from stonks_overwatch.utils.database.db_utils import dictfetchone, get_connection_for_model
 
 
 class ProductQuotationsRepository:
@@ -15,6 +13,7 @@ class ProductQuotationsRepository:
         ### Returns
             List of quotations, or None if the product is not found
         """
+        connection = get_connection_for_model(DeGiroProductQuotation)
         with connection.cursor() as cursor:
             cursor.execute(
                 """
