@@ -1,16 +1,9 @@
 # IMPORTATIONS
 import logging
-import os
-import sys
-from pathlib import Path
 
-import django
+from scripts.common import setup_django_environment
 
-sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
-
-# Set up Django
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "stonks_overwatch.settings")
-django.setup()
+setup_django_environment()
 
 # Initialize broker registry for standalone script usage
 from stonks_overwatch.core.registry_setup import ensure_registry_initialized  # noqa: E402

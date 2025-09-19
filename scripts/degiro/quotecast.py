@@ -1,14 +1,15 @@
-"""poetry run python ./scripts/degiro/quotecast.py"""
+"""poetry run python -m scripts.degiro.quotecast"""
 
 # IMPORTATIONS
 import logging
 from datetime import datetime
 
-import common
 import polars as pl
 from dateutil.relativedelta import relativedelta
 from degiro_connector.quotecast.models.chart import ChartRequest, Interval
 from degiro_connector.quotecast.tools.chart_fetcher import ChartFetcher
+
+import scripts.degiro.common as common
 
 # SETUP LOGGING
 logging.basicConfig(level=logging.INFO)

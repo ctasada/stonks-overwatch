@@ -3,40 +3,29 @@
 The script is used to update or re-create the DB with all the necessary data from DeGiro.
 
 Usage:
-    poetry run python ./scripts/generate_demo_db.py --help
+    poetry run python -m scripts.generate_demo_db --help
 """
 
 import logging
 import os
 import random
-import sys
 import textwrap
 from argparse import Namespace
 from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-import django
-from common import init_logger
-from degiro_connector.quotecast.models.chart import Interval
-from django.core.management import call_command
+from scripts.common import setup_script_environment
 
-from stonks_overwatch.services.brokers.degiro.client.constants import TransactionType
-from stonks_overwatch.utils.core.datetime import DateTimeUtility
-from stonks_overwatch.utils.core.localization import LocalizationUtility
-
-# Add the src directory to the Python path
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
-
-# Set up Django
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "stonks_overwatch.settings")
+# Set up Django environment and logging - with demo mode
 os.environ["DEMO_MODE"] = "True"
-django.setup()
+setup_script_environment()
 
-# Initialize broker registry for standalone script usage
-from stonks_overwatch.core.registry_setup import ensure_registry_initialized  # noqa: E402
+# Import Django and application modules after setup
+from degiro_connector.quotecast.models.chart import Interval  # noqa: E402
+from django.core.management import call_command  # noqa: E402
 
-ensure_registry_initialized()
+from stonks_overwatch.services.brokers.degiro.client.constants import TransactionType  # noqa: E402
 
 # The import is defined here, so all the Django configuration can be executed
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService  # noqa: E402
@@ -52,6 +41,8 @@ from stonks_overwatch.services.brokers.degiro.repositories.product_quotations_re
 )
 from stonks_overwatch.services.brokers.degiro.services.currency_service import CurrencyConverterService  # noqa: E402
 from stonks_overwatch.settings import STONKS_OVERWATCH_DATA_DIR, STONKS_OVERWATCH_DB_NAME, TIME_ZONE  # noqa: E402
+from stonks_overwatch.utils.core.datetime import DateTimeUtility  # noqa: E402
+from stonks_overwatch.utils.core.localization import LocalizationUtility  # noqa: E402
 
 LIST_OF_PRODUCTS = {
     "5462588": {
@@ -573,7 +564,6 @@ def parse_args() -> Namespace:
 
 
 def main():
-    init_logger()
     args = parse_args()
 
     if os.path.exists(Path(STONKS_OVERWATCH_DATA_DIR).resolve().joinpath(STONKS_OVERWATCH_DB_NAME)):

@@ -1,11 +1,12 @@
-"""poetry run python ./scripts/degiro/agenda_dividends.py"""
+"""poetry run python -m scripts.degiro.agenda_dividends"""
 
 # IMPORTATIONS
 import json
 from datetime import datetime, timedelta
 
-import common
 from degiro_connector.trading.models.agenda import AgendaRequest, CalendarType
+
+import scripts.degiro.common as common
 
 trading_api = common.connect_to_degiro()
 

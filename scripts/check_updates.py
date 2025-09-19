@@ -1,13 +1,17 @@
 """
-poetry run python ./scripts/check_updates.py
+poetry run python -m scripts.check_updates
 """
 
 import argparse
 import logging
 
-from common import init_logger
+from scripts.common import setup_script_environment
 
-from stonks_overwatch.services.utilities.google_drive_service import GoogleDriveService
+# Set up Django environment and logging
+setup_script_environment()
+
+# Import application modules after setup
+from stonks_overwatch.services.utilities.google_drive_service import GoogleDriveService  # noqa: E402
 
 
 def handle_list_command(args):
@@ -53,7 +57,6 @@ def handle_latest_command(args):
 
 
 def main() -> None:
-    init_logger()
     parser = argparse.ArgumentParser(description="Google Drive public folder utility")
     subparsers = parser.add_subparsers(dest="command")
 

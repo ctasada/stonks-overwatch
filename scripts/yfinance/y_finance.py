@@ -1,6 +1,10 @@
-"""poetry run python ./scripts/yfinance/y_finance.py"""
+"""poetry run python -m scripts.yfinance.y_finance"""
 
-from stonks_overwatch.services.brokers.yfinance.client.yfinance_client import YFinanceClient
+from scripts.common import setup_python_path
+
+setup_python_path()
+
+from stonks_overwatch.services.brokers.yfinance.client.yfinance_client import YFinanceClient  # noqa: E402
 
 client = YFinanceClient(enable_debug=True)
 
