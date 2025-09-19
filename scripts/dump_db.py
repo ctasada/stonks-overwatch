@@ -7,9 +7,9 @@ This script provides functionality to:
 2. Load database content from a JSON dump file
 
 Usage:
-    poetry run python ./scripts/dump_db.py --help
-    poetry run python ./scripts/dump_db.py dump [--output filename.json]
-    poetry run python ./scripts/dump_db.py load --input filename.json
+    poetry run python -m scripts.dump_db --help
+    poetry run python -m scripts.dump_db dump [--output filename.json]
+    poetry run python -m scripts.dump_db.py load --input filename.json
 """
 
 import argparse
@@ -17,19 +17,17 @@ import os
 from pathlib import Path
 
 # Django setup
-import django
 from django.core import serializers
 from django.core.management import call_command
 from django.db import transaction
 
-from stonks_overwatch.settings import STONKS_OVERWATCH_DATA_DIR
-from stonks_overwatch.utils.database.db_utils import dump_database
+from scripts.common import setup_script_environment
 
+# Set up Django environment and logging
+setup_script_environment()
 
-def setup_django():
-    """Setup Django environment"""
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "stonks_overwatch.settings")
-    django.setup()
+from stonks_overwatch.settings import STONKS_OVERWATCH_DATA_DIR  # noqa: E402
+from stonks_overwatch.utils.database.db_utils import dump_database  # noqa: E402
 
 
 def load_database(input_file):
@@ -103,9 +101,6 @@ def main():
     if not args.command:
         parser.print_help()
         return
-
-    # Setup Django
-    setup_django()
 
     if args.command == "dump":
         dump_database(output_file=args.output)

@@ -1,9 +1,9 @@
-"""poetry run python ./scripts/degiro/products_info.py"""
+"""poetry run python -m scripts.degiro.products_info"""
 
 # IMPORTATIONS
 import json
 
-import common
+import scripts.degiro.common as common
 
 trading_api = common.connect_to_degiro()
 

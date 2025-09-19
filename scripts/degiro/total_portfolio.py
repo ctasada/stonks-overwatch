@@ -1,10 +1,11 @@
-"""poetry run python ./scripts/degiro/total_portfolio.py"""
+"""poetry run python -m scripts.degiro.total_portfolio"""
 
 # IMPORTATIONS
 import json
 
-import common
 from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
+
+import scripts.degiro.common as common
 
 trading_api = common.connect_to_degiro()
 

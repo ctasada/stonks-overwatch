@@ -1,10 +1,11 @@
-"""poetry run python ./scripts/degiro//account_report.py"""
+"""poetry run python -m scripts.degiro.account_report"""
 
 # IMPORTATIONS
 from datetime import date
 
-import common
 from degiro_connector.trading.models.account import Format, ReportRequest
+
+import scripts.degiro.common as common
 
 trading_api = common.connect_to_degiro()
 
