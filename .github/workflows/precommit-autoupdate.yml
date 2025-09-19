@@ -34,4 +34,14 @@ jobs:
         if: steps.check-changes.outputs.changes == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
+          token: ${{ secrets.PAT_TOKEN }}
           title: 'chore: autoupdate pre-commit hooks'
+          body: |
+            This PR updates pre-commit hooks to their latest versions.
+
+            Changes made by `pre-commit autoupdate`.
+
+            Please review the changes before merging.
+          branch: chore/autoupdate-pre-commit-hooks
+          commit-message: 'chore: autoupdate pre-commit hooks'
+          delete-branch: true
