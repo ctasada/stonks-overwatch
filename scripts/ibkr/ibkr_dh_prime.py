@@ -1,4 +1,4 @@
-"""poetry run python ./scripts/ibkr/ibkr_dh_prime.py"""
+"""poetry run python -m scripts.ibkr.ibkr_dh_prime"""
 
 import re
 import subprocess

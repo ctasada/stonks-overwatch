@@ -1,12 +1,13 @@
-"""poetry run python ./scripts/degiro//account_overview.py"""
+"""poetry run python -m scripts.degiro.account_overview"""
 
 # IMPORTATIONS
 import json
 from datetime import date, datetime
 
-import common
 import polars as pl
 from degiro_connector.trading.models.account import OverviewRequest
+
+import scripts.degiro.common as common
 
 trading_api = common.connect_to_degiro()
 

@@ -1,4 +1,4 @@
-"""poetry run python ./scripts/exchanges.py"""
+"""poetry run python -m scripts.exchanges"""
 
 from iso10383 import MIC
 

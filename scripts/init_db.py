@@ -3,32 +3,23 @@
 The script is used to update or re-create the DB with all the necessary data from DeGiro.
 
 Usage:
-    poetry run python ./scripts/init_db.py --help
+    poetry run python -m scripts.init_db --help
 """
 
 import logging
 import os
-import sys
 import textwrap
 from argparse import Namespace
 
-import django
-from common import init_logger
-from django.core.management import call_command
+from scripts.common import setup_script_environment
 
-from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+# Set up Django environment and logging
+setup_script_environment()
 
-# Add the src directory to the Python path
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
+# Import Django and application modules after setup
+from django.core.management import call_command  # noqa: E402
 
-# Set up Django
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "stonks_overwatch.settings")
-django.setup()
-
-# Initialize broker registry for standalone script usage
-from stonks_overwatch.core.registry_setup import ensure_registry_initialized  # noqa: E402
-
-ensure_registry_initialized()
+from stonks_overwatch.core.factories.broker_factory import BrokerFactory  # noqa: E402
 
 # The import is defined here, so all the Django configuration can be executed
 from stonks_overwatch.services.brokers.bitvavo.services.update_service import (  # noqa: E402
@@ -203,7 +194,6 @@ def get_bitvavo_update_service(args, broker_factory):
 
 
 def main():
-    init_logger()
     logging.info("Applying database migrations...")
     call_command("migrate")
 
