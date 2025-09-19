@@ -35,9 +35,9 @@
     --sidebar-border-color: rgba(255, 255, 255, 0.3);
 
     /* Toggle button positioning */
-    --toggle-position-desktop: -21px;
-    --toggle-position-tablet: -17px;
-    --toggle-position-mobile: -16px;
+    --toggle-position-desktop: -14px;
+    --toggle-position-tablet: -10px;
+    --toggle-position-mobile: -9px;
 
     /* Common box shadows */
     --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.15);
