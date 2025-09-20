@@ -34,6 +34,11 @@ jobs:
         if: steps.check-changes.outputs.changes == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
+          # The token must have the next permissions:
+          #  Fine=grained permissions:
+          #   - Contents: Read and write,
+          #   - Pull requests: Read and write
+          #   - Workflows: Read and write (may be not required)
           token: ${{ secrets.PAT_TOKEN }}
           title: 'chore: autoupdate pre-commit hooks'
           body: |
