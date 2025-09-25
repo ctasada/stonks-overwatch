@@ -15,7 +15,7 @@ SHELL := /bin/bash
 .DELETE_ON_ERROR:
 
 # Project configuration
-PYTHON_VERSION := 3.11
+PYTHON_VERSION := 3.13
 PROJECT_NAME := stonks-overwatch
 SRC_DIR := src
 WHEEL_DIR := ./wheels

@@ -316,7 +316,7 @@ SOFTWARE.
 
 
 asgiref
-3.9.1
+3.9.2
 BSD License
 Copyright (c) Django Software Foundation and individual contributors.
 All rights reserved.
