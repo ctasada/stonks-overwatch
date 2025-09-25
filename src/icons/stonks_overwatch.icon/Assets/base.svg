@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-0 0 1024 1024">
+  <g transform="matrix(0.1, 0, 0, -0.1, 5606.561035, 5718.910645)" fill="none" stroke="#222628" stroke-width="100">
+    <g transform="matrix(1.333333, 0, 0, 1.333333, -58481.4375, 45547.34375)" fill="#000000" stroke="none">
+      <g id="eye" transform="matrix(0.976603, 0, 0, 1.032299, 83.458092, -340.243683)" fill="none" stroke="#222628" stroke-width="100" stroke-linecap="round" stroke-linejoin="round" style="">
+        <path d="M 7191.13 5067.91 C 7191.13 3921.43 5950.07 3204.89 4957.16 3778.11 C 4496.36 4044.15 4212.52 4535.81 4212.52 5067.91 C 4212.52 6214.37 5453.57 6930.9 6446.48 6357.63 C 6907.29 6091.61 7191.13 5599.95 7191.13 5067.91 Z" style="stroke: rgb(0, 0, 0); fill: rgb(0, 0, 0);"></path>
+        <path d="M 2757.42 5067.86 C 4777.12 7206.72 6740.22 7206.72 8646.22 5067.86 C 6626.42 2929.05 4663.52 2929.05 2757.42 5067.86 Z" style="stroke: rgb(0, 0, 0); stroke-width: 225px;"></path>
+      </g>
+      <g id="iris" style="transform-origin: 251.807068px 191.141312px;" transform="matrix(11.533887, 0, 0, -11.416698, 2445.39624, 6882.505859)">
+        <circle r="40" cx="358.192" cy="845.872" fill="transparent" stroke-dasharray="62.8318 251.3272" stroke-dashoffset="0" style="transform-box: fill-box; transform-origin: 50% 50%; stroke-width: 27.000094px; stroke: rgb(130, 159, 102); stroke-linecap: butt;" transform="matrix(0, -2.235725, 2.098034, 0, 148.319519, -461.363739)"></circle>
+        <circle r="40" cx="358.192" cy="845.872" fill="transparent" stroke-dasharray="50.26544 251.3272" stroke-dashoffset="-62.8318" style="transform-box: fill-box; transform-origin: 50% 50%; stroke-width: 27.000094px; stroke: rgb(170, 123, 216); stroke-linecap: butt;" transform="matrix(0, -2.235725, 2.098034, 0, 148.319519, -461.363739)"></circle>
+        <circle r="40" cx="358.192" cy="845.872" fill="transparent" stroke-dasharray="37.69908 251.3272" stroke-dashoffset="-113.09724" style="transform-box: fill-box; transform-origin: 50% 50%; stroke-width: 27.000094px; stroke: rgb(130, 100, 159); stroke-linecap: butt;" transform="matrix(0, -2.235725, 2.098034, 0, 148.319519, -461.363739)"></circle>
+        <circle r="40" cx="358.192" cy="845.872" fill="transparent" stroke-dasharray="30.159264 251.3272" stroke-dashoffset="-150.79632" style="transform-box: fill-box; transform-origin: 50% 50%; stroke-width: 27.000094px; stroke: rgb(215, 192, 125); stroke-linecap: butt;" transform="matrix(0, -2.235725, 2.098034, 0, 148.319519, -461.363739)"></circle>
+        <circle r="40" cx="358.192" cy="845.872" fill="transparent" stroke-dasharray="25.13272 251.3272" stroke-dashoffset="-180.955584" style="transform-box: fill-box; transform-origin: 50% 50%; stroke-width: 27.000094px; stroke: rgb(158, 143, 101); stroke-linecap: butt;" transform="matrix(0, -2.235725, 2.098034, 0, 148.319519, -461.363739)"></circle>
+        <circle r="40" cx="358.192" cy="845.872" fill="transparent" stroke-dasharray="20.106176 251.3272" stroke-dashoffset="-206.088304" style="transform-box: fill-box; transform-origin: 50% 50%; stroke-width: 27.000094px; stroke: rgb(129, 216, 147); stroke-linecap: butt;" transform="matrix(0, -2.235725, 2.098034, 0, 148.319519, -461.363739)"></circle>
+        <circle r="40" cx="358.192" cy="845.872" fill="transparent" stroke-dasharray="15.079632 251.3272" stroke-dashoffset="-226.19448" style="transform-box: fill-box; transform-origin: 50% 50%; stroke-width: 27.000094px; stroke: rgb(124, 146, 216); stroke-linecap: butt;" transform="matrix(0, -2.235725, 2.098034, 0, 148.319519, -461.363739)"></circle>
+        <circle r="40" cx="358.192" cy="845.872" fill="transparent" stroke-dasharray="10.053088 251.3272" stroke-dashoffset="-241.274112" style="transform-box: fill-box; transform-origin: 50% 50%; stroke-width: 27.000094px; stroke: rgb(217, 125, 193); stroke-linecap: butt;" transform="matrix(0, -2.235725, 2.098034, 0, 148.319519, -461.363739)"></circle>
+      </g>
+    </g>
+  </g>
+</svg>
