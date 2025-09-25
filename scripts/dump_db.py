@@ -72,11 +72,11 @@ def load_database(input_file, database="default"):
         with open(input_file, "r", encoding="utf-8") as f:
             data = f.read()
 
-        # Deserialize and save
+        # Deserialize and save to the correct database
         objects_loaded = 0
-        with transaction.atomic():
+        with transaction.atomic(using=database):
             for obj in serializers.deserialize("json", data):
-                obj.save()
+                obj.save(using=database)
                 objects_loaded += 1
 
         print(f"Successfully loaded {objects_loaded} objects from {input_file}")

@@ -9,6 +9,7 @@ Usage:
 import logging
 import os
 import random
+import shutil
 import textwrap
 from argparse import Namespace
 from datetime import datetime, timedelta
@@ -220,6 +221,9 @@ class DBDemoGenerator:
         if supported_decimals > 0:
             # Choose a random float between a small minimum and max_quantity, with correct precision
             min_quantity = 10 ** (-supported_decimals)
+            # Ensure max_quantity is at least min_quantity to avoid ValueError in random.uniform
+            if max_quantity < min_quantity:
+                return balance
             quantity = round(random.uniform(min_quantity, max_quantity), supported_decimals)
         else:
             quantity = random.randint(1, int(max_quantity))
@@ -319,7 +323,14 @@ class DBDemoGenerator:
 
         return balance - change_in_base_currency
 
-    def update_dividends(self, product_id: str, quantity: int, transaction_date: datetime) -> None:
+    def update_dividends(self, product_id: str, quantity: int | float, transaction_date: datetime) -> None:
+        """Update dividend tracking for a product after a purchase.
+
+        Args:
+            product_id: The product identifier
+            quantity: Number of shares/units purchased (can be float for crypto)
+            transaction_date: When the purchase was made
+        """
         if "dividends" not in LIST_OF_PRODUCTS[product_id]:
             return
 
@@ -410,6 +421,11 @@ class DBDemoGenerator:
             if identifier_type is None:
                 identifier_type = row.get("vwdIdentifierType")
                 identifier_value = row.get("vwdId")
+
+            # Skip if no valid identifier is available
+            if identifier_value is None:
+                logging.info(f"No valid identifier for '{symbol}'({key}): {row}")
+                continue
 
             quotes_dict = self.degiro_service.get_product_quotation(identifier_type, identifier_value, interval, symbol)
 
@@ -622,6 +638,23 @@ def main():
     """Main function to run the script."""
     generator = DBDemoGenerator()
     generator.generate(args.start_date, args.num_transactions, args.initial_deposit, args.monthly_deposit)
+
+    # Copy the generated database to fixtures for distribution with Briefcase
+    dev_demo_db = Path(DATABASES["demo"]["NAME"]).resolve()
+    fixtures_demo_db = Path(__file__).parent.parent / "src" / "stonks_overwatch" / "fixtures" / "demo_db.sqlite3"
+
+    logging.info("Copying demo DB to fixtures for distribution...")
+    logging.info(f"  Source: {dev_demo_db}")
+    logging.info(f"  Destination: {fixtures_demo_db}")
+
+    # Ensure fixtures directory exists
+    fixtures_demo_db.parent.mkdir(parents=True, exist_ok=True)
+
+    # Copy the database
+    shutil.copy2(dev_demo_db, fixtures_demo_db)
+
+    logging.info("Demo DB successfully copied to fixtures directory")
+    logging.info(f"Fixture size: {fixtures_demo_db.stat().st_size / 1024:.2f} KB")
 
 
 if __name__ == "__main__":
