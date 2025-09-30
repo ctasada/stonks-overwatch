@@ -136,6 +136,23 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .navbar-bra
     justify-content: center;
 }
 
+/* Immediate collapsed state - portfolio selector image centering */
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar #sidebar-portfolio-selector .sidebar-nav-link img {
+    margin: 0 !important;
+}
+
+/* Immediate collapsed state rules consolidated above */
+
+/* Immediate collapsed state - connection status centering */
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .mt-auto > div {
+    justify-content: center !important;
+    padding: 0 var(--sidebar-margin) !important;
+}
+
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .mt-auto .sidebar-icon {
+    margin: 0 !important;
+}
+
 /* Note: Toggle button icon is handled by JavaScript since we use different icon classes */
 
 /* Immediate collapsed state - responsive breakpoints */
@@ -190,12 +207,37 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .navbar-bra
     max-width: 40px;
 }
 
-/* Style portfolio selector when collapsed - show only logo centered */
-#sidebar.sidebar-collapsed #sidebar-portfolio-selector .sidebar-nav-link {
+/* Portfolio selector collapsed state - base styles */
+#sidebar.sidebar-collapsed #sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle,
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar #sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle {
     justify-content: center;
-    margin: 0 var(--sidebar-margin);
-    padding: 0.4rem 1rem !important;
+    margin: 0;
+    padding: 0.3rem 0.5rem;
     border-radius: var(--border-radius-standard);
+    text-align: center;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Remove margin from portfolio selector image when collapsed and ensure perfect centering */
+#sidebar.sidebar-collapsed #sidebar-portfolio-selector .sidebar-nav-link img {
+    margin: 0 auto !important;
+    display: block !important;
+}
+
+/* Portfolio selector container margin - collapsed states */
+#sidebar.sidebar-collapsed div.dropdown#sidebar-portfolio-selector,
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.dropdown#sidebar-portfolio-selector {
+    padding: 0;
+    margin: 0 var(--sidebar-margin);
+}
+
+/* Portfolio selector parent container - collapsed states */
+#sidebar.sidebar-collapsed div.px-2.py-1.border-bottom.w-100,
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py-1.border-bottom.w-100 {
+    padding: 0;
 }
 
 #sidebar.sidebar-collapsed #sidebar-portfolio-selector .dropdown-toggle::after {
@@ -223,6 +265,17 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .navbar-bra
 /* Keep toggle button position consistent when collapsed */
 #sidebar.sidebar-collapsed .sidebar-toggle {
     right: var(--toggle-position-desktop);
+}
+
+/* Center connection status when collapsed */
+#sidebar.sidebar-collapsed .mt-auto > div {
+    justify-content: center !important;
+    padding: 0 var(--sidebar-margin) !important;
+}
+
+/* Remove margin from connection status icon when collapsed */
+#sidebar.sidebar-collapsed .mt-auto .sidebar-icon {
+    margin: 0 !important;
 }
 
 #sidebar .navbar {
@@ -259,6 +312,11 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .navbar-bra
     max-width: 48px;
     height: auto;
     flex-shrink: 0;
+}
+
+/* Reduce logo margin when sidebar is expanded for better spacing */
+#sidebar:not(.sidebar-collapsed) .sidebar-logo {
+    margin-right: 0.5rem !important; /* Reduce from me-3 (1rem) to 0.5rem */
 }
 
 /* Two-line navigation text */
@@ -329,27 +387,39 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .navbar-bra
     --bs-tooltip-bg: var(--primary-dark);
 }
 
-/* Portfolio Selector Styling */
-#sidebar-portfolio-selector .sidebar-nav-link {
-    border: none !important;
-    background: none !important;
-    box-shadow: none !important;
+/* Portfolio Selector Styling - account for extra div nesting */
+#sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle {
+    border: none;
+    background: none;
+    box-shadow: none;
     border-radius: var(--border-radius-standard);
-    color: var(--sidebar-text-color) !important;
+    color: var(--sidebar-text-color);
+    margin: 0; /* Remove margin from button since parent handles it */
+    position: relative;
+}
+
+/* The dropdown container should handle the margin like regular nav items */
+#sidebar:not(.sidebar-collapsed) div.dropdown#sidebar-portfolio-selector {
     margin: 0 var(--sidebar-margin);
 }
 
-#sidebar-portfolio-selector .sidebar-nav-link:hover {
-    background-color: var(--sidebar-hover-bg) !important;
-    color: #fff !important;
-    transform: none !important; /* Prevent rightward movement on hover */
+/* Ensure portfolio selector parent container has no extra padding */
+#sidebar:not(.sidebar-collapsed) div.px-2.py-1.border-bottom.w-100 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
 }
 
-#sidebar-portfolio-selector .sidebar-nav-link:focus {
-    background-color: var(--sidebar-hover-bg) !important;
-    color: #fff !important;
-    box-shadow: none !important;
-    transform: none !important; /* Prevent rightward movement on focus */
+#sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle:hover {
+    background-color: var(--sidebar-hover-bg);
+    color: #fff;
+    transform: none; /* Prevent rightward movement on hover */
+}
+
+#sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle:focus {
+    background-color: var(--sidebar-hover-bg);
+    color: #fff;
+    box-shadow: none;
+    transform: none; /* Prevent rightward movement on focus */
 }
 
 #sidebar-portfolio-selector button img {
@@ -442,10 +512,19 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .navbar-bra
         padding: 0.35rem 0.85rem !important;
     }
 
-    #sidebar.sidebar-collapsed #sidebar-portfolio-selector .sidebar-nav-link {
-        padding: 0.35rem 0.85rem !important;
-        margin: 0 var(--sidebar-margin);
-        border-radius: var(--border-radius-standard);
+    /* Tablet - override base collapsed styles with smaller padding */
+    #sidebar.sidebar-collapsed #sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle {
+        padding: 0.25rem 0.4rem; /* Tablet-specific smaller padding */
+    }
+
+    /* Tablet - connection status centering when collapsed */
+    #sidebar.sidebar-collapsed .mt-auto > div {
+        justify-content: center !important;
+        padding: 0 var(--sidebar-margin) !important;
+    }
+
+    #sidebar.sidebar-collapsed .mt-auto .sidebar-icon {
+        margin: 0 !important;
     }
 
         #sidebar .navbar-brand span {
@@ -494,6 +573,26 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .navbar-bra
         padding: 0.3rem 0.75rem !important;
         margin: 0 var(--sidebar-margin);
         border-radius: var(--border-radius-standard);
+    }
+
+    /* Mobile - portfolio selector image centering when collapsed */
+    #sidebar.sidebar-collapsed #sidebar-portfolio-selector .sidebar-nav-link img {
+        margin: 0 !important;
+    }
+
+    /* Mobile - override base collapsed styles with smaller padding */
+    #sidebar.sidebar-collapsed #sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle {
+        padding: 0.2rem 0.3rem; /* Mobile-specific smaller padding */
+    }
+
+    /* Mobile - connection status centering when collapsed */
+    #sidebar.sidebar-collapsed .mt-auto > div {
+        justify-content: center !important;
+        padding: 0 var(--sidebar-margin) !important;
+    }
+
+    #sidebar.sidebar-collapsed .mt-auto .sidebar-icon {
+        margin: 0 !important;
     }
 
     #sidebar .navbar-brand {
