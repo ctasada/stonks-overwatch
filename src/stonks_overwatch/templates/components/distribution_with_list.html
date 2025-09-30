@@ -21,7 +21,7 @@
                                     {% if item.product_type == 'sector' %}
                                         <i class="bi bi-{{ item.symbol }} fs-4"></i>
                                     {% elif item.product_type == 'cash' %}
-                                        <i class="bi bi-{{ item.symbol }} fs-4"></i>
+                                        <span class="currency-symbol" data-currency="{{ item.name|lower }}">{{ item.symbol }}</span>
                                     {% else %}
                                         <img src="{% url 'asset_logo' product_type=item.product_type|lower symbol=item.symbol|lower %}"
                                              width="30" height="30"

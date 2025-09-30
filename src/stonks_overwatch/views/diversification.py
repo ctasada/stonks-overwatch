@@ -194,8 +194,5 @@ class Diversification(View):
 
     @staticmethod
     def __get_currency_logo(currency: str) -> str:
-        """Returns the logo for the given currency."""
-        if currency.lower() == "eur":
-            return "currency-euro"
-        else:
-            return "currency-dollar"
+        """Returns the actual currency symbol using the existing LocalizationUtility."""
+        return LocalizationUtility.get_currency_symbol(currency)
