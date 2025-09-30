@@ -706,6 +706,168 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     z-index: 100;
 }
 
+/* Country Flag Styling Improvements */
+.country-flag-container {
+    position: relative;
+    width: 2.8rem;
+    height: 2.8rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border: 2px solid var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(115, 134, 213, 0.15);
+    transition: var(--transition-standard);
+    overflow: hidden;
+    /* Use CSS clip-path for better circular clipping */
+    clip-path: circle(50%);
+}
+
+.country-flag-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(115, 134, 213, 0.25);
+    border-color: var(--primary-dark);
+}
+
+.country-flag-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.country-flag-image {
+    width: 2.4rem;
+    height: 2.4rem;
+    object-fit: cover;
+    position: relative;
+    z-index: 1;
+    filter: contrast(1.1) saturate(1.1);
+    transition: var(--transition-standard);
+    background: transparent;
+    border-radius: 50%;
+}
+
+.country-flag-container:hover .country-flag-image {
+    transform: scale(1.05);
+    filter: contrast(1.15) saturate(1.2);
+}
+
+/* Alternative circular flag design with flag aspect ratio preserved */
+.country-flag-circular {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background-size: 150% 150%;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    z-index: 1;
+    transition: var(--transition-standard);
+}
+
+.country-flag-container:hover .country-flag-circular {
+    transform: scale(1.05);
+    background-size: 160% 160%;
+}
+
+/* Enhanced styling for all asset icons in diversification */
+.asset-icon-container {
+    position: relative;
+    width: 2.8rem;
+    height: 2.8rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border: 2px solid var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(115, 134, 213, 0.15);
+    transition: var(--transition-standard);
+    overflow: hidden;
+}
+
+.asset-icon-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(115, 134, 213, 0.25);
+    border-color: var(--primary-dark);
+}
+
+.asset-icon-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.asset-icon-container img,
+.asset-icon-container i {
+    position: relative;
+    z-index: 1;
+    transition: var(--transition-standard);
+}
+
+.asset-icon-container:hover img,
+.asset-icon-container:hover i {
+    transform: scale(1.05);
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+    .country-flag-container,
+    .asset-icon-container {
+        width: 2.4rem;
+        height: 2.4rem;
+    }
+
+    .country-flag-image {
+        width: 1.8rem;
+        height: 1.8rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .country-flag-container,
+    .asset-icon-container {
+        width: 2.2rem;
+        height: 2.2rem;
+    }
+
+    .country-flag-image {
+        width: 1.6rem;
+        height: 1.6rem;
+    }
+}
+
+/* Enhanced accessibility and focus states */
+.country-flag-container:focus-within,
+.asset-icon-container:focus-within {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Improved loading state */
+.country-flag-image[src=""],
+.country-flag-image:not([src]) {
+    background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%),
+                linear-gradient(-45deg, #f0f0f0 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #f0f0f0 75%),
+                linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+    background-size: 8px 8px;
+    background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+}
+
 /* Bootstrap Table Pagination Styles */
 .bootstrap-table .btn:focus, .bootstrap-table .btn:hover {
     background-color: #6A7ED2;
