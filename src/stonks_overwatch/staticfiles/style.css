@@ -823,6 +823,69 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     transform: scale(1.05);
 }
 
+/* Universal currency symbol styling - works for any currency */
+.currency-symbol {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-size: 1.5rem;
+    font-weight: 400;
+    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, monospace;
+    color: #000;
+    text-align: center;
+    line-height: 1;
+    /* Force optical centering */
+    vertical-align: middle;
+    /* Remove any potential text baseline issues */
+    font-feature-settings: 'tnum' 1;
+    /* Ensure consistent character spacing */
+    letter-spacing: 0;
+    /* Remove any inherited text transformations */
+    text-transform: none;
+}
+
+/* Specific micro-adjustment for Euro symbol optical centering */
+.currency-symbol[data-currency="eur"] {
+    /* Very slight adjustment for Euro's visual weight distribution */
+    transform: translateX(-0.05em);
+}
+
+/* Hover effect for currency symbols */
+.asset-icon-container:hover .currency-symbol {
+    transform: scale(1.1);
+    color: #333;
+}
+
+/* Hover effect for Euro symbol (preserve centering adjustment) */
+.asset-icon-container:hover .currency-symbol[data-currency="eur"] {
+    transform: translateX(-0.05em) scale(1.1);
+    color: #333;
+}
+
+/* Ensure all sector icons are properly centered */
+.asset-icon-container i[class^="bi-"] {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100%;
+    height: 100%;
+    line-height: 1;
+    text-align: center;
+}
+
+/* Additional centering for all Bootstrap icons in asset containers */
+.asset-icon-container i.bi {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100%;
+    height: 100%;
+    line-height: 1;
+    text-align: center;
+}
+
 /* Responsive design for smaller screens */
 @media (max-width: 768px) {
     .country-flag-container,
@@ -834,6 +897,11 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     .country-flag-image {
         width: 1.8rem;
         height: 1.8rem;
+    }
+
+    /* Responsive currency symbol sizing */
+    .currency-symbol {
+        font-size: 1.3rem;
     }
 }
 
@@ -847,6 +915,11 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     .country-flag-image {
         width: 1.6rem;
         height: 1.6rem;
+    }
+
+    /* Mobile currency symbol sizing */
+    .currency-symbol {
+        font-size: 1.2rem;
     }
 }
 
