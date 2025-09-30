@@ -45,10 +45,4 @@
     {% endif %}
 </div>
 
-<script>
-    document.getElementById('visible-positions-selector').addEventListener('change', async function () {
-        const selectedValue = this.value;
-        window.location.href = `?positions=${selectedValue}`;
-    });
-</script>
 {% endblock %}
