@@ -136,6 +136,23 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .navbar-bra
     justify-content: center;
 }
 
+/* Immediate collapsed state - portfolio selector image centering */
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar #sidebar-portfolio-selector .sidebar-nav-link img {
+    margin: 0 !important;
+}
+
+/* Immediate collapsed state rules consolidated above */
+
+/* Immediate collapsed state - connection status centering */
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .mt-auto > div {
+    justify-content: center !important;
+    padding: 0 var(--sidebar-margin) !important;
+}
+
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .mt-auto .sidebar-icon {
+    margin: 0 !important;
+}
+
 /* Note: Toggle button icon is handled by JavaScript since we use different icon classes */
 
 /* Immediate collapsed state - responsive breakpoints */
@@ -190,12 +207,37 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .navbar-bra
     max-width: 40px;
 }
 
-/* Style portfolio selector when collapsed - show only logo centered */
-#sidebar.sidebar-collapsed #sidebar-portfolio-selector .sidebar-nav-link {
+/* Portfolio selector collapsed state - base styles */
+#sidebar.sidebar-collapsed #sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle,
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar #sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle {
     justify-content: center;
-    margin: 0 var(--sidebar-margin);
-    padding: 0.4rem 1rem !important;
+    margin: 0;
+    padding: 0.3rem 0.5rem;
     border-radius: var(--border-radius-standard);
+    text-align: center;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Remove margin from portfolio selector image when collapsed and ensure perfect centering */
+#sidebar.sidebar-collapsed #sidebar-portfolio-selector .sidebar-nav-link img {
+    margin: 0 auto !important;
+    display: block !important;
+}
+
+/* Portfolio selector container margin - collapsed states */
+#sidebar.sidebar-collapsed div.dropdown#sidebar-portfolio-selector,
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.dropdown#sidebar-portfolio-selector {
+    padding: 0;
+    margin: 0 var(--sidebar-margin);
+}
+
+/* Portfolio selector parent container - collapsed states */
+#sidebar.sidebar-collapsed div.px-2.py-1.border-bottom.w-100,
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py-1.border-bottom.w-100 {
+    padding: 0;
 }
 
 #sidebar.sidebar-collapsed #sidebar-portfolio-selector .dropdown-toggle::after {
@@ -223,6 +265,17 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .navbar-bra
 /* Keep toggle button position consistent when collapsed */
 #sidebar.sidebar-collapsed .sidebar-toggle {
     right: var(--toggle-position-desktop);
+}
+
+/* Center connection status when collapsed */
+#sidebar.sidebar-collapsed .mt-auto > div {
+    justify-content: center !important;
+    padding: 0 var(--sidebar-margin) !important;
+}
+
+/* Remove margin from connection status icon when collapsed */
+#sidebar.sidebar-collapsed .mt-auto .sidebar-icon {
+    margin: 0 !important;
 }
 
 #sidebar .navbar {
@@ -259,6 +312,11 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .navbar-bra
     max-width: 48px;
     height: auto;
     flex-shrink: 0;
+}
+
+/* Reduce logo margin when sidebar is expanded for better spacing */
+#sidebar:not(.sidebar-collapsed) .sidebar-logo {
+    margin-right: 0.5rem !important; /* Reduce from me-3 (1rem) to 0.5rem */
 }
 
 /* Two-line navigation text */
@@ -329,27 +387,39 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .navbar-bra
     --bs-tooltip-bg: var(--primary-dark);
 }
 
-/* Portfolio Selector Styling */
-#sidebar-portfolio-selector .sidebar-nav-link {
-    border: none !important;
-    background: none !important;
-    box-shadow: none !important;
+/* Portfolio Selector Styling - account for extra div nesting */
+#sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle {
+    border: none;
+    background: none;
+    box-shadow: none;
     border-radius: var(--border-radius-standard);
-    color: var(--sidebar-text-color) !important;
+    color: var(--sidebar-text-color);
+    margin: 0; /* Remove margin from button since parent handles it */
+    position: relative;
+}
+
+/* The dropdown container should handle the margin like regular nav items */
+#sidebar:not(.sidebar-collapsed) div.dropdown#sidebar-portfolio-selector {
     margin: 0 var(--sidebar-margin);
 }
 
-#sidebar-portfolio-selector .sidebar-nav-link:hover {
-    background-color: var(--sidebar-hover-bg) !important;
-    color: #fff !important;
-    transform: none !important; /* Prevent rightward movement on hover */
+/* Ensure portfolio selector parent container has no extra padding */
+#sidebar:not(.sidebar-collapsed) div.px-2.py-1.border-bottom.w-100 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
 }
 
-#sidebar-portfolio-selector .sidebar-nav-link:focus {
-    background-color: var(--sidebar-hover-bg) !important;
-    color: #fff !important;
-    box-shadow: none !important;
-    transform: none !important; /* Prevent rightward movement on focus */
+#sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle:hover {
+    background-color: var(--sidebar-hover-bg);
+    color: #fff;
+    transform: none; /* Prevent rightward movement on hover */
+}
+
+#sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle:focus {
+    background-color: var(--sidebar-hover-bg);
+    color: #fff;
+    box-shadow: none;
+    transform: none; /* Prevent rightward movement on focus */
 }
 
 #sidebar-portfolio-selector button img {
@@ -442,10 +512,19 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .navbar-bra
         padding: 0.35rem 0.85rem !important;
     }
 
-    #sidebar.sidebar-collapsed #sidebar-portfolio-selector .sidebar-nav-link {
-        padding: 0.35rem 0.85rem !important;
-        margin: 0 var(--sidebar-margin);
-        border-radius: var(--border-radius-standard);
+    /* Tablet - override base collapsed styles with smaller padding */
+    #sidebar.sidebar-collapsed #sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle {
+        padding: 0.25rem 0.4rem; /* Tablet-specific smaller padding */
+    }
+
+    /* Tablet - connection status centering when collapsed */
+    #sidebar.sidebar-collapsed .mt-auto > div {
+        justify-content: center !important;
+        padding: 0 var(--sidebar-margin) !important;
+    }
+
+    #sidebar.sidebar-collapsed .mt-auto .sidebar-icon {
+        margin: 0 !important;
     }
 
         #sidebar .navbar-brand span {
@@ -494,6 +573,26 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .navbar-bra
         padding: 0.3rem 0.75rem !important;
         margin: 0 var(--sidebar-margin);
         border-radius: var(--border-radius-standard);
+    }
+
+    /* Mobile - portfolio selector image centering when collapsed */
+    #sidebar.sidebar-collapsed #sidebar-portfolio-selector .sidebar-nav-link img {
+        margin: 0 !important;
+    }
+
+    /* Mobile - override base collapsed styles with smaller padding */
+    #sidebar.sidebar-collapsed #sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle {
+        padding: 0.2rem 0.3rem; /* Mobile-specific smaller padding */
+    }
+
+    /* Mobile - connection status centering when collapsed */
+    #sidebar.sidebar-collapsed .mt-auto > div {
+        justify-content: center !important;
+        padding: 0 var(--sidebar-margin) !important;
+    }
+
+    #sidebar.sidebar-collapsed .mt-auto .sidebar-icon {
+        margin: 0 !important;
     }
 
     #sidebar .navbar-brand {
@@ -605,6 +704,241 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .navbar-bra
     right: 10px;
     position: relative;
     z-index: 100;
+}
+
+/* Country Flag Styling Improvements */
+.country-flag-container {
+    position: relative;
+    width: 2.8rem;
+    height: 2.8rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border: 2px solid var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(115, 134, 213, 0.15);
+    transition: var(--transition-standard);
+    overflow: hidden;
+    /* Use CSS clip-path for better circular clipping */
+    clip-path: circle(50%);
+}
+
+.country-flag-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(115, 134, 213, 0.25);
+    border-color: var(--primary-dark);
+}
+
+.country-flag-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.country-flag-image {
+    width: 2.4rem;
+    height: 2.4rem;
+    object-fit: cover;
+    position: relative;
+    z-index: 1;
+    filter: contrast(1.1) saturate(1.1);
+    transition: var(--transition-standard);
+    background: transparent;
+    border-radius: 50%;
+}
+
+.country-flag-container:hover .country-flag-image {
+    transform: scale(1.05);
+    filter: contrast(1.15) saturate(1.2);
+}
+
+/* Alternative circular flag design with flag aspect ratio preserved */
+.country-flag-circular {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background-size: 150% 150%;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    z-index: 1;
+    transition: var(--transition-standard);
+}
+
+.country-flag-container:hover .country-flag-circular {
+    transform: scale(1.05);
+    background-size: 160% 160%;
+}
+
+/* Enhanced styling for all asset icons in diversification */
+.asset-icon-container {
+    position: relative;
+    width: 2.8rem;
+    height: 2.8rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border: 2px solid var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(115, 134, 213, 0.15);
+    transition: var(--transition-standard);
+    overflow: hidden;
+}
+
+.asset-icon-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(115, 134, 213, 0.25);
+    border-color: var(--primary-dark);
+}
+
+.asset-icon-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.asset-icon-container img,
+.asset-icon-container i {
+    position: relative;
+    z-index: 1;
+    transition: var(--transition-standard);
+}
+
+.asset-icon-container:hover img,
+.asset-icon-container:hover i {
+    transform: scale(1.05);
+}
+
+/* Universal currency symbol styling - works for any currency */
+.currency-symbol {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-size: 1.5rem;
+    font-weight: 400;
+    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, monospace;
+    color: #000;
+    text-align: center;
+    line-height: 1;
+    /* Force optical centering */
+    vertical-align: middle;
+    /* Remove any potential text baseline issues */
+    font-feature-settings: 'tnum' 1;
+    /* Ensure consistent character spacing */
+    letter-spacing: 0;
+    /* Remove any inherited text transformations */
+    text-transform: none;
+}
+
+/* Specific micro-adjustment for Euro symbol optical centering */
+.currency-symbol[data-currency="eur"] {
+    /* Very slight adjustment for Euro's visual weight distribution */
+    transform: translateX(-0.05em);
+}
+
+/* Hover effect for currency symbols */
+.asset-icon-container:hover .currency-symbol {
+    transform: scale(1.1);
+    color: #333;
+}
+
+/* Hover effect for Euro symbol (preserve centering adjustment) */
+.asset-icon-container:hover .currency-symbol[data-currency="eur"] {
+    transform: translateX(-0.05em) scale(1.1);
+    color: #333;
+}
+
+/* Ensure all sector icons are properly centered */
+.asset-icon-container i[class^="bi-"] {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100%;
+    height: 100%;
+    line-height: 1;
+    text-align: center;
+}
+
+/* Additional centering for all Bootstrap icons in asset containers */
+.asset-icon-container i.bi {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100%;
+    height: 100%;
+    line-height: 1;
+    text-align: center;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+    .country-flag-container,
+    .asset-icon-container {
+        width: 2.4rem;
+        height: 2.4rem;
+    }
+
+    .country-flag-image {
+        width: 1.8rem;
+        height: 1.8rem;
+    }
+
+    /* Responsive currency symbol sizing */
+    .currency-symbol {
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .country-flag-container,
+    .asset-icon-container {
+        width: 2.2rem;
+        height: 2.2rem;
+    }
+
+    .country-flag-image {
+        width: 1.6rem;
+        height: 1.6rem;
+    }
+
+    /* Mobile currency symbol sizing */
+    .currency-symbol {
+        font-size: 1.2rem;
+    }
+}
+
+/* Enhanced accessibility and focus states */
+.country-flag-container:focus-within,
+.asset-icon-container:focus-within {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Improved loading state */
+.country-flag-image[src=""],
+.country-flag-image:not([src]) {
+    background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%),
+                linear-gradient(-45deg, #f0f0f0 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #f0f0f0 75%),
+                linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+    background-size: 8px 8px;
+    background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
 }
 
 /* Bootstrap Table Pagination Styles */
