@@ -9,16 +9,27 @@
                 <div class="diversification-weight">
                     <div class="d-flex align-items-center">
                         {% if item.product_type %}
-                            <div class="ratio ratio-1x1 d-inline-flex align-items-center justify-content-center
-            bg-white border border-primary rounded-circle" style="width: 2.5rem; height: 2.5rem;">
-                            {% if item.product_type == 'sector' %}
-                                <i class="bi bi-{{ item.symbol }} fs-4" style="display: flex; align-items: center; justify-content: center;"></i>
-                            {% elif item.product_type == 'cash' %}
-                                <i class="bi bi-{{ item.symbol }} fs-4" style="display: flex; align-items: center; justify-content: center;"></i>
+                            {% if item.product_type == 'country' %}
+                                <div class="country-flag-container">
+                                    <img src="{% url 'asset_logo' product_type=item.product_type|lower symbol=item.symbol|lower %}"
+                                         class="country-flag-image"
+                                         alt="{{ item.name }} flag"
+                                         onerror="this.style.display='none';">
+                                </div>
                             {% else %}
-                                <img src="{% url 'asset_logo' product_type=item.product_type|lower symbol=item.symbol|lower %}" width="30" height="30" alt="{{ item.symbol }} logo" onerror="this.style.display='none'">
+                                <div class="asset-icon-container">
+                                    {% if item.product_type == 'sector' %}
+                                        <i class="bi bi-{{ item.symbol }} fs-4"></i>
+                                    {% elif item.product_type == 'cash' %}
+                                        <i class="bi bi-{{ item.symbol }} fs-4"></i>
+                                    {% else %}
+                                        <img src="{% url 'asset_logo' product_type=item.product_type|lower symbol=item.symbol|lower %}"
+                                             width="30" height="30"
+                                             alt="{{ item.symbol }} logo"
+                                             onerror="this.style.display='none'">
+                                    {% endif %}
+                                </div>
                             {% endif %}
-                            </div>
                         {% endif %}
                     </div>
                     <div class="p-2 me-auto">{{ item.name }}</div>
