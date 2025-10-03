@@ -75,7 +75,7 @@ class Dashboard(View):
         self.logger.debug(f"Rendering dashboard view with interval: {interval} and view type: {view}")
 
         data = self.deposits.cash_deposits_history(selected_portfolio)
-        cash_contributions = [{"x": item["date"], "y": item["total_deposit"]} for item in data]
+        cash_contributions = [DailyValue(x=item["date"], y=item["total_deposit"]) for item in data]
 
         portfolio_value = self._get_portfolio_value(selected_portfolio)
 
