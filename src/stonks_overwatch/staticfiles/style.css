@@ -403,10 +403,23 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     margin: 0 var(--sidebar-margin);
 }
 
+/* When portfolio selector is non-clickable (single portfolio), remove dropdown container margin */
+#sidebar:not(.sidebar-collapsed) div.dropdown#sidebar-portfolio-selector:has(.non-clickable) {
+    margin: 0;
+}
+
 /* Ensure portfolio selector parent container has no extra padding */
 #sidebar:not(.sidebar-collapsed) div.px-2.py-1.border-bottom.w-100 {
     padding-left: 0.5rem;
     padding-right: 0.5rem;
+}
+
+/* When non-clickable, match the regular nav items container padding */
+#sidebar:not(.sidebar-collapsed) div.px-2.py-1.border-bottom.w-100:has(.non-clickable) {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
 }
 
 #sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle:hover {
@@ -450,10 +463,12 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     border: 2px solid var(--sidebar-border-color);
 }
 
-/* Non-clickable portfolio selector styling */
+/* Non-clickable portfolio selector styling - matches navigation links */
 #sidebar-portfolio-selector .sidebar-nav-link.non-clickable {
     cursor: default !important;
     pointer-events: none;
+    padding: 0.5rem !important; /* Match nav link padding */
+    margin-bottom: 0.25rem; /* Match nav link spacing */
 }
 
 #sidebar-portfolio-selector .sidebar-nav-link.non-clickable:hover {
@@ -467,6 +482,22 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     color: var(--sidebar-text-color) !important;
     box-shadow: none !important;
     transform: none !important;
+    outline: none !important;
+}
+
+/* Remove button-specific styling when non-clickable */
+#sidebar-portfolio-selector button.sidebar-nav-link.non-clickable {
+    border: none !important;
+    background: transparent !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+}
+
+/* Collapsed state for non-clickable portfolio selector */
+#sidebar.sidebar-collapsed #sidebar-portfolio-selector .sidebar-nav-link.non-clickable {
+    justify-content: center;
+    margin: 0 var(--sidebar-margin);
+    padding: 0.4rem 1rem !important;
 }
 
 /* ---------------------------------------------------
@@ -543,6 +574,11 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
         width: 28px;
         height: 28px;
         right: var(--toggle-position-tablet);
+    }
+
+    /* Tablet - non-clickable portfolio selector */
+    #sidebar-portfolio-selector .sidebar-nav-link.non-clickable {
+        padding: 0.5rem !important;
     }
 }
 
@@ -623,6 +659,11 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
         width: 26px;
         height: 26px;
         right: var(--toggle-position-mobile);
+    }
+
+    /* Mobile - non-clickable portfolio selector */
+    #sidebar-portfolio-selector .sidebar-nav-link.non-clickable {
+        padding: 0.5rem !important;
     }
 }
 
