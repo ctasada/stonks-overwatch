@@ -494,7 +494,9 @@ class UpdateService(BaseService, AbstractUpdateService):
             product_growth[key]["product"]["isin"] = product["isin"]
             product_growth[key]["product"]["symbol"] = product["symbol"]
             product_growth[key]["product"]["currency"] = product["currency"]
+            product_growth[key]["product"]["vwdIdentifierType"] = product["vwdIdentifierType"]
             product_growth[key]["product"]["vwdId"] = product["vwdId"]
+            product_growth[key]["product"]["vwdIdentifierTypeSecondary"] = product["vwdIdentifierTypeSecondary"]
             product_growth[key]["product"]["vwdIdSecondary"] = product["vwdIdSecondary"]
 
             # Calculate Quotation Range
@@ -518,17 +520,20 @@ class UpdateService(BaseService, AbstractUpdateService):
         # We need to use the productIds to get the daily quote for each product
         for key in product_growth.keys():
             symbol = product_growth[key]["product"]["symbol"]
-            isin = product_growth[key]["product"]["isin"]
-            if product_growth[key]["product"].get("vwdIdSecondary") is not None:
-                issue_id = product_growth[key]["product"].get("vwdIdSecondary")
+            if product_growth[key]["product"].get("vwdIdentifierTypeSecondary") is not None:
+                identifier_type = product_growth[key]["product"].get("vwdIdentifierTypeSecondary")
+                identifier_value = product_growth[key]["product"].get("vwdIdSecondary")
             else:
-                issue_id = product_growth[key]["product"].get("vwdId")
+                identifier_type = product_growth[key]["product"].get("vwdIdentifierType")
+                identifier_value = product_growth[key]["product"].get("vwdId")
 
             interval = product_growth[key]["quotation"]["interval"]
-            quotes_dict = self.degiro_service.get_product_quotation(issue_id, isin, interval, symbol)
+            quotes_dict = self.degiro_service.get_product_quotation(identifier_type, identifier_value, interval, symbol)
 
             if not quotes_dict:
-                self.logger.info(f"Quotation not found for '{symbol}' ({key}): {issue_id} / {interval}")
+                self.logger.info(
+                    f"Quotation not found for '{symbol}' ({key}): {identifier_type}:{identifier_value} / {interval}"
+                )
                 continue
 
             # Update the data ONLY if we get something back from DeGiro

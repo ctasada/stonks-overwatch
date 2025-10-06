@@ -12,9 +12,15 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 ### Changed
 
+- Enhanced the style of the diversification icons
+
 ### Fixed
 
+- Multiple sidebar style fixes
+
 ### Security
+
+- Updated internal dependencies
 
 ---
 
