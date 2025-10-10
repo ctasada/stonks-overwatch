@@ -1,6 +1,6 @@
 from stonks_overwatch.utils.domain.constants import ProductType, Sector
 
-import pytest
+from unittest.mock import patch
 
 
 def test_product_type_from_str():
@@ -22,5 +22,8 @@ def test_sector_from_str():
 
 
 def test_sector_invalid():
-    with pytest.raises(ValueError):
-        Sector.from_str("INVALID_TYPE")
+    with patch("stonks_overwatch.utils.core.logger.StonksLogger.get_logger") as mock_get_logger:
+        mock_logger = mock_get_logger.return_value
+        result = Sector.from_str("INVALID_TYPE")
+        assert result == Sector.UNKNOWN
+        mock_logger.error.assert_called_once_with("Unknown sector label: INVALID_TYPE")

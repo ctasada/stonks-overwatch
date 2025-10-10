@@ -60,7 +60,7 @@ class Sector(Enum):
             return Sector.COMMUNICATION_SERVICES
         elif value == "basic materials":
             return Sector.BASIC_MATERIALS
-        elif value in ["industrial", "industrials"]:
+        elif value in ["industrial", "industrials", "transportation"]:
             return Sector.INDUSTRIALS
         elif value == "real estate":
             return Sector.REAL_ESTATE
@@ -77,7 +77,11 @@ class Sector(Enum):
         elif value == "etf":
             return Sector.ETF
 
-        raise ValueError(f"Unknown sector: {label}")
+        from stonks_overwatch.utils.core.logger import StonksLogger
+
+        logger = StonksLogger.get_logger("stonks_overwatch.utils.domain.constants", "[SECTOR]")
+        logger.error(f"Unknown sector label: {label}")
+        return Sector.UNKNOWN
 
     def to_logo(self) -> str:  # noqa: C901
         if self == Sector.TECHNOLOGY:
