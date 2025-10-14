@@ -43,7 +43,8 @@ class CashMovementsRepository:
                 SELECT date, balance_total
                 FROM degiro_cashmovements
                 WHERE currency = 'EUR'
-                    AND type = 'CASH_TRANSACTION'
+                  AND type = 'CASH_TRANSACTION'
+                ORDER BY date, id
                 """
             )
             return dictfetchall(cursor)
@@ -56,7 +57,8 @@ class CashMovementsRepository:
                 SELECT SUM(change)
                 FROM degiro_cashmovements
                 WHERE currency = 'EUR'
-                    AND description IN ('iDEAL storting', 'iDEAL Deposit', 'Terugstorting', 'flatex terugstorting')
+                  AND description IN ('iDEAL storting', 'iDEAL Deposit', 'Terugstorting', 'flatex terugstorting')
+                ORDER BY date, id
                 """
             )
             return cursor.fetchone()[0]
@@ -70,7 +72,7 @@ class CashMovementsRepository:
                 FROM degiro_cashmovements
                 WHERE type = 'FLATEX_CASH_SWEEP'
                     AND currency = %s
-                ORDER BY id DESC
+                ORDER BY date DESC, id DESC
                 LIMIT 1
                 """,
                 [currency],
