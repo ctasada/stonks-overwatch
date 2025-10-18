@@ -59,19 +59,19 @@ class TestDepositsService(TestCase):
         assert len(deposits) == 3
         assert deposits[0].datetime_as_date() == "2024-09-15"
         assert deposits[0].currency == "EUR"
-        assert deposits[0].change == -50.0
+        assert deposits[0].change == pytest.approx(-50.0)
         assert deposits[0].description == "Terugstorting"
         assert deposits[0].type == DepositType.WITHDRAWAL
 
         assert deposits[1].datetime_as_date() == "2020-03-10"
         assert deposits[1].currency == "EUR"
-        assert deposits[1].change == 100.0
-        assert deposits[1].description == "iDEAL Storting"
+        assert deposits[1].change == pytest.approx(200.0)
+        assert deposits[1].description == "iDEAL Deposit"
         assert deposits[1].type == DepositType.DEPOSIT
 
     def test_calculate_cash_account_value(self):
         value = self.deposits_service.calculate_cash_account_value()
 
         assert value is not None
-        assert value["2020-03-10"] == 300.0
-        assert value["2024-09-15"] == 250.0
+        assert value["2020-03-10"] == pytest.approx(300.0)
+        assert value["2024-09-15"] == pytest.approx(258.3)

@@ -43,8 +43,15 @@ class CashMovementsRepository:
                 SELECT date, balance_total
                 FROM degiro_cashmovements
                 WHERE currency = 'EUR'
-                  AND type = 'CASH_TRANSACTION'
-                ORDER BY date, id
+                  AND type IN ('CASH_TRANSACTION', 'FLATEX_CASH_SWEEP')
+                  AND id IN (
+                    SELECT MAX(id)
+                    FROM degiro_cashmovements
+                    WHERE currency = 'EUR'
+                      AND type IN ('CASH_TRANSACTION', 'FLATEX_CASH_SWEEP')
+                    GROUP BY DATE(date)
+                )
+                ORDER BY date
                 """
             )
             return dictfetchall(cursor)
