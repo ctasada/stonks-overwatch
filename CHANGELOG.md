@@ -17,6 +17,7 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 ### Fixed
 
 - Multiple sidebar style fixes
+- Fixed some style inconsistencies across the application
 
 ### Security
 

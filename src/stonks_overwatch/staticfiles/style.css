@@ -43,6 +43,15 @@
     --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.15);
     --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.2);
     --shadow-dark: 0 4px 15px rgba(0, 0, 0, 0.2);
+
+    /* Dropdown styling variables for consistency */
+    --dropdown-custom-color: var(--primary-color);
+    --dropdown-custom-bg: white;
+    --dropdown-custom-border: var(--primary-color);
+    --dropdown-custom-hover-bg: var(--primary-light);
+    --dropdown-custom-hover-color: black;
+    --dropdown-custom-active-bg: var(--primary-color);
+    --dropdown-custom-active-color: white;
 }
 
 /* Base Styles */
@@ -383,8 +392,14 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     flex-shrink: 0;
 }
 
-.dividends-tooltip {
+/* Custom tooltip styling for consistent theming */
+.info-tooltip {
     --bs-tooltip-bg: var(--primary-dark);
+    --bs-tooltip-color: white;
+    --bs-tooltip-border-radius: var(--border-radius-standard);
+    --bs-tooltip-font-size: 0.875rem;
+    --bs-tooltip-padding-x: 0.5rem;
+    --bs-tooltip-padding-y: 0.25rem;
 }
 
 /* Portfolio Selector Styling - account for extra div nesting */
@@ -1057,27 +1072,28 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 .dropdown-custom {
-    color: var(--primary-color) !important;
-    background-color: white;
-    border-color: var(--primary-color);
+    color: var(--dropdown-custom-color) !important;
+    background-color: var(--dropdown-custom-bg);
+    border-color: var(--dropdown-custom-border);
+    transition: var(--transition-standard);
 }
 
 .dropdown-custom:hover,
 .dropdown-custom:focus {
-    background-color: var(--primary-light) !important;
-    color: black !important;
+    background-color: var(--dropdown-custom-hover-bg) !important;
+    color: var(--dropdown-custom-hover-color) !important;
 }
 
 .dropdown-custom + .dropdown-menu .dropdown-item.active,
 .dropdown-custom + .dropdown-menu .dropdown-item:active {
-    background-color: var(--primary-color) !important;
-    color: #fff !important;
+    background-color: var(--dropdown-custom-active-bg) !important;
+    color: var(--dropdown-custom-active-color) !important;
 }
 
 .dropdown-custom + .dropdown-menu .dropdown-item:hover,
 .dropdown-custom + .dropdown-menu .dropdown-item:focus {
-    background-color: var(--primary-light) !important;
-    color: black !important;
+    background-color: var(--dropdown-custom-hover-bg) !important;
+    color: var(--dropdown-custom-hover-color) !important;
 }
 
 /* Connection Status Icons - Better contrast against dark sidebar */
@@ -1145,13 +1161,31 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     z-index: 1060 !important;
 }
 
-/* Additional Bootstrap Table dropdown fixes for better compatibility */
-.bootstrap-table .fixed-table-pagination .pagination-detail .page-list .dropdown-toggle {
-    position: relative !important;
+/* Apply dropdown-custom styling to Bootstrap Table page list dropdowns */
+.bootstrap-table .page-list .dropdown-toggle {
+    color: var(--dropdown-custom-color) !important;
+    background-color: var(--dropdown-custom-bg) !important;
+    border-color: var(--dropdown-custom-border) !important;
+    transition: var(--transition-standard) !important;
 }
 
-.bootstrap-table .fixed-table-pagination .pagination-detail .page-list .dropdown-toggle:focus {
+.bootstrap-table .page-list .dropdown-toggle:hover,
+.bootstrap-table .page-list .dropdown-toggle:focus {
+    background-color: var(--dropdown-custom-hover-bg) !important;
+    color: var(--dropdown-custom-hover-color) !important;
     box-shadow: 0 0 0 0.2rem rgba(115, 134, 213, 0.25) !important;
+}
+
+.bootstrap-table .page-list .dropdown-menu .dropdown-item.active,
+.bootstrap-table .page-list .dropdown-menu .dropdown-item:active {
+    background-color: var(--dropdown-custom-active-bg) !important;
+    color: var(--dropdown-custom-active-color) !important;
+}
+
+.bootstrap-table .page-list .dropdown-menu .dropdown-item:hover,
+.bootstrap-table .page-list .dropdown-menu .dropdown-item:focus {
+    background-color: var(--dropdown-custom-hover-bg) !important;
+    color: var(--dropdown-custom-hover-color) !important;
 }
 
 /* Fix for Bootstrap 5 dropdown positioning with Popper.js */
