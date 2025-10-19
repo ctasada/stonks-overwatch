@@ -2,7 +2,7 @@
     <div class="d-flex justify-content-between align-items-start w-100">
         <label class="fs-6 text-primary mb-0">{{ label }}</label>
         {% if tooltip %}
-        <span class="ms-2" data-bs-toggle="tooltip" data-bs-placement="right" title="{{ tooltip }}">
+        <span class="ms-2" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="info-tooltip" title="{{ tooltip }}">
             <i class="bi bi-info-circle text-secondary"></i>
         </span>
         {% endif %}
