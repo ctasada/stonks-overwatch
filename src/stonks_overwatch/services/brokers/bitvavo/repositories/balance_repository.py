@@ -1,5 +1,8 @@
+from decimal import Decimal
+
 from django.db import connection
 
+from stonks_overwatch.services.brokers.bitvavo.repositories.models import BitvavoAssets
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.database.db_utils import dictfetchall, dictfetchone
 
@@ -51,24 +54,24 @@ class BalanceRepository:
         # Calculate the balance based on the transactions
         balance_dict = {}
 
-        def process_entry(symbol: str, amount: float):
-            if not symbol or not amount:
+        def process_entry(_symbol: str, _amount: Decimal):
+            if not _symbol or not _amount:
                 return
 
-            if symbol in balance_dict:
-                balance_dict[symbol] += amount
+            if _symbol in balance_dict:
+                balance_dict[_symbol] += _amount
             else:
-                balance_dict[symbol] = amount
+                balance_dict[_symbol] = _amount
 
         for entry in entries:
             if "receivedCurrency" in entry:
                 symbol = entry["receivedCurrency"]
-                amount = float(entry.get("receivedAmount") or 0)
+                amount = Decimal(entry.get("receivedAmount") or 0)
                 process_entry(symbol, amount)
 
             if "sentCurrency" in entry:
                 symbol = entry["sentCurrency"]
-                amount = -float(entry.get("sentAmount") or 0)
+                amount = -Decimal(entry.get("sentAmount") or 0)
                 process_entry(symbol, amount)
 
         # FIXME: Compare with the Balance available, and keep the 'max'
@@ -85,7 +88,7 @@ class BalanceRepository:
 
     @staticmethod
     def _merge_with_raw_balance(balance_dict):
-        """Compares calculated balances with raw balances and applies min/max logic."""
+        """Compares calculated balances with raw balances and applies min/max logic, then rounds to asset decimals."""
         raw_balance = BalanceRepository.get_balance_raw()
         raw_balance_dict = {entry["symbol"]: float(entry.get("available") or 0) for entry in raw_balance}
 
@@ -95,4 +98,14 @@ class BalanceRepository:
                 balance_dict[symbol] = min(raw_amount, abs(calc_amount))
             else:
                 balance_dict[symbol] = max(raw_amount, calc_amount)
+
+        # Round each balance to the correct number of decimals from BitvavoAssets
+        for symbol in list(balance_dict.keys()):
+            try:
+                asset = BitvavoAssets.objects.get(symbol=symbol)
+                decimals = asset.decimals or 0
+            except BitvavoAssets.DoesNotExist:
+                decimals = 8  # Default to 8 decimals if not found
+            balance_dict[symbol] = round(balance_dict[symbol], decimals)
+
         return balance_dict

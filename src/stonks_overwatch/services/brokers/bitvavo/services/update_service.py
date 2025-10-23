@@ -162,6 +162,8 @@ class UpdateService(BaseService, AbstractUpdateService):
         return quotes
 
     def __import_balance(self, balance: list[dict]) -> None:
+        # Clear existing balances to avoid stale data
+        BitvavoBalance.objects.all().delete()
         for row in balance:
             try:
                 self._retry_database_operation(

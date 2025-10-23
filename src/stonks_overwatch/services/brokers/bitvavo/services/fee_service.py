@@ -41,7 +41,7 @@ class FeeService(FeeServiceInterface, BaseService):
                 )
             )
 
-        return sorted(total_fees, key=lambda k: k.datetime, reverse=True)
+        return sorted(total_fees, key=lambda k: (k.date, k.time), reverse=True)
 
     def __convert_buy_sell(self, buy_sell: str) -> str:
         if buy_sell in ["buy", "staking"]:
