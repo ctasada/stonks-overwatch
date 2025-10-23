@@ -1,5 +1,6 @@
 import json
 import pathlib
+from datetime import datetime
 
 from django.utils.dateparse import parse_datetime
 
@@ -44,11 +45,11 @@ class TestCashMovementsRepository(BaseRepositoryTest):
 
     def test_get_total_cash_deposits_raw(self):
         total_cash_deposits = CashMovementsRepository.get_total_cash_deposits_raw()
-        assert total_cash_deposits == 250.0
+        assert total_cash_deposits == pytest.approx(250.0)
 
     def test_get_total_cash(self):
         total_cash = CashMovementsRepository.get_total_cash("EUR")
-        assert total_cash == 300.0
+        assert total_cash == pytest.approx(243.94)
 
     def test_get_total_cash_from_nonexisting_currency(self):
         total_cash = CashMovementsRepository.get_total_cash("XXX")
@@ -66,6 +67,10 @@ class TestCashMovementsRepository(BaseRepositoryTest):
     def test_get_cash_balance_by_date(self):
         cash_deposits = CashMovementsRepository.get_cash_balance_by_date()
         assert len(cash_deposits) == 3
-        assert cash_deposits[0]["balanceTotal"] == "100.0"
-        assert cash_deposits[1]["balanceTotal"] == "300.0"
-        assert cash_deposits[2]["balanceTotal"] == "250.0"
+        # The two entries from 2020-03-10 should be grouped together, showing the latest balance
+        assert cash_deposits[0]["date"] == datetime.fromisoformat("2020-03-10T09:28:14")
+        assert cash_deposits[0]["balanceTotal"] == "300.0"
+        assert cash_deposits[1]["date"] == datetime.fromisoformat("2024-09-15T10:22:24")
+        assert cash_deposits[1]["balanceTotal"] == "258.3"
+        assert cash_deposits[2]["date"] == datetime.fromisoformat("2024-09-16T18:46:52")
+        assert cash_deposits[2]["balanceTotal"] == "243.94"
