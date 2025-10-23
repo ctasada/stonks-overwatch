@@ -9,8 +9,8 @@
     "type": "CASH_TRANSACTION"
   },
   "cash_transaction_2": {
-    "date": "2020-03-10T08:28:14Z",
-    "value_date": "2020-03-10T08:28:14Z",
+    "date": "2020-03-10T09:28:14Z",
+    "value_date": "2020-03-10T09:28:14Z",
     "description": "iDEAL Deposit",
     "change": 200.0,
     "currency": "EUR",
@@ -41,7 +41,7 @@
     "description": "Dividend",
     "change": 8.4,
     "currency": "USD",
-    "balance_total": 300.0,
+    "balance_total": 308.3,
     "product_id": 332111,
     "type": "CASH_TRANSACTION"
   },
@@ -60,7 +60,7 @@
     "description": "Koop 2 @ 100,000 EUR",
     "change": -200.0,
     "currency": "EUR",
-    "balance_total": 300.0,
+    "balance_total": 308.3,
     "product_id": 331868,
     "type": "TRANSACTION"
   },
@@ -70,7 +70,7 @@
     "description": "Terugstorting",
     "change": -50.00,
     "currency": "EUR",
-    "balance_total": 250.0,
+    "balance_total": 258.3,
     "type": "CASH_TRANSACTION"
   },
   "flatex_cash_sweep": {
@@ -79,7 +79,7 @@
     "description": "Degiro Cash Sweep Transfer",
     "change": -14.36,
     "currency": "EUR",
-    "balance_total": 300.0,
+    "balance_total": 243.94,
     "type": "FLATEX_CASH_SWEEP"
   }
 }

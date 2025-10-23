@@ -19,6 +19,9 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 - Multiple sidebar style fixes
 - Fixed some style inconsistencies across the application
 - Fixed sector handling: Unknown sectors are now properly group under "Unknown"
+- **DEGIRO**:
+  - Fixed calculation of daily cash
+  - Fixed sorting of cash movements
 
 ### Security
 
