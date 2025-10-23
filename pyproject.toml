@@ -1,6 +1,6 @@
 [project]
 name = "stonks-overwatch"
-version = "0.1.5.dev0"
+version = "0.1.5"
 description = "Stonks Overwatch"
 authors = [{name = "Carlos Tasada", email = "carlos.tasada@gmail.com"}]
 license = "MIT"
