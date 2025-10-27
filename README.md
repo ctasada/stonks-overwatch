@@ -67,7 +67,6 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
   * 'WEBR'(600179738) (https://www.investing.com/equities/weber-chart)
   * 'TEF.D'(280180545)
   * 'FRZA'(600236745)
-* 'SYROS' is not shown in the Portfolio view for some reason
 * CreateProduct Quotation does not respect the proper timeframes
 * Django Cache is disabled so that the portfolio selection works, otherwise the page is not properly reload
 * Dashboard: Drawing the dashboard is slow. It seems that the code is executed three times

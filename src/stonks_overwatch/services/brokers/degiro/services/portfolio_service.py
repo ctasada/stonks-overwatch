@@ -96,10 +96,8 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
                 continue
 
             symbol = product_info["symbol"]
-            if symbol in processed_symbols:
-                continue
-
-            processed_symbols.add(symbol)
+            if symbol not in processed_symbols:
+                processed_symbols.add(symbol)
 
             # Get correlated products for the same symbol
             correlated_products = self._get_correlated_products(symbol)
@@ -113,7 +111,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
     def _get_correlated_products(self, symbol: str) -> list[str]:
         """Get all product IDs for the same symbol (handles reopened products)."""
         tmp_products = self.product_info.get_products_info_raw_by_symbol([symbol])
-        return [p["id"] for p in tmp_products.values()]
+        return [p["id"] for p in tmp_products.values() if "Non tradeable" not in p.get("name", "")]
 
     def _create_portfolio_entry(
         self, product_data: dict, product_info: dict, products_config: dict, correlated_products: list[str]
