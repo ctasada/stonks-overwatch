@@ -17,6 +17,8 @@ update = trading_api.get_update(
     raw=True,
 )
 
+# print(json.dumps(update, indent=4))
+
 products_ids = []
 
 # ITERATION OVER THE TRANSACTIONS TO OBTAIN THE PRODUCTS
@@ -32,26 +34,32 @@ products_info = trading_api.get_products_info(
 )
 
 # DEBUG Values
-print(json.dumps(products_info, indent=4))
+# print(json.dumps(products_info, indent=4))
 
 my_portfolio = []
 
 for portfolio in update["portfolio"]["value"]:
     if portfolio["id"].isnumeric():
         info = products_info["data"][portfolio["id"]]
+        size_value = next((item["value"] for item in portfolio["value"] if item["name"] == "size"), None)
+        price_value = next((item["value"] for item in portfolio["value"] if item["name"] == "price"), None)
+        break_even_price_value = next(
+            (item["value"] for item in portfolio["value"] if item["name"] == "breakEvenPrice"), None
+        )
+        value_value = next((item["value"] for item in portfolio["value"] if item["name"] == "value"), None)
         my_portfolio.append(
             {
                 "name": info["name"],
                 "symbol": info["symbol"],
-                # size = portfolio['size'],
-                # price = portfolio['closePrice'],
+                "size": size_value,
+                "price": price_value,
                 "currency": info["currency"],
-                # breakEvenPrice = portfolio['breakEvenPrice'], # GAK: Average Purchase Price
-                # value = portfolio['value'],
+                "breakEvenPrice": break_even_price_value,  # GAK: Average Purchase Price
+                "value": value_value,
                 "isin": info["isin"],
             }
         )
 
-# print(myPortfolio)
+print(json.dumps(my_portfolio, indent=4))
 
 trading_api.logout()
