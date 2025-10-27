@@ -10,7 +10,7 @@ class ExpiredDialog(toga.Window):
             minimizable=False,
             resizable=False,
             closable=True,
-            size=(375, 550),
+            size=(375, 600),
         )
         self._main_window = main_window
 
