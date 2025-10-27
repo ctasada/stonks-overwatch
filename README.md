@@ -67,6 +67,7 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
   * 'WEBR'(600179738) (https://www.investing.com/equities/weber-chart)
   * 'TEF.D'(280180545)
   * 'FRZA'(600236745)
+* 'SYROS' is not shown in the Portfolio view for some reason
 * CreateProduct Quotation does not respect the proper timeframes
 * Django Cache is disabled so that the portfolio selection works, otherwise the page is not properly reload
 * Dashboard: Drawing the dashboard is slow. It seems that the code is executed three times
@@ -99,9 +100,11 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
   * [ ] Provide more details about Dividends per year
   * [ ] Should include Dividends in the Deposit Overview?
   * [ ] Add information about the Dividend Yield
-* [ ] Fees
+* [ ] Fees ( see "https://www.giroscope.io/portfolio/208/tab/fees")
   * [ ] Provide more details about Fees timeline
   * [ ] Provide more visual details about the fees, maybe a pie chart?
+  * [ ] Add total Fees
+  * [ ] Add avg Fees per month/year
 * [ ] Track delisted stocks
   * EODHD: "https://eodhd.medium.com/leveraging-delisted-stocks-for-backtesting-a-3-ema-strategy-using-python-d67221e774f5"
     * "https://eodhd.com/pricing"
@@ -142,6 +145,12 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
     * [ ] Implement Announced and Forecasted dividends
   * [ ] Deposits: Implement Deposits and Withdrawals (As per support ticket it's only possible with a FlexQuery up to 365 days old)
   * [ ] Portfolio Growth: Implement Portfolio Growth
+* [ ] Add information about Trade Activity (see "https://www.giroscope.io/portfolio/208/tab/trade-activity")
+  * [ ] Total Trades
+  * [ ] Total Volume
+  * [ ] Average Trade Size
+  * [ ] Win Rate
+  * [ ] Average Holding Period
 
 ## Logos
 
@@ -159,7 +168,6 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
 * [PortfoliosLab](https://portfolioslab.com/tools/stock-comparison/AAPL/MSFT)
 * [Stonksfolio](https://stonksfolio.com/portfolios/4qltYv/performance)
 * [Quantinsti](https://blog.quantinsti.com/portfolio-analysis-performance-measurement-evaluation/)
-
 * TWRR focuses purely on the timing of cash flows, providing an accurate measure of performance that disregards the
   amount of money involved.
 * XIRR, on the other hand, considers both the timing and the size of cash flows, offering a complete picture of
