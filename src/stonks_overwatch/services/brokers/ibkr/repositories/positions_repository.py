@@ -12,7 +12,7 @@ class PositionsRepository:
                 """
                 SELECT *
                 FROM ibkr_positions
-                ORDER BY conid ASC
+                ORDER BY conid
                 """
             )
             return dictfetchall(cursor)
