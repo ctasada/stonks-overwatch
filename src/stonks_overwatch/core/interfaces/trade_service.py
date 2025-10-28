@@ -1,23 +1,23 @@
 """
-Transaction service interface.
+Trades service interface.
 
-This module defines the interface for transaction service implementations.
-All broker transaction services should implement this interface.
+This module defines the interface for trade service implementations.
+All broker trade services should implement this interface.
 """
 
 from abc import ABC, abstractmethod
 from typing import List
 
-from stonks_overwatch.services.models import Transaction
+from stonks_overwatch.services.models import Trade
 
 
-class TransactionServiceInterface(ABC):
+class TradeServiceInterface(ABC):
     """
-    Interface for transaction service implementations.
+    Interface for trades service implementations.
 
-    This interface defines the common operations that all transaction services
-    should support, such as retrieving transaction history and processing
-    transaction data.
+    This interface defines the common operations that all trade services
+    should support, such as retrieving trade history and processing
+    trade data.
 
     **Dependency Injection Support:**
 
@@ -35,7 +35,7 @@ class TransactionServiceInterface(ABC):
        ```python
        from stonks_overwatch.core.interfaces.base_service import BaseService
 
-       class MyTransactionService(TransactionServiceInterface, BaseService):
+       class MyTradeService(TradeServiceInterface, BaseService):
            def __init__(self, config: Optional[BaseConfig] = None, **kwargs):
                super().__init__(config, **kwargs)
                # Now you can use self.config and self.base_currency
@@ -46,11 +46,11 @@ class TransactionServiceInterface(ABC):
     """
 
     @abstractmethod
-    def get_transactions(self) -> List[Transaction]:
+    def get_trades(self) -> List[Trade]:
         """
-        Retrieves the transaction history.
+        Retrieves the trade history.
 
         Returns:
-            List[Transaction]: List of transactions sorted by date (newest first)
+            List[Trade]: List of trades sorted by date (newest first)
         """
         pass

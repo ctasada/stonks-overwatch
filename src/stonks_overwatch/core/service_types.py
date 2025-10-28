@@ -12,7 +12,7 @@ class ServiceType(Enum):
     """Enumeration of available service types."""
 
     PORTFOLIO = "portfolio"
-    TRANSACTION = "transaction"
+    TRADE = "trade"
     DEPOSIT = "deposit"
     DIVIDEND = "dividend"
     FEE = "fee"

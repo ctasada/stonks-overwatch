@@ -1,27 +1,27 @@
 from typing import List, Optional
 
 from stonks_overwatch.config.base_config import BaseConfig
-from stonks_overwatch.core.interfaces import TransactionServiceInterface
+from stonks_overwatch.core.interfaces import TradeServiceInterface
 from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.services.brokers.ibkr.client.constants import TransactionType
 from stonks_overwatch.services.brokers.ibkr.client.ibkr_service import IbkrService
 from stonks_overwatch.services.brokers.ibkr.repositories.positions_repository import PositionsRepository
 from stonks_overwatch.services.brokers.ibkr.repositories.transactions_repository import TransactionsRepository
-from stonks_overwatch.services.models import Transaction
+from stonks_overwatch.services.models import Trade
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.core.logger import StonksLogger
 
 
-class TransactionsService(BaseService, TransactionServiceInterface):
-    logger = StonksLogger.get_logger("stonks_overwatch.account_overview_data", "[IBKR|TRANSACTIONS]")
+class TradeService(BaseService, TradeServiceInterface):
+    logger = StonksLogger.get_logger("stonks_overwatch.account_overview_data", "[IBKR|TRADES]")
 
     def __init__(self, ibkr_service: Optional[IbkrService] = None, config: Optional[BaseConfig] = None):
         super().__init__(config)
         self.ibkr_service = ibkr_service or IbkrService()
         # Note: base_currency is accessed via self.base_currency property inherited from BaseService
 
-    def get_transactions(self) -> List[Transaction]:
-        self.logger.debug("Get Transactions")
+    def get_trades(self) -> List[Trade]:
+        self.logger.debug("Get Trades")
         # FETCH TRANSACTIONS DATA
         transactions_history = TransactionsRepository.get_transactions_raw()
 
@@ -47,7 +47,7 @@ class TransactionsService(BaseService, TransactionServiceInterface):
                 price = total
 
             my_transactions.append(
-                Transaction(
+                Trade(
                     name=info["name"],
                     symbol=info["ticker"],
                     date=transaction["date"].strftime(LocalizationUtility.DATE_FORMAT),

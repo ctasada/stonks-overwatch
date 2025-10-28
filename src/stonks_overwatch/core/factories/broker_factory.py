@@ -16,7 +16,7 @@ from stonks_overwatch.core.factories.broker_registry import (
 from stonks_overwatch.core.interfaces.deposit_service import DepositServiceInterface
 from stonks_overwatch.core.interfaces.dividend_service import DividendServiceInterface
 from stonks_overwatch.core.interfaces.portfolio_service import PortfolioServiceInterface
-from stonks_overwatch.core.interfaces.transaction_service import TransactionServiceInterface
+from stonks_overwatch.core.interfaces.trade_service import TradeServiceInterface
 from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.singleton import singleton
@@ -218,21 +218,21 @@ class BrokerFactory:
 
         return self.create_service(broker_name, ServiceType.PORTFOLIO, **kwargs)
 
-    def create_transaction_service(self, broker_name: str, **kwargs) -> Optional[TransactionServiceInterface]:
+    def create_trade_service(self, broker_name: str, **kwargs) -> Optional[TradeServiceInterface]:
         """
-        Create a transaction service instance for the specified broker.
+        Create a trade service instance for the specified broker.
 
         Args:
             broker_name: Name of the broker
             **kwargs: Additional arguments to pass to service constructor
 
         Returns:
-            Transaction service instance if available, None otherwise
+            Trade service instance if available, None otherwise
         """
-        if not self._registry.broker_supports_service(broker_name, ServiceType.TRANSACTION):
-            raise BrokerFactoryError(f"Broker '{broker_name}' does not support transaction service")
+        if not self._registry.broker_supports_service(broker_name, ServiceType.TRADE):
+            raise BrokerFactoryError(f"Broker '{broker_name}' does not support trade service")
 
-        return self.create_service(broker_name, ServiceType.TRANSACTION, **kwargs)
+        return self.create_service(broker_name, ServiceType.TRADE, **kwargs)
 
     def create_deposit_service(self, broker_name: str, **kwargs) -> Optional[DepositServiceInterface]:
         """

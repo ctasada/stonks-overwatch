@@ -4,7 +4,7 @@ from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.core.interfaces.fee_service import FeeServiceInterface
 from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import BitvavoService
-from stonks_overwatch.services.brokers.bitvavo.services.transaction_service import TransactionsService
+from stonks_overwatch.services.brokers.bitvavo.services.trade_service import TradesService
 from stonks_overwatch.services.models import Fee, FeeType
 
 
@@ -32,8 +32,8 @@ class FeeService(FeeServiceInterface, BaseService):
 
             total_fees.append(
                 Fee(
-                    date=TransactionsService.format_date(transaction["executedAt"]),
-                    time=TransactionsService.format_time(transaction["executedAt"]),
+                    date=TradesService.format_date(transaction["executedAt"]),
+                    time=TradesService.format_time(transaction["executedAt"]),
                     type=FeeType.TRANSACTION,
                     description=description,
                     fee_value=fee_value,
