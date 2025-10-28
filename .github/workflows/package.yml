@@ -183,7 +183,7 @@ jobs:
         uses: ./.github/actions/common-action
 
       - name: Download all build artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           path: artifacts
 
