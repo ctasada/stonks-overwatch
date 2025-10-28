@@ -28,14 +28,14 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
     def get_portfolio(self) -> List[PortfolioEntry]:
         self.logger.debug("Get Portfolio")
 
-        open_positions = self.positions_repository.get_all_positions()
+        all_positions = self.positions_repository.get_all_positions()
 
         account_summary = self.ibkr_service.get_account_summary()
         base_currency = self.ibkr_service.get_default_currency()
 
         portfolio = []
 
-        for position in open_positions:
+        for position in all_positions:
             try:
                 entry = self.__create_portfolio_entry(position, base_currency)
                 portfolio.append(entry)
@@ -80,6 +80,8 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         )
         total_costs = position["position"] * avg_price
 
+        is_open = position["position"] > 0
+
         return PortfolioEntry(
             name=position["name"],
             symbol=position["ticker"],
@@ -98,7 +100,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
             base_currency_break_even_price=base_currency_break_even_price,
             value=value,
             base_currency_value=base_currency_value,
-            is_open=True,
+            is_open=is_open,
             unrealized_gain=unrealized_gain,
             realized_gain=total_realized_gains,
             total_costs=total_costs,
