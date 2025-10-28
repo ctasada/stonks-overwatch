@@ -15,7 +15,7 @@ from stonks_overwatch.core.factories.broker_registry import (
 from stonks_overwatch.core.interfaces.deposit_service import DepositServiceInterface
 from stonks_overwatch.core.interfaces.dividend_service import DividendServiceInterface
 from stonks_overwatch.core.interfaces.portfolio_service import PortfolioServiceInterface
-from stonks_overwatch.core.interfaces.transaction_service import TransactionServiceInterface
+from stonks_overwatch.core.interfaces.trade_service import TradeServiceInterface
 from stonks_overwatch.core.service_types import ServiceType
 
 import pytest
@@ -103,14 +103,14 @@ class MockPortfolioService(PortfolioServiceInterface):
         return {"holdings": []}
 
 
-class MockTransactionService(TransactionServiceInterface):
-    """Mock transaction service for testing."""
+class MockTradesService(TradeServiceInterface):
+    """Mock trade service for testing."""
 
     def __init__(self, config: MockBrokerConfig = None):
         self.config = config
 
-    def get_transactions(self):
-        return {"transactions": []}
+    def get_trades(self):
+        return {"trades": []}
 
 
 class MockDepositService(DepositServiceInterface):
@@ -203,13 +203,13 @@ class TestBrokerRegistry:
         self.registry.register_broker_services(
             "testbroker",
             portfolio=MockPortfolioService,
-            transaction=MockTransactionService,
+            trade=MockTradesService,
             deposit=MockDepositService,
             dividend=MockDividendService,
         )
 
         assert self.registry.get_service_class("testbroker", ServiceType.PORTFOLIO) == MockPortfolioService
-        assert self.registry.get_service_class("testbroker", ServiceType.TRANSACTION) == MockTransactionService
+        assert self.registry.get_service_class("testbroker", ServiceType.TRADE) == MockTradesService
         assert self.registry.get_service_class("testbroker", ServiceType.DEPOSIT) == MockDepositService
         assert self.registry.get_service_class("testbroker", ServiceType.DIVIDEND) == MockDividendService
 
@@ -218,7 +218,7 @@ class TestBrokerRegistry:
         with pytest.raises(BrokerRegistryValidationError, match="Missing required services"):
             self.registry.register_broker_services(
                 "testbroker",
-                transaction=MockTransactionService,
+                trade=MockTradesService,
                 deposit=MockDepositService,
             )
 
@@ -228,7 +228,7 @@ class TestBrokerRegistry:
             self.registry.register_broker_services(
                 "testbroker",
                 portfolio=MockPortfolioService,
-                invalid_service=MockTransactionService,
+                invalid_service=MockTradesService,
             )
 
     def test_register_broker_services_invalid_service_class(self):
@@ -270,11 +270,11 @@ class TestBrokerRegistry:
         self.registry.register_broker_services(
             "testbroker",
             portfolio=MockPortfolioService,
-            transaction=MockTransactionService,
+            trade=MockTradesService,
         )
 
         assert self.registry.broker_supports_service("testbroker", ServiceType.PORTFOLIO)
-        assert self.registry.broker_supports_service("testbroker", ServiceType.TRANSACTION)
+        assert self.registry.broker_supports_service("testbroker", ServiceType.TRADE)
         assert not self.registry.broker_supports_service("testbroker", ServiceType.DIVIDEND)
         assert not self.registry.broker_supports_service("nonexistent", ServiceType.PORTFOLIO)
 
@@ -283,12 +283,12 @@ class TestBrokerRegistry:
         self.registry.register_broker_services(
             "testbroker",
             portfolio=MockPortfolioService,
-            transaction=MockTransactionService,
+            trade=MockTradesService,
         )
 
         capabilities = self.registry.get_broker_capabilities("testbroker")
         assert ServiceType.PORTFOLIO in capabilities
-        assert ServiceType.TRANSACTION in capabilities
+        assert ServiceType.TRADE in capabilities
         assert ServiceType.DIVIDEND not in capabilities
 
         # Test non-existent broker
@@ -301,14 +301,14 @@ class TestBrokerRegistry:
             "testbroker",
             MockBrokerConfig,
             portfolio=MockPortfolioService,
-            transaction=MockTransactionService,
+            trade=MockTradesService,
             deposit=MockDepositService,
         )
 
         assert self.registry.is_config_registered("testbroker")
         assert self.registry.get_config_class("testbroker") == MockBrokerConfig
         assert self.registry.get_service_class("testbroker", ServiceType.PORTFOLIO) == MockPortfolioService
-        assert self.registry.get_service_class("testbroker", ServiceType.TRANSACTION) == MockTransactionService
+        assert self.registry.get_service_class("testbroker", ServiceType.TRADE) == MockTradesService
         assert self.registry.get_service_class("testbroker", ServiceType.DEPOSIT) == MockDepositService
 
     def test_test_register_complete_broker_rollback_on_service_failure(self):
@@ -317,7 +317,7 @@ class TestBrokerRegistry:
             self.registry.register_complete_broker(
                 "testbroker",
                 MockBrokerConfig,
-                transaction=MockTransactionService,  # Missing required portfolio service
+                trade=MockTradesService,  # Missing required portfolio service
             )
 
         # Configuration should not be registered due to rollback

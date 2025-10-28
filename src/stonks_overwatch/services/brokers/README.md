@@ -21,7 +21,7 @@ services/brokers/your_broker/
 ├── services/                   # 🏢 Business Logic Layer
 │   ├── __init__.py
 │   ├── portfolio_service.py    # Portfolio operations
-│   ├── transaction_service.py  # Transaction operations
+│   ├── trades_service.py       # Trade operations
 │   ├── deposit_service.py      # Deposit/cash operations
 │   ├── dividend_service.py     # Dividend operations (optional)
 │   ├── fee_service.py          # Fee operations (optional)
@@ -99,7 +99,7 @@ def register_broker_services() -> None:
     registry.register_broker(
         broker_name="your_broker",
         portfolio_service=YourBrokerPortfolioService,
-        transaction_service=YourBrokerTransactionService,
+        trades_service=YourBrokerTradeService,
         deposit_service=YourBrokerDepositService,
         dividend_service=None,  # Optional
         fee_service=None,       # Optional
@@ -262,26 +262,27 @@ class PortfolioService(PortfolioServiceInterface):
         }
 ```
 
-##### **Transaction Service**
+##### **Trades Service**
 
 ```python
-# services/transaction_service.py
+# services/trades_service.py
 from typing import List
-from stonks_overwatch.core.interfaces.transaction_service import TransactionServiceInterface
-from stonks_overwatch.services.models import Transaction, TransactionType
+from stonks_overwatch.core.interfaces.trade_service import TradeServiceInterface
+from stonks_overwatch.services.models import Trade, TransactionType
 from ..client.your_broker_client import YourBrokerClient
 
-class TransactionsService(TransactionServiceInterface):
+
+class TradesService(TradeServiceInterface):
     def __init__(self):
         self.client = YourBrokerClient()
 
-    def get_transactions(self) -> List[Transaction]:
+    def get_trades(self) -> List[Trade]:
         """Get all transactions."""
         raw_data = self.client.get("transactions")
 
         transactions = []
         for item in raw_data:
-            transaction = Transaction(
+            transaction = Trade(
                 datetime=item["datetime"],
                 symbol=item["symbol"],
                 name=item["name"],
@@ -536,7 +537,7 @@ def register_broker_services() -> None:
     registry.register_broker(
         broker_name="your_broker",
         portfolio_service=YourBrokerPortfolioService,
-        transaction_service=YourBrokerTransactionService,
+        trades_service=YourBrokerTradeService,
         deposit_service=YourBrokerDepositService,
         dividend_service=YourBrokerDividendService,  # Optional
         fee_service=YourBrokerFeesService,           # Optional
@@ -691,7 +692,7 @@ Study these existing implementations for reference:
 ### **Core Interfaces**
 
 - `core/interfaces/portfolio_service.py` - Portfolio interface contract
-- `core/interfaces/transaction_service.py` - Transaction interface contract
+- `core/interfaces/trades_service.py` - Trade interface contract
 - `core/interfaces/deposit_service.py` - Deposit interface contract
 - `core/interfaces/dividend_service.py` - Dividend interface contract
 

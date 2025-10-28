@@ -3,8 +3,8 @@
 {% block content %}
 <div class="container-fluid row-gap-5">
     <div class="row border border-primary-subtle bg-light rounded mb-3 position-relative">
-        <p class="h4 position-absolute top-0 start-0 z-2 px-3" style="padding-top: 8px; padding-left: 4px">Transactions</p>
-        <table id="transactions-table"
+        <p class="h4 position-absolute top-0 start-0 z-2 px-3" style="padding-top: 8px; padding-left: 4px">Trades</p>
+        <table id="trades-table"
                data-toggle="table"
                data-search="true"
                data-pagination="true"
@@ -32,24 +32,24 @@
                 </tr>
             </thead>
             <tbody>
-                {% for transaction in transactions %}
+                {% for trade in trades %}
                 <tr>
-                    <td class="text-nowrap">{{ transaction.date }}<br><small class="fw-lighter">{{ transaction.time }}</small></td>
+                    <td class="text-nowrap">{{ trade.date }}<br><small class="fw-lighter">{{ trade.time }}</small></td>
                     <td>
-                        {% if transaction.buy_sell == "Buy" %}
-                        <span class="green-pill">{{ transaction.buy_sell }}</span>
+                        {% if trade.buy_sell == "Buy" %}
+                        <span class="green-pill">{{ trade.buy_sell }}</span>
                         {% else %}
-                        <span class="red-pill">{{ transaction.buy_sell }}</span>
+                        <span class="red-pill">{{ trade.buy_sell }}</span>
                         {% endif %}
                         <br>
-                        <small class="fw-lighter">{{ transaction.transaction_type }}</small>
+                        <small class="fw-lighter">{{ trade.transaction_type }}</small>
                     </td>
-                    <td>{{ transaction.symbol }}<br><small class="fw-lighter">{{ transaction.name }}</small></td>
-                    <td>{{ transaction.price }}</td>
-                    <td>{{ transaction.quantity }}</td>
-                    <td>{{ transaction.total }}</td>
-                    <td>{{ transaction.total_in_base_currency }}</td>
-                    <td>{{ transaction.fees }}</td>
+                    <td>{{ trade.symbol }}<br><small class="fw-lighter">{{ trade.name }}</small></td>
+                    <td>{{ trade.price }}</td>
+                    <td>{{ trade.quantity }}</td>
+                    <td>{{ trade.total }}</td>
+                    <td>{{ trade.total_in_base_currency }}</td>
+                    <td>{{ trade.fees }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

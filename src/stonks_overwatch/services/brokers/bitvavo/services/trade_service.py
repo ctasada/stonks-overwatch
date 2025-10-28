@@ -3,15 +3,15 @@ from typing import List, Optional
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.core.interfaces.base_service import BaseService
-from stonks_overwatch.core.interfaces.transaction_service import TransactionServiceInterface
+from stonks_overwatch.core.interfaces.trade_service import TradeServiceInterface
 from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import BitvavoService
 from stonks_overwatch.services.brokers.bitvavo.repositories.assets_repository import AssetsRepository
 from stonks_overwatch.services.brokers.bitvavo.repositories.transactions_repository import TransactionsRepository
-from stonks_overwatch.services.models import Transaction
+from stonks_overwatch.services.models import Trade
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 
 
-class TransactionsService(BaseService, TransactionServiceInterface):
+class TradesService(BaseService, TradeServiceInterface):
     TIME_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
     TIME_FORMAT = "%H:%M:%S"
 
@@ -22,7 +22,7 @@ class TransactionsService(BaseService, TransactionServiceInterface):
     # Note: base_currency property is inherited from BaseService and handles
     # dependency injection automatically
 
-    def get_transactions(self) -> List[Transaction]:
+    def get_trades(self) -> List[Trade]:
         # FETCH TRANSACTIONS DATA
         transactions_history = TransactionsRepository.get_transactions_raw()
 
@@ -35,11 +35,11 @@ class TransactionsService(BaseService, TransactionServiceInterface):
             asset = AssetsRepository.get_asset(transaction["receivedCurrency"])
 
             my_transactions.append(
-                Transaction(
+                Trade(
                     name=asset["name"],
                     symbol=transaction["receivedCurrency"],
-                    date=TransactionsService.format_date(transaction["executedAt"]),
-                    time=TransactionsService.format_time(transaction["executedAt"]),
+                    date=TradesService.format_date(transaction["executedAt"]),
+                    time=TradesService.format_time(transaction["executedAt"]),
                     buy_sell=self.__convert_buy_sell(transaction["type"]),
                     transaction_type=self.__transaction_type(transaction["type"]),
                     price=LocalizationUtility.format_money_value(
@@ -86,10 +86,10 @@ class TransactionsService(BaseService, TransactionServiceInterface):
         Parses a date time string to a datetime object.
         """
         try:
-            return datetime.strptime(value, TransactionsService.TIME_DATE_FORMAT)
+            return datetime.strptime(value, TradesService.TIME_DATE_FORMAT)
         except ValueError as e:
             raise ValueError(
-                f"Invalid date format: {value}. Expected format is {TransactionsService.TIME_DATE_FORMAT}."
+                f"Invalid date format: {value}. Expected format is {TradesService.TIME_DATE_FORMAT}."
             ) from e
 
     @staticmethod
@@ -98,7 +98,7 @@ class TransactionsService(BaseService, TransactionServiceInterface):
         Formats a date time string to date string.
         """
         if isinstance(value, str):
-            time = TransactionsService.parse_date(value)
+            time = TradesService.parse_date(value)
         elif isinstance(value, datetime):
             time = value
         else:
@@ -112,7 +112,7 @@ class TransactionsService(BaseService, TransactionServiceInterface):
         Formats a date time string to time string.
         """
         if isinstance(value, str):
-            time = TransactionsService.parse_date(value)
+            time = TradesService.parse_date(value)
         elif isinstance(value, datetime):
             time = value
         else:
