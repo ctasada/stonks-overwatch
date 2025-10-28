@@ -14,7 +14,7 @@ from .dividend_service import DividendServiceInterface
 from .fee_service import FeeServiceInterface
 from .portfolio_service import PortfolioServiceInterface
 from .session_manager import SessionManagerInterface
-from .transaction_service import TransactionServiceInterface
+from .trade_service import TradeServiceInterface
 
 __all__ = [
     "AccountServiceInterface",
@@ -28,5 +28,5 @@ __all__ = [
     "FeeServiceInterface",
     "PortfolioServiceInterface",
     "SessionManagerInterface",
-    "TransactionServiceInterface",
+    "TradeServiceInterface",
 ]

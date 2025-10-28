@@ -15,7 +15,7 @@ from stonks_overwatch.core.interfaces import (
     DividendServiceInterface,
     FeeServiceInterface,
     PortfolioServiceInterface,
-    TransactionServiceInterface,
+    TradeServiceInterface,
 )
 from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.services.models import (
@@ -25,7 +25,7 @@ from stonks_overwatch.services.models import (
     Fee,
     PortfolioEntry,
     TotalPortfolio,
-    Transaction,
+    Trade,
 )
 
 import pytest
@@ -60,10 +60,10 @@ class ValidPortfolioService(PortfolioServiceInterface):
         return TotalPortfolio()
 
 
-class ValidTransactionService(TransactionServiceInterface):
-    """Valid transaction service that implements the interface."""
+class ValidTradeService(TradeServiceInterface):
+    """Valid trade service that implements the interface."""
 
-    def get_transactions(self) -> List[Transaction]:
+    def get_trades(self) -> List[Trade]:
         return []
 
 
@@ -106,10 +106,10 @@ class InvalidPortfolioService:
         return []
 
 
-class InvalidTransactionService:
-    """Invalid transaction service that doesn't implement the interface."""
+class InvalidTradeService:
+    """Invalid trade service that doesn't implement the interface."""
 
-    def get_transactions_wrong(self):
+    def get_trades_wrong(self):
         return []
 
 
@@ -140,7 +140,7 @@ class TestServiceInterfaceValidation:
         self.registry.register_broker_services(
             "testbroker",
             portfolio=ValidPortfolioService,
-            transaction=ValidTransactionService,
+            trade=ValidTradeService,
             deposit=ValidDepositService,
             dividend=ValidDividendService,
             fee=ValidFeeService,
@@ -166,20 +166,20 @@ class TestServiceInterfaceValidation:
         assert "PortfolioServiceInterface" in error_message
         assert "does not implement the required interface" in error_message
 
-    def test_invalid_transaction_service_interface_fails(self):
-        """Test that transaction service without correct interface fails validation."""
+    def test_invalid_trade_service_interface_fails(self):
+        """Test that trade service without correct interface fails validation."""
         self.registry.register_broker_config("testbroker", MockConfig)
 
         with pytest.raises(BrokerRegistryValidationError) as exc_info:
             self.registry.register_broker_services(
                 "testbroker",
                 portfolio=ValidPortfolioService,
-                transaction=InvalidTransactionService,
+                trade=InvalidTradeService,
             )
 
         error_message = str(exc_info.value)
-        assert "InvalidTransactionService" in error_message
-        assert "TransactionServiceInterface" in error_message
+        assert "InvalidTradeService" in error_message
+        assert "TradeServiceInterface" in error_message
 
     def test_wrong_interface_for_service_type_fails(self):
         """Test that service implementing wrong interface fails validation."""
@@ -203,7 +203,7 @@ class TestServiceInterfaceValidation:
         self.registry.register_broker_services(
             "testbroker",
             portfolio=ValidPortfolioService,
-            transaction=ValidTransactionService,
+            trade=ValidTradeService,
             deposit=ValidDepositService,
         )
 
@@ -231,9 +231,9 @@ class TestServiceInterfaceValidation:
         # Manually inject services to bypass registration validation (for testing purposes)
         self.registry._service_classes["testbroker"] = {
             ServiceType.PORTFOLIO: InvalidPortfolioService,
-            ServiceType.TRANSACTION: ValidTransactionService,
+            ServiceType.TRADE: ValidTradeService,
         }
-        self.registry._broker_capabilities["testbroker"] = [ServiceType.PORTFOLIO, ServiceType.TRANSACTION]
+        self.registry._broker_capabilities["testbroker"] = [ServiceType.PORTFOLIO, ServiceType.TRADE]
 
         result = self.registry.validate_all_service_interfaces("testbroker")
 
@@ -243,11 +243,11 @@ class TestServiceInterfaceValidation:
 
         # Check that one service is invalid, one is valid
         portfolio_service = next(s for s in result["validated_services"] if s["service_type"] == "portfolio")
-        transaction_service = next(s for s in result["validated_services"] if s["service_type"] == "transaction")
+        trade_service = next(s for s in result["validated_services"] if s["service_type"] == "trade")
 
         assert portfolio_service["status"] == "invalid"
         assert "error" in portfolio_service
-        assert transaction_service["status"] == "valid"
+        assert trade_service["status"] == "valid"
 
     def test_validate_all_service_interfaces_nonexistent_broker(self):
         """Test validate_all_service_interfaces with nonexistent broker."""
@@ -340,7 +340,7 @@ class TestServiceInterfaceValidationIntegration:
         self.registry.register_broker_services(
             "completebroker",
             portfolio=ValidPortfolioService,
-            transaction=ValidTransactionService,
+            trade=ValidTradeService,
             deposit=ValidDepositService,
             dividend=ValidDividendService,
             fee=ValidFeeService,
@@ -354,7 +354,7 @@ class TestServiceInterfaceValidationIntegration:
         # Verify all services are available
         capabilities = self.registry.get_broker_capabilities("completebroker")
         assert ServiceType.PORTFOLIO in capabilities
-        assert ServiceType.TRANSACTION in capabilities
+        assert ServiceType.TRADE in capabilities
         assert ServiceType.DEPOSIT in capabilities
         assert ServiceType.DIVIDEND in capabilities
         assert ServiceType.FEE in capabilities
@@ -372,7 +372,7 @@ class TestServiceInterfaceValidationIntegration:
             "completebroker",
             MockConfig,
             portfolio=ValidPortfolioService,
-            transaction=ValidTransactionService,
+            trade=ValidTradeService,
             deposit=ValidDepositService,
         )
 
