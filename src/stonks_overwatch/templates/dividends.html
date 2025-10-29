@@ -40,15 +40,23 @@
                 <p class="h5 my-1">Dividends Calendar</p>
             </div>
             <div class="col-auto">
-                <div class="dropdown btn-sm dropdown-custom" id="dividendsYearsDropdown">
-                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle dropdown-custom" type="button" id="dividendsYearsDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
-                        {{ selectedYear }}
+                <div class="btn-group btn-group-sm" role="group" aria-label="Year navigation">
+                    <button class="btn btn-outline-secondary dropdown-custom" type="button" id="dividendsPrevYearButton" title="Previous year">
+                        <i class="bi bi-chevron-left"></i>
                     </button>
-                    <ul class="dropdown-menu" aria-labelledby="dividendsYearsDropdownButton" style="min-width: 100%; width: auto;">
-                        {% for year in dividendsCalendar.years %}
-                        <li><a class="dropdown-item" href="#">{{ year }}</a></li>
-                        {% endfor %}
-                    </ul>
+                    <div class="dropdown dropdown-custom" id="dividendsYearsDropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle dropdown-custom" type="button" id="dividendsYearsDropdownButton" data-bs-toggle="dropdown" aria-expanded="false" style="min-width: 80px;">
+                            {{ selectedYear }}
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dividendsYearsDropdownButton" style="min-width: 100%; width: auto;">
+                            {% for year in dividendsCalendar.years %}
+                            <li><a class="dropdown-item" href="#">{{ year }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <button class="btn btn-outline-secondary dropdown-custom" type="button" id="dividendsNextYearButton" title="Next year">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
                 </div>
             </div>
             <div class="col-auto ms-auto d-flex justify-content-end">
@@ -205,22 +213,47 @@
         {{ dividendsDiversification.chart.values|safe }}
     );
 
-    // Handle dividends year dropdown selection
-    $('#dividendsYearsDropdown .dropdown-item').on('click', function(e) {
-        e.preventDefault();
-        // Remove active class from all items
-        $('#dividendsYearsDropdown .dropdown-item').removeClass('active');
-        // Add active class to clicked item
-        $(this).addClass('active');
-        // Update the dropdown button text
-        $('#dividendsYearsDropdownButton').text($(this).text());
+    // Available years list (sorted descending: newest to oldest)
+    const availableYears = {{ dividendsCalendar.years|safe }};
+    let currentYearIndex = availableYears.indexOf({{ selectedYear }});
 
-        // Get the selected year
-        const selectedYear = $(this).text();
-        console.log('Selected year:', selectedYear);
+    // Function to update navigation button states
+    function updateNavigationButtons() {
+        const prevButton = $('#dividendsPrevYearButton');
+        const nextButton = $('#dividendsNextYearButton');
+
+        // Previous button (goes to older year - higher index in descending list)
+        if (currentYearIndex >= availableYears.length - 1) {
+            prevButton.prop('disabled', true).addClass('disabled');
+        } else {
+            prevButton.prop('disabled', false).removeClass('disabled');
+        }
+
+        // Next button (goes to newer year - lower index in descending list)
+        if (currentYearIndex <= 0) {
+            nextButton.prop('disabled', true).addClass('disabled');
+        } else {
+            nextButton.prop('disabled', false).removeClass('disabled');
+        }
+    }
+
+    // Function to load calendar for a specific year
+    function loadCalendarYear(year) {
+        console.log('Loading calendar for year:', year);
+
+        // Update button text
+        $('#dividendsYearsDropdownButton').text(year);
+
+        // Update active state in dropdown
+        $('#dividendsYearsDropdown .dropdown-item').removeClass('active');
+        $('#dividendsYearsDropdown .dropdown-item').each(function() {
+            if (parseInt($(this).text()) === year) {
+                $(this).addClass('active');
+            }
+        });
 
         // Make AJAX request to get the calendar HTML
-        let url = HOST + URL + "?calendar_year=" + selectedYear + "&html_only=true";
+        let url = HOST + URL + "?calendar_year=" + year + "&html_only=true";
 
         fetch(url, {
             method: 'GET',
@@ -242,6 +275,49 @@
         .catch(error => {
             console.error('Error fetching calendar HTML:', error);
         });
+    }
+
+    // Initialize navigation button states
+    updateNavigationButtons();
+
+    // Handle previous year button (older year - higher index in descending list)
+    $('#dividendsPrevYearButton').on('click', function(e) {
+        e.preventDefault();
+        if (currentYearIndex < availableYears.length - 1) {
+            currentYearIndex++;
+            const newYear = availableYears[currentYearIndex];
+            loadCalendarYear(newYear);
+            updateNavigationButtons();
+        }
+    });
+
+    // Handle next year button (newer year - lower index in descending list)
+    $('#dividendsNextYearButton').on('click', function(e) {
+        e.preventDefault();
+        if (currentYearIndex > 0) {
+            currentYearIndex--;
+            const newYear = availableYears[currentYearIndex];
+            loadCalendarYear(newYear);
+            updateNavigationButtons();
+        }
+    });
+
+    // Handle dividends year dropdown selection
+    $('#dividendsYearsDropdown .dropdown-item').on('click', function(e) {
+        e.preventDefault();
+
+        // Get the selected year
+        const selectedYear = parseInt($(this).text());
+        console.log('Selected year:', selectedYear);
+
+        // Update current year index
+        currentYearIndex = availableYears.indexOf(selectedYear);
+
+        // Load the calendar
+        loadCalendarYear(selectedYear);
+
+        // Update navigation buttons
+        updateNavigationButtons();
     });
 </script>
 {% endblock %}
