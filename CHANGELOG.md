@@ -16,11 +16,18 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 ### Fixed
 
-- **DEGIRO**:
+- **Portfolio**:
   - Exchanges: Fixed bug skipping the Exchange name in some cases
+- **Dividends**:
+  - Correctly display selected year in dividends calendar dropdown
+- **DEGIRO**:
   - Fixed bug wrongly calculating the Realised Gains for some transactions
 
 ### Security
+
+- Updated internal dependencies
+
+---
 
 ## [0.1.5] - 2025-10-27
 

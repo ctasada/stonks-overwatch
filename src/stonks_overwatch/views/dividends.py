@@ -57,6 +57,7 @@ class Dividends(View):
                 "dividendsDiversification": dividends_diversification,
                 "dividendsGrowth": dividends_growth,
                 "currencySymbol": LocalizationUtility.get_currency_symbol(self.base_currency),
+                "selectedYear": calendar_year,
             }
         else:
             context = {}
@@ -67,11 +68,11 @@ class Dividends(View):
 
         return render(request, "dividends.html", context)
 
-    def _parse_request_calendar_year(self, request) -> str:
+    def _parse_request_calendar_year(self, request) -> int:
         """Parse calendar year from request query parameters."""
         calendar_year = request.GET.get("calendar_year", datetime.now().year)
 
-        return calendar_year
+        return int(calendar_year)
 
     def _get_dividends_calendar(self, dividends: List[Dividend]) -> dict:
         dividends_calendar = {}
