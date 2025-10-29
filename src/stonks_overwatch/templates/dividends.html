@@ -42,7 +42,7 @@
             <div class="col-auto">
                 <div class="dropdown btn-sm dropdown-custom" id="dividendsYearsDropdown">
                     <button class="btn btn-outline-secondary btn-sm dropdown-toggle dropdown-custom" type="button" id="dividendsYearsDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
-                        {{ dividendsCalendar.years.0 }}
+                        {{ selectedYear }}
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="dividendsYearsDropdownButton" style="min-width: 100%; width: auto;">
                         {% for year in dividendsCalendar.years %}
