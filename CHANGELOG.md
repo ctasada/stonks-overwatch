@@ -10,11 +10,13 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 ### Added
 
+- **Dividends**:
+    - Added calendar navigation bars to quickly switch between years
+    - Added total dividends per year in the calendar view
+
 ### Changed
 
 - Renamed "Transactions" to "Trades" to better reflect its content
-- **Dividends**:
-  - Added navigation bars to quickly switch between years
 
 ### Fixed
 

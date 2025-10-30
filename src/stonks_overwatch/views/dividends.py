@@ -35,6 +35,7 @@ class Dividends(View):
         total_net_dividends = self._get_total_net_dividends(dividends_overview)
         total_gross_dividends = self._get_total_gross_dividends(dividends_overview)
         total_tax_dividends = total_net_dividends - total_gross_dividends
+        total_year_dividends = 0.0
 
         if total_net_dividends > 0.0:
             # Filter the dividends_calendar to only include items matching the calendar_year
@@ -42,6 +43,9 @@ class Dividends(View):
                 key: value for key, value in dividends_calendar["calendar"].items() if key.endswith(str(calendar_year))
             }
             dividends_calendar["calendar"] = filtered_calendar
+
+            # Calculate total paid dividends for the selected year
+            total_year_dividends = sum(month_data.get("total", 0) for month_data in filtered_calendar.values())
 
             context = {
                 "total_net_dividends": LocalizationUtility.format_money_value(
@@ -52,6 +56,9 @@ class Dividends(View):
                 ),
                 "total_tax_dividends": LocalizationUtility.format_money_value(
                     value=total_tax_dividends, currency=self.base_currency
+                ),
+                "total_year_dividends": LocalizationUtility.format_money_value(
+                    value=total_year_dividends, currency=self.base_currency
                 ),
                 "dividendsCalendar": dividends_calendar,
                 "dividendsDiversification": dividends_diversification,
@@ -64,7 +71,16 @@ class Dividends(View):
 
         if request.headers.get("Accept") == "application/json" and request.GET.get("html_only"):
             # Return only the calendar HTML
-            return render(request, "dividends/calendar.html", {"dividendsCalendar": dividends_calendar})
+            return render(
+                request,
+                "dividends/calendar.html",
+                {
+                    "dividendsCalendar": dividends_calendar,
+                    "total_year_dividends": LocalizationUtility.format_money_value(
+                        value=total_year_dividends, currency=self.base_currency
+                    ),
+                },
+            )
 
         return render(request, "dividends.html", context)
 
@@ -116,7 +132,7 @@ class Dividends(View):
                 if dividend_pay.amount > 0:
                     month_entry["payouts"] = payouts + 1
                 # Total payout in the month
-                month_entry["total"] = month_entry.setdefault("total", 0) + dividend_pay.net_amount()
+                month_entry["total"] = round(month_entry.setdefault("total", 0) + dividend_pay.net_amount(), 2)
                 month_entry["formatedTotal"] = LocalizationUtility.format_money_value(
                     value=month_entry["total"], currency=dividend_pay.currency
                 )
