@@ -59,6 +59,12 @@
                     </button>
                 </div>
             </div>
+            <div class="col-auto ms-1 py-1">
+                <div class="col-auto border rounded-pill d-flex align-items-center px-3 py-1" style="background-color: var(--primary-color); color: white">
+                    <span>Total Paid:</span>
+                    <span id="dividendsYearTotal" class="ms-2">{{ total_year_dividends }}</span>
+                </div>
+            </div>
             <div class="col-auto ms-auto d-flex justify-content-end">
                 <div class="d-flex flex-row align-items-center">
                     <div class="d-flex align-items-center me-3">
@@ -268,8 +274,18 @@
             const calendarContainer = document.getElementById('dividends-calendar-container');
             if (calendarContainer) {
                 calendarContainer.innerHTML = html;
-            } else {
-                console.error('Could not find calendar container');
+
+                // Extract and update the calendar year total from the response
+                const yearTotalElement = calendarContainer.querySelector('#calendar-year-total');
+                if (yearTotalElement) {
+                    const yearTotal = yearTotalElement.dataset.yearTotal;
+
+                    // Update the visible year total on the page
+                    const visibleYearTotal = document.getElementById('dividendsYearTotal');
+                    if (visibleYearTotal) {
+                        visibleYearTotal.textContent = yearTotal;
+                    }
+                }
             }
         })
         .catch(error => {
