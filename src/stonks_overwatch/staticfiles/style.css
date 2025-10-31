@@ -1096,6 +1096,71 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     color: var(--dropdown-custom-hover-color) !important;
 }
 
+/* ===================================================
+   YEAR NAVIGATION COMPONENT
+   Unified styling for dividends calendar navigation
+   =================================================== */
+
+/* Year navigation group container */
+.btn-group[aria-label="Year navigation"] {
+    border: 1px solid var(--dropdown-custom-border);
+    border-radius: 0.25rem;
+}
+
+/* Remove default borders from all internal elements */
+.btn-group[aria-label="Year navigation"] .btn,
+.btn-group[aria-label="Year navigation"] .dropdown-toggle {
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0;
+}
+
+/* Add rounded corners only to outer edges */
+.btn-group[aria-label="Year navigation"] .btn:first-child {
+    border-top-left-radius: calc(0.25rem - 1px) !important;
+    border-bottom-left-radius: calc(0.25rem - 1px) !important;
+}
+
+.btn-group[aria-label="Year navigation"] .btn:last-child {
+    border-top-right-radius: calc(0.25rem - 1px) !important;
+    border-bottom-right-radius: calc(0.25rem - 1px) !important;
+}
+
+/* Internal dividers between elements */
+.btn-group[aria-label="Year navigation"] .btn:not(:last-child),
+.btn-group[aria-label="Year navigation"] .dropdown:not(:last-child) {
+    border-right: 1px solid var(--dropdown-custom-border) !important;
+}
+
+/* Navigation buttons - base styling */
+#dividendsPrevYearButton,
+#dividendsNextYearButton {
+    background-color: var(--dropdown-custom-bg) !important;
+    color: var(--dropdown-custom-color) !important;
+    transition: all 0.15s ease-in-out;
+}
+
+/* Interactive states for enabled buttons */
+#dividendsPrevYearButton:not(:disabled):hover,
+#dividendsPrevYearButton:not(:disabled):focus,
+#dividendsPrevYearButton:not(:disabled):active,
+#dividendsNextYearButton:not(:disabled):hover,
+#dividendsNextYearButton:not(:disabled):focus,
+#dividendsNextYearButton:not(:disabled):active {
+    background-color: var(--dropdown-custom-hover-bg) !important;
+    color: var(--dropdown-custom-hover-color) !important;
+    border-color: transparent !important;
+}
+
+/* Disabled state */
+#dividendsPrevYearButton:disabled,
+#dividendsNextYearButton:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background-color: var(--dropdown-custom-bg) !important;
+    color: var(--dropdown-custom-color) !important;
+}
+
 /* Connection Status Icons - Better contrast against dark sidebar */
 #sidebar .text-success {
     color: #90EE90 !important; /* Light green for better contrast */

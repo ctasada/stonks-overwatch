@@ -4060,7 +4060,7 @@ SOFTWARE.
 
 
 polars
-1.35.0
+1.35.1
 MIT License
 Copyright (c) 2025 Ritchie Vink
 Some portions Copyright (c) 2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
@@ -4085,7 +4085,7 @@ SOFTWARE.
 
 
 polars-runtime-32
-1.35.0
+1.35.1
 MIT License
 Copyright (c) 2025 Ritchie Vink
 Some portions Copyright (c) 2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
