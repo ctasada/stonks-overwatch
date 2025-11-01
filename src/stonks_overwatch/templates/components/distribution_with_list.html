@@ -1,8 +1,8 @@
-<div class="row align-items-stretch border border-primary-subtle bg-light rounded mb-3 pb-3">
+<div class="row align-items-stretch w-100 {% if show_border != False %}border border-primary-subtle bg-light rounded mb-3{% else %}mx-0{% endif %} pb-3">
     <div class="col-sm diversification-chart-container">
         <canvas id="{{ chart_id }}"></canvas>
     </div>
-    <div class="col-sm diversification-scrollable-list list-group mt-3">
+    <div class="col-sm diversification-scrollable-list list-group mt-3 w-100">
         {% for item in items %}
             <div class="list-group-item rounded m-1">
                 <div class="progress-bar-background" style="width: {{ item.weight }}%;"></div>
