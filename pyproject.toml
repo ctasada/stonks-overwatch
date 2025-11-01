@@ -16,13 +16,13 @@ dependencies = [
     "django-extensions >= 4.1.0",
     "currencyconverter >= 0.18.11",
     "django-node-assets >= 0.9.15",
-    "apscheduler >= 3.11.0",
+    "apscheduler >= 3.11.1",
     "tzlocal >= 5.3.1",
     "python-bitvavo-api >= 1.4.3",
     "yfinance >= 0.2.66",
     "iso10383 >=2025.2.10",
     "requests >=2.32.4",
-    "ibind[oauth] >=0.1.20",
+    "ibind[oauth] >=0.1.21",
     "cryptography >=45.0.6",
     "packaging >=25.0",
     "python-dateutil >=2.9.0.post0",
@@ -59,7 +59,7 @@ deptry = "^0.23.0"
 pre-commit = "^4.3.0"
 bandit = "^1.8.6"
 pymarkdownlnt = "^0.9.33"
-pyarmor = "^9.1.9"
+pyarmor = "^9.2.0"
 pytest-asyncio = "^1.2.0"
 
 [tool.poetry]

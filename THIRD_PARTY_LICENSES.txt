@@ -1,5 +1,5 @@
 APScheduler
-3.11.0
+3.11.1
 MIT License
 This is the MIT license: http://www.opensource.org/licenses/mit-license.php
 
@@ -868,7 +868,7 @@ Library.
 
 
 ibind
-0.1.20
+0.1.21
 UNKNOWN
 Copyright 2020 Voy Zan
 
