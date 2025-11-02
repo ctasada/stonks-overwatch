@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import List
 
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
 
@@ -15,6 +16,7 @@ from stonks_overwatch.utils.core.logger import StonksLogger
 
 class Dividends(View):
     logger = StonksLogger.get_logger("stonks_overwatch.dividends.views", "[VIEW|DIVIDENDS]")
+    ALL_TIME_OPTION = "All Time"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -25,70 +27,162 @@ class Dividends(View):
         selected_portfolio = SessionManager.get_selected_portfolio(request)
         self.logger.debug(f"Selected Portfolio: {selected_portfolio}")
 
+        diversification_option = self._parse_request_diversification_option(request)
         calendar_year = self._parse_request_calendar_year(request)
 
         dividends_overview = self.dividends.get_dividends(selected_portfolio)
 
-        dividends_calendar = self._get_dividends_calendar(dividends_overview)
-        dividends_growth = self._get_dividends_growth(dividends_calendar["calendar"])
-        dividends_diversification = self._get_diversification(dividends_overview)
+        # Early return if no dividends
+        if not dividends_overview:
+            return render(request, "dividends.html", {})
+
+        # Calculate basic totals
         total_net_dividends = self._get_total_net_dividends(dividends_overview)
         total_gross_dividends = self._get_total_gross_dividends(dividends_overview)
         total_tax_dividends = total_net_dividends - total_gross_dividends
-        total_year_dividends = 0.0
 
-        if total_net_dividends > 0.0:
-            # Filter the dividends_calendar to only include items matching the calendar_year
-            filtered_calendar = {
-                key: value for key, value in dividends_calendar["calendar"].items() if key.endswith(str(calendar_year))
-            }
-            dividends_calendar["calendar"] = filtered_calendar
+        # Get calendar and years
+        dividends_calendar = self._get_dividends_calendar(dividends_overview)
 
-            # Calculate total paid dividends for the selected year
-            total_year_dividends = sum(month_data.get("total", 0) for month_data in filtered_calendar.values())
+        # Get diversification years (only years with paid dividends)
+        diversification_years = self._get_diversification_years(dividends_overview)
+        diversification_options = [self.ALL_TIME_OPTION] + diversification_years
 
-            context = {
-                "total_net_dividends": LocalizationUtility.format_money_value(
-                    value=total_net_dividends, currency=self.base_currency
-                ),
-                "total_gross_dividends": LocalizationUtility.format_money_value(
-                    value=total_gross_dividends, currency=self.base_currency
-                ),
-                "total_tax_dividends": LocalizationUtility.format_money_value(
-                    value=total_tax_dividends, currency=self.base_currency
-                ),
-                "total_year_dividends": LocalizationUtility.format_money_value(
-                    value=total_year_dividends, currency=self.base_currency
-                ),
-                "dividendsCalendar": dividends_calendar,
-                "dividendsDiversification": dividends_diversification,
-                "dividendsGrowth": dividends_growth,
-                "currencySymbol": LocalizationUtility.get_currency_symbol(self.base_currency),
-                "selectedYear": calendar_year,
-            }
-        else:
-            context = {}
+        # Filter dividends for diversification if a specific year is selected
+        filtered_dividends = self._filter_dividends_by_option(dividends_overview, diversification_option)
+        dividends_diversification = self._get_diversification(filtered_dividends)
 
-        if request.headers.get("Accept") == "application/json" and request.GET.get("html_only"):
-            # Return only the calendar HTML
+        # Filter calendar for the selected year
+        filtered_calendar = self._filter_calendar_by_year(dividends_calendar["calendar"], calendar_year)
+        total_year_dividends: float = sum(month_data.get("total", 0) for month_data in filtered_calendar.values())
+
+        dividends_calendar["calendar"] = filtered_calendar
+
+        # Handle AJAX requests
+        if request.headers.get("Accept") == "application/json":
+            return self._handle_json_request(
+                request,
+                diversification_option,
+                dividends_calendar,
+                dividends_diversification,
+                diversification_options,
+                total_year_dividends,
+            )
+
+        # Calculate growth and filter calendar for the selected year
+        dividends_growth = self._get_dividends_growth(dividends_calendar["calendar"])
+
+        context = {
+            "totalNetDividends": LocalizationUtility.format_money_value(
+                value=total_net_dividends, currency=self.base_currency
+            ),
+            "totalGrossDividends": LocalizationUtility.format_money_value(
+                value=total_gross_dividends, currency=self.base_currency
+            ),
+            "totalTaxDividends": LocalizationUtility.format_money_value(
+                value=total_tax_dividends, currency=self.base_currency
+            ),
+            "totalYearDividends": LocalizationUtility.format_money_value(
+                value=total_year_dividends, currency=self.base_currency
+            ),
+            "dividendsCalendar": dividends_calendar,
+            "dividendsDiversification": dividends_diversification,
+            "dividendsGrowth": dividends_growth,
+            "currencySymbol": LocalizationUtility.get_currency_symbol(self.base_currency),
+            "selectedCalendarYear": calendar_year,
+            "diversificationOptions": diversification_options,
+            "selectedDiversificationOption": diversification_option,
+        }
+
+        return render(request, "dividends.html", context)
+
+    def _parse_request_diversification_option(self, request) -> str:
+        """Parse diversification year from request query parameters."""
+        return request.GET.get("diversification_option", self.ALL_TIME_OPTION)
+
+    def _parse_request_calendar_year(self, request) -> int:
+        """Parse calendar year from request query parameters."""
+        calendar_year = request.GET.get("calendar_year", datetime.now().year)
+        return int(calendar_year)
+
+    def _get_diversification_years(self, dividends: List[Dividend]) -> List[int]:
+        """
+        Extract unique years from paid dividends only (not forecasted/announced).
+        Returns years in descending order.
+        """
+        paid_years = set()
+        for dividend in dividends:
+            # Only include years where dividends have been paid
+            if dividend.is_paid() and dividend.amount > 0:
+                paid_years.add(dividend.payment_date.year)
+
+        return sorted(paid_years, reverse=True)
+
+    def _filter_dividends_by_option(self, dividends: List[Dividend], option: str) -> List[Dividend]:
+        """Filter dividends list based on the selected diversification option."""
+        if option == self.ALL_TIME_OPTION:
+            return dividends
+
+        try:
+            year = int(option)
+            return [d for d in dividends if d.payment_date.year == year]
+        except ValueError:
+            self.logger.warning(f"Invalid diversification option: {option}, using all time")
+            return dividends
+
+    def _filter_calendar_by_year(self, calendar: dict, year: int) -> dict:
+        """Filter calendar to only include entries for the specified year."""
+        return {key: value for key, value in calendar.items() if key.endswith(str(year))}
+
+    def _handle_json_request(
+        self,
+        request,
+        diversification_option: str,
+        dividends_calendar: dict,
+        dividends_diversification: dict,
+        diversification_options: List[str],
+        total_year_dividends: float,
+    ):
+        """Handle AJAX/JSON requests for different data types."""
+        # Request for calendar HTML only
+        if request.GET.get("html_only"):
             return render(
                 request,
                 "dividends/calendar.html",
                 {
                     "dividendsCalendar": dividends_calendar,
-                    "total_year_dividends": LocalizationUtility.format_money_value(
+                    "totalYearDividends": LocalizationUtility.format_money_value(
                         value=total_year_dividends, currency=self.base_currency
                     ),
                 },
             )
 
-        return render(request, "dividends.html", context)
+        # Request for diversification data
+        if request.GET.get("diversification_option"):
+            # Return both HTML and chart data as JSON
+            from django.template.loader import render_to_string
 
-    def _parse_request_calendar_year(self, request) -> int:
-        """Parse calendar year from request query parameters."""
-        calendar_year = request.GET.get("calendar_year", datetime.now().year)
+            html = render_to_string(
+                "components/distribution_with_list.html",
+                {
+                    "chart_id": "dividends-chart",
+                    "show_border": False,
+                    "items": dividends_diversification["table"],
+                },
+            )
 
-        return int(calendar_year)
+            return JsonResponse(
+                {
+                    "html": html,
+                    "chartData": {
+                        "labels": dividends_diversification["chart"]["labels"],
+                        "values": dividends_diversification["chart"]["values"],
+                    },
+                }
+            )
+
+        # Default JSON response
+        return JsonResponse({"error": "Invalid request parameters"}, status=400)
 
     def _get_dividends_calendar(self, dividends: List[Dividend]) -> dict:
         dividends_calendar = {}

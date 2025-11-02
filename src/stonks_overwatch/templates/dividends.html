@@ -4,20 +4,20 @@
 {% block content %}
 
 <div class="container-fluid row-gap-5">
-    {% if total_net_dividends == None %}
+    {% if totalNetDividends == None %}
     <div class="row mt-2 column-gap-3">
         <p class="h4 mb-1">No dividends found</p>
     </div>
     {% else %}
     <div class="row mt-2 column-gap-3">
-        {% include 'components/summary_card.html' with label="Net Dividends" value=total_net_dividends tooltip="Total net dividends received." %}
-        {% include 'components/summary_card.html' with label="Dividend Tax" value=total_tax_dividends tooltip="Total amount paid in dividend taxes." %}
-        {% include 'components/summary_card.html' with label="Gross Dividends" value=total_gross_dividends tooltip="Gross dividend is the total amount paid out before dividend tax is deducted." %}
+        {% include 'components/summary_card.html' with label="Net Dividends" value=totalNetDividends tooltip="Total net dividends received." %}
+        {% include 'components/summary_card.html' with label="Dividend Tax" value=totalTaxDividends tooltip="Total amount paid in dividend taxes." %}
+        {% include 'components/summary_card.html' with label="Gross Dividends" value=totalGrossDividends tooltip="Gross dividend is the total amount paid out before dividend tax is deducted." %}
     </div>
     <div class="row border border-primary-subtle bg-light rounded mb-3">
         <div class="row mt-2">
             <div class="col">
-                <p class="h5 mb-1">Dividend Cash Flow</p>
+                <p class="h5 mb-1">Dividends Cash Flow</p>
             </div>
             <div class="col float-end text-end">
                 <div class="btn-group btn-group-sm" role="group">
@@ -33,7 +33,28 @@
             <canvas id="dividends-growth"></canvas>
         </div>
     </div>
-    {% include 'components/distribution_with_list.html' with chart_id="dividends-chart" items=dividendsDiversification.table %}
+    <div class="row border border-primary-subtle bg-light rounded mb-3">
+        <div class="row mt-2">
+            <div class="col-auto py-2">
+                <p class="h5 mb-1">Dividends Diversification</p>
+            </div>
+            <div class="col-auto">
+                <div class="dropdown dropdown-custom" id="dividendsDiversificationDropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle dropdown-custom" type="button" id="dividendsDiversificationDropdownButton" data-bs-toggle="dropdown" aria-expanded="false" style="min-width: 80px;">
+                        {{ selectedDiversificationOption }}
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dividendsDiversificationDropdownButton" style="min-width: 100%; width: auto;">
+                        {% for option in diversificationOptions %}
+                            <li><a class="dropdown-item" href="#">{{ option }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="dividends-diversification-container">
+            {% include 'components/distribution_with_list.html' with chart_id="dividends-chart" show_border=False items=dividendsDiversification.table %}
+        </div>
+    </div>
     <div class="row border border-primary-subtle bg-light rounded mb-3" style="background-color:#dbf5ff">
         <div class="row my-2">
             <div class="col-auto">
@@ -46,7 +67,7 @@
                     </button>
                     <div class="dropdown dropdown-custom" id="dividendsYearsDropdown">
                         <button class="btn btn-outline-secondary dropdown-toggle dropdown-custom" type="button" id="dividendsYearsDropdownButton" data-bs-toggle="dropdown" aria-expanded="false" style="min-width: 80px;">
-                            {{ selectedYear }}
+                            {{ selectedCalendarYear }}
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="dividendsYearsDropdownButton" style="min-width: 100%; width: auto;">
                             {% for year in dividendsCalendar.years %}
@@ -62,7 +83,7 @@
             <div class="col-auto ms-1 py-1">
                 <div class="col-auto border rounded-pill d-flex align-items-center px-3 py-1" style="background-color: var(--primary-color); color: white">
                     <span>Total Paid:</span>
-                    <span id="dividendsYearTotal" class="ms-2">{{ total_year_dividends }}</span>
+                    <span id="dividendsYearTotal" class="ms-2">{{ totalYearDividends }}</span>
                 </div>
             </div>
             <div class="col-auto ms-auto d-flex justify-content-end">
@@ -214,14 +235,17 @@
     drawDividends("Month")
     drawDoughnutChart(
         "dividends-chart",
-        "Dividends",
+        "",
         {{ dividendsDiversification.chart.labels|safe }},
         {{ dividendsDiversification.chart.values|safe }}
     );
 
+    const diversificationOptions = {{ diversificationOptions|safe }};
+    let selectedDiversificationOption = diversificationOptions.indexOf("{{ selectedDiversificationOption }}");
+
     // Available years list (sorted descending: newest to oldest)
     const availableYears = {{ dividendsCalendar.years|safe }};
-    let currentYearIndex = availableYears.indexOf({{ selectedYear }});
+    let currentYearIndex = availableYears.indexOf({{ selectedCalendarYear }});
 
     // Function to update navigation button states
     function updateNavigationButtons() {
@@ -323,17 +347,73 @@
         e.preventDefault();
 
         // Get the selected year
-        const selectedYear = parseInt($(this).text());
-        console.log('Selected year:', selectedYear);
+        const selectedCalendarYear = parseInt($(this).text());
+        console.log('Selected year:', selectedCalendarYear);
 
         // Update current year index
-        currentYearIndex = availableYears.indexOf(selectedYear);
+        currentYearIndex = availableYears.indexOf(selectedCalendarYear);
 
         // Load the calendar
-        loadCalendarYear(selectedYear);
+        loadCalendarYear(selectedCalendarYear);
 
         // Update navigation buttons
         updateNavigationButtons();
+    });
+
+    // Function to load dividends diversification for a specific option
+    function loadDiversification(option) {
+        console.log('Loading diversification for:', option);
+
+        // Update button text
+        $('#dividendsDiversificationDropdownButton').text(option);
+
+        // Update active state in dropdown
+        $('#dividendsDiversificationDropdown .dropdown-item').removeClass('active');
+        $('#dividendsDiversificationDropdown .dropdown-item').each(function() {
+            if ($(this).text() === option) {
+                $(this).addClass('active');
+            }
+        });
+
+        // Fetch the rendered HTML and chart data
+        let url = HOST + URL + "?diversification_option=" + encodeURIComponent(option);
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Replace the HTML
+            const container = document.getElementById('dividends-diversification-container');
+            if (container) {
+                container.innerHTML = data.html;
+            }
+
+            // Reinitialize the chart with new data
+            const chart = Chart.getChart("dividends-chart");
+            if (chart) {
+                chart.destroy();
+            }
+
+            drawDoughnutChart(
+                "dividends-chart",
+                "",
+                data.chartData.labels,
+                data.chartData.values
+            );
+        })
+        .catch(error => {
+            console.error('Error fetching dividends diversification:', error);
+        });
+    }
+
+    // Handle dividends diversification dropdown selection
+    $('#dividendsDiversificationDropdown .dropdown-item').on('click', function(e) {
+        e.preventDefault();
+        loadDiversification($(this).text());
     });
 </script>
 {% endblock %}
