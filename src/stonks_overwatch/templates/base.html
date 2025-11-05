@@ -24,6 +24,8 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/static/style.css">
 
+    {% block extra_css %}{% endblock %}
+
     <!-- Inline script to prevent sidebar flash - runs before DOM is rendered -->
     <script>
         (function() {

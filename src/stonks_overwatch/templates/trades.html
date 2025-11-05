@@ -1,31 +1,37 @@
 {% extends 'base.html' %}
 {% load static %}
+
+{% block extra_css %}
+<!-- Bootstrap Table Sticky Header CSS -->
+<link href="{% static 'bootstrap-table/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.css' %}" rel="stylesheet">
+<style>
+    /* Allow sticky header to work - remove overflow from scrollable-area on this page */
+    body:has(#trades-table) .scrollable-area,
+    body.trades-page .scrollable-area {
+        overflow: visible !important;
+    }
+
+    /* Ensure Bootstrap Table's own scroll container works */
+    #trades-table + .bootstrap-table .fixed-table-container {
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+
+    /* Fix sticky header positioning within Bootstrap Table's scroll container */
+    .fixed-table-header {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1000 !important;
+        background-color: white !important;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid row-gap-5">
     <div class="row border border-primary-subtle bg-light rounded mb-3 position-relative">
         <p class="h4 position-absolute top-0 start-0 z-2 px-3" style="padding-top: 8px; padding-left: 4px">Trades</p>
-        <table id="trades-table"
-               data-toggle="table"
-               data-search="true"
-               data-pagination="true"
-               data-pagination-loop="false"
-               data-page-list="[10, 25, 50, 100, 200, All]"
-               data-pagination-parts="['pageInfo','pageList', 'pageSize']"
-               data-page-size="10"
-               data-sortable="true"
-               data-sort-order="desc"
-               data-sort-name="date"
-               data-icons="icons"
-               data-icons-prefix="bi"
-               data-fixed-scroll="true"
-               data-classes="table table-hover"
-               data-show-columns="true"
-               data-show-export="true"
-               data-export-types="['csv']"
-               data-export-options='{
-                   "fileName": "trades_export",
-                   "ignoreColumn": []
-               }'>
+        <table id="trades-table">
             <thead>
                 <tr>
                     <th data-field="date" data-sortable="true" data-width="100" data-width-unit="px">Date</th>
@@ -69,11 +75,94 @@
 <!-- TableExport dependencies -->
 <script src="{% static 'tableexport.jquery.plugin/libs/FileSaver/FileSaver.min.js' %}"></script>
 <script src="{% static 'tableexport.jquery.plugin/tableExport.min.js' %}"></script>
-<!-- Bootstrap Table Export Extension -->
+<!-- Bootstrap Table Extensions -->
 <script src="{% static 'bootstrap-table/dist/extensions/export/bootstrap-table-export.min.js' %}"></script>
+<script src="{% static 'bootstrap-table/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.js' %}"></script>
 
 <script>
     $(document).ready(function() {
+        // Function to calculate dynamic table height based on available screen space
+        function calculateTableHeight() {
+            var $table = $('#trades-table');
+            var $scrollableArea = $('.scrollable-area');
+
+            // Calculate the expected scrollable area height based on viewport
+            var viewportHeight = $(window).height();
+            var expectedScrollableHeight = viewportHeight - 100;
+            var scrollableAreaTop = $scrollableArea.offset().top;
+            var scrollableAreaBottom = scrollableAreaTop + expectedScrollableHeight;
+
+            var $tableContainer = $table.data('bootstrap.table')
+                ? $table.closest('.bootstrap-table')
+                : $table.parent();
+
+            var availableHeight;
+
+            // If table is initialized, measure from the Bootstrap Table wrapper
+            if ($table.data('bootstrap.table') && $tableContainer.length) {
+                var bootstrapTableTop = $tableContainer.offset().top;
+                availableHeight = scrollableAreaBottom - bootstrapTableTop;
+            } else {
+                // Fallback calculation for before initialization
+                var tableContainerTop = $tableContainer.offset().top;
+                availableHeight = scrollableAreaBottom - tableContainerTop - 55;
+            }
+
+            return Math.max(availableHeight, 400);
+        }
+
+        // Initialize Bootstrap Table with sticky-header extension
+        var $table = $('#trades-table');
+        var navbarHeight = $('.navbar').outerHeight() || 0;
+
+        var tableHeight = calculateTableHeight();
+
+        // Initialize table with all options including sticky-header
+        $table.bootstrapTable({
+            search: true,
+            pagination: true,
+            paginationLoop: false,
+            pageList: [10, 25, 50, 100, 200, 'All'],
+            paginationParts: ['pageInfo', 'pageList', 'pageSize'],
+            pageSize: 10,
+            sortable: true,
+            sortOrder: 'desc',
+            sortName: 'date',
+            icons: 'icons',
+            iconsPrefix: 'bi',
+            fixedScroll: true,
+            classes: 'table table-hover',
+            showColumns: true,
+            showExport: true,
+            exportTypes: ['csv'],
+            exportOptions: {
+                fileName: 'trades_export',
+                ignoreColumn: []
+            },
+            stickyHeader: true,
+            stickyHeaderOffsetY: navbarHeight,
+            height: tableHeight
+        });
+
+        // Recalculate height on window resize
+        var resizeTimeout;
+        $(window).on('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(function() {
+                var newHeight = calculateTableHeight();
+                $table.bootstrapTable('resetView', { height: newHeight });
+            }, 100);
+        });
+
+        // Remove overflow from scrollable-area to allow sticky positioning and recalculate height
+        setTimeout(function() {
+            $('.scrollable-area').css('overflow', 'visible');
+            setTimeout(function() {
+                var updatedHeight = calculateTableHeight();
+                $table.bootstrapTable('resetView', { height: updatedHeight });
+            }, 100);
+        }, 300);
+
         // Fix dropdown positioning by triggering Popper recalculation
         var observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
