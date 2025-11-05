@@ -8,13 +8,13 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "degiro-connector[quotecast] @ git+https://github.com/ctasada/degiro-connector.git@main",
-    "django >= 5.2.7",
+    "django >= 5.2.8",
     "pycountry >= 24.6.1",
     "currency-symbols >= 2.0.4",
     "polars >=1.35.1",
     "requests-cache >= 1.2.1",
     "django-extensions >= 4.1.0",
-    "currencyconverter >= 0.18.11",
+    "currencyconverter >= 0.18.12",
     "django-node-assets >= 0.9.15",
     "apscheduler >= 3.11.1",
     "tzlocal >= 5.3.1",
