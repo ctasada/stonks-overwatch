@@ -18,7 +18,14 @@
                data-icons="icons"
                data-icons-prefix="bi"
                data-fixed-scroll="true"
-               data-classes="table table-hover">
+               data-classes="table table-hover"
+               data-show-columns="true"
+               data-show-export="true"
+               data-export-types="['csv']"
+               data-export-options='{
+                   "fileName": "trades_export",
+                   "ignoreColumn": []
+               }'>
             <thead>
                 <tr>
                     <th data-field="date" data-sortable="true" data-width="100" data-width-unit="px">Date</th>
@@ -56,4 +63,41 @@
         </table>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- TableExport dependencies -->
+<script src="{% static 'tableexport.jquery.plugin/libs/FileSaver/FileSaver.min.js' %}"></script>
+<script src="{% static 'tableexport.jquery.plugin/tableExport.min.js' %}"></script>
+<!-- Bootstrap Table Export Extension -->
+<script src="{% static 'bootstrap-table/dist/extensions/export/bootstrap-table-export.min.js' %}"></script>
+
+<script>
+    $(document).ready(function() {
+        // Fix dropdown positioning by triggering Popper recalculation
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.attributeName === 'class') {
+                    var $target = $(mutation.target);
+                    if ($target.hasClass('dropdown-menu') && $target.hasClass('show')) {
+                        // Trigger resize and scroll events to force Popper to recalculate position
+                        setTimeout(function() {
+                            window.dispatchEvent(new Event('resize'));
+                        }, 10);
+                        setTimeout(function() {
+                            window.dispatchEvent(new Event('scroll'));
+                        }, 20);
+                    }
+                }
+            });
+        });
+
+        // Start observing after Bootstrap Table initializes
+        setTimeout(function() {
+            $('.bootstrap-table .dropdown-menu').each(function() {
+                observer.observe(this, { attributes: true, attributeFilter: ['class'] });
+            });
+        }, 500);
+    });
+</script>
 {% endblock %}

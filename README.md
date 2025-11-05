@@ -153,7 +153,7 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
 
 ## Logos
 
-* [Brandfetch](https://docs.brandfetch.com/docs/getting-started) (requires API Key)
+* [Brandfetch](https://docs.brandfetch.com/docs/getting-started) (requires API Key) [100 requests/month free]
 * [Alpaca](https://docs.alpaca.markets/docs/getting-started-with-alpaca-market-data) (Logos and Data) (requires API Key)
 * [EOHD](https://eodhd.com/financial-apis-blog/40000-company-logos) (requires API Key)
 * [nvstly](https://github.com/nvstly/icons) (misses icons)
