@@ -1,5 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
+
+{% block extra_css %}
+{% include 'components/bootstrap_table_sticky_header_css.html' with table_id='fees-table' page_class='fees' %}
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid row-gap-5">
     <div class="row mt-2 column-gap-3">
@@ -10,21 +15,7 @@
     </div>
     <div class="row border border-primary-subtle bg-light rounded mb-3 position-relative">
         <p class="h4 position-absolute top-0 start-0 z-2 px-3" style="padding-top: 8px; padding-left: 4px">Fees</p>
-        <table id="fees-table"
-               data-toggle="table"
-               data-search="true"
-               data-pagination="true"
-               data-pagination-loop="false"
-               data-page-list="[10, 25, 50, 100, 200, All]"
-               data-pagination-parts="['pageInfo','pageList', 'pageSize']"
-               data-page-size="10"
-               data-sortable="true"
-               data-sort-order="desc"
-               data-sort-name="date"
-               data-icons="icons"
-               data-icons-prefix="bi"
-               data-fixed-scroll="true"
-               data-classes="table table-hover">
+        <table id="fees-table">
             <thead>
                 <tr>
                     <th data-field="date" data-sortable="true" data-width="150" data-width-unit="px">Date</th>
@@ -46,4 +37,8 @@
         </table>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+{% include 'components/bootstrap_table_sticky_header_js.html' with table_id='fees-table' export_filename='fees_export' %}
 {% endblock %}

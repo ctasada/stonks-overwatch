@@ -6,12 +6,54 @@
 <script src="{% static 'bootstrap-table/dist/extensions/export/bootstrap-table-export.min.js' %}"></script>
 <script src="{% static 'bootstrap-table/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.js' %}"></script>
 
+<!--
+    Bootstrap Table Sticky Header Component
+
+    Purpose: Initializes Bootstrap Table with sticky headers, search, pagination, export, and dynamic height calculation
+
+    Required Parameters:
+        - table_id: The HTML ID of the table element (e.g., 'trades-table')
+        - export_filename: The name for exported CSV files (e.g., 'trades_export')
+
+    Optional Parameters:
+        - sort_name: Column name to sort by default (default: 'date')
+        - min_height: Minimum table height in pixels (default: 400)
+                      Pass a positive integer. Values < 400 are automatically increased to 400 to ensure
+                      the table remains usable (enough space for header, pagination, and at least a few rows).
+
+    Configuration:
+        The table is initialized with the following features:
+        - Search: Enabled (search box above table)
+        - Pagination: Enabled with options [10, 25, 50, 100, 200, 'All']
+        - Default page size: 10 rows
+        - Sorting: Enabled, default sort by 'date' column descending
+        - Column visibility toggle: Enabled
+        - CSV Export: Enabled
+        - Sticky header: Enabled (header stays visible when scrolling)
+        - Dynamic height: Table height adjusts to available viewport space
+
+    Usage:
+        Include this component in your template's extra_js block:
+        - Required: table_id='my-table' export_filename='my_export'
+        - Optional: sort_name='date' min_height=600
+
+        Example: See account_overview.html, deposits.html, fees.html, or trades.html
+-->
+
 <script>
     $(document).ready(function() {
         // Constants for height calculations
         var VIEWPORT_HEIGHT_OFFSET = 100; // Accounts for navbar, padding, and margins above scrollable area
         var TABLE_CONTAINER_PADDING = 55; // Accounts for page title, margins, and spacing below table container
-        var MIN_TABLE_HEIGHT = 400; // Minimum table height in pixels to ensure usability
+        var DEFAULT_MIN_TABLE_HEIGHT = 400; // Default minimum table height
+
+        // Parse and validate min_height parameter
+        // Values < 400 are clamped to 400px to ensure table usability (header + pagination + content rows)
+        // Values >= 400 are preserved as-is
+        var parsedHeight = parseInt("{{ min_height|default:400|escapejs }}", 10);
+        var MIN_TABLE_HEIGHT = (isNaN(parsedHeight) || parsedHeight < DEFAULT_MIN_TABLE_HEIGHT)
+            ? DEFAULT_MIN_TABLE_HEIGHT
+            : parsedHeight;
 
         // Function to calculate dynamic table height based on available screen space
         function calculateTableHeight() {
@@ -49,51 +91,70 @@
 
         var tableHeight = calculateTableHeight();
 
-        // Initialize table with all options including sticky-header
+        // Initialize Bootstrap Table with all configuration options
+        // This replaces the old data-* attributes that were previously on the table element
         $table.bootstrapTable({
-            search: true,
-            pagination: true,
-            paginationLoop: false,
-            pageList: [10, 25, 50, 100, 200, 'All'],
-            paginationParts: ['pageInfo', 'pageList', 'pageSize'],
-            pageSize: 10,
-            sortable: true,
-            sortOrder: 'desc',
-            sortName: '{{ sort_name|default:"date" }}',
-            icons: 'icons',
-            iconsPrefix: 'bi',
-            fixedScroll: true,
-            classes: 'table table-hover',
-            showColumns: true,
-            showExport: true,
-            exportTypes: ['csv'],
+            // Search & Filter
+            search: true,                           // Enable search box
+
+            // Pagination
+            pagination: true,                       // Enable pagination
+            paginationLoop: false,                  // Don't loop pagination (no wrap around)
+            pageList: [10, 25, 50, 100, 200, 'All'], // Available page size options
+            paginationParts: ['pageInfo', 'pageList', 'pageSize'], // Show page info, size selector, and list
+            pageSize: 10,                           // Default page size
+
+            // Sorting
+            sortable: true,                         // Enable column sorting
+            sortOrder: 'desc',                      // Default sort order (descending)
+            sortName: '{{ sort_name|default:"date" }}', // Default sort column (configurable via sort_name parameter)
+
+            // Icons (Bootstrap Icons)
+            icons: 'icons',                         // Use icon set
+            iconsPrefix: 'bi',                      // Bootstrap Icons prefix
+
+            // Layout & Styling
+            fixedScroll: true,                      // Fixed scroll behavior
+            classes: 'table table-hover',           // Bootstrap table classes
+
+            // Features
+            showColumns: true,                      // Show column visibility toggle
+            showExport: true,                       // Show export button
+            exportTypes: ['csv'],                   // Export formats (CSV)
             exportOptions: {
-                fileName: '{{ export_filename }}',
-                ignoreColumn: []
+                fileName: '{{ export_filename }}',  // Export filename (required parameter)
+                ignoreColumn: []                    // Export all columns
             },
-            stickyHeader: true,
-            stickyHeaderOffsetY: navbarHeight,
-            height: tableHeight
+
+            // Sticky Header Extension
+            stickyHeader: true,                     // Enable sticky header
+            stickyHeaderOffsetY: navbarHeight,      // Offset for navbar
+
+            // Dynamic Height
+            height: tableHeight                     // Calculated dynamic height
         });
 
         // Recalculate height on window resize
+        // Debounced to avoid excessive recalculations during continuous resize events
         var resizeTimeout;
         var resizeHandler = function() {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(function() {
                 var newHeight = calculateTableHeight();
                 $table.bootstrapTable('resetView', { height: newHeight });
-            }, 100);
+            }, 100); // 100ms debounce delay
         };
         $(window).on('resize', resizeHandler);
 
-        // Remove overflow from scrollable-area to allow sticky positioning and recalculate height
+        // Recalculate height after initialization to ensure proper sizing
+        // Delay is necessary because:
+        // 1. Bootstrap Table needs time to complete its DOM manipulation (wrapping, adding controls)
+        // 2. Browser needs time to calculate actual element positions after table initialization
+        // 3. The table container's final offset().top is only accurate after full render
+        // 300ms provides sufficient time for Bootstrap Table initialization + DOM layout completion
         setTimeout(function() {
-            $('.scrollable-area').css('overflow', 'visible');
-            setTimeout(function() {
-                var updatedHeight = calculateTableHeight();
-                $table.bootstrapTable('resetView', { height: updatedHeight });
-            }, 100);
+            var updatedHeight = calculateTableHeight();
+            $table.bootstrapTable('resetView', { height: updatedHeight });
         }, 300);
 
         // Fix dropdown positioning by triggering Popper recalculation
@@ -137,6 +198,11 @@
         }
 
         // Start observing after Bootstrap Table initializes
+        // Delay is necessary to ensure:
+        // 1. Bootstrap Table has completed DOM manipulation (creates dropdown-menu elements)
+        // 2. All Bootstrap dropdowns are fully initialized
+        // 3. The dropdown elements exist in the DOM before we attach observers
+        // 500ms provides sufficient time for Bootstrap Table + Bootstrap dropdown initialization
         setTimeout(function() {
             $('.bootstrap-table .dropdown-menu').each(function() {
                 observer.observe(this, { attributes: true, attributeFilter: ['class'] });
