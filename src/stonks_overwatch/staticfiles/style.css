@@ -1304,6 +1304,36 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     pointer-events: auto;
 }
 
+/* Fix gap between showColumns and showExport buttons in toolbar */
+/* Remove inline-block display that creates unwanted spacing */
+.bootstrap-table .fixed-table-toolbar .columns,
+.bootstrap-table .fixed-table-toolbar .export {
+    display: inline-flex !important;
+}
+
+.bootstrap-table .fixed-table-toolbar .columns .btn-group,
+.bootstrap-table .fixed-table-toolbar .export .btn-group {
+    display: inline-flex !important;
+}
+
+/* Add subtle 1px divider between buttons for visual separation */
+.bootstrap-table .fixed-table-toolbar .columns {
+    border-right: 1px solid var(--dropdown-custom-border);
+}
+
+/* Make buttons flush with each other by removing border radius on touching sides */
+.bootstrap-table .fixed-table-toolbar .columns .dropdown-toggle {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    margin-right: 0 !important;
+}
+
+.bootstrap-table .fixed-table-toolbar .export .dropdown-toggle {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    margin-left: 0 !important;
+}
+
 /* ---------------------------------------------------
     END BOOTSTRAP TABLE FIXES
 ----------------------------------------------------- */
