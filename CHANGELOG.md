@@ -18,6 +18,7 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 ### Changed
 
 - Renamed "Transactions" to "Trades" to better reflect its content
+- Enhanced table functionality at **Deposits**, **Fees**, **Transactions**, and **Account Statement** sections
 
 ### Fixed
 
