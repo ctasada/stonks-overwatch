@@ -52,14 +52,15 @@ class TradesService(BaseService, TradeServiceInterface):
                     time=transaction["date"].strftime(LocalizationUtility.TIME_FORMAT),
                     buy_sell=self.__convert_buy_sell(transaction["buysell"]),
                     transaction_type=TransactionType.from_int(transaction["transactionTypeId"]).to_string(),
-                    price=LocalizationUtility.format_money_value(transaction["price"], currency=info["currency"]),
+                    price=transaction["price"],
+                    currency=info["currency"],
                     quantity=transaction["quantity"],
-                    total=LocalizationUtility.format_money_value(value=transaction["total"], currency=info["currency"]),
-                    total_in_base_currency=LocalizationUtility.format_money_value(
-                        value=transaction["totalInBaseCurrency"],
-                        currency=self.base_currency,
-                    ),
-                    fees=LocalizationUtility.format_money_value(value=fees, currency=self.base_currency),
+                    total=transaction["total"],
+                    total_currency=info["currency"],
+                    total_in_base_currency=transaction["totalInBaseCurrency"],
+                    base_currency=self.base_currency,
+                    fees=fees,
+                    fees_currency=self.base_currency,
                 )
             )
 

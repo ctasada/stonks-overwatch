@@ -41,10 +41,10 @@
                     <td>{{ trade.symbol }}</td>
                     <td>{{ trade.name }}</td>
                     <td>{{ trade.quantity }}</td>
-                    <td>{{ trade.price }}</td>
-                    <td>{{ trade.total }}</td>
-                    <td>{{ trade.total_in_base_currency }}</td>
-                    <td>{{ trade.fees }}</td>
+                    <td>{{ trade.formatted_price }}</td>
+                    <td>{{ trade.formatted_total }}</td>
+                    <td>{{ trade.formatted_total_in_base_currency }}</td>
+                    <td>{{ trade.formatted_fees }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

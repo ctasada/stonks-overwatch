@@ -42,23 +42,15 @@ class TradesService(BaseService, TradeServiceInterface):
                     time=TradesService.format_time(transaction["executedAt"]),
                     buy_sell=self.__convert_buy_sell(transaction["type"]),
                     transaction_type=self.__transaction_type(transaction["type"]),
-                    price=LocalizationUtility.format_money_value(
-                        transaction.get("priceAmount") or 0.0,
-                        currency=transaction.get("priceCurrency") or self.base_currency,
-                    ),
+                    price=transaction.get("priceAmount") or 0.0,
+                    currency=transaction.get("priceCurrency") or self.base_currency,
                     quantity=transaction["receivedAmount"],
-                    total=LocalizationUtility.format_money_value(
-                        value=transaction.get("sentAmount") or 0.0,
-                        currency=transaction.get("sentCurrency") or self.base_currency,
-                    ),
-                    total_in_base_currency=LocalizationUtility.format_money_value(
-                        value=transaction.get("sentAmount") or 0.0,
-                        currency=transaction.get("sentCurrency") or self.base_currency,
-                    ),
-                    fees=LocalizationUtility.format_money_value(
-                        value=transaction.get("feesAmount") or 0.0,
-                        currency=transaction.get("feesCurrency") or self.base_currency,
-                    ),
+                    total=transaction.get("sentAmount") or 0.0,
+                    total_currency=transaction.get("sentCurrency") or self.base_currency,
+                    total_in_base_currency=transaction.get("sentAmount") or 0.0,
+                    base_currency=self.base_currency,
+                    fees=transaction.get("feesAmount") or 0.0,
+                    fees_currency=transaction.get("feesCurrency") or self.base_currency,
                 )
             )
 
