@@ -7,6 +7,7 @@
 :root {
     --primary-color: #7386D5;
     --primary-dark: #6D7FCC;
+    --primary-hover: #6A7ED2;
     --primary-light: #A6B9FF;
     --primary-lighter: #D0E0FF;
 
@@ -52,6 +53,9 @@
     --dropdown-custom-hover-color: black;
     --dropdown-custom-active-bg: var(--primary-color);
     --dropdown-custom-active-color: white;
+
+    /* Bootstrap Table control dimensions */
+    --bootstrap-table-control-height: 38px;
 }
 
 /* Base Styles */
@@ -999,7 +1003,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 /* Bootstrap Table Pagination Styles */
 .bootstrap-table .btn:focus, .bootstrap-table .btn:hover {
-    background-color: #6A7ED2;
+    background-color: var(--primary-hover);
 }
 .bootstrap-table .btn {
     background-color: var(--primary-color);
@@ -1064,6 +1068,67 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .bootstrap-table .page-size-selector:focus {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 0.2rem rgba(115, 134, 213, 0.25);
+}
+
+/* Bootstrap Table Page Jump To Component Styling */
+.bootstrap-table .fixed-table-pagination .page-jump-to {
+    margin-left: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    height: var(--bootstrap-table-control-height);
+}
+
+.bootstrap-table .fixed-table-pagination .page-jump-to .input-group {
+    height: 100%;
+    display: inline-flex;
+    align-items: center;
+}
+
+.bootstrap-table .fixed-table-pagination .page-jump-to .input-group input {
+    height: var(--bootstrap-table-control-height);
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--primary-color);
+    border-color: #dee2e6;
+    background-color: white;
+    border-radius: 0.25rem 0 0 0.25rem;
+    width: 60px; /* Narrow width for page number input */
+    text-align: center;
+}
+
+.bootstrap-table .fixed-table-pagination .page-jump-to .input-group input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(115, 134, 213, 0.25);
+    outline: 0;
+}
+
+.bootstrap-table .fixed-table-pagination .page-jump-to .input-group .btn {
+    height: var(--bootstrap-table-control-height);
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    border-radius: 0 0.25rem 0.25rem 0;
+    border-left: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bootstrap-table .fixed-table-pagination .page-jump-to .input-group .btn:hover,
+.bootstrap-table .fixed-table-pagination .page-jump-to .input-group .btn:focus {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+    color: white;
+}
+
+.bootstrap-table .fixed-table-pagination .page-jump-to .input-group .btn:active {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+    color: white;
 }
 
 .table td, .table th {

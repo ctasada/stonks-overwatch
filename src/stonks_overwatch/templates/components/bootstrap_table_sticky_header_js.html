@@ -5,6 +5,7 @@
 <!-- Bootstrap Table Extensions -->
 <script src="{% static 'bootstrap-table/dist/extensions/export/bootstrap-table-export.min.js' %}"></script>
 <script src="{% static 'bootstrap-table/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.js' %}"></script>
+<script src="{% static 'bootstrap-table/dist/extensions/page-jump-to/bootstrap-table-page-jump-to.min.js' %}"></script>
 
 <!--
     Bootstrap Table Sticky Header Component
@@ -118,6 +119,8 @@
             classes: 'table table-hover',           // Bootstrap table classes
 
             // Features
+            showJumpTo: true,                       // Show jump to page control (will be conditionally hidden if <= 5 pages)
+            showPaginationSwitch: true,             // Show pagination toggle
             showColumns: true,                      // Show column visibility toggle
             showExport: true,                       // Show export button
             exportTypes: ['csv'],                   // Export formats (CSV)
@@ -131,8 +134,44 @@
             stickyHeaderOffsetY: navbarHeight,      // Offset for navbar
 
             // Dynamic Height
-            height: tableHeight                     // Calculated dynamic height
+            height: tableHeight,                    // Calculated dynamic height
+
+            // Event handlers
+            onPostBody: function() {
+                // Conditionally show/hide jump-to component based on total pages
+                updateJumpToVisibility();
+            },
+            onPageChange: function() {
+                // Update visibility when page changes (in case total pages changed)
+                updateJumpToVisibility();
+            },
+            onPageChangeSize: function() {
+                // Update visibility when page size changes (total pages may change)
+                // This callback is executed by Bootstrap Table after the page size change is complete
+                updateJumpToVisibility();
+            },
+            onToggle: function() {
+                // Update visibility when pagination is toggled on/off
+                // This callback is executed by Bootstrap Table after the toggle is complete
+                updateJumpToVisibility();
+            },
+            onRefresh: function() {
+                // Update visibility when table is refreshed
+                updateJumpToVisibility();
+            }
         });
+
+        // Helper function to conditionally show/hide jump-to component
+        function updateJumpToVisibility() {
+            var totalPages = $table.bootstrapTable('getOptions').totalPages;
+            var $jumpTo = $table.closest('.bootstrap-table').find('.page-jump-to');
+
+            if (totalPages <= 5) {
+                $jumpTo.hide();
+            } else {
+                $jumpTo.show();
+            }
+        }
 
         // Recalculate height on window resize
         // Debounced to avoid excessive recalculations during continuous resize events
@@ -155,6 +194,8 @@
         setTimeout(function() {
             var updatedHeight = calculateTableHeight();
             $table.bootstrapTable('resetView', { height: updatedHeight });
+            // Update jump-to visibility after table is fully initialized
+            updateJumpToVisibility();
         }, 300);
 
         // Fix dropdown positioning by triggering Popper recalculation
