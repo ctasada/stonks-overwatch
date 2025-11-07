@@ -1070,6 +1070,33 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     box-shadow: 0 0 0 0.2rem rgba(115, 134, 213, 0.25);
 }
 
+/* Reduce height of pagination detail buttons */
+.bootstrap-table .fixed-table-pagination .pagination-detail button {
+    height: var(--bootstrap-table-control-height);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Reduce height of pagination container div (but not the ul inside) */
+.bootstrap-table .fixed-table-pagination .float-right.pagination > div {
+    height: var(--bootstrap-table-control-height);
+    display: inline-flex;
+    align-items: center;
+    line-height: 1.5;
+}
+
+/* Reduce height of input inside pagination container div */
+.bootstrap-table .fixed-table-pagination .float-right.pagination > div > input {
+    height: var(--bootstrap-table-control-height);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
 /* Bootstrap Table Page Jump To Component Styling */
 .bootstrap-table .fixed-table-pagination .page-jump-to {
     margin-left: 0.5rem;
