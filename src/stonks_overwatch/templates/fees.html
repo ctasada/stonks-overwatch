@@ -18,7 +18,8 @@
         <table id="fees-table">
             <thead>
                 <tr>
-                    <th data-field="date" data-sortable="true" data-width="150" data-width-unit="px">Date</th>
+                    <th data-field="date" data-sortable="true" data-width="100" data-width-unit="px" data-formatter="dateTimeFormatter">Date</th>
+                    <th data-field="time" data-sortable="true" data-width="100" data-width-unit="px" data-visible="false">Time</th>
                     <th data-field="type" data-sortable="true" data-width="100" data-width-unit="px">Type</th>
                     <th data-field="description" data-sortable="true">Description</th>
                     <th data-field="fees" data-sortable="true" data-width="100" data-width-unit="px">Fee Amount</th>
@@ -27,7 +28,8 @@
             <tbody>
                 {% for fee in fees %}
                 <tr>
-                    <td>{{ fee.date }}<br><small class="fw-lighter">{{ fee.time }}</small></td>
+                    <td class="text-nowrap">{{ fee.date }}</td>
+                    <td class="text-nowrap">{{ fee.time }}</td>
                     <td><span class="red-pill">{{ fee.type }}</span></td>
                     <td>{{ fee.description }}</td>
                     <td>{{ fee.fee_formatted }}</td>
@@ -37,6 +39,21 @@
         </table>
     </div>
 </div>
+
+<script>
+    function isTimeColumnVisible() {
+        let visibleColumns = $('#fees-table').bootstrapTable('getVisibleColumns');
+        return visibleColumns.some(function(col) { return col.field === 'time'; });
+    }
+
+    function dateTimeFormatter(value, row, index) {
+        if (isTimeColumnVisible()) {
+            return value;
+        } else {
+            return value + '<br><small class="fw-lighter">' + row.time + '</small>';
+        }
+    }
+</script>
 {% endblock %}
 
 {% block extra_js %}

@@ -12,7 +12,8 @@
         <table id="account-overview-table">
             <thead>
                 <tr>
-                    <th data-field="date" data-sortable="true" data-width="100" data-width-unit="px">Date</th>
+                    <th data-field="date" data-sortable="true" data-width="100" data-width-unit="px" data-formatter="dateTimeFormatter">Date</th>
+                    <th data-field="time" data-sortable="true" data-width="100" data-width-unit="px" data-visible="false">Time</th>
                     <th data-field="type" data-sortable="true" data-width="100" data-width-unit="px">Type</th>
                     <th data-field="symbol" data-sortable="true" data-width="100" data-width-unit="px" data-formatter="symbolNameFormatter">Stock</th>
                     <th data-field="name" data-sortable="true" data-visible="false">Name</th>
@@ -24,7 +25,8 @@
             <tbody>
                 {% for statement in account_overview %}
                 <tr>
-                    <td class="text-nowrap">{{ statement.date }}<br><small class="fw-lighter">{{ statement.time }}</small></td>
+                    <td class="text-nowrap">{{ statement.date }}</td>
+                    <td class="text-nowrap">{{ statement.time }}</td>
                     <td>{{ statement.type_str }}</td>
                     <td>{{ statement.stock_symbol }}</td>
                     <td>{{ statement.stock_name }}</td>
@@ -39,6 +41,19 @@
 </div>
 
 <script>
+    function isTimeColumnVisible() {
+        let visibleColumns = $('#account-overview-table').bootstrapTable('getVisibleColumns');
+        return visibleColumns.some(function(col) { return col.field === 'time'; });
+    }
+
+    function dateTimeFormatter(value, row, index) {
+        if (isTimeColumnVisible()) {
+            return value;
+        } else {
+            return value + '<br><small class="fw-lighter">' + row.time + '</small>';
+        }
+    }
+
     function isNameColumnVisible() {
         let visibleColumns = $('#account-overview-table').bootstrapTable('getVisibleColumns');
         return visibleColumns.some(function(col) { return col.field === 'name'; });
