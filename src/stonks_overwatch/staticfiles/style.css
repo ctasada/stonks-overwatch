@@ -1095,6 +1095,8 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     padding: 0.25rem 0.5rem;
     font-size: 0.875rem;
     line-height: 1.5;
+    width: 60px; /* Width sufficient for page numbers */
+    text-align: center;
 }
 
 /* Bootstrap Table Page Jump To Component Styling */
