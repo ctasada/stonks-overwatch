@@ -18,10 +18,14 @@
                     <th data-field="symbol" data-sortable="true" data-formatter="symbolNameFormatter">Stock</th>
                     <th data-field="name" data-sortable="true" data-visible="false">Name</th>
                     <th data-field="quantity" data-sortable="true" data-width="100" data-width-unit="px">Quantity</th>
-                    <th data-field="price" data-sortable="true" data-width="120" data-width-unit="px">Price</th>
+                    <th data-field="price" data-sortable="true" data-width="120" data-width-unit="px" data-formatter="priceFormatter">Price</th>
+                    <th data-field="formatted_price" data-sortable="false" data-width="120" data-width-unit="px" data-visible="false" data-switchable="false">Formatted Price</th>
+                    <th data-field="currency" data-sortable="true" data-width="80" data-width-unit="px" data-visible="false">Currency</th>
                     <th data-field="total" data-sortable="true" data-width="100" data-width-unit="px">Local Value</th>
                     <th data-field="total_in_base_currency" data-sortable="true" data-width="120" data-width-unit="px">Value</th>
-                    <th data-field="fees" data-sortable="true" data-width="100" data-width-unit="px">Fees</th>
+                    <th data-field="fees" data-sortable="true" data-width="100" data-width-unit="px" data-formatter="feesFormatter">Fees</th>
+                    <th data-field="formatted_fees" data-sortable="false" data-width="100" data-width-unit="px" data-visible="false" data-switchable="false">Formatted Fees</th>
+                    <th data-field="fees_currency" data-sortable="true" data-width="80" data-width-unit="px" data-visible="false">Fees Currency</th>
                 </tr>
             </thead>
             <tbody>
@@ -41,10 +45,14 @@
                     <td>{{ trade.symbol }}</td>
                     <td>{{ trade.name }}</td>
                     <td>{{ trade.quantity }}</td>
+                    <td>{{ trade.price }}</td>
                     <td>{{ trade.formatted_price }}</td>
+                    <td>{{ trade.currency }}</td>
                     <td>{{ trade.formatted_total }}</td>
                     <td>{{ trade.formatted_total_in_base_currency }}</td>
+                    <td>{{ trade.fees }}</td>
                     <td>{{ trade.formatted_fees }}</td>
+                    <td>{{ trade.fees_currency }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -76,6 +84,32 @@
             return value;
         } else {
             return value + '<br><small class="fw-lighter">' + row.name + '</small>';
+        }
+    }
+
+    function isCurrencyColumnVisible() {
+        let visibleColumns = $('#trades-table').bootstrapTable('getVisibleColumns');
+        return visibleColumns.some(function(col) { return col.field === 'currency'; });
+    }
+
+    function isFeesCurrencyColumnVisible() {
+        let visibleColumns = $('#trades-table').bootstrapTable('getVisibleColumns');
+        return visibleColumns.some(function(col) { return col.field === 'fees_currency'; });
+    }
+
+    function priceFormatter(value, row, index) {
+        if (isCurrencyColumnVisible()) {
+            return value;
+        } else {
+            return row.formatted_price;
+        }
+    }
+
+    function feesFormatter(value, row, index) {
+        if (isFeesCurrencyColumnVisible()) {
+            return value;
+        } else {
+            return row.formatted_fees;
         }
     }
 </script>

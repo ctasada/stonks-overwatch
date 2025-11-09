@@ -420,6 +420,13 @@ class Trade:
     fees: float
     fees_currency: str
 
+    def __post_init__(self):
+        """Round monetary values to 2 decimal places."""
+        object.__setattr__(self, "price", round(self.price, 2))
+        object.__setattr__(self, "total", round(self.total, 2))
+        object.__setattr__(self, "total_in_base_currency", round(self.total_in_base_currency, 2))
+        object.__setattr__(self, "fees", round(self.fees, 2))
+
     @property
     def formatted_price(self) -> str:
         return LocalizationUtility.format_money_value(value=self.price, currency=self.currency)
