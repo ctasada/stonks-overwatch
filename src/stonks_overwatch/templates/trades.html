@@ -21,8 +21,12 @@
                     <th data-field="price" data-sortable="true" data-width="120" data-width-unit="px" data-formatter="priceFormatter">Price</th>
                     <th data-field="formatted_price" data-sortable="false" data-width="120" data-width-unit="px" data-visible="false" data-switchable="false">Formatted Price</th>
                     <th data-field="currency" data-sortable="true" data-width="80" data-width-unit="px" data-visible="false">Currency</th>
-                    <th data-field="total" data-sortable="true" data-width="100" data-width-unit="px">Local Value</th>
-                    <th data-field="total_in_base_currency" data-sortable="true" data-width="120" data-width-unit="px">Value</th>
+                    <th data-field="total" data-sortable="true" data-width="100" data-width-unit="px" data-formatter="totalFormatter">Local Value</th>
+                    <th data-field="formatted_total" data-sortable="false" data-width="100" data-width-unit="px" data-visible="false" data-switchable="false">Formatted Local Value</th>
+                    <th data-field="total_currency" data-sortable="true" data-width="80" data-width-unit="px" data-visible="false">Local Currency</th>
+                    <th data-field="total_in_base_currency" data-sortable="true" data-width="120" data-width-unit="px" data-formatter="totalInBaseCurrencyFormatter">Value</th>
+                    <th data-field="formatted_total_in_base_currency" data-sortable="false" data-width="120" data-width-unit="px" data-visible="false" data-switchable="false">Formatted Value</th>
+                    <th data-field="base_currency" data-sortable="true" data-width="80" data-width-unit="px" data-visible="false">Base Currency</th>
                     <th data-field="fees" data-sortable="true" data-width="100" data-width-unit="px" data-formatter="feesFormatter">Fees</th>
                     <th data-field="formatted_fees" data-sortable="false" data-width="100" data-width-unit="px" data-visible="false" data-switchable="false">Formatted Fees</th>
                     <th data-field="fees_currency" data-sortable="true" data-width="80" data-width-unit="px" data-visible="false">Fees Currency</th>
@@ -48,8 +52,12 @@
                     <td>{{ trade.price }}</td>
                     <td>{{ trade.formatted_price }}</td>
                     <td>{{ trade.currency }}</td>
+                    <td>{{ trade.total }}</td>
                     <td>{{ trade.formatted_total }}</td>
+                    <td>{{ trade.total_currency }}</td>
+                    <td>{{ trade.total_in_base_currency }}</td>
                     <td>{{ trade.formatted_total_in_base_currency }}</td>
+                    <td>{{ trade.base_currency }}</td>
                     <td>{{ trade.fees }}</td>
                     <td>{{ trade.formatted_fees }}</td>
                     <td>{{ trade.fees_currency }}</td>
@@ -92,6 +100,16 @@
         return visibleColumns.some(function(col) { return col.field === 'currency'; });
     }
 
+    function isTotalCurrencyColumnVisible() {
+        let visibleColumns = $('#trades-table').bootstrapTable('getVisibleColumns');
+        return visibleColumns.some(function(col) { return col.field === 'total_currency'; });
+    }
+
+    function isBaseCurrencyColumnVisible() {
+        let visibleColumns = $('#trades-table').bootstrapTable('getVisibleColumns');
+        return visibleColumns.some(function(col) { return col.field === 'base_currency'; });
+    }
+
     function isFeesCurrencyColumnVisible() {
         let visibleColumns = $('#trades-table').bootstrapTable('getVisibleColumns');
         return visibleColumns.some(function(col) { return col.field === 'fees_currency'; });
@@ -102,6 +120,22 @@
             return value;
         } else {
             return row.formatted_price;
+        }
+    }
+
+    function totalFormatter(value, row, index) {
+        if (isTotalCurrencyColumnVisible()) {
+            return value;
+        } else {
+            return row.formatted_total;
+        }
+    }
+
+    function totalInBaseCurrencyFormatter(value, row, index) {
+        if (isBaseCurrencyColumnVisible()) {
+            return value;
+        } else {
+            return row.formatted_total_in_base_currency;
         }
     }
 
