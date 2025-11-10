@@ -304,3 +304,25 @@ the code will create files in the following path:
 It's possible to easily delete them with `make briefcase-clean`
 
 The Briefcase application is obfuscated with Pyarmor by default, if needed, you can disable it with `make briefcase-package obfuscate=false`
+
+## Debug the Native App
+
+To debug the native application, you can enable debugging mode by setting the environment variable `STONKS_OVERWATCH_DEBUG=true`.
+
+When running the application with `make briefcase-run`, you can do it like this:
+
+```shell
+make briefcase-run debug=true demo=true
+```
+
+It's also interesting to know that it's possible to debug the UI with:
+
+```shell
+defaults write com.caribay.stonks-overwatch WebKitDeveloperExtras -bool true
+```
+
+Then, when running your app:
+1. Open Safari
+2. Go to Develop menu
+3. Select your app's window
+4. Check the Console for errors when you click export
