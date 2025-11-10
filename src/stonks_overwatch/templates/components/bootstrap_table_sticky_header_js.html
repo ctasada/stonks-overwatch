@@ -29,7 +29,7 @@
         - Default page size: 10 rows
         - Sorting: Enabled, default sort by 'date' column descending
         - Column visibility toggle: Enabled
-        - CSV Export: Enabled
+        - CSV Export: Enabled in webapp mode, disabled in Toga WebView
         - Sticky header: Enabled (header stays visible when scrolling)
         - Dynamic height: Table height adjusts to available viewport space
 
@@ -122,7 +122,7 @@
             showJumpTo: true,                       // Show jump to page control (will be conditionally hidden if <= 5 pages)
             showPaginationSwitch: true,             // Show pagination toggle
             showColumns: true,                      // Show column visibility toggle
-            showExport: true,                       // Show export button
+            showExport: {{ is_webapp|lower }},      // Show export button (only enabled in webapp mode, not in Toga WebView)
             exportTypes: ['csv'],                   // Export formats (CSV)
             exportOptions: {
                 fileName: '{{ export_filename }}',  // Export filename (required parameter)

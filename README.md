@@ -95,6 +95,7 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
 * [ ] Provide more information in the Dashboard performance overview
 * [ ] Migrate UI to "https://github.com/coreui/coreui"
 * [ ] Add GitHub Dependabot support for Poetry: Track "https://github.com/dependabot/dependabot-core/issues/11237"
+* [ ] Fix Bootstrap-Table 'Export to CSV' option. The 'Export to CSV' is disabled when using Toga due to WebView limitations.
 * [ ] Dividends
   * [ ] Provide more details about Dividends per year
   * [ ] Should include Dividends in the Deposit Overview?
