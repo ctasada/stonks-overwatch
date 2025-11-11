@@ -28,6 +28,6 @@ jobs:
       - name: Validate package.json and package-lock.json
         run: |
           cd src
-          npm audit --production
+          npm audit --omit=dev
 #          npm run lint
 #          npm test

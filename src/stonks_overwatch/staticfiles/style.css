@@ -7,6 +7,7 @@
 :root {
     --primary-color: #7386D5;
     --primary-dark: #6D7FCC;
+    --primary-hover: #6A7ED2;
     --primary-light: #A6B9FF;
     --primary-lighter: #D0E0FF;
 
@@ -52,6 +53,9 @@
     --dropdown-custom-hover-color: black;
     --dropdown-custom-active-bg: var(--primary-color);
     --dropdown-custom-active-color: white;
+
+    /* Bootstrap Table control dimensions */
+    --bootstrap-table-control-height: 38px;
 }
 
 /* Base Styles */
@@ -999,7 +1003,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 /* Bootstrap Table Pagination Styles */
 .bootstrap-table .btn:focus, .bootstrap-table .btn:hover {
-    background-color: #6A7ED2;
+    background-color: var(--primary-hover);
 }
 .bootstrap-table .btn {
     background-color: var(--primary-color);
@@ -1064,6 +1068,96 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .bootstrap-table .page-size-selector:focus {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 0.2rem rgba(115, 134, 213, 0.25);
+}
+
+/* Reduce height of pagination detail buttons */
+.bootstrap-table .fixed-table-pagination .pagination-detail button {
+    height: var(--bootstrap-table-control-height);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Reduce height of pagination container div (but not the ul inside) */
+.bootstrap-table .fixed-table-pagination .float-right.pagination > div {
+    height: var(--bootstrap-table-control-height);
+    display: inline-flex;
+    align-items: center;
+    line-height: 1.5;
+}
+
+/* Reduce height of input inside pagination container div */
+.bootstrap-table .fixed-table-pagination .float-right.pagination > div > input {
+    height: var(--bootstrap-table-control-height);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    width: 60px; /* Width sufficient for page numbers */
+    text-align: center;
+}
+
+/* Bootstrap Table Page Jump To Component Styling */
+.bootstrap-table .fixed-table-pagination .page-jump-to {
+    margin-left: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    height: var(--bootstrap-table-control-height);
+}
+
+.bootstrap-table .fixed-table-pagination .page-jump-to .input-group {
+    height: 100%;
+    display: inline-flex;
+    align-items: center;
+}
+
+.bootstrap-table .fixed-table-pagination .page-jump-to .input-group input {
+    height: var(--bootstrap-table-control-height);
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--primary-color);
+    border-color: #dee2e6;
+    background-color: white;
+    border-radius: 0.25rem 0 0 0.25rem;
+    width: 60px; /* Narrow width for page number input */
+    text-align: center;
+}
+
+.bootstrap-table .fixed-table-pagination .page-jump-to .input-group input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(115, 134, 213, 0.25);
+    outline: 0;
+}
+
+.bootstrap-table .fixed-table-pagination .page-jump-to .input-group .btn {
+    height: var(--bootstrap-table-control-height);
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    border-radius: 0 0.25rem 0.25rem 0;
+    border-left: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bootstrap-table .fixed-table-pagination .page-jump-to .input-group .btn:hover,
+.bootstrap-table .fixed-table-pagination .page-jump-to .input-group .btn:focus {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+    color: white;
+}
+
+.bootstrap-table .fixed-table-pagination .page-jump-to .input-group .btn:active {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+    color: white;
 }
 
 .table td, .table th {
@@ -1196,12 +1290,12 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 .bootstrap-table .fixed-table-pagination .pagination-detail .page-list .btn-group .dropdown-menu {
     position: absolute !important;
-    top: 100% !important;
+    bottom: 100% !important;
     left: 0 !important;
     z-index: 1055 !important;
     transform: none !important;
     will-change: auto !important;
-    margin-top: 2px;
+    margin-bottom: 2px;
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
 }
 
@@ -1256,9 +1350,10 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 /* Fix for Bootstrap 5 dropdown positioning with Popper.js */
 .bootstrap-table .fixed-table-pagination .dropdown-menu[data-bs-popper] {
     position: absolute !important;
-    top: 100% !important;
+    bottom: 100% !important;
+    top: auto !important;
     left: 0 !important;
-    margin-top: 2px !important;
+    margin-bottom: 2px !important;
 }
 
 /* Ensure proper stacking context for all Bootstrap Table dropdowns */
@@ -1301,6 +1396,36 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     position: relative;
     z-index: 1070;
     pointer-events: auto;
+}
+
+/* Fix gap between showColumns and showExport buttons in toolbar */
+/* Remove inline-block display that creates unwanted spacing */
+.bootstrap-table .fixed-table-toolbar .columns,
+.bootstrap-table .fixed-table-toolbar .export {
+    display: inline-flex !important;
+}
+
+.bootstrap-table .fixed-table-toolbar .columns .btn-group,
+.bootstrap-table .fixed-table-toolbar .export .btn-group {
+    display: inline-flex !important;
+}
+
+/* Add subtle 1px divider between buttons for visual separation */
+.bootstrap-table .fixed-table-toolbar .columns {
+    border-right: 1px solid var(--dropdown-custom-border);
+}
+
+/* Make buttons flush with each other by removing border radius on touching sides */
+.bootstrap-table .fixed-table-toolbar .columns .dropdown-toggle {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    margin-right: 0 !important;
+}
+
+.bootstrap-table .fixed-table-toolbar .export .dropdown-toggle {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    margin-left: 0 !important;
 }
 
 /* ---------------------------------------------------

@@ -125,7 +125,7 @@ class TestAssetLogoView(TestCase):
         self.assertEqual(response.content, b"<svg>test</svg>")
         self.assertEqual(response["Content-Type"], "image/svg+xml")
         mock_get.assert_called_once_with(
-            "https://cdnjs.cloudflare.com/ajax/libs/twemoji/16.0.1/svg/1f1fa-1f1f8.svg", timeout=5
+            "https://cdnjs.cloudflare.com/ajax/libs/twemoji/17.0.0/svg/1f1fa-1f1f8.svg", timeout=5
         )
 
     @patch("requests.get")
@@ -145,7 +145,7 @@ class TestAssetLogoView(TestCase):
         self.assertEqual(response.content, b"<svg>test</svg>")
         self.assertEqual(response["Content-Type"], "image/svg+xml")
         mock_get.assert_called_once_with(
-            "https://cdnjs.cloudflare.com/ajax/libs/twemoji/16.0.1/svg/1f5a5-fe0f.svg", timeout=5
+            "https://cdnjs.cloudflare.com/ajax/libs/twemoji/17.0.0/svg/1f5a5-fe0f.svg", timeout=5
         )
 
     @patch("requests.get")
@@ -179,9 +179,9 @@ class TestAssetLogoView(TestCase):
         # Test with a country flag emoji (🇺🇸)
         emoji = "🇺🇸"
         url = self.view._AssetLogoView__emoji_to_svg(emoji)
-        self.assertEqual(url, "https://cdnjs.cloudflare.com/ajax/libs/twemoji/16.0.1/svg/1f1fa-1f1f8.svg")
+        self.assertEqual(url, "https://cdnjs.cloudflare.com/ajax/libs/twemoji/17.0.0/svg/1f1fa-1f1f8.svg")
 
         # Test with a sector emoji (🖥️)
         emoji = "🖥️"
         url = self.view._AssetLogoView__emoji_to_svg(emoji)
-        self.assertEqual(url, "https://cdnjs.cloudflare.com/ajax/libs/twemoji/16.0.1/svg/1f5a5-fe0f.svg")
+        self.assertEqual(url, "https://cdnjs.cloudflare.com/ajax/libs/twemoji/17.0.0/svg/1f5a5-fe0f.svg")

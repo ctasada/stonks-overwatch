@@ -54,16 +54,17 @@ class TradeService(BaseService, TradeServiceInterface):
                     time=transaction["date"].strftime(LocalizationUtility.TIME_FORMAT),
                     buy_sell=self.__convert_buy_sell(transaction["type"]),
                     transaction_type=transaction["type"],
-                    price=LocalizationUtility.format_money_value(price, currency=transaction["cur"]),
+                    price=price,
+                    currency=transaction["cur"],
                     quantity=transaction["qty"],
                     # FIXME: Validate if amt is always in the same currency as the product
-                    total=LocalizationUtility.format_money_value(value=total, currency=transaction["cur"]),
-                    total_in_base_currency=LocalizationUtility.format_money_value(
-                        value=total,
-                        currency=self.base_currency,
-                    ),
+                    total=total,
+                    total_currency=transaction["cur"],
+                    total_in_base_currency=total,
+                    base_currency=self.base_currency,
                     # FIXME: Find out how to obtain the transaction fees
-                    fees=LocalizationUtility.format_money_value(value=0.0, currency=self.base_currency),
+                    fees=0.0,
+                    fees_currency=self.base_currency,
                 )
             )
 
