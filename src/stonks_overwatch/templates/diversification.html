@@ -8,10 +8,10 @@
     {% if positions and positions.table %}
     {% include 'components/distribution_with_list.html' with chart_id="positions-chart" items=positions.table %}
     {% endif %}
-    {% if crypto and crypto.table %}
-    {% include 'components/distribution_with_list.html' with chart_id="crypto-chart" items=crypto.table %}
-    {% endif %}
     {% include 'components/distribution_with_list.html' with chart_id="sectors-chart" items=sectors.table %}
+    {% if crypto and crypto.table %}
+        {% include 'components/distribution_with_list.html' with chart_id="crypto-chart" items=crypto.table %}
+    {% endif %}
     {% include 'components/distribution_with_list.html' with chart_id="currencies-chart" items=currencies.table %}
     {% if countries and countries.table %}
     {% include 'components/distribution_with_list.html' with chart_id="countries-chart" items=countries.table %}

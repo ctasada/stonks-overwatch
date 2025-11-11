@@ -23,6 +23,10 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 ### Changed
 
 - Add stability indicators for broker integrations and tooltips for unstable portfolios
+- **Portfolio**:
+  - Minor terminology changes for better clarity
+- **Diversification**:
+  - Show "Crypto" after "Sectors" to keep all "Stocks" related data together
 
 ### Fixed
 
