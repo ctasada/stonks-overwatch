@@ -1,30 +1,22 @@
 {% extends 'base.html' %}
 {% load static %}
+
+{% block extra_css %}
+{% include 'components/bootstrap_table_sticky_header_css.html' with table_id='account-overview-table' page_class='account-overview' %}
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid row-gap-5">
     <div class="row border border-primary-subtle bg-light rounded mb-3 position-relative">
         <p class="h4 position-absolute top-0 start-0 z-2 px-3" style="padding-top: 8px; padding-left: 4px">Account Overview</p>
-        <table id="account-overview-table"
-               data-toggle="table"
-               data-search="true"
-               data-pagination="true"
-               data-pagination-loop="false"
-               data-page-list="[10, 25, 50, 100, 200, All]"
-               {#FIXME: pageSize doesn't work. https://bootstrap-table.com/docs/api/table-options/#paginationparts#}
-               data-pagination-parts="['pageInfo','pageList', 'pageSize']"
-               data-page-size="10"
-               data-sortable="true"
-               data-sort-order="desc"
-               data-sort-name="date"
-               data-icons="icons"
-               data-icons-prefix="bi"
-               data-fixed-scroll="true"
-               data-classes="table table-hover">
+        <table id="account-overview-table">
             <thead>
                 <tr>
-                    <th data-field="date" data-sortable="true" data-width="100" data-width-unit="px">Date</th>
+                    <th data-field="date" data-sortable="true" data-width="100" data-width-unit="px" data-formatter="dateTimeFormatter">Date</th>
+                    <th data-field="time" data-sortable="true" data-width="100" data-width-unit="px" data-visible="false">Time</th>
                     <th data-field="type" data-sortable="true" data-width="100" data-width-unit="px">Type</th>
-                    <th data-field="symbol" data-sortable="true" data-width="100" data-width-unit="px">Stock</th>
+                    <th data-field="symbol" data-sortable="true" data-width="100" data-width-unit="px" data-formatter="symbolNameFormatter">Stock</th>
+                    <th data-field="name" data-sortable="true" data-visible="false">Name</th>
                     <th data-field="description" data-sortable="true">Description</th>
                     <th data-field="formated_change" data-sortable="true" data-width="100" data-width-unit="px">Change</th>
                     <th data-field="value_date" data-sortable="true" data-width="100" data-width-unit="px">Value Date</th>
@@ -33,9 +25,11 @@
             <tbody>
                 {% for statement in account_overview %}
                 <tr>
-                    <td class="text-nowrap">{{ statement.date }}<br><small class="fw-lighter">{{ statement.time }}</small></td>
+                    <td class="text-nowrap">{{ statement.date }}</td>
+                    <td class="text-nowrap">{{ statement.time }}</td>
                     <td>{{ statement.type_str }}</td>
-                    <td>{{ statement.stock_symbol }}<br><small class="fw-lighter">{{ statement.stock_name }}</small></td>
+                    <td>{{ statement.stock_symbol }}</td>
+                    <td>{{ statement.stock_name }}</td>
                     <td>{{ statement.description }}</td>
                     <td class="text-nowrap">{{ statement.formated_change }}</td>
                     <td class="text-nowrap">{{ statement.value_date }}<br><small class="fw-lighter">{{ statement.value_time }}</small></td>
@@ -45,4 +39,36 @@
         </table>
     </div>
 </div>
+
+<script>
+    function isTimeColumnVisible() {
+        let visibleColumns = $('#account-overview-table').bootstrapTable('getVisibleColumns');
+        return visibleColumns.some(function(col) { return col.field === 'time'; });
+    }
+
+    function dateTimeFormatter(value, row, index) {
+        if (isTimeColumnVisible()) {
+            return value;
+        } else {
+            return value + '<br><small class="fw-lighter">' + row.time + '</small>';
+        }
+    }
+
+    function isNameColumnVisible() {
+        let visibleColumns = $('#account-overview-table').bootstrapTable('getVisibleColumns');
+        return visibleColumns.some(function(col) { return col.field === 'name'; });
+    }
+
+    function symbolNameFormatter(value, row, index) {
+        if (isNameColumnVisible()) {
+            return value;
+        } else {
+            return value + '<br><small class="fw-lighter">' + row.name + '</small>';
+        }
+    }
+</script>
+{% endblock %}
+
+{% block extra_js %}
+{% include 'components/bootstrap_table_sticky_header_js.html' with table_id='account-overview-table' export_filename='account_overview_export' %}
 {% endblock %}

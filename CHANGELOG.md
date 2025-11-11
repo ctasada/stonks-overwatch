@@ -14,6 +14,9 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
     - Added diversification filter by year
     - Added calendar navigation bars to quickly switch between years
     - Added total dividends per year in the calendar view
+- Enhanced table functionality at **Deposits**, **Fees**, **Transactions**, and **Account Statement** sections:
+    - Added ability to show/hide columns
+    - Added ability to show all the rows in a single page
 
 ### Changed
 

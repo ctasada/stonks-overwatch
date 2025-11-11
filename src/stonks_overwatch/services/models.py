@@ -410,11 +410,38 @@ class Trade:
     time: str
     buy_sell: str
     transaction_type: str
-    price: str
+    price: float
+    currency: str
     quantity: float
-    total: str
-    total_in_base_currency: str
-    fees: str
+    total: float
+    total_currency: str
+    total_in_base_currency: float
+    base_currency: str
+    fees: float
+    fees_currency: str
+
+    def __post_init__(self):
+        """Round monetary values to 2 decimal places."""
+        object.__setattr__(self, "price", round(self.price, 2))
+        object.__setattr__(self, "total", round(self.total, 2))
+        object.__setattr__(self, "total_in_base_currency", round(self.total_in_base_currency, 2))
+        object.__setattr__(self, "fees", round(self.fees, 2))
+
+    @property
+    def formatted_price(self) -> str:
+        return LocalizationUtility.format_money_value(value=self.price, currency=self.currency)
+
+    @property
+    def formatted_total(self) -> str:
+        return LocalizationUtility.format_money_value(value=self.total, currency=self.total_currency)
+
+    @property
+    def formatted_total_in_base_currency(self) -> str:
+        return LocalizationUtility.format_money_value(value=self.total_in_base_currency, currency=self.base_currency)
+
+    @property
+    def formatted_fees(self) -> str:
+        return LocalizationUtility.format_money_value(value=self.fees, currency=self.fees_currency)
 
 
 def dataclass_to_dict(obj) -> dict:

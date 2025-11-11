@@ -1,40 +1,42 @@
 {% extends 'base.html' %}
 {% load static %}
+
+{% block extra_css %}
+{% include 'components/bootstrap_table_sticky_header_css.html' with table_id='trades-table' page_class='trades' %}
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid row-gap-5">
     <div class="row border border-primary-subtle bg-light rounded mb-3 position-relative">
         <p class="h4 position-absolute top-0 start-0 z-2 px-3" style="padding-top: 8px; padding-left: 4px">Trades</p>
-        <table id="trades-table"
-               data-toggle="table"
-               data-search="true"
-               data-pagination="true"
-               data-pagination-loop="false"
-               data-page-list="[10, 25, 50, 100, 200, All]"
-               data-pagination-parts="['pageInfo','pageList', 'pageSize']"
-               data-page-size="10"
-               data-sortable="true"
-               data-sort-order="desc"
-               data-sort-name="date"
-               data-icons="icons"
-               data-icons-prefix="bi"
-               data-fixed-scroll="true"
-               data-classes="table table-hover">
+        <table id="trades-table">
             <thead>
                 <tr>
-                    <th data-field="date" data-sortable="true" data-width="100" data-width-unit="px">Date</th>
+                    <th data-field="date" data-sortable="true" data-width="100" data-width-unit="px" data-formatter="dateTimeFormatter">Date</th>
+                    <th data-field="time" data-sortable="true" data-width="100" data-width-unit="px" data-visible="false">Time</th>
                     <th data-field="buy_sell" data-sortable="true" data-width="100" data-width-unit="px">Action</th>
-                    <th data-field="symbol" data-sortable="true">Stock</th>
-                    <th data-field="price" data-sortable="true" data-width="120" data-width-unit="px">Price</th>
+                    <th data-field="symbol" data-sortable="true" data-formatter="symbolNameFormatter">Stock</th>
+                    <th data-field="name" data-sortable="true" data-visible="false">Name</th>
                     <th data-field="quantity" data-sortable="true" data-width="100" data-width-unit="px">Quantity</th>
-                    <th data-field="total" data-sortable="true" data-width="100" data-width-unit="px">Local Value</th>
-                    <th data-field="total_in_base_currency" data-sortable="true" data-width="120" data-width-unit="px">Value</th>
-                    <th data-field="fees" data-sortable="true" data-width="100" data-width-unit="px">Fees</th>
+                    <th data-field="price" data-sortable="true" data-width="120" data-width-unit="px" data-formatter="priceFormatter">Price</th>
+                    <th data-field="formatted_price" data-sortable="false" data-width="120" data-width-unit="px" data-visible="false" data-switchable="false">Formatted Price</th>
+                    <th data-field="currency" data-sortable="true" data-width="80" data-width-unit="px" data-visible="false">Currency</th>
+                    <th data-field="total" data-sortable="true" data-width="100" data-width-unit="px" data-formatter="totalFormatter">Local Value</th>
+                    <th data-field="formatted_total" data-sortable="false" data-width="100" data-width-unit="px" data-visible="false" data-switchable="false">Formatted Local Value</th>
+                    <th data-field="total_currency" data-sortable="true" data-width="80" data-width-unit="px" data-visible="false">Local Currency</th>
+                    <th data-field="total_in_base_currency" data-sortable="true" data-width="120" data-width-unit="px" data-formatter="totalInBaseCurrencyFormatter">Value</th>
+                    <th data-field="formatted_total_in_base_currency" data-sortable="false" data-width="120" data-width-unit="px" data-visible="false" data-switchable="false">Formatted Value</th>
+                    <th data-field="base_currency" data-sortable="true" data-width="80" data-width-unit="px" data-visible="false">Base Currency</th>
+                    <th data-field="fees" data-sortable="true" data-width="100" data-width-unit="px" data-formatter="feesFormatter">Fees</th>
+                    <th data-field="formatted_fees" data-sortable="false" data-width="100" data-width-unit="px" data-visible="false" data-switchable="false">Formatted Fees</th>
+                    <th data-field="fees_currency" data-sortable="true" data-width="80" data-width-unit="px" data-visible="false">Fees Currency</th>
                 </tr>
             </thead>
             <tbody>
                 {% for trade in trades %}
                 <tr>
-                    <td class="text-nowrap">{{ trade.date }}<br><small class="fw-lighter">{{ trade.time }}</small></td>
+                    <td class="text-nowrap">{{ trade.date }}</td>
+                    <td class="text-nowrap">{{ trade.time }}</td>
                     <td>
                         {% if trade.buy_sell == "Buy" %}
                         <span class="green-pill">{{ trade.buy_sell }}</span>
@@ -44,16 +46,109 @@
                         <br>
                         <small class="fw-lighter">{{ trade.transaction_type }}</small>
                     </td>
-                    <td>{{ trade.symbol }}<br><small class="fw-lighter">{{ trade.name }}</small></td>
-                    <td>{{ trade.price }}</td>
+                    <td>{{ trade.symbol }}</td>
+                    <td>{{ trade.name }}</td>
                     <td>{{ trade.quantity }}</td>
+                    <td>{{ trade.price }}</td>
+                    <td>{{ trade.formatted_price }}</td>
+                    <td>{{ trade.currency }}</td>
                     <td>{{ trade.total }}</td>
+                    <td>{{ trade.formatted_total }}</td>
+                    <td>{{ trade.total_currency }}</td>
                     <td>{{ trade.total_in_base_currency }}</td>
+                    <td>{{ trade.formatted_total_in_base_currency }}</td>
+                    <td>{{ trade.base_currency }}</td>
                     <td>{{ trade.fees }}</td>
+                    <td>{{ trade.formatted_fees }}</td>
+                    <td>{{ trade.fees_currency }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+
+<script>
+    function isTimeColumnVisible() {
+        let visibleColumns = $('#trades-table').bootstrapTable('getVisibleColumns');
+        return visibleColumns.some(function(col) { return col.field === 'time'; });
+    }
+
+    function dateTimeFormatter(value, row, index) {
+        if (isTimeColumnVisible()) {
+            return value;
+        } else {
+            return value + '<br><small class="fw-lighter">' + row.time + '</small>';
+        }
+    }
+
+    function isNameColumnVisible() {
+        let visibleColumns = $('#trades-table').bootstrapTable('getVisibleColumns');
+        return visibleColumns.some(function(col) { return col.field === 'name'; });
+    }
+
+    function symbolNameFormatter(value, row, index) {
+        if (isNameColumnVisible()) {
+            return value;
+        } else {
+            return value + '<br><small class="fw-lighter">' + row.name + '</small>';
+        }
+    }
+
+    function isCurrencyColumnVisible() {
+        let visibleColumns = $('#trades-table').bootstrapTable('getVisibleColumns');
+        return visibleColumns.some(function(col) { return col.field === 'currency'; });
+    }
+
+    function isTotalCurrencyColumnVisible() {
+        let visibleColumns = $('#trades-table').bootstrapTable('getVisibleColumns');
+        return visibleColumns.some(function(col) { return col.field === 'total_currency'; });
+    }
+
+    function isBaseCurrencyColumnVisible() {
+        let visibleColumns = $('#trades-table').bootstrapTable('getVisibleColumns');
+        return visibleColumns.some(function(col) { return col.field === 'base_currency'; });
+    }
+
+    function isFeesCurrencyColumnVisible() {
+        let visibleColumns = $('#trades-table').bootstrapTable('getVisibleColumns');
+        return visibleColumns.some(function(col) { return col.field === 'fees_currency'; });
+    }
+
+    function priceFormatter(value, row, index) {
+        if (isCurrencyColumnVisible()) {
+            return value;
+        } else {
+            return row.formatted_price;
+        }
+    }
+
+    function totalFormatter(value, row, index) {
+        if (isTotalCurrencyColumnVisible()) {
+            return value;
+        } else {
+            return row.formatted_total;
+        }
+    }
+
+    function totalInBaseCurrencyFormatter(value, row, index) {
+        if (isBaseCurrencyColumnVisible()) {
+            return value;
+        } else {
+            return row.formatted_total_in_base_currency;
+        }
+    }
+
+    function feesFormatter(value, row, index) {
+        if (isFeesCurrencyColumnVisible()) {
+            return value;
+        } else {
+            return row.formatted_fees;
+        }
+    }
+</script>
+{% endblock %}
+
+{% block extra_js %}
+{% include 'components/bootstrap_table_sticky_header_js.html' with table_id='trades-table' export_filename='trades_export' %}
 {% endblock %}

@@ -95,6 +95,7 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
 * [ ] Provide more information in the Dashboard performance overview
 * [ ] Migrate UI to "https://github.com/coreui/coreui"
 * [ ] Add GitHub Dependabot support for Poetry: Track "https://github.com/dependabot/dependabot-core/issues/11237"
+* [ ] Fix Bootstrap-Table 'Export to CSV' option. The 'Export to CSV' is disabled when using Toga due to WebView limitations.
 * [ ] Dividends
   * [ ] Provide more details about Dividends per year
   * [ ] Should include Dividends in the Deposit Overview?
@@ -153,7 +154,7 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
 
 ## Logos
 
-* [Brandfetch](https://docs.brandfetch.com/docs/getting-started) (requires API Key)
+* [Brandfetch](https://docs.brandfetch.com/docs/getting-started) (requires API Key) [100 requests/month free]
 * [Alpaca](https://docs.alpaca.markets/docs/getting-started-with-alpaca-market-data) (Logos and Data) (requires API Key)
 * [EOHD](https://eodhd.com/financial-apis-blog/40000-company-logos) (requires API Key)
 * [nvstly](https://github.com/nvstly/icons) (misses icons)

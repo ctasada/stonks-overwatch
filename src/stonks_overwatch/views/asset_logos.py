@@ -46,6 +46,9 @@ class AssetLogoView(View):
     logger = StonksLogger.get_logger("stonks_overwatch.dashboard.views", "[VIEW|ASSET_LOGO]")
     SVG_CONTENT_TYPE = "image/svg+xml"
 
+    # Twemoji CDN base URL. See https://github.com/jdecked/twemoji
+    TWEMOJI_CDN_BASE_URL = "https://cdnjs.cloudflare.com/ajax/libs/twemoji/17.0.0/svg"
+
     # Keep track of alternatives as NVSTly
     # return f"https://raw.githubusercontent.com/nvstly/icons/main/ticker_icons/{symbol.upper()}.png"
     # https://img.stockanalysis.com/logos1/MC/IBE.png
@@ -114,8 +117,8 @@ class AssetLogoView(View):
         # Convert emoji to its Unicode codepoint
         codepoint = "-".join(f"{ord(c):x}" for c in emoji_char)
 
-        # Twemoji URL for the SVG. See https://github.com/jdecked/twemoji
-        return f"https://cdnjs.cloudflare.com/ajax/libs/twemoji/16.0.1/svg/{codepoint}.svg"
+        # Return Twemoji SVG URL
+        return f"{self.TWEMOJI_CDN_BASE_URL}/{codepoint}.svg"
 
     def __generate_enhanced_flag_svg(self, emoji_char: str) -> str:
         """Generate an enhanced SVG for country flags with better circular presentation."""
@@ -124,7 +127,7 @@ class AssetLogoView(View):
 
         try:
             # First, try to fetch the actual SVG content from Twemoji
-            twemoji_url = f"https://cdnjs.cloudflare.com/ajax/libs/twemoji/16.0.1/svg/{codepoint}.svg"
+            twemoji_url = f"{self.TWEMOJI_CDN_BASE_URL}/{codepoint}.svg"
             response = requests.get(twemoji_url, timeout=5)
             response.raise_for_status()
 
