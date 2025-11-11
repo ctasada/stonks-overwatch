@@ -10,5 +10,8 @@
         "jquery": "^3.7.1",
         "luxon": "^3.7.2",
         "tableexport.jquery.plugin": "^1.33.0"
+    },
+    "overrides": {
+        "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
     }
 }
