@@ -128,8 +128,16 @@ license-check: ## Check license compatibility
 
 generate-third-party: ## Generate third-party licenses file
 	@echo -e  "$(BOLD)$(BLUE)Generating third-party licenses...$(RESET)"
+	@echo -e  "$(YELLOW)Extracting Python dependencies...$(RESET)"
+	@rm -f THIRD_PARTY_LICENSES.txt
 	@packages=$$(poetry show --only=main | awk '{print $$1}'); \
-	poetry run pip-licenses --packages $$packages
+	poetry run pip-licenses --packages $$packages --with-license-file --no-license-path > /dev/null
+	@echo -e  "$(YELLOW)Extracting NodeJS dependencies...$(RESET)"
+	@cd $(SRC_DIR) && npx --yes license-checker --production --json --relativeLicensePath > ../npm-licenses.json
+	@echo -e  "$(YELLOW)Combining licenses...$(RESET)"
+	@poetry run python scripts/combine_licenses.py
+	@rm -f npm-licenses.json
+	@echo -e  "$(GREEN)Third-party licenses saved to THIRD_PARTY_LICENSES.txt$(RESET)"
 
 check-dependencies: ## Check for dependency issues
 	@echo -e  "$(BOLD)$(BLUE)Checking dependencies...$(RESET)"
