@@ -429,8 +429,6 @@ the code will create files in the following path:
 
 It's possible to easily delete them with `make briefcase-clean`
 
-The Briefcase application is obfuscated with Pyarmor by default, if needed, you can disable it with `make briefcase-package obfuscate=false`
-
 ## Debug the Native App
 
 To debug the native application, you can enable debugging mode by setting the environment variable `STONKS_OVERWATCH_DEBUG=true`.
