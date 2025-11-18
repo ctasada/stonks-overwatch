@@ -5,7 +5,6 @@ from asgiref.sync import sync_to_async
 from toga.dialogs import ConfirmDialog, ErrorDialog, InfoDialog, SaveFileDialog
 
 from stonks_overwatch.app.dialogs.download_dialog import DownloadDialog
-from stonks_overwatch.app.dialogs.expired_dialog import ExpiredDialog
 from stonks_overwatch.app.dialogs.preferences_dialog import PreferencesDialog
 from stonks_overwatch.app.dialogs.release_notes_dialog import ReleaseNotesDialog
 from stonks_overwatch.services.utilities.google_drive_service import GoogleDriveService
@@ -14,7 +13,6 @@ from stonks_overwatch.utils.database.db_utils import dump_database
 
 
 class DialogManager:
-    _expired_dialog_instance = None
     _release_notes_window_instance = None
     _preferences_dialog_instance = None
     _check_for_updates_dialog_instance = None
@@ -62,30 +60,6 @@ class DialogManager:
             await self.app.main_window.dialog(
                 InfoDialog("Cache Cleared", "Application cache has been cleared successfully.")
             )
-
-    async def license_info(self, base_url: str):
-        """Show the license information dialog."""
-        try:
-            if DialogManager._expired_dialog_instance is not None:
-                self.logger.debug("ExpiredDialog already open, focusing window.")
-                DialogManager._expired_dialog_instance.hide()
-                DialogManager._expired_dialog_instance.show()
-                return
-
-            dialog = ExpiredDialog("License Information", base_url, main_window=self.app.main_window)
-            DialogManager._expired_dialog_instance = dialog
-
-            def on_close(widget):
-                self.logger.debug("ExpiredDialog close handler called")
-                DialogManager._expired_dialog_instance = None
-                dialog.close()
-
-            dialog.on_close = on_close
-            dialog.show()
-
-        except Exception as e:
-            self.logger.error(f"Failed to retrieve license info: {str(e)}")
-            await self.app.main_window.dialog(ErrorDialog("License", f"Failed to retrieve license info: {str(e)}"))
 
     async def preferences(self):
         # If a dialog is open and not closed, focus it

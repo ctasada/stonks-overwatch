@@ -43,7 +43,6 @@ class TestDialogManager:
             patch("stonks_overwatch.app.dialogs.dialogs.ErrorDialog") as mock_error,
             patch("stonks_overwatch.app.dialogs.dialogs.InfoDialog") as mock_info,
             patch("stonks_overwatch.app.dialogs.dialogs.SaveFileDialog") as mock_save,
-            patch("stonks_overwatch.app.dialogs.dialogs.ExpiredDialog") as mock_expired,
             patch("stonks_overwatch.app.dialogs.dialogs.PreferencesDialog") as mock_prefs,
             patch("stonks_overwatch.app.dialogs.dialogs.DownloadDialog") as mock_download,
             patch("stonks_overwatch.app.dialogs.dialogs.GoogleDriveService") as mock_drive,
@@ -58,7 +57,6 @@ class TestDialogManager:
                 "ErrorDialog": mock_error,
                 "InfoDialog": mock_info,
                 "SaveFileDialog": mock_save,
-                "ExpiredDialog": mock_expired,
                 "PreferencesDialog": mock_prefs,
                 "DownloadDialog": mock_download,
                 "GoogleDriveService": mock_drive,
@@ -196,57 +194,6 @@ class TestDialogManager:
         mock_remove.assert_not_called()
 
         # Verify only confirmation dialog was shown
-        dialog_manager.app.main_window.dialog.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_license_info_new_dialog(self, dialog_manager, mock_dependencies):
-        """Test license info dialog creation when no dialog exists."""
-        base_url = "http://test.url"
-
-        # Ensure no existing dialog
-        DialogManager._expired_dialog_instance = None
-
-        await dialog_manager.license_info(base_url)
-
-        # Verify ExpiredDialog was created
-        mock_dependencies["ExpiredDialog"].assert_called_once_with(
-            "License Information", base_url, main_window=dialog_manager.app.main_window
-        )
-
-        # Verify dialog instance was stored
-        assert DialogManager._expired_dialog_instance is not None
-
-    @pytest.mark.asyncio
-    async def test_license_info_existing_dialog(self, dialog_manager):
-        """Test license info when dialog already exists."""
-        base_url = "http://test.url"
-
-        # Mock existing dialog
-        existing_dialog = MagicMock()
-        DialogManager._expired_dialog_instance = existing_dialog
-
-        await dialog_manager.license_info(base_url)
-
-        # Verify existing dialog was shown
-        existing_dialog.show.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_license_info_exception(self, dialog_manager, mock_dependencies):
-        """Test license info with exception handling."""
-        base_url = "http://test.url"
-
-        # Ensure no existing dialog
-        DialogManager._expired_dialog_instance = None
-
-        # Mock ExpiredDialog to raise exception
-        mock_dependencies["ExpiredDialog"].side_effect = Exception("Test error")
-
-        await dialog_manager.license_info(base_url)
-
-        # Verify error was logged
-        dialog_manager.logger.error.assert_called_once()
-
-        # Verify error dialog was shown
         dialog_manager.app.main_window.dialog.assert_called_once()
 
     @pytest.mark.asyncio
@@ -403,38 +350,6 @@ class TestDialogManager:
 
         # Verify GoogleDriveService was called (dialog was reset)
         mock_dependencies["GoogleDriveService"].list_files.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_dialog_close_handlers(self, dialog_manager, mock_dependencies):
-        """Test that dialog close handlers properly reset class variables."""
-        # Test ExpiredDialog close handler
-        mock_dialog = MagicMock()
-        mock_dependencies["ExpiredDialog"].return_value = mock_dialog
-
-        # Reset dialog instance before test
-        DialogManager._expired_dialog_instance = None
-
-        # Mock the license_info method to avoid async issues
-        async def mock_license_info(url):
-            DialogManager._expired_dialog_instance = mock_dialog
-
-            # Simulate setting the close handler
-            def on_close(widget):
-                DialogManager._expired_dialog_instance = None
-                mock_dialog.close()
-
-            mock_dialog.on_close = on_close
-
-        dialog_manager.license_info = mock_license_info
-
-        # Call license_info
-        await dialog_manager.license_info("http://test.url")
-
-        # Call the close handler
-        mock_dialog.on_close(None)
-
-        # Verify the instance was reset
-        assert DialogManager._expired_dialog_instance is None
 
     @pytest.mark.asyncio
     async def test_all_dialog_instances_are_class_variables(self, dialog_manager):
