@@ -68,7 +68,7 @@ src/stonks_overwatch/
 │   ├── config.py              # Main Config class
 │   ├── base_config.py         # BaseConfig abstract class
 │   ├── base_credentials.py    # BaseCredentials class
-│   ├── degiro.py             # DeGiro configuration
+│   ├── degiro.py             # DEGIRO configuration
 │   ├── bitvavo.py            # Bitvavo configuration
 │   └── ibkr.py               # IBKR configuration
 ├── core/
@@ -487,11 +487,9 @@ Add your broker configuration to the JSON file:
   "degiro": {
     "enabled": true,
     "credentials": {
-      "username": "user",
-      "password": "pass",
-      "int_account": 123456,
-      "totp_secret_key": "ABCDEFGHIJKLMNOP",
-      "one_time_password": 123456
+      "username": "your_degiro_username",
+      "password": "your_degiro_password",
+      "totp_secret_key": "YOUR_TOTP_SECRET_KEY"
     },
     "start_date": "2023-01-01",
     "update_frequency_minutes": 5

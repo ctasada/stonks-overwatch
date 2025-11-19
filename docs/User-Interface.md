@@ -1,6 +1,6 @@
 # Developing the User Interface
 
-The user interface of **Stonks Overwatch** is build with the next technologies:
+The user interface of **Stonks Overwatch** is built with the following technologies:
 
 - [Bootstrap](https://getbootstrap.com) for the CSS framework
 - [Bootstrap Table](https://bootstrap-table.com/) for the tables
@@ -24,7 +24,7 @@ has its own subdirectory with the templates related to that feature.
 By default, the templates are rendered using the `base.html` template, which includes the necessary CSS and JS files.
 
 The CSS and JS files are located in the `src/stonks_overwatch/staticfiles` directory. The Node.js files are installed
-using `npminstall` (which wraps `npm` for Python) and are located in the `src/stonks_overwatch/staticfiles/node_modules`
+using `npminstall` (which wraps `npm` for Python) and are located in the `src/node_modules`
 directory.
 
 The templates are using Bootstrap for the layout and styling, Bootstrap Table for the tables and Charts.js for the charts.

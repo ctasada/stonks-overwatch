@@ -6,7 +6,7 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 ---
 
-## [Unreleased] - yyyy-mm-dd
+## [Unreleased]
 
 ### Added
 
@@ -16,7 +16,7 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
     - Added diversification filter by year
     - Added calendar navigation bars to quickly switch between years
     - Added total dividends per year in the calendar view
-- Enhanced table functionality at **Deposits**, **Fees**, **Transactions**, and **Account Statement** sections:
+- Enhanced table functionality at **Deposits**, **Fees**, **Trades**, and **Account Statement** sections:
     - Added ability to show/hide columns
     - Added ability to show all the rows in a single page
 
@@ -33,7 +33,7 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 ### Security
 
-- Updated internal dependencies
+- Routine dependency updates for security and stability
 
 ---
 
@@ -54,7 +54,7 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 ### Security
 
-- Updated internal dependencies
+- Routine dependency updates for security and stability
 
 ---
 
@@ -77,7 +77,7 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 - Installers now include OS name in filenames
 - Update Download dialog shows percentage and downloaded size
 - Unified icons in Diversification section across the application
-- Added page size selector to the Fees, Deposits, Transactions and Account Statement tables
+- Added page size selector to the Fees, Deposits, Trades and Account Statement tables
 
 ### Fixed
 
@@ -90,7 +90,7 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 ### Security
 
-- Updated internal dependencies
+- Routine dependency updates for security and stability
 
 ---
 
@@ -112,7 +112,7 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 ### Security
 
-- Updated internal dependencies
+- Routine dependency updates for security and stability
 
 ---
 
@@ -137,7 +137,7 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 ### Security
 
-- Updated internal dependencies
+- Routine dependency updates for security and stability
 
 ---
 
@@ -148,7 +148,7 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 - **DEGIRO Credentials:**
     - "Settings" dialog for credentials and 2FA token
     - "Remember me" checkbox in login dialog
-    - Credentials stored securely with AES-128 key
+    - Credentials stored securely with AES-128-CBC encryption
 - **Updates:**
     - "Check for updates" menu item
     - "Update available" notification
@@ -159,7 +159,7 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 ### Security
 
-- Updated internal dependencies
+- Routine dependency updates for security and stability
 
 ---
 
@@ -170,8 +170,17 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 - Connect to DEGIRO with credentials and 2FA
 - Automatic DEGIRO information updates
 - Dashboard with portfolio growth
-- Portfolio, Dividends, Fees, Deposits, Transactions, and full Account Statement
+- Portfolio, Dividends, Fees, Deposits, Trades, and full Account Statement
 - Diversification information
 - Installers for macOS, Windows, and Linux
 
 ---
+
+<!-- Version Comparison Links -->
+[Unreleased]: https://github.com/ctasada/stonks-overwatch/compare/v0.1.5...HEAD
+[0.1.5]: https://github.com/ctasada/stonks-overwatch/compare/v0.1.4...v0.1.5
+[0.1.4]: https://github.com/ctasada/stonks-overwatch/compare/v0.1.3...v0.1.4
+[0.1.3]: https://github.com/ctasada/stonks-overwatch/compare/v0.1.2...v0.1.3
+[0.1.2]: https://github.com/ctasada/stonks-overwatch/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/ctasada/stonks-overwatch/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/ctasada/stonks-overwatch/releases/tag/v0.1.0

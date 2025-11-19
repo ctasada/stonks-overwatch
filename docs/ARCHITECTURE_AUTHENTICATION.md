@@ -1,10 +1,26 @@
-# DeGiro Authentication Architecture
+# Stonks Overwatch - Authentication Architecture
+
+> **Audience:** Developers working on authentication systems
+>
+> **Purpose:** Detailed documentation of the authentication architecture, focusing on DEGIRO's complex authentication flows
+>
+> **Related Documentation:**
+>
+> - **[← Architecture Overview](ARCHITECTURE.md)** - System architecture and design patterns
+> - **[← Broker Integration Guide](ARCHITECTURE_BROKERS.md)** - For implementing broker authentication
+> - **[Pending Tasks →](PENDING_TASKS.md)** - Current improvements and technical debt
+
+---
 
 ## Overview
 
-This document describes the authentication architecture for DeGiro integration in Stonks Overwatch. The system underwent **major modernization in 2025**, featuring unified factory patterns, dependency injection, interface-based design, and performance optimizations while maintaining DeGiro-specific authentication flows.
+This document describes the authentication architecture for broker integrations in Stonks Overwatch, featuring unified factory patterns, dependency injection, interface-based design, and performance optimizations.
 
-## 2025 Architecture Modernization
+**Primary Focus**: DEGIRO authentication (most complex implementation with TOTP and In-App authentication)
+
+**Also Covers**: General authentication patterns applicable to all brokers
+
+## Key Architecture Features
 
 ✅ **Factory Pattern with DI**: Unified AuthenticationFactory with automatic dependency injection
 ✅ **Interface-Based Design**: Type-safe contracts for all authentication services
@@ -12,15 +28,17 @@ This document describes the authentication architecture for DeGiro integration i
 ✅ **Centralized Registration**: Single-point service registration and configuration
 ✅ **Enhanced Error Handling**: Professional exception hierarchy and recovery mechanisms
 
+> **📖 Context:** See [Architecture Overview](ARCHITECTURE.md#exception-management) for details on the exception hierarchy.
+
 ## Architecture
 
-### Modern Factory Architecture (2025)
+### Factory Architecture
 
-The authentication system now uses a sophisticated factory pattern with dependency injection:
+The authentication system uses a sophisticated factory pattern with dependency injection:
 
 ```mermaid
 graph TD
-    subgraph "Modern Authentication Architecture"
+    subgraph "Authentication Architecture"
         AL["AuthenticationLocator<br/>🎯 Service Access"] --> AF["AuthenticationFactory<br/>🏭 Dependency Injection"]
         AS_SETUP["AuthenticationSetup<br/>⚙️ Service Registration"] --> AF
 
@@ -32,24 +50,24 @@ graph TD
         ACS_I -.-> ACS["AuthenticationCredentialService<br/>🔐 Implementation"]
         AS_I -.-> AS["AuthenticationService<br/>🎪 Implementation"]
 
-        MW["DeGiroAuthMiddleware"] --> AL
+        MW["DEGIROAuthMiddleware"] --> AL
         LV["Login View"] --> AL
 
-        AS --> DS["DeGiroService<br/>🌐 API Client"]
+        AS --> DS["DEGIROService<br/>🌐 API Client"]
 
         ASM --> SS["Session Storage<br/>💾 Django Sessions"]
         ACS --> DB["Database<br/>🗄️ BrokersConfiguration"]
         ACS --> CFG["Configuration Files<br/>📁 JSON/YAML"]
 
-        DS --> API["DeGiro API<br/>🌍 External Service"]
+        DS --> API["DEGIRO API<br/>🌍 External Service"]
     end
 
-    classDef modern fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef factory fill:#e1f5fe,stroke:#01579b,stroke-width:2px
     classDef interface fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
     classDef implementation fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
     classDef external fill:#fff3e0,stroke:#e65100,stroke-width:2px
 
-    class AL,AF,AS_SETUP modern
+    class AL,AF,AS_SETUP factory
     class ASM_I,ACS_I,AS_I interface
     class ASM,ACS,AS,MW,LV implementation
     class DS,API,SS,DB,CFG external
@@ -62,6 +80,8 @@ The authentication system consists of three main service layers:
 1. **Service Factory Layer**: AuthenticationFactory with dependency injection
 2. **Interface Layer**: Type-safe contracts for all services
 3. **Implementation Layer**: Concrete service implementations
+
+> **📖 Pattern Details:** See [Architecture Overview](ARCHITECTURE.md#factory-pattern) for more on the factory pattern implementation.
 
 #### Service Interfaces
 
@@ -78,8 +98,8 @@ The authentication system consists of three main service layers:
 - **Key Methods**:
   - `authenticate_user()`: Handle username/password authentication
   - `handle_totp_authentication()`: Handle 2FA flow
-  - `handle_in_app_authentication()`: **Handle in-app authentication flow** (NEW 2025)
-  - `check_degiro_connection()`: Verify DeGiro connectivity
+  - `handle_in_app_authentication()`: Handle in-app authentication flow
+  - `check_degiro_connection()`: Verify DEGIRO connectivity
   - `logout_user()`: Clear authentication state
 
 #### AuthenticationSessionManager
@@ -101,7 +121,7 @@ The authentication system consists of three main service layers:
   - `get_effective_credentials()`: Resolve credentials from multiple sources
   - `store_credentials_in_database()`: Handle "remember me" functionality
 
-### Modern Service Access Patterns
+### Service Access Patterns
 
 #### Service Locator Pattern (Recommended)
 
@@ -151,23 +171,23 @@ def process_authentication(auth_service: AuthenticationServiceInterface):
 1. **User submits credentials** → Login View
 2. **Extract and validate** → AuthenticationCredentialService
 3. **Store in session** → AuthenticationSessionManager
-4. **Attempt DeGiro connection** → DeGiroService
+4. **Attempt DEGIRO connection** → DEGIROService
 5. **Handle result** → AuthenticationService
 
 ### TOTP (2FA) Flow
 
-1. **DeGiro returns TOTP required** → AuthenticationService
+1. **DEGIRO returns TOTP required** → AuthenticationService
 2. **Store credentials and set TOTP flag** → Session Manager
 3. **Redirect with preserved session** → Middleware
 4. **User submits 2FA code** → Login View
 5. **Retrieve stored credentials** → Session Manager
-6. **Complete authentication** → DeGiroService
+6. **Complete authentication** → DEGIROService
 
-### In-App Authentication Flow (Updated 2025)
+### In-App Authentication Flow
 
 When 2FA is not enabled, DEGIRO automatically triggers In-App authentication requiring mobile app confirmation:
 
-1. **DeGiro returns In-App auth required** → AuthenticationService detects `status == 12` or `inAppTOTPNeeded`
+1. **DEGIRO returns In-App auth required** → AuthenticationService detects `status == 12` or `inAppTOTPNeeded`
 2. **Store credentials with in_app_token** → Session Manager stores token from error details
 3. **Set in_app_auth_required flag** → Session Manager sets UI state
 4. **Redirect to login with In-App UI** → Middleware preserves session
@@ -175,7 +195,7 @@ When 2FA is not enabled, DEGIRO automatically triggers In-App authentication req
 6. **JavaScript auto-submits form** → Browser automatically posts `in_app_auth=true`
 7. **View delegates to service** → Login View calls `auth_service.handle_in_app_authentication()`
 8. **Service orchestrates authentication** → AuthenticationService handles the complete flow
-9. **Service uses DeGiroService** → Proper service layer integration with credential management
+9. **Service uses DEGIROService** → Proper service layer integration with credential management
 10. **Continuous polling** → `_wait_for_in_app_confirmation()` calls `degiro_service.connect()` every 5 seconds
 11. **Check connection status** → Handle different error statuses:
     - `status == 3`: Continue waiting (user hasn't confirmed yet)
@@ -187,21 +207,21 @@ When 2FA is not enabled, DEGIRO automatically triggers In-App authentication req
 ### Connection Check Flow (Middleware)
 
 1. **Check if authenticated** → Session Manager
-2. **If not authenticated, check DeGiro** → AuthenticationService
+2. **If not authenticated, check DEGIRO** → AuthenticationService
 3. **Handle TOTP/In-App/errors** → Preserve or clear session
 4. **Allow or redirect** → Based on result
 
-## In-App Authentication Implementation Details (2025)
+## In-App Authentication
 
 ### Overview
 
-In-App authentication is DEGIRO's newer security mechanism that requires users to confirm login attempts through their mobile app. This feature is automatically enabled when traditional 2FA (TOTP) is not configured on the account.
+In-App authentication is DEGIRO's security mechanism that requires users to confirm login attempts through their mobile app. This feature is automatically enabled when traditional 2FA (TOTP) is not configured on the account.
 
 ### Technical Architecture
 
 #### Error Detection
 
-The system detects In-App authentication requirements through DeGiro API responses:
+The system detects In-App authentication requirements through DEGIRO API responses:
 - **Status Code**: `error_details.status == 12`
 - **Status Text**: `error_details.status_text == "inAppTOTPNeeded"`
 - **In-App Token**: `error_details.in_app_token` contains the authentication token
@@ -233,7 +253,7 @@ The login template supports four states:
 ```python
 def _wait_for_in_app_confirmation(self, credentials) -> Optional[str]:
     """Wait for user confirmation in DEGIRO mobile app."""
-    # Create proper credentials with in_app_token
+    # Create credentials with in_app_token
     degiro_credentials = DegiroCredentials(
         username=credentials.username,
         password=credentials.password,
@@ -241,7 +261,7 @@ def _wait_for_in_app_confirmation(self, credentials) -> Optional[str]:
         # ... other fields
     )
 
-    # Use existing DeGiroService (proper service layer integration)
+    # Initialize DEGIROService with credentials
     credentials_manager = CredentialsManager(degiro_credentials)
     self.degiro_service.set_credentials(credentials_manager)
 
@@ -280,38 +300,60 @@ def _wait_for_in_app_confirmation(self, credentials) -> Optional[str]:
 
 ### Implementation Files
 
-- **Authentication Service**: `src/stonks_overwatch/services/utilities/authentication_service.py` ⭐ **Main Implementation**
-  - `handle_in_app_authentication()`: **Main orchestration method** (NEW)
-  - `_wait_for_in_app_confirmation()`: **Polling loop implementation** (MOVED from view)
-  - `_handle_in_app_auth_required_error()`: Error handler
-  - Uses `DeGiroService` for proper service layer integration
-- **Login View**: `src/stonks_overwatch/views/login.py`
-  - `_handle_in_app_authentication()`: **UI delegation method** (delegates to service)
-  - Handles UI concerns only, business logic moved to service layer
-- **Session Manager**: `src/stonks_overwatch/services/utilities/authentication_session_manager.py`
-  - `set_in_app_auth_required()`: Set UI state flag
-  - `is_in_app_auth_required()`: Check UI state flag
-  - `store_credentials()`: Store token with credentials
-- **Template**: `src/stonks_overwatch/templates/login.html`
-  - In-App UI section with spinner and auto-submit logic
-- **Middleware**: `src/stonks_overwatch/middleware/degiro_auth.py`
-  - Handles In-App auth redirects and session preservation
+#### Authentication Service
+
+**Path**: `src/stonks_overwatch/services/utilities/authentication_service.py`
+
+**Methods**:
+- `handle_in_app_authentication()` - Main orchestration method
+- `_wait_for_in_app_confirmation()` - Polling loop implementation
+- `_handle_in_app_auth_required_error()` - Error handler
+
+**Integration**: Uses DEGIROService for proper service layer integration
+
+#### Login View
+
+**Path**: `src/stonks_overwatch/views/login.py`
+
+**Methods**:
+- `_handle_in_app_authentication()` - Delegates to service layer (UI concerns only)
+
+#### Session Manager
+
+**Path**: `src/stonks_overwatch/services/utilities/authentication_session_manager.py`
+
+**Methods**:
+- `set_in_app_auth_required()` - Set UI state flag
+- `is_in_app_auth_required()` - Check UI state flag
+- `store_credentials()` - Store token with credentials
+
+#### Template
+
+**Path**: `src/stonks_overwatch/templates/login.html`
+
+**Features**: In-App UI section with spinner and auto-submit logic
+
+#### Middleware
+
+**Path**: `src/stonks_overwatch/middleware/degiro_auth.py`
+
+**Responsibilities**: Handles In-App auth redirects and session preservation
 
 ### Security Considerations
 
 - **Token Storage**: In-App tokens are stored temporarily in session only
 - **Session Cleanup**: Tokens are cleared on successful authentication or errors
-- **Timeout Handling**: No explicit timeout - relies on DEGIRO API timeout behavior
+- **Timeout Handling**: Relies on DEGIRO API timeout behavior
 - **Error Recovery**: Unrecoverable errors clear session and return to login form
 
-### Testing In-App Authentication (2025)
+### Testing In-App Authentication
 
 #### Unit Testing Approach
 
-The refactored architecture enables better testing by mocking service dependencies:
+The architecture enables testing by mocking service dependencies:
 
 ```python
-# Test service layer method directly
+# Test service layer method
 def test_handle_in_app_authentication_success(self):
     # Setup credentials with in_app_token
     credentials = DegiroCredentials("user", "pass", in_app_token="token123")
@@ -328,38 +370,12 @@ def test_handle_in_app_authentication_success(self):
 
 # Test waiting loop with retry behavior
 def test_wait_for_in_app_confirmation_with_retry(self):
-    # Mock DeGiroService for proper service layer testing
+    # Mock DEGIROService to simulate retry scenario
     self.mock_degiro_service.connect.side_effect = [
         DeGiroConnectionError("Still waiting", error_status_3),
         None  # Success on second call
     ]
     self.mock_degiro_service.get_session_id.return_value = "session_after_retry"
-```
-
-### Troubleshooting
-
-#### Common Issues
-
-1. **"No in-app token found"**: Check that In-App auth was properly triggered and token stored
-2. **Infinite waiting**: User may need to check DEGIRO mobile app for notification
-3. **Connection timeouts**: Network issues or DEGIRO API problems
-4. **Service layer errors**: Check that DeGiroService is properly initialized and configured
-
-#### Debug Commands
-
-```python
-# Check In-App session state
-session_data = auth_service.session_manager.get_session_data(request)
-print(f"In-App required: {session_data.get('in_app_auth_required')}")
-
-# Check stored credentials include token
-credentials = auth_service.session_manager.get_credentials(request)
-print(f"Has in-app token: {bool(credentials and credentials.in_app_token)}")
-
-# Test service layer method directly (2025)
-result = auth_service.handle_in_app_authentication(request)
-print(f"Service result: {result.result}")
-print(f"Session ID: {result.session_id}")
 ```
 
 ## Error Handling
@@ -371,6 +387,8 @@ All error messages are centralized in `src/stonks_overwatch/utils/core/constants
 - `AuthenticationErrorMessages`: User-facing error messages
 - `LogMessages`: Internal logging messages
 
+> **📖 Related:** See [Architecture Overview](ARCHITECTURE.md#exception-management) for the complete exception hierarchy.
+
 ### Authentication Results
 
 The system uses an enum-based result system:
@@ -379,17 +397,18 @@ The system uses an enum-based result system:
 class AuthenticationResult(Enum):
     SUCCESS = "success"
     TOTP_REQUIRED = "totp_required"
+    IN_APP_AUTH_REQUIRED = "in_app_auth_required"
     INVALID_CREDENTIALS = "invalid_credentials"
     CONNECTION_ERROR = "connection_error"
     MAINTENANCE_MODE = "maintenance_mode"
     CONFIGURATION_ERROR = "configuration_error"
 ```
 
-## Modern Service Registration
+## Service Registration
 
 ### Authentication Service Setup
 
-The modern architecture uses centralized service registration:
+The architecture uses centralized service registration:
 
 ```python
 # From: src/stonks_overwatch/core/authentication_setup.py
@@ -425,7 +444,7 @@ def register_authentication_services():
 
 ### Credential Sources (Priority Order)
 
-1. **Session**: Stored during authentication for TOTP flow
+1. **Session**: Stored during authentication for TOTP and In-App flows
 2. **Database**: "Remember me" credentials (BrokersConfiguration)
 3. **Configuration**: Default credentials from config files
 
@@ -439,6 +458,27 @@ class BrokersConfiguration(models.Model):
     is_enabled = models.BooleanField(default=True)
     credentials = models.JSONField()  # Encrypted credential storage
 ```
+
+## Implementing Authentication for New Brokers
+
+When adding authentication to a new broker:
+
+1. **Simple API Key Authentication** (like Bitvavo):
+   - Store credentials in configuration
+   - Pass to broker client during initialization
+   - No complex flows needed
+
+2. **Session-Based Authentication** (like DEGIRO):
+   - Consider using/extending `AuthenticationService` patterns
+   - Implement session management if needed
+   - Handle authentication errors appropriately
+
+3. **OAuth/Token-Based**:
+   - Implement token refresh logic
+   - Store tokens securely
+   - Handle expiration and renewal
+
+> **📖 Getting Started:** See [Broker Integration Guide](ARCHITECTURE_BROKERS.md#advanced-features) for authentication implementation examples.
 
 ## Maintenance Guidelines
 
@@ -454,7 +494,7 @@ class BrokersConfiguration(models.Model):
 1. **Check logs**: All authentication operations are logged
 2. **Session state**: Use session manager to inspect current state
 3. **Credential resolution**: Verify which source is being used
-4. **Connection status**: Check DeGiro API connectivity
+4. **Connection status**: Check DEGIRO API connectivity
 
 ### Performance Considerations
 
@@ -468,87 +508,27 @@ class BrokersConfiguration(models.Model):
 - Session credentials are cleared on logout
 - Database credentials are encrypted in storage
 - TOTP codes are not persisted beyond the authentication flow
-
-## Migration Notes
-
-### 2025 Modern Architecture Migration
-
-The 2025 modernization represents a **major architectural upgrade** while maintaining full backward compatibility:
-
-#### In-App Authentication Refactoring (2025)
-
-**Key architectural improvements achieved:**
-
-✅ **Service Layer Separation**: In-app authentication logic moved from view to service layer
-- Business logic properly encapsulated in `AuthenticationService`
-- View layer only handles UI concerns and delegation
-- Consistent with TOTP authentication patterns
-
-✅ **Proper API Integration**: Uses `DeGiroService` instead of direct `TradingApi`
-- Follows established service architecture patterns
-- Leverages existing credential management infrastructure
-- Consistent session ID retrieval through service layer
-
-✅ **Enhanced Testability**: Service layer methods can be unit tested independently
-- Mock service dependencies instead of low-level API calls
-- Better test coverage for retry logic and error scenarios
-- Cleaner test structure following service boundaries
-
-✅ **Improved Maintainability**: Changes centralized in service layer
-- Future DEGIRO API changes only affect service implementation
-- Authentication logic reusable across different UI components
-- Better error handling and logging consistency
-
-#### What's New
-
-✅ **Factory Pattern**: Unified AuthenticationFactory replaces manual service instantiation
-✅ **Dependency Injection**: Automatic configuration and service injection
-✅ **Interface Contracts**: Type-safe service interfaces for better development experience
-✅ **Service Locator**: High-performance caching and optimized access patterns
-✅ **Error Handling**: Professional exception hierarchy and recovery mechanisms
-
-#### Migration Path
-
-**Old Pattern (Pre-2025)**:
-
-```python
-# Manual service creation
-session_manager = AuthenticationSessionManager()
-credential_service = AuthenticationCredentialService()
-auth_service = AuthenticationService(session_manager, credential_service)
-```
-
-**New Pattern (2025+)**:
-
-```python
-# Optimized service locator (recommended)
-from stonks_overwatch.core.authentication_locator import get_authentication_service
-auth_service = get_authentication_service()  # All dependencies injected automatically
-```
-
-#### Breaking Changes
-
-- ❌ **Manual Service Instantiation**: Deprecated in favor of factory pattern
-- ❌ **Direct Service Dependencies**: Services now auto-inject dependencies
-- ⚠️ **API Changes**: Some method signatures updated for better type safety
-
-#### Backward Compatibility
-
-✅ **Core APIs**: All main authentication methods remain unchanged
-✅ **DeGiro Flows**: TOTP and authentication flows work identically
-✅ **Session Management**: Session APIs maintain compatibility
-✅ **Error Handling**: Enhanced but backward-compatible error responses
+- In-App tokens are temporary and session-only
 
 ## Troubleshooting
 
-### Common Issues
+### General Authentication Issues
 
 1. **"Username and Password required" during TOTP**: Check credential storage in session
 2. **Session cleared unexpectedly**: Verify middleware preserve_session logic
 3. **Database credentials not working**: Check BrokersConfiguration table
 4. **TOTP form not showing**: Verify session TOTP flag is set
 
+### In-App Authentication Issues
+
+1. **"No in-app token found"**: Check that In-App auth was properly triggered and token stored
+2. **Infinite waiting**: User may need to check DEGIRO mobile app for notification
+3. **Connection timeouts**: Network issues or DEGIRO API problems
+4. **Service layer errors**: Check that DEGIROService is properly initialized and configured
+
 ### Debug Commands
+
+#### General Authentication Status
 
 ```python
 from stonks_overwatch.core.authentication_locator import get_authentication_service, get_authentication_cache_status
@@ -572,3 +552,40 @@ print(f"Credential sources - Session: {has_session}, Database: {has_database}, C
 cache_status = get_authentication_cache_status()
 print(f"Cache performance: {cache_status}")
 ```
+
+#### In-App Authentication Debug
+
+```python
+# Check In-App session state
+session_data = auth_service.session_manager.get_session_data(request)
+print(f"In-App required: {session_data.get('in_app_auth_required')}")
+
+# Check stored credentials include token
+credentials = auth_service.session_manager.get_credentials(request)
+print(f"Has in-app token: {bool(credentials and credentials.in_app_token)}")
+
+# Test service layer method
+result = auth_service.handle_in_app_authentication(request)
+print(f"Service result: {result.result}")
+print(f"Session ID: {result.session_id}")
+```
+
+---
+
+## Additional Resources
+
+### Related Documentation
+
+- **[← Architecture Overview](ARCHITECTURE.md)** - Core architecture concepts and patterns
+- **[← Broker Integration Guide](ARCHITECTURE_BROKERS.md)** - Implementing broker services
+- **[Pending Tasks →](PENDING_TASKS.md)** - Current improvements and technical debt
+
+### Implementation References
+
+- **DEGIRO Authentication**: Most complex implementation with all flows
+- **Bitvavo Authentication**: Simple API key example
+- **IBKR Authentication**: Session-based example
+
+---
+
+*Last Updated: November 2025*

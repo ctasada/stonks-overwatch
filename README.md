@@ -1,50 +1,167 @@
 # Stonks Overwatch
 
-**Stonks Overwatch** is a new Open Source Stocks Dashboard.
+![Stonks Overwatch Logo](src/icons/stonks_overwatch.png)
 
-Why do we need yet another dashboard? I have been a DEGIRO user for many years, and the more active I was,
-the more frustrated I became with the lack of any decent dashboard to overview my investments.
+**A privacy-first, open-source investment portfolio tracker**
 
-After trying different options (I will omit names), I couldn't find any that was really covering my needs, or
-that I could trust.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
+[![Django 5.2+](https://img.shields.io/badge/django-5.2+-green.svg)](https://www.djangoproject.com/)
 
-Stonks Overwatch runs locally and doesn't share your data with anyone. Your data is yours.
+[Quickstart](docs/Quickstart.md) • [Documentation](docs/Home.md) • [Contributing](CONTRIBUTING.md)
 
-## What does offer **Stonks Overwatch**?
+---
 
-**Stonks Overwatch** is born with the intention to provide a usable investment dashboard for DEGIRO, but with the desire
-to keep growing to provide many more features in the future.
+## Overview
 
-Right now the features we offer are:
+**Stonks Overwatch** is an open-source investment dashboard that helps you track and manage your portfolio across multiple brokers. Built with privacy and extensibility in mind, all your data stays local on your machine—no cloud services, no data sharing.
 
-* Realtime access to your DEGIRO investments
-* Portfolio value overtime
-* Portfolio growth
-* Dividends overview
-* Fees overview
-* Deposits overview
-* Diversification overview
-* Transactions
-* Account Statements
+### Why Stonks Overwatch?
 
-### How to login to DEGIRO
+- **🔒 Privacy First**: Your financial data never leaves your computer
+- **📊 Multi-Broker Support**: Unified view across DEGIRO, Bitvavo, IBKR and more to come
+- **🎯 Real-Time Tracking**: Live portfolio values, dividends, and performance metrics
+- **🔌 Extensible Architecture**: Plugin system for adding new brokers
+- **💻 Cross-Platform**: Available on Windows, macOS, and Linux (native and web versions)
+- **🆓 100% Free**: No subscriptions, no hidden costs, no data selling
 
-See [Wiki - DEGIRO](./docs/DEGIRO)
+## Features
 
-### How to login to Bitvavo
+### Portfolio Management
 
-See [Wiki - Bitvavo](./docs/Bitvavo)
+- **Real-time portfolio tracking** with automatic updates
+- **Multi-broker consolidation** for a unified view
+- **Performance analytics** with historical data
+- **Dividend tracking** and forecasting
+- **Fee analysis** across all brokers
+- **Asset diversification** visualization
 
-### How to login to IBKR (Interactive Brokers)
+### Supported Brokers
 
-See [Wiki - IBKR](https://github.com/ctasada/stonks-overwatch/wiki/IBKR)
+- **DEGIRO** - Full support with real-time data
+- **Bitvavo** - Cryptocurrency exchange integration
+- **IBKR** (Interactive Brokers) - International markets
 
-## Start Developing
+### Technical Features
 
-See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
+- **Local-first architecture** - All data stored locally
+- **Modern web UI** - Built with Bootstrap and Charts.js
+- **Native applications** - Desktop apps for all major platforms
+- **Offline mode** - Work without internet connection
+- **Automated backups** - Never lose your data
+- **Demo mode** - Try it out with sample data
+
+## Screenshots
+
+> *Coming soon - Add screenshots showing the dashboard, portfolio view, and analytics*
+
+## Quick Start
+
+### Prerequisites
+
+- Python 3.13 or higher
+- Poetry 2.2.1 or higher (for development)
+- Git
+
+### Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/ctasada/stonks-overwatch.git
+   cd stonks-overwatch
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   make install
+   ```
+
+   This command will install all required dependencies.
+
+3. **Initialize the database and collect static files**
+
+   ```bash
+   make collectstatic migrate
+   ```
+
+4. **Configure your brokers**
+
+   ```bash
+   cp config/config.json.template config/config.json
+   # Edit config.json with your broker credentials
+   ```
+
+5. **Start the application**
+
+   ```bash
+   make run
+   ```
+
+   The application will be available at [http://127.0.0.1:8000](http://127.0.0.1:8000)
+
+> **Quick Setup**: If you want to do everything in one command, use `make start` which combines steps 2-5 and starts the server immediately.
+
+For detailed installation instructions, see the [Quickstart Guide](docs/Quickstart.md).
 
 ## Documentation
 
-* [DEGIRO Connector](https://github.com/Chavithra/degiro-connector)
-* [IBKR Client](https://github.com/Voyz/ibind)
-* [Bootstrap](https://getbootstrap.com)
+- **📘 [User Documentation](docs/Home.md)** - Complete guide to using Stonks Overwatch
+- **🚀 [Quickstart Guide](docs/Quickstart.md)** - Get up and running in minutes
+- **🖥️ [Desktop App Guide](docs/Application.md)** - Native application installation and updates
+- **🔧 [Developer Guide](docs/Developing-Stonks-Overwatch.md)** - Contributing and development setup
+- **🏦 Broker Setup**: [DEGIRO](docs/DEGIRO.md) • [Bitvavo](docs/Bitvavo.md) • [IBKR](docs/IBKR.md)
+- **❓ [FAQ](docs/FAQ.md)** - Frequently asked questions
+
+## Contributing
+
+We welcome contributions from the community! Whether you're fixing bugs, adding features, or improving documentation, your help is appreciated.
+
+- **🐛 [Report a Bug](https://github.com/ctasada/stonks-overwatch/issues/new?template=bug_report.md)** - Found an issue? Let us know
+- **💡 [Request a Feature](https://github.com/ctasada/stonks-overwatch/issues/new?template=feature_request.md)** - Have an idea? Share it
+- **👨‍💻 [Contribute Code](CONTRIBUTING.md)** - Ready to code? Check our guidelines
+- **📝 [Improve Docs](CONTRIBUTING.md)** - Documentation improvements are always welcome
+
+Please read our [Contributing Guidelines](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md) before getting started.
+
+## Community & Support
+
+- **📚 [Documentation](docs/Home.md)** - Comprehensive guides and tutorials
+- **💬 [Discussions](https://github.com/ctasada/stonks-overwatch/discussions)** - Ask questions and share ideas
+- **🐛 [Issue Tracker](https://github.com/ctasada/stonks-overwatch/issues)** - Report bugs and request features
+- **📧 [Email](mailto:carlos.tasada@gmail.com)** - Direct contact for sensitive issues
+
+## Future Development
+
+Stonks Overwatch is under active development. Planned features under consideration:
+
+- Dynamic plugin architecture for brokers
+- Mobile app support
+- Advanced analytics and reporting
+- Additional broker integrations
+- Community-driven enhancements
+
+Check the [CHANGELOG](CHANGELOG.md) for release history and [GitHub Issues](https://github.com/ctasada/stonks-overwatch/issues) to track upcoming features.
+
+## License
+
+Stonks Overwatch is released under the [MIT License](LICENSE). You're free to use, modify, and distribute this software.
+
+## Acknowledgments
+
+Built with these amazing open-source projects:
+- [Django](https://www.djangoproject.com/) - Web framework
+- [DEGIRO Connector](https://github.com/Chavithra/degiro-connector) - DEGIRO API client
+- [Bitvavo API](https://github.com/bitvavo/python-bitvavo-api) - Bitvavo integration
+- [iBind](https://github.com/Voyz/ibind) - IBKR API client
+- [Bootstrap](https://getbootstrap.com/) - UI framework
+- [Charts.js](https://www.chartjs.org/) - Data visualization
+
+Special thanks to all [contributors](https://github.com/ctasada/stonks-overwatch/graphs/contributors) who help make this project better!
+
+---
+
+**⭐ If you find Stonks Overwatch useful, please star the project! ⭐**
+
+Made with ❤️ by the Stonks Overwatch community
