@@ -41,7 +41,7 @@ if not os.path.exists(STONKS_OVERWATCH_LOGS_DIR):
     os.makedirs(STONKS_OVERWATCH_LOGS_DIR)
 STONKS_OVERWATCH_LOGS_FILENAME = "stonks-overwatch.log"
 
-STONKS_OVERWATCH_SUPPORT_URL = "https://forms.gle/djPWAtLSFfRYbDwV7"
+STONKS_OVERWATCH_SUPPORT_URL = "https://github.com/ctasada/stonks-overwatch/issues/new"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
