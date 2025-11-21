@@ -403,7 +403,7 @@ class TotalPortfolio:
 
 
 @dataclass
-class Trade:
+class Transaction:
     name: str
     symbol: str
     date: str

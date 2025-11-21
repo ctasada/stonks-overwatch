@@ -906,7 +906,7 @@ quotecast = ["polars (>=1.33.0)"]
 type = "git"
 url = "https://github.com/ctasada/degiro-connector.git"
 reference = "main"
-resolved_reference = "99f1c89a4f7bfe7b0423f3f33f619b8d3bf15685"
+resolved_reference = "b592a7b1157a0879724b178fcc60b26f10735747"
 
 [[package]]
 name = "deptry"

@@ -51,7 +51,7 @@ graph TB
     %% Service Interfaces
     subgraph "Service Interfaces"
         PSI[PortfolioServiceInterface<br/>📊 Portfolio Contract]
-        TSI[TradeServiceInterface<br/>💸 Trade Contract]
+        TSI[TransactionServiceInterface<br/>💸 Transaction Contract]
         ASI[AccountServiceInterface<br/>👤 Account Contract]
         DSI[DepositServiceInterface<br/>💰 Deposit Contract]
         DivSI[DividendServiceInterface<br/>💵 Dividend Contract]
@@ -61,7 +61,7 @@ graph TB
     %% Service Implementations
     subgraph "DeGiro Services"
         DegiroP[DeGiroPortfolioService]
-        DegiroT[DeGiroTradeService]
+        DegiroT[DeGiroTransactionService]
         DegiroA[DeGiroAccountService]
         DegiroD[DeGiroDepositService]
         DegiroDiv[DeGiroDividendService]
@@ -77,7 +77,7 @@ graph TB
 
     subgraph "Bitvavo Services"
         BitvavoP[BitvavoPortfolioService]
-        BitvavoT[BitvavoTradeService]
+        BitvavoT[BitvavoTransactionService]
         BitvavoA[BitvavoAccountService]
         BitvavoD[BitvavoDepositService]
         BitvavoDiv[BitvavoDividendService]
@@ -93,7 +93,7 @@ graph TB
 
     subgraph "Your New Broker Services"
         NewP[NewBrokerPortfolioService<br/>➕ Implement This]
-        NewT[NewBrokerTradeService<br/>➕ Implement This]
+        NewT[NewBrokerTransactionService<br/>➕ Implement This]
         NewA[NewBrokerAccountService<br/>➕ Implement This]
         NewD[NewBrokerDepositService<br/>➕ Optional]
 
@@ -250,25 +250,24 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         return []
 ```
 
-#### Trade Service
+#### Transaction Service
 
 ```python
-# src/stonks_overwatch/services/brokers/newbroker/services/trade_service.py
-from stonks_overwatch.core.interfaces.trade_service import TradeServiceInterface
+# src/stonks_overwatch/services/brokers/newbroker/services/transaction_service.py
+from stonks_overwatch.core.interfaces.transaction_service import TransactionServiceInterface
 from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.logger_constants import LOGGER_SERVICES
 
-
-class TradeService(BaseService, TradeServiceInterface):
+class TransactionService(BaseService, TransactionServiceInterface):
     def __init__(self, config=None):
         super().__init__(config)
-        self.logger = StonksLogger.get_logger(LOGGER_SERVICES, "[NEWBROKER|TRADE]")
+        self.logger = StonksLogger.get_logger(LOGGER_SERVICES, "[NEWBROKER|TRANSACTION]")
 
-    def get_trades(self):
-        """Return trades data for this broker."""
-        self.logger.debug("Fetching trades data")
-        # Implement your trades retrieval logic
+    def get_transactions(self):
+        """Return transaction data for this broker."""
+        self.logger.debug("Fetching transaction data")
+        # Implement your transaction retrieval logic
         return []
 ```
 
@@ -307,12 +306,9 @@ Add your broker to the unified registry by updating `src/stonks_overwatch/core/r
 ```python
 # Import your configuration and services
 from stonks_overwatch.config.newbroker import NewBrokerConfig
-from stonks_overwatch.services.brokers.newbroker.services.portfolio_service import
-    PortfolioService as NewBrokerPortfolioService
-from stonks_overwatch.services.brokers.newbroker.services.trade_service import
-    TradeService as NewBrokerTradeService
-from stonks_overwatch.services.brokers.newbroker.services.account_service import
-    AccountService as NewBrokerAccountService
+from stonks_overwatch.services.brokers.newbroker.services.portfolio_service import PortfolioService as NewBrokerPortfolioService
+from stonks_overwatch.services.brokers.newbroker.services.transaction_service import TransactionService as NewBrokerTransactionService
+from stonks_overwatch.services.brokers.newbroker.services.account_service import AccountService as NewBrokerAccountService
 
 # Add to BROKER_CONFIGS dictionary
 BROKER_CONFIGS = {
@@ -321,7 +317,7 @@ BROKER_CONFIGS = {
         "config": NewBrokerConfig,
         "services": {
             ServiceType.PORTFOLIO: NewBrokerPortfolioService,
-            ServiceType.TRADE: NewBrokerTradeService,
+            ServiceType.TRANSACTION: NewBrokerTransactionService,
             ServiceType.ACCOUNT: NewBrokerAccountService,
             # Add other services as needed:
             # ServiceType.DEPOSIT: NewBrokerDepositService,
@@ -372,17 +368,17 @@ class PortfolioServiceInterface(ABC):
         pass
 ```
 
-#### TradeServiceInterface
+#### TransactionServiceInterface
 
 ```python
-class TradeServiceInterface(ABC):
+class TransactionServiceInterface(ABC):
     @abstractmethod
-    def get_trades(self) -> List[Trade]:
+    def get_transactions(self) -> List[Transaction]:
         """
-        Retrieves the trade history.
+        Retrieves the transaction history.
 
         Returns:
-            List[Trade]: List of trades sorted by date (newest first)
+            List[Transaction]: List of transactions sorted by date (newest first)
         """
         pass
 ```
