@@ -5,7 +5,7 @@ from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.core.interfaces.deposit_service import DepositServiceInterface
 from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import BitvavoService
-from stonks_overwatch.services.brokers.bitvavo.services.trade_service import TradesService
+from stonks_overwatch.services.brokers.bitvavo.services.transaction_service import TransactionsService
 from stonks_overwatch.services.models import Deposit, DepositType
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.core.logger import StonksLogger
@@ -103,7 +103,7 @@ class DepositsService(BaseService, DepositServiceInterface):
             else:
                 self.logger.error("Unknown transaction type:", transaction["type"])
 
-            dataset[TradesService.format_date(transaction["executedAt"])] = round(cash_value, 2)
+            dataset[TransactionsService.format_date(transaction["executedAt"])] = round(cash_value, 2)
 
         return self.__fill_missing_dates(dataset)
 
@@ -128,6 +128,6 @@ class DepositsService(BaseService, DepositServiceInterface):
                 cash_value -= float(transaction["sentAmount"])
             # Skip "deposit" and "withdrawal" - these are handled as external cash flows
 
-            dataset[TradesService.format_date(transaction["executedAt"])] = round(cash_value, 2)
+            dataset[TransactionsService.format_date(transaction["executedAt"])] = round(cash_value, 2)
 
         return self.__fill_missing_dates(dataset)

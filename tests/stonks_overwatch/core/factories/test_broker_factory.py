@@ -21,7 +21,7 @@ from stonks_overwatch.core.interfaces import (
     DepositServiceInterface,
     FeeServiceInterface,
     PortfolioServiceInterface,
-    TradeServiceInterface,
+    TransactionServiceInterface,
 )
 from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.services.models import TotalPortfolio
@@ -148,13 +148,13 @@ class MockPortfolioService(PortfolioServiceInterface):
         return {}
 
 
-class MockTradeService(TradeServiceInterface):
-    """Mock trade service for testing."""
+class MockTransactionService(TransactionServiceInterface):
+    """Mock transaction service for testing."""
 
     def __init__(self, config: MockBrokerConfig = None):
         self.config = config
 
-    def get_trades(self):
+    def get_transactions(self):
         return []
 
 
@@ -202,7 +202,7 @@ class TestBrokerFactory:
         self.registry.register_broker_services(
             "testbroker",
             portfolio=MockPortfolioService,
-            trade=MockTradeService,
+            transaction=MockTransactionService,
             deposit=MockDepositService,
         )
 
@@ -424,7 +424,7 @@ class TestBrokerFactory:
         # Register broker with portfolio service first (required by registry)
         self.registry.register_broker_config("noportfoliobroker", MockBrokerConfig)
         self.registry.register_broker_services(
-            "noportfoliobroker", portfolio=MockPortfolioService, trade=MockTradeService
+            "noportfoliobroker", portfolio=MockPortfolioService, transaction=MockTransactionService
         )
 
         # Now manually remove the portfolio service to simulate unsupported service
@@ -434,24 +434,26 @@ class TestBrokerFactory:
         with pytest.raises(BrokerFactoryError, match="does not support portfolio service"):
             self.factory.create_portfolio_service("noportfoliobroker")
 
-    def test_create_trade_service(self):
-        """Test creating trade service with type checking."""
-        service = self.factory.create_trade_service("testbroker")
+    def test_create_transaction_service(self):
+        """Test creating transaction service with type checking."""
+        service = self.factory.create_transaction_service("testbroker")
 
         assert service is not None
-        assert isinstance(service, MockTradeService)
+        assert isinstance(service, MockTransactionService)
 
-    def test_create_trade_service_unsupported(self):
-        """Test creating trade service for broker that doesn't support it."""
-        self.registry.register_broker_config("notradebroker", MockBrokerConfig)
-        self.registry.register_broker_services("notradebroker", portfolio=MockPortfolioService, trade=MockTradeService)
+    def test_create_transaction_service_unsupported(self):
+        """Test creating transaction service for broker that doesn't support it."""
+        self.registry.register_broker_config("notransactionbroker", MockBrokerConfig)
+        self.registry.register_broker_services(
+            "notransactionbroker", portfolio=MockPortfolioService, transaction=MockTransactionService
+        )
 
-        # Remove trade service to simulate unsupported service
-        self.registry._service_classes["notradebroker"].pop(ServiceType.TRADE, None)
-        self.registry._broker_capabilities["notradebroker"].remove(ServiceType.TRADE)
+        # Remove transaction service to simulate unsupported service
+        self.registry._service_classes["notransactionbroker"].pop(ServiceType.TRANSACTION, None)
+        self.registry._broker_capabilities["notransactionbroker"].remove(ServiceType.TRANSACTION)
 
-        with pytest.raises(BrokerFactoryError, match="does not support trade service"):
-            self.factory.create_trade_service("notradebroker")
+        with pytest.raises(BrokerFactoryError, match="does not support transaction service"):
+            self.factory.create_transaction_service("notransactionbroker")
 
     def test_create_deposit_service(self):
         """Test creating deposit service with type checking."""
@@ -498,11 +500,11 @@ class TestBrokerFactory:
 
         assert len(services) == 3
         assert ServiceType.PORTFOLIO in services
-        assert ServiceType.TRADE in services
+        assert ServiceType.TRANSACTION in services
         assert ServiceType.DEPOSIT in services
 
         assert isinstance(services[ServiceType.PORTFOLIO], MockPortfolioService)
-        assert isinstance(services[ServiceType.TRADE], MockTradeService)
+        assert isinstance(services[ServiceType.TRANSACTION], MockTransactionService)
         assert isinstance(services[ServiceType.DEPOSIT], MockDepositService)
 
     def test_get_available_brokers(self):
@@ -519,13 +521,13 @@ class TestBrokerFactory:
         """Test getting broker capabilities."""
         capabilities = self.factory.get_broker_capabilities("testbroker")
         assert ServiceType.PORTFOLIO in capabilities
-        assert ServiceType.TRADE in capabilities
+        assert ServiceType.TRANSACTION in capabilities
         assert ServiceType.DEPOSIT in capabilities
 
     def test_broker_supports_service(self):
         """Test checking if broker supports specific service."""
         assert self.factory.broker_supports_service("testbroker", ServiceType.PORTFOLIO)
-        assert self.factory.broker_supports_service("testbroker", ServiceType.TRADE)
+        assert self.factory.broker_supports_service("testbroker", ServiceType.TRANSACTION)
         assert not self.factory.broker_supports_service("testbroker", ServiceType.DIVIDEND)
 
     def test_clear_cache_specific_broker(self):
@@ -594,7 +596,7 @@ class TestBrokerFactory:
         # Create some instances
         self.factory.create_config("testbroker")
         self.factory.create_service("testbroker", ServiceType.PORTFOLIO)
-        self.factory.create_service("testbroker", ServiceType.TRADE)
+        self.factory.create_service("testbroker", ServiceType.TRANSACTION)
 
         stats = self.factory.get_cache_stats()
 

@@ -30,7 +30,7 @@ class TestConfigurationDrivenRegistration:
             "config": DegiroConfig,
             "services": {
                 ServiceType.PORTFOLIO: MagicMock(),
-                ServiceType.TRADE: MagicMock(),
+                ServiceType.TRANSACTION: MagicMock(),
                 ServiceType.ACCOUNT: MagicMock(),
             },
             "supports_complete_registration": True,
@@ -82,7 +82,7 @@ class TestConfigurationDrivenRegistration:
                 "config": DegiroConfig,
                 "services": {
                     ServiceType.PORTFOLIO: MagicMock(),
-                    ServiceType.TRADE: MagicMock(),
+                    ServiceType.TRANSACTION: MagicMock(),
                     ServiceType.DEPOSIT: MagicMock(),
                     ServiceType.DIVIDEND: MagicMock(),
                     ServiceType.FEE: MagicMock(),
@@ -94,7 +94,7 @@ class TestConfigurationDrivenRegistration:
                 "config": BitvavoConfig,
                 "services": {
                     ServiceType.PORTFOLIO: MagicMock(),
-                    ServiceType.TRADE: MagicMock(),
+                    ServiceType.TRANSACTION: MagicMock(),
                     ServiceType.DEPOSIT: MagicMock(),
                     ServiceType.DIVIDEND: MagicMock(),
                     ServiceType.FEE: MagicMock(),
@@ -106,7 +106,7 @@ class TestConfigurationDrivenRegistration:
                 "config": IbkrConfig,
                 "services": {
                     ServiceType.PORTFOLIO: MagicMock(),
-                    ServiceType.TRADE: MagicMock(),
+                    ServiceType.TRANSACTION: MagicMock(),
                     ServiceType.DIVIDEND: MagicMock(),
                     ServiceType.ACCOUNT: MagicMock(),
                 },
@@ -171,7 +171,7 @@ class TestNewBrokerAdditionSimulation:
                 "config": MockBrokerConfig,  # Use mock that passes validation
                 "services": {
                     ServiceType.PORTFOLIO: Mock(),
-                    ServiceType.TRADE: Mock(),
+                    ServiceType.TRANSACTION: Mock(),
                     ServiceType.ACCOUNT: Mock(),
                 },
                 "supports_complete_registration": True,
@@ -188,7 +188,7 @@ class TestNewBrokerAdditionSimulation:
 
         # Verify service types are properly defined
         services = broker_config["services"]
-        core_services = {ServiceType.PORTFOLIO, ServiceType.TRADE, ServiceType.ACCOUNT}
+        core_services = {ServiceType.PORTFOLIO, ServiceType.TRANSACTION, ServiceType.ACCOUNT}
         available_services = set(services.keys())
         assert core_services.issubset(available_services)
 
@@ -262,7 +262,7 @@ class TestNewBrokerAdditionSimulation:
                 "config": MockBrokerConfig,
                 "services": {
                     ServiceType.PORTFOLIO: Mock(),
-                    ServiceType.TRADE: Mock(),
+                    ServiceType.TRANSACTION: Mock(),
                     ServiceType.DEPOSIT: Mock(),
                     ServiceType.ACCOUNT: Mock(),
                     # Note: Missing ServiceType.DIVIDEND and ServiceType.FEE

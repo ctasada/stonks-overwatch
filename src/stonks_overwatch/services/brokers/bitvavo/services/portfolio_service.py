@@ -13,7 +13,7 @@ from stonks_overwatch.services.brokers.bitvavo.repositories.product_quotations_r
 )
 from stonks_overwatch.services.brokers.bitvavo.repositories.transactions_repository import TransactionsRepository
 from stonks_overwatch.services.brokers.bitvavo.services.deposit_service import DepositsService
-from stonks_overwatch.services.brokers.bitvavo.services.trade_service import TradesService
+from stonks_overwatch.services.brokers.bitvavo.services.transaction_service import TransactionsService
 from stonks_overwatch.services.models import DailyValue, PortfolioEntry, TotalPortfolio
 from stonks_overwatch.utils.core.datetime import DateTimeUtility
 from stonks_overwatch.utils.core.localization import LocalizationUtility
@@ -255,7 +255,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
             product = product_growth.get(key, {})
             carry_total = tmp_carry_total.get(key, 0)
 
-            stock_date = TradesService.format_date(entry["executedAt"])
+            stock_date = TransactionsService.format_date(entry["executedAt"])
             if entry["type"] in ["buy", "staking"]:
                 carry_total += float(entry["receivedAmount"])
             else:

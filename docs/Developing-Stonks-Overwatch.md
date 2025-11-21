@@ -143,7 +143,7 @@ from stonks_overwatch.core.service_types import ServiceType
 
 factory = BrokerFactory()
 for broker in ["degiro", "bitvavo", "ibkr"]:
-    for service_type in [ServiceType.PORTFOLIO, ServiceType.TRADE, ServiceType.ACCOUNT]:
+    for service_type in [ServiceType.PORTFOLIO, ServiceType.TRANSACTION, ServiceType.ACCOUNT]:
         try:
             service = factory.create_service(broker, service_type)
             print(f"✅ {broker} {service_type.value}: {service}")

@@ -2,16 +2,16 @@ from typing import List, Optional
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.core.interfaces.base_service import BaseService
-from stonks_overwatch.core.interfaces.trade_service import TradeServiceInterface
+from stonks_overwatch.core.interfaces.transaction_service import TransactionServiceInterface
 from stonks_overwatch.services.brokers.degiro.client.constants import TransactionType
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
 from stonks_overwatch.services.brokers.degiro.repositories.product_info_repository import ProductInfoRepository
 from stonks_overwatch.services.brokers.degiro.repositories.transactions_repository import TransactionsRepository
-from stonks_overwatch.services.models import Trade
+from stonks_overwatch.services.models import Transaction
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 
 
-class TradesService(BaseService, TradeServiceInterface):
+class TransactionsService(BaseService, TransactionServiceInterface):
     def __init__(
         self,
         degiro_service: Optional[DeGiroService] = None,
@@ -23,7 +23,7 @@ class TradesService(BaseService, TradeServiceInterface):
     # Note: base_currency property is inherited from BaseService and handles
     # dependency injection automatically
 
-    def get_trades(self) -> List[Trade]:
+    def get_transactions(self) -> List[Transaction]:
         # FETCH TRANSACTIONS DATA
         transactions_history = TransactionsRepository.get_transactions_raw()
 
@@ -45,7 +45,7 @@ class TradesService(BaseService, TradeServiceInterface):
             fees = transaction["totalPlusFeeInBaseCurrency"] - transaction["totalInBaseCurrency"]
 
             my_transactions.append(
-                Trade(
+                Transaction(
                     name=info["name"],
                     symbol=info["symbol"],
                     date=transaction["date"].strftime(LocalizationUtility.DATE_FORMAT),

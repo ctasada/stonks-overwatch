@@ -404,7 +404,7 @@ BROKER_CONFIGS = {
         "config": DegiroConfig,
         "services": {
             ServiceType.PORTFOLIO: DegiroPortfolioService,
-            ServiceType.TRADE: DegiroTradeService,
+            ServiceType.TRANSACTION: DegiroTransactionService,
             # ... other services
         },
         "supports_complete_registration": True,

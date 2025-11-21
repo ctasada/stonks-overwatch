@@ -124,7 +124,7 @@ Create a standardized plugin descriptor system:
   "capabilities": {
     "services": [
       "portfolio",
-      "trade",
+      "transaction",
       "deposit",
       "dividend",
       "fee",
@@ -152,7 +152,7 @@ Create a standardized plugin descriptor system:
   },
   "services": {
     "portfolio": "degiro.services.PortfolioService",
-    "trade": "degiro.services.TradeService",
+    "transaction": "degiro.services.TransactionService",
     "deposit": "degiro.services.DepositService",
     "dividend": "degiro.services.DividendService",
     "fee": "degiro.services.FeeService",
