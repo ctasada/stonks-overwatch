@@ -1,23 +1,23 @@
 """
-Trades service interface.
+Transaction service interface.
 
-This module defines the interface for trade service implementations.
-All broker trade services should implement this interface.
+This module defines the interface for transaction service implementations.
+All broker transaction services should implement this interface.
 """
 
 from abc import ABC, abstractmethod
 from typing import List
 
-from stonks_overwatch.services.models import Trade
+from stonks_overwatch.services.models import Transaction
 
 
-class TradeServiceInterface(ABC):
+class TransactionServiceInterface(ABC):
     """
-    Interface for trades service implementations.
+    Interface for transaction service implementations.
 
-    This interface defines the common operations that all trade services
-    should support, such as retrieving trade history and processing
-    trade data.
+    This interface defines the common operations that all transaction services
+    should support, such as retrieving transaction history and processing
+    transaction data.
 
     **Dependency Injection Support:**
 
@@ -35,7 +35,7 @@ class TradeServiceInterface(ABC):
        ```python
        from stonks_overwatch.core.interfaces.base_service import BaseService
 
-       class MyTradeService(TradeServiceInterface, BaseService):
+       class MyTransactionService(TransactionServiceInterface, BaseService):
            def __init__(self, config: Optional[BaseConfig] = None, **kwargs):
                super().__init__(config, **kwargs)
                # Now you can use self.config and self.base_currency
@@ -46,11 +46,11 @@ class TradeServiceInterface(ABC):
     """
 
     @abstractmethod
-    def get_trades(self) -> List[Trade]:
+    def get_transactions(self) -> List[Transaction]:
         """
-        Retrieves the trade history.
+        Retrieves the transaction history.
 
         Returns:
-            List[Trade]: List of trades sorted by date (newest first)
+            List[Transaction]: List of transactions sorted by date (newest first)
         """
         pass

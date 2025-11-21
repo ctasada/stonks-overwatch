@@ -24,8 +24,8 @@ from stonks_overwatch.services.brokers.bitvavo.services.fee_service import FeeSe
 from stonks_overwatch.services.brokers.bitvavo.services.portfolio_service import (
     PortfolioService as BitvavoPortfolioService,
 )
-from stonks_overwatch.services.brokers.bitvavo.services.trade_service import (
-    TradesService as BitvavoTradeService,
+from stonks_overwatch.services.brokers.bitvavo.services.transaction_service import (
+    TransactionsService as BitvavoTransactionService,
 )
 from stonks_overwatch.services.brokers.degiro.services.account_service import (
     AccountOverviewService as DeGiroAccountService,
@@ -36,8 +36,8 @@ from stonks_overwatch.services.brokers.degiro.services.fee_service import FeesSe
 from stonks_overwatch.services.brokers.degiro.services.portfolio_service import (
     PortfolioService as DeGiroPortfolioService,
 )
-from stonks_overwatch.services.brokers.degiro.services.trade_service import (
-    TradesService as DeGiroTradeService,
+from stonks_overwatch.services.brokers.degiro.services.transaction_service import (
+    TransactionsService as DeGiroTransactionService,
 )
 from stonks_overwatch.services.brokers.ibkr.services.account_overview import (
     AccountOverviewService as IbkrAccountOverviewService,
@@ -48,8 +48,8 @@ from stonks_overwatch.services.brokers.ibkr.services.dividends import (
 from stonks_overwatch.services.brokers.ibkr.services.portfolio import (
     PortfolioService as IbkrPortfolioService,
 )
-from stonks_overwatch.services.brokers.ibkr.services.trades import (
-    TradeService as IbkrTradeService,
+from stonks_overwatch.services.brokers.ibkr.services.transactions import (
+    TransactionsService as IbkrTransactionService,
 )
 from stonks_overwatch.utils.core.logger import StonksLogger
 
@@ -62,7 +62,7 @@ BROKER_CONFIGS: Dict[str, Dict[str, Any]] = {
         "config": DegiroConfig,
         "services": {
             ServiceType.PORTFOLIO: DeGiroPortfolioService,
-            ServiceType.TRADE: DeGiroTradeService,
+            ServiceType.TRANSACTION: DeGiroTransactionService,
             ServiceType.DEPOSIT: DeGiroDepositService,
             ServiceType.DIVIDEND: DeGiroDividendService,
             ServiceType.FEE: DeGiroFeeService,
@@ -74,7 +74,7 @@ BROKER_CONFIGS: Dict[str, Dict[str, Any]] = {
         "config": BitvavoConfig,
         "services": {
             ServiceType.PORTFOLIO: BitvavoPortfolioService,
-            ServiceType.TRADE: BitvavoTradeService,
+            ServiceType.TRANSACTION: BitvavoTransactionService,
             ServiceType.DEPOSIT: BitvavoDepositService,
             ServiceType.DIVIDEND: BitvavoDividendsService,
             ServiceType.FEE: BitvavoFeeService,
@@ -86,7 +86,7 @@ BROKER_CONFIGS: Dict[str, Dict[str, Any]] = {
         "config": IbkrConfig,
         "services": {
             ServiceType.PORTFOLIO: IbkrPortfolioService,
-            ServiceType.TRADE: IbkrTradeService,
+            ServiceType.TRANSACTION: IbkrTransactionService,
             ServiceType.DIVIDEND: IbkrDividendsService,
             ServiceType.ACCOUNT: IbkrAccountOverviewService,
             # Note: IBKR doesn't support deposit and fee services

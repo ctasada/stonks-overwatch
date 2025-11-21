@@ -16,7 +16,7 @@ from stonks_overwatch.core.interfaces import (
     DividendServiceInterface,
     FeeServiceInterface,
     PortfolioServiceInterface,
-    TradeServiceInterface,
+    TransactionServiceInterface,
 )
 from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.utils.core.logger import StonksLogger
@@ -43,7 +43,7 @@ class BrokerRegistry:
     # Mapping from ServiceType to expected interface
     SERVICE_INTERFACES = {
         ServiceType.PORTFOLIO: PortfolioServiceInterface,
-        ServiceType.TRADE: TradeServiceInterface,
+        ServiceType.TRANSACTION: TransactionServiceInterface,
         ServiceType.DEPOSIT: DepositServiceInterface,
         ServiceType.DIVIDEND: DividendServiceInterface,
         ServiceType.FEE: FeeServiceInterface,

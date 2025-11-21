@@ -9,7 +9,7 @@ from stonks_overwatch.core.interfaces.deposit_service import DepositServiceInter
 from stonks_overwatch.core.interfaces.dividend_service import DividendServiceInterface
 from stonks_overwatch.core.interfaces.fee_service import FeeServiceInterface
 from stonks_overwatch.core.interfaces.portfolio_service import PortfolioServiceInterface
-from stonks_overwatch.core.interfaces.trade_service import TradeServiceInterface
+from stonks_overwatch.core.interfaces.transaction_service import TransactionServiceInterface
 
 import pytest
 
@@ -111,8 +111,8 @@ def _import_real_services():
     from stonks_overwatch.services.brokers.bitvavo.services.portfolio_service import (
         PortfolioService as BitvavoPortfolioService,
     )
-    from stonks_overwatch.services.brokers.bitvavo.services.trade_service import (
-        TradesService as BitvavoTradeService,
+    from stonks_overwatch.services.brokers.bitvavo.services.transaction_service import (
+        TransactionsService as BitvavoTransactionService,
     )
     from stonks_overwatch.services.brokers.degiro.services.account_service import (
         AccountOverviewService as DeGiroAccountService,
@@ -129,8 +129,8 @@ def _import_real_services():
     from stonks_overwatch.services.brokers.degiro.services.portfolio_service import (
         PortfolioService as DeGiroPortfolioService,
     )
-    from stonks_overwatch.services.brokers.degiro.services.trade_service import (
-        TradesService as DeGiroTradeService,
+    from stonks_overwatch.services.brokers.degiro.services.transaction_service import (
+        TransactionsService as DeGiroTransactionService,
     )
 
     # Import IBKR services
@@ -143,14 +143,14 @@ def _import_real_services():
     from stonks_overwatch.services.brokers.ibkr.services.portfolio import (
         PortfolioService as IbkrPortfolioService,
     )
-    from stonks_overwatch.services.brokers.ibkr.services.trades import (
-        TradeService as IbkrTradeService,
+    from stonks_overwatch.services.brokers.ibkr.services.transactions import (
+        TransactionsService as IbkrTransactionService,
     )
 
     return {
         "degiro": {
             "portfolio": DeGiroPortfolioService,
-            "trade": DeGiroTradeService,
+            "transaction": DeGiroTransactionService,
             "deposit": DeGiroDepositService,
             "dividend": DeGiroDividendService,
             "fee": DeGiroFeeService,
@@ -158,7 +158,7 @@ def _import_real_services():
         },
         "bitvavo": {
             "portfolio": BitvavoPortfolioService,
-            "trade": BitvavoTradeService,
+            "transaction": BitvavoTransactionService,
             "deposit": BitvavoDepositService,
             "dividend": BitvavoDividendService,
             "fee": BitvavoFeeService,
@@ -166,7 +166,7 @@ def _import_real_services():
         },
         "ibkr": {
             "portfolio": IbkrPortfolioService,
-            "trade": IbkrTradeService,
+            "transaction": IbkrTransactionService,
             "dividend": IbkrDividendService,
             "account": IbkrAccountService,
         },
@@ -190,14 +190,14 @@ class MockPortfolioService(PortfolioServiceInterface):
         return []
 
 
-class MockTradesService(TradeServiceInterface):
-    """Mock trades service that implements the required interface."""
+class MockTransactionService(TransactionServiceInterface):
+    """Mock transaction service that implements the required interface."""
 
     def __init__(self, config=None):
         super().__init__()
         self.config = config
 
-    def get_trades(self, start_date=None, end_date=None):
+    def get_transactions(self, start_date=None, end_date=None):
         return []
 
 
@@ -253,7 +253,7 @@ def _create_mock_services():
     return {
         "degiro": {
             "portfolio": MockPortfolioService,
-            "trade": MockTradesService,
+            "transaction": MockTransactionService,
             "deposit": MockDepositService,
             "dividend": MockDividendService,
             "fee": MockFeeService,
@@ -261,7 +261,7 @@ def _create_mock_services():
         },
         "bitvavo": {
             "portfolio": MockPortfolioService,
-            "trade": MockTradesService,
+            "transaction": MockTransactionService,
             "deposit": MockDepositService,
             "dividend": MockDividendService,
             "fee": MockFeeService,
@@ -269,7 +269,7 @@ def _create_mock_services():
         },
         "ibkr": {
             "portfolio": MockPortfolioService,
-            "trade": MockTradesService,
+            "transaction": MockTransactionService,
             "dividend": MockDividendService,
             "account": MockAccountService,
         },
@@ -336,9 +336,6 @@ def reset_global_config():
             print("Successfully initialized unified registry for tests (config classes + mock services)")
 
     except Exception as e:
-        import traceback
-
-        traceback.print_exc()
         print(f"Warning: Could not initialize unified registry for tests: {e}")
 
     # Ensure authentication services are registered for tests

@@ -24,7 +24,7 @@ Right now the features we offer are:
 * Fees overview
 * Deposits overview
 * Diversification overview
-* Trades
+* Transactions
 * Account Statements
 
 ### How to login to DEGIRO
@@ -134,9 +134,9 @@ See [Wiki - Developing Stonks Overwatch](./docs/Developing-Stonks-Overwatch)
     * [ ] Fix sectors to be properly grouped
     * [ ] Remove Cash and Crypto from Holdings
   * [ ] Fees: Add support for Fees
-  * [ ] Trades:
+  * [ ] Transactions:
     * [ ] Add fees/taxes
-    * [ ] Review provided values: Should Dividends be included in the trades?
+    * [ ] Review provided values: Should Dividends be included in the transactions?
     * [ ] Web:
       * Performance & Reports / Transaction History: Shows transactions for the last 2 years
       * Flex Query: Allows creating custom reports.
