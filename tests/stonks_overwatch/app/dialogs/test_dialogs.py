@@ -45,7 +45,7 @@ class TestDialogManager:
             patch("stonks_overwatch.app.dialogs.dialogs.SaveFileDialog") as mock_save,
             patch("stonks_overwatch.app.dialogs.dialogs.PreferencesDialog") as mock_prefs,
             patch("stonks_overwatch.app.dialogs.dialogs.DownloadDialog") as mock_download,
-            patch("stonks_overwatch.app.dialogs.dialogs.GoogleDriveService") as mock_drive,
+            patch("stonks_overwatch.app.dialogs.dialogs.GitHubReleaseService") as mock_github,
             patch("stonks_overwatch.app.dialogs.dialogs.sync_to_async") as mock_sync,  # Use Mock, not AsyncMock
             patch("stonks_overwatch.app.dialogs.dialogs.dump_database") as mock_dump,
         ):
@@ -59,7 +59,7 @@ class TestDialogManager:
                 "SaveFileDialog": mock_save,
                 "PreferencesDialog": mock_prefs,
                 "DownloadDialog": mock_download,
-                "GoogleDriveService": mock_drive,
+                "GitHubReleaseService": mock_github,
                 "sync_to_async": mock_sync,
                 "dump_database": mock_dump,
             }
@@ -252,14 +252,14 @@ class TestDialogManager:
     @pytest.mark.asyncio
     async def test_check_for_updates_update_available_confirmed(self, dialog_manager, mock_dependencies):
         """Test check for updates when update is available and user confirms."""
-        # Mock GoogleDriveService responses
-        mock_file = MagicMock()
-        mock_file.version = "2.0.0"
+        # Mock GitHubReleaseService responses
+        mock_asset = MagicMock()
+        mock_asset.version = "2.0.0"
 
-        mock_dependencies["GoogleDriveService"].list_files.return_value = [mock_file]
-        mock_dependencies["GoogleDriveService"].get_platform_for_os.return_value = "test_platform"
-        mock_dependencies["GoogleDriveService"].get_latest_for_platform.return_value = mock_file
-        mock_dependencies["GoogleDriveService"].is_file_newer_than_version.return_value = True
+        mock_dependencies["GitHubReleaseService"].list_releases.return_value = [mock_asset]
+        mock_dependencies["GitHubReleaseService"].get_platform_for_os.return_value = "test_platform"
+        mock_dependencies["GitHubReleaseService"].get_latest_for_platform.return_value = mock_asset
+        mock_dependencies["GitHubReleaseService"].is_asset_newer_than_version.return_value = True
 
         # Mock confirmation dialog to return True
         dialog_manager.app.main_window.dialog.return_value = True
@@ -272,21 +272,21 @@ class TestDialogManager:
 
         # Verify DownloadDialog was created and shown
         mock_dependencies["DownloadDialog"].assert_called_once_with(
-            mock_file, main_window=dialog_manager.app.main_window
+            mock_asset, main_window=dialog_manager.app.main_window
         )
         mock_download_dialog.show.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_check_for_updates_update_available_declined(self, dialog_manager, mock_dependencies):
         """Test check for updates when update is available but user declines."""
-        # Mock GoogleDriveService responses
-        mock_file = MagicMock()
-        mock_file.version = "2.0.0"
+        # Mock GitHubReleaseService responses
+        mock_asset = MagicMock()
+        mock_asset.version = "2.0.0"
 
-        mock_dependencies["GoogleDriveService"].list_files.return_value = [mock_file]
-        mock_dependencies["GoogleDriveService"].get_platform_for_os.return_value = "test_platform"
-        mock_dependencies["GoogleDriveService"].get_latest_for_platform.return_value = mock_file
-        mock_dependencies["GoogleDriveService"].is_file_newer_than_version.return_value = True
+        mock_dependencies["GitHubReleaseService"].list_releases.return_value = [mock_asset]
+        mock_dependencies["GitHubReleaseService"].get_platform_for_os.return_value = "test_platform"
+        mock_dependencies["GitHubReleaseService"].get_latest_for_platform.return_value = mock_asset
+        mock_dependencies["GitHubReleaseService"].is_asset_newer_than_version.return_value = True
 
         # Mock confirmation dialog to return False
         dialog_manager.app.main_window.dialog.return_value = False
@@ -302,8 +302,8 @@ class TestDialogManager:
         # Ensure no existing dialog
         DialogManager._check_for_updates_dialog_instance = None
 
-        # Mock GoogleDriveService responses for no update
-        mock_dependencies["GoogleDriveService"].list_files.return_value = []
+        # Mock GitHubReleaseService responses for no update
+        mock_dependencies["GitHubReleaseService"].list_releases.return_value = []
 
         await dialog_manager.check_for_updates(show_no_updates=True)
 
@@ -313,8 +313,8 @@ class TestDialogManager:
     @pytest.mark.asyncio
     async def test_check_for_updates_no_update_available_no_message(self, dialog_manager, mock_dependencies):
         """Test check for updates when no update is available and should not show message."""
-        # Mock GoogleDriveService responses for no update
-        mock_dependencies["GoogleDriveService"].list_files.return_value = []
+        # Mock GitHubReleaseService responses for no update
+        mock_dependencies["GitHubReleaseService"].list_releases.return_value = []
 
         await dialog_manager.check_for_updates(show_no_updates=False)
 
@@ -332,8 +332,8 @@ class TestDialogManager:
 
         await dialog_manager.check_for_updates()
 
-        # Verify GoogleDriveService was not called (early return)
-        mock_dependencies["GoogleDriveService"].list_files.assert_not_called()
+        # Verify GitHubReleaseService was not called (early return)
+        mock_dependencies["GitHubReleaseService"].list_releases.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_check_for_updates_existing_dialog_closed(self, dialog_manager, mock_dependencies):
@@ -343,13 +343,13 @@ class TestDialogManager:
         existing_dialog._closed = True
         DialogManager._check_for_updates_dialog_instance = existing_dialog
 
-        # Mock GoogleDriveService responses for no update
-        mock_dependencies["GoogleDriveService"].list_files.return_value = []
+        # Mock GitHubReleaseService responses for no update
+        mock_dependencies["GitHubReleaseService"].list_releases.return_value = []
 
         await dialog_manager.check_for_updates(show_no_updates=False)
 
-        # Verify GoogleDriveService was called (dialog was reset)
-        mock_dependencies["GoogleDriveService"].list_files.assert_called_once()
+        # Verify GitHubReleaseService was called (dialog was reset)
+        mock_dependencies["GitHubReleaseService"].list_releases.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_all_dialog_instances_are_class_variables(self, dialog_manager):

@@ -35,7 +35,6 @@ briefcase = [
     "toga >=0.5.2",
     "asgiref >= 3.11.0",
     "pyotp >= 2.9.0",
-    "beautifulsoup4 >= 4.14.2",
 ]
 
 [tool.poetry.dependencies]
@@ -225,7 +224,6 @@ requires = [
     "std-nslog >=1.0.3",
     "asgiref >= 3.11.0",
     "pyotp >= 2.9.0",
-    "beautifulsoup4 >= 4.14.2",
 ]
 test_requires = [ ]
 requirement_installer_args = ["--find-links", "./wheels"]

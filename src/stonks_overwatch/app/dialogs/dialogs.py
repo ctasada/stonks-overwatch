@@ -7,7 +7,7 @@ from toga.dialogs import ConfirmDialog, ErrorDialog, InfoDialog, SaveFileDialog
 from stonks_overwatch.app.dialogs.download_dialog import DownloadDialog
 from stonks_overwatch.app.dialogs.preferences_dialog import PreferencesDialog
 from stonks_overwatch.app.dialogs.release_notes_dialog import ReleaseNotesDialog
-from stonks_overwatch.services.utilities.google_drive_service import GoogleDriveService
+from stonks_overwatch.services.utilities.github_release_service import GitHubReleaseService
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.database.db_utils import dump_database
 
@@ -116,26 +116,28 @@ class DialogManager:
                 DialogManager._check_for_updates_dialog_instance = None
 
         is_update_available = False
-        newest_version_file = None
+        newest_version_asset = None
 
         # Get list of available updates
-        update_files = GoogleDriveService.list_files()
-        if update_files:
-            platform = GoogleDriveService.get_platform_for_os()
-            newest_version_file = GoogleDriveService.get_latest_for_platform(update_files, platform)
-            is_update_available = GoogleDriveService.is_file_newer_than_version(newest_version_file, self.app.version)
+        release_assets = GitHubReleaseService.list_releases()
+        if release_assets:
+            platform = GitHubReleaseService.get_platform_for_os()
+            newest_version_asset = GitHubReleaseService.get_latest_for_platform(release_assets, platform)
+            is_update_available = GitHubReleaseService.is_asset_newer_than_version(
+                newest_version_asset, self.app.version
+            )
 
         if is_update_available:
             confirmed = await self.app.main_window.dialog(
                 ConfirmDialog(
                     "Update Available",
-                    f"Update to version {newest_version_file.version} available. Do you want to download it?",
+                    f"Update to version {newest_version_asset.version} available. Do you want to download it?",
                 )
             )
             if not confirmed:
                 return
 
-            dialog = DownloadDialog(newest_version_file, main_window=self.app.main_window)
+            dialog = DownloadDialog(newest_version_asset, main_window=self.app.main_window)
             dialog._closed = False
             DialogManager._check_for_updates_dialog_instance = dialog
 
