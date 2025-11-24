@@ -253,6 +253,54 @@ def ensure_registry_initialized() -> None:
         )
 
 
+def reload_broker_configurations() -> None:
+    """
+    Reload broker configurations to reflect environment changes (e.g., demo mode).
+
+    This method clears the broker factory cache and forces reinitialization
+    of all broker configurations to pick up new environment variables like DEMO_MODE.
+    """
+    logger.info("Reloading broker configurations...")
+
+    try:
+        # Import the broker factory and clear its cache
+        from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+
+        broker_factory = BrokerFactory()
+
+        # Get list of currently registered brokers before clearing
+        registry = BrokerRegistry()
+        registered_brokers = registry.get_registered_brokers()
+        logger.debug(f"Found registered brokers: {registered_brokers}")
+
+        # Clear cache and registry
+        broker_factory.clear_cache()
+        registry.clear_all_registrations()
+
+        # Re-register all brokers with updated configurations
+        ensure_registry_initialized()
+
+        # Force creation of new configuration instances to trigger the constructor logs
+        for broker_name in get_all_broker_names():
+            try:
+                config = broker_factory.create_config(broker_name)
+                if config:
+                    # Force lazy loading by accessing a property to trigger the actual constructor
+                    # This ensures the DegiroConfig.__init__ method is called with the new DEMO_MODE
+                    _ = config.enabled  # This will trigger _ensure_loaded() in LazyConfig
+                    logger.debug(f"Recreated configuration for broker: {broker_name}")
+                else:
+                    logger.warning(f"Failed to create configuration for broker: {broker_name}")
+            except Exception as e:
+                logger.warning(f"Error creating configuration for broker {broker_name}: {e}")
+
+        logger.info("Broker configurations reloaded successfully")
+
+    except Exception as e:
+        logger.error(f"Failed to reload broker configurations: {e}")
+        raise
+
+
 # Automatically initialize when this module is imported
 try:
     ensure_registry_initialized()

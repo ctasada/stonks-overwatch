@@ -1,6 +1,5 @@
-from django.db import connection
-
-from stonks_overwatch.utils.database.db_utils import dictfetchall, dictfetchone
+from stonks_overwatch.services.brokers.degiro.repositories.models import DeGiroProductInfo
+from stonks_overwatch.utils.database.db_utils import dictfetchall, dictfetchone, get_connection_for_model
 
 
 class ProductInfoRepository:
@@ -13,6 +12,7 @@ class ProductInfoRepository:
         ### Returns
             list: list of product infos
         """
+        connection = get_connection_for_model(DeGiroProductInfo)
         with connection.cursor() as cursor:
             # Use a parameterized query to prevent SQL injection
             placeholders = ",".join(["%s"] * len(ids))
@@ -39,6 +39,7 @@ class ProductInfoRepository:
         ### Returns
             list: list of product infos. For a single symbol, the list may contain multiple products.
         """
+        connection = get_connection_for_model(DeGiroProductInfo)
         with connection.cursor() as cursor:
             # Use a parameterized query to prevent SQL injection
             placeholders = ",".join(["%s"] * len(symbols))
@@ -69,6 +70,7 @@ class ProductInfoRepository:
         ### Returns
             Product Info
         """
+        connection = get_connection_for_model(DeGiroProductInfo)
         with connection.cursor() as cursor:
             # Use parameterized query to prevent SQL injection
             cursor.execute(
@@ -89,6 +91,7 @@ class ProductInfoRepository:
         ### Returns
             list: list of product ISINs
         """
+        connection = get_connection_for_model(DeGiroProductInfo)
         with connection.cursor() as cursor:
             cursor.execute(
                 """

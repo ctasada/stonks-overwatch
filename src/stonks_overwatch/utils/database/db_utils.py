@@ -1,7 +1,9 @@
+import os
 import zipfile
 
 from django.apps import apps
 from django.core import serializers
+from django.db import connections, router
 from django.db.backends.utils import CursorWrapper
 
 
@@ -21,6 +23,23 @@ def dictfetchone(cursor: CursorWrapper) -> dict | None:
     if not results:
         return None
     return results[0]
+
+
+def get_connection_for_model(model_class):
+    """
+    Get the appropriate database connection for a model based on the database router.
+
+    This function ensures that database operations respect the DEMO_MODE environment
+    variable and use the correct database (default or demo).
+
+    Args:
+        model_class: The Django model class to get the connection for
+
+    Returns:
+        Database connection object that respects the router configuration
+    """
+    db_alias = router.db_for_read(model_class)
+    return connections[db_alias]
 
 
 def snake_to_camel(snake_str):
@@ -43,8 +62,11 @@ def get_models():
     return models
 
 
-def dump_database(output_file="db_dump.zip"):
+def dump_database(output_file="db_dump.zip", database="default"):
     """Dump database content to JSON file"""
+
+    if database == "demo":
+        os.environ["DEMO_MODE"] = "True"
 
     print(f"Dumping database to {output_file}...")
 

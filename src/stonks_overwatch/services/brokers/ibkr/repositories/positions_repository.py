@@ -1,11 +1,11 @@
-from django.db import connection
-
-from stonks_overwatch.utils.database.db_utils import dictfetchall
+from stonks_overwatch.services.brokers.ibkr.repositories.models import IBKRPosition
+from stonks_overwatch.utils.database.db_utils import dictfetchall, get_connection_for_model
 
 
 class PositionsRepository:
     @staticmethod
     def get_all_positions() -> list[dict]:
+        connection = get_connection_for_model(IBKRPosition)
         with connection.cursor() as cursor:
             # In case the date is the same, use the id to provide a consistent sorting
             cursor.execute(
@@ -26,6 +26,7 @@ class PositionsRepository:
         ### Returns
             list: list of product infos
         """
+        connection = get_connection_for_model(IBKRPosition)
         with connection.cursor() as cursor:
             # Use a parameterized query to prevent SQL injection
             placeholders = ",".join(["%s"] * len(ids))

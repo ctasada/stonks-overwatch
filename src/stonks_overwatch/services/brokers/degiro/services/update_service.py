@@ -7,7 +7,6 @@ from degiro_connector.quotecast.models.chart import Interval
 from degiro_connector.trading.models.account import OverviewRequest
 from degiro_connector.trading.models.transaction import HistoryRequest
 from django.core.cache import cache
-from django.db import connection
 
 from stonks_overwatch.config.degiro import DegiroConfig
 from stonks_overwatch.core.interfaces.base_service import BaseService
@@ -37,7 +36,7 @@ from stonks_overwatch.services.brokers.yfinance.repositories.models import YFina
 from stonks_overwatch.utils.core.datetime import DateTimeUtility
 from stonks_overwatch.utils.core.debug import save_to_json
 from stonks_overwatch.utils.core.localization import LocalizationUtility
-from stonks_overwatch.utils.database.db_utils import dictfetchall
+from stonks_overwatch.utils.database.db_utils import dictfetchall, get_connection_for_model
 from stonks_overwatch.utils.domain.constants import ProductType
 
 CACHE_KEY_UPDATE_PORTFOLIO = "portfolio_data_update_from_degiro"
@@ -400,6 +399,7 @@ class UpdateService(BaseService, AbstractUpdateService):
         ### Returns
             list: list of product ids
         """
+        connection = get_connection_for_model(DeGiroTransactions)
         with connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -640,6 +640,7 @@ class UpdateService(BaseService, AbstractUpdateService):
         ### Returns
             list: list of ticket symbols
         """
+        connection = get_connection_for_model(DeGiroProductInfo)
         with connection.cursor() as cursor:
             cursor.execute(
                 """

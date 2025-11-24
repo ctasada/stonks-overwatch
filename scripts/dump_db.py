@@ -14,7 +14,6 @@ Usage:
 
 import argparse
 import os
-from pathlib import Path
 
 # Django setup
 from django.core import serializers
@@ -26,17 +25,20 @@ from scripts.common import setup_script_environment
 # Set up Django environment and logging
 setup_script_environment()
 
-from stonks_overwatch.settings import STONKS_OVERWATCH_DATA_DIR  # noqa: E402
+from stonks_overwatch.settings import DATABASES  # noqa: E402
 from stonks_overwatch.utils.database.db_utils import dump_database  # noqa: E402
 
 
-def load_database(input_file):
+def load_database(input_file, database="default"):
     """Load database content from the JSON file"""
     if not os.path.exists(input_file):
         print(f"Error: Input file {input_file} not found")
         return
 
-    existing_db_file = Path(STONKS_OVERWATCH_DATA_DIR).resolve().joinpath("db.sqlite3")
+    if database == "demo":
+        os.environ["DEMO_MODE"] = "True"
+
+    existing_db_file = DATABASES[database]["NAME"]
 
     if os.path.exists(existing_db_file):
         print(f"Warning: Existing database file '{existing_db_file}' found.")
@@ -61,7 +63,7 @@ def load_database(input_file):
             return
 
     print("Creating new database...")
-    call_command("migrate")
+    call_command("migrate", database=database)
 
     print(f"Loading database from {input_file}...")
 
@@ -70,11 +72,11 @@ def load_database(input_file):
         with open(input_file, "r", encoding="utf-8") as f:
             data = f.read()
 
-        # Deserialize and save
+        # Deserialize and save to the correct database
         objects_loaded = 0
-        with transaction.atomic():
+        with transaction.atomic(using=database):
             for obj in serializers.deserialize("json", data):
-                obj.save()
+                obj.save(using=database)
                 objects_loaded += 1
 
         print(f"Successfully loaded {objects_loaded} objects from {input_file}")
@@ -91,10 +93,24 @@ def main():
     # Dump command
     dump_parser = subparsers.add_parser("dump", help="Dump database to file")
     dump_parser.add_argument("--output", "-o", default="db_dump.zip", help="Output file name (default: db_dump.zip)")
+    dump_parser.add_argument(
+        "--database",
+        "-d",
+        default="default",
+        choices=["default", "demo"],
+        help="Database to use (default: default, options: default, demo)",
+    )
 
     # Load command
     load_parser = subparsers.add_parser("load", help="Load database from file")
     load_parser.add_argument("--input", "-i", required=True, help="Input file name")
+    load_parser.add_argument(
+        "--database",
+        "-d",
+        default="default",
+        choices=["default", "demo"],
+        help="Database to use (default: default, options: default, demo)",
+    )
 
     args = parser.parse_args()
 
@@ -103,9 +119,9 @@ def main():
         return
 
     if args.command == "dump":
-        dump_database(output_file=args.output)
+        dump_database(output_file=args.output, database=args.database)
     elif args.command == "load":
-        load_database(input_file=args.input)
+        load_database(input_file=args.input, database=args.database)
 
 
 if __name__ == "__main__":
