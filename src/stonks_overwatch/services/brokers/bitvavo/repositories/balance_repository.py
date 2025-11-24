@@ -1,10 +1,12 @@
 from decimal import Decimal
 
-from django.db import connection
-
-from stonks_overwatch.services.brokers.bitvavo.repositories.models import BitvavoAssets
+from stonks_overwatch.services.brokers.bitvavo.repositories.models import (
+    BitvavoAssets,
+    BitvavoBalance,
+    BitvavoTransactions,
+)
 from stonks_overwatch.utils.core.logger import StonksLogger
-from stonks_overwatch.utils.database.db_utils import dictfetchall, dictfetchone
+from stonks_overwatch.utils.database.db_utils import dictfetchall, dictfetchone, get_connection_for_model
 
 
 class BalanceRepository:
@@ -12,6 +14,7 @@ class BalanceRepository:
 
     @staticmethod
     def get_balance_raw() -> list[dict]:
+        connection = get_connection_for_model(BitvavoBalance)
         with connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -24,6 +27,7 @@ class BalanceRepository:
     @staticmethod
     def get_balance_for_symbol(symbol: str) -> dict | None:
         """Gets the balance for a specific symbol."""
+        connection = get_connection_for_model(BitvavoBalance)
         with connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -38,6 +42,7 @@ class BalanceRepository:
     @staticmethod
     def get_balance_calculated() -> list[dict]:
         """Gets the balance from the DB, with the calculated value in EUR."""
+        connection = get_connection_for_model(BitvavoTransactions)
         with connection.cursor() as cursor:
             cursor.execute(
                 """

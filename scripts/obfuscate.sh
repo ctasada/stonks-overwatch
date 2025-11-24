@@ -15,6 +15,7 @@ if [ "$OBFUSCATE_MODE" = "true" ]; then
     cp -r "$SRC_DIR/static" "$OBFUSCATED_DIR/stonks_overwatch/static"
     cp -r "$SRC_DIR/staticfiles" "$OBFUSCATED_DIR/stonks_overwatch/staticfiles"
     cp -r "$SRC_DIR/templates" "$OBFUSCATED_DIR/stonks_overwatch/templates"
+    cp -r "$SRC_DIR/fixtures" "$OBFUSCATED_DIR/stonks_overwatch/fixtures"
     echo "Obfuscation complete. Obfuscated code is in $OBFUSCATED_DIR."
 else
     echo "OBFUSCATE_MODE=true: Copying plain sources to $OBFUSCATED_DIR..."

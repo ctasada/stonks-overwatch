@@ -128,14 +128,12 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # Defines if the application will use the Demo DB or not
 DEMO_MODE = os.getenv("DEMO_MODE", False) in [True, "true", "True", "1"]
-STONKS_OVERWATCH_DB_NAME = "db.sqlite3"
-if DEMO_MODE:
-    STONKS_OVERWATCH_DB_NAME = "demo_db.sqlite3"
 
+# Define both databases - production and demo
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": Path(STONKS_OVERWATCH_DATA_DIR).resolve().joinpath(STONKS_OVERWATCH_DB_NAME),
+        "NAME": Path(STONKS_OVERWATCH_DATA_DIR).resolve().joinpath("db.sqlite3"),
         "TEST": {
             "NAME": Path(STONKS_OVERWATCH_CACHE_DIR).resolve().joinpath("test_db.sqlite3"),
         },
@@ -150,7 +148,27 @@ DATABASES = {
             """,
         },
     },
+    "demo": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": Path(STONKS_OVERWATCH_DATA_DIR).resolve().joinpath("demo_db.sqlite3"),
+        "TEST": {
+            "NAME": Path(STONKS_OVERWATCH_CACHE_DIR).resolve().joinpath("test_demo_db.sqlite3"),
+        },
+        "OPTIONS": {
+            "timeout": 30,
+            "init_command": """
+                PRAGMA journal_mode = WAL;
+                PRAGMA synchronous = NORMAL;
+                PRAGMA temp_store = MEMORY;
+                PRAGMA mmap_size = 268435456;
+                PRAGMA busy_timeout = 30000;
+            """,
+        },
+    },
 }
+
+# Database router to select which database to use based on DEMO_MODE
+DATABASE_ROUTERS = ["stonks_overwatch.utils.database.db_router.DatabaseRouter"]
 # With the flattening of the prj structure, the auto register doesn't seem to work anymore.
 MIGRATION_MODULES = {
     "stonks_overwatch": "stonks_overwatch.migrations",

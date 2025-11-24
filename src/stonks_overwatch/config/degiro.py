@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 from datetime import date
 from typing import Any, Dict, Optional
@@ -44,8 +45,12 @@ class DegiroConfig(BaseConfig):
         start_date: date,
         update_frequency_minutes: int = DEFAULT_DEGIRO_UPDATE_FREQUENCY,
         enabled: bool = True,
-        offline_mode: bool = False,
+        offline_mode: bool = None,
     ) -> None:
+        if offline_mode is None:
+            offline_mode = os.getenv("DEMO_MODE", False) in [True, "true", "True", "1"]
+
+        self.logger.info(f"Initializing DegiroConfig with offline_mode={offline_mode}")
         super().__init__(credentials, start_date, enabled, offline_mode, update_frequency_minutes)
 
     def __eq__(self, value: object) -> bool:
@@ -75,7 +80,13 @@ class DegiroConfig(BaseConfig):
         if isinstance(start_date, str):
             start_date = LocalizationUtility.convert_string_to_date(start_date)
         update_frequency_minutes = data.get("update_frequency_minutes", cls.DEFAULT_DEGIRO_UPDATE_FREQUENCY)
-        offline_mode = data.get("offline_mode", False)
+
+        demo_mode = os.getenv("DEMO_MODE", False) in [True, "true", "True", "1"]
+        if demo_mode:
+            offline_mode = True
+        else:
+            # Only use offline_mode from data if explicitly set, otherwise let constructor check DEMO_MODE
+            offline_mode = data.get("offline_mode") if "offline_mode" in data else None
 
         return cls(credentials, start_date, update_frequency_minutes, enabled, offline_mode)
 

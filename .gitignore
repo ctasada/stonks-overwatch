@@ -60,6 +60,8 @@ coverage.xml
 *.log
 local_settings.py
 *.sqlite3
+# Exception: Allow bundled demo database template for distribution
+!src/stonks_overwatch/fixtures/demo_db.sqlite3
 *.sqlite3-journal
 
 # Flask stuff:

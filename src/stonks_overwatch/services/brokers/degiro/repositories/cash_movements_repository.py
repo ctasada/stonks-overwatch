@@ -1,14 +1,13 @@
 from datetime import datetime
 
-from django.db import connection
-
 from stonks_overwatch.services.brokers.degiro.repositories.models import DeGiroCashMovements
-from stonks_overwatch.utils.database.db_utils import dictfetchall
+from stonks_overwatch.utils.database.db_utils import dictfetchall, get_connection_for_model
 
 
 class CashMovementsRepository:
     @staticmethod
     def get_cash_movements_raw() -> list[dict]:
+        connection = get_connection_for_model(DeGiroCashMovements)
         with connection.cursor() as cursor:
             # In case the date is the same, use the id to provide a consistent sorting
             cursor.execute(
@@ -23,6 +22,7 @@ class CashMovementsRepository:
     @staticmethod
     def get_cash_deposits_raw() -> list[dict]:
         # FIXME: DeGiro doesn't have a consistent description or type.
+        connection = get_connection_for_model(DeGiroCashMovements)
         with connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -37,6 +37,7 @@ class CashMovementsRepository:
 
     @staticmethod
     def get_cash_balance_by_date() -> list[dict]:
+        connection = get_connection_for_model(DeGiroCashMovements)
         with connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -58,6 +59,7 @@ class CashMovementsRepository:
 
     @staticmethod
     def get_total_cash_deposits_raw() -> float:
+        connection = get_connection_for_model(DeGiroCashMovements)
         with connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -72,6 +74,7 @@ class CashMovementsRepository:
 
     @staticmethod
     def get_total_cash(currency: str) -> float | None:
+        connection = get_connection_for_model(DeGiroCashMovements)
         with connection.cursor() as cursor:
             cursor.execute(
                 """
