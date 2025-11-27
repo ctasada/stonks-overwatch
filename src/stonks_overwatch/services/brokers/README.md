@@ -684,7 +684,7 @@ class PortfolioEntry(BaseModel):
 
 Study these existing implementations for reference:
 
-- **DeGiro** (`services/brokers/degiro/`) - Complex broker with all features
+- **DEGIRO** (`services/brokers/degiro/`) - Complex broker with all features
 - **Bitvavo** (`services/brokers/bitvavo/`) - Crypto broker example
 - **YFinance** (`services/brokers/yfinance/`) - Market data provider example
 

@@ -1,8 +1,10 @@
 # Developing Stonks Overwatch
 
-Stonks Overwatch is a portfolio tracker integrating with multiple brokers (DeGiro, Bitvavo, IBKR) using a
-**unified modern architecture** (2025). The system features factory patterns, dependency injection,
-interface-based design, and a centralized broker registry that dramatically simplifies development and maintenance.
+> **Audience:** Developers, contributors
+>
+> **Summary:** This guide explains how to set up the development environment and contribute to Stonks Overwatch.
+
+Stonks Overwatch is a portfolio tracker integrating with multiple brokers (DEGIRO, Bitvavo, IBKR). The system features a **unified broker architecture** with factory patterns, dependency injection, interface-based design, and a centralized broker registry that simplifies development and maintenance.
 
 ## First Steps
 
@@ -20,6 +22,23 @@ git clone ctasada/stonks-overwatch
 
 You can execute `make start`, it will install and configure everything needed to run.
 
+### Updating Dependencies
+
+To update all dependencies to their latest versions:
+
+```shell
+make update
+```
+
+This command will:
+
+- Update Poetry itself
+- Update all Python dependencies
+- Update Node.js dependencies
+- Regenerate third-party licenses file
+
+> **Note**: Use `make update` instead of `poetry update` directly to ensure all dependencies and licenses are properly updated.
+
 Alternatively, you can also use Docker
 
 ```shell
@@ -30,7 +49,7 @@ The application is available at [http://127.0.0.1:8000](http://127.0.0.1:8000) O
 
 If everything goes fine you should see a login screen for your configured brokers.
 
-## Understanding the Modern Architecture (2025)
+## Understanding the Architecture
 
 Before diving into development, it's important to understand the **unified broker architecture** that powers Stonks Overwatch:
 
@@ -43,22 +62,28 @@ Before diving into development, it's important to understand the **unified broke
 
 ### For New Developers
 
-If you're adding new features or brokers, familiarize yourself with:
+If you're adding new features or brokers, familiarize yourself with these key documents:
 
-1. **Broker Integration Guide**: `docs/BROKER_ARCHITECTURE.md` - Complete guide for adding new brokers
-2. **Authentication System**: `docs/DEGIRO_AUTH_ARCHITECTURE.md` - Modern authentication patterns
-3. **Architecture Overview**: `docs/ARCHITECTURE_IMPROVEMENTS.md` - System design and improvements
+- **[Broker Integration Guide](ARCHITECTURE_BROKERS.md)** - Complete guide for adding new brokers
+- **[Architecture Overview](ARCHITECTURE.md)** - System design and improvements
+- **[Authentication System](ARCHITECTURE_AUTHENTICATION.md)** - Authentication patterns and flows
 
 ### Service Access Pattern
 
+The unified broker architecture uses a factory pattern for creating broker services:
+
 ```python
-# Modern service access (recommended)
 from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 from stonks_overwatch.core.service_types import ServiceType
 
+# Create a factory instance
 factory = BrokerFactory()
+
+# Request a specific service for a broker
 portfolio_service = factory.create_service("degiro", ServiceType.PORTFOLIO)
 ```
+
+This pattern ensures consistent service creation across all brokers with automatic dependency injection.
 
 ## Start Developing
 
@@ -66,8 +91,8 @@ portfolio_service = factory.create_service("degiro", ServiceType.PORTFOLIO)
 
 To develop the application, it's important to have installed in your system the next dependencies:
 
-- Python 3.13
-- Poetry 2.1
+- Python 3.13 or higher
+- Poetry 2.2.1 or higher
 
 ### With Docker
 
@@ -123,9 +148,9 @@ make test
 
 Will execute the test suite, generating coverage report
 
-### Working with the Modern Architecture
+### Working with Broker Services
 
-#### Debug Broker Services
+#### Debug Broker Registration
 
 ```shell
 # Check broker registration status
@@ -202,13 +227,13 @@ provides the most up-to-date information on how to profile a web request in Djan
 poetry run python ./scripts/init_db.py --help
 ```
 
-This command will create a new database with the initial data from your configured broker accounts (DeGiro, Bitvavo, IBKR).
+This command will create a new database with the initial data from your configured broker accounts (DEGIRO, Bitvavo, IBKR).
 
 > This script expects the `config/config.json` file to be present and properly configured with your broker credentials.
 
 ### Configuration File Format
 
-The modern configuration supports multiple brokers:
+The configuration system supports multiple brokers simultaneously:
 
 ```json
 {

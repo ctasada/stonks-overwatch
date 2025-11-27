@@ -155,7 +155,6 @@ portfolio-performance/*.csv
 portfolio-performance/*.pdf
 
 /src/stonks_overwatch/static/
-/src/obfuscated/
 /src/stonks_overwatch.dist-info
 
 # Ignore IBKR certificates

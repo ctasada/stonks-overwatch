@@ -281,3 +281,5 @@ exclude_dirs = ["build", ".venv"]
 plugins.md007.indent = 4
 plugins.md013.enabled = false
 plugins.md024.siblings_only = true
+plugins.md026.enabled = false
+plugins.md036.enabled = false

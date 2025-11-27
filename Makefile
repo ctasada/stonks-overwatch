@@ -88,6 +88,7 @@ update: ## Update all dependencies
 	cd $(SRC_DIR) && npm update
 	poetry self update
 	poetry update
+	$(MAKE) generate-third-party
 
 clean: ## Clean temporary files and caches
 	@echo -e  "$(BOLD)$(YELLOW)Cleaning temporary files...$(RESET)"
@@ -137,6 +138,9 @@ generate-third-party: ## Generate third-party licenses file
 	@echo -e  "$(YELLOW)Combining licenses...$(RESET)"
 	@poetry run python scripts/combine_licenses.py
 	@rm -f npm-licenses.json
+	@echo -e  "$(YELLOW)Fixing whitespace and end of file...$(RESET)"
+	@poetry run pre-commit run trailing-whitespace --files THIRD_PARTY_LICENSES.txt || true
+	@poetry run pre-commit run end-of-file-fixer --files THIRD_PARTY_LICENSES.txt || true
 	@echo -e  "$(GREEN)Third-party licenses saved to THIRD_PARTY_LICENSES.txt$(RESET)"
 
 check-dependencies: ## Check for dependency issues
