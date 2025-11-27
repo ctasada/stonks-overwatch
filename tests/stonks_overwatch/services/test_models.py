@@ -91,7 +91,7 @@ def test_default_portfolio_entry():
 
     assert model.percentage_unrealized_gain == 0.0
     assert model.percentage_realized_gain == 0.0
-    assert model.formatted_portfolio_size() == "0.00%"
+    assert model.formatted_product_type_share() == "0.00%"
     with pytest.raises(ValueError):
         model.formatted_break_even_price()
     with pytest.raises(ValueError):
@@ -138,12 +138,12 @@ def test_portfolio_entry():
         unrealized_gain=1000.0,
         realized_gain=0.0,
         total_costs=6000.0,
-        portfolio_size=0.01,
+        product_type_share=0.01,
     )
 
     assert model.percentage_unrealized_gain == 0.08333333333333333
     assert model.percentage_realized_gain == 0.0
-    assert model.formatted_portfolio_size() == "1.00%"
+    assert model.formatted_product_type_share() == "1.00%"
     assert model.formatted_break_even_price() == "$ 120.00"
     assert model.formatted_base_currency_break_even_price() == "€ 100.00"
     assert model.formatted_price() == "$ 130.00"

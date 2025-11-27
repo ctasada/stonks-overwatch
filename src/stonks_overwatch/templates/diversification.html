@@ -5,8 +5,11 @@
 
 <div class="container-fluid row-gap-5">
     {% include 'components/distribution_with_list.html' with chart_id="type-chart" items=productTypes.table %}
-    {% if positions and positions.table %}
-    {% include 'components/distribution_with_list.html' with chart_id="positions-chart" items=positions.table %}
+    {% if stocks and stocks.table %}
+    {% include 'components/distribution_with_list.html' with chart_id="stocks-chart" items=stocks.table %}
+    {% endif %}
+    {% if etfs and etfs.table %}
+        {% include 'components/distribution_with_list.html' with chart_id="etfs-chart" items=etfs.table %}
     {% endif %}
     {% include 'components/distribution_with_list.html' with chart_id="sectors-chart" items=sectors.table %}
     {% if crypto and crypto.table %}
@@ -33,13 +36,22 @@
         {{ productTypes.chart.values|safe }}
     );
 
-    {% if positions and positions.table %}
+    {% if stocks and stocks.table %}
     drawDoughnutChart(
-        "positions-chart",
-        "Positions",
-        {{ positions.chart.labels|safe }},
-        {{ positions.chart.values|safe }}
+        "stocks-chart",
+        "Stocks",
+        {{ stocks.chart.labels|safe }},
+        {{ stocks.chart.values|safe }}
     );
+    {% endif %}
+
+    {% if etfs and etfs.table %}
+        drawDoughnutChart(
+            "etfs-chart",
+            "ETFs",
+            {{ etfs.chart.labels|safe }},
+            {{ etfs.chart.values|safe }}
+        );
     {% endif %}
 
     {% if crypto and crypto.table %}

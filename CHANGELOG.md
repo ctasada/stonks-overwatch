@@ -32,6 +32,8 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 - **Portfolio**:
   - Exchanges: Fixed bug skipping the Exchange name in some cases
+- **Diversification**:
+  - Percentages are now properly based on the type
 - **Dividends**:
   - Correctly display selected year in dividends calendar dropdown
 - **DEGIRO**:
