@@ -196,7 +196,7 @@ class DownloadDialog(toga.Window):
                 if file_path.lower().endswith((".deb", ".rpm", ".AppImage")):
                     if file_path.lower().endswith(".AppImage"):
                         # Make AppImage executable and run it
-                        os.chmod(file_path, 0o755)
+                        os.chmod(file_path, 0o744)
                         subprocess.Popen([file_path])
                     else:
                         # Open with default application (usually package manager)
