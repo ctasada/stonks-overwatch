@@ -1,20 +1,376 @@
-# Plugin Architecture Implementation Roadmap
+# Plugin Architecture - Comprehensive Proposal & Implementation Guide
+
+---
+
+**📋 DOCUMENT STATUS**
+
+- **Type**: Comprehensive Proposal with Implementation Guide
+- **Status**: 🔴 Not Started (0% Complete)
+- **Approval**: ⏳ Pending Review
+- **Target Timeline**: 16-22 weeks (post-approval)
+- **Last Updated**: November 2025
+
+**⚠️ IMPORTANT**: This document describes a **proposed future architecture** with detailed implementation guidance. The current system uses a static broker registry as documented in [ARCHITECTURE_BROKERS.md](ARCHITECTURE_BROKERS.md).
+
+**🤖 AI Agent Note**: This document is designed to be comprehensive for AI-assisted development. All phases include detailed implementation guidance with code examples.
+
+---
+
+## Table of Contents
+
+1. [Executive Summary](#executive-summary)
+2. [Related Documentation](#related-documentation)
+3. [Current State Analysis](#current-state-as-of-november-2025)
+4. [Proposed Architecture](#proposed-enhancement-dynamic-plugin-architecture)
+5. [Implementation Benefits](#implementation-benefits)
+6. [Prerequisites](#prerequisites)
+7. [Implementation Status](#implementation-status)
+8. [Decision Gates](#decision-gates)
+9. [Detailed Implementation Phases](#detailed-implementation-phases)
+   - [Phase 1: Foundation](#phase-1-foundation--standards-2-3-weeks)
+   - [Phase 2: Plugin Core](#phase-2-plugin-core-system-3-4-weeks)
+   - [Phase 3: Discovery System](#phase-3-discovery-system-2-3-weeks)
+   - [Phase 4: Lifecycle Management](#phase-4-lifecycle-management-3-4-weeks)
+   - [Phase 5: Legacy Migration](#phase-5-legacy-migration-2-3-weeks)
+   - [Phase 6: Advanced Features](#phase-6-advanced-features-4-5-weeks)
+10. [Risk Mitigation](#risk-mitigation--success-criteria)
+11. [Success Criteria](#success-criteria)
+12. [Testing Strategy](#testing-strategy)
+
+---
 
 ## Executive Summary
 
-This roadmap provides a detailed, phase-by-phase implementation plan to transform Stonks Overwatch from a static broker architecture to a dynamic plugin system. The migration is designed to be incremental, low-risk, and backward-compatible.
+This document outlines a comprehensive proposal to evolve the current broker architecture from a static registry-based system to a dynamic plugin architecture. The goal is to create a truly extensible system where brokers can be developed, distributed, and deployed independently while maintaining type safety and backward compatibility.
 
-## Implementation Overview
+**Key Objectives:**
+- Enable dynamic broker discovery and loading
+- Support independent broker distribution as packages
+- Provide plugin isolation and sandboxing
+- Implement API versioning for compatibility
+- Maintain 100% backward compatibility
+- Reduce broker development time by 50%
 
-| Phase | Duration | Effort | Risk | Dependencies |
-|-------|----------|--------|------|--------------|
-| **Phase 1**: Foundation | 2-3 weeks | Medium | Low | Core team |
-| **Phase 2**: Plugin Core | 3-4 weeks | High | Medium | Phase 1 |
-| **Phase 3**: Discovery System | 2-3 weeks | Medium | Low | Phase 2 |
-| **Phase 4**: Lifecycle Management | 3-4 weeks | High | Medium | Phase 3 |
-| **Phase 5**: Legacy Migration | 2-3 weeks | Medium | Low | Phase 4 |
-| **Phase 6**: Advanced Features | 4-5 weeks | High | Medium | Phase 5 |
-| **Total** | **16-22 weeks** | **High** | **Medium** | - |
+## Related Documentation
+
+- **[Current Broker Architecture](ARCHITECTURE_BROKERS.md)** - How brokers work today (implemented)
+- **[Architecture Overview](ARCHITECTURE.md)** - Core system design principles
+- **[Authentication Architecture](ARCHITECTURE_AUTHENTICATION.md)** - Authentication patterns
+
+## Current State (As of November 2025)
+
+The current broker architecture uses a static registry system. See [ARCHITECTURE_BROKERS.md](ARCHITECTURE_BROKERS.md) for complete implementation details.
+
+### Strengths
+
+- ✅ **Broker Registry**: Central registry for broker management
+- ✅ **Factory Pattern**: Consistent broker creation with dependency injection
+- ✅ **Interface Contracts**: Type-safe service interfaces
+- ✅ **3-Layer Architecture**: Clear separation of concerns (client/services/repositories)
+- ✅ **Configuration-Driven**: Declarative broker definitions
+
+### Limitations
+
+- ❌ **Static Discovery**: Hard-coded imports in `registry_setup.py`
+- ❌ **Compile-Time Binding**: All brokers must be present at build time
+- ❌ **Manual Registration**: New brokers require core code changes
+- ❌ **No Isolation**: Brokers share the same process space without boundaries
+- ❌ **Version Coupling**: No API versioning for broker compatibility
+- ❌ **Distribution Challenges**: Cannot distribute brokers as separate packages
+
+## Proposed Enhancement: Dynamic Plugin Architecture
+
+### Architecture Overview
+
+```mermaid
+graph TB
+    subgraph "Plugin System Core"
+        PM[PluginManager<br/>🔌 Discovery & Lifecycle]
+        PL[PluginLoader<br/>📦 Dynamic Loading]
+        PR[PluginRegistry<br/>📋 Plugin Catalog]
+        PV[PluginValidator<br/>✅ Validation & Compatibility]
+        PM --> PL
+        PM --> PR
+        PM --> PV
+    end
+
+    subgraph "Plugin Discovery"
+        EP[EntryPoints<br/>🔍 setuptools discovery]
+        FM[FileManifest<br/>📄 manifest.json scanning]
+        DR[DirectoryScanner<br/>📂 plugin directories]
+        EP --> PM
+        FM --> PM
+        DR --> PM
+    end
+
+    subgraph "Plugin Types"
+        BP[BrokerPlugin<br/>🏦 Broker Implementation]
+        AP[AggregatorPlugin<br/>📊 Custom Aggregators]
+        VP[ViewPlugin<br/>🌐 UI Extensions]
+        MP[MiddlewarePlugin<br/>⚙️ Processing Middleware]
+    end
+
+    subgraph "Plugin Metadata"
+        MAN[Manifest<br/>📋 Plugin Descriptor]
+        DEP[Dependencies<br/>🔗 Version Requirements]
+        CAP[Capabilities<br/>🎯 Service Declarations]
+        MAN --> DEP
+        MAN --> CAP
+    end
+
+    subgraph "Legacy Integration"
+        BR[BrokerRegistry<br/>📚 Existing System]
+        BF[BrokerFactory<br/>🏭 Current Factory]
+        PA[PluginAdapter<br/>🔄 Legacy Bridge]
+        BR --> PA
+        BF --> PA
+        PA --> PM
+    end
+
+    subgraph "API Versioning"
+        V1[v1.0 API<br/>🔢 Current Interface]
+        V2[v2.0 API<br/>🚀 Future Interface]
+        VC[VersionChecker<br/>⚖️ Compatibility]
+        V1 --> VC
+        V2 --> VC
+        VC --> PV
+    end
+
+    BP --> MAN
+    AP --> MAN
+    VP --> MAN
+    MP --> MAN
+```
+
+### Plugin Metadata Standard
+
+Example `plugin_manifest.json` structure:
+
+```json
+{
+  "plugin": {
+    "name": "degiro-broker",
+    "version": "1.0.0",
+    "type": "broker",
+    "display_name": "DeGiro Broker Plugin",
+    "description": "DeGiro broker integration for Stonks Overwatch",
+    "author": "Stonks Overwatch Team",
+    "license": "MIT",
+    "homepage": "https://github.com/stonks-overwatch/degiro-plugin"
+  },
+  "api": {
+    "min_version": "1.0.0",
+    "max_version": "2.0.0",
+    "interfaces": [
+      "BrokerServiceInterface",
+      "PortfolioServiceInterface",
+      "TransactionServiceInterface"
+    ]
+  },
+  "dependencies": {
+    "python": ">=3.11",
+    "stonks-overwatch-core": ">=2.0.0,<3.0.0",
+    "degiro-connector": ">=3.0.0"
+  },
+  "capabilities": {
+    "services": [
+      "portfolio",
+      "trade",
+      "deposit",
+      "dividend",
+      "fee",
+      "account"
+    ],
+    "features": [
+      "real_time_data",
+      "historical_data",
+      "order_execution"
+    ],
+    "supported_markets": ["XAMS", "XNYS", "XNAS"],
+    "supported_currencies": ["EUR", "USD", "GBP"]
+  },
+  "configuration": {
+    "config_class": "degiro.config.DegiroConfig",
+    "required_credentials": [
+      "username",
+      "password",
+      "int_account"
+    ],
+    "optional_settings": [
+      "use_2fa",
+      "session_timeout"
+    ]
+  },
+  "services": {
+    "portfolio": "degiro.services.PortfolioService",
+    "trade": "degiro.services.TradeService",
+    "deposit": "degiro.services.DepositService",
+    "dividend": "degiro.services.DividendService",
+    "fee": "degiro.services.FeeService",
+    "account": "degiro.services.AccountService"
+  },
+  "entry_points": {
+    "main": "degiro.plugin:DegiroPlugin",
+    "config": "degiro.config:DegiroConfig"
+  }
+}
+```
+
+## Implementation Benefits
+
+### Comparison: Current vs Proposed
+
+| Aspect | Current System | Proposed Plugin System |
+|--------|----------------|------------------------|
+| **Broker Discovery** | Hard-coded imports | Dynamic entry points + file system |
+| **Installation** | Modify core code | Install package or drop in plugins/ |
+| **Distribution** | Part of core | Independent packages |
+| **Versioning** | Coupled to core | Independent versions with API compatibility |
+| **Isolation** | Shared process | Sandboxed execution |
+| **Hot Reload** | Requires restart | Dynamic load/unload |
+| **Third-Party Dev** | Not supported | Fully supported |
+| **Time to Add Broker** | 2-4 hours + core PR | 1-2 hours, no core changes |
+
+### For Developers
+
+- 🚀 **Faster Development**: Independent broker development and testing
+- 🔄 **Hot Reloading**: Update brokers without restarting the application
+- 📦 **Distribution**: Distribute brokers as separate packages
+- 🧪 **Testing**: Isolated testing environment for each broker
+- 📚 **Documentation**: Auto-generated API documentation
+
+### For Users
+
+- 🔌 **Plug & Play**: Easy installation of new brokers
+- 🎛️ **Configurability**: Fine-grained control over broker features
+- 🔧 **Customization**: Custom broker implementations for specific needs
+- 📊 **Monitoring**: Real-time plugin health and performance monitoring
+- 🔄 **Updates**: Independent broker updates without core changes
+
+### For the System
+
+- 🏗️ **Scalability**: Better resource isolation and management
+- 🛡️ **Stability**: Plugin failures don't crash the entire system
+- 🔄 **Maintainability**: Clear separation of concerns
+- 🚀 **Performance**: Lazy loading and resource optimization
+- 🔒 **Security**: Sandboxed plugin execution
+
+### Success Metrics
+
+- ✅ **Reduced Core Changes**: 90% reduction in core code changes for new brokers
+- ✅ **Development Speed**: 50% faster broker development cycle
+- ✅ **System Stability**: 99.9% uptime with plugin isolation
+- ✅ **Community Growth**: Enable third-party broker development
+- ✅ **Maintenance Cost**: 60% reduction in maintenance overhead
+
+## Prerequisites
+
+Before starting Phase 1, ensure the following prerequisites are met:
+
+### Documentation & Planning
+
+- [ ] Current broker architecture is fully documented (see ARCHITECTURE_BROKERS.md) ✅ **Complete**
+- [ ] Plugin architecture proposal has been reviewed and approved
+- [ ] Success criteria and metrics are defined and agreed upon
+- [ ] Risk mitigation strategies are documented
+
+### Resources & Capacity
+
+- [ ] Development team has capacity for 16-22 weeks of focused work
+- [ ] 2-3 senior developers assigned to the project
+- [ ] Code review resources allocated
+- [ ] QA/Testing resources available
+
+### Technical Readiness
+
+- [ ] All existing brokers are working and tested ✅ **Current state**
+- [ ] Current test suite passes with > 80% coverage
+- [ ] Development environment is stable
+- [ ] CI/CD pipeline is operational
+
+### Stakeholder Alignment
+
+- [ ] Stakeholders have approved the proposal and timeline
+- [ ] Communication plan established for progress updates
+- [ ] Rollback plan documented in case of critical issues
+
+## Implementation Status
+
+**Overall Progress**: 0% Complete (0/6 phases)
+
+| Phase | Status | Owner | Start Date | Target Date | Actual Date | Progress |
+|-------|--------|-------|------------|-------------|-------------|----------|
+| Phase 1: Foundation | 🔴 Not Started | TBD | TBD | TBD | - | 0% |
+| Phase 2: Plugin Core | 🔴 Not Started | TBD | TBD | TBD | - | 0% |
+| Phase 3: Discovery | 🔴 Not Started | TBD | TBD | TBD | - | 0% |
+| Phase 4: Lifecycle | 🔴 Not Started | TBD | TBD | TBD | - | 0% |
+| Phase 5: Migration | 🔴 Not Started | TBD | TBD | TBD | - | 0% |
+| Phase 6: Advanced | 🔴 Not Started | TBD | TBD | TBD | - | 0% |
+
+**Legend:** 🔴 Not Started | 🟡 In Progress | 🟢 Complete | ⏸️ Blocked | ⚠️ At Risk
+
+## Decision Gates
+
+### Phase 0: Pre-Implementation Decisions
+
+**Must be completed before Phase 1 begins:**
+
+#### Strategic Approval
+
+- [ ] **Approve plugin architecture proposal**
+  - Decision maker: [Name/Role]
+  - Required by: [Date]
+  - Status: ⏳ Pending
+
+- [ ] **Allocate development resources**
+  - Team size: 2-3 developers
+  - Duration: 16-22 weeks
+  - Budget: [Amount]
+  - Status: ⏳ Pending
+
+- [ ] **Define and approve success criteria**
+  - Performance targets: < 5% overhead
+  - Compatibility: 100% backward compatible
+  - Testing: 90% code coverage
+  - Uptime: 99.9% with plugin isolation
+  - Status: ⏳ Pending
+
+#### Technical Decisions
+
+- [ ] **Plugin discovery mechanism**
+  - Options: Entry points, file system, or both
+  - Recommendation: Both for maximum flexibility
+  - Decision: TBD
+
+- [ ] **API versioning strategy**
+  - Semantic versioning for plugin API
+  - Compatibility matrix maintenance
+  - Decision: TBD
+
+- [ ] **Security/sandboxing approach**
+  - Process isolation vs permission system
+  - Resource limits and tracking
+  - Decision: TBD
+
+- [ ] **Dependency management**
+  - Virtual environments per plugin
+  - Shared dependencies with version constraints
+  - Decision: TBD
+
+### Phase Completion Gates
+
+Each phase requires sign-off before proceeding to the next:
+
+- [ ] **Phase 1 Gate**: All deliverables complete, tests passing, documentation updated
+- [ ] **Phase 2 Gate**: Plugin loading functional, integration tests pass
+- [ ] **Phase 3 Gate**: Discovery working, plugins can be found and loaded
+- [ ] **Phase 4 Gate**: Lifecycle management stable, health monitoring operational
+- [ ] **Phase 5 Gate**: At least one legacy broker successfully migrated
+- [ ] **Phase 6 Gate**: All features complete, production-ready
+
+---
+
+## Detailed Implementation Phases
 
 ## Phase 1: Foundation & Standards (2-3 weeks)
 
@@ -29,9 +385,9 @@ This roadmap provides a detailed, phase-by-phase implementation plan to transfor
 
 #### 1.1 Plugin Metadata Standard (Week 1)
 
-```python
-# File: src/stonks_overwatch/plugins/models.py
+**File**: `src/stonks_overwatch/plugins/models.py`
 
+```python
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 from enum import Enum
@@ -96,9 +452,9 @@ class PluginInfo:
 
 #### 1.2 Base Plugin Interface (Week 1)
 
-```python
-# File: src/stonks_overwatch/plugins/interfaces.py
+**File**: `src/stonks_overwatch/plugins/interfaces.py`
 
+```python
 from abc import ABC, abstractmethod
 from typing import Dict, List, Type, Any
 from stonks_overwatch.core.service_types import ServiceType
@@ -176,9 +532,9 @@ src/stonks_overwatch/
 
 #### 1.4 Plugin Validation Framework (Week 2)
 
-```python
-# File: src/stonks_overwatch/plugins/manager/validator.py
+**File**: `src/stonks_overwatch/plugins/manager/validator.py`
 
+```python
 from typing import List, Dict, Any
 from stonks_overwatch.plugins.models import PluginManifest, PluginInfo
 
@@ -237,22 +593,36 @@ class PluginValidator:
     def _is_valid_version(self, version: str) -> bool:
         """Check if version string is valid semantic version."""
         # Implementation for semantic version validation
-        pass
+        import re
+        pattern = r'^\d+\.\d+\.\d+$'
+        return bool(re.match(pattern, version))
 
     def _is_api_compatible(self, min_version: str, max_version: str) -> bool:
         """Check if plugin is compatible with current API version."""
         # Implementation for API compatibility check
-        pass
+        # Compare with current system API version
+        return True  # Placeholder
 
     def _check_python_version(self, requirement: str) -> bool:
         """Check if Python version requirement is satisfied."""
-        # Implementation for Python version check
-        pass
+        import sys
+        from packaging import version, specifiers
+
+        current_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+        spec = specifiers.SpecifierSet(requirement)
+        return version.parse(current_version) in spec
 
     def _check_dependency(self, package: str, version_spec: str) -> bool:
         """Check if package dependency is satisfied."""
-        # Implementation for dependency check
-        pass
+        try:
+            import importlib.metadata
+            from packaging import version, specifiers
+
+            installed_version = importlib.metadata.version(package)
+            spec = specifiers.SpecifierSet(version_spec)
+            return version.parse(installed_version) in spec
+        except importlib.metadata.PackageNotFoundError:
+            return False
 ```
 
 ### Deliverables
@@ -268,20 +638,20 @@ class PluginValidator:
 
 ## Phase 2: Plugin Core System (3-4 weeks)
 
-### Phase 2 - Goals
+### Goals
 
 - Implement core plugin management functionality
 - Create plugin registry and lifecycle management
 - Build plugin loading and unloading mechanisms
 - Establish error handling and logging
 
-### Phase 2 - Tasks
+### Tasks
 
 #### 2.1 Plugin Registry (Week 1)
 
-```python
-# File: src/stonks_overwatch/plugins/registry/plugin_registry.py
+**File**: `src/stonks_overwatch/plugins/registry/plugin_registry.py`
 
+```python
 from typing import Dict, List, Optional
 from stonks_overwatch.plugins.models import PluginInfo, PluginManifest
 from stonks_overwatch.plugins.interfaces import PluginInterface
@@ -336,9 +706,9 @@ class PluginRegistry:
 
 #### 2.2 Plugin Loader (Week 1-2)
 
-```python
-# File: src/stonks_overwatch/plugins/manager/loader.py
+**File**: `src/stonks_overwatch/plugins/manager/loader.py`
 
+```python
 import importlib
 import importlib.util
 import sys
@@ -426,10 +796,47 @@ class PluginLoader:
                 manifest_data = json.load(f)
 
             # Convert to PluginManifest object
-            return PluginManifest(**manifest_data)
+            return self._parse_manifest(manifest_data)
 
         except Exception as e:
             raise PluginLoadError(f"Failed to load manifest {manifest_path}: {e}")
+
+    def _parse_manifest(self, data: dict) -> PluginManifest:
+        """Parse manifest JSON into PluginManifest object."""
+        plugin_data = data.get('plugin', {})
+        api_data = data.get('api', {})
+        deps_data = data.get('dependencies', {})
+        caps_data = data.get('capabilities', {})
+        config_data = data.get('configuration', {})
+        services_data = data.get('services', {})
+        entry_data = data.get('entry_points', {})
+
+        return PluginManifest(
+            name=plugin_data.get('name'),
+            version=plugin_data.get('version'),
+            type=plugin_data.get('type'),
+            display_name=plugin_data.get('display_name'),
+            description=plugin_data.get('description'),
+            author=plugin_data.get('author'),
+            license=plugin_data.get('license'),
+            homepage=plugin_data.get('homepage'),
+            min_api_version=api_data.get('min_version'),
+            max_api_version=api_data.get('max_version'),
+            required_interfaces=api_data.get('interfaces', []),
+            python_version=deps_data.get('python'),
+            core_dependencies={k: v for k, v in deps_data.items() if k != 'python'},
+            plugin_dependencies=deps_data.get('plugin_dependencies', {}),
+            services=caps_data.get('services', []),
+            features=caps_data.get('features', []),
+            supported_markets=caps_data.get('supported_markets', []),
+            supported_currencies=caps_data.get('supported_currencies', []),
+            config_class=config_data.get('config_class'),
+            required_credentials=config_data.get('required_credentials', []),
+            optional_settings=config_data.get('optional_settings', []),
+            service_mappings=services_data,
+            main_entry_point=entry_data.get('main'),
+            config_entry_point=entry_data.get('config')
+        )
 
     def _load_plugin_module(self, plugin_path: Path, manifest: PluginManifest):
         """Load plugin module from path."""
@@ -490,9 +897,9 @@ class PluginLoader:
 
 #### 2.3 Plugin Manager (Week 2-3)
 
-```python
-# File: src/stonks_overwatch/plugins/manager/plugin_manager.py
+**File**: `src/stonks_overwatch/plugins/manager/plugin_manager.py`
 
+```python
 from typing import List, Optional, Dict, Any
 from pathlib import Path
 from stonks_overwatch.plugins.models import PluginInfo, PluginManifest
@@ -502,12 +909,13 @@ from stonks_overwatch.plugins.manager.loader import PluginLoader
 from stonks_overwatch.plugins.manager.validator import PluginValidator
 from stonks_overwatch.plugins.manager.discovery import PluginDiscovery
 from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.utils.core.logger_constants import LOGGER_PLUGINS
 
 class PluginManager:
     """Central manager for all plugin operations."""
 
     def __init__(self):
-        self.logger = StonksLogger.get_logger("stonks_overwatch.plugins", "[PLUGIN_MANAGER]")
+        self.logger = StonksLogger.get_logger(LOGGER_PLUGINS, "[PLUGIN_MANAGER]")
         self.registry = PluginRegistry()
         self.loader = PluginLoader()
         self.validator = PluginValidator()
@@ -566,7 +974,7 @@ class PluginManager:
                 # Load from file system
                 plugin = self.loader.load_plugin_from_path(Path(plugin_info.path))
             else:
-                # Load from entry point (need to implement entry point loading)
+                # Load from entry point
                 self.logger.error("Entry point loading not yet implemented")
                 return False
 
@@ -643,7 +1051,7 @@ class PluginManager:
         return self.load_plugin(plugin_name)
 ```
 
-### Phase 2 - Deliverables
+### Deliverables
 
 - [ ] Plugin registry implementation
 - [ ] Plugin loader with file system and entry point support
@@ -656,24 +1064,26 @@ class PluginManager:
 
 ## Phase 3: Discovery System (2-3 weeks)
 
-### Phase 3 - Goals
+### Goals
 
 - Implement multiple plugin discovery mechanisms
 - Support entry points (setuptools) discovery
 - Support file system discovery with manifest scanning
 - Create plugin metadata parsing and validation
 
-### Phase 3 - Tasks
+### Tasks
 
-#### 3.1 Entry Points Discovery (Week 1)
+#### 3.1 Plugin Discovery (Week 1-2)
+
+**File**: `src/stonks_overwatch/plugins/manager/discovery.py`
 
 ```python
-# File: src/stonks_overwatch/plugins/manager/discovery.py
-
 import pkg_resources
 from typing import List, Iterator
 from pathlib import Path
 from stonks_overwatch.plugins.models import PluginInfo, PluginManifest
+from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.utils.core.logger_constants import LOGGER_PLUGINS
 
 class PluginDiscovery:
     """Handles discovery of plugins from multiple sources."""
@@ -684,6 +1094,9 @@ class PluginDiscovery:
         Path.home() / ".stonks_overwatch" / "plugins",
         Path("/usr/local/share/stonks_overwatch/plugins"),
     ]
+
+    def __init__(self):
+        self.logger = StonksLogger.get_logger(LOGGER_PLUGINS, "[PLUGIN_DISCOVERY]")
 
     def discover_from_entry_points(self) -> List[PluginInfo]:
         """Discover plugins using setuptools entry points."""
@@ -795,7 +1208,7 @@ class PluginDiscovery:
         )
 ```
 
-### Phase 3 - Deliverables
+### Deliverables
 
 - [ ] Entry points discovery implementation
 - [ ] File system discovery with manifest parsing
@@ -808,20 +1221,20 @@ class PluginDiscovery:
 
 ## Phase 4: Lifecycle Management (3-4 weeks)
 
-### Phase 4 - Goals
+### Goals
 
 - Implement comprehensive plugin state management
 - Create plugin event system
 - Build health monitoring and metrics
 - Add plugin configuration hot-reloading
 
-### Phase 4 - Tasks
+### Tasks
 
 #### 4.1 Plugin State Management (Week 1)
 
-```python
-# File: src/stonks_overwatch/plugins/manager/lifecycle.py
+**File**: `src/stonks_overwatch/plugins/manager/lifecycle.py`
 
+```python
 from enum import Enum
 from typing import Dict, List, Callable, Any
 from dataclasses import dataclass
@@ -905,9 +1318,9 @@ class PluginLifecycleManager:
 
 #### 4.2 Health Monitoring (Week 2)
 
-```python
-# File: src/stonks_overwatch/plugins/monitoring/health.py
+**File**: `src/stonks_overwatch/plugins/monitoring/health.py`
 
+```python
 from typing import Dict, Any, List
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -1052,7 +1465,7 @@ class PluginHealthMonitor:
         return unit_map.get(metric_name, '')
 ```
 
-### Phase 4 - Deliverables
+### Deliverables
 
 - [ ] Plugin state management system
 - [ ] Lifecycle event system
@@ -1065,20 +1478,20 @@ class PluginHealthMonitor:
 
 ## Phase 5: Legacy Migration (2-3 weeks)
 
-### Phase 5 - Goals
+### Goals
 
 - Create adapters for existing broker implementations
 - Enable side-by-side operation of legacy and plugin systems
 - Provide migration tools and utilities
 - Maintain backward compatibility
 
-### Phase 5 - Tasks
+### Tasks
 
 #### 5.1 Legacy Bridge Adapter (Week 1)
 
-```python
-# File: src/stonks_overwatch/plugins/legacy/bridge.py
+**File**: `src/stonks_overwatch/plugins/legacy/bridge.py`
 
+```python
 from typing import Dict, Type, List
 from stonks_overwatch.plugins.interfaces import BrokerPluginInterface
 from stonks_overwatch.plugins.models import PluginManifest, PluginType
@@ -1142,8 +1555,6 @@ class LegacyBrokerAdapter(BrokerPluginInterface):
         if not config:
             errors.append("Configuration is required")
 
-        # Add more validation as needed
-
         return errors
 
     def _create_manifest(self) -> PluginManifest:
@@ -1194,9 +1605,9 @@ class LegacyBrokerAdapter(BrokerPluginInterface):
 
 #### 5.2 Migration Utilities (Week 2)
 
-```python
-# File: src/stonks_overwatch/plugins/legacy/migration.py
+**File**: `src/stonks_overwatch/plugins/legacy/migration.py`
 
+```python
 from pathlib import Path
 from typing import Dict, Any
 import json
@@ -1229,12 +1640,12 @@ class BrokerMigrationTool:
         manifest_path = plugin_dir / "plugin_manifest.json"
 
         with open(manifest_path, 'w') as f:
-            json.dump(self._manifest_to_dict(manifest), f, indent=2)
+            json.dump(manifest, f, indent=2)
 
         # Generate plugin wrapper
         self._generate_plugin_wrapper(broker_name, broker_config, plugin_dir)
 
-        # Copy/link existing code
+        # Setup plugin structure
         self._setup_plugin_structure(broker_name, plugin_dir)
 
         print(f"Migration complete: {plugin_dir}")
@@ -1294,6 +1705,7 @@ class BrokerMigrationTool:
     def _generate_plugin_wrapper(self, broker_name: str, broker_config: dict, plugin_dir: Path):
         """Generate plugin wrapper class."""
 
+        config_class_name = broker_config.get("config", "Config").__name__
         plugin_class_name = f"{broker_name.title()}Plugin"
 
         plugin_code = f'''"""
@@ -1309,7 +1721,7 @@ from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.config.base_config import BaseConfig
 
 # Import legacy components
-from stonks_overwatch.config.{broker_name} import {broker_config.get("config", "Config").__name__}
+from stonks_overwatch.config.{broker_name} import {config_class_name}
 {self._generate_service_imports(broker_name, broker_config)}
 
 class {plugin_class_name}(BrokerPluginInterface):
@@ -1325,7 +1737,6 @@ class {plugin_class_name}(BrokerPluginInterface):
     def initialize(self) -> bool:
         """Initialize {broker_name} plugin."""
         try:
-            # Add any initialization logic here
             return True
         except Exception:
             return False
@@ -1333,7 +1744,6 @@ class {plugin_class_name}(BrokerPluginInterface):
     def shutdown(self) -> bool:
         """Shutdown {broker_name} plugin."""
         try:
-            # Add any cleanup logic here
             return True
         except Exception:
             return False
@@ -1348,7 +1758,7 @@ class {plugin_class_name}(BrokerPluginInterface):
 
     def get_config_class(self) -> Type[BaseConfig]:
         """Return {broker_name} configuration class."""
-        return {broker_config.get("config", "Config").__name__}
+        return {config_class_name}
 
     def get_services(self) -> Dict[ServiceType, Type]:
         """Return {broker_name} services."""
@@ -1360,17 +1770,14 @@ class {plugin_class_name}(BrokerPluginInterface):
         """Validate {broker_name} configuration."""
         errors = []
 
-        if not isinstance(config, {broker_config.get("config", "Config").__name__}):
+        if not isinstance(config, {config_class_name}):
             errors.append("Invalid configuration type")
-
-        # Add specific validation logic here
 
         return errors
 
     @classmethod
     def get_manifest(cls) -> PluginManifest:
         """Get plugin manifest."""
-        # Load from manifest file
         import json
         from pathlib import Path
 
@@ -1378,8 +1785,8 @@ class {plugin_class_name}(BrokerPluginInterface):
         with open(manifest_path, 'r') as f:
             data = json.load(f)
 
-        # Convert to PluginManifest object
-        # (Implementation would need full conversion logic)
+        # Parse and return manifest
+        # Implementation would need full conversion logic
         pass
 '''
 
@@ -1427,7 +1834,7 @@ class {plugin_class_name}(BrokerPluginInterface):
         print(f"Created plugin structure in {plugin_dir}")
 ```
 
-### Phase 5 - Deliverables
+### Deliverables
 
 - [ ] Legacy broker adapter implementation
 - [ ] Migration utilities and tools
@@ -1440,24 +1847,48 @@ class {plugin_class_name}(BrokerPluginInterface):
 
 ## Phase 6: Advanced Features (4-5 weeks)
 
-### Phase 6 - Goals
+### Goals
 
 - Implement advanced plugin capabilities
 - Add security and sandboxing
 - Create plugin marketplace features
 - Build comprehensive monitoring and analytics
 
-### Phase 6 - Tasks
+### Tasks
 
 #### 6.1 Plugin Security & Sandboxing (Week 1-2)
 
+**Considerations:**
+- Resource limits per plugin (memory, CPU)
+- Permission system for file access
+- Network access control
+- Process isolation options
+
 #### 6.2 Plugin Dependencies & Versioning (Week 2-3)
+
+**Considerations:**
+- Semantic versioning enforcement
+- Dependency conflict resolution
+- Virtual environment per plugin
+- Shared dependency optimization
 
 #### 6.3 Plugin Marketplace Features (Week 3-4)
 
+**Considerations:**
+- Plugin catalog/directory
+- Plugin ratings and reviews
+- Automatic updates
+- Plugin signing and verification
+
 #### 6.4 Advanced Monitoring & Analytics (Week 4-5)
 
-### Phase 6 - Deliverables
+**Considerations:**
+- Performance metrics collection
+- Resource usage tracking
+- Error rate monitoring
+- Usage analytics
+
+### Deliverables
 
 - [ ] Security and sandboxing framework
 - [ ] Dependency resolution system
@@ -1479,7 +1910,14 @@ class {plugin_class_name}(BrokerPluginInterface):
 | Plugin compatibility issues | Medium | High | Comprehensive validation, version checks |
 | Security vulnerabilities | High | Low | Sandboxing, permission system |
 
-### Success Criteria
+### Operational Risks
+
+- **Migration**: Gradual migration with fallback to current system
+- **Testing**: Comprehensive test suite for plugin validation
+- **Documentation**: Clear migration guides and examples
+- **Support**: Backward compatibility for existing integrations
+
+## Success Criteria
 
 - [ ] **Zero Breaking Changes**: Existing functionality continues to work
 - [ ] **Performance Maintained**: <5% performance impact for core operations
@@ -1487,20 +1925,74 @@ class {plugin_class_name}(BrokerPluginInterface):
 - [ ] **Reliable Operations**: 99.9% uptime with plugin failures isolated
 - [ ] **Community Adoption**: Enable 3rd party broker development
 
-### Testing Strategy
+## Testing Strategy
 
-1. **Unit Tests**: 90% code coverage for all plugin components
-2. **Integration Tests**: Full plugin lifecycle testing
-3. **Performance Tests**: Load testing with multiple plugins
-4. **Security Tests**: Plugin isolation and permission testing
-5. **Compatibility Tests**: Cross-version plugin compatibility
+### Unit Testing
 
-### Documentation Plan
+- 90% code coverage for all plugin components
+- Mock plugin implementations for testing
+- Validation logic testing
+- Dependency resolution testing
 
-1. **Architecture Documentation**: Complete system design docs
-2. **Developer Guide**: Plugin development tutorial and API reference
-3. **Migration Guide**: Step-by-step legacy migration instructions
-4. **Operations Guide**: Plugin management and troubleshooting
-5. **API Reference**: Comprehensive plugin API documentation
+### Integration Testing
 
-This roadmap provides a structured approach to implementing a robust plugin architecture while maintaining system stability and backward compatibility. Each phase builds upon the previous one, allowing for incremental delivery and validation of the plugin system.
+- Full plugin lifecycle testing (discover → load → initialize → use → unload)
+- Multi-plugin scenarios
+- Legacy adapter testing
+- Configuration validation
+
+### Performance Testing
+
+- Load testing with multiple plugins
+- Memory leak detection
+- CPU usage profiling
+- Startup time impact
+
+### Security Testing
+
+- Plugin isolation verification
+- Permission system testing
+- Malicious plugin simulation
+- Resource limit enforcement
+
+### Compatibility Testing
+
+- Cross-version plugin compatibility
+- API version compatibility matrix
+- Legacy broker compatibility
+- Python version compatibility
+
+---
+
+## Next Steps
+
+### If This Proposal is Approved
+
+1. **Phase 0: Preparation** (1-2 weeks)
+   - Finalize all decision gates
+   - Assign development team
+   - Set up project tracking
+   - Create detailed sprint plans
+
+2. **Phase 1: Start Implementation** (Week 1)
+   - Begin with plugin metadata and interfaces
+   - Set up development environment
+   - Create initial documentation structure
+
+3. **Regular Reviews**
+   - Weekly progress reviews
+   - Phase completion gate reviews
+   - Stakeholder updates
+
+### If This Proposal is Not Approved
+
+- Archive this document for future reference
+- Document reasons for rejection
+- Consider alternative approaches to extensibility
+- Focus on incremental improvements to current system
+
+---
+
+*Last Updated: November 2025*
+*Document Type: Comprehensive Proposal with Implementation Guide*
+*Status: Pending Approval*

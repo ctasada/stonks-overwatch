@@ -1,25 +1,43 @@
-# New Broker Integration Guide
+# Stonks Overwatch - Broker Integration Guide
+
+> **Audience:** Developers integrating new brokers
+>
+> **Purpose:** Step-by-step instructions for adding a new broker integration
+>
+> **Related Documentation:**
+>
+> - **[← Architecture Overview](ARCHITECTURE.md)** - System architecture and design patterns
+> - **[Authentication Architecture →](ARCHITECTURE_AUTHENTICATION.md)** - For implementing authentication flows
+> - **[Pending Tasks →](PENDING_TASKS.md)** - Current improvements and technical debt
+
+---
 
 ## Overview
 
-This guide provides step-by-step instructions for integrating a new broker into the Stonks Overwatch unified architecture. The system uses a unified broker registry and factory pattern that dramatically simplifies the broker addition process.
+This guide provides step-by-step instructions for integrating a new broker into Stonks Overwatch. The system uses a broker registry and factory pattern that dramatically simplifies the broker addition process.
 
-## Recent Architecture Improvements (2025)
+**Time to integrate a new broker**: 2-4 hours
 
-- ✅ **Removed GlobalConfig**: Eliminated redundant singleton configuration layer
-- ✅ **Simplified BrokerFactory**: Dynamic credential handling with automatic class mapping
-- ✅ **Logger Constants**: Centralized logging patterns for consistency across modules
-- ✅ **Enhanced Testing**: Improved reset mechanisms for better test isolation
+## Prerequisites
+
+Before starting, familiarize yourself with:
+
+- **[Architecture Overview](ARCHITECTURE.md)** - Understand core concepts
+- Service-oriented design principles
+- Django ORM basics
+- Python dependency injection patterns
 
 ## Architecture Summary
 
-The unified broker architecture consists of:
+The broker architecture consists of:
 
 - **BrokerRegistry**: Central registry for broker configurations and services
-- **BrokerFactory**: Simplified factory for creating broker configurations and services with automatic dependency injection
+- **BrokerFactory**: Factory for creating broker configurations and services with automatic dependency injection
 - **Configuration-Driven Registration**: Declarative broker definitions in a single location
 - **Service Interfaces**: Type-safe contracts that all broker services must implement
 - **Logger Constants**: Centralized logging patterns for consistent debugging across modules
+
+> **📖 Deep Dive:** See [Architecture Overview](ARCHITECTURE.md#broker-factory) for detailed information on the factory pattern.
 
 ## Architecture Diagram
 
@@ -180,6 +198,7 @@ Create a new configuration file in `src/stonks_overwatch/config/`:
 # src/stonks_overwatch/config/newbroker.py
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.base_credentials import BaseCredentials
+from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.logger_constants import LOGGER_CONFIG, TAG_BASE_CONFIG
 
 class NewBrokerCredentials(BaseCredentials):
@@ -301,14 +320,17 @@ Implement additional services as needed:
 
 ### 4. Register the Broker
 
-Add your broker to the unified registry by updating `src/stonks_overwatch/core/registry_setup.py`:
+Add your broker to the registry by updating `src/stonks_overwatch/core/registry_setup.py`:
 
 ```python
 # Import your configuration and services
 from stonks_overwatch.config.newbroker import NewBrokerConfig
-from stonks_overwatch.services.brokers.newbroker.services.portfolio_service import PortfolioService as NewBrokerPortfolioService
-from stonks_overwatch.services.brokers.newbroker.services.transaction_service import TransactionService as NewBrokerTransactionService
-from stonks_overwatch.services.brokers.newbroker.services.account_service import AccountService as NewBrokerAccountService
+from stonks_overwatch.services.brokers.newbroker.services.portfolio_service import \
+    PortfolioService as NewBrokerPortfolioService
+from stonks_overwatch.services.brokers.newbroker.services.transaction_service import
+    TransactionService as NewBrokerTransactionService
+from stonks_overwatch.services.brokers.newbroker.services.account_service import \
+    AccountService as NewBrokerAccountService
 
 # Add to BROKER_CONFIGS dictionary
 BROKER_CONFIGS = {
@@ -347,7 +369,7 @@ credential_classes = {
 
 ## Service Interfaces
 
-All broker services must implement the appropriate interface:
+All broker services must implement the appropriate interface. See complete specifications in [Architecture Overview](ARCHITECTURE.md#service-interfaces).
 
 ### Required Interfaces
 
@@ -454,22 +476,15 @@ Once registered, your broker will automatically:
 - ✅ Be available in all aggregator services
 - ✅ Receive automatic dependency injection of configurations
 - ✅ Work with the portfolio filtering system
-- ✅ Be included in the unified factory system
+- ✅ Be included in the factory system
 - ✅ Pass interface validation checks
 - ✅ Appear in Config.__repr__ output dynamically
 - ✅ Support credential updates if mapping is added
 - ✅ Use consistent logging patterns via logger constants
 
-## Benefits of the Unified Architecture
+## Benefits of the Architecture
 
-### Before (Legacy System)
-
-- **8-10 files** to modify for each new broker
-- **Manual hardcoded checks** throughout the codebase
-- **Error-prone process** with multiple failure points
-- **Scattered registration** across different systems
-
-### After (Unified System)
+The architecture provides:
 
 - **2-3 steps** to add a new broker:
   1. Create configuration and services using logger constants
@@ -547,6 +562,8 @@ class NewBrokerClient:
         pass
 ```
 
+> **📖 Authentication Guide:** For complex authentication flows (2FA, session management, etc.), see [Authentication Architecture](ARCHITECTURE_AUTHENTICATION.md).
+
 ### Repository Pattern
 
 Implement data access repositories:
@@ -564,14 +581,24 @@ class PortfolioRepository:
 
 ## Summary
 
-This completes the broker integration guide. The unified architecture ensures that adding new brokers is straightforward, type-safe, and automatically integrated with the entire system.
+The architecture ensures that adding new brokers is straightforward, type-safe, and automatically integrated with the entire system.
 
-### Key Benefits of Recent Improvements
+---
 
-- **Simplified Architecture**: Removed GlobalConfig redundancy while maintaining all functionality
-- **Dynamic Credential Handling**: Automatic credential class mapping without hardcoded imports
-- **Consistent Logging**: Centralized logger constants reduce duplication and improve debugging
-- **Better Testing**: Improved reset mechanisms for better test isolation
-- **Future-Proof**: Dynamic adaptation means less maintenance as new brokers are added
+## Additional Resources
 
-The unified architecture ensures that adding new brokers is straightforward, type-safe, and automatically integrated with the entire system.
+### Related Documentation
+
+- **[← Architecture Overview](ARCHITECTURE.md)** - Core architecture concepts and patterns
+- **[Authentication Architecture →](ARCHITECTURE_AUTHENTICATION.md)** - Authentication implementation details
+- **[Pending Tasks →](PENDING_TASKS.md)** - Current improvements and technical debt
+
+### Broker Examples
+
+- **DeGiro Implementation**: See `src/stonks_overwatch/services/brokers/degiro/`
+- **Bitvavo Implementation**: See `src/stonks_overwatch/services/brokers/bitvavo/`
+- **IBKR Implementation**: See `src/stonks_overwatch/services/brokers/ibkr/`
+
+---
+
+*Last Updated: November 2025*
