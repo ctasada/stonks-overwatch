@@ -268,6 +268,8 @@ class PortfolioService:
 - **Error handling**: Use custom exceptions with proper error messages
 - **Logging**: Use structured logging with appropriate log levels
 
+> **Note for AI Agents:** See [`AGENTS.md`](../AGENTS.md) for detailed architecture patterns, code examples, and AI-specific guidance.
+
 ## Testing
 
 ### Test Requirements

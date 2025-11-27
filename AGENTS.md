@@ -1,8 +1,19 @@
 # AGENTS.md
 
+> **⚠️ IMPORTANT FOR AI AGENTS:** This file is automatically loaded as workspace rules in Cursor. Always refer to this document when making code changes, answering questions, or planning features. Follow the guidelines, workflows, and checklists provided here.
+
 ## Purpose
 
 This document provides a concise, structured reference for AI agents (such as GPT, Claude, Gemini, etc.) to understand and assist with the Stonks Overwatch project. It summarizes the architecture, extension points, and key development practices, enabling agents to answer questions, generate code, or plan enhancements effectively.
+
+**For AI Agents:** This file contains critical information about:
+- Code style and standards
+- Architecture patterns (Factory, Registry, Dependency Injection)
+- Validation workflows
+- Self-review checklists
+- Common pitfalls to avoid
+
+**Always consult this file before making changes.**
 
 ---
 
@@ -45,6 +56,7 @@ make collectstatic     # After editing static files
 - ❌ Don't skip type hints - They're required
 - ❌ Don't use bare `except:` - Always catch specific exceptions
 - ❌ Don't hardcode paths - Use environment variables or Django settings
+- ❌ Don't use HTML in Markdown files - Use pure Markdown syntax only
 
 ---
 
@@ -610,6 +622,17 @@ class PortfolioEntry:
 - **Auto-fix Markdown files:**
   - `make markdown-fix` — Automatically fix Markdown style issues.
 
+### Markdown Standards
+
+- **HTML is NOT allowed** - Use pure Markdown syntax only
+- Markdown files are linted using `pymarkdown` (run `make markdown-check` to verify)
+- **Image sizing:** Standard Markdown does not support image sizing. To resize images:
+  - Resize the actual image file itself using image editing tools
+  - Use a smaller version of the image file if available
+  - Do NOT use HTML `<img>` tags with width/height attributes
+- Follow standard Markdown conventions for consistency
+- Run `make markdown-fix` to auto-fix common Markdown style issues
+
 ### Additional Useful Commands
 
 - `make help` — List all available Makefile commands.
@@ -858,6 +881,12 @@ def test_fetch_data():
 - [ ] `make test` passes (all tests green)
 - [ ] `make check-dependencies` passes (if dependencies changed)
 - [ ] `make pre-commit-run` passes (all hooks green)
+
+### Documentation
+- [ ] Markdown files use pure Markdown syntax (no HTML)
+- [ ] `make markdown-check` passes (no Markdown linting errors)
+- [ ] `make markdown-fix` run if needed (auto-fix Markdown style issues)
+- [ ] Documentation is clear and helpful for users
 
 ### Compatibility & Best Practices
 - [ ] Changes are backward compatible (unless explicitly breaking)
