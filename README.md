@@ -1,6 +1,6 @@
 # Stonks Overwatch
 
-![Stonks Overwatch Logo](src/icons/stonks_overwatch.png)
+![Stonks Overwatch Logo](src/icons/stonks_overwatch-256.png)
 
 **A privacy-first, open-source investment portfolio tracker**
 
@@ -111,6 +111,7 @@ For detailed installation instructions, see the [Quickstart Guide](docs/Quicksta
 - **🚀 [Quickstart Guide](docs/Quickstart.md)** - Get up and running in minutes
 - **🖥️ [Desktop App Guide](docs/Application.md)** - Native application installation and updates
 - **🔧 [Developer Guide](docs/Developing-Stonks-Overwatch.md)** - Contributing and development setup
+- **🤖 [AI Agent Guide](AGENTS.md)** - Guidelines for AI assistants working on this project
 - **🏦 Broker Setup**: [DEGIRO](docs/DEGIRO.md) • [Bitvavo](docs/Bitvavo.md) • [IBKR](docs/IBKR.md)
 - **❓ [FAQ](docs/FAQ.md)** - Frequently asked questions
 

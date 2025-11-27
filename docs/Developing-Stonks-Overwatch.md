@@ -3,6 +3,8 @@
 > **Audience:** Developers, contributors
 >
 > **Summary:** This guide explains how to set up the development environment and contribute to Stonks Overwatch.
+>
+> **Note for AI Agents:** For AI-specific guidance, code patterns, and validation workflows, see [`AGENTS.md`](../../AGENTS.md) in the project root.
 
 Stonks Overwatch is a portfolio tracker integrating with multiple brokers (DEGIRO, Bitvavo, IBKR). The system features a **unified broker architecture** with factory patterns, dependency injection, interface-based design, and a centralized broker registry that simplifies development and maintenance.
 
