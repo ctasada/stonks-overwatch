@@ -21,14 +21,14 @@
     </div>
     {% if stocks %}
     <div class="row mt-2">
-        <p class="h5 mb-3">Shares</p>
+        <p class="h5 mb-3">Stocks</p>
         {% include 'portfolio/table.html' with items=stocks show_columns=show_stocks_columns %}
     </div>
     {% endif %}
-    {% if trackers %}
+    {% if etfs %}
     <div class="row mt-2">
-        <p class="h5 mb-3">Trackers (ETF)</p>
-        {% include 'portfolio/table.html' with items=trackers show_columns=show_trackers_columns %}
+        <p class="h5 mb-3">ETF</p>
+        {% include 'portfolio/table.html' with items=etfs show_columns=show_etfs_columns %}
     </div>
     {% endif %}
     {% if crypto %}
