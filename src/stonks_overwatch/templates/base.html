@@ -165,6 +165,11 @@
     <script src="{% static 'bootstrap-table/dist/themes/bootstrap-table/bootstrap-table.min.js' %}"></script>
 
     <script type="text/javascript">
+        // Tooltip message for unstable portfolios
+        const IN_DEVELOPMENT_MSG = 'is in development';
+        // Wrench emoji HTML for unstable portfolios (no custom class, just Bootstrap)
+        const WRENCH_HTML = '<span class="ms-2 float-end">🧪️</span>';
+
         let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             const tooltip = new bootstrap.Tooltip(tooltipTriggerEl);
@@ -185,7 +190,28 @@
             .then(response => response.json())
             .then(data => {
                 const selectedPortfolio = document.getElementById("selectPortfolio");
-                selectedPortfolio.innerHTML = `<img src="${data.selected_portfolio.logo}" alt="${data.selected_portfolio.id}" width="25" height="25" class="rounded-circle me-2 sidebar-icon flex-shrink-0"><span class="sidebar-text">${data.selected_portfolio.name}</span>`;
+                // Always keep dropdown functionality
+                selectedPortfolio.setAttribute("data-bs-toggle", "dropdown");
+                selectedPortfolio.setAttribute("aria-expanded", "false");
+                selectedPortfolio.classList.add("dropdown-toggle");
+                selectedPortfolio.classList.remove("non-clickable");
+
+                // Consistent stability check: treat as stable unless stable is explicitly false
+                const selectedStable = data.selected_portfolio.stable !== false;
+                let selectedPortfolioHTML = `<img src="${data.selected_portfolio.logo}" alt="${data.selected_portfolio.id}" width="25" height="25" class="rounded-circle me-2 sidebar-icon flex-shrink-0"><span class="sidebar-text">${data.selected_portfolio.name}</span>`;
+                if (!selectedStable) {
+                    selectedPortfolioHTML += WRENCH_HTML;
+                    selectedPortfolio.setAttribute("title", `${data.selected_portfolio.name} ${IN_DEVELOPMENT_MSG}`);
+                    // Initialize tooltip for selectPortfolio
+                    if (!bootstrap.Tooltip.getInstance(selectedPortfolio)) {
+                        new bootstrap.Tooltip(selectedPortfolio);
+                    }
+                } else {
+                    selectedPortfolio.removeAttribute("title");
+                    const tooltipInstance = bootstrap.Tooltip.getInstance(selectedPortfolio);
+                    if (tooltipInstance) tooltipInstance.dispose();
+                }
+                selectedPortfolio.innerHTML = selectedPortfolioHTML;
 
                 const portfolioMenu = document.getElementById("sidebar-portfolio-menu");
                 portfolioMenu.innerHTML = ""; // Clear existing menu items
@@ -193,13 +219,26 @@
                 if (data.available_portfolios.length === 1) {
                     // Remove the dropdown toggle if there is only one portfolio
                     selectedPortfolio.removeAttribute("data-bs-toggle");
+                    selectedPortfolio.removeAttribute("aria-expanded");
                     selectedPortfolio.classList.remove("dropdown-toggle");
                     selectedPortfolio.classList.add("non-clickable");
                 } else {
                     // Show the portfolio selector dropdown only when there are multiple portfolios
                     data.available_portfolios.forEach(portfolio => {
                         const menuItem = document.createElement("li");
-                        menuItem.innerHTML = `<a class="dropdown-item portfolio-link-filter" href="#" data-value="${portfolio.id}"><img src="${portfolio.logo}" alt="${portfolio.id}" width="25" height="25" class="rounded-circle me-2">${portfolio.name}</a>`;
+                        // Consistent stability check for each portfolio
+                        const isStable = portfolio.stable !== false;
+                        const tooltipAttrs = !isStable ? ` data-bs-toggle=\"tooltip\" title=\"${portfolio.name} ${IN_DEVELOPMENT_MSG}\"` : '';
+                        const menuItemHTML = `
+                            <a class="dropdown-item portfolio-link-filter d-flex align-items-center justify-content-between" href="#" data-value="${portfolio.id}"${tooltipAttrs}>
+                                <span>
+                                    <img src="${portfolio.logo}" alt="${portfolio.id}" width="25" height="25" class="rounded-circle me-2">
+                                    ${portfolio.name}
+                                </span>
+                                ${!isStable ? WRENCH_HTML : ''}
+                            </a>
+                        `;
+                        menuItem.innerHTML = menuItemHTML;
 
                         // Add click event listener to menuItem
                         menuItem.querySelector("a").addEventListener("click", function(event) {
@@ -224,6 +263,14 @@
                         portfolioMenu.appendChild(menuItem);
                     });
                 }
+
+                // Initialize tooltips for new elements
+                const newTooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                newTooltipTriggerList.forEach(function (tooltipTriggerEl) {
+                    if (!bootstrap.Tooltip.getInstance(tooltipTriggerEl)) {
+                        new bootstrap.Tooltip(tooltipTriggerEl);
+                    }
+                });
 
                 // Restore sidebar state after portfolio data is loaded
                 restoreSidebarState();

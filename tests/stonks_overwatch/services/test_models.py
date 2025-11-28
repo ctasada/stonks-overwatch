@@ -27,6 +27,7 @@ def test_portfolio_ids():
         assert as_dict["id"] == portfolio_id.id
         assert as_dict["name"] == portfolio_id.long_name
         assert as_dict["logo"] == portfolio_id.logo
+        assert as_dict["stable"] == portfolio_id.stable
 
     assert PortfolioId.from_id("XXX") == PortfolioId.ALL
 

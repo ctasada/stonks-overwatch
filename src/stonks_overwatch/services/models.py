@@ -348,28 +348,29 @@ class PortfolioEntry:
 
 class PortfolioId(Enum):
     ALL = ("all", "Portfolios", "/static/stonks_overwatch.svg")
-    DEGIRO = ("degiro", "DeGiro", "/static/logos/degiro.svg")
-    BITVAVO = ("bitvavo", "Bitvavo", "/static/logos/bitvavo.svg")
-    IBKR = ("ibkr", "IBKR", "/static/logos/ibkr.svg")
+    DEGIRO = ("degiro", "DEGIRO", "/static/logos/degiro.svg")
+    BITVAVO = ("bitvavo", "Bitvavo", "/static/logos/bitvavo.svg", False)
+    IBKR = ("ibkr", "IBKR", "/static/logos/ibkr.svg", False)
 
-    def __init__(self, id: str, long_name: str, logo: str):
+    def __init__(self, id: str, long_name: str, logo: str, stable: bool = True):
         self.id = id
         self.long_name = long_name
         self.logo = logo
+        self.stable = stable
 
     @classmethod
     def values(cls) -> list["PortfolioId"]:
         return list(cls)
 
     @classmethod
-    def from_id(cls, id: str):
+    def from_id(cls, broker_id: str):
         for portfolio in cls:
-            if portfolio.id == id:
+            if portfolio.id == broker_id:
                 return portfolio
         return cls.ALL
 
     def to_dict(self):
-        return {"id": self.id, "name": self.long_name, "logo": self.logo}
+        return {"id": self.id, "name": self.long_name, "logo": self.logo, "stable": self.stable}
 
 
 @dataclass
