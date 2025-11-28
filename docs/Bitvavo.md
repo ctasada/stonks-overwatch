@@ -1,5 +1,7 @@
 # Bitvavo Integration Guide
 
+> **⚠️ Bitvavo integration is not yet stable. Features and reliability may change in future releases. Use with caution.**
+
 [Bitvavo](https://bitvavo.com/en/) is a cryptocurrency exchange supported by **Stonks Overwatch**, allowing you to track your crypto investments, portfolio value, and growth alongside your traditional investments.
 
 ## Overview
