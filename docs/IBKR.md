@@ -1,5 +1,7 @@
 # IBKR (Interactive Brokers) Integration Guide
 
+> **⚠️ IBKR integration is not yet stable. Features and reliability may change in future releases. Use with caution.**
+
 Interactive Brokers (IBKR) is a global broker supported by **Stonks Overwatch**, providing access to international markets and securities.
 
 ## Overview
