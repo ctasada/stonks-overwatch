@@ -44,7 +44,7 @@ class Portfolio(View):
         status = self.__parse_request_interval(request)
 
         stocks = [item for item in portfolio if item.product_type == ProductType.STOCK]
-        trackers = [item for item in portfolio if item.product_type == ProductType.ETF]
+        etfs = [item for item in portfolio if item.product_type == ProductType.ETF]
         cash = [item for item in portfolio if item.product_type == ProductType.CASH]
         cryptos = [item for item in portfolio if item.product_type == ProductType.CRYPTO]
 
@@ -61,8 +61,8 @@ class Portfolio(View):
                 "unrealized_gain": True,
                 "realized_gain": True,
             },
-            "trackers": [tracker.to_dict() for tracker in trackers if self.__show_position(tracker, status)],
-            "show_trackers_columns": {
+            "etfs": [etf.to_dict() for etf in etfs if self.__show_position(etf, status)],
+            "show_etfs_columns": {
                 "category": True,
                 "sector": True,
                 "shares": True,

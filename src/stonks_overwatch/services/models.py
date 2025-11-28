@@ -240,7 +240,7 @@ class PortfolioEntry:
     unrealized_gain: float = 0.0
     realized_gain: float = 0.0
     total_costs: float = 0.0
-    portfolio_size: float = 0.0
+    product_type_share: float = 0.0
 
     @property
     def percentage_unrealized_gain(self) -> float:
@@ -268,7 +268,7 @@ class PortfolioEntry:
         result["name"] = self.formatted_name()
         result["shares"] = self.formatted_shares()
         result["product_type"] = self.product_type.value
-        result["formatted_portfolio_size"] = self.formatted_portfolio_size
+        result["formatted_product_type_share"] = self.formatted_product_type_share
         result["formatted_break_even_price"] = self.formatted_break_even_price
         result["formatted_base_currency_break_even_price"] = self.formatted_base_currency_break_even_price
         result["formatted_price"] = self.formatted_price
@@ -310,8 +310,8 @@ class PortfolioEntry:
             return f"{int(self.shares)}"
         return f"{self.shares:.2f}"
 
-    def formatted_portfolio_size(self) -> str:
-        return f"{self.portfolio_size:.2%}"
+    def formatted_product_type_share(self) -> str:
+        return f"{self.product_type_share:.2%}"
 
     def formatted_break_even_price(self) -> str:
         return LocalizationUtility.format_money_value(value=self.break_even_price, currency=self.product_currency)
