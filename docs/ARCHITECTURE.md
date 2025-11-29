@@ -357,11 +357,11 @@ The architecture is designed for easy broker integration. The system uses a unif
 
 ## Technology Stack
 
-- **Framework**: Django 4.x
+- **Framework**: Django 5.2+
 - **Database**: PostgreSQL (recommended) / SQLite (development)
 - **Cache**: Redis (production) / In-memory (development)
 - **Testing**: pytest, unittest
-- **Code Quality**: pylint, black, mypy
+- **Code Quality**: ruff, pytest, pre-commit
 
 ## Architecture Metrics
 

@@ -6,72 +6,23 @@ labels: enhancement
 assignees: ''
 ---
 
-## Feature Description
+## What feature would you like?
 
-A clear and concise description of the feature you'd like to see.
+<!-- Brief description of the feature -->
 
-## Problem Statement
+## Why is this useful?
 
-What problem does this feature solve? Why would this be useful?
+<!-- What problem does it solve? -->
 
-**Example:** "I'm frustrated when I try to [...]"
+## How should it work?
 
-## Proposed Solution
+<!-- Describe your idea -->
 
-Describe how you envision this feature working.
+## Additional info
 
-## Alternative Solutions
+- **Broker-specific?** [ ] DEGIRO [ ] Bitvavo [ ] IBKR [ ] All [ ] Core
+- **Priority:** [ ] Critical [ ] High [ ] Medium [ ] Low
 
-Have you considered any alternative approaches? Describe them here.
+---
 
-## Use Cases
-
-Who would benefit from this feature? How would they use it?
-
-1. User type: [e.g., active trader, long-term investor, developer]
-2. Scenario: [e.g., monitoring daily performance, tracking dividends]
-
-## Related Features
-
-Are there existing features this relates to or builds upon?
-
-- Related to: #[issue number]
-- Depends on: #[issue number]
-
-## Implementation Ideas
-
-If you have thoughts on how this could be implemented, share them here.
-
-## Mockups/Examples
-
-If applicable, add mockups, wireframes, or examples from other applications.
-
-## Broker-Specific
-
-Is this feature specific to a particular broker?
-
-- [ ] DEGIRO
-- [ ] Bitvavo
-- [ ] IBKR
-- [ ] All brokers
-- [ ] Core application
-
-## Priority
-
-How important is this feature to you?
-
-- [ ] Critical - Blocking my usage
-- [ ] High - Would significantly improve my experience
-- [ ] Medium - Nice to have
-- [ ] Low - Just an idea
-
-## Additional Context
-
-Add any other context, screenshots, or information about the feature request here.
-
-## Checklist
-
-- [ ] I have searched for existing feature requests
-- [ ] I have read the [documentation](../docs/Home.md)
-- [ ] I have checked the [CHANGELOG](../CHANGELOG.md) to see if this is already planned
-- [ ] This is a single, focused feature request (not multiple features)
+💡 **Before submitting:** Searched existing feature requests and checked [CHANGELOG](../CHANGELOG.md)?

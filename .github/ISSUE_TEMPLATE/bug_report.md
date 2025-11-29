@@ -6,69 +6,34 @@ labels: bug
 assignees: ''
 ---
 
-## Bug Description
+## What happened?
 
-A clear and concise description of what the bug is.
+<!-- Describe the bug clearly -->
 
-## Steps to Reproduce
+## Steps to reproduce
 
-1. Go to '...'
-2. Click on '...'
-3. Scroll down to '...'
-4. See error
+1.
+2.
+3.
 
-## Expected Behavior
+## Expected vs Actual
 
-A clear and concise description of what you expected to happen.
-
-## Actual Behavior
-
-A clear and concise description of what actually happened.
-
-## Screenshots
-
-If applicable, add screenshots to help explain your problem.
+**Expected:**
+**Actual:**
 
 ## Environment
 
-- **OS**: [e.g., macOS 14.0, Windows 11, Ubuntu 22.04]
-- **Python Version**: [e.g., 3.13.0]
-- **Stonks Overwatch Version**: [e.g., 0.1.5]
-- **Browser** (if web UI): [e.g., Chrome 120, Firefox 121]
+- **OS**:
+- **Python Version**:
+- **Broker(s)**: [ ] DEGIRO [ ] Bitvavo [ ] IBKR
+- **App Type**: [ ] Web [ ] Native [ ] Docker
 
-## Configuration
-
-**Which brokers are you using?**
-- [ ] DEGIRO
-- [ ] Bitvavo
-- [ ] IBKR
-
-**Are you using:**
-- [ ] Web application (`make run`)
-- [ ] Native application
-- [ ] Docker
-
-## Logs
-
-Please attach relevant log entries from `data/logs/stonks-overwatch.log`
-
-<details>
-<summary>Log output</summary>
+## Logs (if available)
 
 ```
-Paste relevant log entries here
+Paste relevant log entries from data/logs/stonks-overwatch.log
 ```
 
-</details>
+---
 
-## Additional Context
-
-Add any other context about the problem here.
-
-## Checklist
-
-- [ ] I have searched for existing issues
-- [ ] I have read the [FAQ](../docs/FAQ.md)
-- [ ] I have checked the [documentation](../docs/Home.md)
-- [ ] I am using the latest version
-- [ ] I have included relevant log entries
+💡 **Before submitting:** Checked [FAQ](../docs/FAQ.md) and searched existing issues?
