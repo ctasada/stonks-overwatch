@@ -105,6 +105,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.messages.context_processors.messages",
                 "stonks_overwatch.context_processors.app_mode_processor",
+                "stonks_overwatch.context_processors.version_processor",
             ],
             # With the flattening of the prj structure, the auto register doesn't seem to work anymore.
             "libraries": {
