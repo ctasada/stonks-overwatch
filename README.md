@@ -72,36 +72,28 @@
    cd stonks-overwatch
    ```
 
-2. **Install dependencies**
-
-   ```bash
-   make install
-   ```
-
-   This command will install all required dependencies.
-
-3. **Initialize the database and collect static files**
-
-   ```bash
-   make collectstatic migrate
-   ```
-
-4. **Configure your brokers**
+2. **Configure your brokers** (optional, can be done later)
 
    ```bash
    cp config/config.json.template config/config.json
    # Edit config.json with your broker credentials
    ```
 
-5. **Start the application**
+3. **Install dependencies and start the application**
 
    ```bash
-   make run
+   make start
    ```
+
+   This command will:
+   - Install all Python and Node.js dependencies
+   - Initialize the database
+   - Collect static files
+   - Start the development server
 
    The application will be available at [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
-> **Quick Setup**: If you want to do everything in one command, use `make start` which combines steps 2-5 and starts the server immediately.
+> **Alternative**: If you prefer step-by-step setup, you can run `make install` first, then `make collectstatic migrate`, and finally `make run`. However, `make start` handles all of this automatically.
 
 For detailed installation instructions, see the [Quickstart Guide](docs/Quickstart.md).
 
