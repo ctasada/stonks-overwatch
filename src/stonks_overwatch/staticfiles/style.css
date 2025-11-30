@@ -257,6 +257,37 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     display: none;
 }
 
+/* Settings selector collapsed state - matches portfolio selector */
+#sidebar.sidebar-collapsed #sidebar-settings-selector a.sidebar-nav-link.dropdown-toggle,
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar #sidebar-settings-selector a.sidebar-nav-link.dropdown-toggle {
+    justify-content: center;
+    margin: 0;
+    padding: 0.3rem 0.5rem;
+    border-radius: var(--border-radius-standard);
+    text-align: center;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Settings selector container margin - collapsed states */
+#sidebar.sidebar-collapsed div.dropdown#sidebar-settings-selector,
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.dropdown#sidebar-settings-selector {
+    padding: 0;
+    margin: 0 var(--sidebar-margin);
+}
+
+/* Settings selector parent container - collapsed states */
+#sidebar.sidebar-collapsed div.px-2.py-1.border-top.w-100,
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py-1.border-top.w-100 {
+    padding: 0;
+}
+
+#sidebar.sidebar-collapsed #sidebar-settings-selector .dropdown-toggle::after {
+    display: none;
+}
+
 /* Center icons when collapsed and adjust padding for square highlights */
 #sidebar.sidebar-collapsed .sidebar-nav-link {
     justify-content: center;
@@ -459,25 +490,66 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     border: 2px solid var(--sidebar-border-color);
 }
 
-#sidebar-portfolio-menu {
+/* Settings Selector Styling - matches portfolio selector */
+#sidebar-settings-selector a.sidebar-nav-link.dropdown-toggle {
+    border: none;
+    background: none;
+    box-shadow: none;
+    border-radius: var(--border-radius-standard);
+    color: var(--sidebar-text-color);
+    margin: 0; /* Remove margin from link since parent handles it */
+    position: relative;
+}
+
+/* The dropdown container should handle the margin like regular nav items */
+#sidebar:not(.sidebar-collapsed) div.dropdown#sidebar-settings-selector {
+    margin: 0 var(--sidebar-margin);
+}
+
+/* Ensure settings selector parent container has no extra padding */
+#sidebar:not(.sidebar-collapsed) div.px-2.py-1.border-top.w-100 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+#sidebar-settings-selector a.sidebar-nav-link.dropdown-toggle:hover {
+    background-color: var(--sidebar-hover-bg);
+    color: #fff;
+    transform: none; /* Prevent rightward movement on hover */
+}
+
+#sidebar-settings-selector a.sidebar-nav-link.dropdown-toggle:focus {
+    background-color: var(--sidebar-hover-bg);
+    color: #fff;
+    box-shadow: none;
+    transform: none; /* Prevent rightward movement on focus */
+}
+
+/* Shared styles for sidebar dropdown menus */
+#sidebar-portfolio-menu,
+#sidebar-settings-menu {
     background: var(--primary-dark);
     border: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.15);
     backdrop-filter: blur(10px);
 }
 
-#sidebar-portfolio-menu .dropdown-item {
+#sidebar-portfolio-menu .dropdown-item,
+#sidebar-settings-menu .dropdown-item {
     color: #fff;
     padding: 8px 15px;
 }
 
 #sidebar-portfolio-menu .dropdown-item:hover,
-#sidebar-portfolio-menu .dropdown-item:focus {
+#sidebar-portfolio-menu .dropdown-item:focus,
+#sidebar-settings-menu .dropdown-item:hover,
+#sidebar-settings-menu .dropdown-item:focus {
     background-color: var(--primary-color);
     color: #fff;
 }
 
-#sidebar-portfolio-menu .dropdown-item img {
+#sidebar-portfolio-menu .dropdown-item img,
+#sidebar-settings-menu .dropdown-item img {
     background: white;
     border: 2px solid var(--sidebar-border-color);
 }
@@ -567,6 +639,11 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
         padding: 0.25rem 0.4rem; /* Tablet-specific smaller padding */
     }
 
+    /* Tablet - settings selector collapsed state */
+    #sidebar.sidebar-collapsed #sidebar-settings-selector a.sidebar-nav-link.dropdown-toggle {
+        padding: 0.25rem 0.4rem; /* Tablet-specific smaller padding */
+    }
+
     /* Tablet - connection status centering when collapsed */
     #sidebar.sidebar-collapsed .mt-auto > div {
         justify-content: center !important;
@@ -637,6 +714,11 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
     /* Mobile - override base collapsed styles with smaller padding */
     #sidebar.sidebar-collapsed #sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle {
+        padding: 0.2rem 0.3rem; /* Mobile-specific smaller padding */
+    }
+
+    /* Mobile - settings selector collapsed state */
+    #sidebar.sidebar-collapsed #sidebar-settings-selector a.sidebar-nav-link.dropdown-toggle {
         padding: 0.2rem 0.3rem; /* Mobile-specific smaller padding */
     }
 
@@ -1431,3 +1513,23 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 /* ---------------------------------------------------
     END BOOTSTRAP TABLE FIXES
 ----------------------------------------------------- */
+
+/* Settings menu specific positioning (opens to the right) */
+#sidebar-settings-selector {
+    position: relative;
+}
+
+#sidebar-settings-menu {
+    min-width: 200px;
+}
+
+/* Rotate dropdown arrow to point right when dropdown is open */
+#sidebar-settings-selector .dropdown-toggle::after {
+    transition: transform 0.15s ease-in-out;
+}
+
+/* When dropdown is open, rotate arrow to point right */
+#sidebar-settings-selector .dropdown-toggle.show::after,
+#sidebar-settings-selector .dropdown-toggle[aria-expanded="true"]::after {
+    transform: rotate(-90deg);
+}

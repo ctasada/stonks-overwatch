@@ -123,23 +123,51 @@
                         </a>
                     </div>
 
-                    <!-- Connection Status -->
-                    <div class="mt-auto px-3 py-3 border-top border-light border-opacity-25 w-100">
-                        {% is_connected_to_degiro as is_degiro_connected %}
-                        {% get_connected_tooltip as get_connected_tooltip %}
-                        <div class="d-flex align-items-center text-white" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-html="true" title="{{ get_connected_tooltip }}">
-                            {%  if is_degiro_connected %}
-                                <i class="bi-cloud-check-fill me-3 fs-5 text-success sidebar-icon"></i>
-                                <span class="small sidebar-text">Connected</span>
-                            {% else %}
-                                <i class="bi-cloud-slash-fill me-3 fs-5 text-warning sidebar-icon"></i>
-                                <span class="small sidebar-text">Disconnected</span>
-                            {% endif %}
+                    <!-- Sticky Bottom Section -->
+                    <div class="d-flex flex-column w-100 mt-auto">
+                        <!-- Settings Dropdown Menu Entry -->
+                        <div class="dropdown px-2 py-1 border-top border-light border-opacity-25 w-100" id="sidebar-settings-selector">
+                            <a href="#" class="sidebar-nav-link dropdown-toggle w-100 text-start d-flex align-items-center py-2"
+                               id="select-settings" data-bs-toggle="dropdown" aria-expanded="false" data-bs-popper-config='{"placement":"right","modifiers":[{"name":"offset","options":{"offset":[0,2]}}]}' title="Configuration" data-tooltip-text="Configuration">
+                                <i class="bi bi-gear fs-5 sidebar-icon me-3"></i>
+                                <span class="sidebar-text">Configuration</span>
+                            </a>
+                            <ul class="dropdown-menu shadow" id="sidebar-settings-menu" aria-labelledby="select-settings">
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center" href="/settings/">
+                                        <i class="bi bi-sliders me-2"></i> Settings
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center" href="/release-notes/">
+                                        <i class="bi bi-journal-text me-2"></i> Release Notes
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center" href="https://forms.gle/djPWAtLSFfRYbDwV7" target="_blank" rel="noopener">
+                                        <i class="bi bi-bug me-2"></i> Report Issue
+                                    </a>
+                                </li>
+                            </ul>
                         </div>
-                    </div>
-                    <!-- App Version at Bottom -->
-                    <div class="text-center text-white-50 small py-2">
-                        v{{ VERSION }}
+                        <!-- Connection Status -->
+                        <div class="px-3 pt-3 pb-1 border-top border-light border-opacity-25 w-100">
+                            {% is_connected_to_degiro as is_degiro_connected %}
+                            {% get_connected_tooltip as get_connected_tooltip %}
+                            <div class="d-flex align-items-center text-white" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-html="true" title="{{ get_connected_tooltip }}">
+                                {%  if is_degiro_connected %}
+                                    <i class="bi-cloud-check-fill me-3 fs-5 text-success sidebar-icon"></i>
+                                    <span class="small sidebar-text">Connected</span>
+                                {% else %}
+                                    <i class="bi-cloud-slash-fill me-3 fs-5 text-warning sidebar-icon"></i>
+                                    <span class="small sidebar-text">Disconnected</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <!-- App Version at Bottom -->
+                        <div class="text-center text-white-50 small px-3 pb-2">
+                            v{{ VERSION }}
+                        </div>
                     </div>
                 </nav>
             </div>
@@ -408,6 +436,29 @@
 
         // Add event listener to toggle button
         document.getElementById('sidebarToggle').addEventListener('click', toggleSidebar);
+
+        // Ensure settings dropdown opens to the right
+        // Bootstrap will auto-initialize, but we need to update Popper config after initialization
+        setTimeout(function() {
+            const settingsDropdownElement = document.getElementById('select-settings');
+            if (settingsDropdownElement) {
+                const dropdownInstance = bootstrap.Dropdown.getInstance(settingsDropdownElement);
+                if (dropdownInstance && dropdownInstance._popper) {
+                    // Update Popper placement
+                    dropdownInstance._popper.setOptions({
+                        placement: 'right',
+                        modifiers: [
+                                {
+                                name: 'offset',
+                                options: {
+                                    offset: [0, 2]
+                                }
+                            }
+                        ]
+                    });
+                }
+            }
+        }, 100);
     </script>
 
     {% block extra_js %}{% endblock %}
