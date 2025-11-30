@@ -16,7 +16,6 @@ from toga.command import Separator
 from stonks_overwatch.app.dialogs.dialogs import DialogManager
 from stonks_overwatch.app.ui.menu import MenuManager
 from stonks_overwatch.app.webserver import StaticFilesMiddleware, ThreadedWSGIServer
-from stonks_overwatch.services.utilities.license_manager import LicenseManager
 from stonks_overwatch.utils.core.logger import StonksLogger
 
 
@@ -34,7 +33,6 @@ class StonksOverwatchApp(toga.App):
         self.server_exists = None
         self.host = None
         self.port = None
-        self.license_manager = LicenseManager()
         self.menu_manager = MenuManager(self)
         self.dialog_manager = DialogManager(self)
 
@@ -127,27 +125,8 @@ class StonksOverwatchApp(toga.App):
             self.main_window.size = (w + 1, h)
             self.main_window.size = (w, h)
 
-        # Check license status
-        await self.check_license()
-
         # Check for updates
         await self.check_update()
-
-    async def check_license(self):
-        """Check the license status and show dialog at specific thresholds."""
-        try:
-            if not self._license_dialog_shown:
-                license_info = self.license_manager.get_license_info()
-                days_remaining = license_info.get("days_remaining")
-
-                # Show dialog for specific day thresholds
-                if days_remaining is not None and days_remaining <= 15:
-                    # Show for: 15, 10, 5, 2, 1. Once expired, the application blocks itself
-                    if days_remaining in [15, 10, 5, 2, 1]:
-                        self._license_dialog_shown = True
-                        await self.dialog_manager.license_info(self.web_view.url)
-        except Exception as e:
-            self.logger.error(f"Failed to check license status: {str(e)}")
 
     async def check_update(self):
         """Check the update status and show download dialog if needed."""

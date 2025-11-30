@@ -1,5 +1,5 @@
 import traceback
-from datetime import datetime, timezone
+from datetime import datetime
 
 from django.conf import settings
 from django.http import HttpResponseServerError
@@ -21,15 +21,7 @@ class CustomErrorHandlerMiddleware(MiddlewareMixin):
         Intercept any unhandled exceptions and render our custom 500 template.
         """
         # Get build information
-        build_date = getattr(settings, "BUILD_DATE", datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"))
-        version = getattr(settings, "VERSION", "Unknown")
         support_url = getattr(settings, "STONKS_OVERWATCH_SUPPORT_URL", "#")
-
-        # Parse build_date if it's a string
-        if isinstance(build_date, str):
-            build_date = datetime.strptime(build_date, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-        elif isinstance(build_date, datetime) and build_date.tzinfo is None:
-            build_date = build_date.replace(tzinfo=timezone.utc)
 
         # Get exception info
         exc_type = type(exception).__name__
@@ -38,8 +30,6 @@ class CustomErrorHandlerMiddleware(MiddlewareMixin):
         context = {
             "exception_message": exc_message,
             "exception_type": exc_type,
-            "build_date": build_date,
-            "version": version,
             "support_url": support_url,
             # Only include traceback in development
             "traceback": traceback.format_exc() if settings.DEBUG else None,
@@ -57,8 +47,6 @@ class CustomErrorHandlerMiddleware(MiddlewareMixin):
                 <h1>Server Error</h1>
                 <p><strong>Error Type:</strong> {exc_type}</p>
                 <p><strong>Error Message:</strong> {exc_message}</p>
-                <p><strong>Build Date:</strong> {build_date}</p>
-                <p><strong>Version:</strong> {version}</p>
                 <p><strong>Timestamp:</strong> {context["timestamp"]}</p>
                 <p><a href=\"{support_url}\">Contact Support</a></p>
                 </body></html>

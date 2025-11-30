@@ -7,12 +7,12 @@ import toga
 from toga.style import Pack
 
 from stonks_overwatch.app.utils.dialog_utils import center_window_on_parent
-from stonks_overwatch.services.utilities.google_drive_service import GoogleDriveService
+from stonks_overwatch.services.utilities.github_release_service import GitHubReleaseService
 from stonks_overwatch.utils.core.logger import StonksLogger
 
 
 class DownloadDialog(toga.Window):
-    def __init__(self, file_info: GoogleDriveService.FileInfo, main_window: toga.Window | None = None):
+    def __init__(self, asset_info: GitHubReleaseService.AssetInfo, main_window: toga.Window | None = None):
         super().__init__(
             title="Downloading Update",
             closable=False,
@@ -24,10 +24,10 @@ class DownloadDialog(toga.Window):
 
         self.logger = StonksLogger.get_logger("stonks_overwatch.app", "[DOWNLOAD_DIALOG]")
 
-        self.file_name = file_info
+        self.asset_info = asset_info
         self._main_window = main_window
 
-        self.label = toga.Label(f"Downloading: {file_info.name}")
+        self.label = toga.Label(f"Downloading: {asset_info.name}")
         self.progress = toga.ProgressBar(max=None, value=0)
         self.download_info_label = toga.Label("Preparing download...", style=Pack(text_align="center"))
         self.cancel_button = toga.Button("Cancel", on_press=self.on_cancel)
@@ -157,7 +157,7 @@ class DownloadDialog(toga.Window):
                 return os.path.expanduser("~/Downloads")
 
         downloads_folder = get_downloads_folder()
-        output_path = os.path.join(downloads_folder, self.file_name.name)
+        output_path = os.path.join(downloads_folder, self.asset_info.name)
 
         def download():
             def progress_callback(percent, downloaded_bytes=0, total_bytes=0):
@@ -167,11 +167,12 @@ class DownloadDialog(toga.Window):
                 self.update_progress(percent, downloads_folder, output_path, downloaded_bytes, total_bytes)
 
             try:
-                GoogleDriveService.download_file(
-                    self.file_name.id,
+                GitHubReleaseService.download_asset(
+                    self.asset_info.download_url,
                     output_path,
                     progress_callback=progress_callback,
                     should_cancel=lambda: self._closed,
+                    api_url=self.asset_info.api_url,
                 )
             except Exception as e:
                 self.logger.error(f"Download error: {e}")
@@ -195,7 +196,7 @@ class DownloadDialog(toga.Window):
                 if file_path.lower().endswith((".deb", ".rpm", ".AppImage")):
                     if file_path.lower().endswith(".AppImage"):
                         # Make AppImage executable and run it
-                        os.chmod(file_path, 0o755)
+                        os.chmod(file_path, 0o744)
                         subprocess.Popen([file_path])
                     else:
                         # Open with default application (usually package manager)
