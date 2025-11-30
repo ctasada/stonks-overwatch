@@ -34,13 +34,11 @@ class TransactionsRepository:
         with connection.cursor() as cursor:
             # Use parameterized query to prevent SQL injection
             placeholders = ",".join(["%s"] * len(product_ids))
-            cursor.execute(
-                f"""
+            query = f"""
                 SELECT * FROM ibkr_transactions
                 WHERE product_id IN ({placeholders})
-                """,
-                product_ids,
-            )
+                """  # nosec: B608 - placeholders are generated safely and values are parameterized
+            cursor.execute(query, product_ids)
             return dictfetchall(cursor)
 
     @staticmethod

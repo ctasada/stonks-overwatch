@@ -8,13 +8,11 @@ across the application, such as session management, licensing, and authenticatio
 from .authentication_credential_service import AuthenticationCredentialService
 from .authentication_service import AuthenticationService
 from .authentication_session_manager import AuthenticationSessionManager
-from .license_manager import LicenseManager
 from .session_manager import SessionManager
 
 __all__ = [
     "AuthenticationCredentialService",
     "AuthenticationService",
     "AuthenticationSessionManager",
-    "LicenseManager",
     "SessionManager",
 ]
