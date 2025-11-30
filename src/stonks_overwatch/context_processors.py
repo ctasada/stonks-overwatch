@@ -3,6 +3,7 @@ import os
 import tomllib
 from pathlib import Path
 
+from django.conf import settings
 from django.http import HttpRequest
 
 
@@ -44,3 +45,9 @@ def version_processor(request: HttpRequest) -> dict[str, str]:
     else:
         version = get_cached_project_version()
     return {"VERSION": version}
+
+
+def support_url_processor(request: HttpRequest) -> dict[str, str]:
+    """Add support URL to template context."""
+    support_url = settings.STONKS_OVERWATCH_SUPPORT_URL
+    return {"STONKS_OVERWATCH_SUPPORT_URL": support_url}
