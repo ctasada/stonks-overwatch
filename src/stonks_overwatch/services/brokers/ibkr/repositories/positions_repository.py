@@ -30,14 +30,12 @@ class PositionsRepository:
         with connection.cursor() as cursor:
             # Use a parameterized query to prevent SQL injection
             placeholders = ",".join(["%s"] * len(ids))
-            cursor.execute(
-                f"""
+            query = f"""
                 SELECT *
                 FROM ibkr_positions
                 WHERE conid IN ({placeholders})
-                """,
-                ids,
-            )
+                """  # nosec: B608 - placeholders are generated safely and values are parameterized
+            cursor.execute(query, ids)
             rows = dictfetchall(cursor)
 
         # Convert the list of dictionaries into a dictionary indexed by 'productId'

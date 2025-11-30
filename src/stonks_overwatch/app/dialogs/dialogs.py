@@ -5,16 +5,14 @@ from asgiref.sync import sync_to_async
 from toga.dialogs import ConfirmDialog, ErrorDialog, InfoDialog, SaveFileDialog
 
 from stonks_overwatch.app.dialogs.download_dialog import DownloadDialog
-from stonks_overwatch.app.dialogs.expired_dialog import ExpiredDialog
 from stonks_overwatch.app.dialogs.preferences_dialog import PreferencesDialog
 from stonks_overwatch.app.dialogs.release_notes_dialog import ReleaseNotesDialog
-from stonks_overwatch.services.utilities.google_drive_service import GoogleDriveService
+from stonks_overwatch.services.utilities.github_release_service import GitHubReleaseService
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.database.db_utils import dump_database
 
 
 class DialogManager:
-    _expired_dialog_instance = None
     _release_notes_window_instance = None
     _preferences_dialog_instance = None
     _check_for_updates_dialog_instance = None
@@ -62,30 +60,6 @@ class DialogManager:
             await self.app.main_window.dialog(
                 InfoDialog("Cache Cleared", "Application cache has been cleared successfully.")
             )
-
-    async def license_info(self, base_url: str):
-        """Show the license information dialog."""
-        try:
-            if DialogManager._expired_dialog_instance is not None:
-                self.logger.debug("ExpiredDialog already open, focusing window.")
-                DialogManager._expired_dialog_instance.hide()
-                DialogManager._expired_dialog_instance.show()
-                return
-
-            dialog = ExpiredDialog("License Information", base_url, main_window=self.app.main_window)
-            DialogManager._expired_dialog_instance = dialog
-
-            def on_close(widget):
-                self.logger.debug("ExpiredDialog close handler called")
-                DialogManager._expired_dialog_instance = None
-                dialog.close()
-
-            dialog.on_close = on_close
-            dialog.show()
-
-        except Exception as e:
-            self.logger.error(f"Failed to retrieve license info: {str(e)}")
-            await self.app.main_window.dialog(ErrorDialog("License", f"Failed to retrieve license info: {str(e)}"))
 
     async def preferences(self):
         # If a dialog is open and not closed, focus it
@@ -142,26 +116,28 @@ class DialogManager:
                 DialogManager._check_for_updates_dialog_instance = None
 
         is_update_available = False
-        newest_version_file = None
+        newest_version_asset = None
 
         # Get list of available updates
-        update_files = GoogleDriveService.list_files()
-        if update_files:
-            platform = GoogleDriveService.get_platform_for_os()
-            newest_version_file = GoogleDriveService.get_latest_for_platform(update_files, platform)
-            is_update_available = GoogleDriveService.is_file_newer_than_version(newest_version_file, self.app.version)
+        release_assets = GitHubReleaseService.list_releases()
+        if release_assets:
+            platform = GitHubReleaseService.get_platform_for_os()
+            newest_version_asset = GitHubReleaseService.get_latest_for_platform(release_assets, platform)
+            is_update_available = GitHubReleaseService.is_asset_newer_than_version(
+                newest_version_asset, self.app.version
+            )
 
         if is_update_available:
             confirmed = await self.app.main_window.dialog(
                 ConfirmDialog(
                     "Update Available",
-                    f"Update to version {newest_version_file.version} available. Do you want to download it?",
+                    f"Update to version {newest_version_asset.version} available. Do you want to download it?",
                 )
             )
             if not confirmed:
                 return
 
-            dialog = DownloadDialog(newest_version_file, main_window=self.app.main_window)
+            dialog = DownloadDialog(newest_version_asset, main_window=self.app.main_window)
             dialog._closed = False
             DialogManager._check_for_updates_dialog_instance = dialog
 

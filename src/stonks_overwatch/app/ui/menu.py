@@ -1,13 +1,11 @@
 import os
 import platform
 import webbrowser
-from datetime import datetime
 from urllib.parse import urlparse
 
 from toga.command import Command, Group
 
 from stonks_overwatch.app.ui.logs_window import LogStreamWindow
-from stonks_overwatch.services.utilities.license_manager import LicenseManager
 
 
 class MenuManager:
@@ -15,7 +13,6 @@ class MenuManager:
         self.app = app
         # Track the log viewer window
         self.log_window = None
-        self.license_manager = LicenseManager()
 
     def setup_main_menu(self):
         app_group = Group.APP
@@ -91,7 +88,6 @@ class MenuManager:
         )
         self.app.commands.add(bug_report_cmd)
 
-        license_section = 1
         if platform.system() != "Darwin":
             # On non-macOS systems, the "Check for Updates" command is added to the Help menu
             check_update_cmd = Command(
@@ -111,36 +107,6 @@ class MenuManager:
             )
             self.app.commands.add(release_notes_info_cmd)
 
-            license_section = 2
-
-        license_cmd = Command(
-            self._open_license_info,
-            text=self.__license_label(),
-            tooltip="License information",
-            enabled=not self.license_manager.is_license_expired(),
-            group=help_group,
-            section=license_section,
-        )
-        self.app.commands.add(license_cmd)
-
-    def __license_label(self) -> str:
-        """Generate the license expiration label."""
-        from stonks_overwatch.build_config import EXPIRATION_DATE
-
-        expiration = datetime.fromisoformat(EXPIRATION_DATE)
-        now = datetime.now(expiration.tzinfo)
-        delta = expiration - now
-        if delta.days < 0:
-            return "License Expired"
-        elif delta.days == 0:
-            return "License Expires Today"
-        elif delta.days == 1:
-            return "License Expires Tomorrow"
-        elif delta.days < 30:
-            return f"License Expires in {delta.days} days"
-        else:
-            return f"License Expires: {expiration.strftime('%Y-%m-%d')}"
-
     def open_bug_report(self, widget):
         from stonks_overwatch.settings import STONKS_OVERWATCH_SUPPORT_URL
 
@@ -148,11 +114,6 @@ class MenuManager:
 
     async def _preferences_dialog(self, widget):
         await self.app.dialog_manager.preferences()
-
-    async def _open_license_info(self, widget):
-        parsed_url = urlparse(self.app.web_view.url)
-        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
-        await self.app.dialog_manager.license_info(base_url)
 
     async def _download_database(self, widget):
         await self.app.dialog_manager.download_database()

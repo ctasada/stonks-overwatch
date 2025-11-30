@@ -20,7 +20,9 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
     - Added ability to show/hide columns
     - Added ability to show all the rows in a single page
 
-### Changed
+### Removed
+
+- Removed license controls to make the application open source and free to use
 
 - Add stability indicators for broker integrations and tooltips for unstable portfolios
 - **Portfolio**:
@@ -42,6 +44,7 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 ### Security
 
 - Routine dependency updates for security and stability
+- Fixed permission issue when downloading Stonks Overwatch update installers
 
 ---
 

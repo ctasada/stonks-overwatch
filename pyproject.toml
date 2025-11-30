@@ -7,7 +7,7 @@ license = "MIT"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "degiro-connector[quotecast] @ git+https://github.com/ctasada/degiro-connector.git@main",
+    "degiro-connector[quotecast] >= 3.0.35",
     "django >= 5.2.8",
     "pycountry >= 24.6.1",
     "currency-symbols >= 2.0.4",
@@ -33,9 +33,8 @@ dependencies = [
 # Keep in sync with `tool.briefcase.app.stonks-overwatch.requires`
 briefcase = [
     "toga >=0.5.2",
-    "asgiref >= 3.9.1",
+    "asgiref >= 3.11.0",
     "pyotp >= 2.9.0",
-    "beautifulsoup4 >= 4.14.2",
 ]
 
 [tool.poetry.dependencies]
@@ -56,10 +55,9 @@ licensecheck = "^2025.1.0"
 pip-licenses = "^5.5.0"
 briefcase = "^0.3.25"
 deptry = "^0.23.0"
-pre-commit = "^4.4.0"
-bandit = "^1.8.6"
+pre-commit = "^4.5.0"
+bandit = "^1.9.2"
 pymarkdownlnt = "^0.9.33"
-pyarmor = "^9.2.0"
 pytest-asyncio = "^1.3.0"
 
 [tool.poetry]
@@ -215,8 +213,7 @@ Stonks Overwatch runs locally and doesn't share your data with anyone. Your data
 """
 icon = "src/icons/stonks_overwatch"
 sources = [
-    "src/obfuscated/pyarmor_runtime_000000",
-    "src/obfuscated/stonks_overwatch",
+    "src/stonks_overwatch",
 ]
 test_sources = [
     "tests",
@@ -225,9 +222,8 @@ test_sources = [
 requires = [
     "toga >=0.5.2",
     "std-nslog >=1.0.3",
-    "asgiref >= 3.9.1",
+    "asgiref >= 3.11.0",
     "pyotp >= 2.9.0",
-    "beautifulsoup4 >= 4.13.5",
 ]
 test_requires = [ ]
 requirement_installer_args = ["--find-links", "./wheels"]

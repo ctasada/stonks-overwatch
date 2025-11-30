@@ -45,14 +45,6 @@
             {% if exception_type %}
             <div class="bg-light rounded p-3 mb-2">
                 <div class="row mb-2">
-                    <div class="col-4 fw-semibold text-dark">Version:</div>
-                    <div class="col-8 text-secondary">{{ version }}</div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-4 fw-semibold text-dark">Build Date:</div>
-                    <div class="col-8 text-secondary">{{ build_date|date:"M d, Y" }}</div>
-                </div>
-                <div class="row mb-2">
                     <div class="col-4 fw-semibold text-dark">Error Type:</div>
                     <div class="col-8 text-secondary">{{ exception_type }}</div>
                 </div>

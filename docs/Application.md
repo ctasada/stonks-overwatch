@@ -316,6 +316,10 @@ Then:
 
 > **Note:** Automatic updates are only available in the native desktop application. If you're running the web version (via `make run`), you'll need to update manually using `git pull` and `make install`.
 
+### How Updates Work
+
+Stonks Overwatch automatically checks for new releases on [GitHub](https://github.com/ctasada/stonks-overwatch/releases). When a new version is available, you'll receive a notification in the app.
+
 ### Automatic Updates
 
 The native application checks for updates automatically:
