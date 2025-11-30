@@ -1,0 +1,83 @@
+<style>
+    .release-notes-content {
+        background: {{ bg_color }};
+        color: {{ text_color }};
+        font-family: -apple-system, system-ui, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        line-height: 1.5;
+        font-size: 15px;
+        padding: 1rem;
+    }
+    .release-notes-content h1,
+    .release-notes-content h2,
+    .release-notes-content h3,
+    .release-notes-content h4,
+    .release-notes-content h5,
+    .release-notes-content h6 {
+        color: {{ text_color }};
+    }
+    .release-notes-content p {
+        margin: 0.6em 0 0.9em;
+    }
+    .release-notes-content a {
+        color: #4ea3ff;
+        text-decoration: none;
+    }
+    .release-notes-content a:hover {
+        text-decoration: underline;
+    }
+    .release-notes-content hr {
+        border: 0;
+        border-top: 1px solid #333;
+        margin: 1.8em 0;
+    }
+    .release-notes-content ul,
+    .release-notes-content ol {
+        padding-left: 1.3rem;
+        margin: 0.4em 0 1em;
+    }
+    .release-notes-content li {
+        margin: 0.25em 0;
+    }
+    .release-notes-content code {
+        background: {{ code_bg }};
+        color: {{ text_color }};
+        padding: 0.15em 0.4em;
+        border-radius: 4px;
+        font-size: 0.95em;
+    }
+    .release-notes-content pre code {
+        padding: 0;
+        background: transparent;
+    }
+    .release-notes-content pre {
+        background: {{ code_bg }};
+        padding: 0.85rem 1rem;
+        border-radius: 6px;
+        overflow-x: auto;
+        font-size: 0.9em;
+        line-height: 1.4;
+        border: 1px solid #222;
+    }
+    .release-notes-content blockquote {
+        margin: 0.9rem 0;
+        padding: 0.55rem 0.9rem;
+        border-left: 4px solid #444;
+        background: {{ blockquote_bg }};
+        color: #ccc;
+        border-radius: 4px;
+    }
+    .release-notes-content img {
+        max-width: 100%;
+        display: block;
+        margin: 0.75rem auto;
+    }
+    .release-notes-content strong {
+        color: {{ text_color }};
+    }
+    .release-notes-content em {
+        color: #ddd;
+    }
+</style>
+<div class="release-notes-content">
+    {{ html_fragment|safe }}
+</div>

@@ -2,13 +2,31 @@ import os
 
 import markdown
 from django.conf import settings
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.views import View
 
 
 class ReleaseNotesView(View):
-    def get(self, request):
+    def get(self, request) -> HttpResponse:
+        """
+        Handle GET request for release notes.
+
+        Reads the CHANGELOG.md file, converts it from Markdown to HTML, and returns
+        either a full HTML page or an HTML fragment depending on the request type.
+
+        Args:
+            request: Django HTTP request object
+
+        Returns:
+            HttpResponse: Rendered HTML response
+                - HTML fragment template for XHR requests (modal)
+                - Full release notes page template for regular browser requests
+        """
+        is_xhr_request = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+
         changelog_path = os.path.join(settings.STATIC_ROOT, "CHANGELOG.md")
+
         # Read and convert
         with open(changelog_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
@@ -46,5 +64,9 @@ class ReleaseNotesView(View):
             "code_bg": code_bg,
             "blockquote_bg": blockquote_bg,
         }
+
+        # Return HTML fragment for XHR requests (modal)
+        if is_xhr_request:
+            return render(request, "components/release_notes_content.html", context)
 
         return render(request, "release_notes.html", context)

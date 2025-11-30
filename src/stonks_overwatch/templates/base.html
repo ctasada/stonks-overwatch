@@ -139,7 +139,7 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item d-flex align-items-center" href="/release-notes/">
+                                    <a class="dropdown-item d-flex align-items-center" href="#" data-bs-toggle="modal" data-bs-target="#releaseNotesModal">
                                         <i class="bi bi-journal-text me-2"></i> Release Notes
                                     </a>
                                 </li>
@@ -459,6 +459,61 @@
                 }
             }
         }, 100);
+    </script>
+
+    <!-- Release Notes Modal -->
+    <div class="modal fade" id="releaseNotesModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 0;">
+                    <!-- Content will be loaded via AJAX -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Release Notes Modal - Initialize after DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            const releaseNotesModal = document.getElementById('releaseNotesModal');
+            if (releaseNotesModal) {
+                releaseNotesModal.addEventListener('show.bs.modal', function() {
+                    const modalBody = this.querySelector('.modal-body');
+
+                    // Only load if content is not already loaded
+                    if (!modalBody.dataset.loaded) {
+                        modalBody.innerHTML = '<div class="text-center py-5"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+
+                        const releaseNotesUrl = "{% url 'release_notes' %}?dark_mode=0";
+
+                        fetch(releaseNotesUrl, {
+                            method: "GET",
+                            headers: {
+                                "Accept": "text/html",
+                                "X-Requested-With": "XMLHttpRequest"
+                            }
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error(`HTTP error! status: ${response.status}`);
+                                }
+                                return response.text();
+                            })
+                            .then(html => {
+                                modalBody.innerHTML = html;
+                                modalBody.dataset.loaded = 'true';
+                            })
+                            .catch(error => {
+                                console.error('Error loading release notes:', error);
+                                modalBody.innerHTML = '<div class="alert alert-danger">Failed to load release notes. Please try again later.</div>';
+                            });
+                    }
+                });
+            }
+        });
     </script>
 
     {% block extra_js %}{% endblock %}
