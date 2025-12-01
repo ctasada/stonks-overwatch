@@ -13,6 +13,9 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 - **Application:**
     - Added "Demo Mode" for exploring the application without a broker connection
     - Added "Configuration" submenu to the sidebar
+        - Added option to see the release notes
+        - Added option to report issues on GitHub
+        - Added Broker configuration settings
 - **Dividends**:
     - Added diversification filter by year
     - Added calendar navigation bars to quickly switch between years

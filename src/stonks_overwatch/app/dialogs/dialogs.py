@@ -62,6 +62,7 @@ class DialogManager:
             )
 
     async def preferences(self):
+        """Show the Preferences dialog."""
         # If a dialog is open and not closed, focus it
         if DialogManager._preferences_dialog_instance is not None:
             if not getattr(DialogManager._preferences_dialog_instance, "_closed", False):

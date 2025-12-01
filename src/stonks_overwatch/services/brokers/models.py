@@ -76,3 +76,21 @@ class BrokersConfigurationRepository:
     @staticmethod
     def save_broker_configuration(broker_config: BrokersConfiguration) -> None:
         broker_config.save()
+
+    @staticmethod
+    def update_broker_credentials(broker_config: BrokersConfiguration, credentials: dict) -> None:
+        """
+        Update credentials for a broker configuration.
+
+        Ensures credentials is properly initialized as an empty dict if None,
+        then updates it with the provided credentials.
+
+        Args:
+            broker_config: The broker configuration instance to update
+            credentials: Dictionary of credentials to update
+        """
+        # Ensure credentials is initialized as an empty dict if None
+        if broker_config.credentials is None:
+            broker_config.credentials = {}
+        # Update with new credentials
+        broker_config.credentials.update(credentials)

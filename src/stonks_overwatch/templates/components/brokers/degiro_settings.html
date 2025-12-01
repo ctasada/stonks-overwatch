@@ -1,0 +1,66 @@
+{% load static %}
+<!-- DEGIRO Settings Section -->
+<div id="broker-degiro" class="broker-section">
+    <div class="broker-header">
+        <img src="{% static 'brokers/degiro.png' %}" alt="DEGIRO">
+        <h4 class="mb-0">DEGIRO</h4>
+    </div>
+
+    <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="degiro-enabled"
+               {% if degiro_config.enabled %}checked{% endif %} disabled>
+        <label class="form-check-label" for="degiro-enabled">
+            Enabled
+        </label>
+    </div>
+
+    <h6 class="fw-bold mt-4 mb-2">Credentials:</h6>
+    <hr class="my-2">
+
+    <div class="settings-form-group">
+        <label for="degiro-username">Username</label>
+        <input type="text" class="form-control" id="degiro-username"
+               value="{% if degiro_config.credentials.username %}{{ degiro_config.credentials.username }}{% endif %}">
+    </div>
+
+    <div class="settings-form-group">
+        <label for="degiro-password">Password</label>
+        <div class="input-group">
+            <input type="password" class="form-control" id="degiro-password"
+                   value="{% if degiro_config.credentials.password %}{{ degiro_config.credentials.password }}{% endif %}">
+            <i class="bi bi-eye-slash-fill toggle-password" data-target="degiro-password"></i>
+        </div>
+    </div>
+
+    <div class="settings-form-group">
+        <label for="degiro-totp">TOTP Secret Key</label>
+        <div class="input-group">
+            <input type="password" class="form-control" id="degiro-totp"
+                   value="{% if degiro_config.credentials.totp_secret_key %}{{ degiro_config.credentials.totp_secret_key }}{% endif %}"
+                   oninput="updateVerificationCode('degiro')">
+            <i class="bi bi-eye-slash-fill toggle-password" data-target="degiro-totp"></i>
+        </div>
+    </div>
+
+    <div class="settings-form-group" id="degiro-verification-container" style="display: none;">
+        <label>Verification Code</label>
+        <div class="verification-code-container">
+            <span class="verification-code" id="degiro-verification-code"></span>
+            <div class="progress verification-timer">
+                <div class="progress-bar" id="degiro-verification-timer" role="progressbar" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-3">
+
+    <div class="settings-form-group">
+        <label>Update Frequency</label>
+        <div class="update-frequency-group">
+            <input type="number" class="form-control update-frequency-input" id="degiro-update-frequency"
+                   min="1" max="60" step="1"
+                   value="{% if degiro_config.update_frequency %}{{ degiro_config.update_frequency }}{% else %}5{% endif %}">
+            <span>minutes</span>
+        </div>
+    </div>
+</div>

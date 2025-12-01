@@ -156,10 +156,20 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar #sidebar-po
 
 /* Immediate collapsed state rules consolidated above */
 
-/* Immediate collapsed state - connection status centering */
-html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .mt-auto > div {
+/* Immediate collapsed state - connection status centering - override px-3 padding */
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .mt-auto > div.px-3 {
+    padding-left: var(--sidebar-margin) !important;
+    padding-right: var(--sidebar-margin) !important;
+    display: flex !important;
     justify-content: center !important;
-    padding: 0 var(--sidebar-margin) !important;
+    align-items: center !important;
+}
+
+/* Immediate collapsed state - center connection status inner flex container */
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .mt-auto > div > div.d-flex {
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 auto !important;
 }
 
 html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .mt-auto .sidebar-icon {
@@ -311,15 +321,42 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     right: var(--toggle-position-desktop);
 }
 
-/* Center connection status when collapsed */
-#sidebar.sidebar-collapsed .mt-auto > div {
+/* Center connection status when collapsed - override px-3 padding */
+#sidebar.sidebar-collapsed .mt-auto > div.px-3 {
+    padding-left: var(--sidebar-margin) !important;
+    padding-right: var(--sidebar-margin) !important;
+    display: flex !important;
     justify-content: center !important;
-    padding: 0 var(--sidebar-margin) !important;
+    align-items: center !important;
+}
+
+/* Center connection status inner flex container when collapsed */
+#sidebar.sidebar-collapsed .mt-auto > div > div.d-flex {
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 auto !important;
 }
 
 /* Remove margin from connection status icon when collapsed */
 #sidebar.sidebar-collapsed .mt-auto .sidebar-icon {
     margin: 0 !important;
+}
+
+/* Version number styling - ensure it fits */
+#sidebar .mt-auto > div.text-center.text-white-50 {
+    font-size: 0.7rem !important;
+    line-height: 1.2;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Version number when collapsed - even smaller */
+#sidebar.sidebar-collapsed .mt-auto > div.text-center.text-white-50 {
+    font-size: 0.65rem !important;
+    padding: 0.25rem 0 !important;
 }
 
 #sidebar .navbar {
@@ -645,9 +682,18 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     }
 
     /* Tablet - connection status centering when collapsed */
-    #sidebar.sidebar-collapsed .mt-auto > div {
+    #sidebar.sidebar-collapsed .mt-auto > div.px-3 {
+        padding-left: var(--sidebar-margin) !important;
+        padding-right: var(--sidebar-margin) !important;
+        display: flex !important;
         justify-content: center !important;
-        padding: 0 var(--sidebar-margin) !important;
+        align-items: center !important;
+    }
+
+    #sidebar.sidebar-collapsed .mt-auto > div > div.d-flex {
+        justify-content: center !important;
+        align-items: center !important;
+        margin: 0 auto !important;
     }
 
     #sidebar.sidebar-collapsed .mt-auto .sidebar-icon {
@@ -723,9 +769,18 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     }
 
     /* Mobile - connection status centering when collapsed */
-    #sidebar.sidebar-collapsed .mt-auto > div {
+    #sidebar.sidebar-collapsed .mt-auto > div.px-3 {
+        padding-left: var(--sidebar-margin) !important;
+        padding-right: var(--sidebar-margin) !important;
+        display: flex !important;
         justify-content: center !important;
-        padding: 0 var(--sidebar-margin) !important;
+        align-items: center !important;
+    }
+
+    #sidebar.sidebar-collapsed .mt-auto > div > div.d-flex {
+        justify-content: center !important;
+        align-items: center !important;
+        margin: 0 auto !important;
     }
 
     #sidebar.sidebar-collapsed .mt-auto .sidebar-icon {
@@ -1532,4 +1587,95 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 #sidebar-settings-selector .dropdown-toggle.show::after,
 #sidebar-settings-selector .dropdown-toggle[aria-expanded="true"]::after {
     transform: rotate(-90deg);
+}
+
+/* ---------------------------------------------------
+    MODAL STYLING
+----------------------------------------------------- */
+
+/* Ensure modal buttons use application primary color */
+.modal-footer .btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    font-weight: 500;
+    font-size: 0.875rem;
+    padding: 0.375rem 1rem;
+    border-radius: 0.25rem;
+    transition: var(--transition-standard);
+}
+
+.modal-footer .btn-primary:hover,
+.modal-footer .btn-primary:focus {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+    color: white;
+    box-shadow: 0 0 0 0.2rem rgba(115, 134, 213, 0.25);
+}
+
+.modal-footer .btn-primary:active {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+    color: white;
+}
+
+/* Secondary button uses a complementary gray that works well with the purple-blue primary */
+/* Using a slightly warmer gray (#6c757d) that complements the cool purple-blue tones */
+.modal-footer .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+    font-weight: 500;
+    font-size: 0.875rem;
+    padding: 0.375rem 1rem;
+    border-radius: 0.25rem;
+    transition: var(--transition-standard);
+}
+
+.modal-footer .btn-secondary:hover,
+.modal-footer .btn-secondary:focus {
+    background-color: #5a6268;
+    border-color: #545b62;
+    color: white;
+    box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+}
+
+.modal-footer .btn-secondary:active {
+    background-color: #545b62;
+    border-color: #4e555b;
+    color: white;
+}
+
+/* Modal header styling */
+.modal-header {
+    border-bottom: 1px solid #dee2e6;
+    padding: 0.75rem 1.25rem;
+}
+
+.modal-header.border-0 {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.modal-title {
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: 1.125rem;
+}
+
+/* Modal content styling */
+.modal-content {
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.modal-footer {
+    padding: 0.75rem 1.25rem;
+    background-color: #f8f9fa;
+}
+
+.modal-footer.border-0 {
+    border-top: none;
+    padding-top: 0.75rem;
 }
