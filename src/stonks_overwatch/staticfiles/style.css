@@ -873,7 +873,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 .dividends {
-    background-color: var(--primary-light)
+    background-color: var(--primary-light);
 }
 
 .upcoming-dividends {
@@ -1568,6 +1568,340 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 /* ---------------------------------------------------
     END BOOTSTRAP TABLE FIXES
 ----------------------------------------------------- */
+
+/* ---------------------------------------------------
+    RELEASE NOTES STYLING
+----------------------------------------------------- */
+
+/* Release Notes Content - uses CSS custom properties for theming */
+.release-notes-content {
+    background: var(--release-notes-bg-color, #FFFFFF);
+    color: var(--release-notes-text-color, #000000);
+    font-family: -apple-system, system-ui, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    line-height: 1.5;
+    font-size: 14px;
+    padding: 1.25rem 1.5rem;
+}
+
+/* Ensure release notes styles work in modal context */
+.modal-body .release-notes-content {
+    padding: 1.25rem 1.5rem;
+}
+
+.release-notes-content h1,
+.release-notes-content h2,
+.release-notes-content h3,
+.release-notes-content h4,
+.release-notes-content h5,
+.release-notes-content h6 {
+    color: var(--release-notes-text-color, #000000);
+}
+
+.release-notes-content p {
+    margin: 0.6em 0 0.9em;
+}
+
+.release-notes-content a {
+    color: #4ea3ff;
+    text-decoration: none;
+}
+
+.release-notes-content a:hover {
+    text-decoration: underline;
+}
+
+.release-notes-content hr {
+    border: 0;
+    border-top: 1px solid #333;
+    margin: 1.8em 0;
+}
+
+.release-notes-content ul,
+.release-notes-content ol {
+    padding-left: 1.3rem;
+    margin: 0.4em 0 1em;
+}
+
+.release-notes-content li {
+    margin: 0.25em 0;
+}
+
+.release-notes-content code {
+    background: var(--release-notes-code-bg, #F5F5F5);
+    color: var(--release-notes-text-color, #000000);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.95em;
+}
+
+.release-notes-content pre code {
+    padding: 0;
+    background: transparent;
+}
+
+.release-notes-content pre {
+    background: var(--release-notes-code-bg, #F5F5F5);
+    padding: 0.85rem 1rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-size: 0.9em;
+    line-height: 1.4;
+    border: 1px solid #222;
+}
+
+.release-notes-content blockquote {
+    margin: 0.9rem 0;
+    padding: 0.55rem 0.9rem;
+    border-left: 4px solid #444;
+    background: var(--release-notes-blockquote-bg, #F0F0F0);
+    color: #ccc;
+    border-radius: 4px;
+}
+
+.release-notes-content img {
+    max-width: 100%;
+    display: block;
+    margin: 0.75rem auto;
+}
+
+.release-notes-content strong {
+    color: var(--release-notes-text-color, #000000);
+}
+
+.release-notes-content em {
+    color: #ddd;
+}
+
+/* Standalone release notes page styling */
+.release-notes-standalone {
+    margin: 0;
+    padding: 0;
+    background: var(--release-notes-bg-color, #FFFFFF);
+    color: var(--release-notes-text-color, #000000);
+    height: 100%;
+}
+
+/* ---------------------------------------------------
+    SETTINGS STYLING
+----------------------------------------------------- */
+
+/* Settings Content - uses CSS custom properties for theming */
+.settings-content {
+    padding: 1.5rem;
+    font-family: 'Poppins', sans-serif;
+    color: var(--settings-text-color, #000000);
+    background: var(--settings-bg-color, transparent);
+}
+
+/* Ensure settings styles work in modal context */
+.modal-body .settings-content {
+    padding: 1.5rem;
+}
+
+.settings-sidebar {
+    width: 150px;
+    border-right: 1px solid var(--settings-border-color, #dee2e6);
+    padding-right: 1rem;
+    margin-right: 1.5rem;
+}
+
+.settings-main {
+    flex: 1;
+}
+
+.broker-item {
+    padding: 0.75rem;
+    cursor: pointer;
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+    color: var(--settings-text-color, #000000);
+}
+
+.broker-item:hover {
+    background-color: var(--settings-hover-bg, #f8f9fa);
+    transform: translateX(3px);
+}
+
+.broker-item.active {
+    background-color: var(--settings-active-bg, #D0E0FF);
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.broker-item img {
+    width: 24px;
+    height: 24px;
+    margin-right: 0.75rem;
+}
+
+.broker-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.broker-header img {
+    width: 32px;
+    height: 32px;
+    margin-right: 0.75rem;
+}
+
+.broker-header h4 {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.settings-form-group {
+    margin-bottom: 1rem;
+}
+
+.settings-form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    width: 150px;
+    color: var(--settings-text-color, #333);
+}
+
+.settings-form-group .form-control {
+    max-width: 500px;
+    border: 1px solid var(--settings-form-border, #dee2e6);
+    border-radius: 0.25rem;
+    padding: 0.375rem 0.75rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    background-color: var(--settings-form-bg, #fff);
+    color: var(--settings-text-color, #000000);
+}
+
+.settings-form-group .form-control:focus {
+    border-color: var(--primary-color);
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(115, 134, 213, 0.25);
+}
+
+.verification-code-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.verification-code {
+    font-family: monospace;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #198754;
+}
+
+.verification-timer {
+    width: 200px;
+    height: 8px;
+}
+
+.verification-timer .progress-bar {
+    background-color: var(--primary-color);
+}
+
+.update-frequency-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 500px;
+}
+
+.update-frequency-input {
+    width: 100px;
+}
+
+.settings-content hr {
+    border-color: #dee2e6;
+    opacity: 0.5;
+}
+
+.settings-content h6.fw-bold {
+    color: var(--primary-color);
+}
+
+.settings-content .input-group {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    max-width: 500px;
+}
+
+.settings-content .input-group .form-control {
+    flex: 1;
+    padding-right: 40px;
+    max-width: 100%;
+}
+
+.settings-content .input-group .toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    z-index: 10;
+    font-size: 1.1rem;
+    color: #6c757d;
+    transition: color 0.2s ease;
+    pointer-events: auto;
+}
+
+.settings-content .input-group .toggle-password:hover {
+    color: var(--primary-color);
+}
+
+/* Standalone settings page styling */
+.settings-standalone {
+    margin: 0;
+    padding: 0;
+    background: var(--settings-bg-color, #f8f9fa);
+    color: var(--settings-text-color, #000000);
+    height: 100%;
+}
+
+.settings-page-container {
+    padding: 1.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.settings-page-header {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--settings-border-color, #dee2e6);
+}
+
+.settings-page-header h2 {
+    color: var(--primary-color);
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.settings-page-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--settings-border-color, #dee2e6);
+}
+
+/* Toast positioning for standalone settings page */
+.settings-standalone .toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1100;
+}
+
+.settings-standalone .toast {
+    min-width: 300px;
+}
 
 /* Settings menu specific positioning (opens to the right) */
 #sidebar-settings-selector {

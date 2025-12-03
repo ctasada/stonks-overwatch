@@ -14,191 +14,42 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'style.css' %}">
-{% endif %}
+    <style>
+        /* Set CSS custom properties for theme colors */
+        :root {
+            --settings-bg-color: {{ bg_color|default:"#f8f9fa" }};
+            --settings-text-color: {{ text_color|default:"#000000" }};
+            --settings-border-color: {% if is_dark_mode %}#555{% else %}#dee2e6{% endif %};
+            --settings-hover-bg: {% if is_dark_mode %}#4a4a4a{% else %}#f8f9fa{% endif %};
+            --settings-active-bg: {% if is_dark_mode %}#4a5568{% else %}#D0E0FF{% endif %};
+            --settings-form-bg: {% if is_dark_mode %}#4a4a4a{% else %}#fff{% endif %};
+            --settings-form-border: {% if is_dark_mode %}#555{% else %}#dee2e6{% endif %};
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: var(--settings-bg-color);
+            color: var(--settings-text-color);
+        }
+    </style>
+{% else %}
 <style>
-    {% if is_standalone %}
-    html, body {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        background: {{ bg_color|default:"#f8f9fa" }};
-        color: {{ text_color|default:"#000000" }};
-    }
-    .settings-page-container {
-        padding: 1.5rem;
-        max-width: 900px;
-        margin: 0 auto;
-    }
-    .settings-page-header {
-        margin-bottom: 1rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid {% if is_dark_mode %}#555{% else %}#dee2e6{% endif %};
-    }
-    .settings-page-header h2 {
-        color: #7386D5;
-        margin: 0;
-        font-size: 1.5rem;
-    }
-    .settings-page-footer {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        margin-top: 1.5rem;
-        padding-top: 1rem;
-        border-top: 1px solid {% if is_dark_mode %}#555{% else %}#dee2e6{% endif %};
-    }
-    /* Toast positioning */
-    .toast-container {
-        position: fixed;
-        top: 1rem;
-        right: 1rem;
-        z-index: 1100;
-    }
-    .toast {
-        min-width: 300px;
-    }
-    {% endif %}
+    /* Set CSS custom properties for theme colors (fragment mode) - scoped to settings content */
     .settings-content {
-        padding: 1.5rem;
-        font-family: 'Poppins', sans-serif;
-        color: {{ text_color|default:"#000000" }};
-    }
-    .settings-sidebar {
-        width: 150px;
-        border-right: 1px solid {% if is_dark_mode %}#555{% else %}#dee2e6{% endif %};
-        padding-right: 1rem;
-        margin-right: 1.5rem;
-    }
-    .settings-main {
-        flex: 1;
-    }
-    .broker-item {
-        padding: 0.75rem;
-        cursor: pointer;
-        border-radius: 0.5rem;
-        margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-        transition: all 0.3s ease;
-        color: {{ text_color|default:"#000000" }};
-    }
-    .broker-item:hover {
-        background-color: {% if is_dark_mode %}#4a4a4a{% else %}#f8f9fa{% endif %};
-        transform: translateX(3px);
-    }
-    .broker-item.active {
-        background-color: {% if is_dark_mode %}#4a5568{% else %}#D0E0FF{% endif %};
-        font-weight: 600;
-        color: #7386D5;
-    }
-    .broker-item img {
-        width: 24px;
-        height: 24px;
-        margin-right: 0.75rem;
-    }
-    .broker-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 1.5rem;
-    }
-    .broker-header img {
-        width: 32px;
-        height: 32px;
-        margin-right: 0.75rem;
-    }
-    .broker-header h4 {
-        color: #7386D5;
-        font-weight: 600;
-    }
-    .settings-form-group {
-        margin-bottom: 1rem;
-    }
-    .settings-form-group label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: 500;
-        width: 150px;
-        color: {{ text_color|default:"#333" }};
-    }
-    .settings-form-group .form-control {
-        max-width: 500px;
-        border: 1px solid {% if is_dark_mode %}#555{% else %}#dee2e6{% endif %};
-        border-radius: 0.25rem;
-        padding: 0.375rem 0.75rem;
-        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-        background-color: {% if is_dark_mode %}#4a4a4a{% else %}#fff{% endif %};
-        color: {{ text_color|default:"#000000" }};
-    }
-    .settings-form-group .form-control:focus {
-        border-color: #7386D5;
-        outline: 0;
-        box-shadow: 0 0 0 0.2rem rgba(115, 134, 213, 0.25);
-    }
-    .verification-code-container {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-top: 0.5rem;
-    }
-    .verification-code {
-        font-family: monospace;
-        font-size: 1.2rem;
-        font-weight: 600;
-        color: #198754;
-    }
-    .verification-timer {
-        width: 200px;
-        height: 8px;
-    }
-    .verification-timer .progress-bar {
-        background-color: #7386D5;
-    }
-    .update-frequency-group {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        max-width: 500px;
-    }
-    .update-frequency-input {
-        width: 100px;
-    }
-    hr {
-        border-color: #dee2e6;
-        opacity: 0.5;
-    }
-    h6.fw-bold {
-        color: #7386D5;
-    }
-    .input-group {
-        position: relative;
-        display: flex;
-        align-items: stretch;
-        max-width: 500px;
-    }
-    .input-group .form-control {
-        flex: 1;
-        padding-right: 40px;
-        max-width: 100%;
-    }
-    .input-group .toggle-password {
-        position: absolute;
-        right: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        cursor: pointer;
-        z-index: 10;
-        font-size: 1.1rem;
-        color: #6c757d;
-        transition: color 0.2s ease;
-        pointer-events: auto;
-    }
-    .input-group .toggle-password:hover {
-        color: #7386D5;
+        --settings-bg-color: {{ bg_color|default:"#f8f9fa" }};
+        --settings-text-color: {{ text_color|default:"#000000" }};
+        --settings-border-color: {% if is_dark_mode %}#555{% else %}#dee2e6{% endif %};
+        --settings-hover-bg: {% if is_dark_mode %}#4a4a4a{% else %}#f8f9fa{% endif %};
+        --settings-active-bg: {% if is_dark_mode %}#4a5568{% else %}#D0E0FF{% endif %};
+        --settings-form-bg: {% if is_dark_mode %}#4a4a4a{% else %}#fff{% endif %};
+        --settings-form-border: {% if is_dark_mode %}#555{% else %}#dee2e6{% endif %};
     }
 </style>
+{% endif %}
 {% if is_standalone %}
 </head>
-<body>
+<body class="settings-standalone">
     <!-- Toast Container -->
     <div class="toast-container">
         <div id="settings-toast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
