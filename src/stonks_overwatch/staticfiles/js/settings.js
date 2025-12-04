@@ -140,7 +140,11 @@ class TOTPVerificationManager {
         const now = new Date();
         const seconds = now.getSeconds();
         const progress = (seconds % 30) / 30 * 100;
-        timerBar.style.width = progress + '%';
+        // Circumference of circle (2 * π * r) where r = 16
+        const circumference = 2 * Math.PI * 16;
+        // Calculate stroke-dashoffset: when progress is 100%, offset is 0; when 0%, offset is circumference
+        const offset = circumference * (1 - progress / 100);
+        timerBar.style.strokeDashoffset = offset;
     }
 
     /**
@@ -149,7 +153,8 @@ class TOTPVerificationManager {
      */
     _showError(elements) {
         elements.codeDisplay.textContent = 'Invalid TOTP Key';
-        elements.timerBar.style.width = '0%';
+        const circumference = 2 * Math.PI * 16;
+        elements.timerBar.style.strokeDashoffset = circumference;
     }
 
     /**
@@ -162,7 +167,8 @@ class TOTPVerificationManager {
 
         elements.container.style.display = 'none';
         elements.codeDisplay.textContent = '';
-        elements.timerBar.style.width = '0%';
+        const circumference = 2 * Math.PI * 16;
+        elements.timerBar.style.strokeDashoffset = circumference;
     }
 }
 
