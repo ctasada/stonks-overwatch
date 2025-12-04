@@ -23,7 +23,11 @@
     --transition-standard: all 0.3s ease;
 
     /* Common border radius */
+    --border-radius-xs: 0.25rem;
+    --border-radius-sm: 0.375rem;
     --border-radius-standard: 0.5rem;
+    --border-radius-md: 0.5rem;
+    --border-radius-lg: 0.75rem;
     --border-radius-large: 8px;
 
     /* Sidebar spacing */
@@ -44,32 +48,95 @@
     --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.15);
     --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.2);
     --shadow-dark: 0 4px 15px rgba(0, 0, 0, 0.2);
+    --shadow-modal: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
 
     /* Dropdown styling variables for consistency */
     --dropdown-custom-color: var(--primary-color);
-    --dropdown-custom-bg: white;
+    --dropdown-custom-bg: var(--color-white);
     --dropdown-custom-border: var(--primary-color);
     --dropdown-custom-hover-bg: var(--primary-light);
-    --dropdown-custom-hover-color: black;
+    --dropdown-custom-hover-color: var(--color-black);
     --dropdown-custom-active-bg: var(--primary-color);
-    --dropdown-custom-active-color: white;
+    --dropdown-custom-active-color: var(--color-white);
 
     /* Bootstrap Table control dimensions */
     --bootstrap-table-control-height: 38px;
+
+    /* Spacing scale */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+
+    /* Font sizes */
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.5rem;
+
+    /* Z-index scale */
+    --z-index-dropdown: 1000;
+    --z-index-sticky: 1020;
+    --z-index-fixed: 1030;
+    --z-index-modal-backdrop: 1040;
+    --z-index-modal: 1050;
+    --z-index-popover: 1060;
+    --z-index-tooltip: 1070;
+    --z-index-toast: 1100;
+
+    /* Common colors */
+    --color-white: #ffffff;
+    --color-black: #000000;
+    --color-link: #4ea3ff;
+    --color-border-light: #dee2e6;
+    --color-border-dark: #333;
+    --color-border-darker: #222;
+    --color-text-muted: #6c757d;
+    --color-bg-light: #f8f9fa;
+    --color-bg-base: #fafafa;
+    --color-text-muted-light: #ccc;
+    --color-success-light: #90EE90;
+    --color-success-dark: #155724;
+    --color-success-bg: #d4edda;
+    --color-danger-light: #f8d7da;
+    --color-danger-dark: #721c24;
+    --color-warning-light: #FFD700;
+    --color-primary-hover-dark: #5a6cb2;
+    --color-bg-hover-light: #e9ecef;
+
+    /* Max widths */
+    --max-width-sm: 200px;
+    --max-width-md: 500px;
+    --max-width-lg: 900px;
+
+    /* Box shadows with primary color */
+    --shadow-primary-light: 0 4px 12px rgba(115, 134, 213, 0.15);
+    --shadow-primary-medium: 0 6px 20px rgba(115, 134, 213, 0.25);
+    --focus-ring-primary: 0 0 0 0.2rem rgba(115, 134, 213, 0.25);
+    --focus-ring-secondary: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+
+    /* Border radius values */
+    --border-radius-xs: 0.25rem;
+    --border-radius-sm: 0.375rem;
+    --border-radius-md: 0.5rem;
+    --border-radius-lg: 0.75rem;
+    --border-radius-xl: 1rem;
 }
 
 /* Base Styles */
 body {
     font-family: 'Poppins', sans-serif;
-    background: #fafafa;
+    background: var(--color-bg-base);
 }
 
 p {
-    font-family: 'Poppins', sans-serif;
+    font-family: inherit; /* Inherit from body */
     font-size: 1.1em;
     font-weight: 300;
     line-height: 1.7em;
-    color: #999;
+    color: var(--color-text-muted);
 }
 
 a,
@@ -81,11 +148,11 @@ a:focus {
 }
 
 .navbar {
-    padding: 10px 10px;
-    background: #fff;
+    padding: var(--spacing-sm) var(--spacing-sm);
+    background: var(--color-white);
     border: none;
     border-radius: 0;
-    margin-bottom: 10px;
+    margin-bottom: var(--spacing-sm);
     box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
 }
 
@@ -98,8 +165,8 @@ a:focus {
 .line {
     width: 100%;
     height: 1px;
-    border-bottom: 1px dashed #ddd;
-    margin: 40px 0;
+    border-bottom: 1px dashed var(--color-border-light);
+    margin: 2.5rem 0;
 }
 
 i,
@@ -156,8 +223,9 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar #sidebar-po
 
 /* Immediate collapsed state rules consolidated above */
 
-/* Immediate collapsed state - connection status centering - override px-3 padding */
-html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .mt-auto > div.px-3 {
+/* Connection status centering when sidebar is collapsed - shared styles */
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .mt-auto > div.px-3,
+#sidebar.sidebar-collapsed .mt-auto > div.px-3 {
     padding-left: var(--sidebar-margin) !important;
     padding-right: var(--sidebar-margin) !important;
     display: flex !important;
@@ -165,14 +233,15 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .mt-auto > 
     align-items: center !important;
 }
 
-/* Immediate collapsed state - center connection status inner flex container */
-html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .mt-auto > div > div.d-flex {
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .mt-auto > div > div.d-flex,
+#sidebar.sidebar-collapsed .mt-auto > div > div.d-flex {
     justify-content: center !important;
     align-items: center !important;
     margin: 0 auto !important;
 }
 
-html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .mt-auto .sidebar-icon {
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .mt-auto .sidebar-icon,
+#sidebar.sidebar-collapsed .mt-auto .sidebar-icon {
     margin: 0 !important;
 }
 
@@ -230,9 +299,11 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .mt-auto .s
     max-width: 40px;
 }
 
-/* Portfolio selector collapsed state - base styles */
+/* Shared collapsed state styles for sidebar dropdown toggles */
 #sidebar.sidebar-collapsed #sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle,
-html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar #sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle {
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar #sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle,
+#sidebar.sidebar-collapsed #sidebar-settings-selector a.sidebar-nav-link.dropdown-toggle,
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar #sidebar-settings-selector a.sidebar-nav-link.dropdown-toggle {
     justify-content: center;
     margin: 0;
     padding: 0.3rem 0.5rem;
@@ -267,33 +338,25 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     display: none;
 }
 
-/* Settings selector collapsed state - matches portfolio selector */
-#sidebar.sidebar-collapsed #sidebar-settings-selector a.sidebar-nav-link.dropdown-toggle,
-html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar #sidebar-settings-selector a.sidebar-nav-link.dropdown-toggle {
-    justify-content: center;
-    margin: 0;
-    padding: 0.3rem 0.5rem;
-    border-radius: var(--border-radius-standard);
-    text-align: center;
-    display: flex;
-    align-items: center;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-/* Settings selector container margin - collapsed states */
+/* Shared collapsed state styles for sidebar dropdown containers */
+#sidebar.sidebar-collapsed div.dropdown#sidebar-portfolio-selector,
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.dropdown#sidebar-portfolio-selector,
 #sidebar.sidebar-collapsed div.dropdown#sidebar-settings-selector,
 html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.dropdown#sidebar-settings-selector {
     padding: 0;
     margin: 0 var(--sidebar-margin);
 }
 
-/* Settings selector parent container - collapsed states */
+/* Shared collapsed state styles for sidebar dropdown parent containers */
+#sidebar.sidebar-collapsed div.px-2.py-1.border-bottom.w-100,
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py-1.border-bottom.w-100,
 #sidebar.sidebar-collapsed div.px-2.py-1.border-top.w-100,
 html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py-1.border-top.w-100 {
     padding: 0;
 }
 
+/* Hide dropdown toggle arrows when collapsed */
+#sidebar.sidebar-collapsed #sidebar-portfolio-selector .dropdown-toggle::after,
 #sidebar.sidebar-collapsed #sidebar-settings-selector .dropdown-toggle::after {
     display: none;
 }
@@ -321,26 +384,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     right: var(--toggle-position-desktop);
 }
 
-/* Center connection status when collapsed - override px-3 padding */
-#sidebar.sidebar-collapsed .mt-auto > div.px-3 {
-    padding-left: var(--sidebar-margin) !important;
-    padding-right: var(--sidebar-margin) !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-}
-
-/* Center connection status inner flex container when collapsed */
-#sidebar.sidebar-collapsed .mt-auto > div > div.d-flex {
-    justify-content: center !important;
-    align-items: center !important;
-    margin: 0 auto !important;
-}
-
-/* Remove margin from connection status icon when collapsed */
-#sidebar.sidebar-collapsed .mt-auto .sidebar-icon {
-    margin: 0 !important;
-}
+/* Connection status centering rules consolidated above */
 
 /* Version number styling - ensure it fits */
 #sidebar .mt-auto > div.text-center.text-white-50 {
@@ -365,7 +409,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 #sidebar .navbar-brand {
-    color: white !important;
+    color: var(--color-white) !important;
     border-color: rgba(255, 255, 255, 0.25);
     width: 100%;
     margin: 0;
@@ -428,18 +472,23 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     align-items: center;
     justify-content: center;
     transition: var(--transition-standard);
-    background-color: white !important;
+    background-color: var(--color-white) !important;
     border: none !important;
     box-shadow: var(--shadow-light);
     top: 15px;
     right: var(--toggle-position-desktop);
-    z-index: 1000;
+    z-index: var(--z-index-dropdown);
 }
 
 .sidebar-toggle:hover {
-    background-color: #f8f9fa !important;
+    background-color: var(--color-bg-light) !important;
     box-shadow: var(--shadow-medium);
     transform: scale(1.05);
+}
+
+.sidebar-toggle:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
 }
 
 .sidebar-nav-link:hover {
@@ -448,9 +497,14 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     transform: translateX(5px);
 }
 
+.sidebar-nav-link:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 2px;
+}
+
 .sidebar-nav-link.active {
     background-color: var(--sidebar-active-bg) !important;
-    color: #fff !important;
+    color: var(--color-white) !important;
 }
 
 /* Disable transform when collapsed */
@@ -467,11 +521,11 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 /* Custom tooltip styling for consistent theming */
 .info-tooltip {
     --bs-tooltip-bg: var(--primary-dark);
-    --bs-tooltip-color: white;
+    --bs-tooltip-color: var(--color-white);
     --bs-tooltip-border-radius: var(--border-radius-standard);
-    --bs-tooltip-font-size: 0.875rem;
-    --bs-tooltip-padding-x: 0.5rem;
-    --bs-tooltip-padding-y: 0.25rem;
+    --bs-tooltip-font-size: var(--font-size-sm);
+    --bs-tooltip-padding-x: var(--spacing-sm);
+    --bs-tooltip-padding-y: var(--spacing-xs);
 }
 
 /* Portfolio Selector Styling - account for extra div nesting */
@@ -511,19 +565,21 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 #sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle:hover {
     background-color: var(--sidebar-hover-bg);
-    color: #fff;
+    color: var(--color-white);
     transform: none; /* Prevent rightward movement on hover */
 }
 
 #sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle:focus {
     background-color: var(--sidebar-hover-bg);
-    color: #fff;
+    color: var(--color-white);
     box-shadow: none;
     transform: none; /* Prevent rightward movement on focus */
+    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 2px;
 }
 
 #sidebar-portfolio-selector button img {
-    background: white;
+    background: var(--color-white);
     border: 2px solid var(--sidebar-border-color);
 }
 
@@ -551,15 +607,17 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 #sidebar-settings-selector a.sidebar-nav-link.dropdown-toggle:hover {
     background-color: var(--sidebar-hover-bg);
-    color: #fff;
+    color: var(--color-white);
     transform: none; /* Prevent rightward movement on hover */
 }
 
 #sidebar-settings-selector a.sidebar-nav-link.dropdown-toggle:focus {
     background-color: var(--sidebar-hover-bg);
-    color: #fff;
+    color: var(--color-white);
     box-shadow: none;
     transform: none; /* Prevent rightward movement on focus */
+    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 2px;
 }
 
 /* Shared styles for sidebar dropdown menus */
@@ -573,8 +631,8 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 #sidebar-portfolio-menu .dropdown-item,
 #sidebar-settings-menu .dropdown-item {
-    color: #fff;
-    padding: 8px 15px;
+    color: var(--color-white);
+    padding: var(--spacing-sm) var(--spacing-md);
 }
 
 #sidebar-portfolio-menu .dropdown-item:hover,
@@ -582,12 +640,12 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 #sidebar-settings-menu .dropdown-item:hover,
 #sidebar-settings-menu .dropdown-item:focus {
     background-color: var(--primary-color);
-    color: #fff;
+    color: var(--color-white);
 }
 
 #sidebar-portfolio-menu .dropdown-item img,
 #sidebar-settings-menu .dropdown-item img {
-    background: white;
+    background: var(--color-white);
     border: 2px solid var(--sidebar-border-color);
 }
 
@@ -633,7 +691,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 ----------------------------------------------------- */
 
 #content {
-    padding: 5px 10px;
+    padding: 0.3125rem var(--spacing-sm);
     min-height: 100vh;
     transition: var(--transition-standard);
 }
@@ -681,24 +739,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
         padding: 0.25rem 0.4rem; /* Tablet-specific smaller padding */
     }
 
-    /* Tablet - connection status centering when collapsed */
-    #sidebar.sidebar-collapsed .mt-auto > div.px-3 {
-        padding-left: var(--sidebar-margin) !important;
-        padding-right: var(--sidebar-margin) !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-    }
-
-    #sidebar.sidebar-collapsed .mt-auto > div > div.d-flex {
-        justify-content: center !important;
-        align-items: center !important;
-        margin: 0 auto !important;
-    }
-
-    #sidebar.sidebar-collapsed .mt-auto .sidebar-icon {
-        margin: 0 !important;
-    }
+    /* Tablet - connection status centering rules consolidated in main collapsed state rules */
 
         #sidebar .navbar-brand span {
         font-size: 0.9rem;
@@ -768,27 +809,10 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
         padding: 0.2rem 0.3rem; /* Mobile-specific smaller padding */
     }
 
-    /* Mobile - connection status centering when collapsed */
-    #sidebar.sidebar-collapsed .mt-auto > div.px-3 {
-        padding-left: var(--sidebar-margin) !important;
-        padding-right: var(--sidebar-margin) !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-    }
-
-    #sidebar.sidebar-collapsed .mt-auto > div > div.d-flex {
-        justify-content: center !important;
-        align-items: center !important;
-        margin: 0 auto !important;
-    }
-
-    #sidebar.sidebar-collapsed .mt-auto .sidebar-icon {
-        margin: 0 !important;
-    }
+    /* Mobile - connection status centering rules consolidated in main collapsed state rules */
 
     #sidebar .navbar-brand {
-        padding: 0.75rem;
+        padding: var(--spacing-md);
     }
 
     #sidebar .navbar-brand span {
@@ -828,17 +852,17 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 ----------------------------------------------------- */
 
 .green-pill {
-    background-color: #d4edda;
-    color: #155724;
-    border-radius: 0.25rem;
-    padding: 0.25rem 0.5rem;
+    background-color: var(--color-success-bg);
+    color: var(--color-success-dark);
+    border-radius: var(--border-radius-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
 }
 
 .red-pill {
-    background-color: #f8d7da;
-    color: #721c24;
-    border-radius: 0.25rem;
-    padding: 0.25rem 0.5rem;
+    background-color: var(--color-danger-light);
+    color: var(--color-danger-dark);
+    border-radius: var(--border-radius-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
 }
 
 .progress-bar-background {
@@ -908,13 +932,13 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     position: relative;
     width: 2.8rem;
     height: 2.8rem;
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    background: linear-gradient(135deg, var(--color-white) 0%, var(--color-bg-light) 100%);
     border: 2px solid var(--primary-color);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(115, 134, 213, 0.15);
+    box-shadow: var(--shadow-primary-light);
     transition: var(--transition-standard);
     overflow: hidden;
     /* Use CSS clip-path for better circular clipping */
@@ -923,7 +947,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 .country-flag-container:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(115, 134, 213, 0.25);
+    box-shadow: var(--shadow-primary-medium);
     border-color: var(--primary-dark);
 }
 
@@ -979,20 +1003,20 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     position: relative;
     width: 2.8rem;
     height: 2.8rem;
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    background: linear-gradient(135deg, var(--color-white) 0%, var(--color-bg-light) 100%);
     border: 2px solid var(--primary-color);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(115, 134, 213, 0.15);
+    box-shadow: var(--shadow-primary-light);
     transition: var(--transition-standard);
     overflow: hidden;
 }
 
 .asset-icon-container:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(115, 134, 213, 0.25);
+    box-shadow: var(--shadow-primary-medium);
     border-color: var(--primary-dark);
 }
 
@@ -1102,6 +1126,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     }
 }
 
+/* Responsive design for asset icons - Mobile */
 @media (max-width: 576px) {
     .country-flag-container,
     .asset-icon-container {
@@ -1161,25 +1186,25 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .bootstrap-table .pagination .page-pre {
     margin: 0;
     padding: 0;
-    border-radius: 4px 0 0 4px;
+    border-radius: var(--border-radius-xs) 0 0 var(--border-radius-xs);
 }
 
 .bootstrap-table .pagination .page-next {
     margin: 0;
     padding: 0;
-    border-radius: 0 4px 4px 0;
+    border-radius: 0 var(--border-radius-xs) var(--border-radius-xs) 0;
 }
 
 .bootstrap-table .pagination .page-item.active {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
-    color: white;
+    color: var(--color-white);
 }
 
 .bootstrap-table .page-item.active .page-link {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
-    color: white;
+    color: var(--color-white);
 }
 
 .bootstrap-table .page-link {
@@ -1187,9 +1212,9 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 .bootstrap-table .page-link:hover {
-    color: #5a6cb2;
-    background-color: #e9ecef;
-    border-color: #dee2e6;
+    color: var(--color-primary-hover-dark);
+    background-color: var(--color-bg-hover-light);
+    border-color: var(--color-border-light);
 }
 
 .bootstrap-table .page-item.disabled .page-link {
@@ -1198,20 +1223,20 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 .bootstrap-table .page-size-selector {
     color: var(--primary-color);
-    border-color: #dee2e6;
-    background-color: white;
+    border-color: var(--color-border-light);
+    background-color: var(--color-white);
 }
 
 .bootstrap-table .page-size-selector:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(115, 134, 213, 0.25);
+    box-shadow: var(--focus-ring-primary);
 }
 
 /* Reduce height of pagination detail buttons */
 .bootstrap-table .fixed-table-pagination .pagination-detail button {
     height: var(--bootstrap-table-control-height);
-    padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-sm);
     line-height: 1.5;
     display: inline-flex;
     align-items: center;
@@ -1229,8 +1254,8 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 /* Reduce height of input inside pagination container div */
 .bootstrap-table .fixed-table-pagination .float-right.pagination > div > input {
     height: var(--bootstrap-table-control-height);
-    padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-sm);
     line-height: 1.5;
     width: 60px; /* Width sufficient for page numbers */
     text-align: center;
@@ -1256,28 +1281,28 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     font-size: 1rem;
     line-height: 1.5;
     color: var(--primary-color);
-    border-color: #dee2e6;
-    background-color: white;
-    border-radius: 0.25rem 0 0 0.25rem;
+    border-color: var(--color-border-light);
+    background-color: var(--color-white);
+    border-radius: var(--border-radius-xs) 0 0 var(--border-radius-xs);
     width: 60px; /* Narrow width for page number input */
     text-align: center;
 }
 
 .bootstrap-table .fixed-table-pagination .page-jump-to .input-group input:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(115, 134, 213, 0.25);
+    box-shadow: var(--focus-ring-primary);
     outline: 0;
 }
 
 .bootstrap-table .fixed-table-pagination .page-jump-to .input-group .btn {
     height: var(--bootstrap-table-control-height);
     padding: 0.375rem 0.75rem;
-    font-size: 1rem;
+    font-size: var(--font-size-base);
     line-height: 1.5;
     background-color: var(--primary-color);
-    color: white;
+    color: var(--color-white);
     border-color: var(--primary-color);
-    border-radius: 0 0.25rem 0.25rem 0;
+    border-radius: 0 var(--border-radius-xs) var(--border-radius-xs) 0;
     border-left: none;
     display: flex;
     align-items: center;
@@ -1288,7 +1313,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .bootstrap-table .fixed-table-pagination .page-jump-to .input-group .btn:focus {
     background-color: var(--primary-hover);
     border-color: var(--primary-hover);
-    color: white;
+    color: var(--color-white);
 }
 
 .bootstrap-table .fixed-table-pagination .page-jump-to .input-group .btn:active {
@@ -1335,7 +1360,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 /* Year navigation group container */
 .btn-group[aria-label="Year navigation"] {
     border: 1px solid var(--dropdown-custom-border);
-    border-radius: 0.25rem;
+    border-radius: var(--border-radius-xs);
 }
 
 /* Remove default borders from all internal elements */
@@ -1394,11 +1419,11 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 /* Connection Status Icons - Better contrast against dark sidebar */
 #sidebar .text-success {
-    color: #90EE90 !important; /* Light green for better contrast */
+    color: var(--color-success-light) !important; /* Light green for better contrast */
 }
 
 #sidebar .text-warning {
-    color: #FFD700 !important; /* Gold/bright yellow for better contrast */
+    color: var(--color-warning-light) !important; /* Gold/bright yellow for better contrast */
 }
 
 /* ---------------------------------------------------
@@ -1433,7 +1458,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     transform: none !important;
     will-change: auto !important;
     margin-bottom: 2px;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-modal);
 }
 
 /* Ensure table containers don't clip dropdowns */
@@ -1454,7 +1479,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 /* Ensure dropdowns appear above modals and other high z-index elements */
 .dropdown-menu {
-    z-index: 1060 !important;
+    z-index: var(--z-index-popover) !important;
 }
 
 /* Apply dropdown-custom styling to Bootstrap Table page list dropdowns */
@@ -1469,7 +1494,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .bootstrap-table .page-list .dropdown-toggle:focus {
     background-color: var(--dropdown-custom-hover-bg) !important;
     color: var(--dropdown-custom-hover-color) !important;
-    box-shadow: 0 0 0 0.2rem rgba(115, 134, 213, 0.25) !important;
+    box-shadow: var(--focus-ring-primary) !important;
 }
 
 .bootstrap-table .page-list .dropdown-menu .dropdown-item.active,
@@ -1531,7 +1556,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 /* Ensure Bootstrap-Table search box is always interactive and above dropdowns */
 .bootstrap-table .fixed-table-toolbar .search input {
     position: relative;
-    z-index: 1070;
+    z-index: var(--z-index-tooltip);
     pointer-events: auto;
 }
 
@@ -1579,13 +1604,13 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     color: var(--release-notes-text-color, #000000);
     font-family: -apple-system, system-ui, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     line-height: 1.5;
-    font-size: 14px;
-    padding: 1.25rem 1.5rem;
+    font-size: var(--font-size-sm);
+    padding: 1.25rem var(--spacing-lg);
 }
 
 /* Ensure release notes styles work in modal context */
 .modal-body .release-notes-content {
-    padding: 1.25rem 1.5rem;
+    padding: 1.25rem var(--spacing-lg);
 }
 
 .release-notes-content h1,
@@ -1602,7 +1627,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 .release-notes-content a {
-    color: #4ea3ff;
+    color: var(--color-link);
     text-decoration: none;
 }
 
@@ -1612,7 +1637,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 .release-notes-content hr {
     border: 0;
-    border-top: 1px solid #333;
+    border-top: 1px solid var(--color-border-dark);
     margin: 1.8em 0;
 }
 
@@ -1630,7 +1655,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     background: var(--release-notes-code-bg, #F5F5F5);
     color: var(--release-notes-text-color, #000000);
     padding: 0.15em 0.4em;
-    border-radius: 4px;
+    border-radius: var(--border-radius-xs);
     font-size: 0.95em;
 }
 
@@ -1641,12 +1666,12 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 .release-notes-content pre {
     background: var(--release-notes-code-bg, #F5F5F5);
-    padding: 0.85rem 1rem;
-    border-radius: 6px;
+    padding: 0.85rem var(--spacing-md);
+    border-radius: var(--border-radius-sm);
     overflow-x: auto;
     font-size: 0.9em;
     line-height: 1.4;
-    border: 1px solid #222;
+    border: 1px solid var(--color-border-darker);
 }
 
 .release-notes-content blockquote {
@@ -1654,8 +1679,8 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     padding: 0.55rem 0.9rem;
     border-left: 4px solid #444;
     background: var(--release-notes-blockquote-bg, #F0F0F0);
-    color: #ccc;
-    border-radius: 4px;
+    color: var(--color-text-muted-light);
+    border-radius: var(--border-radius-xs);
 }
 
 .release-notes-content img {
@@ -1687,15 +1712,15 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 /* Settings Content - uses CSS custom properties for theming */
 .settings-content {
-    padding: 1.5rem;
-    font-family: 'Poppins', sans-serif;
+    padding: var(--spacing-lg);
+    font-family: inherit; /* Inherit from body */
     color: var(--settings-text-color, #000000);
     background: var(--settings-bg-color, transparent);
 }
 
 /* Ensure settings styles work in modal context */
 .modal-body .settings-content {
-    padding: 1.5rem;
+    padding: var(--spacing-lg);
 }
 
 .settings-sidebar {
@@ -1710,19 +1735,24 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 .broker-item {
-    padding: 0.75rem;
+    padding: var(--spacing-md);
     cursor: pointer;
-    border-radius: 0.5rem;
-    margin-bottom: 0.5rem;
+    border-radius: var(--border-radius-md);
+    margin-bottom: var(--spacing-sm);
     display: flex;
     align-items: center;
-    transition: all 0.3s ease;
+    transition: var(--transition-standard);
     color: var(--settings-text-color, #000000);
 }
 
 .broker-item:hover {
-    background-color: var(--settings-hover-bg, #f8f9fa);
+    background-color: var(--settings-hover-bg, var(--color-bg-light));
     transform: translateX(3px);
+}
+
+.broker-item:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
 }
 
 .broker-item.active {
@@ -1755,21 +1785,21 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 .settings-form-group {
-    margin-bottom: 1rem;
+    margin-bottom: var(--spacing-md);
 }
 
 .settings-form-group label {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--spacing-sm);
     font-weight: 500;
     width: 150px;
     color: var(--settings-text-color, #333);
 }
 
 .settings-form-group .form-control {
-    max-width: 500px;
-    border: 1px solid var(--settings-form-border, #dee2e6);
-    border-radius: 0.25rem;
+    max-width: var(--max-width-md);
+    border: 1px solid var(--settings-form-border, var(--color-border-light));
+    border-radius: var(--border-radius-xs);
     padding: 0.375rem 0.75rem;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
     background-color: var(--settings-form-bg, #fff);
@@ -1779,7 +1809,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .settings-form-group .form-control:focus {
     border-color: var(--primary-color);
     outline: 0;
-    box-shadow: 0 0 0 0.2rem rgba(115, 134, 213, 0.25);
+    box-shadow: var(--focus-ring-primary);
 }
 
 .verification-code-container {
@@ -1797,7 +1827,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 .verification-timer {
-    width: 200px;
+    width: var(--max-width-sm);
     height: 8px;
 }
 
@@ -1808,8 +1838,8 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .update-frequency-group {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    max-width: 500px;
+    gap: var(--spacing-sm);
+    max-width: var(--max-width-md);
 }
 
 .update-frequency-input {
@@ -1817,7 +1847,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 .settings-content hr {
-    border-color: #dee2e6;
+    border-color: var(--color-border-light);
     opacity: 0.5;
 }
 
@@ -1829,7 +1859,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     position: relative;
     display: flex;
     align-items: stretch;
-    max-width: 500px;
+    max-width: var(--max-width-md);
 }
 
 .settings-content .input-group .form-control {
@@ -1846,7 +1876,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     cursor: pointer;
     z-index: 10;
     font-size: 1.1rem;
-    color: #6c757d;
+    color: var(--color-text-muted);
     transition: color 0.2s ease;
     pointer-events: auto;
 }
@@ -1865,15 +1895,15 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 .settings-page-container {
-    padding: 1.5rem;
-    max-width: 900px;
+    padding: var(--spacing-lg);
+    max-width: var(--max-width-lg);
     margin: 0 auto;
 }
 
 .settings-page-header {
-    margin-bottom: 1rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--settings-border-color, #dee2e6);
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--settings-border-color, var(--color-border-light));
 }
 
 .settings-page-header h2 {
@@ -1894,9 +1924,9 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 /* Toast positioning for standalone settings page */
 .settings-standalone .toast-container {
     position: fixed;
-    top: 1rem;
-    right: 1rem;
-    z-index: 1100;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    z-index: var(--z-index-toast);
 }
 
 .settings-standalone .toast {
@@ -1909,7 +1939,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 #sidebar-settings-menu {
-    min-width: 200px;
+    min-width: var(--max-width-sm);
 }
 
 /* Rotate dropdown arrow to point right when dropdown is open */
@@ -1931,11 +1961,11 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .modal-footer .btn-primary {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
-    color: white;
+    color: var(--color-white);
     font-weight: 500;
-    font-size: 0.875rem;
-    padding: 0.375rem 1rem;
-    border-radius: 0.25rem;
+    font-size: var(--font-size-sm);
+    padding: 0.375rem var(--spacing-md);
+    border-radius: var(--border-radius-xs);
     transition: var(--transition-standard);
 }
 
@@ -1943,26 +1973,26 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .modal-footer .btn-primary:focus {
     background-color: var(--primary-hover);
     border-color: var(--primary-hover);
-    color: white;
-    box-shadow: 0 0 0 0.2rem rgba(115, 134, 213, 0.25);
+    color: var(--color-white);
+    box-shadow: var(--focus-ring-primary);
 }
 
 .modal-footer .btn-primary:active {
     background-color: var(--primary-dark);
     border-color: var(--primary-dark);
-    color: white;
+    color: var(--color-white);
 }
 
 /* Secondary button uses a complementary gray that works well with the purple-blue primary */
-/* Using a slightly warmer gray (#6c757d) that complements the cool purple-blue tones */
+/* Using a slightly warmer gray that complements the cool purple-blue tones */
 .modal-footer .btn-secondary {
-    background-color: #6c757d;
-    border-color: #6c757d;
-    color: white;
+    background-color: var(--color-text-muted);
+    border-color: var(--color-text-muted);
+    color: var(--color-white);
     font-weight: 500;
-    font-size: 0.875rem;
-    padding: 0.375rem 1rem;
-    border-radius: 0.25rem;
+    font-size: var(--font-size-sm);
+    padding: 0.375rem var(--spacing-md);
+    border-radius: var(--border-radius-xs);
     transition: var(--transition-standard);
 }
 
@@ -1970,20 +2000,20 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .modal-footer .btn-secondary:focus {
     background-color: #5a6268;
     border-color: #545b62;
-    color: white;
-    box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+    color: var(--color-white);
+    box-shadow: var(--focus-ring-secondary);
 }
 
 .modal-footer .btn-secondary:active {
     background-color: #545b62;
     border-color: #4e555b;
-    color: white;
+    color: var(--color-white);
 }
 
 /* Modal header styling */
 .modal-header {
-    border-bottom: 1px solid #dee2e6;
-    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--color-border-light);
+    padding: var(--spacing-md) var(--spacing-lg);
 }
 
 .modal-header.border-0 {
@@ -1994,22 +2024,22 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .modal-title {
     color: var(--primary-color);
     font-weight: 600;
-    font-size: 1.125rem;
+    font-size: var(--font-size-lg);
 }
 
 /* Modal content styling */
 .modal-content {
     border: none;
-    border-radius: 0.5rem;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-modal);
 }
 
 .modal-footer {
-    padding: 0.75rem 1.25rem;
-    background-color: #f8f9fa;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background-color: var(--color-bg-light);
 }
 
 .modal-footer.border-0 {
     border-top: none;
-    padding-top: 0.75rem;
+    padding-top: var(--spacing-md);
 }
