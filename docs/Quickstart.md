@@ -205,8 +205,8 @@ Now that you have Stonks Overwatch running:
 
 - **Configure Brokers**: See broker-specific guides for detailed setup
   - [DEGIRO Setup](DEGIRO.md)
-  - [Bitvavo Setup](Bitvavo.md)
-  - [IBKR Setup](IBKR.md)
+  - [Bitvavo Setup 🧪️(experimental)](Bitvavo.md)
+  - [IBKR Setup 🧪️(experimental)](IBKR.md)
 - **Explore Features**: Check the [User Guide](Home.md) for feature walkthroughs
 - **Customize**: Learn about configuration options in [Configuration Guide](Configuration-Integration.md)
 - **Contribute**: Want to help? See [Contributing Guidelines](../CONTRIBUTING.md)

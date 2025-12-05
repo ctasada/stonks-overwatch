@@ -39,8 +39,8 @@
 ### Supported Brokers
 
 - **DEGIRO** - Full support with real-time data
-- **Bitvavo** - Cryptocurrency exchange integration
-- **IBKR** (Interactive Brokers) - International markets
+- **Bitvavo (beta)** - Cryptocurrency exchange integration
+- **IBKR (beta)** (Interactive Brokers) - International markets
 
 ### Technical Features
 
@@ -53,7 +53,18 @@
 
 ## Screenshots
 
-> *Coming soon - Add screenshots showing the dashboard, portfolio view, and analytics*
+![Dashboard Screenshot](docs/images/dashboard.png)
+*Dashboard view showing portfolio overview and performance metrics.*
+![Portfolio Screenshot](docs/images/portfolio.png)
+*Detailed portfolio breakdown with asset allocation and recent transactions.*
+![Diversification Screenshot](docs/images/diversification.png)
+*Visual representation of asset diversification across different classes.*
+![Dividends Screenshot](docs/images/dividends.png)
+*Dividend tracking and upcoming payments overview.*
+![Dividends Calendar Screenshot](docs/images/dividends-2.png)
+*Calendar view of upcoming dividend payments.*
+![Fees Screenshot](docs/images/fees.png)
+*Analysis of fees incurred across different brokers.*
 
 ## Quick Start
 
