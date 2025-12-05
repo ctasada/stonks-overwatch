@@ -54,7 +54,7 @@ class Sector(Enum):
             return Sector.FINANCIAL_SERVICES
         elif value == "healthcare":
             return Sector.HEALTHCARE
-        elif value == "consumer cyclical":
+        elif value in ["consumer cyclical", "consumer, cyclical"]:
             return Sector.CONSUMER_CYCLICAL
         elif value in ["communication services", "services", "communications"]:
             return Sector.COMMUNICATION_SERVICES
