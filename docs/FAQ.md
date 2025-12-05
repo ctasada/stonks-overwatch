@@ -25,8 +25,8 @@ Both web-based and native desktop applications are available.
 Currently supported brokers:
 
 - **DEGIRO** - Full support with real-time data
-- **Bitvavo** - Cryptocurrency exchange
-- **IBKR** (Interactive Brokers) - International markets
+- **Bitvavo 🧪️(experimental)** - Cryptocurrency exchange
+- **IBKR  🧪️(experimental)** (Interactive Brokers) - International markets
 
 More brokers can be added through our plugin architecture. Check the [CHANGELOG](../CHANGELOG.md) for updates and planned integrations.
 
