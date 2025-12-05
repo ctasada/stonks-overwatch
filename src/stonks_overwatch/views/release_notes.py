@@ -2,13 +2,34 @@ import os
 
 import markdown
 from django.conf import settings
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.views import View
 
+from stonks_overwatch.utils.core.theme import get_theme_colors
+
 
 class ReleaseNotesView(View):
-    def get(self, request):
+    def get(self, request) -> HttpResponse:
+        """
+        Handle GET request for release notes.
+
+        Reads the CHANGELOG.md file, converts it from Markdown to HTML, and returns
+        a self-contained template that renders as either a full HTML page or an HTML
+        fragment depending on the request type (AJAX vs regular).
+
+        Args:
+            request: Django HTTP request object
+
+        Returns:
+            HttpResponse: Rendered HTML response from release_notes_content.html
+                - HTML fragment for AJAX requests (modal in base.html)
+                - Full HTML page for regular requests (native app WebView)
+        """
+        is_ajax_request = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+
         changelog_path = os.path.join(settings.STATIC_ROOT, "CHANGELOG.md")
+
         # Read and convert
         with open(changelog_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
@@ -27,24 +48,13 @@ class ReleaseNotesView(View):
 
         dark_mode_param = request.GET.get("dark_mode", "0")
         is_dark_mode = dark_mode_param in ["1", "true", "True"]
-
-        if is_dark_mode:
-            bg_color = "#3B3B3B"
-            text_color = "#FFFFFF"
-            code_bg = "#696969"
-            blockquote_bg = "#101010"
-        else:
-            bg_color = "#FFFFFF"
-            text_color = "#000000"
-            code_bg = "#F5F5F5"
-            blockquote_bg = "#F0F0F0"
+        theme_colors = get_theme_colors(is_dark_mode)
 
         context = {
             "html_fragment": html_fragment,
-            "bg_color": bg_color,
-            "text_color": text_color,
-            "code_bg": code_bg,
-            "blockquote_bg": blockquote_bg,
+            "is_standalone": not is_ajax_request,  # Wrap in HTML structure for non-AJAX requests
+            **theme_colors,
         }
 
-        return render(request, "release_notes.html", context)
+        # Always return the content component (it handles standalone vs fragment internally)
+        return render(request, "components/release_notes_content.html", context)

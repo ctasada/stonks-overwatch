@@ -1,0 +1,46 @@
+{% load static %}
+<!-- Bitvavo Settings Section -->
+<div id="broker-bitvavo" class="broker-section" style="display: none;">
+    <div class="broker-header">
+        <img src="{% static 'brokers/bitvavo.png' %}" alt="Bitvavo">
+        <h4 class="mb-0">Bitvavo</h4>
+    </div>
+
+    <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="bitvavo-enabled"
+               {% if bitvavo_config.enabled %}checked{% endif %}>
+        <label class="form-check-label" for="bitvavo-enabled">
+            Enabled
+        </label>
+    </div>
+
+    <h6 class="fw-bold mt-4 mb-2">Credentials:</h6>
+    <hr class="my-2">
+
+    <div class="settings-form-group">
+        <label for="bitvavo-apikey">API Key</label>
+        <input type="text" class="form-control" id="bitvavo-apikey"
+               value="{% if bitvavo_config.credentials.apikey %}{{ bitvavo_config.credentials.apikey }}{% endif %}">
+    </div>
+
+    <div class="settings-form-group">
+        <label for="bitvavo-apisecret">API Secret</label>
+        <div class="input-group">
+            <input type="password" class="form-control" id="bitvavo-apisecret"
+                   value="{% if bitvavo_config.credentials.apisecret %}{{ bitvavo_config.credentials.apisecret }}{% endif %}">
+            <i class="bi bi-eye-slash-fill toggle-password" data-target="bitvavo-apisecret"></i>
+        </div>
+    </div>
+
+    <hr class="my-3">
+
+    <div class="settings-form-group">
+        <label>Update Frequency</label>
+        <div class="update-frequency-group">
+            <input type="number" class="form-control update-frequency-input" id="bitvavo-update-frequency"
+                   min="1" max="60" step="1"
+                   value="{% if bitvavo_config.update_frequency %}{{ bitvavo_config.update_frequency }}{% else %}5{% endif %}">
+            <span>minutes</span>
+        </div>
+    </div>
+</div>

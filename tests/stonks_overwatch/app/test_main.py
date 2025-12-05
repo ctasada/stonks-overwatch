@@ -126,6 +126,7 @@ class TestStonksOverwatchApp:
 
             # Verify environment variables are set
             assert os.environ["STONKS_OVERWATCH_APP"] == "1"
+            assert os.environ["STONKS_OVERWATCH_VERSION"] == "Unknown Version"  # Default when version is None
             assert os.environ["DJANGO_SETTINGS_MODULE"] == "stonks_overwatch.settings"
             assert os.environ["STONKS_OVERWATCH_DATA_DIR"] == "/test/data"
             assert os.environ["STONKS_OVERWATCH_CONFIG_DIR"] == "/test/config"

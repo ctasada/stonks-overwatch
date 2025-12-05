@@ -1,0 +1,295 @@
+{% load static %}
+{% if is_standalone %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Stonks Overwatch</title>
+    <link rel="icon" type="image/png" href="{% static 'stonks_overwatch-32x32.png' %}" sizes="32x32">
+
+    <!-- Bootstrap CSS -->
+    <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'bootstrap-icons/font/bootstrap-icons.css' %}" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <style>
+        /* Set CSS custom properties for theme colors */
+        :root {
+            --settings-bg-color: {{ bg_color|default:"#f8f9fa" }};
+            --settings-text-color: {{ text_color|default:"#000000" }};
+            --settings-border-color: {% if is_dark_mode %}#555{% else %}#dee2e6{% endif %};
+            --settings-hover-bg: {% if is_dark_mode %}#4a4a4a{% else %}#f8f9fa{% endif %};
+            --settings-active-bg: {% if is_dark_mode %}#4a5568{% else %}#D0E0FF{% endif %};
+            --settings-form-bg: {% if is_dark_mode %}#4a4a4a{% else %}#fff{% endif %};
+            --settings-form-border: {% if is_dark_mode %}#555{% else %}#dee2e6{% endif %};
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: var(--settings-bg-color);
+            color: var(--settings-text-color);
+        }
+    </style>
+{% else %}
+<style>
+    /* Set CSS custom properties for theme colors (fragment mode) - scoped to settings content */
+    .settings-content {
+        --settings-bg-color: {{ bg_color|default:"#f8f9fa" }};
+        --settings-text-color: {{ text_color|default:"#000000" }};
+        --settings-border-color: {% if is_dark_mode %}#555{% else %}#dee2e6{% endif %};
+        --settings-hover-bg: {% if is_dark_mode %}#4a4a4a{% else %}#f8f9fa{% endif %};
+        --settings-active-bg: {% if is_dark_mode %}#4a5568{% else %}#D0E0FF{% endif %};
+        --settings-form-bg: {% if is_dark_mode %}#4a4a4a{% else %}#fff{% endif %};
+        --settings-form-border: {% if is_dark_mode %}#555{% else %}#dee2e6{% endif %};
+    }
+</style>
+{% endif %}
+{% if is_standalone %}
+</head>
+<body class="settings-standalone">
+    <!-- Toast Container -->
+    <div class="toast-container">
+        <div id="settings-toast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body d-flex align-items-center">
+                    <i id="toast-icon" class="bi me-2 fs-5"></i>
+                    <span id="toast-message"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    <div class="settings-page-container">
+        <div class="settings-page-header">
+            <h2><i class="bi bi-sliders me-2"></i>Settings</h2>
+        </div>
+{% endif %}
+<div class="settings-content">
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <div class="settings-sidebar">
+            <h6 class="fw-bold mb-3">Brokers</h6>
+            <hr class="my-2">
+            {% if degiro_config %}
+            <div class="broker-item active" data-broker="degiro" onclick="selectBroker('degiro')">
+                <img src="{% static 'brokers/degiro.png' %}" alt="DEGIRO">
+                <span>DEGIRO</span>
+            </div>
+            {% endif %}
+            {% if bitvavo_config %}
+            <div class="broker-item" data-broker="bitvavo" onclick="selectBroker('bitvavo')">
+                <img src="{% static 'brokers/bitvavo.png' %}" alt="Bitvavo">
+                <span>Bitvavo</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Main Content -->
+        <div class="settings-main">
+            <!-- DEGIRO Section -->
+            {% if degiro_config %}
+            {% include 'components/brokers/degiro_settings.html' %}
+            {% endif %}
+
+            <!-- Bitvavo Section -->
+            {% if bitvavo_config %}
+            {% include 'components/brokers/bitvavo_settings.html' %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% if is_standalone %}
+        <!-- Save button hidden - buttons are provided by the containing dialog/modal -->
+        <div class="settings-page-footer" style="display: none;">
+            <button type="button" class="btn btn-primary" id="settings-page-save-btn" onclick="saveSettings()">
+                <i class="bi bi-check-lg me-1"></i>Save
+            </button>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="{% static 'bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+    <!-- jQuery -->
+    <script src="{% static 'jquery/dist/jquery.slim.min.js' %}"></script>
+    <!-- Settings JS -->
+    <script src="{% static 'js/settings.js' %}"></script>
+{% endif %}
+
+<script>
+    // Initialize Settings Manager
+    const settingsManager = new SettingsManager("{% url 'settings' %}", "{{ csrf_token }}");
+
+    // Export functions for global use
+    window.selectBroker = (brokerName) => settingsManager.selectBroker(brokerName);
+    window.updateVerificationCode = (brokerName) => settingsManager.updateVerificationCode(brokerName);
+    window.initializeSettingsContent = () => settingsManager.initialize();
+    window.clearVerificationTimers = () => settingsManager.cleanup();
+
+    /**
+     * Sets up click handlers for password visibility toggle icons.
+     *
+     * This function finds all password toggle icons (elements with the 'toggle-password' class)
+     * and attaches click event listeners that toggle the visibility of the associated password
+     * input fields by switching between 'password' and 'text' input types. It also updates
+     * the icon appearance to reflect the current visibility state.
+     */
+    function initializePasswordToggles() {
+        document.querySelectorAll('.toggle-password').forEach(toggleIcon => {
+            toggleIcon.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const passwordInput = document.getElementById(targetId);
+
+                if (passwordInput) {
+                    // Toggle the type attribute
+                    const currentType = passwordInput.getAttribute('type');
+                    passwordInput.setAttribute('type', currentType === 'password' ? 'text' : 'password');
+
+                    // Toggle the icon
+                    this.classList.toggle('bi-eye-fill');
+                    this.classList.toggle('bi-eye-slash-fill');
+                }
+            });
+        });
+    }
+
+    /**
+     * Initializes the settings manager and password toggles.
+     *
+     * This function performs the initial setup required for the settings page to function
+     * properly. It initializes the SettingsManager instance and sets up password visibility
+     * toggle functionality. This function is available in both standalone (native app WebView)
+     * and modal (browser modal dialog) contexts.
+     */
+    function initializeSettings() {
+        settingsManager.initialize();
+        initializePasswordToggles();
+    }
+
+    {% if is_standalone %}
+    /**
+     * Show a Bootstrap toast notification
+     * @param {string} message - The message to display
+     * @param {string} type - 'success', 'error', 'warning', or 'info'
+     */
+    function showToast(message, type = 'info') {
+        const toastEl = document.getElementById('settings-toast');
+        const toastIcon = document.getElementById('toast-icon');
+        const toastMessage = document.getElementById('toast-message');
+
+        // Remove previous type classes
+        toastEl.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-warning', 'text-bg-info');
+
+        // Set icon and color based on type
+        const config = {
+            success: { bg: 'text-bg-success', icon: 'bi-check-circle-fill' },
+            error: { bg: 'text-bg-danger', icon: 'bi-exclamation-triangle-fill' },
+            warning: { bg: 'text-bg-warning', icon: 'bi-exclamation-circle-fill' },
+            info: { bg: 'text-bg-info', icon: 'bi-info-circle-fill' }
+        };
+
+        const { bg, icon } = config[type] || config.info;
+        toastEl.classList.add(bg);
+        toastIcon.className = `bi ${icon} me-2 fs-5`;
+        toastMessage.textContent = message;
+
+        // Show the toast
+        const toast = new bootstrap.Toast(toastEl, { delay: type === 'error' ? 5000 : 3000 });
+        toast.show();
+    }
+
+    /**
+     * Global function to save settings
+     * Returns a JSON string (WKWebView doesn't support returning objects)
+     * Format: '{"success": true/false, "message": "..."}'
+     * This allows the native app dialog to wait for the save to complete
+     */
+    async function saveSettings() {
+        const activeBroker = document.querySelector('.broker-item.active');
+        if (!activeBroker) {
+            showToast('Please select a broker', 'warning');
+            return JSON.stringify({ success: false, message: 'No broker selected' });
+        }
+
+        const brokerName = activeBroker.getAttribute('data-broker');
+        let payload = { broker_name: brokerName };
+
+        if (brokerName === 'degiro') {
+            const usernameEl = document.getElementById('degiro-username');
+            const passwordEl = document.getElementById('degiro-password');
+            const totpEl = document.getElementById('degiro-totp');
+            const updateFreqEl = document.getElementById('degiro-update-frequency');
+
+            if (!usernameEl || !passwordEl || !totpEl || !updateFreqEl) {
+                showToast('DEGIRO settings are not available', 'error');
+                return JSON.stringify({ success: false, message: 'DEGIRO configuration elements not found' });
+            }
+
+            payload.credentials = {
+                username: usernameEl.value,
+                password: passwordEl.value,
+                totp_secret_key: totpEl.value
+            };
+            payload.update_frequency = parseInt(updateFreqEl.value);
+        } else if (brokerName === 'bitvavo') {
+            const enabledEl = document.getElementById('bitvavo-enabled');
+            const apikeyEl = document.getElementById('bitvavo-apikey');
+            const apisecretEl = document.getElementById('bitvavo-apisecret');
+            const updateFreqEl = document.getElementById('bitvavo-update-frequency');
+
+            if (!enabledEl || !apikeyEl || !apisecretEl || !updateFreqEl) {
+                showToast('Bitvavo settings are not available', 'error');
+                return JSON.stringify({ success: false, message: 'Bitvavo configuration elements not found' });
+            }
+
+            payload.enabled = enabledEl.checked;
+            payload.credentials = {
+                apikey: apikeyEl.value,
+                apisecret: apisecretEl.value
+            };
+            payload.update_frequency = parseInt(updateFreqEl.value);
+        }
+
+        try {
+            const response = await fetch("{% url 'settings' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                showToast('Configuration saved successfully!', 'success');
+                return JSON.stringify({ success: true, message: 'Configuration saved successfully' });
+            } else {
+                const errorMsg = data.error || 'Failed to save configuration';
+                showToast(errorMsg, 'error');
+                return JSON.stringify({ success: false, message: errorMsg });
+            }
+        } catch (error) {
+            console.error('Error saving settings:', error);
+            const errorMsg = 'Failed to save configuration. Please try again.';
+            showToast(errorMsg, 'error');
+            return JSON.stringify({ success: false, message: errorMsg });
+        }
+    }
+    {% endif %}
+
+    // Initialize on load (handles both loading and already-loaded states)
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeSettings);
+    } else {
+        initializeSettings();
+    }
+</script>
+{% if is_standalone %}
+</body>
+</html>
+{% endif %}

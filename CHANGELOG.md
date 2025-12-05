@@ -12,6 +12,10 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 - **Application:**
     - Added "Demo Mode" for exploring the application without a broker connection
+    - Added "Configuration" submenu to the sidebar
+        - Added option to see the release notes
+        - Added option to report issues on GitHub
+        - Added Broker configuration settings
 - **Dividends**:
     - Added diversification filter by year
     - Added calendar navigation bars to quickly switch between years
@@ -24,22 +28,24 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 - Removed license controls to make the application open source and free to use
 
+### Changed
+
 - Add stability indicators for broker integrations and tooltips for unstable portfolios
 - **Portfolio**:
-  - Minor terminology changes for better clarity
+    - Minor terminology changes for better clarity
 - **Diversification**:
-  - Show "Crypto" after "Sectors" to keep all "Stocks" related data together
+    - Show "Crypto" after "Sectors" to keep all "Stocks" related data together
 
 ### Fixed
 
 - **Portfolio**:
-  - Exchanges: Fixed bug skipping the Exchange name in some cases
+    - Exchanges: Fixed bug skipping the Exchange name in some cases
 - **Diversification**:
-  - Percentages are now properly based on the type
+    - Percentages are now properly based on the type
 - **Dividends**:
-  - Correctly display selected year in dividends calendar dropdown
+    - Correctly display selected year in dividends calendar dropdown
 - **DEGIRO**:
-  - Fixed bug wrongly calculating the Realised Gains for some transactions
+    - Fixed bug wrongly calculating the Realised Gains for some transactions
 
 ### Security
 
@@ -60,8 +66,8 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 - Fixed some style inconsistencies across the application
 - Fixed sector handling: Unknown sectors are now properly group under "Unknown"
 - **DEGIRO**:
-  - Fixed calculation of daily cash
-  - Fixed sorting of cash movements
+    - Fixed calculation of daily cash
+    - Fixed sorting of cash movements
 
 ### Security
 

@@ -42,6 +42,9 @@ class StonksOverwatchApp(toga.App):
     def web_server(self):
         self.logger.info("Configuring settings...")
         os.environ["STONKS_OVERWATCH_APP"] = "1"
+        # Convert version to string, handling None case
+        version = str(self.version) if self.version is not None else "Unknown Version"
+        os.environ["STONKS_OVERWATCH_VERSION"] = version
         os.environ["DJANGO_SETTINGS_MODULE"] = "stonks_overwatch.settings"
         os.environ["STONKS_OVERWATCH_DATA_DIR"] = self.paths.data.as_posix()
         os.environ["STONKS_OVERWATCH_CONFIG_DIR"] = self.paths.config.as_posix()

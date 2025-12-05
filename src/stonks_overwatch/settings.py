@@ -41,7 +41,7 @@ if not os.path.exists(STONKS_OVERWATCH_LOGS_DIR):
     os.makedirs(STONKS_OVERWATCH_LOGS_DIR)
 STONKS_OVERWATCH_LOGS_FILENAME = "stonks-overwatch.log"
 
-STONKS_OVERWATCH_SUPPORT_URL = "https://github.com/ctasada/stonks-overwatch/issues/new"
+STONKS_OVERWATCH_SUPPORT_URL = "https://github.com/ctasada/stonks-overwatch/issues"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -105,6 +105,8 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.messages.context_processors.messages",
                 "stonks_overwatch.context_processors.app_mode_processor",
+                "stonks_overwatch.context_processors.version_processor",
+                "stonks_overwatch.context_processors.support_url_processor",
             ],
             # With the flattening of the prj structure, the auto register doesn't seem to work anymore.
             "libraries": {
