@@ -209,7 +209,6 @@ NODE_MODULES_ROOT = os.path.join(PROJECT_PATH, "src", "node_modules")
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CACHES = {
     "default": {

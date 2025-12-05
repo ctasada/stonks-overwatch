@@ -229,7 +229,7 @@ Apache License
 
 
 Django
-5.2.8
+6.0
 BSD-3-Clause
 The MIT License (MIT)
 
@@ -374,7 +374,7 @@ SOFTWARE.
 
 
 beautifulsoup4
-4.14.2
+4.14.3
 MIT License
 Beautiful Soup is made available under the MIT license:
 
