@@ -410,11 +410,13 @@ Planned features include:
 
 ### How can I support the project?
 
-- **Star** the repository on GitHub ⭐
-- **Share** with others who might find it useful
-- **Contribute** code, documentation, or ideas
-- **Report** bugs and suggest improvements
-- **Sponsor** development (coming soon)
+- **⭐ Star** the repository on GitHub - Helps others discover the project
+- **💰 Sponsor** development - [Support via GitHub Sponsors](https://github.com/sponsors/ctasada)
+- **💻 Contribute** code, documentation, or ideas - See [Contributing Guide](../CONTRIBUTING.md)
+- **🐛 Report** bugs and suggest improvements - [Open an issue](https://github.com/ctasada/stonks-overwatch/issues)
+- **📢 Share** with others who might find it useful
+
+For more information about sponsorship and why it matters, see the [Support & Sponsorship](Home.md#support--sponsorship) section in the documentation.
 
 ---
 

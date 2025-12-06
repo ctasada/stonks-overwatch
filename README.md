@@ -6,9 +6,10 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
-[![Django 5.2+](https://img.shields.io/badge/django-5.2+-green.svg)](https://www.djangoproject.com/)
+[![Django 6.0+](https://img.shields.io/badge/django-6.0+-green.svg)](https://www.djangoproject.com/)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/ctasada?label=Sponsor&logo=github&color=ea4aaa)](https://github.com/sponsors/ctasada)
 
-[Quickstart](docs/Quickstart.md) • [Documentation](docs/Home.md) • [Contributing](CONTRIBUTING.md)
+[Quickstart](docs/Quickstart.md) • [Documentation](docs/Home.md) • [Contributing](CONTRIBUTING.md) • [Sponsor](https://github.com/sponsors/ctasada)
 
 ---
 
@@ -169,3 +170,83 @@ Special thanks to all [contributors](https://github.com/ctasada/stonks-overwatch
 **⭐ If you find Stonks Overwatch useful, please star the project! ⭐**
 
 Made with ❤️ by the Stonks Overwatch community
+
+---
+
+## ❤️ Why Sponsor Me?
+
+Hi, I'm Carlos—the creator and maintainer of Stonks Overwatch. Let me share why I built this project and why your support matters.
+
+### The Story Behind Stonks Overwatch
+
+Like many investors, I found myself juggling multiple broker accounts—DEGIRO for stocks, Bitvavo for crypto, IBKR for international markets. Each broker had its own interface, its own way of presenting data, and none of them gave me the unified view I needed to truly understand my portfolio.
+
+The commercial alternatives? They either charged monthly fees I couldn't justify, collected and sold my financial data, or required me to trust third-party cloud services with my most sensitive information. That didn't sit right with me.
+
+So I built Stonks Overwatch—a privacy-first, open-source solution that runs entirely on your machine. Your data never leaves your computer. No subscriptions. No data selling. Just honest, transparent portfolio tracking.
+
+### The Reality of Maintaining This Project
+
+**Time Investment:** I spend a lot of my free time over the last year to build an improve Stonks Overwatch:
+- Fixing bugs and responding to issues
+- Improving the UI/UX based on feedback
+- Writing documentation and guides
+- Building native desktop applications for all platforms
+
+**What I've Built So Far:**
+- ✅ Full integration with DEGIRO (real-time data)
+- ✅ Beta support for Bitvavo and IBKR
+- ✅ Native desktop apps for Windows, macOS, and Linux
+- ✅ Comprehensive portfolio analytics and visualization
+- ✅ Dividend tracking and forecasting
+- ✅ Fee analysis across all brokers
+- ✅ Complete documentation and developer guides
+- ✅ Plugin architecture design (ready for implementation)
+
+**What's Coming Next:**
+- 🚀 Dynamic plugin system for easy broker additions
+- 📱 Mobile app support (iOS and Android)
+- 📊 Advanced analytics and reporting
+- 🔌 Community-driven broker plugins
+- 🌍 Support for more international brokers
+- ⚡ Performance optimizations and caching improvements
+
+### What Sponsorship Enables
+
+Your sponsorship directly enables me to:
+
+1. **Dedicate More Time** - Currently, I work on this in evenings and weekends. Sponsorship would allow me to allocate more focused development time.
+
+2. **Faster Broker Integrations** - Each new broker integration requires significant research, API exploration, testing, and documentation. Sponsorship helps prioritize these features.
+
+3. **Better Infrastructure** - Covering costs for CI/CD, testing infrastructure, code signing certificates for native apps, and hosting for documentation.
+
+4. **Community Growth** - Supporting community initiatives, hackathons, and contributor recognition programs.
+
+5. **Long-term Sustainability** - Ensuring Stonks Overwatch remains free, open-source, and privacy-focused for years to come.
+
+### Your Support Makes a Difference
+
+Every contribution, no matter the size, helps sustain this project. Whether you're:
+- A casual investor who found value in the tool
+- A developer who appreciates the clean architecture
+- Someone who believes in privacy-first software
+- A company using Stonks Overwatch internally
+
+Your sponsorship shows that open-source, privacy-focused tools matter—and that independent developers can build something meaningful without compromising on values.
+
+### How to Support
+
+**GitHub Sponsors** (Recommended):
+👉 [Sponsor me on GitHub](https://github.com/sponsors/ctasada)
+
+**Other Ways to Help:**
+- ⭐ **Star the repository** - Helps others discover the project
+- 🐛 **Report bugs** - Help improve stability
+- 💡 **Suggest features** - Shape the roadmap
+- 📝 **Contribute code** - See [Contributing Guide](CONTRIBUTING.md)
+- 📢 **Share with others** - Spread the word
+
+---
+
+**Thank you for considering supporting Stonks Overwatch. Your sponsorship helps keep financial privacy accessible to everyone.** 🙏

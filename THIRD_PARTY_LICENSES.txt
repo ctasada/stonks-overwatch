@@ -4034,7 +4034,7 @@ THE SOFTWARE.
 
 
 platformdirs
-4.5.0
+4.5.1
 MIT
 MIT License
 
@@ -4110,7 +4110,7 @@ SOFTWARE.
 
 
 protobuf
-6.33.1
+6.33.2
 3-Clause BSD License
 Copyright 2008 Google Inc.  All rights reserved.
 
@@ -5749,7 +5749,7 @@ SOFTWARE.
 
 
 urllib3
-2.5.0
+2.6.0
 MIT
 MIT License
 

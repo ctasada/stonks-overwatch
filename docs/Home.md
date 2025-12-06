@@ -329,6 +329,41 @@ We welcome contributions! Here's how you can help:
 
 ---
 
+## Support & Sponsorship
+
+Stonks Overwatch is a free, open-source project built and maintained by volunteers. Your support helps ensure the project continues to grow and improve.
+
+### Why Sponsor?
+
+Stonks Overwatch was created to solve a real problem: managing investments across multiple brokers while maintaining complete privacy. The project represents over a year of dedicated development work, including:
+
+- Full broker integrations (DEGIRO, Bitvavo, IBKR)
+- Native desktop applications for all platforms
+- Comprehensive documentation and developer guides
+- Privacy-first architecture with local data storage
+
+**Your sponsorship enables:**
+- More time dedicated to development and maintenance
+- Faster broker integrations and feature development
+- Better infrastructure (CI/CD, testing, code signing)
+- Long-term sustainability of the project
+
+### How to Support
+
+**GitHub Sponsors** (Recommended):
+👉 [Sponsor via GitHub Sponsors](https://github.com/sponsors/ctasada)
+
+**Other Ways to Help:**
+- ⭐ **Star the repository** - Helps others discover the project
+- 🐛 **Report bugs** - [Open an issue](https://github.com/ctasada/stonks-overwatch/issues)
+- 💡 **Suggest features** - [Request a feature](https://github.com/ctasada/stonks-overwatch/issues/new?template=feature_request.md)
+- 📝 **Contribute code** - See [Contributing Guidelines](../CONTRIBUTING.md)
+- 📢 **Share with others** - Spread the word about Stonks Overwatch
+
+For more details about the project's story and what sponsorship enables, see the [README sponsorship section](https://github.com/ctasada/stonks-overwatch#-why-sponsor-me) on GitHub.
+
+---
+
 ## Project Resources
 
 ### Links
