@@ -159,3 +159,4 @@ portfolio-performance/*.pdf
 
 # Ignore IBKR certificates
 *.pem
+/.tool-versions

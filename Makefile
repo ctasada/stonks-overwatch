@@ -69,6 +69,8 @@ help: ## Show this help message
 	@echo -e  "  make runserver debug=true       # Run server in debug mode"
 	@echo -e  "  make test                       # Run tests"
 	@echo -e  "  make docker-run                 # Build and run with Docker"
+	@echo -e  "  make cicd workflow=package target=deb  # Test deb build locally"
+	@echo -e  "  make cicd-restore                     # Restore environment after cicd"
 
 #==============================================================================
 ##@ Development Environment
@@ -303,18 +305,111 @@ pre-commit-update: ## Update pre-commit hook versions
 ##@ CI/CD Operations
 #==============================================================================
 
-cicd: ## Run CI/CD pipeline (use job=<name> or workflow=<name>)
+cicd: ## Run CI/CD pipeline (use job=<name>, workflow=<name>, or target=<flatpak|deb|rpm>)
 	@echo -e  "$(BOLD)$(BLUE)Running CI/CD pipeline...$(RESET)"
+	@echo -e  "$(YELLOW)Note: Local .venv will be affected when using --bind. Run 'make cicd-restore' after if needed.$(RESET)"
+	@mkdir -p dist
 	@if [ -n "$(workflow)" ]; then \
 		echo -e "$(YELLOW)Running workflow: $(workflow)$(RESET)"; \
-		act -W ".github/workflows/$(workflow).yml" --container-architecture linux/arm64 -P macos-latest=self-hosted; \
+		if [ -n "$(target)" ]; then \
+			echo -e "$(YELLOW)With matrix target: $(target)$(RESET)"; \
+			act workflow_dispatch \
+				-W ".github/workflows/$(workflow).yml" \
+				--container-architecture linux/arm64 \
+				-P macos-latest=self-hosted \
+				--bind \
+				--container-options "-v /var/run/docker.sock:/var/run/docker.sock --privileged" \
+				--matrix target:$(target); \
+			EXIT_CODE=$$?; \
+			if [ $$EXIT_CODE -eq 0 ] && [ "$(workflow)" = "package" ]; then \
+				echo -e "$(GREEN)✓ Packages available in dist/:$(RESET)"; \
+				ls -lh dist/ 2>/dev/null || echo -e "$(YELLOW)No packages found$(RESET)"; \
+			fi; \
+			exit $$EXIT_CODE; \
+		else \
+			act workflow_dispatch \
+				-W ".github/workflows/$(workflow).yml" \
+				--container-architecture linux/arm64 \
+				-P macos-latest=self-hosted \
+				--bind \
+				--container-options "-v /var/run/docker.sock:/var/run/docker.sock --privileged"; \
+			EXIT_CODE=$$?; \
+			if [ $$EXIT_CODE -eq 0 ] && [ "$(workflow)" = "package" ]; then \
+				echo -e "$(GREEN)✓ Packages available in dist/:$(RESET)"; \
+				ls -lh dist/ 2>/dev/null || echo -e "$(YELLOW)No packages found$(RESET)"; \
+			fi; \
+			exit $$EXIT_CODE; \
+		fi; \
 	elif [ -n "$(job)" ]; then \
 		echo -e "$(YELLOW)Running job: $(job)$(RESET)"; \
-		act --job $(job) --container-architecture linux/arm64 -P macos-latest=self-hosted; \
+		if [ -n "$(target)" ]; then \
+			echo -e "$(YELLOW)With matrix target: $(target)$(RESET)"; \
+			act workflow_dispatch \
+				--job $(job) \
+				--container-architecture linux/arm64 \
+				-P macos-latest=self-hosted \
+				--bind \
+				--container-options "-v /var/run/docker.sock:/var/run/docker.sock --privileged" \
+				--matrix target:$(target); \
+			EXIT_CODE=$$?; \
+			if [ $$EXIT_CODE -eq 0 ] && [ "$(job)" = "package" ]; then \
+				echo -e "$(GREEN)✓ Packages available in dist/:$(RESET)"; \
+				ls -lh dist/ 2>/dev/null || echo -e "$(YELLOW)No packages found$(RESET)"; \
+			fi; \
+			exit $$EXIT_CODE; \
+		else \
+			act workflow_dispatch \
+				--job $(job) \
+				--container-architecture linux/arm64 \
+				-P macos-latest=self-hosted \
+				--bind \
+				--container-options "-v /var/run/docker.sock:/var/run/docker.sock --privileged"; \
+			EXIT_CODE=$$?; \
+			if [ $$EXIT_CODE -eq 0 ] && [ "$(job)" = "package" ]; then \
+				echo -e "$(GREEN)✓ Packages available in dist/:$(RESET)"; \
+				ls -lh dist/ 2>/dev/null || echo -e "$(YELLOW)No packages found$(RESET)"; \
+			fi; \
+			exit $$EXIT_CODE; \
+		fi; \
 	else \
 		echo -e "$(YELLOW)Available jobs and workflows:$(RESET)"; \
 		act --list --container-architecture linux/arm64; \
-		echo -e "$(YELLOW)Use 'make cicd job=<jobId>' or 'make cicd workflow=<workflowFile>' to run specific jobs or workflows$(RESET)"; \
+		echo -e "$(YELLOW)Usage examples:$(RESET)"; \
+		echo -e "  make cicd job=<jobId>"; \
+		echo -e "  make cicd workflow=<workflowFile>"; \
+		echo -e "  make cicd workflow=package target=deb"; \
+		echo -e "  make cicd workflow=package target=rpm"; \
+		echo -e "  make cicd workflow=package target=flatpak"; \
+	fi
+
+cicd-restore: ## Restore local environment after running 'make cicd' (removes poetry.toml and recreates .venv)
+	@echo -e  "$(BOLD)$(BLUE)Restoring local environment after CI/CD run...$(RESET)"
+	@if [ -f "poetry.toml" ]; then \
+		echo -e "$(YELLOW)Removing poetry.toml...$(RESET)"; \
+		rm -f poetry.toml; \
+		echo -e "$(GREEN)✓ Removed poetry.toml$(RESET)"; \
+	else \
+		echo -e "$(GREEN)✓ poetry.toml not found (already clean)$(RESET)"; \
+	fi
+	@if [ -d ".venv" ]; then \
+		echo -e "$(YELLOW)Removing affected .venv directory...$(RESET)"; \
+		rm -rf .venv; \
+		echo -e "$(GREEN)✓ Removed .venv$(RESET)"; \
+	else \
+		echo -e "$(GREEN)✓ .venv not found (already clean)$(RESET)"; \
+	fi
+	@echo -e "$(YELLOW)Recreating .venv with poetry install...$(RESET)"
+	@if poetry install --no-interaction 2>&1; then \
+		echo -e "$(GREEN)✓ Local environment restored successfully!$(RESET)"; \
+		poetry env info | grep -E "(Python|Path|Valid)" || true; \
+	else \
+		echo -e "$(RED)✗ Failed to restore environment$(RESET)"; \
+		echo -e "$(YELLOW)This is likely due to Python version configuration.$(RESET)"; \
+		echo -e "$(YELLOW)Try one of these fixes:$(RESET)"; \
+		echo -e "  1. Set Python version: asdf set python 3.13.11"; \
+		echo -e "  2. Or use system Python: unset ASDF_DIR"; \
+		echo -e "  3. Then run: make cicd-restore"; \
+		exit 1; \
 	fi
 
 #==============================================================================
@@ -328,6 +423,7 @@ _check-poetry:
 # Check if Docker is running
 _check-docker:
 	@docker info > /dev/null 2>&1 || (echo -e "$(RED)Error: Docker is not running$(RESET)" && exit 1)
+
 
 # Add dependency checks to relevant targets
 install: _check-poetry

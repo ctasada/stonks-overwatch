@@ -196,13 +196,50 @@ make briefcase-run
 
 As before, only the application for the current OS will be created and executed.
 
-### CICD
+### CI/CD
+
+Test GitHub Actions workflows locally using `act`:
 
 ```shell
 make cicd
 ```
 
-Will execute the GitHub Actions locally. It's a good way of validating changes in the CI/CD code
+**Important:** Running `make cicd` will affect your local `.venv` directory. Always restore your environment afterward:
+
+```shell
+make cicd-restore
+```
+
+**Common CI/CD Commands:**
+
+```shell
+# Test package builds locally
+make cicd workflow=package target=deb      # Build .deb package
+make cicd workflow=package target=rpm      # Build .rpm package
+make cicd workflow=package target=flatpak  # Build Flatpak package
+
+# Restore local environment after cicd run
+make cicd-restore
+
+# List available workflows
+make cicd
+```
+
+**Generated packages** are saved to `dist/` directory:
+
+- `stonks-overwatch_*.deb` - Debian/Ubuntu installer
+- `stonks-overwatch-*.rpm` - Fedora/RHEL installer
+- `stonks-overwatch-*.flatpak` - Universal Linux package
+
+**Troubleshooting:**
+
+If `make cicd-restore` fails with Python version errors:
+
+```shell
+# Fix Python version configuration
+asdf set python 3.13.11
+make cicd-restore
+```
 
 ## Troubleshooting
 
