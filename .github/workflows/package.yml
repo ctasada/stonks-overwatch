@@ -22,18 +22,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [ "windows", "macos", "flatpak", "deb", "rpm" ]
+        target: [ "flatpak", "deb", "rpm" ]
         include:
-          - target: "windows"
-            output-format: "app"
-            runs-on: "windows-latest"
-
-          - target: "macos"
-            output-format: "app"
-            runs-on: "macos-latest"
-            pre-command: "make _create-wheels"
-            run-target: True
-
           - target: "flatpak"
             platform: "Linux"
             output-format: "Flatpak"
@@ -119,88 +109,3 @@ jobs:
           path: dist
           retention-days: 5
           if-no-files-found: error
-
-  release:
-    name: Release Packages
-    needs: package
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Run common actions
-        uses: ./.github/actions/common-action
-
-      - name: Download all build artifacts
-        uses: actions/download-artifact@v6
-        with:
-          path: artifacts
-
-      - name: Display contents
-        run: ls -R artifacts
-
-      - name: Get version from Poetry
-        id: get_version
-        run: |
-          version=$(poetry version -s)
-          echo "version=$version" >> $GITHUB_OUTPUT
-
-      - name: Extract changelog entry
-        id: changelog
-        run: |
-          version=${{ steps.get_version.outputs.version }}
-          # First try to match the exact version in brackets
-          awk "/^##\\s\\[$version\\]/{flag=1;next}/^##\\s/{flag=0}flag" CHANGELOG.md > release_notes.md
-          # If no match found, try without brackets
-          if [ ! -s release_notes.md ]; then
-            awk "/^##\\s$version/{flag=1;next}/^##\\s/{flag=0}flag" CHANGELOG.md > release_notes.md
-          fi
-          echo "RELEASE_BODY<<EOF" >> $GITHUB_ENV
-          cat release_notes.md >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
-      - name: Rename release files to include OS by extension
-        run: |
-          find artifacts -type f \( -name '*.dmg' -o -name '*.msi' -o -name '*.flatpak' -o -name '*.deb' -o -name '*.rpm' \) | while read filepath; do
-            filename=$(basename "$filepath")
-            dir=$(dirname "$filepath")
-            case "$filename" in
-              *.dmg)
-                suffix=macos
-                ;;
-              *.msi)
-                suffix=windows
-                ;;
-              *.flatpak|*.deb|*.rpm)
-                suffix=linux
-                ;;
-              *)
-                continue
-                ;;
-            esac
-            # Only add OS if not already present
-            if [[ "$filename" =~ ^(.*)-(macos|windows|linux)\.(dmg|msi|flatpak|deb|rpm)$ ]]; then
-              continue
-            fi
-            name_no_ext="${filename%.*}"
-            ext="${filename##*.}"
-            newname="${name_no_ext}-${suffix}.${ext}"
-            mv "$filepath" "$dir/$newname"
-            echo "Renamed $filepath to $dir/$newname"
-          done
-
-      - name: Create GitHub Release
-        if: ${{ !env.ACT }}
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ steps.get_version.outputs.version }}
-          body: ${{ env.RELEASE_BODY }}
-          files: |
-            artifacts/**/*.dmg
-            artifacts/**/*.msi
-            artifacts/**/*.flatpak
-            artifacts/**/*.deb
-            artifacts/**/*.rpm
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
