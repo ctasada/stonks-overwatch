@@ -10,6 +10,10 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 ### Added
 
+- **Installers:**
+    - Added Linux Debian (.deb) installer
+    - Added Linux Red Hat (.rpm) installer
+
 ### Changed
 
 ### Fixed

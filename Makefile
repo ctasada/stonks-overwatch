@@ -82,7 +82,6 @@ install: ## Install all dependencies
 update: ## Update all dependencies
 	@echo -e  "$(BOLD)$(YELLOW)Updating dependencies...$(RESET)"
 	cd $(SRC_DIR) && npm update
-	poetry self update
 	poetry update
 	$(MAKE) generate-third-party
 
@@ -259,8 +258,8 @@ briefcase-clean: ## Clean Briefcase build artifacts
 	@echo -e  "$(BOLD)$(YELLOW)Cleaning Briefcase build artifacts...$(RESET)"
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 	rm -rf build/ dist/ *.egg-info/ logs/ wheels/
-	pip uninstall stonks-overwatch -y || true
-	pip cache purge
+	poetry run pip uninstall stonks-overwatch -y || true
+	poetry run pip cache purge || true
 	@if [ "$$(uname)" == "Darwin" ]; then \
 		rm -rf "/Users/$(USER)/Library/Application Support/com.caribay.stonks_overwatch"; \
 		rm -rf "/Users/$(USER)/Library/Preferences/com.caribay.stonks_overwatch"; \

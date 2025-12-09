@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [ "windows", "macos", "flatpak"]
+        target: [ "windows", "macos", "flatpak", "deb", "rpm" ]
         include:
           - target: "windows"
             output-format: "app"
@@ -40,6 +40,22 @@ jobs:
             runs-on: "ubuntu-latest"
             pre-command: "sudo apt update && sudo apt -y install flatpak flatpak-builder"
             briefcase-run-prefix: "xvfb-run"
+
+          - target: "deb"
+            platform: "Linux"
+            output-format: "system"
+            runs-on: "ubuntu-latest"
+            pre-command: "sudo apt -y install socat"
+            briefcase-run-prefix: "xvfb-run"
+            briefcase-args: "--target ubuntu:24.04"
+
+          - target: "rpm"
+            platform: "Linux"
+            output-format: "system"
+            runs-on: "fedora-latest"
+            pre-command: "sudo apt -y install socat"
+            briefcase-run-prefix: "xvfb-run"
+            briefcase-args: "--target fedora:40"
 
     steps:
       - name: Checkout
@@ -146,7 +162,7 @@ jobs:
 
       - name: Rename release files to include OS by extension
         run: |
-          find artifacts -type f \( -name '*.dmg' -o -name '*.msi' -o -name '*.flatpak' \) | while read filepath; do
+          find artifacts -type f \( -name '*.dmg' -o -name '*.msi' -o -name '*.flatpak' -o -name '*.deb' -o -name '*.rpm' \) | while read filepath; do
             filename=$(basename "$filepath")
             dir=$(dirname "$filepath")
             case "$filename" in
@@ -156,7 +172,7 @@ jobs:
               *.msi)
                 suffix=windows
                 ;;
-              *.flatpak)
+              *.flatpak|*.deb|*.rpm)
                 suffix=linux
                 ;;
               *)
@@ -164,7 +180,7 @@ jobs:
                 ;;
             esac
             # Only add OS if not already present
-            if [[ "$filename" =~ ^(.*)-(macos|windows|linux)\.(dmg|msi|flatpak)$ ]]; then
+            if [[ "$filename" =~ ^(.*)-(macos|windows|linux)\.(dmg|msi|flatpak|deb|rpm)$ ]]; then
               continue
             fi
             name_no_ext="${filename%.*}"
@@ -184,5 +200,7 @@ jobs:
             artifacts/**/*.dmg
             artifacts/**/*.msi
             artifacts/**/*.flatpak
+            artifacts/**/*.deb
+            artifacts/**/*.rpm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
