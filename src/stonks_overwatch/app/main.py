@@ -50,6 +50,12 @@ class StonksOverwatchApp(toga.App):
         os.environ["STONKS_OVERWATCH_CONFIG_DIR"] = self.paths.config.as_posix()
         os.environ["STONKS_OVERWATCH_LOGS_DIR"] = self.paths.logs.as_posix()
         os.environ["STONKS_OVERWATCH_CACHE_DIR"] = self.paths.cache.as_posix()
+
+        # Import settings and ensure directories exist after env vars are set
+        from stonks_overwatch.settings import ensure_data_directories
+
+        ensure_data_directories()
+
         django.setup(set_prefix=False)
 
         self.logger.debug(f"STONKS_OVERWATCH_DATA_DIR= {os.environ['STONKS_OVERWATCH_DATA_DIR']}")

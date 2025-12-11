@@ -23,22 +23,33 @@ PROJECT_PATH = BASE_DIR.parent.parent
 DEFAULT_DATA_DIR = os.path.join(PROJECT_PATH, "data")
 # Define the data directory
 STONKS_OVERWATCH_DATA_DIR = os.environ.get("STONKS_OVERWATCH_DATA_DIR", DEFAULT_DATA_DIR)
-# Ensure the directory exists
-if not os.path.exists(STONKS_OVERWATCH_DATA_DIR):
-    os.makedirs(STONKS_OVERWATCH_DATA_DIR)
 
 # Define the cache directory
 DEFAULT_CACHE_DIR = os.path.join(STONKS_OVERWATCH_DATA_DIR, "cache")
 STONKS_OVERWATCH_CACHE_DIR = os.environ.get("STONKS_OVERWATCH_CACHE_DIR", DEFAULT_CACHE_DIR)
-# Ensure the directory exists
-if not os.path.exists(STONKS_OVERWATCH_CACHE_DIR):
-    os.makedirs(STONKS_OVERWATCH_CACHE_DIR)
 
 DEFAULT_LOGS_DIR = os.path.join(STONKS_OVERWATCH_DATA_DIR, "logs")
 STONKS_OVERWATCH_LOGS_DIR = os.environ.get("STONKS_OVERWATCH_LOGS_DIR", DEFAULT_LOGS_DIR)
-# Ensure the directory exists
-if not os.path.exists(STONKS_OVERWATCH_LOGS_DIR):
-    os.makedirs(STONKS_OVERWATCH_LOGS_DIR)
+
+
+def ensure_data_directories():
+    """
+    Ensure all required data directories exist.
+
+    This function is called after environment variables are set (e.g., by the Toga app)
+    to create the necessary directories in platform-appropriate locations.
+    """
+    directories = [
+        STONKS_OVERWATCH_DATA_DIR,
+        STONKS_OVERWATCH_CACHE_DIR,
+        STONKS_OVERWATCH_LOGS_DIR,
+    ]
+
+    for directory in directories:
+        if not os.path.exists(directory):
+            os.makedirs(directory, exist_ok=True)
+
+
 STONKS_OVERWATCH_LOGS_FILENAME = "stonks-overwatch.log"
 
 STONKS_OVERWATCH_SUPPORT_URL = "https://github.com/ctasada/stonks-overwatch/issues"

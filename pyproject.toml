@@ -1,6 +1,6 @@
 [project]
 name = "stonks-overwatch"
-version = "0.2.1.dev0"
+version = "0.2.1.dev1"
 description = "Stonks Overwatch"
 authors = [{name = "Carlos Tasada", email = "carlos.tasada@gmail.com"}]
 license = "MIT"
@@ -225,10 +225,17 @@ requires = [
     "asgiref >= 3.11.0",
 ]
 test_requires = [ ]
-requirement_installer_args = ["--find-links", "./wheels"]
 
 [tool.briefcase.app.stonks-overwatch.macOS]
 universal_build = false
+# Use local wheels directory for macOS builds
+requirement_installer_args = ["--find-links", "./wheels"]
+
+[tool.briefcase.app.stonks-overwatch.linux]
+# Linux app configuration for Debian packages
+# Icon will be automatically placed in /usr/share/icons/hicolor/{size}x{size}/apps/
+# and referenced in the .desktop file
+# Do NOT use local wheels directory for Linux - let pip download platform-specific wheels from PyPI
 
 [tool.briefcase.app.stonks-overwatch.linux.flatpak]
 flatpak_runtime = "org.freedesktop.Platform"
@@ -236,16 +243,30 @@ flatpak_runtime_version = "24.08"
 flatpak_sdk = "org.freedesktop.Sdk"
 
 [tool.briefcase.app.stonks-overwatch.linux.system.debian]
+# Force Ubuntu 24.04 (noble) base image - has stable repositories
+# We'll install Python 3.13 from deadsnakes PPA
+docker_base_image = "ubuntu:24.04"
 system_requires = [
+    "software-properties-common",  # Needed for add-apt-repository
     "build-essential",
     "git",
     "libcairo2-dev",
     "libgirepository-2.0-dev",
     "libpango1.0-dev",
     "pkg-config",
-    "python3-dev",
     "gir1.2-gtk-3.0",
 ]
+# Install Python 3.13 from deadsnakes PPA as part of system_requires
+# This will be executed as root before the user switch
+dockerfile_extra_content = """
+# Install Python 3.13 from deadsnakes PPA (Ubuntu 24.04 has Python 3.12 by default)
+RUN add-apt-repository -y ppa:deadsnakes/ppa && \\
+    apt-get update -y && \\
+    apt-get install --no-install-recommends -y python3.13 python3.13-dev python3.13-venv python3-pip && \\
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 && \\
+    update-alternatives --set python3 /usr/bin/python3.13 && \\
+    python3 --version
+"""
 
 [tool.briefcase.app.stonks-overwatch.linux.system.fedora]
 system_requires = [
@@ -263,6 +284,8 @@ system_requires = [
 
 [tool.briefcase.app.stonks-overwatch.windows]
 use_full_install_path = false
+# Use local wheels directory for Windows builds
+requirement_installer_args = ["--find-links", "./wheels"]
 
 [tool.pip-licenses]
 format = "plain-vertical"

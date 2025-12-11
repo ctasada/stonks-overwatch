@@ -120,9 +120,15 @@ class TestStonksOverwatchApp:
                 with patch.object(type(app_instance), "loop", new_callable=lambda: MagicMock()):
                     app_instance.server_exists = MagicMock()
 
-                    # Mock STATIC_ROOT import
-                    with patch("stonks_overwatch.settings.STATIC_ROOT", "/test/static"):
+                    # Mock STATIC_ROOT import and ensure_data_directories
+                    with (
+                        patch("stonks_overwatch.settings.STATIC_ROOT", "/test/static"),
+                        patch("stonks_overwatch.settings.ensure_data_directories") as mock_ensure_dirs,
+                    ):
                         app_instance.web_server()
+
+                        # Verify ensure_data_directories was called
+                        mock_ensure_dirs.assert_called_once()
 
             # Verify environment variables are set
             assert os.environ["STONKS_OVERWATCH_APP"] == "1"

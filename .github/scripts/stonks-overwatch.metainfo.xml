@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.caribay.stonks_overwatch</id>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Stonks Overwatch</name>
+  <summary>Privacy-first investment portfolio tracker</summary>
+  <description>
+    <p>
+      Stonks Overwatch is an open-source, privacy-first investment portfolio tracker
+      that consolidates data from multiple brokers. All your financial data stays
+      local on your machine—no cloud services, no data sharing.
+    </p>
+    <p>Key features:</p>
+    <ul>
+      <li>Real-time portfolio tracking with automatic updates</li>
+      <li>Multi-broker consolidation for a unified view</li>
+      <li>Performance analytics with historical data</li>
+      <li>Dividend tracking and forecasting</li>
+      <li>Fee analysis across all brokers</li>
+      <li>Asset diversification visualization</li>
+    </ul>
+    <p>
+      Supported brokers include DEGIRO, Bitvavo, and Interactive Brokers (IBKR),
+      with more brokers coming soon.
+    </p>
+  </description>
+  <url type="homepage">https://github.com/ctasada/stonks-overwatch</url>
+  <url type="bugtracker">https://github.com/ctasada/stonks-overwatch/issues</url>
+  <url type="help">https://github.com/ctasada/stonks-overwatch/blob/main/docs/Home.md</url>
+  <launchable type="desktop-id">stonks-overwatch.desktop</launchable>
+  <developer>
+    <name>Carlos Tasada</name>
+  </developer>
+  <categories>
+    <category>Finance</category>
+    <category>Office</category>
+  </categories>
+  <keywords>
+    <keyword>portfolio</keyword>
+    <keyword>investment</keyword>
+    <keyword>stocks</keyword>
+    <keyword>trading</keyword>
+    <keyword>finance</keyword>
+    <keyword>degiro</keyword>
+    <keyword>bitvavo</keyword>
+    <keyword>ibkr</keyword>
+  </keywords>
+  <screenshots>
+    <!-- Screenshots placeholder - uncomment and update URLs when screenshots are available -->
+    <screenshot type="default">
+      <image>https://github.com/ctasada/stonks-overwatch/raw/main/docs/images/dashboard.png</image>
+      <caption>Dashboard view showing portfolio overview</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/ctasada/stonks-overwatch/raw/main/docs/images/portfolio.png</image>
+      <caption>Portfolio view with detailed holdings</caption>
+    </screenshot>
+  </screenshots>
+  <releases>
+    <!-- Release information will be populated during build -->
+  </releases>
+  <content_rating type="oars-1.1"/>
+  <provides>
+    <binary>stonks-overwatch</binary>
+  </provides>
+</component>

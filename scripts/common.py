@@ -25,7 +25,8 @@ def setup_django_environment():
     1. Adding the src directory to Python path
     2. Setting Django settings module
     3. Initializing Django
-    4. Setting up broker registry
+    4. Ensuring data directories exist
+    5. Setting up broker registry
 
     Returns:
         None
@@ -39,6 +40,14 @@ def setup_django_environment():
     import django
 
     django.setup()
+
+    # Ensure data directories exist after Django is set up
+    try:
+        from stonks_overwatch.settings import ensure_data_directories
+
+        ensure_data_directories()
+    except Exception as e:
+        logging.warning(f"Failed to ensure data directories: {e}")
 
     # Initialize broker registry for standalone script usage
     try:

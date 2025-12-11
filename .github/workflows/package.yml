@@ -71,12 +71,12 @@ jobs:
 
       - name: Prepare Build Environment
         run: |
-          # Make briefcase wrapper executable
-          chmod +x .github/scripts/briefcase-wrapper.py
+          # Make scripts executable
+          chmod +x .github/scripts/*.sh .github/scripts/*.py
 
-          # Clean any previous system format builds to force template regeneration
+          # Clean any previous builds to force template regeneration
           # Use || true to ignore errors (directories may be bind-mounted or have permission issues)
-          rm -rf build/stonks-overwatch/ubuntu build/stonks-overwatch/fedora || true
+          rm -rf build/stonks-overwatch/ubuntu build/stonks-overwatch/fedora build/stonks-overwatch/linux/flatpak || true
 
           # Create build directory
           mkdir -p build
@@ -143,134 +143,12 @@ jobs:
       - name: Build .deb package manually
         if: ${{ matrix.target == 'deb' }}
         run: |
-          # Install dpkg-deb if not present
-          sudo apt-get update -qq && sudo apt-get install -y dpkg-dev > /dev/null 2>&1
-
-          # Extract version from pyproject.toml
-          VERSION=$(toml get --toml-path pyproject.toml project.version | tr -d '"')
-
-          # Find the actual build directory (limit output)
-          BUILD_BASE=$(find build/stonks-overwatch -type d -path "*/ubuntu/*/stonks-overwatch-*" -print -quit 2>/dev/null)
-
-          if [ -z "$BUILD_BASE" ]; then
-            echo "Error: Could not find build directory"
-            exit 1
-          fi
-
-          echo "Using build directory: $BUILD_BASE"
-          echo "Using version: $VERSION"
-
-          # Create DEBIAN control directory
-          mkdir -p "$BUILD_BASE/DEBIAN"
-
-          # Detect architecture
-          ARCH=$(uname -m)
-          case $ARCH in
-            aarch64|arm64) DEB_ARCH="arm64" ;;
-            x86_64|amd64) DEB_ARCH="amd64" ;;
-            *) DEB_ARCH="$ARCH" ;;
-          esac
-
-          # Create control file with dynamic version
-          cat > "$BUILD_BASE/DEBIAN/control" << 'CONTROL_EOF'
-          Package: stonks-overwatch
-          Version: VERSION_PLACEHOLDER
-          Section: utils
-          Priority: optional
-          Architecture: ARCH_PLACEHOLDER
-          Maintainer: Carlos Tasada <ctasada@gmail.com>
-          Description: Privacy-first investment portfolio tracker
-           Stonks Overwatch is an open-source, privacy-first investment portfolio
-           tracker that consolidates data from multiple brokers.
-          CONTROL_EOF
-
-          # Replace placeholders
-          sed -i "s/VERSION_PLACEHOLDER/$VERSION/" "$BUILD_BASE/DEBIAN/control"
-          sed -i "s/ARCH_PLACEHOLDER/$DEB_ARCH/" "$BUILD_BASE/DEBIAN/control"
-
-          # Build the .deb package
-          mkdir -p dist
-          PACKAGE_NAME="stonks-overwatch_${VERSION}_${DEB_ARCH}.deb"
-          dpkg-deb --build "$BUILD_BASE" "dist/$PACKAGE_NAME"
-
-          echo "✓ Created: dist/$PACKAGE_NAME"
-          ls -lh "dist/$PACKAGE_NAME"
+          .github/scripts/build-deb.sh
 
       - name: Build .rpm package manually
         if: ${{ matrix.target == 'rpm' }}
         run: |
-          # Install rpm tools if not present
-          sudo apt-get update -qq && sudo apt-get install -y rpm > /dev/null 2>&1
-
-          # Extract version from pyproject.toml
-          VERSION=$(toml get --toml-path pyproject.toml project.version | tr -d '"')
-
-          # Find the actual build directory (limit output)
-          BUILD_BASE=$(find build/stonks-overwatch -type d -path "*/fedora/*/stonks-overwatch-*" -print -quit 2>/dev/null)
-
-          if [ -z "$BUILD_BASE" ]; then
-            echo "Error: Could not find build directory"
-            exit 1
-          fi
-
-          echo "Using build directory: $BUILD_BASE"
-          echo "Using version: $VERSION"
-
-          # Get the absolute path to the build directory
-          BUILD_DIR=$(realpath "$BUILD_BASE")
-
-          # Create RPM build structure
-          mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-
-          # Detect architecture
-          ARCH=$(uname -m)
-          case $ARCH in
-            aarch64) RPM_ARCH="aarch64" ;;
-            x86_64) RPM_ARCH="x86_64" ;;
-            *) RPM_ARCH="$ARCH" ;;
-          esac
-
-          # Create spec file with dynamic version and paths
-          cat > ~/rpmbuild/SPECS/stonks-overwatch.spec << 'SPEC_EOF'
-          Name:           stonks-overwatch
-          Version:        VERSION_PLACEHOLDER
-          Release:        1%{?dist}
-          Summary:        Privacy-first investment portfolio tracker
-          License:        MIT
-          URL:            https://github.com/ctasada/stonks-overwatch
-          BuildArch:      ARCH_PLACEHOLDER
-
-          %description
-          Stonks Overwatch is an open-source, privacy-first investment portfolio
-          tracker that consolidates data from multiple brokers.
-
-          %install
-          mkdir -p %{buildroot}/usr
-          cp -r BUILD_DIR_PLACEHOLDER/usr/* %{buildroot}/usr/
-
-          %files
-          /usr/*
-
-          %changelog
-          * CHANGELOG_DATE_PLACEHOLDER Carlos Tasada <ctasada@gmail.com> - VERSION_PLACEHOLDER-1
-          - Release version VERSION_PLACEHOLDER
-          SPEC_EOF
-
-          # Replace placeholders
-          sed -i "s|VERSION_PLACEHOLDER|$VERSION|g" ~/rpmbuild/SPECS/stonks-overwatch.spec
-          sed -i "s|ARCH_PLACEHOLDER|$RPM_ARCH|" ~/rpmbuild/SPECS/stonks-overwatch.spec
-          sed -i "s|BUILD_DIR_PLACEHOLDER|$BUILD_DIR|" ~/rpmbuild/SPECS/stonks-overwatch.spec
-          sed -i "s|CHANGELOG_DATE_PLACEHOLDER|$(date '+%a %b %d %Y')|" ~/rpmbuild/SPECS/stonks-overwatch.spec
-
-          # Build the RPM
-          mkdir -p dist
-          rpmbuild -bb ~/rpmbuild/SPECS/stonks-overwatch.spec 2>&1 | grep -v "^+"
-
-          # Copy RPM to dist (find it dynamically)
-          find ~/rpmbuild/RPMS -name "*.rpm" -exec cp {} dist/ \; 2>/dev/null
-
-          echo "✓ Created RPM packages:"
-          ls -lh dist/*.rpm
+          .github/scripts/build-rpm.sh
 
       - name: Upload App
         if: ${{ !env.ACT }}
