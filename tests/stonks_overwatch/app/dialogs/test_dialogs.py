@@ -355,16 +355,13 @@ class TestDialogManager:
     async def test_all_dialog_instances_are_class_variables(self, dialog_manager):
         """Test that dialog instances are stored as class variables for singleton behavior."""
         # Reset all dialog instances
-        DialogManager._expired_dialog_instance = None
         DialogManager._preferences_dialog_instance = None
         DialogManager._check_for_updates_dialog_instance = None
 
         # Verify all dialog instance variables exist as class variables
-        assert hasattr(DialogManager, "_expired_dialog_instance")
         assert hasattr(DialogManager, "_preferences_dialog_instance")
         assert hasattr(DialogManager, "_check_for_updates_dialog_instance")
 
         # Verify they start as None
-        assert DialogManager._expired_dialog_instance is None
         assert DialogManager._preferences_dialog_instance is None
         assert DialogManager._check_for_updates_dialog_instance is None

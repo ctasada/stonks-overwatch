@@ -14,6 +14,9 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 ### Fixed
 
+- **Native Application:**
+    - Application Settings were not being shown correctly in some cases
+
 ### Security
 
 ---
