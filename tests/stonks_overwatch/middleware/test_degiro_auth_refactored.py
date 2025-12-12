@@ -214,6 +214,6 @@ class TestDeGiroAuthMiddlewareRefactored(TestCase):
     def test_is_public_url_method(self):
         """Test _is_public_url method correctly identifies public URLs."""
         assert self.middleware._is_public_url("login") is True
-        assert self.middleware._is_public_url("expired") is True
+        assert self.middleware._is_public_url("settings") is True
         assert self.middleware._is_public_url("dashboard") is False
         assert self.middleware._is_public_url(None) is False
