@@ -46,13 +46,18 @@ class Login(View):
 
     def get(self, request: HttpRequest) -> HttpResponse:
         # Use AuthenticationService to check TOTP requirement, in-app auth requirement, and authentication status
-        show_otp = self.auth_service.session_manager.is_totp_required(request)
-        show_in_app_auth = self.auth_service.session_manager.is_in_app_auth_required(request)
+        show_otp = False
+        show_in_app_auth = False
         show_loading = False
 
+        # If user is already authenticated, show loading screen and skip TOTP/in-app auth checks
         if self.auth_service.is_user_authenticated(request):
             self.logger.info(LogMessages.USER_ALREADY_AUTHENTICATED)
             show_loading = True
+        else:
+            # Only check for TOTP/in-app auth requirements if user is not authenticated
+            show_otp = self.auth_service.session_manager.is_totp_required(request)
+            show_in_app_auth = self.auth_service.session_manager.is_in_app_auth_required(request)
 
         return self._render_login_template(request, show_otp, show_loading, show_in_app_auth)
 

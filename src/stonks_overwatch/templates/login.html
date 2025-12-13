@@ -103,8 +103,10 @@
                     <input type="hidden" name="update_portfolio" id="update_portfolio" value="true">
                     <script>
                         $(document).ready(function() {
-                            <!-- In this scenario we want to submit the form automatically -->
-                            document.getElementById("login-form").submit();
+                            // Small delay to ensure loading screen is visible before form submission
+                            setTimeout(function() {
+                                document.getElementById("login-form").submit();
+                            }, 100);
                         });
                     </script>
                 {% else %}
