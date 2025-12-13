@@ -14,6 +14,8 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 ### Fixed
 
+- **Login:**
+    - Fixed race condition in the login screen. After introducing the credentials, the "2FA" screen could stay stuck or the "Loading" screen may not be shown
 - **Native Application:**
     - Application Settings were not being shown correctly in some cases
 
