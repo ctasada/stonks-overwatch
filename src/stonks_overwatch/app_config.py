@@ -7,11 +7,14 @@ from stonks_overwatch.utils.core.logger import StonksLogger
 
 
 class StonksOverwatchConfig(AppConfig):
-    logger = StonksLogger.get_logger("stonks_overwatch.config", "[MAIN]")
     default_auto_field = "django.db.models.BigAutoField"
     name = "stonks_overwatch"
 
     def ready(self):
+        # Create logger in ready() method, not as class variable,
+        # to ensure environment variables are set before logger initialization
+        self.logger = StonksLogger.get_logger("stonks_overwatch.config", "[BASE_CONFIG]")
+
         # Guarantee that the Jobs are initialized only once
         if os.environ.get("RUN_MAIN") or os.environ.get("STONKS_OVERWATCH_APP"):
             self.logger.info("Stonks Overwatch ready - RUN MAIN")

@@ -389,4 +389,3 @@ _check-node:
 
 _check-act:
 	@command -v act >/dev/null 2>&1 || (echo -e "$(RED)Error: 'act' not found. Install 'nektos/act' to run workflows locally: https://github.com/nektos/act$(RESET)" && exit 1)
-

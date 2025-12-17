@@ -16,6 +16,16 @@ def main():
             "available on your PYTHONPATH environment variable? Did you "
             "forget to activate a virtual environment?"
         ) from exc
+
+    # Ensure data directories exist before running Django commands
+    try:
+        from stonks_overwatch.settings import ensure_data_directories
+
+        ensure_data_directories()
+    except Exception:
+        # If this fails, let Django handle the error
+        pass
+
     execute_from_command_line(sys.argv)
 
 

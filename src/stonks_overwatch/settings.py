@@ -23,22 +23,93 @@ PROJECT_PATH = BASE_DIR.parent.parent
 DEFAULT_DATA_DIR = os.path.join(PROJECT_PATH, "data")
 # Define the data directory
 STONKS_OVERWATCH_DATA_DIR = os.environ.get("STONKS_OVERWATCH_DATA_DIR", DEFAULT_DATA_DIR)
-# Ensure the directory exists
-if not os.path.exists(STONKS_OVERWATCH_DATA_DIR):
-    os.makedirs(STONKS_OVERWATCH_DATA_DIR)
 
 # Define the cache directory
 DEFAULT_CACHE_DIR = os.path.join(STONKS_OVERWATCH_DATA_DIR, "cache")
 STONKS_OVERWATCH_CACHE_DIR = os.environ.get("STONKS_OVERWATCH_CACHE_DIR", DEFAULT_CACHE_DIR)
-# Ensure the directory exists
-if not os.path.exists(STONKS_OVERWATCH_CACHE_DIR):
-    os.makedirs(STONKS_OVERWATCH_CACHE_DIR)
 
 DEFAULT_LOGS_DIR = os.path.join(STONKS_OVERWATCH_DATA_DIR, "logs")
 STONKS_OVERWATCH_LOGS_DIR = os.environ.get("STONKS_OVERWATCH_LOGS_DIR", DEFAULT_LOGS_DIR)
-# Ensure the directory exists
-if not os.path.exists(STONKS_OVERWATCH_LOGS_DIR):
-    os.makedirs(STONKS_OVERWATCH_LOGS_DIR)
+
+
+def ensure_data_directories():
+    """
+    Ensure all required data directories exist.
+
+    This function is called after environment variables are set (e.g., by the Toga app)
+    to create the necessary directories in platform-appropriate locations.
+
+    IMPORTANT: This function reads environment variables directly instead of using
+    module-level constants to ensure it gets the values set by the application,
+    not the defaults computed at module import time.
+
+    Raises:
+        OSError: If directory creation fails (e.g., read-only file system)
+    """
+    import logging
+
+    logger = logging.getLogger("stonks_overwatch.settings")
+
+    # Read environment variables directly to get values set by the app
+    # (not the module-level constants which were evaluated at import time)
+    data_dir = os.environ.get("STONKS_OVERWATCH_DATA_DIR", DEFAULT_DATA_DIR)
+    cache_dir = os.environ.get("STONKS_OVERWATCH_CACHE_DIR", os.path.join(data_dir, "cache"))
+    logs_dir = os.environ.get("STONKS_OVERWATCH_LOGS_DIR", os.path.join(data_dir, "logs"))
+    config_dir = os.environ.get("STONKS_OVERWATCH_CONFIG_DIR", os.path.join(data_dir, "config"))
+
+    directories = [
+        data_dir,
+        cache_dir,
+        logs_dir,
+        config_dir,
+    ]
+
+    logger.info("Ensuring data directories exist...")
+    logger.info(f"Data directory: {data_dir}")
+    logger.info(f"Cache directory: {cache_dir}")
+    logger.info(f"Logs directory: {logs_dir}")
+    logger.info(f"Config directory: {config_dir}")
+
+    for directory in directories:
+        if not os.path.exists(directory):
+            try:
+                logger.info(f"Creating directory: {directory}")
+                os.makedirs(directory, exist_ok=True, mode=0o755)
+                logger.info(f"Successfully created directory: {directory}")
+            except OSError as e:
+                # Check if it's a read-only filesystem error
+                if e.errno == 30:  # EROFS - Read-only file system
+                    logger.error(
+                        f"Failed to create directory '{directory}': Read-only file system. "
+                        "This may occur in Flatpak/container environments. "
+                        "The application should use XDG directories instead."
+                    )
+                    raise OSError(
+                        f"Cannot create directory '{directory}' on read-only file system. "
+                        "For Flatpak builds, ensure environment variables are set to use XDG directories."
+                    ) from e
+
+                # Provide detailed diagnostic information
+                logger.error(f"Failed to create directory '{directory}': {e}")
+                logger.error(
+                    f"STONKS_OVERWATCH_DATA_DIR env var: {os.environ.get('STONKS_OVERWATCH_DATA_DIR', 'NOT SET')}"
+                )
+                logger.error(f"Current working directory: {os.getcwd()}")
+                logger.error(f"__file__ path: {__file__}")
+                logger.error(f"BASE_DIR: {BASE_DIR}")
+                logger.error(f"PROJECT_PATH: {PROJECT_PATH}")
+
+                raise OSError(
+                    f"Failed to create directory '{directory}': {e}. "
+                    f"This may indicate a read-only file system or insufficient permissions. "
+                    "Environment variable STONKS_OVERWATCH_DATA_DIR: "
+                    f"{os.environ.get('STONKS_OVERWATCH_DATA_DIR', 'NOT SET')}. "
+                    f"Please check that the path is writable."
+                ) from e
+        else:
+            logger.info(f"Directory already exists: {directory}")
+
+
 STONKS_OVERWATCH_LOGS_FILENAME = "stonks-overwatch.log"
 
 STONKS_OVERWATCH_SUPPORT_URL = "https://github.com/ctasada/stonks-overwatch/issues"
@@ -126,13 +197,18 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 # Defines if the application will use the Demo DB or not
 DEMO_MODE = os.getenv("DEMO_MODE", False) in [True, "true", "True", "1"]
 
+# Get database path dynamically from environment to support runtime configuration
+# Read directly from environment instead of using module-level constants
+_db_data_dir = os.environ.get("STONKS_OVERWATCH_DATA_DIR", DEFAULT_DATA_DIR)
+_db_cache_dir = os.environ.get("STONKS_OVERWATCH_CACHE_DIR", os.path.join(_db_data_dir, "cache"))
+
 # Define both databases - production and demo
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": Path(STONKS_OVERWATCH_DATA_DIR).resolve().joinpath("db.sqlite3"),
+        "NAME": Path(_db_data_dir).resolve().joinpath("db.sqlite3"),
         "TEST": {
-            "NAME": Path(STONKS_OVERWATCH_CACHE_DIR).resolve().joinpath("test_db.sqlite3"),
+            "NAME": Path(_db_cache_dir).resolve().joinpath("test_db.sqlite3"),
         },
         "OPTIONS": {
             "timeout": 30,  # Increase timeout for database operations
@@ -147,9 +223,9 @@ DATABASES = {
     },
     "demo": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": Path(STONKS_OVERWATCH_DATA_DIR).resolve().joinpath("demo_db.sqlite3"),
+        "NAME": Path(_db_data_dir).resolve().joinpath("demo_db.sqlite3"),
         "TEST": {
-            "NAME": Path(STONKS_OVERWATCH_CACHE_DIR).resolve().joinpath("test_demo_db.sqlite3"),
+            "NAME": Path(_db_cache_dir).resolve().joinpath("test_demo_db.sqlite3"),
         },
         "OPTIONS": {
             "timeout": 30,
@@ -230,6 +306,56 @@ if DEBUG_MODE:
 STONKS_LOG_FORMATTER = os.getenv("STONKS_LOG_FORMATTER", "verbose")
 # Valid options: "verbose", "simple"
 
+
+# Compute logging filename dynamically to handle environment variable changes
+# Read environment variable directly instead of using module-level constant
+def _get_log_filename():
+    """Get log filename dynamically and ensure log directory exists.
+
+    This function serves two purposes:
+    1. Computes the log file path from environment variables
+    2. Ensures the log directory exists (defensive programming)
+
+    The directory creation is intentional here as a safety measure. Even though
+    the application should create directories during initialization, this provides
+    a fallback for cases where:
+    - Settings are imported before app initialization
+    - The logger is created in an unexpected order
+    - Running in test/development environments
+
+    Returns:
+        str: Full path to the log file
+
+    Note:
+        Uses RotatingFileHandler with delay=True, so the file isn't created
+        until the first log message is written.
+    """
+    import warnings
+
+    # Read from environment to get runtime value, not import-time value
+    logs_dir = os.environ.get("STONKS_OVERWATCH_LOGS_DIR")
+    if not logs_dir:
+        # Fallback: compute from data dir
+        data_dir = os.environ.get("STONKS_OVERWATCH_DATA_DIR", DEFAULT_DATA_DIR)
+        logs_dir = os.path.join(data_dir, "logs")
+
+    # Ensure logs directory exists before returning the filename
+    # This prevents FileNotFoundError when the logger tries to write
+    try:
+        os.makedirs(logs_dir, mode=0o755, exist_ok=True)
+    except OSError as e:
+        # Warn but continue - the logger will fail later with a clearer error
+        warnings.warn(
+            f"Failed to create log directory {logs_dir}: {e}. Logging may fail.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+
+    return os.path.join(logs_dir, STONKS_OVERWATCH_LOGS_FILENAME)
+
+
+_log_filename = _get_log_filename()
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -252,11 +378,12 @@ LOGGING = {
         "file": {
             "level": "DEBUG",
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": os.path.join(STONKS_OVERWATCH_LOGS_DIR, STONKS_OVERWATCH_LOGS_FILENAME),
+            "filename": _log_filename,
             "formatter": STONKS_LOG_FORMATTER,
             "maxBytes": 5 * 1024 * 1024,  # 5MB per file
             "backupCount": 5,  # Keeps the last 5 logs
             "encoding": "utf-8",
+            "delay": True,  # Delay file creation until first write
         },
     },
     "loggers": {

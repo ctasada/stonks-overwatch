@@ -3,6 +3,8 @@ import hashlib
 import os
 import platform
 import shutil
+import sys
+from pathlib import Path
 from threading import Thread
 
 import django
@@ -17,12 +19,47 @@ from stonks_overwatch.app.dialogs.dialogs import DialogManager
 from stonks_overwatch.app.ui.menu import MenuManager
 from stonks_overwatch.app.webserver import StaticFilesMiddleware, ThreadedWSGIServer
 from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.utils.platform_utils import get_flatpak_paths, is_flatpak
 
 
 class StonksOverwatchApp(toga.App):
     def __init__(self, *args, **kwargs):
+        # CRITICAL: Set environment variables BEFORE super().__init__() to ensure
+        # Django's settings.py uses correct paths when it's first imported
+        os.environ["STONKS_OVERWATCH_APP"] = "1"
+        os.environ["DJANGO_SETTINGS_MODULE"] = "stonks_overwatch.settings"
+
+        # Determine platform and get appropriate paths
+        in_flatpak = is_flatpak()
+        paths_to_create = None
+
+        if in_flatpak:
+            # For Flatpak, set paths BEFORE super().__init__() since we don't need self.paths
+            paths_to_create = get_flatpak_paths()
+            self._set_environment_from_paths(paths_to_create)
+
+        # Initialize parent class (this may trigger settings.py import)
         super().__init__(*args, **kwargs)
 
+        # Set version after super().__init__() when self.version is available
+        version = str(self.version) if self.version is not None else "Unknown Version"
+        os.environ["STONKS_OVERWATCH_VERSION"] = version
+
+        # For non-Flatpak, set paths AFTER super().__init__() when self.paths is available
+        if not in_flatpak:
+            paths_to_create = {
+                "data": self.paths.data,
+                "config": self.paths.config,
+                "logs": self.paths.logs,
+                "cache": self.paths.cache,
+            }
+            self._set_environment_from_paths(paths_to_create)
+
+        # Ensure all directories exist (works for both Flatpak and non-Flatpak)
+        self._ensure_directories_exist(paths_to_create)
+
+        # NOW it's safe to create loggers since environment variables are set
+        # and directories exist
         self.logger = StonksLogger.get_logger("stonks_overwatch.app", "[APP]")
 
         self.main_window = None
@@ -39,17 +76,56 @@ class StonksOverwatchApp(toga.App):
         # Track if we've shown the license dialog
         self._license_dialog_shown = False
 
+    def _set_environment_from_paths(self, paths: dict) -> None:
+        """Set environment variables from path dictionary.
+
+        Args:
+            paths: Dictionary mapping path types ('data', 'config', 'logs', 'cache')
+                   to Path objects
+        """
+        env_mapping = {
+            "data": "STONKS_OVERWATCH_DATA_DIR",
+            "config": "STONKS_OVERWATCH_CONFIG_DIR",
+            "logs": "STONKS_OVERWATCH_LOGS_DIR",
+            "cache": "STONKS_OVERWATCH_CACHE_DIR",
+        }
+
+        for key, env_var in env_mapping.items():
+            if key in paths:
+                path_str = paths[key].as_posix() if hasattr(paths[key], "as_posix") else str(paths[key])
+                os.environ[env_var] = path_str
+
+    def _ensure_directories_exist(self, paths: dict) -> None:
+        """Ensure all required directories exist.
+
+        Creates directories with proper permissions and warns if creation fails.
+        The application will continue even if directory creation fails, but may
+        fail later with a clearer error message.
+
+        Args:
+            paths: Dictionary mapping path types to Path objects
+        """
+        import warnings
+
+        for path_type, path in paths.items():
+            try:
+                path.mkdir(parents=True, exist_ok=True)
+            except OSError as e:
+                # Warn but continue - application will fail later with clearer error
+                warning_msg = f"Failed to create {path_type} directory {path}: {e}. Application may fail to start."
+                warnings.warn(warning_msg, RuntimeWarning, stacklevel=2)
+                # Also print to stderr for immediate visibility
+                print(f"WARNING: {warning_msg}", file=sys.stderr)
+
     def web_server(self):
         self.logger.info("Configuring settings...")
-        os.environ["STONKS_OVERWATCH_APP"] = "1"
-        # Convert version to string, handling None case
-        version = str(self.version) if self.version is not None else "Unknown Version"
-        os.environ["STONKS_OVERWATCH_VERSION"] = version
-        os.environ["DJANGO_SETTINGS_MODULE"] = "stonks_overwatch.settings"
-        os.environ["STONKS_OVERWATCH_DATA_DIR"] = self.paths.data.as_posix()
-        os.environ["STONKS_OVERWATCH_CONFIG_DIR"] = self.paths.config.as_posix()
-        os.environ["STONKS_OVERWATCH_LOGS_DIR"] = self.paths.logs.as_posix()
-        os.environ["STONKS_OVERWATCH_CACHE_DIR"] = self.paths.cache.as_posix()
+
+        # Environment variables are already set in __init__
+        # Import settings and ensure directories exist
+        from stonks_overwatch.settings import ensure_data_directories
+
+        ensure_data_directories()
+
         django.setup(set_prefix=False)
 
         self.logger.debug(f"STONKS_OVERWATCH_DATA_DIR= {os.environ['STONKS_OVERWATCH_DATA_DIR']}")
@@ -204,7 +280,6 @@ class StonksOverwatchApp(toga.App):
         self.logger.info("Switching to demo mode...")
 
         # Import async utilities
-        from pathlib import Path
 
         from asgiref.sync import sync_to_async
         from django.core.management import call_command
