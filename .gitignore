@@ -55,6 +55,7 @@ ENV/
 /data/
 
 # Editor/IDE/project files
+.idea/
 *.iml
 .claude/
 

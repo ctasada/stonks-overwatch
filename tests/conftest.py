@@ -14,6 +14,22 @@ from stonks_overwatch.core.interfaces.transaction_service import TransactionServ
 import pytest
 
 
+def ensure_test_directories():
+    """Ensure required directories exist for test database creation."""
+    from pathlib import Path
+
+    # Get the directories from environment variables or use defaults
+    data_dir = os.environ.get("STONKS_OVERWATCH_DATA_DIR", os.path.join(os.getcwd(), "data"))
+    cache_dir = os.environ.get("STONKS_OVERWATCH_CACHE_DIR", os.path.join(data_dir, "cache"))
+    logs_dir = os.environ.get("STONKS_OVERWATCH_LOGS_DIR", os.path.join(data_dir, "logs"))
+    config_dir = os.environ.get("STONKS_OVERWATCH_CONFIG_DIR", os.path.join(data_dir, "config"))
+
+    # Create directories if they don't exist
+    for directory in [data_dir, cache_dir, logs_dir, config_dir]:
+        Path(directory).mkdir(parents=True, exist_ok=True)
+        print(f"Ensured directory exists: {directory}")
+
+
 # Django setup for test environment - must be done before any Django model imports
 def setup_django_for_tests():
     """Properly initialize Django settings for unified architecture tests."""
@@ -42,6 +58,9 @@ def setup_django_for_tests():
         )
         django.setup()
 
+
+# Ensure required directories exist before any test execution
+ensure_test_directories()
 
 # Initialize Django before any imports that might reference Django models
 setup_django_for_tests()
