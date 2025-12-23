@@ -241,6 +241,14 @@ flatpak_finish_args = [
     "--filesystem=xdg-data/stonks-overwatch:create",
     "--filesystem=xdg-config/stonks-overwatch:create",
     "--filesystem=xdg-cache/stonks-overwatch:create",
+    # Display and graphics access
+    "--socket=x11",
+    "--socket=wayland",
+    "--share=ipc",
+    # Hardware acceleration for graphics
+    "--device=dri",
+    # Audio support (fixes canberra-gtk-module warning)
+    "--socket=pulseaudio",
 ]
 
 [tool.briefcase.app.stonks-overwatch.windows]
