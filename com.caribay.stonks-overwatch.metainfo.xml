@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2024-2025 Carlos Tasada -->
+<component type="desktop-application">
+  <id>com.caribay.stonks-overwatch</id>
+
+  <name>Stonks Overwatch</name>
+  <summary>Privacy-first investment portfolio tracker</summary>
+
+  <developer id="com.caribay">
+    <name>Carlos Tasada</name>
+  </developer>
+
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+
+  <description>
+    <p>
+      Stonks Overwatch is an open-source investment dashboard that helps you track and manage your portfolio across multiple brokers.
+      Built with privacy and extensibility in mind, all your data stays local on your machine—no cloud services, no data sharing.
+    </p>
+    <p>Why Stonks Overwatch?</p>
+    <ul>
+      <li>Privacy First: Your financial data never leaves your computer</li>
+      <li>Multi-Broker Support: Unified view across DEGIRO, Bitvavo, IBKR and more to come</li>
+      <li>Real-Time Tracking: Live portfolio values, dividends, and performance metrics</li>
+      <li>Extensible Architecture: Plugin system for adding new brokers</li>
+      <li>Cross-Platform: Available on Windows, macOS, and Linux (native and web versions)</li>
+      <li>100% Free: No subscriptions, no hidden costs, no data selling</li>
+    </ul>
+    <p>Features:</p>
+    <ul>
+      <li>Real-time portfolio tracking with automatic updates</li>
+      <li>Multi-broker consolidation for a unified view</li>
+      <li>Performance analytics with historical data</li>
+      <li>Dividend tracking and forecasting</li>
+      <li>Fee analysis across all brokers</li>
+      <li>Asset diversification visualization</li>
+    </ul>
+  </description>
+
+  <launchable type="desktop-id">com.caribay.stonks-overwatch.desktop</launchable>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>Dashboard view showing portfolio overview and performance metrics</caption>
+      <image>https://raw.githubusercontent.com/ctasada/stonks-overwatch/main/docs/images/dashboard.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Detailed portfolio breakdown with asset allocation and recent transactions</caption>
+      <image>https://raw.githubusercontent.com/ctasada/stonks-overwatch/main/docs/images/portfolio.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Visual representation of asset diversification across different classes</caption>
+      <image>https://raw.githubusercontent.com/ctasada/stonks-overwatch/main/docs/images/diversification.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Dividend tracking and upcoming payments overview</caption>
+      <image>https://raw.githubusercontent.com/ctasada/stonks-overwatch/main/docs/images/dividends.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Calendar view of upcoming dividend payments</caption>
+      <image>https://raw.githubusercontent.com/ctasada/stonks-overwatch/main/docs/images/dividends-2.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Analysis of fees incurred across different brokers</caption>
+      <image>https://raw.githubusercontent.com/ctasada/stonks-overwatch/main/docs/images/fees.png</image>
+    </screenshot>
+  </screenshots>
+
+  <url type="homepage">https://github.com/ctasada/stonks-overwatch</url>
+  <url type="bugtracker">https://github.com/ctasada/stonks-overwatch/issues</url>
+  <url type="help">https://github.com/ctasada/stonks-overwatch/blob/main/docs/Home.md</url>
+  <url type="donation">https://github.com/sponsors/ctasada</url>
+  <url type="vcs-browser">https://github.com/ctasada/stonks-overwatch</url>
+  <url type="contribute">https://github.com/ctasada/stonks-overwatch/blob/main/CONTRIBUTING.md</url>
+
+  <content_rating type="oars-1.1">
+    <content_attribute id="violence-cartoon">none</content_attribute>
+    <content_attribute id="violence-fantasy">none</content_attribute>
+    <content_attribute id="violence-realistic">none</content_attribute>
+    <content_attribute id="violence-bloodshed">none</content_attribute>
+    <content_attribute id="violence-sexual">none</content_attribute>
+    <content_attribute id="violence-desecration">none</content_attribute>
+    <content_attribute id="violence-slavery">none</content_attribute>
+    <content_attribute id="violence-worship">none</content_attribute>
+    <content_attribute id="drugs-alcohol">none</content_attribute>
+    <content_attribute id="drugs-narcotics">none</content_attribute>
+    <content_attribute id="drugs-tobacco">none</content_attribute>
+    <content_attribute id="sex-nudity">none</content_attribute>
+    <content_attribute id="sex-themes">none</content_attribute>
+    <content_attribute id="sex-homosexuality">none</content_attribute>
+    <content_attribute id="sex-prostitution">none</content_attribute>
+    <content_attribute id="sex-adultery">none</content_attribute>
+    <content_attribute id="sex-appearance">none</content_attribute>
+    <content_attribute id="language-profanity">none</content_attribute>
+    <content_attribute id="language-humor">none</content_attribute>
+    <content_attribute id="language-discrimination">none</content_attribute>
+    <content_attribute id="social-chat">none</content_attribute>
+    <content_attribute id="social-info">none</content_attribute>
+    <content_attribute id="social-audio">none</content_attribute>
+    <content_attribute id="social-location">none</content_attribute>
+    <content_attribute id="social-contacts">none</content_attribute>
+    <content_attribute id="money-purchasing">none</content_attribute>
+    <content_attribute id="money-gambling">none</content_attribute>
+  </content_rating>
+
+  <categories>
+    <category>Office</category>
+    <category>Finance</category>
+  </categories>
+
+  <keywords>
+    <keyword>portfolio</keyword>
+    <keyword>stocks</keyword>
+    <keyword>investment</keyword>
+    <keyword>finance</keyword>
+    <keyword>trading</keyword>
+    <keyword>degiro</keyword>
+    <keyword>bitvavo</keyword>
+    <keyword>ibkr</keyword>
+    <keyword>broker</keyword>
+    <keyword>crypto</keyword>
+  </keywords>
+
+  <releases>
+    <release version="0.2.1" date="2025-12-23">
+      <description>
+        <p>Development release with improved Flatpak packaging.</p>
+      </description>
+    </release>
+  </releases>
+
+  <provides>
+    <binary>stonks-overwatch</binary>
+  </provides>
+
+  <requires>
+    <display_length compare="ge">768</display_length>
+  </requires>
+
+  <recommends>
+    <control>pointing</control>
+    <control>keyboard</control>
+  </recommends>
+
+  <supports>
+    <control>touch</control>
+  </supports>
+</component>

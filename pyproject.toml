@@ -200,16 +200,24 @@ author_email = "ctasada@gmail.com"
 
 [tool.briefcase.app.stonks-overwatch]
 formal_name = "Stonks Overwatch"
-description = "Stocks Porfolio Tracker"
-long_description = """Stonks Overwatch is a new Stocks Dashboard.
+description = "Privacy-first investment portfolio tracker"
+long_description = """Stonks Overwatch is an open-source investment dashboard that helps you track and manage your portfolio across multiple brokers. Built with privacy and extensibility in mind, all your data stays local on your machine—no cloud services, no data sharing.
 
-Why do we need yet another dashboard? I have been a DeGiro user for many years, and the more active I was,
-the more frustrated I became with the lack of any decent dashboard to overview my investments.
+Why Stonks Overwatch?
+• Privacy First: Your financial data never leaves your computer
+• Multi-Broker Support: Unified view across DEGIRO, Bitvavo, IBKR and more
+• Real-Time Tracking: Live portfolio values, dividends, and performance metrics
+• Extensible Architecture: Plugin system for adding new brokers
+• Cross-Platform: Available on Windows, macOS, and Linux
+• 100% Free: No subscriptions, no hidden costs, no data selling
 
-After trying different options (I will omit names), I couldn't find any that was really covering my needs, or
-that I could trust.
-
-Stonks Overwatch runs locally and doesn't share your data with anyone. Your data is yours
+Features:
+• Real-time portfolio tracking with automatic updates
+• Multi-broker consolidation for a unified view
+• Performance analytics with historical data
+• Dividend tracking and forecasting
+• Fee analysis across all brokers
+• Asset diversification visualization
 """
 icon = "src/icons/stonks_overwatch"
 sources = [
