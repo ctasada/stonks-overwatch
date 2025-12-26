@@ -6,11 +6,7 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 ---
 
-## [Unreleased]
-
-### Added
-
-### Changed
+## [0.2.1] - 2025-12-26
 
 ### Fixed
 
