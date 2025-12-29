@@ -20,7 +20,13 @@ import pytest
 
 
 def test_portfolio_ids():
-    assert PortfolioId.values() == [PortfolioId.ALL, PortfolioId.DEGIRO, PortfolioId.BITVAVO, PortfolioId.IBKR]
+    assert PortfolioId.values() == [
+        PortfolioId.ALL,
+        PortfolioId.DEGIRO,
+        PortfolioId.BITVAVO,
+        PortfolioId.IBKR,
+        PortfolioId.METATRADER4,
+    ]
 
     for portfolio_id in PortfolioId.values():
         assert PortfolioId.from_id(portfolio_id.id) == portfolio_id
@@ -39,6 +45,7 @@ def test_portfolio_id_broker_name_property():
     assert PortfolioId.DEGIRO.broker_name == BrokerName.DEGIRO
     assert PortfolioId.BITVAVO.broker_name == BrokerName.BITVAVO
     assert PortfolioId.IBKR.broker_name == BrokerName.IBKR
+    assert PortfolioId.METATRADER4.broker_name == BrokerName.METATRADER4
 
     # ALL should return None
     assert PortfolioId.ALL.broker_name is None
@@ -49,6 +56,7 @@ def test_portfolio_id_from_broker_name():
     assert PortfolioId.from_broker_name(BrokerName.DEGIRO) == PortfolioId.DEGIRO
     assert PortfolioId.from_broker_name(BrokerName.BITVAVO) == PortfolioId.BITVAVO
     assert PortfolioId.from_broker_name(BrokerName.IBKR) == PortfolioId.IBKR
+    assert PortfolioId.from_broker_name(BrokerName.METATRADER4) == PortfolioId.METATRADER4
 
 
 def test_portfolio_id_get_broker_portfolios():
@@ -62,9 +70,10 @@ def test_portfolio_id_get_broker_portfolios():
     assert PortfolioId.DEGIRO in broker_portfolios
     assert PortfolioId.BITVAVO in broker_portfolios
     assert PortfolioId.IBKR in broker_portfolios
+    assert PortfolioId.METATRADER4 in broker_portfolios
 
     # Should have exactly 3 broker portfolios
-    assert len(broker_portfolios) == 3
+    assert len(broker_portfolios) == 4
 
 
 def test_portfolio_id_uses_broker_name_values():
@@ -73,6 +82,7 @@ def test_portfolio_id_uses_broker_name_values():
     assert PortfolioId.DEGIRO.id == BrokerName.DEGIRO.value
     assert PortfolioId.BITVAVO.id == BrokerName.BITVAVO.value
     assert PortfolioId.IBKR.id == BrokerName.IBKR.value
+    assert PortfolioId.METATRADER4.id == BrokerName.METATRADER4.value
 
 
 def test_default_account_overview():

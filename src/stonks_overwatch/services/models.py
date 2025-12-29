@@ -395,6 +395,7 @@ class PortfolioId(Enum):
     DEGIRO = (BrokerName.DEGIRO, "/static/logos/degiro.svg", True)
     BITVAVO = (BrokerName.BITVAVO, "/static/logos/bitvavo.svg", False)
     IBKR = (BrokerName.IBKR, "/static/logos/ibkr.svg", False)
+    METATRADER4 = (BrokerName.METATRADER4, "/static/logos/metatrader4.svg", False)
 
     def __init__(self, broker: Optional[BrokerName], logo: str, stable: bool = True):
         """

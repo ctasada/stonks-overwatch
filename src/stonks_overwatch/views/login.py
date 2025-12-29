@@ -71,6 +71,11 @@ class Login(View):
             use_factory=True,
             handles_totp=False,
         ),
+        BrokerName.METATRADER4: BrokerAuthStrategy(
+            broker_name=BrokerName.METATRADER4,
+            use_factory=True,
+            handles_totp=False,
+        ),
     }
 
     def __init__(self, **kwargs):
@@ -195,6 +200,7 @@ class Login(View):
             BrokerName.DEGIRO: "European online broker with low fees",
             BrokerName.BITVAVO: "Dutch cryptocurrency exchange platform",
             BrokerName.IBKR: "Global investment platform with advanced tools",
+            BrokerName.METATRADER4: "Popular forex and CFD trading platform",
         }
         return descriptions.get(broker_name, "Investment platform")
 

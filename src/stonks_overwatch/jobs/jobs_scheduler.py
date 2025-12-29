@@ -7,6 +7,9 @@ from stonks_overwatch.core.exceptions import CredentialsException
 from stonks_overwatch.services.brokers.bitvavo.services.update_service import UpdateService as BitvavoUpdateService
 from stonks_overwatch.services.brokers.degiro.services.update_service import UpdateService as DegiroUpdateService
 from stonks_overwatch.services.brokers.ibkr.services.update_service import UpdateService as IbkrUpdateService
+from stonks_overwatch.services.brokers.metatrader4.services.update_service import (
+    UpdateService as MetaTrader4UpdateService,
+)
 from stonks_overwatch.settings import DEBUG_MODE, STONKS_OVERWATCH_START_DATE
 from stonks_overwatch.utils.core.logger import StonksLogger
 
@@ -47,6 +50,14 @@ class JobsScheduler:
             "service_attr": "ibkr_service",
             "connection_check": "get_client",
             "connection_method": None,  # Handled during initialization
+        },
+        BrokerName.METATRADER4.value: {
+            "job_id": "update_metatrader4_portfolio",
+            "check_offline": True,
+            "update_service_class": MetaTrader4UpdateService,
+            "service_attr": "mt4_service",
+            "connection_check": "get_client",
+            "connection_method": None,  # FTP connection handled during update
         },
     }
 

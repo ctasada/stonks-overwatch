@@ -1,0 +1,75 @@
+{% extends 'login/base_broker_login.html' %}
+{% load static %}
+
+{% block page_title %}MetaTrader 4 Login{% endblock %}
+
+{% block broker_logo %}
+<img src="{% static 'logos/metatrader4.svg' %}" alt="MetaTrader 4" width="32" height="32" class="mb-2"
+    onerror="this.style.display='none';">
+{% endblock %}
+
+{% block page_header %}
+{% if show_loading %}
+<h4 class="mb-0">Loading...</h4>
+<small class="text-muted">MetaTrader 4</small>
+{% else %}
+<h4 class="mb-0">Login</h4>
+<small class="text-muted">MetaTrader 4</small>
+{% endif %}
+{% endblock %}
+
+{% block form_content %}
+{% if show_loading %}
+{% include 'components/loading_state.html' %}
+{% else %}
+<!-- Login Form -->
+<div class="form-group mb-3">
+    <label for="ftp_server" class="form-label">FTP Server</label>
+    <input type="text" class="form-control" id="ftp_server" name="ftp_server" placeholder="ftp.example.com"
+        value="{{ form_data.ftp_server.0|default:'' }}" required autofocus>
+</div>
+
+<div class="form-group mb-3">
+    <label for="username" class="form-label">Username</label>
+    <input type="text" class="form-control" id="username" name="username" placeholder="Enter your FTP username"
+        value="{{ form_data.username.0|default:'' }}" required>
+</div>
+
+{% include 'components/password_field.html' with field_id='password' field_name='password' label='Password' placeholder='Enter your FTP password' required=True %}
+
+<div class="form-group mb-3">
+    <label for="path" class="form-label">Path</label>
+    <input type="text" class="form-control" id="path" name="path" placeholder="/MT4/statement.htm"
+        value="{{ form_data.path.0|default:'' }}" required>
+    <small class="form-text text-muted">
+        <i class="bi bi-info-circle"></i>
+        Path to the reports directory or file on the FTP server (e.g., /MT4/statement.htm)
+    </small>
+</div>
+
+<div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" id="remember_me" name="remember_me" value="true" checked>
+    <label class="form-check-label" for="remember_me">
+        Remember me
+    </label>
+</div>
+
+<button type="submit" class="btn btn-primary w-100">Login</button>
+
+<div class="mt-3">
+    <small class="text-muted">
+        <i class="bi bi-info-circle me-1"></i>
+        Configure your MT4 platform to export reports to an FTP server.
+        <a href="https://www.metatrader4.com/en/trading-platform/help/service/ftp" target="_blank" class="text-decoration-none">
+            Learn more <i class="bi bi-box-arrow-up-right"></i>
+        </a>
+    </small>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if show_loading %}
+<script src="{% static 'js/auto_submit.js' %}"></script>
+{% endif %}
+{% endblock %}
