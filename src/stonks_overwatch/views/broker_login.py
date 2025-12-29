@@ -36,6 +36,7 @@ class BrokerLogin(View):
             BrokerName.DEGIRO: "login/degiro_login.html",
             BrokerName.BITVAVO: "login/bitvavo_login.html",
             BrokerName.IBKR: "login/ibkr_login.html",
+            BrokerName.METATRADER4: "login/metatrader4_login.html",
         }
         return template_mapping.get(broker_name, "login/degiro_login.html")
 
@@ -186,6 +187,16 @@ class BrokerLogin(View):
                 "supports_remember_me": True,
                 "auth_type": "oauth",  # Indicate this uses OAuth instead of username/password
             }
+        elif broker_name == BrokerName.METATRADER4:
+            return {
+                "ftp_server_label": "FTP Server",
+                "username_label": "Username",
+                "password_label": "Password",
+                "path_label": "Path",
+                "supports_2fa": False,
+                "supports_remember_me": True,
+                "auth_type": "ftp",  # Indicate this uses FTP credentials
+            }
         else:
             return {
                 "username_label": "Username",
@@ -264,6 +275,8 @@ class BrokerLogin(View):
             return self._extract_bitvavo_credentials(request)
         elif broker_name == BrokerName.IBKR:
             return self._extract_ibkr_credentials(request)
+        elif broker_name == BrokerName.METATRADER4:
+            return self._extract_metatrader4_credentials(request)
         return None
 
     def _extract_degiro_credentials(self, request: HttpRequest) -> Optional[dict]:
@@ -332,6 +345,24 @@ class BrokerLogin(View):
             }
         return None
 
+    def _extract_metatrader4_credentials(self, request: HttpRequest) -> Optional[dict]:
+        """Extract MetaTrader 4 FTP credentials from request."""
+        ftp_server = request.POST.get("ftp_server")
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        path = request.POST.get("path")
+        remember_me = request.POST.get("remember_me") == "true"
+
+        if ftp_server and username and password and path:
+            return {
+                "ftp_server": ftp_server,
+                "username": username,
+                "password": password,
+                "path": path,
+                "remember_me": remember_me,
+            }
+        return None
+
     def _perform_authentication(self, request: HttpRequest, broker_name: BrokerName, credentials: dict) -> dict:
         """Perform authentication for the specified broker."""
         try:
@@ -341,6 +372,8 @@ class BrokerLogin(View):
                 return self._authenticate_bitvavo(request, credentials)
             elif broker_name == BrokerName.IBKR:
                 return self._authenticate_ibkr(request, credentials)
+            elif broker_name == BrokerName.METATRADER4:
+                return self._authenticate_metatrader4(request, credentials)
             else:
                 return {"success": False, "message": f"Authentication not implemented for {broker_name}"}
         except Exception as e:
@@ -460,6 +493,34 @@ class BrokerLogin(View):
             self.logger.error(f"IBKR authentication error: {str(e)}")
             return {"success": False, "message": "Authentication failed"}
 
+    def _authenticate_metatrader4(self, request: HttpRequest, credentials: dict) -> dict:
+        """Authenticate with MetaTrader 4 (validate FTP credentials)."""
+        try:
+            # Create MetaTrader 4 authentication service using factory
+            auth_service = self.factory.create_authentication_service(BrokerName.METATRADER4)
+            if not auth_service:
+                return {"success": False, "message": "MetaTrader 4 authentication service not available"}
+
+            # Authenticate using the service
+            result = auth_service.authenticate_user(
+                request=request,
+                ftp_server=credentials["ftp_server"],
+                username=credentials["username"],
+                password=credentials["password"],
+                path=credentials["path"],
+                remember_me=credentials.get("remember_me", False),
+            )
+
+            if result["success"]:
+                request.session[SessionKeys.get_authenticated_key(BrokerName.METATRADER4)] = True
+                return {"success": True, "message": "Authentication successful"}
+            else:
+                return {"success": False, "message": result["message"]}
+
+        except Exception as e:
+            self.logger.error(f"MetaTrader 4 authentication error: {str(e)}")
+            return {"success": False, "message": "Authentication failed"}
+
     def _handle_in_app_authentication(self, request: HttpRequest, broker_name: BrokerName) -> HttpResponse:
         """Handle in-app authentication for supported brokers."""
         if broker_name == BrokerName.DEGIRO:
@@ -482,4 +543,4 @@ class BrokerLogin(View):
         else:
             messages.error(request, f"In-app authentication not supported for {broker_name}")
 
-        return self.get(request, broker_name)
+        return self.get(request, broker_name.value)

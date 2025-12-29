@@ -84,12 +84,14 @@ class Dashboard(View):
         if start_date:
             portfolio_value = self.__filter_dashboard_values(portfolio_value, start_date)
             cash_contributions = self.__filter_dashboard_values(cash_contributions, start_date)
-        elif portfolio_value:
-            start_date = portfolio_value[0]["x"]
         else:
-            # Handle empty portfolio data gracefully
-            self.logger.warning("No portfolio data available for dashboard")
-            start_date = timezone.now().strftime("%Y-%m-%d")
+            # Safety check: ensure portfolio_value has at least one entry
+            if portfolio_value and len(portfolio_value) > 0:
+                start_date = portfolio_value[0]["x"]
+            else:
+                # Handle empty portfolio data gracefully
+                self.logger.warning("No portfolio data available for dashboard")
+                start_date = timezone.now().date().strftime("%Y-%m-%d")
 
         performance_twr = self._calculate_portfolio_performance(selected_portfolio, portfolio_value, start_date)
         return {

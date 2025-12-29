@@ -64,6 +64,12 @@
                         <span>IBKR</span>
                     </div>
                     {% endif %}
+                    {% if mt4_config %}
+                        <div class="broker-item" data-broker="metatrader4" onclick="selectBroker('metatrader4')">
+                            <img src="{% static 'brokers/metatrader4.png' %}" alt="MetaTrader 4">
+                            <span>MetaTrader 4</span>
+                        </div>
+                    {% endif %}
                     {% endif %}
                 </div>
 
@@ -85,6 +91,11 @@
                     <!-- IBKR Section -->
                     {% if ibkr_config %}
                     {% include 'components/brokers/ibkr_settings.html' %}
+                    {% endif %}
+
+                    <!-- MetaTrader 4 Section -->
+                    {% if mt4_config %}
+                    {% include 'components/brokers/metatrader4_settings.html' %}
                     {% endif %}
                 </div>
             </div>
@@ -543,8 +554,29 @@
                 };
                 payload.update_frequency = parseInt(updateFreqEl.value);
 
-                console.log('IBKR Debug - Final payload:', payload);
+            console.log('IBKR Debug - Final payload:', payload);
+        } else if (brokerName === 'metatrader4') {
+            const enabledEl = document.getElementById('metatrader4-enabled');
+            const ftpServerEl = document.getElementById('metatrader4-ftp-server');
+            const usernameEl = document.getElementById('metatrader4-username');
+            const passwordEl = document.getElementById('metatrader4-password');
+            const pathEl = document.getElementById('metatrader4-path');
+            const updateFreqEl = document.getElementById('metatrader4-update-frequency');
+
+            if (!enabledEl || !ftpServerEl || !usernameEl || !passwordEl || !pathEl || !updateFreqEl) {
+                showToast('MetaTrader 4 settings are not available', 'error');
+                return JSON.stringify({ success: false, message: 'MetaTrader 4 configuration elements not found' });
             }
+
+            payload.enabled = enabledEl.checked;
+            payload.credentials = {
+                ftp_server: ftpServerEl.value,
+                username: usernameEl.value,
+                password: passwordEl.value,
+                path: pathEl.value
+            };
+            payload.update_frequency = parseInt(updateFreqEl.value);
+        }
 
             try {
                 console.log('About to send payload to server:', JSON.stringify(payload, null, 2));

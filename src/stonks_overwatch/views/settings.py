@@ -50,6 +50,7 @@ class SettingsView(View):
         degiro_config = self.repository.get_broker_by_name(BrokerName.DEGIRO.value)
         bitvavo_config = self.repository.get_broker_by_name(BrokerName.BITVAVO.value)
         ibkr_config = self.repository.get_broker_by_name(BrokerName.IBKR.value)
+        mt4_config = self.repository.get_broker_by_name(BrokerName.METATRADER4)
 
         logo_provider_config = config.get_setting("integration_logo_provider", {})
         if not isinstance(logo_provider_config, dict):
@@ -61,6 +62,7 @@ class SettingsView(View):
             "degiro_config": degiro_config,
             "bitvavo_config": bitvavo_config,
             "ibkr_config": ibkr_config,
+            "mt4_config": mt4_config,
             "logo_provider_config": logo_provider_config,
             "is_standalone": not is_ajax_request,  # Wrap in HTML structure for non-AJAX requests
             "APPEARANCE": config.appearance,

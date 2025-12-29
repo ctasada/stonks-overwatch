@@ -435,6 +435,7 @@ class BrokerFactory:
                     BrokerName.DEGIRO: "stonks_overwatch.config.degiro.DegiroCredentials",
                     BrokerName.BITVAVO: "stonks_overwatch.config.bitvavo.BitvavoCredentials",
                     BrokerName.IBKR: "stonks_overwatch.config.ibkr.IbkrCredentials",
+                    BrokerName.METATRADER4: "stonks_overwatch.config.metatrader4.Metatrader4Credentials",
                 }
 
                 credential_class_path = credential_classes.get(broker_name)

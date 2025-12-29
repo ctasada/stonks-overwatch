@@ -955,6 +955,27 @@
                     signature_key: signatureKeyEl.value || null
                 };
                 payload.update_frequency = parseInt(updateFreqEl.value);
+            } else if (brokerName === 'metatrader4') {
+                const enabledEl = document.getElementById('metatrader4-enabled');
+                const ftpServerEl = document.getElementById('metatrader4-ftp-server');
+                const usernameEl = document.getElementById('metatrader4-username');
+                const passwordEl = document.getElementById('metatrader4-password');
+                const pathEl = document.getElementById('metatrader4-path');
+                const updateFreqEl = document.getElementById('metatrader4-update-frequency');
+
+                if (!enabledEl || !ftpServerEl || !usernameEl || !passwordEl || !pathEl || !updateFreqEl) {
+                    BootstrapAlertHelper.error('<strong>Error:</strong> MetaTrader 4 configuration elements not found');
+                    return JSON.stringify({ success: false, message: 'MetaTrader 4 configuration elements not found' });
+                }
+
+                payload.enabled = enabledEl.checked;
+                payload.credentials = {
+                    ftp_server: ftpServerEl.value,
+                    username: usernameEl.value,
+                    password: passwordEl.value,
+                    path: pathEl.value
+                };
+                payload.update_frequency = parseInt(updateFreqEl.value);
             }
 
             try {

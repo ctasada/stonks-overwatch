@@ -23,6 +23,7 @@ except Exception as e:
 from stonks_overwatch.config.bitvavo import BitvavoConfig
 from stonks_overwatch.config.degiro import DegiroConfig
 from stonks_overwatch.config.ibkr import IbkrConfig
+from stonks_overwatch.config.metatrader4 import Metatrader4Config
 from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.core.factories.broker_registry import BrokerRegistry
 from stonks_overwatch.core.service_types import ServiceType
@@ -89,6 +90,28 @@ from stonks_overwatch.services.brokers.ibkr.services.transactions import (
     TransactionsService as IbkrTransactionService,
 )
 from stonks_overwatch.services.brokers.ibkr.services.update_service import UpdateService as IbkrUpdateService
+from stonks_overwatch.services.brokers.metatrader4.services.account_service import (
+    AccountService as Metatrader4AccountService,
+)
+from stonks_overwatch.services.brokers.metatrader4.services.authentication_service import (
+    Metatrader4AuthenticationService,
+)
+from stonks_overwatch.services.brokers.metatrader4.services.deposit_service import (
+    DepositService as Metatrader4DepositService,
+)
+from stonks_overwatch.services.brokers.metatrader4.services.fee_service import (
+    FeeService as Metatrader4FeeService,
+)
+from stonks_overwatch.services.brokers.metatrader4.services.portfolio_service import (
+    PortfolioService as Metatrader4PortfolioService,
+)
+from stonks_overwatch.services.brokers.metatrader4.services.transaction_service import (
+    TransactionService as Metatrader4TransactionService,
+)
+from stonks_overwatch.utils.core.logger import StonksLogger
+
+logger = StonksLogger.get_logger("stonks_overwatch.core", "[REGISTRY_SETUP]")
+
 
 # Configuration-driven broker definitions
 BROKER_CONFIGS: Dict[BrokerName, Dict[str, Any]] = {
@@ -126,6 +149,17 @@ BROKER_CONFIGS: Dict[BrokerName, Dict[str, Any]] = {
             ServiceType.ACCOUNT: IbkrAccountOverviewService,
             ServiceType.AUTHENTICATION: IbkrAuthenticationService,
             ServiceType.UPDATE: IbkrUpdateService,
+        },
+    },
+    BrokerName.METATRADER4: {
+        "config": Metatrader4Config,
+        "services": {
+            ServiceType.PORTFOLIO: Metatrader4PortfolioService,
+            ServiceType.TRANSACTION: Metatrader4TransactionService,
+            ServiceType.ACCOUNT: Metatrader4AccountService,
+            ServiceType.DEPOSIT: Metatrader4DepositService,
+            ServiceType.FEE: Metatrader4FeeService,
+            ServiceType.AUTHENTICATION: Metatrader4AuthenticationService,
         },
     },
 }

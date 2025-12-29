@@ -53,7 +53,7 @@ class DepositsService(BaseService, DepositServiceInterface):
         capitalized_words = [word if word == "iDEAL" else word.capitalize() for word in words]
         return " ".join(capitalized_words)
 
-    def calculate_cash_account_value(self) -> dict:
+    def calculate_cash_account_value(self) -> dict[str, float]:
         cash_balance = CashMovementsRepository.get_cash_balance_by_date()
 
         if not cash_balance:

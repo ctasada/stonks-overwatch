@@ -2865,10 +2865,10 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 .settings-sidebar {
-    width: 200px;
+    width: 180px;
     background-color: var(--sidebar-bg);
     border-right: 1px solid var(--border-main);
-    padding: var(--spacing-lg);
+    padding: var(--spacing-md) var(--spacing-sm);
     overflow-y: visible;
     flex-shrink: 0;
     align-self: stretch;
@@ -2882,7 +2882,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 .broker-item {
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-xs);
     cursor: pointer;
     border-radius: var(--border-radius-md);
     margin-bottom: var(--spacing-sm);
@@ -2909,11 +2909,20 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 .broker-item img {
-    height: 24px;
+    height: 20px;
     width: auto;
-    max-width: 32px;
-    margin-right: 0.75rem;
+    max-width: 28px;
+    margin-right: 0.5rem;
     object-fit: contain;
+    flex-shrink: 0;
+}
+
+.broker-item span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.9rem;
+    line-height: 1.2;
 }
 
 .broker-header {

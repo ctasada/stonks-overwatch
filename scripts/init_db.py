@@ -34,6 +34,9 @@ from stonks_overwatch.services.brokers.degiro.services.update_service import (  
 from stonks_overwatch.services.brokers.ibkr.services.update_service import (  # noqa: E402
     UpdateService as IbkrUpdateService,
 )
+from stonks_overwatch.services.brokers.metatrader4.services.update_service import (  # noqa: E402
+    UpdateService as MetaTrader4UpdateService,
+)
 from stonks_overwatch.services.brokers.models import BrokersConfigurationRepository  # noqa: E402
 from stonks_overwatch.utils.core.localization import LocalizationUtility  # noqa: E402
 
@@ -56,6 +59,7 @@ def parse_args() -> Namespace:
             * DEGIRO
             * BITVAVO
             * IBKR (Interactive Brokers)
+            * MetaTrader4
         """),
     )
     default_import_folder = os.path.join(STONKS_OVERWATCH_DATA_DIR, "import")
@@ -93,6 +97,9 @@ def parse_args() -> Namespace:
     parser.add_argument("--bitvavo", action="store_true", help="Import Bitvavo")
     parser.add_argument("--bitvavo_portfolio", action="store_true", help="Import Bitvavo portfolio information")
     parser.add_argument("--bitvavo_transactions", action="store_true", help="Import Bitvavo transactions")
+
+    parser.add_argument("--metatrader4", action="store_true", help="Import MetaTrader4")
+    parser.add_argument("--mt4", action="store_true", help="Import MetaTrader4 (alias for --metatrader4)")
 
     parser.add_argument("--update_credentials", action="store_true", help="Update credentials for supported brokers")
 
@@ -187,6 +194,12 @@ def bitvavo_transactions(update_service: BitvavoUpdateService) -> None:
     update_service.update_transactions()
 
 
+def metatrader4_import(update_service: MetaTrader4UpdateService) -> None:
+    """Import MetaTrader4 data from FTP."""
+    logging.info("Importing MetaTrader4 data...")
+    update_service.update_all()
+
+
 def _parse_start_date(start_date_str: str | None) -> date | None:
     """Parse --start_date string to a date object, or return None if not provided."""
     if not start_date_str:
@@ -228,12 +241,22 @@ def get_bitvavo_update_service(args: Namespace, broker_factory: BrokerFactory) -
     return BitvavoUpdateService(import_folder=bitvavo_import_folder, debug_mode=args.debug, config=bitvavo_config)
 
 
+def get_metatrader4_update_service(args, broker_factory):
+    mt4_import_folder = os.path.join(args.import_folder, BrokerName.METATRADER4.lower())
+    mt4_config = broker_factory.create_config(BrokerName.METATRADER4)
+    return MetaTrader4UpdateService(import_folder=mt4_import_folder, debug_mode=args.debug, config=mt4_config)
+
+
 def main():
     logging.info("Applying database migrations...")
     call_command("migrate")
 
     broker_factory = BrokerFactory()
     args = parse_args()
+
+    # Handle MT4 alias
+    if args.mt4:
+        args.metatrader4 = True
 
     actions = [
         (args.degiro_account, degiro_account_import, lambda: get_degiro_update_service(args, broker_factory)),
@@ -249,6 +272,7 @@ def main():
         (args.degiro, lambda svc: svc.update_all(), lambda: get_degiro_update_service(args, broker_factory)),
         (args.ibkr, lambda svc: svc.update_all(), lambda: get_ibkr_update_service(args, broker_factory)),
         (args.bitvavo, lambda svc: svc.update_all(), lambda: get_bitvavo_update_service(args, broker_factory)),
+        (args.metatrader4, metatrader4_import, lambda: get_metatrader4_update_service(args, broker_factory)),
         (args.update_credentials, update_credentials, None),
     ]
 
@@ -265,6 +289,7 @@ def main():
         get_degiro_update_service(args, broker_factory).update_all()
         get_ibkr_update_service(args, broker_factory).update_all()
         get_bitvavo_update_service(args, broker_factory).update_all()
+        get_metatrader4_update_service(args, broker_factory).update_all()
         update_credentials()
 
 
