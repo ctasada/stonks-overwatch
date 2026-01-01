@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Optional
 
 from django.utils.functional import cached_property
@@ -200,8 +201,29 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         raise ValueError(f"Unknown product type: {position['type']} / {position['assetClass']}")
 
     def calculate_historical_value(self) -> List[DailyValue]:
-        # TODO: Implement historical value calculation
-        pass
+        """
+        Calculates the historical portfolio value over time.
+
+        Note: IBKR doesn't provide easy access to historical portfolio values.
+        This implementation returns a minimal dataset with current portfolio value
+        to prevent dashboard errors.
+
+        Returns:
+            List[DailyValue]: List containing current portfolio value
+        """
+        self.logger.debug("Calculating historical value for IBKR")
+
+        try:
+            # Get current portfolio total
+            portfolio_total = self.get_portfolio_total()
+            current_date = datetime.now().strftime("%Y-%m-%d")
+
+            # Return minimal historical data with current value
+            return [DailyValue(x=current_date, y=portfolio_total.current_value)]
+        except Exception as e:
+            self.logger.error(f"Error calculating historical value: {e}")
+            # Return empty list as fallback
+            return []
 
     def calculate_product_growth(self) -> dict:
         # TODO: Implement product growth calculation

@@ -83,17 +83,21 @@ class Dashboard(View):
         if start_date:
             portfolio_value = self.__filter_dashboard_values(portfolio_value, start_date)
             cash_contributions = self.__filter_dashboard_values(cash_contributions, start_date)
-        else:
+        elif portfolio_value:
             start_date = portfolio_value[0]["x"]
+        else:
+            # Handle empty portfolio data gracefully
+            self.logger.warning("No portfolio data available for dashboard")
+            start_date = datetime.now().strftime("%Y-%m-%d")
 
         performance_twr = self._calculate_portfolio_performance(selected_portfolio, portfolio_value, start_date)
         return {
             "portfolio": {
                 "portfolio_value": portfolio_value,
                 "cash_contributions": cash_contributions,
-                "performance": performance_twr.twr,
-                "annual_twr": performance_twr.annual_twr,
-                "monthly_twr": performance_twr.monthly_twr,
+                "performance": performance_twr.twr if performance_twr else [],
+                "annual_twr": performance_twr.annual_twr if performance_twr else {},
+                "monthly_twr": performance_twr.monthly_twr if performance_twr else {},
             }
         }
 
@@ -285,7 +289,7 @@ class Dashboard(View):
 
     def _calculate_portfolio_performance(
         self, selected_portfolio: PortfolioId, portfolio_value: List[DailyValue], start_date: Optional[str] = None
-    ) -> PortfolioPerformance:
+    ) -> Optional[PortfolioPerformance]:
         """
         Calculate portfolio performance using TWR method.
 
@@ -299,10 +303,20 @@ class Dashboard(View):
             start_date: Optional start date for calculations (default: earliest date)
 
         Returns:
-            PortfolioPerformance with TWR data for different time periods
+            PortfolioPerformance with TWR data for different time periods, or None if no data
         """
+        # Handle empty portfolio data
+        if not portfolio_value:
+            self.logger.warning("No portfolio data available for performance calculation")
+            return None
+
         # Prepare data once
         _, cash_flows, market_value_per_day = self._prepare_performance_data(selected_portfolio, portfolio_value)
+
+        # Handle empty market data
+        if not market_value_per_day:
+            self.logger.warning("No market value data available for performance calculation")
+            return None
 
         if not start_date:
             start_date = min(market_value_per_day.keys())
@@ -310,6 +324,12 @@ class Dashboard(View):
 
         # Single TWR calculation for entire period
         all_dates = self._get_business_date_range(start_date, end_date)
+
+        # Handle case where we don't have enough data for TWR calculation
+        if len(all_dates) < 2:
+            self.logger.warning("Insufficient data for TWR calculation (need at least 2 data points)")
+            return PortfolioPerformance(twr=[], annual_twr={}, monthly_twr={})
+
         main_twr = self._calculate_twr(all_dates, market_value_per_day, cash_flows)
 
         # Derive period-specific returns from cumulative returns
