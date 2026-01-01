@@ -42,9 +42,11 @@ from stonks_overwatch.services.brokers.degiro.services.transaction_service impor
 from stonks_overwatch.services.brokers.ibkr.services.account_overview import (
     AccountOverviewService as IbkrAccountOverviewService,
 )
+from stonks_overwatch.services.brokers.ibkr.services.deposit_service import DepositsService as IbkrDepositService
 from stonks_overwatch.services.brokers.ibkr.services.dividends import (
     DividendsService as IbkrDividendsService,
 )
+from stonks_overwatch.services.brokers.ibkr.services.fee_service import FeeService as IbkrFeeService
 from stonks_overwatch.services.brokers.ibkr.services.portfolio import (
     PortfolioService as IbkrPortfolioService,
 )
@@ -87,11 +89,12 @@ BROKER_CONFIGS: Dict[str, Dict[str, Any]] = {
         "services": {
             ServiceType.PORTFOLIO: IbkrPortfolioService,
             ServiceType.TRANSACTION: IbkrTransactionService,
+            ServiceType.DEPOSIT: IbkrDepositService,
             ServiceType.DIVIDEND: IbkrDividendsService,
+            ServiceType.FEE: IbkrFeeService,
             ServiceType.ACCOUNT: IbkrAccountOverviewService,
-            # Note: IBKR doesn't support deposit and fee services
         },
-        "supports_complete_registration": False,  # Missing required services
+        "supports_complete_registration": True,  # Now supports all required services
     },
 }
 
