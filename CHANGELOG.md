@@ -11,6 +11,10 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 ### Added
 
 - **Configuration:** Added support to configure IBKR broker
+- **Broker Selector:**
+  - When starting now it's possible to choose the broker. This allows to use any of the available brokers, and removes
+  a limitation that was enforcing to have a DEGIRO account
+  - Adds possibility to use *only** DEGIRO, Bitvavo or IBKR
 
 ### Changed
 

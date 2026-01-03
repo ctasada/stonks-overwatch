@@ -23,25 +23,11 @@
                value="{% if degiro_config.credentials.username %}{{ degiro_config.credentials.username }}{% endif %}">
     </div>
 
-    <div class="settings-form-group">
-        <label for="degiro-password">Password</label>
-        <div class="input-group">
-            <input type="password" class="form-control" id="degiro-password"
-                   value="{% if degiro_config.credentials.password %}{{ degiro_config.credentials.password }}{% endif %}">
-            <i class="bi bi-eye-slash-fill toggle-password" data-target="degiro-password"></i>
-        </div>
-    </div>
+    {% include 'components/password_field.html' with field_id='degiro-password' label='Password' value=degiro_config.credentials.password wrapper_class='settings-form-group' %}
 
-    <div class="settings-form-group">
-        <label for="degiro-totp">TOTP Secret Key</label>
-        <div class="input-group">
-            <input type="password" class="form-control totp-input" id="degiro-totp" data-broker="degiro"
-                   value="{% if degiro_config.credentials.totp_secret_key %}{{ degiro_config.credentials.totp_secret_key }}{% endif %}">
-            <i class="bi bi-eye-slash-fill toggle-password" data-target="degiro-totp"></i>
-        </div>
-    </div>
+    {% include 'components/password_field.html' with field_id='degiro-totp' label='TOTP Secret Key' value=degiro_config.credentials.totp_secret_key wrapper_class='settings-form-group' oninput="updateVerificationCode('degiro')" %}
 
-    <div class="settings-form-group" id="degiro-verification-container" style="display: none;">
+    <div class="settings-form-group hidden" id="degiro-verification-container">
         <label>Verification Code</label>
         <div class="verification-code-container">
             <span class="verification-code" id="degiro-verification-code"></span>

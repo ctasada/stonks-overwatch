@@ -1,7 +1,11 @@
-from typing import Optional
+"""
+DEGIRO-specific authentication middleware.
+
+This middleware handles authentication logic that is specific to DEGIRO,
+such as connection checking, TOTP handling, and in-app authentication.
+"""
 
 from django.shortcuts import redirect
-from django.urls import resolve
 
 from stonks_overwatch.core.authentication_locator import get_authentication_service
 from stonks_overwatch.core.interfaces.authentication_service import AuthenticationResult
@@ -10,26 +14,33 @@ from stonks_overwatch.utils.core.logger import StonksLogger
 
 
 class DeGiroAuthMiddleware:
-    PUBLIC_URLS = {"login", "settings", "release_notes"}
+    """
+    DEGIRO-specific authentication middleware.
+
+    Handles:
+    - DEGIRO connection status checking
+    - TOTP (2FA) flow management
+    - In-app authentication flow
+    - DEGIRO-specific session management
+
+    Note: This middleware should run AFTER the general AuthenticationMiddleware.
+    """
 
     logger = StonksLogger.get_logger("stonks_overwatch.degiro_auth", "[DEGIRO|AUTH_MIDDLEWARE]")
 
     def __init__(self, get_response):
         self.get_response = get_response
-        # Use optimized service locator for authentication service
         self.auth_service = get_authentication_service()
 
     def __call__(self, request):
-        current_url = resolve(request.path_info).url_name
-
-        # Skip authentication checks for public URLs
-        if self._is_public_url(current_url):
+        # Only perform DEGIRO-specific checks if DEGIRO is enabled
+        if not self._should_check_degiro(request):
             return self.get_response(request)
 
-        # Perform authentication checks
-        should_redirect, redirect_reason, preserve_session = self._check_authentication(request)
+        # Check DEGIRO connection if needed
+        should_redirect, redirect_reason, preserve_session = self._check_degiro_connection(request)
 
-        # Redirect to login if authentication failed
+        # Redirect to login if DEGIRO authentication failed
         if should_redirect:
             if preserve_session:
                 self.logger.warning(f"{LogMessages.REDIRECT_PRESERVING_SESSION}: {redirect_reason}")
@@ -40,27 +51,27 @@ class DeGiroAuthMiddleware:
 
         return self.get_response(request)
 
-    def _check_authentication(self, request) -> tuple[bool, str, bool]:
+    def _should_check_degiro(self, request) -> bool:
         """
-        Check if user authentication is valid.
+        Determine if DEGIRO-specific checks should be performed.
 
         Returns:
-            tuple: (should_redirect_to_login, redirect_reason, preserve_session)
+            True if DEGIRO checks should be performed
         """
-        # Check DeGiro connection if needed
-        connection_redirect, connection_reason, preserve_session = self._check_degiro_connection(request)
-        if connection_redirect:
-            return True, connection_reason, preserve_session
+        try:
+            # Skip if DEGIRO is not enabled or in offline mode
+            if not self.auth_service.is_degiro_enabled() or self.auth_service.is_offline_mode():
+                return False
 
-        # Check basic session authentication
-        if not self.auth_service.is_user_authenticated(request) and not self.auth_service.is_offline_mode():
-            return True, AuthenticationErrorMessages.SESSION_NOT_AUTHENTICATED, False
+            # Skip if connection check is not needed
+            if not self.auth_service.should_check_connection(request):
+                return False
 
-        # Check maintenance mode access
-        if not self.auth_service.is_maintenance_mode_allowed() and not self.auth_service.is_offline_mode():
-            return False, AuthenticationErrorMessages.MAINTENANCE_MODE_ACCESS_DENIED, False
+            return True
 
-        return False, "", False
+        except Exception as e:
+            self.logger.error(f"Error determining if DEGIRO check is needed: {e}")
+            return False
 
     def _check_degiro_connection(self, request) -> tuple[bool, str, bool]:
         """
@@ -70,16 +81,7 @@ class DeGiroAuthMiddleware:
             tuple: (should_redirect_to_login, redirect_reason, preserve_session)
         """
         try:
-            is_degiro_enabled = self.auth_service.is_degiro_enabled()
-            is_degiro_offline = self.auth_service.is_offline_mode()
-
-            self.logger.debug(f"DeGiro Enabled: {is_degiro_enabled}, Offline Mode: {is_degiro_offline}")
-
-            if not is_degiro_enabled or is_degiro_offline:
-                return False, "", False
-
-            if not self.auth_service.should_check_connection(request):
-                return False, "", False
+            self.logger.debug("Checking DEGIRO connection status")
 
             # Check DeGiro connection
             connection_result = self.auth_service.check_degiro_connection(request)
@@ -131,6 +133,3 @@ class DeGiroAuthMiddleware:
 
         # Success - no redirect needed
         return False, "", False
-
-    def _is_public_url(self, url_name: Optional[str]) -> bool:
-        return url_name in self.PUBLIC_URLS

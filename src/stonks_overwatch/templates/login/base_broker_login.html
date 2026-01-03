@@ -1,0 +1,123 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stonks Overwatch - {% block page_title %}Login{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{% static 'stonks_overwatch-32x32.png' %}" sizes="32x32">
+
+    <!-- Bootstrap CSS CDN -->
+    <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'bootstrap-icons/font/bootstrap-icons.css' %}" rel="stylesheet">
+    <!-- JavaScript Bundle with Popper -->
+    <script src="{% static 'bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+    <!-- jQuery CDN - Slim version (=without AJAX) -->
+    <script src="{% static 'jquery/dist/jquery.slim.min.js' %}"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/style.css">
+
+    <style>
+        .alert a {
+            color: #0d6efd !important;
+            text-decoration: underline !important;
+            font-weight: 500;
+        }
+        .alert a:hover {
+            color: #0a58ca !important;
+        }
+        .back-link {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            color: #6c757d;
+            text-decoration: none;
+            z-index: 1000;
+        }
+        .back-link:hover {
+            color: #0d6efd;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <a href="{% url 'login' %}" class="back-link">
+        <i class="bi bi-arrow-left"></i> Back to broker selection
+    </a>
+
+    <div class="container d-flex justify-content-center align-items-center full-height-container">
+        <div class="card shadow p-4 login-card">
+            <div class="text-center mb-4">
+                {% block broker_logo %}{% endblock %}
+                {% block page_header %}{% endblock %}
+            </div>
+
+            <form id="login-form" method="POST" action="{% url 'broker_login' broker_name %}">
+                {% csrf_token %}
+
+                {% include 'components/messages.html' %}
+
+                {% block form_content %}{% endblock %}
+            </form>
+
+            {% block footer_content %}
+            <div class="text-center mt-4">
+                <small class="text-muted">
+                    Need help? Check our
+                    <a href="#" class="text-decoration-none">documentation</a>
+                </small>
+            </div>
+            {% endblock %}
+        </div>
+    </div>
+
+    {% block extra_js %}{% endblock %}
+
+    <script>
+        /**
+         * Initialize password toggle functionality for password fields
+         */
+        function initializePasswordToggles() {
+            document.querySelectorAll('.toggle-password').forEach(function(toggleBtn) {
+                if (toggleBtn.dataset.initialized === 'true') return;
+                toggleBtn.dataset.initialized = 'true';
+
+                toggleBtn.addEventListener('click', function() {
+                    const targetId = this.dataset.target;
+                    const passwordInput = document.getElementById(targetId);
+
+                    if (!passwordInput) return;
+
+                    // Toggle password visibility
+                    const currentType = passwordInput.getAttribute('type');
+                    const newType = currentType === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', newType);
+
+                    // Toggle icon
+                    const icon = this.querySelector('i');
+                    if (icon) {
+                        // Explicitly remove one class and add the other to prevent duplication
+                        if (icon.classList.contains('bi-eye-slash-fill')) {
+                            icon.classList.remove('bi-eye-slash-fill');
+                            icon.classList.add('bi-eye-fill');
+                        } else {
+                            icon.classList.remove('bi-eye-fill');
+                            icon.classList.add('bi-eye-slash-fill');
+                        }
+                    }
+                });
+            });
+        }
+
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializePasswordToggles);
+        } else {
+            initializePasswordToggles();
+        }
+    </script>
+</body>
+</html>

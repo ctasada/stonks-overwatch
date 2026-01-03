@@ -1,8 +1,9 @@
 """
 Unit tests for refactored DeGiroAuthMiddleware.
 
-This module tests the refactored middleware to ensure it maintains
-the same behavior while using AuthenticationService.
+This module tests the refactored DEGIRO-specific middleware that handles
+DEGIRO connection checking, TOTP, and in-app authentication flows.
+Note: General authentication and URL routing is now handled by AuthenticationMiddleware.
 """
 
 from django.http import HttpRequest, HttpResponse
@@ -33,104 +34,67 @@ class TestDeGiroAuthMiddlewareRefactored(TestCase):
         request.path_info = "/dashboard/"
         return request
 
-    @patch("stonks_overwatch.middleware.degiro_auth.resolve")
-    def test_middleware_allows_authenticated_user(self, mock_resolve):
-        """Test middleware allows authenticated users to proceed."""
-        mock_resolve.return_value.url_name = "dashboard"
-
-        # Mock authentication service to return authenticated
+    def test_middleware_allows_authenticated_user(self):
+        """Test middleware allows authenticated users to proceed when DEGIRO checks pass."""
+        # Mock authentication service to return successful DEGIRO connection
         self.mock_auth_service.is_degiro_enabled.return_value = True
         self.mock_auth_service.is_offline_mode.return_value = False
         self.mock_auth_service.should_check_connection.return_value = True
         self.mock_auth_service.check_degiro_connection.return_value = AuthenticationResponse(
             result=AuthenticationResult.SUCCESS, session_id="test_session"
         )
-        self.mock_auth_service.is_user_authenticated.return_value = True
-        self.mock_auth_service.is_maintenance_mode_allowed.return_value = True
 
         response = self.middleware(self.request)
 
-        # Should proceed to the actual view
         assert response == self.get_response.return_value
-        self.get_response.assert_called_once_with(self.request)
+        self.mock_auth_service.check_degiro_connection.assert_called_once_with(self.request)
 
-    @patch("stonks_overwatch.middleware.degiro_auth.resolve")
     @patch("stonks_overwatch.middleware.degiro_auth.redirect")
-    def test_middleware_redirects_unauthenticated_user(self, mock_redirect, mock_resolve):
-        """Test middleware redirects unauthenticated users to login."""
-        mock_resolve.return_value.url_name = "dashboard"
+    def test_middleware_redirects_on_degiro_failure(self, mock_redirect):
+        """Test middleware redirects when DEGIRO authentication fails."""
         mock_redirect_response = Mock()
         mock_redirect.return_value = mock_redirect_response
 
-        # Mock authentication service to return not authenticated
+        # Mock authentication service to return authentication failure
         self.mock_auth_service.is_degiro_enabled.return_value = True
         self.mock_auth_service.is_offline_mode.return_value = False
-        self.mock_auth_service.should_check_connection.return_value = False
-        self.mock_auth_service.is_user_authenticated.return_value = False
-        self.mock_auth_service.is_maintenance_mode_allowed.return_value = False
+        self.mock_auth_service.should_check_connection.return_value = True
+        self.mock_auth_service.check_degiro_connection.return_value = AuthenticationResponse(
+            result=AuthenticationResult.INVALID_CREDENTIALS, message="Invalid credentials"
+        )
 
         response = self.middleware(self.request)
 
-        # Should redirect to login
         assert response == mock_redirect_response
         mock_redirect.assert_called_once_with("login")
         self.mock_auth_service.logout_user.assert_called_once_with(self.request)
 
-    @patch("stonks_overwatch.middleware.degiro_auth.resolve")
-    def test_middleware_allows_public_urls(self, mock_resolve):
-        """Test middleware allows access to public URLs without authentication."""
-        mock_resolve.return_value.url_name = "login"
-
-        # Mock authentication service to return not authenticated
-        self.mock_auth_service.is_degiro_enabled.return_value = True
-        self.mock_auth_service.is_offline_mode.return_value = False
-        self.mock_auth_service.should_check_connection.return_value = False
-        self.mock_auth_service.is_user_authenticated.return_value = False
-
-        response = self.middleware(self.request)
-
-        # Should proceed to the actual view (login page)
-        assert response == self.get_response.return_value
-        self.get_response.assert_called_once_with(self.request)
-
-    @patch("stonks_overwatch.middleware.degiro_auth.resolve")
-    def test_middleware_handles_degiro_disabled(self, mock_resolve):
-        """Test middleware when DeGiro is disabled."""
-        mock_resolve.return_value.url_name = "dashboard"
-
-        # Mock authentication service to return DeGiro disabled
+    def test_middleware_skips_check_when_degiro_disabled(self):
+        """Test middleware skips DEGIRO checks when DEGIRO is disabled."""
+        # Mock authentication service to return DEGIRO disabled
         self.mock_auth_service.is_degiro_enabled.return_value = False
-        self.mock_auth_service.is_user_authenticated.return_value = True
-        self.mock_auth_service.is_maintenance_mode_allowed.return_value = True
 
         response = self.middleware(self.request)
 
-        # Should proceed without connection checks
         assert response == self.get_response.return_value
+        # Should not check connection when DEGIRO is disabled
         self.mock_auth_service.should_check_connection.assert_not_called()
 
-    @patch("stonks_overwatch.middleware.degiro_auth.resolve")
-    def test_middleware_handles_offline_mode(self, mock_resolve):
-        """Test middleware when DeGiro is in offline mode."""
-        mock_resolve.return_value.url_name = "dashboard"
-
+    def test_middleware_skips_check_in_offline_mode(self):
+        """Test middleware skips DEGIRO checks in offline mode."""
         # Mock authentication service for offline mode
         self.mock_auth_service.is_degiro_enabled.return_value = True
         self.mock_auth_service.is_offline_mode.return_value = True
-        self.mock_auth_service.is_user_authenticated.return_value = True
-        self.mock_auth_service.is_maintenance_mode_allowed.return_value = True
 
         response = self.middleware(self.request)
 
-        # Should proceed without connection checks
         assert response == self.get_response.return_value
+        # Should not check connection in offline mode
         self.mock_auth_service.should_check_connection.assert_not_called()
 
-    @patch("stonks_overwatch.middleware.degiro_auth.resolve")
     @patch("stonks_overwatch.middleware.degiro_auth.redirect")
-    def test_middleware_handles_totp_requirement(self, mock_redirect, mock_resolve):
+    def test_middleware_handles_totp_requirement(self, mock_redirect):
         """Test middleware handles TOTP requirement gracefully."""
-        mock_resolve.return_value.url_name = "dashboard"
         mock_redirect_response = Mock()
         mock_redirect.return_value = mock_redirect_response
 
@@ -139,81 +103,58 @@ class TestDeGiroAuthMiddlewareRefactored(TestCase):
         self.mock_auth_service.is_offline_mode.return_value = False
         self.mock_auth_service.should_check_connection.return_value = True
         self.mock_auth_service.check_degiro_connection.return_value = AuthenticationResponse(
-            result=AuthenticationResult.TOTP_REQUIRED, requires_totp=True
+            result=AuthenticationResult.TOTP_REQUIRED
         )
-        self.mock_auth_service.is_user_authenticated.return_value = True
-        self.mock_auth_service.is_maintenance_mode_allowed.return_value = True
 
         response = self.middleware(self.request)
 
-        # Should redirect to login but preserve session for TOTP flow
         assert response == mock_redirect_response
         mock_redirect.assert_called_once_with("login")
-        # Should NOT call logout_user (session preserved for TOTP)
+        # Should preserve session for TOTP flow
         self.mock_auth_service.logout_user.assert_not_called()
-        # Should set TOTP required flag in session
         self.mock_auth_service.session_manager.set_totp_required.assert_called_once_with(self.request, True)
 
-    @patch("stonks_overwatch.middleware.degiro_auth.resolve")
     @patch("stonks_overwatch.middleware.degiro_auth.redirect")
-    def test_middleware_handles_connection_errors(self, mock_redirect, mock_resolve):
-        """Test middleware handles connection errors gracefully."""
-        mock_resolve.return_value.url_name = "dashboard"
+    def test_middleware_handles_in_app_auth_requirement(self, mock_redirect):
+        """Test middleware handles in-app authentication requirement."""
         mock_redirect_response = Mock()
         mock_redirect.return_value = mock_redirect_response
 
-        # Mock authentication service to return connection error
+        # Mock authentication service to return in-app auth required
         self.mock_auth_service.is_degiro_enabled.return_value = True
         self.mock_auth_service.is_offline_mode.return_value = False
         self.mock_auth_service.should_check_connection.return_value = True
         self.mock_auth_service.check_degiro_connection.return_value = AuthenticationResponse(
-            result=AuthenticationResult.CONNECTION_ERROR, message="Connection failed"
+            result=AuthenticationResult.IN_APP_AUTHENTICATION_REQUIRED
         )
-        self.mock_auth_service.is_user_authenticated.return_value = True
-        self.mock_auth_service.is_maintenance_mode_allowed.return_value = True
 
         response = self.middleware(self.request)
 
-        # Should redirect to login due to connection error
         assert response == mock_redirect_response
         mock_redirect.assert_called_once_with("login")
-        self.mock_auth_service.logout_user.assert_called_once_with(self.request)
+        # Should preserve session for in-app auth flow
+        self.mock_auth_service.logout_user.assert_not_called()
+        self.mock_auth_service.session_manager.set_in_app_auth_required.assert_called_once_with(self.request, True)
 
-    @patch("stonks_overwatch.middleware.degiro_auth.resolve")
-    def test_middleware_allows_maintenance_mode_access(self, mock_resolve):
-        """Test middleware allows access during maintenance mode when allowed."""
-        mock_resolve.return_value.url_name = "dashboard"
-
-        # Mock authentication service for maintenance mode with access allowed
+    def test_middleware_skips_check_when_not_needed(self):
+        """Test middleware skips check when connection check is not needed."""
+        # Mock authentication service to indicate check not needed
         self.mock_auth_service.is_degiro_enabled.return_value = True
         self.mock_auth_service.is_offline_mode.return_value = False
         self.mock_auth_service.should_check_connection.return_value = False
-        self.mock_auth_service.is_user_authenticated.return_value = True
-        self.mock_auth_service.is_maintenance_mode_allowed.return_value = True
 
         response = self.middleware(self.request)
 
-        # Should proceed (maintenance mode access is allowed)
         assert response == self.get_response.return_value
+        # Should not check connection when not needed
+        self.mock_auth_service.check_degiro_connection.assert_not_called()
 
-    @patch("stonks_overwatch.middleware.degiro_auth.resolve")
-    def test_middleware_handles_exceptions_gracefully(self, mock_resolve):
+    def test_middleware_handles_exceptions_gracefully(self):
         """Test middleware handles exceptions in authentication service gracefully."""
-        mock_resolve.return_value.url_name = "dashboard"
-
         # Mock authentication service to raise exception
-        self.mock_auth_service.is_degiro_enabled.side_effect = Exception("Service error")
-        self.mock_auth_service.is_user_authenticated.return_value = True
-        self.mock_auth_service.is_maintenance_mode_allowed.return_value = True
+        self.mock_auth_service.is_degiro_enabled.side_effect = Exception("Test exception")
 
         response = self.middleware(self.request)
 
         # Should proceed despite exception (logged but not blocking)
         assert response == self.get_response.return_value
-
-    def test_is_public_url_method(self):
-        """Test _is_public_url method correctly identifies public URLs."""
-        assert self.middleware._is_public_url("login") is True
-        assert self.middleware._is_public_url("settings") is True
-        assert self.middleware._is_public_url("dashboard") is False
-        assert self.middleware._is_public_url(None) is False

@@ -157,7 +157,7 @@ class AuthenticationSessionManager(SessionManagerInterface, BaseService):
         request: HttpRequest,
         username: str,
         password: str,
-        in_app_token: str | None = None,
+        in_app_token: Optional[str] = None,
         remember_me: bool = False,
     ) -> None:
         """

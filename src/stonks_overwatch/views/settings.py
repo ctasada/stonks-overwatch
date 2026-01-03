@@ -130,6 +130,12 @@ class SettingsView(View):
             self.repository.save_broker_configuration(broker_config)
             self.logger.info(f"Configuration saved successfully for broker: {broker_name}")
 
+            # Clear broker factory cache so it picks up the updated configuration
+            self._clear_broker_cache(broker_name)
+
+            # Reconfigure job scheduler to pick up the updated settings
+            self._reconfigure_jobs()
+
             return JsonResponse({"success": True, "message": "Configuration saved successfully"})
 
         except json.JSONDecodeError:
@@ -138,6 +144,50 @@ class SettingsView(View):
         except Exception as e:
             self.logger.error(f"Failed to process request: {e}", exc_info=True)
             return JsonResponse({"error": "Failed to process request. Please try again later."}, status=500)
+
+    def _clear_broker_cache(self, broker_name: str) -> None:
+        """
+        Clear the broker factory cache for ALL brokers.
+
+        This ensures that the factory will reload all configurations from the database
+        after settings are updated. We clear all brokers (not just the one being saved)
+        because the configuration endpoint needs to see the current state of all brokers.
+
+        Args:
+            broker_name: Name of the broker whose settings were saved (for logging)
+        """
+        try:
+            from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+
+            broker_factory = BrokerFactory()
+            # Clear cache for ALL brokers to ensure configuration endpoint shows correct state
+            broker_factory.clear_cache()  # No broker_name = clear all caches
+            self.logger.debug(f"Cleared broker factory cache for all brokers (triggered by {broker_name} update)")
+
+        except Exception as e:
+            self.logger.error(f"Error clearing broker factory cache: {str(e)}")
+            # Don't raise exception - settings were saved successfully
+
+    def _reconfigure_jobs(self) -> None:
+        """
+        Trigger job scheduler reconfiguration to pick up updated settings.
+
+        This ensures that update jobs are scheduled/unscheduled based on the
+        new broker enabled state and update frequencies.
+        """
+        try:
+            from stonks_overwatch.jobs.jobs_scheduler import JobsScheduler
+
+            if JobsScheduler.scheduler:
+                self.logger.info("Reconfiguring job scheduler after settings change")
+                JobsScheduler._configure_jobs()
+                self.logger.info("Job scheduler reconfigured successfully")
+            else:
+                self.logger.warning("Job scheduler not running, skipping reconfiguration")
+
+        except Exception as e:
+            self.logger.error(f"Error reconfiguring job scheduler: {str(e)}")
+            # Don't raise exception - settings were saved successfully
 
     def _generate_totp_code(self, data: dict) -> JsonResponse:
         """

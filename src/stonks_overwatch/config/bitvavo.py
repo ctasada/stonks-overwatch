@@ -19,6 +19,16 @@ class BitvavoCredentials(BaseCredentials):
             return cls("", "")
         return cls(**data)
 
+    @classmethod
+    def from_request(cls, request) -> "BitvavoCredentials":
+        """Create credentials from Django request session."""
+        session_credentials = request.session.get("bitvavo_credentials", {})
+        return cls.from_dict(session_credentials)
+
+    def has_minimal_credentials(self) -> bool:
+        """Check if minimal credentials are provided."""
+        return bool(self.apikey and self.apisecret)
+
 
 class BitvavoConfig(BaseConfig):
     config_key = "bitvavo"

@@ -329,8 +329,13 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         if realtime_total_portfolio:
             total_deposit_withdrawal = realtime_total_portfolio["totalDepositWithdrawal"]
 
-        roi = (portfolio_total_value / total_deposit_withdrawal - 1) * 100
-        total_profit_loss = portfolio_total_value - total_deposit_withdrawal
+        # Handle division by zero/None case when no deposits exist yet
+        if total_deposit_withdrawal and total_deposit_withdrawal > 0:
+            roi = (portfolio_total_value / total_deposit_withdrawal - 1) * 100
+        else:
+            roi = 0.0  # No deposits yet, so no ROI to calculate
+
+        total_profit_loss = portfolio_total_value - (total_deposit_withdrawal or 0)
 
         return TotalPortfolio(
             base_currency=self.base_currency,
@@ -338,7 +343,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
             total_cash=total_cash,
             current_value=portfolio_total_value,
             total_roi=roi,
-            total_deposit_withdrawal=total_deposit_withdrawal,
+            total_deposit_withdrawal=total_deposit_withdrawal or 0.0,
         )
 
     def __get_total_cash(self) -> float:

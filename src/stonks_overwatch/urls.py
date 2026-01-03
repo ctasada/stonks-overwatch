@@ -18,10 +18,10 @@ Including another URLconf
 """
 
 from django.urls import path, re_path
-from django.views.generic import RedirectView
 
 from stonks_overwatch.views.account_overview import AccountOverview
 from stonks_overwatch.views.asset_logos import AssetLogoView
+from stonks_overwatch.views.broker_login import BrokerLogin
 from stonks_overwatch.views.configuration import ConfigurationView
 from stonks_overwatch.views.dashboard import Dashboard
 from stonks_overwatch.views.deposits import Deposits
@@ -31,13 +31,15 @@ from stonks_overwatch.views.fees import Fees
 from stonks_overwatch.views.login import Login
 from stonks_overwatch.views.portfolio import Portfolio
 from stonks_overwatch.views.release_notes import ReleaseNotesView
+from stonks_overwatch.views.root_redirect import RootRedirectView
 from stonks_overwatch.views.settings import SettingsView
 from stonks_overwatch.views.static import RootStaticFileView
 from stonks_overwatch.views.transactions import Transactions
 
 urlpatterns = [
-    path("", RedirectView.as_view(url="dashboard")),
+    path("", RootRedirectView.as_view(), name="root"),
     path("login", Login.as_view(), name="login"),
+    path("login/<str:broker_name>", BrokerLogin.as_view(), name="broker_login"),
     path("account_overview", AccountOverview.as_view(), name="account_overview"),
     path("dashboard", Dashboard.as_view(), name="dashboard"),
     path("deposits", Deposits.as_view(), name="deposits"),

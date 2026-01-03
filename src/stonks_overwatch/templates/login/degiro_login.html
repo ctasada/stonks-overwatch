@@ -1,0 +1,95 @@
+{% extends 'login/base_broker_login.html' %}
+{% load static %}
+
+{% block page_title %}DEGIRO Login{% endblock %}
+
+{% block broker_logo %}
+<img src="/static/logos/degiro.svg" alt="DEGIRO" width="32" height="32" class="mb-2">
+{% endblock %}
+
+{% block page_header %}
+{% if show_otp %}
+    <h4 class="mb-0">Enter 2FA Code</h4>
+    <small class="text-muted">DEGIRO</small>
+{% elif show_in_app_auth %}
+    <h4 class="mb-0">Open DEGIRO App</h4>
+    <small class="text-muted">Confirm login in your mobile app</small>
+{% elif show_loading %}
+    <h4 class="mb-0">Loading...</h4>
+    <small class="text-muted">DEGIRO</small>
+{% else %}
+    <h4 class="mb-0">Login</h4>
+    <small class="text-muted">DEGIRO</small>
+{% endif %}
+{% endblock %}
+
+{% block form_content %}
+{% if show_otp %}
+    <!-- 2FA Code Input -->
+    <div class="form-group mb-3">
+        <label for="2fa_code" class="form-label">2FA Code</label>
+        <input type="text" class="form-control text-center"
+               style="letter-spacing: 1rem; line-height: 1.75em;"
+               id="2fa_code" name="2fa_code" maxlength="6" pattern="\d{6}"
+               placeholder="123456" aria-label="2FA code" required autofocus>
+    </div>
+    <button type="submit" class="btn btn-primary w-100">Confirm</button>
+
+{% elif show_in_app_auth %}
+    <!-- In-App Authentication -->
+    <div class="d-flex align-items-center py-3 mb-4">
+        <i class="bi bi-phone me-3" style="font-size: 2rem; color: #0d6efd;"></i>
+        <div class="flex-grow-1">
+            <p class="mb-0">To verify your login attempt, open the DEGIRO app and tap 'Yes' to approve it.</p>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center mb-3">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Waiting...</span>
+        </div>
+    </div>
+    <input type="hidden" name="in_app_auth" value="true">
+    <button type="submit" class="btn btn-primary w-100">I've approved it</button>
+
+{% elif show_loading %}
+    <!-- Loading State -->
+    <div class="text-center py-4">
+        <div class="spinner-border text-primary mb-3" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="text-muted">Updating your portfolio...</p>
+        <input type="hidden" name="update_portfolio" value="true">
+        <button type="submit" class="btn btn-success w-100">Continue to Dashboard</button>
+    </div>
+
+{% else %}
+    <!-- Login Form -->
+    <div class="form-group mb-3">
+        <label for="username" class="form-label">Username</label>
+        <input type="text" class="form-control" id="username" name="username"
+               placeholder="Enter username" required autofocus>
+    </div>
+
+    {% include 'components/password_field.html' with field_id='password' field_name='password' label='Password' placeholder='Enter password' required=True %}
+
+    <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="remember_me" name="remember_me" value="true">
+        <label class="form-check-label" for="remember_me">
+            Remember me
+        </label>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">Login</button>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if show_loading %}
+<script>
+    // Auto-redirect to dashboard after a short delay
+    setTimeout(function() {
+        document.getElementById('login-form').submit();
+    }, 2000);
+</script>
+{% endif %}
+{% endblock %}

@@ -58,9 +58,8 @@ class AbstractUpdateService(ABC):
             debug_mode if debug_mode is not None else os.getenv("DEBUG_MODE", False) in [True, "true", "True", "1"]
         )
 
-        # Create import folder if it doesn't exist
-        if not os.path.exists(self.import_folder):
-            os.makedirs(self.import_folder)
+        # Create import folder if it doesn't exist (exist_ok prevents race conditions)
+        os.makedirs(self.import_folder, exist_ok=True)
 
         # Initialize logger with broker-specific prefix
         logger_name = f"stonks_overwatch.{self.broker_name}.update_service"
