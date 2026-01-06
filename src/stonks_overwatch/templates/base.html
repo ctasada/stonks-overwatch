@@ -571,6 +571,222 @@
         }
 
         /**
+         * Handle file selection and extract the full path
+         * @param {HTMLInputElement} fileInput - The file input element
+         * @param {string} pathInputId - The ID of the text input to populate with the path
+         */
+        function handleFileSelect(fileInput, pathInputId) {
+            const pathInput = document.getElementById(pathInputId);
+            if (!fileInput.files || fileInput.files.length === 0 || !pathInput) return;
+
+            const file = fileInput.files[0];
+
+            // Try every possible property to get the full path
+            // Log all available properties for debugging
+            console.log('File object properties:', Object.keys(file));
+            console.log('File.path:', file.path);
+            console.log('File.webkitRelativePath:', file.webkitRelativePath);
+            console.log('File.mozFullPath:', file.mozFullPath);
+
+            // Try to get full path from various properties
+            let fullPath = null;
+
+            // Try .path first (available in Electron/native apps)
+            if (file.path && file.path !== '') {
+                fullPath = file.path;
+                console.log('Got path from file.path:', fullPath);
+            }
+            // Try webkitRelativePath
+            else if (file.webkitRelativePath && file.webkitRelativePath !== '') {
+                fullPath = file.webkitRelativePath;
+                console.log('Got path from file.webkitRelativePath:', fullPath);
+            }
+            // Try mozFullPath (Firefox)
+            else if (file.mozFullPath && file.mozFullPath !== '') {
+                fullPath = file.mozFullPath;
+                console.log('Got path from file.mozFullPath:', fullPath);
+            }
+
+            if (fullPath) {
+                // Successfully got full path
+                pathInput.value = fullPath;
+                console.log('✓ Full path extracted:', fullPath);
+                BootstrapAlertHelper.success('✓ Full path: ' + fullPath);
+            } else {
+                // Could not get full path, only have filename - this is normal in browsers
+                console.log('⚠ Browser security: only filename available. User needs to complete path.');
+                // Keep current value if it looks like a path, otherwise just use filename
+                const currentValue = pathInput.value.trim();
+                if (!currentValue || currentValue === file.name) {
+                    pathInput.value = file.name;
+                } else {
+                    // Replace just the filename in existing path
+                    const lastSlash = currentValue.lastIndexOf('/');
+                    if (lastSlash > 0) {
+                        pathInput.value = currentValue.substring(0, lastSlash + 1) + file.name;
+                    } else {
+                        pathInput.value = file.name;
+                    }
+                }
+                // Focus and select so user can easily edit
+                pathInput.focus();
+                pathInput.select();
+            }
+        }
+
+        /**
+         * Load key file content into textarea
+         */
+        function loadKeyFromFile(fileInput, textareaId) {
+            const textarea = document.getElementById(textareaId);
+            const container = document.getElementById(textareaId + '-container');
+            const toggleButton = document.getElementById(textareaId + '-toggle');
+            const statusBadge = document.getElementById(textareaId + '-status');
+            const infoElement = document.getElementById(textareaId + '-info');
+
+            if (!fileInput.files || fileInput.files.length === 0 || !textarea) return;
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const content = e.target.result;
+                textarea.value = content;
+
+                // Show the container if it was hidden
+                if (container) {
+                    container.style.display = 'block';
+                }
+
+                // Update toggle button
+                if (toggleButton) {
+                    toggleButton.innerHTML = '<i class="bi bi-eye-slash"></i> Hide';
+                }
+
+                // Update status badge
+                if (statusBadge) {
+                    statusBadge.style.backgroundColor = '#28a745';
+                    statusBadge.style.color = '#fff';
+                    statusBadge.innerHTML = '<i class="bi bi-check-circle"></i> Loaded';
+                }
+
+                // Update info text
+                if (infoElement) {
+                    infoElement.innerHTML = '<i class="bi bi-info-circle"></i> ' + content.length + ' characters';
+                }
+
+                // Validate the key
+                validateKey(textareaId);
+
+                console.log('✓ Key loaded from file:', file.name);
+                BootstrapAlertHelper.success('✓ Key loaded: ' + file.name);
+            };
+
+            reader.onerror = function() {
+                console.error('✗ Error reading file:', file.name);
+                BootstrapAlertHelper.error('✗ Error reading file: ' + file.name);
+            };
+
+            reader.readAsText(file);
+        }
+
+        /**
+         * Toggle visibility of key textarea container
+         */
+        function toggleKeyVisibility(containerId, toggleButtonId) {
+            const container = document.getElementById(containerId);
+            const toggleButton = document.getElementById(toggleButtonId);
+            if (!container) return;
+
+            if (container.style.display === 'none') {
+                container.style.display = 'block';
+                if (toggleButton) {
+                    toggleButton.innerHTML = '<i class="bi bi-eye-slash"></i> Hide';
+                }
+            } else {
+                container.style.display = 'none';
+                if (toggleButton) {
+                    toggleButton.innerHTML = '<i class="bi bi-eye"></i> Show';
+                }
+            }
+        }
+
+        /**
+         * Clear key content
+         */
+        function clearKey(textareaId) {
+            const textarea = document.getElementById(textareaId);
+            const statusBadge = document.getElementById(textareaId + '-status');
+            const infoElement = document.getElementById(textareaId + '-info');
+            const container = document.getElementById(textareaId + '-container');
+            const toggleButton = document.getElementById(textareaId + '-toggle');
+
+            if (!textarea) return;
+
+            // Confirm before clearing
+            if (textarea.value && !confirm('Are you sure you want to clear this key?')) {
+                return;
+            }
+
+            textarea.value = '';
+            textarea.classList.remove('is-valid', 'is-invalid');
+
+            // Update status badge
+            if (statusBadge) {
+                statusBadge.style.backgroundColor = '#6c757d';
+                statusBadge.style.color = '#fff';
+                statusBadge.innerHTML = '<i class="bi bi-dash-circle"></i> Not Set';
+            }
+
+            // Clear info text
+            if (infoElement) {
+                infoElement.innerHTML = '';
+            }
+
+            // Hide container
+            if (container) {
+                container.style.display = 'none';
+            }
+
+            // Update toggle button
+            if (toggleButton) {
+                toggleButton.innerHTML = '<i class="bi bi-eye"></i> Show';
+            }
+
+            console.log('✓ Key cleared');
+            BootstrapAlertHelper.info('Key cleared');
+        }
+
+        /**
+         * Validate key content
+         */
+        function validateKey(textareaId) {
+            const textarea = document.getElementById(textareaId);
+            const infoElement = document.getElementById(textareaId + '-info');
+            if (!textarea) return;
+
+            const content = textarea.value.trim();
+            const isValid = content.includes('-----BEGIN') && content.includes('-----END');
+
+            // Update visual feedback
+            if (content.length === 0) {
+                textarea.classList.remove('is-valid', 'is-invalid');
+            } else if (isValid) {
+                textarea.classList.remove('is-invalid');
+                textarea.classList.add('is-valid');
+            } else {
+                textarea.classList.remove('is-valid');
+                textarea.classList.add('is-invalid');
+            }
+
+            // Update info text
+            if (infoElement && content.length > 0) {
+                const icon = isValid ? '<i class="bi bi-check-circle text-success"></i>' : '<i class="bi bi-exclamation-circle text-danger"></i>';
+                infoElement.innerHTML = icon + ' ' + content.length + ' characters';
+            }
+        }
+
+        /**
          * Global function to save settings (called from settings_content.html)
          * Returns a JSON string (WKWebView doesn't support returning objects)
          * Format: '{"success": true/false, "message": "..."}'
@@ -621,6 +837,31 @@
                 payload.credentials = {
                     apikey: apikeyEl.value,
                     apisecret: apisecretEl.value
+                };
+                payload.update_frequency = parseInt(updateFreqEl.value);
+            } else if (brokerName === 'ibkr') {
+                const enabledEl = document.getElementById('ibkr-enabled');
+                const accessTokenEl = document.getElementById('ibkr-access-token');
+                const accessTokenSecretEl = document.getElementById('ibkr-access-token-secret');
+                const consumerKeyEl = document.getElementById('ibkr-consumer-key');
+                const dhPrimeEl = document.getElementById('ibkr-dh-prime');
+                const encryptionKeyEl = document.getElementById('ibkr-encryption-key');
+                const signatureKeyEl = document.getElementById('ibkr-signature-key');
+                const updateFreqEl = document.getElementById('ibkr-update-frequency');
+
+                if (!enabledEl || !accessTokenEl || !accessTokenSecretEl || !consumerKeyEl || !dhPrimeEl || !encryptionKeyEl || !signatureKeyEl || !updateFreqEl) {
+                    BootstrapAlertHelper.error('<strong>Error:</strong> IBKR configuration elements not found');
+                    return JSON.stringify({ success: false, message: 'IBKR configuration elements not found' });
+                }
+
+                payload.enabled = enabledEl.checked;
+                payload.credentials = {
+                    access_token: accessTokenEl.value,
+                    access_token_secret: accessTokenSecretEl.value,
+                    consumer_key: consumerKeyEl.value,
+                    dh_prime: dhPrimeEl.value,
+                    encryption_key: encryptionKeyEl.value || null,
+                    signature_key: signatureKeyEl.value || null
                 };
                 payload.update_frequency = parseInt(updateFreqEl.value);
             }

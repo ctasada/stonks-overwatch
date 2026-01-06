@@ -1,0 +1,224 @@
+{% load static %}
+<!-- IBKR Settings Section -->
+<div id="broker-ibkr" class="broker-section">
+    <div class="broker-header">
+        <img src="{% static 'brokers/ibkr.png' %}" alt="IBKR">
+        <h4 class="mb-0">Interactive Brokers (IBKR)</h4>
+    </div>
+
+    <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="ibkr-enabled"
+               {% if ibkr_config.enabled %}checked{% endif %}>
+        <label class="form-check-label" for="ibkr-enabled">
+            Enabled
+        </label>
+    </div>
+
+    <h6 class="fw-bold mt-4 mb-2">OAuth Credentials:</h6>
+    <hr class="my-2">
+
+    <div class="settings-form-group">
+        <label for="ibkr-access-token" class="required">Access Token</label>
+        <input type="text" class="form-control" id="ibkr-access-token" required
+               value="{% if ibkr_config.credentials.access_token %}{{ ibkr_config.credentials.access_token }}{% endif %}">
+    </div>
+
+    <div class="settings-form-group">
+        <label for="ibkr-access-token-secret" class="required">Access Token Secret</label>
+        <div class="input-group">
+            <input type="password" class="form-control" id="ibkr-access-token-secret" required
+                   value="{% if ibkr_config.credentials.access_token_secret %}{{ ibkr_config.credentials.access_token_secret }}{% endif %}">
+            <i class="bi bi-eye-slash-fill toggle-password" data-target="ibkr-access-token-secret"></i>
+        </div>
+    </div>
+
+    <div class="settings-form-group">
+        <label for="ibkr-consumer-key" class="required">
+            Consumer Key
+            <i class="bi bi-question-circle-fill text-muted ms-1"
+               data-bs-toggle="tooltip"
+               data-bs-placement="top"
+               title="Your IBKR OAuth consumer key. This identifies your application to the IBKR API."
+               style="cursor: help;"
+               aria-label="Help for Consumer Key"></i>
+        </label>
+        <input type="text" class="form-control" id="ibkr-consumer-key" required
+               value="{% if ibkr_config.credentials.consumer_key %}{{ ibkr_config.credentials.consumer_key }}{% endif %}">
+    </div>
+
+    <div class="settings-form-group">
+        <label for="ibkr-dh-prime" class="required">
+            DH Prime
+            <i class="bi bi-question-circle-fill text-muted ms-1"
+               data-bs-toggle="tooltip"
+               data-bs-placement="top"
+               title="Diffie-Hellman prime parameter for secure key exchange. Found in your IBKR OAuth configuration page."
+               style="cursor: help;"
+               aria-label="Help for DH Prime"></i>
+        </label>
+        <input type="text" class="form-control" id="ibkr-dh-prime" required
+               value="{% if ibkr_config.credentials.dh_prime %}{{ ibkr_config.credentials.dh_prime }}{% endif %}">
+    </div>
+
+    <div class="key-section-header d-flex align-items-center mt-4 mb-2">
+        <span class="key-section-title fw-bold required" id="encryption-key-label">
+            Encryption Key
+            <i class="bi bi-question-circle-fill text-muted ms-1"
+               data-bs-toggle="tooltip"
+               data-bs-placement="top"
+               title="RSA private key for encrypting OAuth requests. Upload a PEM file or paste the key content."
+               style="cursor: help;"
+               aria-label="Help for Encryption Key"></i>
+        </span>
+        <span class="badge status-badge ms-2 {% if ibkr_config.credentials.encryption_key %}status-badge-loaded{% else %}status-badge-not-set{% endif %}"
+              id="ibkr-encryption-key-status"
+              role="status"
+              aria-live="polite"
+              aria-labelledby="encryption-key-label">
+            {% if ibkr_config.credentials.encryption_key %}
+                <i class="bi bi-check-circle" aria-hidden="true"></i> Loaded
+            {% else %}
+                <i class="bi bi-dash-circle" aria-hidden="true"></i> Not Set
+            {% endif %}
+        </span>
+    </div>
+    <hr class="my-2">
+
+    <div class="settings-form-group">
+        <label for="ibkr-encryption-key">Private Key (PEM format)</label>
+        <div class="mb-2 d-flex gap-2 flex-wrap" role="group" aria-label="Encryption key actions">
+            <button type="button"
+                    class="btn btn-sm btn-key-action"
+                    data-action="load-key-file"
+                    data-target="ibkr-encryption-key-file"
+                    aria-label="Load encryption key from PEM file"
+                    title="Load key from PEM file">
+                <i class="bi bi-upload" aria-hidden="true"></i> Load from file
+            </button>
+            <input type="file"
+                   id="ibkr-encryption-key-file"
+                   accept=".pem,.key,.crt"
+                   class="visually-hidden"
+                   data-textarea-target="ibkr-encryption-key"
+                   aria-label="Encryption key file input">
+            <button type="button"
+                    class="btn btn-sm btn-key-action"
+                    id="ibkr-encryption-key-toggle"
+                    data-action="toggle-key"
+                    data-container="ibkr-encryption-key-container"
+                    aria-label="Show or hide encryption key"
+                    aria-controls="ibkr-encryption-key-container"
+                    aria-expanded="false"
+                    title="Toggle key visibility">
+                <i class="bi bi-eye" aria-hidden="true"></i> Show
+            </button>
+            <button type="button"
+                    class="btn btn-sm btn-key-action btn-key-danger"
+                    data-action="clear-key"
+                    data-target="ibkr-encryption-key"
+                    aria-label="Clear encryption key content"
+                    title="Clear key content">
+                <i class="bi bi-x-circle" aria-hidden="true"></i> Clear
+            </button>
+        </div>
+        <div id="ibkr-encryption-key-container" class="d-none">
+            <textarea class="form-control font-monospace key-textarea"
+                      id="ibkr-encryption-key"
+                      rows="6"
+                      aria-describedby="ibkr-encryption-key-help"
+                      placeholder="Paste your PEM key here (-----BEGIN PRIVATE KEY-----...)">{% if ibkr_config.credentials.encryption_key %}{{ ibkr_config.credentials.encryption_key }}{% endif %}</textarea>
+        </div>
+        <small class="form-text text-muted" id="ibkr-encryption-key-help">
+            <i class="bi bi-shield-lock" aria-hidden="true"></i> Load your private encryption key from a file or paste it directly
+        </small>
+    </div>
+
+    <div class="key-section-header d-flex align-items-center mt-4 mb-2">
+        <span class="key-section-title fw-bold required" id="signature-key-label">
+            Signature Key
+            <i class="bi bi-question-circle-fill text-muted ms-1"
+               data-bs-toggle="tooltip"
+               data-bs-placement="top"
+               title="RSA private key for signing OAuth requests. Upload a PEM file or paste the key content."
+               style="cursor: help;"
+               aria-label="Help for Signature Key"></i>
+        </span>
+        <span class="badge status-badge ms-2 {% if ibkr_config.credentials.signature_key %}status-badge-loaded{% else %}status-badge-not-set{% endif %}"
+              id="ibkr-signature-key-status"
+              role="status"
+              aria-live="polite"
+              aria-labelledby="signature-key-label">
+            {% if ibkr_config.credentials.signature_key %}
+                <i class="bi bi-check-circle" aria-hidden="true"></i> Loaded
+            {% else %}
+                <i class="bi bi-dash-circle" aria-hidden="true"></i> Not Set
+            {% endif %}
+        </span>
+    </div>
+    <hr class="my-2">
+
+    <div class="settings-form-group">
+        <label for="ibkr-signature-key">Private Key (PEM format)</label>
+        <div class="mb-2 d-flex gap-2 flex-wrap" role="group" aria-label="Signature key actions">
+            <button type="button"
+                    class="btn btn-sm btn-key-action"
+                    data-action="load-key-file"
+                    data-target="ibkr-signature-key-file"
+                    aria-label="Load signature key from PEM file"
+                    title="Load key from PEM file">
+                <i class="bi bi-upload" aria-hidden="true"></i> Load from file
+            </button>
+            <input type="file"
+                   id="ibkr-signature-key-file"
+                   accept=".pem,.key,.crt"
+                   class="visually-hidden"
+                   data-textarea-target="ibkr-signature-key"
+                   aria-label="Signature key file input">
+            <button type="button"
+                    class="btn btn-sm btn-key-action"
+                    id="ibkr-signature-key-toggle"
+                    data-action="toggle-key"
+                    data-container="ibkr-signature-key-container"
+                    aria-label="Show or hide signature key"
+                    aria-controls="ibkr-signature-key-container"
+                    aria-expanded="false"
+                    title="Toggle key visibility">
+                <i class="bi bi-eye" aria-hidden="true"></i> Show
+            </button>
+            <button type="button"
+                    class="btn btn-sm btn-key-action btn-key-danger"
+                    data-action="clear-key"
+                    data-target="ibkr-signature-key"
+                    aria-label="Clear signature key content"
+                    title="Clear key content">
+                <i class="bi bi-x-circle" aria-hidden="true"></i> Clear
+            </button>
+        </div>
+        <div id="ibkr-signature-key-container" class="d-none">
+            <textarea class="form-control font-monospace key-textarea"
+                      id="ibkr-signature-key"
+                      rows="6"
+                      aria-describedby="ibkr-signature-key-help"
+                      placeholder="Paste your PEM key here (-----BEGIN PRIVATE KEY-----...)">{% if ibkr_config.credentials.signature_key %}{{ ibkr_config.credentials.signature_key }}{% endif %}</textarea>
+        </div>
+        <small class="form-text text-muted" id="ibkr-signature-key-help">
+            <i class="bi bi-shield-lock" aria-hidden="true"></i> Load your private signature key from a file or paste it directly
+        </small>
+    </div>
+
+    <hr class="my-3">
+
+    <div class="settings-form-group">
+        <label>Update Frequency</label>
+        <div class="update-frequency-group">
+            <input type="number" class="form-control update-frequency-input" id="ibkr-update-frequency"
+                   min="15" max="60" step="1"
+                   value="{% if ibkr_config.update_frequency %}{{ ibkr_config.update_frequency }}{% else %}15{% endif %}">
+            <span>minutes</span>
+        </div>
+        <small class="form-text text-muted">
+            <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+            Minimum 15 minutes required due to IBKR API rate limits (15 requests/minute)
+        </small>
+    </div>
+</div>

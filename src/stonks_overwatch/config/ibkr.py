@@ -14,14 +14,87 @@ class IbkrCredentials(BaseCredentials):
     access_token_secret: str
     consumer_key: str
     dh_prime: str
-    encryption_key_fp: str
-    signature_key_fp: str
+    encryption_key_fp: Optional[str] = None
+    encryption_key: Optional[str] = None
+    signature_key_fp: Optional[str] = None
+    signature_key: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        """
+        Validate IBKR credentials after initialization.
+
+        Ensures that at least one encryption key option (file path or direct content)
+        and one signature key option are provided when credentials are not empty.
+
+        Raises:
+            ValueError: If encryption key is missing (neither encryption_key_fp nor encryption_key provided)
+            ValueError: If signature key is missing (neither signature_key_fp nor signature_key provided)
+
+        Note:
+            Validation is skipped if all required OAuth fields are empty, allowing for
+            empty credential objects during initialization.
+        """
+        # Skip validation if this is an empty credentials object (all required fields are empty)
+        # This handles the defensive case in from_dict when data is empty
+        if not (self.access_token or self.access_token_secret or self.consumer_key or self.dh_prime):
+            return
+
+        # Validate encryption key
+        self._validate_key_option(
+            key_value=self.encryption_key,
+            key_fp=self.encryption_key_fp,
+            key_name="encryption_key",
+            key_display_name="Encryption Key",
+        )
+
+        # Validate signature key
+        self._validate_key_option(
+            key_value=self.signature_key,
+            key_fp=self.signature_key_fp,
+            key_name="signature_key",
+            key_display_name="Signature Key",
+        )
+
+    def _validate_key_option(
+        self, key_value: Optional[str], key_fp: Optional[str], key_name: str, key_display_name: str
+    ) -> None:
+        """
+        Validate that at least one key option (file path or direct value) is provided.
+
+        Args:
+            key_value: Direct key value (PEM content)
+            key_fp: File path to key file
+            key_name: Technical name of the key field (e.g., 'encryption_key')
+            key_display_name: User-friendly display name (e.g., 'Encryption Key')
+
+        Raises:
+            ValueError: If neither key option is provided or both are empty/whitespace
+        """
+        has_key = bool(key_fp and key_fp.strip()) or bool(key_value and key_value.strip())
+        if not has_key:
+            raise ValueError(
+                f"IBKR {key_display_name} is required. Please provide either:\n"
+                f"  • '{key_name}_fp': Path to your PEM file, OR\n"
+                f"  • '{key_name}': Direct PEM content"
+            )
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "IbkrCredentials":
         if not data:
-            return cls("", "", "", "", "", "")
-        return cls(**data)
+            return cls("", "", "", "")
+        # Extract only the fields that exist in the dataclass
+        valid_fields = {
+            "access_token",
+            "access_token_secret",
+            "consumer_key",
+            "dh_prime",
+            "encryption_key_fp",
+            "encryption_key",
+            "signature_key_fp",
+            "signature_key",
+        }
+        filtered_data = {k: v for k, v in data.items() if k in valid_fields}
+        return cls(**filtered_data)
 
 
 class IbkrConfig(BaseConfig):
