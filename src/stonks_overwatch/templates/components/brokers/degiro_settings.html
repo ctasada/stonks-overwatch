@@ -8,7 +8,7 @@
 
     <div class="form-check mb-3">
         <input class="form-check-input" type="checkbox" id="degiro-enabled"
-               {% if degiro_config.enabled %}checked{% endif %} disabled>
+               {% if degiro_config.enabled %}checked{% endif %}>
         <label class="form-check-label" for="degiro-enabled">
             Enabled
         </label>
@@ -35,9 +35,8 @@
     <div class="settings-form-group">
         <label for="degiro-totp">TOTP Secret Key</label>
         <div class="input-group">
-            <input type="password" class="form-control" id="degiro-totp"
-                   value="{% if degiro_config.credentials.totp_secret_key %}{{ degiro_config.credentials.totp_secret_key }}{% endif %}"
-                   oninput="updateVerificationCode('degiro')">
+            <input type="password" class="form-control totp-input" id="degiro-totp" data-broker="degiro"
+                   value="{% if degiro_config.credentials.totp_secret_key %}{{ degiro_config.credentials.totp_secret_key }}{% endif %}">
             <i class="bi bi-eye-slash-fill toggle-password" data-target="degiro-totp"></i>
         </div>
     </div>
@@ -65,5 +64,9 @@
                    value="{% if degiro_config.update_frequency %}{{ degiro_config.update_frequency }}{% else %}5{% endif %}">
             <span>minutes</span>
         </div>
+        <small class="form-text text-muted">
+            <i class="bi bi-info-circle" aria-hidden="true"></i>
+            Recommended: 5-15 minutes for optimal API performance
+        </small>
     </div>
 </div>

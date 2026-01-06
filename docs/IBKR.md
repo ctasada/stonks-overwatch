@@ -104,8 +104,8 @@ mkdir -p config/ibkr_certs
       "access_token_secret": "YOUR_ACCESS_TOKEN_SECRET",
       "consumer_key": "YOUR_CONSUMER_KEY",
       "dh_prime": "YOUR_DH_PRIME_NUMBER",
-      "encryption_key_fp": "config/ibkr_certs/private_encryption.pem",
-      "signature_key_fp": "config/ibkr_certs/private_signature.pem"
+      "encryption_key_fp": "~/Documents/ibkr/private_encryption.pem",
+      "signature_key_fp": "~/Documents/ibkr/private_signature.pem"
     }
   }
 }
@@ -124,8 +124,8 @@ mkdir -p config/ibkr_certs
       "access_token_secret": "YOUR_ACCESS_TOKEN_SECRET",
       "consumer_key": "YOUR_CONSUMER_KEY",
       "dh_prime": "YOUR_DH_PRIME_NUMBER",
-      "encryption_key_fp": "config/ibkr_certs/private_encryption.pem",
-      "signature_key_fp": "config/ibkr_certs/private_signature.pem"
+      "encryption_key_fp": "~/Documents/ibkr/private_encryption.pem",
+      "signature_key_fp": "~/Documents/ibkr/private_signature.pem"
     },
     "start_date": "2020-01-01",
     "update_frequency_minutes": 15
@@ -142,10 +142,14 @@ mkdir -p config/ibkr_certs
 | `credentials.access_token_secret` | string | *required* | OAuth access token secret |
 | `credentials.consumer_key` | string | *required* | OAuth consumer key |
 | `credentials.dh_prime` | string | *required* | Diffie-Hellman prime number |
-| `credentials.encryption_key_fp` | string | *required* | Path to encryption private key |
-| `credentials.signature_key_fp` | string | *required* | Path to signature private key |
+| `credentials.encryption_key_fp` | string | *optional* | **Option 1:** Path to encryption private key (supports `~/path`, `./path`, or `/absolute/path`) |
+| `credentials.encryption_key` | string | *optional* | **Option 2:** Direct PEM key content for encryption |
+| `credentials.signature_key_fp` | string | *optional* | **Option 1:** Path to signature private key (supports `~/path`, `./path`, or `/absolute/path`) |
+| `credentials.signature_key` | string | *optional* | **Option 2:** Direct PEM key content for signature |
 | `start_date` | string | `2020-01-01` | Portfolio tracking start date |
-| `update_frequency_minutes` | integer | `15` | Data refresh interval in minutes |
+| `update_frequency_minutes` | integer | `15` | Data refresh interval in minutes (minimum 15) |
+
+**Note:** For encryption and signature keys, provide **either** the file path (`*_fp`) **or** the direct key content (`*_key`), not both. Direct key values take precedence if both are provided.
 
 ---
 

@@ -1,6 +1,6 @@
 {% load static %}
 <!-- Bitvavo Settings Section -->
-<div id="broker-bitvavo" class="broker-section" style="display: none;">
+<div id="broker-bitvavo" class="broker-section">
     <div class="broker-header">
         <img src="{% static 'brokers/bitvavo.png' %}" alt="Bitvavo">
         <h4 class="mb-0">Bitvavo</h4>
@@ -18,13 +18,13 @@
     <hr class="my-2">
 
     <div class="settings-form-group">
-        <label for="bitvavo-apikey">API Key</label>
+        <label for="bitvavo-apikey" class="required">API Key</label>
         <input type="text" class="form-control" id="bitvavo-apikey"
                value="{% if bitvavo_config.credentials.apikey %}{{ bitvavo_config.credentials.apikey }}{% endif %}">
     </div>
 
     <div class="settings-form-group">
-        <label for="bitvavo-apisecret">API Secret</label>
+        <label for="bitvavo-apisecret" class="required">API Secret</label>
         <div class="input-group">
             <input type="password" class="form-control" id="bitvavo-apisecret"
                    value="{% if bitvavo_config.credentials.apisecret %}{{ bitvavo_config.credentials.apisecret }}{% endif %}">
@@ -42,5 +42,9 @@
                    value="{% if bitvavo_config.update_frequency %}{{ bitvavo_config.update_frequency }}{% else %}5{% endif %}">
             <span>minutes</span>
         </div>
+        <small class="form-text text-muted">
+            <i class="bi bi-info-circle" aria-hidden="true"></i>
+            Recommended: 5-15 minutes for optimal API performance
+        </small>
     </div>
 </div>

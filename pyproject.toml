@@ -22,7 +22,7 @@ dependencies = [
     "yfinance >= 1.0",
     "iso10383 >=2025.2.10",
     "requests >=2.32.4",
-    "ibind[oauth] >=0.1.21",
+    "ibind[oauth] @ git+https://github.com/ctasada/ibind.git@ctasada/oauth1-support-key-content",
     "cryptography >=45.0.6",
     "packaging >=25.0",
     "python-dateutil >=2.9.0.post0",

@@ -42,6 +42,7 @@ class SettingsView(View):
         # Load broker configurations
         degiro_config = self.repository.get_broker_by_name("degiro")
         bitvavo_config = self.repository.get_broker_by_name("bitvavo")
+        ibkr_config = self.repository.get_broker_by_name("ibkr")
 
         # Handle dark mode (for native app WebView)
         dark_mode_param = request.GET.get("dark_mode", "0")
@@ -52,6 +53,7 @@ class SettingsView(View):
         context = {
             "degiro_config": degiro_config,
             "bitvavo_config": bitvavo_config,
+            "ibkr_config": ibkr_config,
             "is_dark_mode": is_dark_mode,
             "is_standalone": not is_ajax_request,  # Wrap in HTML structure for non-AJAX requests
             "bg_color": theme_colors["bg_color"],
@@ -70,7 +72,7 @@ class SettingsView(View):
 
         Expected JSON payload for saving configuration:
         {
-            "broker_name": "degiro" | "bitvavo",
+            "broker_name": "degiro" | "bitvavo" | "ibkr",
             "enabled": true | false,
             "credentials": {
                 "username": "...",
@@ -103,11 +105,13 @@ class SettingsView(View):
             broker_name = data.get("broker_name")
 
             if not broker_name:
+                self.logger.error("broker_name is missing from request data")
                 return JsonResponse({"error": "broker_name is required"}, status=400)
 
             broker_config = self.repository.get_broker_by_name(broker_name)
 
             if not broker_config:
+                self.logger.error(f"Broker '{broker_name}' not found in database")
                 return JsonResponse({"error": f"Broker '{broker_name}' not found"}, status=404)
 
             # Update credentials if provided
@@ -124,8 +128,8 @@ class SettingsView(View):
 
             # Save configuration
             self.repository.save_broker_configuration(broker_config)
-
             self.logger.info(f"Configuration saved successfully for broker: {broker_name}")
+
             return JsonResponse({"success": True, "message": "Configuration saved successfully"})
 
         except json.JSONDecodeError:

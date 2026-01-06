@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 from datetime import datetime, timezone as dt_timezone
 from typing import Optional
@@ -54,6 +55,32 @@ class IbkrService:
         ibkr_credentials = ibkr_config.get_credentials
 
         if ibkr_credentials:
+            # Handle encryption key: prefer direct value over file path
+            encryption_key_value = ibkr_credentials.encryption_key
+            encryption_key_path = None
+            if not encryption_key_value and ibkr_credentials.encryption_key_fp:
+                # Expand paths to handle ~ and relative paths
+                encryption_key_path = os.path.abspath(os.path.expanduser(ibkr_credentials.encryption_key_fp))
+                # Validate file exists
+                if not os.path.exists(encryption_key_path):
+                    self.logger.warning(
+                        f"Encryption key file not found: {encryption_key_path}. "
+                        "Authentication may fail if the path is incorrect."
+                    )
+
+            # Handle signature key: prefer direct value over file path
+            signature_key_value = ibkr_credentials.signature_key
+            signature_key_path = None
+            if not signature_key_value and ibkr_credentials.signature_key_fp:
+                # Expand paths to handle ~ and relative paths
+                signature_key_path = os.path.abspath(os.path.expanduser(ibkr_credentials.signature_key_fp))
+                # Validate file exists
+                if not os.path.exists(signature_key_path):
+                    self.logger.warning(
+                        f"Signature key file not found: {signature_key_path}. "
+                        "Authentication may fail if the path is incorrect."
+                    )
+
             self.client = IbkrClient(
                 use_oauth=True,
                 oauth_config=OAuth1aConfig(
@@ -61,8 +88,10 @@ class IbkrService:
                     access_token_secret=ibkr_credentials.access_token_secret,
                     consumer_key=ibkr_credentials.consumer_key,
                     dh_prime=ibkr_credentials.dh_prime,
-                    encryption_key_fp=ibkr_credentials.encryption_key_fp,
-                    signature_key_fp=ibkr_credentials.signature_key_fp,
+                    encryption_key=encryption_key_value,
+                    encryption_key_fp=encryption_key_path,
+                    signature_key=signature_key_value,
+                    signature_key_fp=signature_key_path,
                     # Disable OAuth shutdown due to issues in the way SIGTERM is managed.
                     # The StonksOverwatchConfig is registering the SIGTERM signal and shutting down the OAuth
                     shutdown_oauth=shutdown_oauth,

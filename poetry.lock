@@ -1349,18 +1349,23 @@ description = "IBind is a REST and WebSocket client library for Interactive Brok
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
-files = [
-    {file = "ibind-0.1.21.tar.gz", hash = "sha256:4350e4720750bb6ce80ca5d3bfd75e58fb2f0b382a4f1c2828760c0b91b425da"},
-]
+files = []
+develop = false
 
 [package.dependencies]
-pycryptodome = {version = ">=3.21", optional = true, markers = "extra == \"oauth\""}
+pycryptodome = {version = ">=3.21", optional = true}
 requests = ">=2.31"
-urllib3 = {version = ">=2.3", optional = true, markers = "extra == \"oauth\""}
+urllib3 = {version = ">=2.3", optional = true}
 websocket-client = ">=1.7"
 
 [package.extras]
 oauth = ["pycryptodome (>=3.21)", "urllib3 (>=2.3)"]
+
+[package.source]
+type = "git"
+url = "https://github.com/ctasada/ibind.git"
+reference = "ctasada/oauth1-support-key-content"
+resolved_reference = "cc1186fc699827553ea0f2048f4d009c3e4454fe"
 
 [[package]]
 name = "identify"
@@ -4276,4 +4281,4 @@ briefcase = ["asgiref", "toga"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "d1d52d98029044e50643be745cfe9429ed2fee4c29bd6cd95ca01b8c3f6bc907"
+content-hash = "bcc81bc3f93dd45aa89377fda1499ba47182d1ded60e75dd5b8ba50aaee3d973"
