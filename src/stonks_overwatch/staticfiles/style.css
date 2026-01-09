@@ -1731,11 +1731,23 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     font-family: inherit; /* Inherit from body */
     color: var(--settings-text-color, #000000);
     background: var(--settings-bg-color, transparent);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
 }
 
 /* Ensure settings styles work in modal context */
 .modal-body .settings-content {
     padding: var(--spacing-lg);
+    height: 70vh;
+    min-height: 400px;
+}
+
+.settings-layout {
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
 }
 
 /* Make settings modal wider to accommodate longer labels and form fields */
@@ -1763,10 +1775,15 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     border-right: 1px solid var(--settings-border-color, #dee2e6);
     padding-right: 1rem;
     margin-right: 1.5rem;
+    overflow-y: auto;
+    height: 100%;
 }
 
 .settings-main {
     flex: 1;
+    overflow-y: auto;
+    height: 100%;
+    padding-right: 0.5rem;
 }
 
 .broker-item {
