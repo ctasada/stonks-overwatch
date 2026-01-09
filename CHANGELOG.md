@@ -22,6 +22,8 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 ### Security
 
+- Routine dependency updates for security and stability
+
 ---
 
 ## [0.2.1] - 2025-12-26
