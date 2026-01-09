@@ -805,17 +805,18 @@
             };
 
             if (brokerName === 'degiro') {
+                const enabledEl = document.getElementById('degiro-enabled');
                 const usernameEl = document.getElementById('degiro-username');
                 const passwordEl = document.getElementById('degiro-password');
                 const totpEl = document.getElementById('degiro-totp');
                 const updateFreqEl = document.getElementById('degiro-update-frequency');
 
-                if (!usernameEl || !passwordEl || !totpEl || !updateFreqEl) {
+                if (!enabledEl || !usernameEl || !passwordEl || !totpEl || !updateFreqEl) {
                     BootstrapAlertHelper.error('<strong>Error:</strong> DEGIRO configuration elements not found');
                     return JSON.stringify({ success: false, message: 'DEGIRO configuration elements not found' });
                 }
 
-                // DEGIRO enabled checkbox is disabled (read-only), don't send it
+                payload.enabled = enabledEl.checked;
                 payload.credentials = {
                     username: usernameEl.value,
                     password: passwordEl.value,

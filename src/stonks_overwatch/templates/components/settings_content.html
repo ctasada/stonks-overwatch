@@ -229,12 +229,14 @@
 
             // Show the container if it was hidden
             if (container) {
-                container.style.display = 'block';
+                container.classList.remove('d-none');
+                container.style.display = '';
             }
 
             // Update toggle button
             if (toggleButton) {
                 toggleButton.innerHTML = '<i class="bi bi-eye-slash"></i> Hide';
+                toggleButton.setAttribute('aria-expanded', 'true');
             }
 
             // Update status badge
@@ -280,15 +282,21 @@
         const toggleButton = document.getElementById(toggleButtonId);
         if (!container) return;
 
-        if (container.style.display === 'none') {
-            container.style.display = 'block';
+        const isHidden = container.classList.contains('d-none');
+
+        if (isHidden) {
+            container.classList.remove('d-none');
+            container.style.display = '';
             if (toggleButton) {
                 toggleButton.innerHTML = '<i class="bi bi-eye-slash"></i> Hide';
+                toggleButton.setAttribute('aria-expanded', 'true');
             }
         } else {
+            container.classList.add('d-none');
             container.style.display = 'none';
             if (toggleButton) {
                 toggleButton.innerHTML = '<i class="bi bi-eye"></i> Show';
+                toggleButton.setAttribute('aria-expanded', 'false');
             }
         }
     }
@@ -451,16 +459,18 @@
         console.log('Initial payload:', payload);
 
         if (brokerName === 'degiro') {
+            const enabledEl = document.getElementById('degiro-enabled');
             const usernameEl = document.getElementById('degiro-username');
             const passwordEl = document.getElementById('degiro-password');
             const totpEl = document.getElementById('degiro-totp');
             const updateFreqEl = document.getElementById('degiro-update-frequency');
 
-            if (!usernameEl || !passwordEl || !totpEl || !updateFreqEl) {
+            if (!enabledEl || !usernameEl || !passwordEl || !totpEl || !updateFreqEl) {
                 showToast('DEGIRO settings are not available', 'error');
                 return JSON.stringify({ success: false, message: 'DEGIRO configuration elements not found' });
             }
 
+            payload.enabled = enabledEl.checked;
             payload.credentials = {
                 username: usernameEl.value,
                 password: passwordEl.value,
