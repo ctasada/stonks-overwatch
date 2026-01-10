@@ -53,8 +53,8 @@ class TestAuthenticationSessionManager(TestCase):
     def test_is_authenticated_with_valid_session(self):
         """Test is_authenticated returns True for valid authenticated session."""
         # Setup valid session
-        self.request.session["is_authenticated"] = True
-        self.request.session["session_id"] = "test_session_123"
+        self.request.session[AuthenticationSessionManager.SESSION_IS_AUTHENTICATED] = True
+        self.request.session[AuthenticationSessionManager.SESSION_ID_KEY] = "test_session_123"
 
         result = self.session_manager.is_authenticated(self.request)
 
@@ -62,7 +62,7 @@ class TestAuthenticationSessionManager(TestCase):
 
     def test_is_authenticated_with_missing_authentication_flag(self):
         """Test is_authenticated returns False when authentication flag is missing."""
-        self.request.session["session_id"] = "test_session_123"
+        self.request.session[AuthenticationSessionManager.SESSION_ID_KEY] = "test_session_123"
 
         result = self.session_manager.is_authenticated(self.request)
 
@@ -70,8 +70,8 @@ class TestAuthenticationSessionManager(TestCase):
 
     def test_is_authenticated_with_false_authentication_flag(self):
         """Test is_authenticated returns False when authentication flag is False."""
-        self.request.session["is_authenticated"] = False
-        self.request.session["session_id"] = "test_session_123"
+        self.request.session[AuthenticationSessionManager.SESSION_IS_AUTHENTICATED] = False
+        self.request.session[AuthenticationSessionManager.SESSION_ID_KEY] = "test_session_123"
 
         result = self.session_manager.is_authenticated(self.request)
 
@@ -79,7 +79,7 @@ class TestAuthenticationSessionManager(TestCase):
 
     def test_is_authenticated_with_missing_session_id(self):
         """Test is_authenticated returns False when session ID is missing."""
-        self.request.session["is_authenticated"] = True
+        self.request.session[AuthenticationSessionManager.SESSION_IS_AUTHENTICATED] = True
 
         result = self.session_manager.is_authenticated(self.request)
 
@@ -87,8 +87,8 @@ class TestAuthenticationSessionManager(TestCase):
 
     def test_is_authenticated_with_empty_session_id(self):
         """Test is_authenticated returns False when session ID is empty."""
-        self.request.session["is_authenticated"] = True
-        self.request.session["session_id"] = ""
+        self.request.session[AuthenticationSessionManager.SESSION_IS_AUTHENTICATED] = True
+        self.request.session[AuthenticationSessionManager.SESSION_ID_KEY] = ""
 
         result = self.session_manager.is_authenticated(self.request)
 
@@ -114,14 +114,14 @@ class TestAuthenticationSessionManager(TestCase):
         """Test set_authenticated sets authentication status to True."""
         self.session_manager.set_authenticated(self.request, True)
 
-        assert self.request.session["is_authenticated"] is True
+        assert self.request.session[AuthenticationSessionManager.SESSION_IS_AUTHENTICATED] is True
         assert hasattr(self.request.session, "modified")
 
     def test_set_authenticated_false(self):
         """Test set_authenticated sets authentication status to False."""
         self.session_manager.set_authenticated(self.request, False)
 
-        assert self.request.session["is_authenticated"] is False
+        assert self.request.session[AuthenticationSessionManager.SESSION_IS_AUTHENTICATED] is False
         assert hasattr(self.request.session, "modified")
 
     def test_set_authenticated_with_exception(self):
@@ -143,7 +143,7 @@ class TestAuthenticationSessionManager(TestCase):
     def test_get_session_id_exists(self):
         """Test get_session_id returns existing session ID."""
         test_session_id = "test_session_123"
-        self.request.session["session_id"] = test_session_id
+        self.request.session[AuthenticationSessionManager.SESSION_ID_KEY] = test_session_id
 
         result = self.session_manager.get_session_id(self.request)
 
@@ -161,13 +161,13 @@ class TestAuthenticationSessionManager(TestCase):
 
         self.session_manager.set_session_id(self.request, test_session_id)
 
-        assert self.request.session["session_id"] == test_session_id
+        assert self.request.session[AuthenticationSessionManager.SESSION_ID_KEY] == test_session_id
         assert hasattr(self.request.session, "modified")
 
     def test_get_credentials_exists(self):
         """Test get_credentials returns existing credentials."""
         credentials_data = {"username": "testuser", "password": "testpass", "remember_me": True}
-        self.request.session["credentials"] = credentials_data
+        self.request.session[AuthenticationSessionManager.SESSION_CREDENTIALS_KEY] = credentials_data
 
         result = self.session_manager.get_credentials(self.request)
 
@@ -186,7 +186,7 @@ class TestAuthenticationSessionManager(TestCase):
     def test_get_credentials_with_exception(self, mock_credentials):
         """Test get_credentials handles exceptions gracefully."""
         mock_credentials.from_dict.side_effect = Exception("Credential error")
-        self.request.session["credentials"] = {"username": "test"}
+        self.request.session[AuthenticationSessionManager.SESSION_CREDENTIALS_KEY] = {"username": "test"}
 
         result = self.session_manager.get_credentials(self.request)
 
@@ -203,7 +203,7 @@ class TestAuthenticationSessionManager(TestCase):
             request=self.request, username=username, password=password, remember_me=remember_me
         )
 
-        stored_credentials = self.request.session["credentials"]
+        stored_credentials = self.request.session[AuthenticationSessionManager.SESSION_CREDENTIALS_KEY]
         assert stored_credentials["username"] == username
         assert stored_credentials["password"] == password
         assert stored_credentials["remember_me"] == remember_me
@@ -216,32 +216,32 @@ class TestAuthenticationSessionManager(TestCase):
 
         self.session_manager.store_credentials(self.request, username, password)
 
-        stored_credentials = self.request.session["credentials"]
+        stored_credentials = self.request.session[AuthenticationSessionManager.SESSION_CREDENTIALS_KEY]
         assert stored_credentials["remember_me"] is False
 
     def test_set_totp_required_true(self):
         """Test set_totp_required sets TOTP requirement to True."""
         self.session_manager.set_totp_required(self.request, True)
 
-        assert self.request.session["show_otp"] is True
+        assert self.request.session[AuthenticationSessionManager.SESSION_SHOW_OTP_KEY] is True
         assert hasattr(self.request.session, "modified")
 
     def test_set_totp_required_false(self):
         """Test set_totp_required sets TOTP requirement to False."""
         self.session_manager.set_totp_required(self.request, False)
 
-        assert self.request.session["show_otp"] is False
+        assert self.request.session[AuthenticationSessionManager.SESSION_SHOW_OTP_KEY] is False
         assert hasattr(self.request.session, "modified")
 
     def test_set_totp_required_default(self):
         """Test set_totp_required with default value (True)."""
         self.session_manager.set_totp_required(self.request)
 
-        assert self.request.session["show_otp"] is True
+        assert self.request.session[AuthenticationSessionManager.SESSION_SHOW_OTP_KEY] is True
 
     def test_is_totp_required_true(self):
         """Test is_totp_required returns True when TOTP is required."""
-        self.request.session["show_otp"] = True
+        self.request.session[AuthenticationSessionManager.SESSION_SHOW_OTP_KEY] = True
 
         result = self.session_manager.is_totp_required(self.request)
 
@@ -249,7 +249,7 @@ class TestAuthenticationSessionManager(TestCase):
 
     def test_is_totp_required_false(self):
         """Test is_totp_required returns False when TOTP is not required."""
-        self.request.session["show_otp"] = False
+        self.request.session[AuthenticationSessionManager.SESSION_SHOW_OTP_KEY] = False
 
         result = self.session_manager.is_totp_required(self.request)
 
@@ -264,19 +264,19 @@ class TestAuthenticationSessionManager(TestCase):
     def test_clear_session(self):
         """Test clear_session removes all authentication data."""
         # Setup session with all authentication data
-        self.request.session["is_authenticated"] = True
-        self.request.session["session_id"] = "test_session"
-        self.request.session["credentials"] = {"username": "test"}
-        self.request.session["show_otp"] = True
+        self.request.session[AuthenticationSessionManager.SESSION_IS_AUTHENTICATED] = True
+        self.request.session[AuthenticationSessionManager.SESSION_ID_KEY] = "test_session"
+        self.request.session[AuthenticationSessionManager.SESSION_CREDENTIALS_KEY] = {"username": "test"}
+        self.request.session[AuthenticationSessionManager.SESSION_SHOW_OTP_KEY] = True
         self.request.session["other_data"] = "should_remain"
 
         self.session_manager.clear_session(self.request)
 
         # Authentication data should be removed
-        assert "is_authenticated" not in self.request.session
-        assert "session_id" not in self.request.session
-        assert "credentials" not in self.request.session
-        assert "show_otp" not in self.request.session
+        assert AuthenticationSessionManager.SESSION_IS_AUTHENTICATED not in self.request.session
+        assert AuthenticationSessionManager.SESSION_ID_KEY not in self.request.session
+        assert AuthenticationSessionManager.SESSION_CREDENTIALS_KEY not in self.request.session
+        assert AuthenticationSessionManager.SESSION_SHOW_OTP_KEY not in self.request.session
 
         # Other data should remain
         assert self.request.session["other_data"] == "should_remain"
@@ -285,10 +285,14 @@ class TestAuthenticationSessionManager(TestCase):
     def test_get_session_data_complete(self):
         """Test get_session_data returns complete session information."""
         # Setup session with all data
-        self.request.session["is_authenticated"] = True
-        self.request.session["session_id"] = "test_session_123456789"
-        self.request.session["credentials"] = {"username": "testuser", "password": "secret123", "remember_me": True}
-        self.request.session["show_otp"] = True
+        self.request.session[AuthenticationSessionManager.SESSION_IS_AUTHENTICATED] = True
+        self.request.session[AuthenticationSessionManager.SESSION_ID_KEY] = "test_session_123456789"
+        self.request.session[AuthenticationSessionManager.SESSION_CREDENTIALS_KEY] = {
+            "username": "testuser",
+            "password": "secret123",
+            "remember_me": True,
+        }
+        self.request.session[AuthenticationSessionManager.SESSION_SHOW_OTP_KEY] = True
 
         result = self.session_manager.get_session_data(self.request)
 
@@ -310,7 +314,7 @@ class TestAuthenticationSessionManager(TestCase):
 
     def test_get_session_data_with_short_session_id(self):
         """Test get_session_data handles short session IDs correctly."""
-        self.request.session["session_id"] = "short"
+        self.request.session[AuthenticationSessionManager.SESSION_ID_KEY] = "short"
 
         result = self.session_manager.get_session_data(self.request)
 

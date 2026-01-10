@@ -15,6 +15,7 @@ from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 from stonks_overwatch.core.factories.broker_registry import BrokerRegistry
 from stonks_overwatch.utils.core.constants import AuthenticationErrorMessages, LogMessages
 from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.utils.core.session_keys import SessionKeys
 
 
 class AuthenticationMiddleware:
@@ -110,7 +111,7 @@ class AuthenticationMiddleware:
                     continue
 
                 # Check broker-specific session key
-                broker_auth_key = f"{broker_name}_authenticated"
+                broker_auth_key = SessionKeys.get_authenticated_key(broker_name)
                 if request.session.get(broker_auth_key, False):
                     self.logger.debug(f"User authenticated with {broker_name}")
                     return True

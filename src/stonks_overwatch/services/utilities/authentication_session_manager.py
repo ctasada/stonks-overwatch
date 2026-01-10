@@ -14,6 +14,7 @@ from stonks_overwatch.config.degiro import DegiroCredentials
 from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.core.interfaces.session_manager import SessionManagerInterface
 from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.utils.core.session_keys import SessionKeys
 
 
 class AuthenticationSessionManager(SessionManagerInterface, BaseService):
@@ -29,11 +30,11 @@ class AuthenticationSessionManager(SessionManagerInterface, BaseService):
     """
 
     # Session keys for authentication data
-    SESSION_IS_AUTHENTICATED = "is_authenticated"
+    SESSION_IS_AUTHENTICATED = SessionKeys.get_authenticated_key("degiro")
     SESSION_ID_KEY = "session_id"
-    SESSION_CREDENTIALS_KEY = "credentials"
-    SESSION_SHOW_OTP_KEY = "show_otp"
-    SESSION_IN_APP_AUTH_KEY = "in_app_auth_required"
+    SESSION_CREDENTIALS_KEY = SessionKeys.get_credentials_key("degiro")
+    SESSION_SHOW_OTP_KEY = SessionKeys.get_totp_required_key("degiro")
+    SESSION_IN_APP_AUTH_KEY = SessionKeys.get_in_app_auth_required_key("degiro")
 
     logger = StonksLogger.get_logger("stonks_overwatch.auth_session_manager", "[AUTH|SESSION_MANAGER]")
 

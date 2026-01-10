@@ -12,6 +12,7 @@ from django.http import HttpRequest
 from stonks_overwatch.config.bitvavo import BitvavoConfig
 from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.utils.core.session_keys import SessionKeys
 
 
 class BitvavoAuthenticationService(BaseService):
@@ -114,8 +115,8 @@ class BitvavoAuthenticationService(BaseService):
                 return validation_result
 
             # Store credentials in session
-            request.session["bitvavo_authenticated"] = True
-            request.session["bitvavo_credentials"] = {
+            request.session[SessionKeys.get_authenticated_key("bitvavo")] = True
+            request.session[SessionKeys.get_credentials_key("bitvavo")] = {
                 "apikey": api_key,
                 "apisecret": api_secret,
             }
@@ -159,11 +160,11 @@ class BitvavoAuthenticationService(BaseService):
         """
         try:
             # Check session authentication
-            if not request.session.get("bitvavo_authenticated", False):
+            if not request.session.get(SessionKeys.get_authenticated_key("bitvavo"), False):
                 return False
 
             # Verify credentials are still valid
-            credentials = request.session.get("bitvavo_credentials")
+            credentials = request.session.get(SessionKeys.get_credentials_key("bitvavo"))
             if not credentials:
                 return False
 
@@ -188,10 +189,11 @@ class BitvavoAuthenticationService(BaseService):
         """
         try:
             # Clear session data
-            request.session.pop("bitvavo_authenticated", None)
-            request.session.pop("bitvavo_credentials", None)
-            request.session.pop("bitvavo_totp_required", None)
-            request.session.pop("bitvavo_in_app_auth_required", None)
+            # Clear session data
+            request.session.pop(SessionKeys.get_authenticated_key("bitvavo"), None)
+            request.session.pop(SessionKeys.get_credentials_key("bitvavo"), None)
+            request.session.pop(SessionKeys.get_totp_required_key("bitvavo"), None)
+            request.session.pop(SessionKeys.get_in_app_auth_required_key("bitvavo"), None)
 
             self.logger.info("Bitvavo user logged out successfully")
             return True

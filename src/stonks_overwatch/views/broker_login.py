@@ -10,6 +10,7 @@ from stonks_overwatch.core.factories.broker_registry import BrokerRegistry
 from stonks_overwatch.jobs.jobs_scheduler import JobsScheduler
 from stonks_overwatch.utils.core.constants import AuthenticationErrorMessages
 from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.utils.core.session_keys import SessionKeys
 
 
 class BrokerLogin(View):
@@ -177,20 +178,20 @@ class BrokerLogin(View):
         # For now, only DEGIRO supports TOTP
         if broker_name == "degiro":
             # Check session for TOTP requirement
-            return request.session.get(f"{broker_name}_totp_required", False)
+            return request.session.get(SessionKeys.get_totp_required_key(broker_name), False)
         return False
 
     def _check_in_app_auth_required(self, request: HttpRequest, broker_name: str) -> bool:
         """Check if in-app authentication is required for this broker."""
         # For now, only DEGIRO supports in-app auth
         if broker_name == "degiro":
-            return request.session.get(f"{broker_name}_in_app_auth_required", False)
+            return request.session.get(SessionKeys.get_in_app_auth_required_key(broker_name), False)
         return False
 
     def _check_authenticated(self, request: HttpRequest, broker_name: str) -> bool:
         """Check if user is authenticated for this broker."""
         # Check session for authentication status
-        return request.session.get(f"{broker_name}_authenticated", False)
+        return request.session.get(SessionKeys.get_authenticated_key(broker_name), False)
 
     def _extract_credentials(self, request: HttpRequest, broker_name: str) -> Optional[dict]:
         """Extract credentials from request based on broker type."""
@@ -299,9 +300,9 @@ class BrokerLogin(View):
 
             if auth_result.is_success:
                 # Clear any pending auth flags since authentication succeeded
-                request.session["degiro_authenticated"] = True
-                request.session["degiro_totp_required"] = False
-                request.session["degiro_in_app_auth_required"] = False
+                request.session[SessionKeys.get_authenticated_key("degiro")] = True
+                request.session[SessionKeys.get_totp_required_key("degiro")] = False
+                request.session[SessionKeys.get_in_app_auth_required_key("degiro")] = False
                 return {"success": True, "message": "Authentication successful"}
             else:
                 # Handle different authentication results
@@ -309,13 +310,13 @@ class BrokerLogin(View):
                     from stonks_overwatch.core.interfaces.authentication_service import AuthenticationResult
 
                     if auth_result.result == AuthenticationResult.TOTP_REQUIRED:
-                        request.session["degiro_totp_required"] = True
-                        request.session["degiro_in_app_auth_required"] = False
+                        request.session[SessionKeys.get_totp_required_key("degiro")] = True
+                        request.session[SessionKeys.get_in_app_auth_required_key("degiro")] = False
                         # Note: credentials are already stored by authentication service in the correct session key
                         return {"success": False, "message": "2FA code required"}
                     elif auth_result.result == AuthenticationResult.IN_APP_AUTHENTICATION_REQUIRED:
-                        request.session["degiro_in_app_auth_required"] = True
-                        request.session["degiro_totp_required"] = False
+                        request.session[SessionKeys.get_in_app_auth_required_key("degiro")] = True
+                        request.session[SessionKeys.get_totp_required_key("degiro")] = False
                         return {"success": False, "message": "In-app authentication required"}
 
                 return {"success": False, "message": auth_result.message or "Authentication failed"}
@@ -344,7 +345,7 @@ class BrokerLogin(View):
             )
 
             if auth_result["success"]:
-                request.session["bitvavo_authenticated"] = True
+                request.session[SessionKeys.get_authenticated_key("bitvavo")] = True
                 return {"success": True, "message": "Authentication successful"}
             else:
                 return {"success": False, "message": auth_result["message"]}
@@ -363,7 +364,7 @@ class BrokerLogin(View):
             # TODO: Implement actual IBKR authentication
             # For now, just validate that credentials are provided
             if len(username) >= 3 and len(password) >= 6:
-                request.session["ibkr_authenticated"] = True
+                request.session[SessionKeys.get_authenticated_key("ibkr")] = True
                 if credentials.get("remember_me"):
                     # TODO: Store encrypted credentials in database
                     pass
@@ -386,7 +387,7 @@ class BrokerLogin(View):
                 auth_result = auth_service.handle_in_app_authentication(request)
 
                 if auth_result.is_success:
-                    request.session["degiro_authenticated"] = True
+                    request.session[SessionKeys.get_authenticated_key("degiro")] = True
                     return redirect("dashboard")
                 else:
                     messages.error(request, auth_result.message or "In-app authentication failed")

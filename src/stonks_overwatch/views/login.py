@@ -7,6 +7,7 @@ from django.views import View
 from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 from stonks_overwatch.core.factories.broker_registry import BrokerRegistry
 from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.utils.core.session_keys import SessionKeys
 
 
 class Login(View):
@@ -218,7 +219,7 @@ class Login(View):
             )
 
             if auth_result.is_success:
-                request.session["degiro_authenticated"] = True
+                request.session[SessionKeys.get_authenticated_key("degiro")] = True
                 return {"success": True, "message": "Auto-authentication successful"}
             else:
                 return {"success": False, "message": auth_result.message or "Authentication failed"}
@@ -247,7 +248,7 @@ class Login(View):
             )
 
             if auth_result["success"]:
-                request.session["bitvavo_authenticated"] = True
+                request.session[SessionKeys.get_authenticated_key("bitvavo")] = True
                 return {"success": True, "message": "Auto-authentication successful"}
             else:
                 return {"success": False, "message": auth_result["message"]}
@@ -263,7 +264,7 @@ class Login(View):
             # TODO: Implement actual IBKR auto-authentication
             # For now, just validate that credentials exist
             if hasattr(credentials, "access_token") and credentials.access_token:
-                request.session["ibkr_authenticated"] = True
+                request.session[SessionKeys.get_authenticated_key("ibkr")] = True
                 return {"success": True, "message": "Auto-authentication successful"}
             else:
                 return {"success": False, "message": "Invalid credentials"}

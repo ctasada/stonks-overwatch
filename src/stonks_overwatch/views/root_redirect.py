@@ -5,6 +5,7 @@ from django.views import View
 from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 from stonks_overwatch.core.factories.broker_registry import BrokerRegistry
 from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.utils.core.session_keys import SessionKeys
 
 
 class RootRedirectView(View):
@@ -94,9 +95,9 @@ class RootRedirectView(View):
         try:
             # Check session for authentication status for any broker
             broker_sessions = [
-                "degiro_authenticated",
-                "bitvavo_authenticated",
-                "ibkr_authenticated",
+                SessionKeys.get_authenticated_key("degiro"),
+                SessionKeys.get_authenticated_key("bitvavo"),
+                SessionKeys.get_authenticated_key("ibkr"),
             ]
 
             for session_key in broker_sessions:
