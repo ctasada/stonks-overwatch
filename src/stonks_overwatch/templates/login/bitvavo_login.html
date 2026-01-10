@@ -5,69 +5,56 @@
 
 {% block broker_logo %}
 <img src="{% static 'logos/bitvavo.svg' %}" alt="Bitvavo" width="32" height="32" class="mb-2"
-     onerror="this.style.display='none';">
+    onerror="this.style.display='none';">
 {% endblock %}
 
 {% block page_header %}
 {% if show_loading %}
-    <h4 class="mb-0">Loading...</h4>
-    <small class="text-muted">Bitvavo</small>
+<h4 class="mb-0">Loading...</h4>
+<small class="text-muted">Bitvavo</small>
 {% else %}
-    <h4 class="mb-0">Login</h4>
-    <small class="text-muted">Bitvavo</small>
+<h4 class="mb-0">Login</h4>
+<small class="text-muted">Bitvavo</small>
 {% endif %}
 {% endblock %}
 
 {% block form_content %}
 {% if show_loading %}
-    <!-- Loading State -->
-    <div class="text-center py-4">
-        <div class="spinner-border text-primary mb-3" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-        <p class="text-muted">Updating your portfolio...</p>
-        <input type="hidden" name="update_portfolio" value="true">
-        <button type="submit" class="btn btn-success w-100">Continue to Dashboard</button>
-    </div>
-
+{% include 'components/loading_state.html' %}
 {% else %}
-    <!-- Login Form -->
-    <div class="form-group mb-3">
-        <label for="username" class="form-label">API Key</label>
-        <input type="text" class="form-control" id="username" name="username"
-               placeholder="Enter your Bitvavo API Key" required autofocus>
-    </div>
+<!-- Login Form -->
+<div class="form-group mb-3">
+    <label for="username" class="form-label">API Key</label>
+    <input type="text" class="form-control" id="username" name="username" placeholder="Enter your Bitvavo API Key"
+        required autofocus>
+</div>
 
-    {% include 'components/password_field.html' with field_id='password' field_name='password' label='API Secret' placeholder='Enter your Bitvavo API Secret' required=True %}
+{% include 'components/password_field.html' with field_id='password' field_name='password' label='API Secret'
+placeholder='Enter your Bitvavo API Secret' required=True %}
 
-    <div class="form-check mb-3">
-        <input class="form-check-input" type="checkbox" id="remember_me" name="remember_me" value="true">
-        <label class="form-check-label" for="remember_me">
-            Remember me
-        </label>
-    </div>
+<div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" id="remember_me" name="remember_me" value="true">
+    <label class="form-check-label" for="remember_me">
+        Remember me
+    </label>
+</div>
 
-    <button type="submit" class="btn btn-primary w-100">Login</button>
+<button type="submit" class="btn btn-primary w-100">Login</button>
 
-    <div class="mt-3">
-        <small class="text-muted">
-            <i class="bi bi-info-circle me-1"></i>
-            You can find your API credentials in your Bitvavo account settings.
-            <a href="https://account.bitvavo.com/api" target="_blank" class="text-decoration-none">
-                Get API keys <i class="bi bi-box-arrow-up-right"></i>
-            </a>
-        </small>
-    </div>
+<div class="mt-3">
+    <small class="text-muted">
+        <i class="bi bi-info-circle me-1"></i>
+        You can find your API credentials in your Bitvavo account settings.
+        <a href="https://account.bitvavo.com/api" target="_blank" class="text-decoration-none">
+            Get API keys <i class="bi bi-box-arrow-up-right"></i>
+        </a>
+    </small>
+</div>
 {% endif %}
 {% endblock %}
 
 {% block extra_js %}
 {% if show_loading %}
-<script>
-    // Auto-redirect to dashboard after a short delay
-    setTimeout(function() {
-        document.getElementById('login-form').submit();
-    }, 2000);
-</script>
+<script src="{% static 'js/auto_submit.js' %}"></script>
 {% endif %}
 {% endblock %}
