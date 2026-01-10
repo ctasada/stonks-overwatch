@@ -28,7 +28,7 @@
 
     <!-- Inline script to prevent sidebar flash - runs before DOM is rendered -->
     <script>
-        (function() {
+        (function () {
             // Check localStorage immediately when head loads
             if (localStorage.getItem('sidebarCollapsed') === 'true') {
                 // Add CSS to immediately apply collapsed state before page renders
@@ -43,14 +43,18 @@
         <div class="row flex-nowrap">
             <!-- Sidebar Navigation -->
             <div class="col-auto px-0 sticky-top" id="sidebar">
-                <nav class="navbar navbar-expand-sm navbar-dark bg-primary flex-column sticky-top min-vh-100 px-0 py-0" aria-label="Sidebar navigation">
+                <nav class="navbar navbar-expand-sm navbar-dark bg-primary flex-column sticky-top min-vh-100 px-0 py-0"
+                    aria-label="Sidebar navigation">
                     <!-- Brand/Title with Toggle -->
-                    <div class="navbar-brand d-flex align-items-center py-3 border-bottom border-light border-opacity-25 w-100 position-relative">
+                    <div
+                        class="navbar-brand d-flex align-items-center py-3 border-bottom border-light border-opacity-25 w-100 position-relative">
                         <!-- Toggle Button -->
-                        <button class="btn btn-sm btn-light position-absolute sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
+                        <button class="btn btn-sm btn-light position-absolute sidebar-toggle" id="sidebarToggle"
+                            type="button" aria-label="Toggle sidebar">
                             <i class="bi bi-chevron-left text-primary"></i>
                         </button>
-                        <img src="{% static 'stonks_overwatch.png' %}" alt="Stonks Overwatch Logo" class="me-3 sidebar-icon sidebar-logo" width="48" height="48">
+                        <img src="{% static 'stonks_overwatch.png' %}" alt="Stonks Overwatch Logo"
+                            class="me-3 sidebar-icon sidebar-logo" width="48" height="48">
                         <div class="sidebar-text fw-semibold text-center">
                             <div class="fs-6 lh-1">Stonks</div>
                             <div class="fs-6 lh-1">Overwatch</div>
@@ -60,7 +64,10 @@
                     <!-- Portfolio Selector -->
                     <div class="px-2 py-1 border-bottom border-light border-opacity-25 w-100">
                         <div class="dropdown" id="sidebar-portfolio-selector">
-                            <button class="sidebar-nav-link dropdown-toggle w-100 text-start d-flex align-items-center py-2" id="selectPortfolio" data-bs-toggle="dropdown" aria-expanded="false" data-bs-placement="right" title="Select Portfolio" data-tooltip-text="Select Portfolio">
+                            <button
+                                class="sidebar-nav-link dropdown-toggle w-100 text-start d-flex align-items-center py-2"
+                                id="selectPortfolio" data-bs-toggle="dropdown" aria-expanded="false"
+                                data-bs-placement="right" title="Select Portfolio" data-tooltip-text="Select Portfolio">
                                 <!-- The JScript block injects the selected portfolio via a GET Request -->
                             </button>
                             <ul class="dropdown-menu w-100 shadow" id="sidebar-portfolio-menu">
@@ -72,49 +79,68 @@
                     <!-- Navigation Links -->
                     <div class="navbar-nav flex-column w-100 px-2 py-2">
                         {% url 'dashboard' as url %}
-                        <a href="{{ url }}" class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white" data-page="dashboard" data-bs-toggle="tooltip" data-bs-placement="right" title="Dashboard">
+                        <a href="{{ url }}"
+                            class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white"
+                            data-page="dashboard" data-bs-toggle="tooltip" data-bs-placement="right" title="Dashboard">
                             <i class="bi bi-graph-up me-3 fs-5 sidebar-icon"></i>
                             <span class="sidebar-text">Dashboard</span>
                         </a>
 
                         {% url 'portfolio' as url %}
-                        <a href="{{ url }}" class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white" data-page="portfolio" data-bs-toggle="tooltip" data-bs-placement="right" title="Portfolio">
+                        <a href="{{ url }}"
+                            class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white"
+                            data-page="portfolio" data-bs-toggle="tooltip" data-bs-placement="right" title="Portfolio">
                             <i class="bi bi-briefcase-fill me-3 fs-5 sidebar-icon"></i>
                             <span class="sidebar-text">Portfolio</span>
                         </a>
 
                         {% url 'diversification' as url %}
-                        <a href="{{ url }}" class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white" data-page="diversification" data-bs-toggle="tooltip" data-bs-placement="right" title="Diversification">
+                        <a href="{{ url }}"
+                            class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white"
+                            data-page="diversification" data-bs-toggle="tooltip" data-bs-placement="right"
+                            title="Diversification">
                             <i class="bi bi-pie-chart-fill me-3 fs-5 sidebar-icon"></i>
                             <span class="sidebar-text">Diversification</span>
                         </a>
 
                         {% url 'dividends' as url %}
-                        <a href="{{ url }}" class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white" data-page="dividends" data-bs-toggle="tooltip" data-bs-placement="right" title="Dividends">
+                        <a href="{{ url }}"
+                            class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white"
+                            data-page="dividends" data-bs-toggle="tooltip" data-bs-placement="right" title="Dividends">
                             <i class="bi bi-cash-coin me-3 fs-5 sidebar-icon"></i>
                             <span class="sidebar-text">Dividends</span>
                         </a>
 
                         {% url 'fees' as url %}
-                        <a href="{{ url }}" class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white" data-page="fees" data-bs-toggle="tooltip" data-bs-placement="right" title="Fees">
+                        <a href="{{ url }}"
+                            class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white"
+                            data-page="fees" data-bs-toggle="tooltip" data-bs-placement="right" title="Fees">
                             <i class="bi bi-receipt me-3 fs-5 sidebar-icon"></i>
                             <span class="sidebar-text">Fees</span>
                         </a>
 
                         {% url 'deposits' as url %}
-                        <a href="{{ url }}" class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white" data-page="deposits" data-bs-toggle="tooltip" data-bs-placement="right" title="Deposits">
+                        <a href="{{ url }}"
+                            class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white"
+                            data-page="deposits" data-bs-toggle="tooltip" data-bs-placement="right" title="Deposits">
                             <i class="bi bi-piggy-bank-fill me-3 fs-5 sidebar-icon"></i>
                             <span class="sidebar-text">Deposits</span>
                         </a>
 
                         {% url 'transactions' as url %}
-                        <a href="{{ url }}" class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white" data-page="transactions" data-bs-toggle="tooltip" data-bs-placement="right" title="Transactions">
+                        <a href="{{ url }}"
+                            class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white"
+                            data-page="transactions" data-bs-toggle="tooltip" data-bs-placement="right"
+                            title="Transactions">
                             <i class="bi bi-arrow-left-right me-3 fs-5 sidebar-icon"></i>
                             <span class="sidebar-text">Transactions</span>
                         </a>
 
                         {% url 'account_overview' as url %}
-                        <a href="{{ url }}" class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white" data-page="account_overview" data-bs-toggle="tooltip" data-bs-placement="right" title="Account Statement">
+                        <a href="{{ url }}"
+                            class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white"
+                            data-page="account_overview" data-bs-toggle="tooltip" data-bs-placement="right"
+                            title="Account Statement">
                             <i class="bi bi-bank me-3 fs-5 sidebar-icon align-self-start"></i>
                             <span class="sidebar-text">
                                 <span class="d-block">Account</span>
@@ -126,25 +152,33 @@
                     <!-- Sticky Bottom Section -->
                     <div class="d-flex flex-column w-100 mt-auto">
                         <!-- Settings Dropdown Menu Entry -->
-                        <div class="dropdown px-2 py-1 border-top border-light border-opacity-25 w-100" id="sidebar-settings-selector">
-                            <a href="#" class="sidebar-nav-link dropdown-toggle w-100 text-start d-flex align-items-center py-2"
-                               id="select-settings" data-bs-toggle="dropdown" aria-expanded="false" data-bs-popper-config='{"placement":"right","modifiers":[{"name":"offset","options":{"offset":[0,2]}}]}' title="Configuration" data-tooltip-text="Configuration">
+                        <div class="dropdown px-2 py-1 border-top border-light border-opacity-25 w-100"
+                            id="sidebar-settings-selector">
+                            <a href="#"
+                                class="sidebar-nav-link dropdown-toggle w-100 text-start d-flex align-items-center py-2"
+                                id="select-settings" data-bs-toggle="dropdown" aria-expanded="false"
+                                data-bs-popper-config='{"placement":"right","modifiers":[{"name":"offset","options":{"offset":[0,2]}}]}'
+                                title="Configuration" data-tooltip-text="Configuration">
                                 <i class="bi bi-gear fs-5 sidebar-icon me-3"></i>
                                 <span class="sidebar-text">Configuration</span>
                             </a>
-                            <ul class="dropdown-menu shadow" id="sidebar-settings-menu" aria-labelledby="select-settings">
+                            <ul class="dropdown-menu shadow" id="sidebar-settings-menu"
+                                aria-labelledby="select-settings">
                                 <li>
-                                    <a class="dropdown-item d-flex align-items-center" href="#" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                                    <a class="dropdown-item d-flex align-items-center" href="#" data-bs-toggle="modal"
+                                        data-bs-target="#settingsModal">
                                         <i class="bi bi-sliders me-2"></i> Settings
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item d-flex align-items-center" href="#" data-bs-toggle="modal" data-bs-target="#releaseNotesModal">
+                                    <a class="dropdown-item d-flex align-items-center" href="#" data-bs-toggle="modal"
+                                        data-bs-target="#releaseNotesModal">
                                         <i class="bi bi-journal-text me-2"></i> Release Notes
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item d-flex align-items-center" href="{{ STONKS_OVERWATCH_SUPPORT_URL }}" target="_blank" rel="noopener">
+                                    <a class="dropdown-item d-flex align-items-center"
+                                        href="{{ STONKS_OVERWATCH_SUPPORT_URL }}" target="_blank" rel="noopener">
                                         <i class="bi bi-bug me-2"></i> Bug Report / Feedback
                                     </a>
                                 </li>
@@ -154,13 +188,14 @@
                         <div class="px-3 pt-3 pb-1 border-top border-light border-opacity-25 w-100">
                             {% is_connected_to_degiro as is_degiro_connected %}
                             {% get_connected_tooltip as get_connected_tooltip %}
-                            <div class="d-flex align-items-center text-white" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-html="true" title="{{ get_connected_tooltip }}">
-                                {%  if is_degiro_connected %}
-                                    <i class="bi-cloud-check-fill me-3 fs-5 text-success sidebar-icon"></i>
-                                    <span class="small sidebar-text">Connected</span>
+                            <div class="d-flex align-items-center text-white" data-bs-toggle="tooltip"
+                                data-bs-placement="right" data-bs-html="true" title="{{ get_connected_tooltip }}">
+                                {% if is_degiro_connected %}
+                                <i class="bi-cloud-check-fill me-3 fs-5 text-success sidebar-icon"></i>
+                                <span class="small sidebar-text">Connected</span>
                                 {% else %}
-                                    <i class="bi-cloud-slash-fill me-3 fs-5 text-warning sidebar-icon"></i>
-                                    <span class="small sidebar-text">Disconnected</span>
+                                <i class="bi-cloud-slash-fill me-3 fs-5 text-warning sidebar-icon"></i>
+                                <span class="small sidebar-text">Disconnected</span>
                                 {% endif %}
                             </div>
                         </div>
@@ -276,7 +311,7 @@
                         menuItem.innerHTML = menuItemHTML;
 
                         // Add click event listener to menuItem
-                        menuItem.querySelector("a").addEventListener("click", function(event) {
+                        menuItem.querySelector("a").addEventListener("click", function (event) {
                             event.preventDefault();  // Prevent default link behavior
 
                             let selectedPortfolio = this.getAttribute("data-value");
@@ -442,7 +477,7 @@
 
         // Ensure settings dropdown opens to the right
         // Bootstrap will auto-initialize, but we need to update Popper config after initialization
-        setTimeout(function() {
+        setTimeout(function () {
             const settingsDropdownElement = document.getElementById('select-settings');
             if (settingsDropdownElement) {
                 const dropdownInstance = bootstrap.Dropdown.getInstance(settingsDropdownElement);
@@ -451,7 +486,7 @@
                     dropdownInstance._popper.setOptions({
                         placement: 'right',
                         modifiers: [
-                                {
+                            {
                                 name: 'offset',
                                 options: {
                                     offset: [0, 2]
@@ -491,7 +526,8 @@
                 </div>
                 <div class="modal-footer border-0 pt-3">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="settings-save-btn" onclick="saveSettings()">Save</button>
+                    <button type="button" class="btn btn-primary" id="settings-save-btn"
+                        onclick="saveSettings()">Save</button>
                 </div>
             </div>
         </div>
@@ -499,10 +535,10 @@
 
     <script>
         // Release Notes Modal - Initialize after DOM is ready
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const releaseNotesModal = document.getElementById('releaseNotesModal');
             if (releaseNotesModal) {
-                releaseNotesModal.addEventListener('show.bs.modal', function() {
+                releaseNotesModal.addEventListener('show.bs.modal', function () {
                     const modalBody = this.querySelector('.modal-body');
 
                     // Only load if content is not already loaded
@@ -539,7 +575,7 @@
             // Settings Modal - Initialize after DOM is ready
             const settingsModal = document.getElementById('settingsModal');
             if (settingsModal) {
-                settingsModal.addEventListener('show.bs.modal', function() {
+                settingsModal.addEventListener('show.bs.modal', function () {
                     const modalBody = this.querySelector('.modal-body');
                     const settingsUrl = "{% url 'settings' %}";
 
@@ -553,7 +589,7 @@
                 });
 
                 // Clean up timers when modal is hidden
-                settingsModal.addEventListener('hidden.bs.modal', function() {
+                settingsModal.addEventListener('hidden.bs.modal', function () {
                     if (typeof clearVerificationTimers === 'function') {
                         clearVerificationTimers();
                     }
@@ -649,7 +685,7 @@
             const file = fileInput.files[0];
             const reader = new FileReader();
 
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 const content = e.target.result;
                 textarea.value = content;
 
@@ -682,7 +718,7 @@
                 BootstrapAlertHelper.success('✓ Key loaded: ' + file.name);
             };
 
-            reader.onerror = function() {
+            reader.onerror = function () {
                 console.error('✗ Error reading file:', file.name);
                 BootstrapAlertHelper.error('✗ Error reading file: ' + file.name);
             };
@@ -793,6 +829,13 @@
          * This allows both the modal and native app dialog to handle save completion
          */
         async function saveSettings() {
+            // Clear existing alerts to prevent stacking
+            const alertContainer = document.querySelector('.settings-content') || document.querySelector('.modal-body');
+            if (alertContainer) {
+                const alerts = alertContainer.querySelectorAll('.alert');
+                alerts.forEach(alert => alert.remove());
+            }
+
             const activeBroker = document.querySelector('.broker-item.active');
             if (!activeBroker) {
                 BootstrapAlertHelper.warning('Please select a broker');
@@ -805,17 +848,18 @@
             };
 
             if (brokerName === 'degiro') {
+                const enabledEl = document.getElementById('degiro-enabled');
                 const usernameEl = document.getElementById('degiro-username');
                 const passwordEl = document.getElementById('degiro-password');
                 const totpEl = document.getElementById('degiro-totp');
                 const updateFreqEl = document.getElementById('degiro-update-frequency');
 
-                if (!usernameEl || !passwordEl || !totpEl || !updateFreqEl) {
+                if (!enabledEl || !usernameEl || !passwordEl || !totpEl || !updateFreqEl) {
                     BootstrapAlertHelper.error('<strong>Error:</strong> DEGIRO configuration elements not found');
                     return JSON.stringify({ success: false, message: 'DEGIRO configuration elements not found' });
                 }
 
-                // DEGIRO enabled checkbox is disabled (read-only), don't send it
+                payload.enabled = enabledEl.checked;
                 payload.credentials = {
                     username: usernameEl.value,
                     password: passwordEl.value,
