@@ -139,6 +139,8 @@ class Login(View):
             Broker name if found, None otherwise
         """
         try:
+            from stonks_overwatch.services.utilities.credential_validator import CredentialValidator
+
             available_brokers = self._get_available_brokers()
 
             # Only attempt auto-auth for enabled brokers
@@ -152,7 +154,7 @@ class Login(View):
                     credentials = config.get_credentials
 
                     # Check if credentials are valid (not placeholders)
-                    if credentials and self._has_valid_credentials(broker_name, credentials):
+                    if credentials and CredentialValidator.has_valid_credentials(broker_name, credentials):
                         self.logger.debug(f"Found stored credentials for broker: {broker_name}")
                         return broker_name
 
@@ -161,55 +163,6 @@ class Login(View):
         except Exception as e:
             self.logger.error(f"Error checking for stored credentials: {str(e)}")
             return None
-
-    def _has_valid_credentials(self, broker_name: str, credentials) -> bool:
-        """
-        Check if broker credentials are valid (not placeholder values).
-
-        Args:
-            broker_name: Name of the broker
-            credentials: Broker credentials object
-
-        Returns:
-            True if credentials appear to be valid (not placeholders)
-        """
-        try:
-            if broker_name == "degiro":
-                return (
-                    hasattr(credentials, "username")
-                    and hasattr(credentials, "password")
-                    and credentials.username
-                    and credentials.password
-                    and credentials.username != "USERNAME"
-                    and credentials.password != "PASSWORD"
-                    and len(credentials.username) > 2
-                    and len(credentials.password) > 2
-                )
-            elif broker_name == "bitvavo":
-                return (
-                    hasattr(credentials, "apikey")
-                    and hasattr(credentials, "apisecret")
-                    and credentials.apikey
-                    and credentials.apisecret
-                    and credentials.apikey != "BITVAVO API KEY"
-                    and credentials.apisecret != "BITVAVO API SECRET"
-                    and len(credentials.apikey) > 10
-                    and len(credentials.apisecret) > 10
-                )
-            elif broker_name == "ibkr":
-                return (
-                    hasattr(credentials, "access_token")
-                    and credentials.access_token
-                    and credentials.access_token != "IBKR ACCESS TOKEN"
-                    and len(credentials.access_token) > 10
-                )
-            else:
-                # For unknown brokers, assume valid if credentials exist
-                return credentials is not None
-
-        except Exception as e:
-            self.logger.warning(f"Error validating credentials for {broker_name}: {str(e)}")
-            return False
 
     def _attempt_auto_authentication(self, request: HttpRequest, broker_name: str) -> dict:
         """

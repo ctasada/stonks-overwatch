@@ -59,6 +59,8 @@ class RootRedirectView(View):
             True if at least one broker is configured, enabled, and has valid credentials
         """
         try:
+            from stonks_overwatch.services.utilities.credential_validator import CredentialValidator
+
             registered_brokers = self.registry.get_registered_brokers()
 
             for broker_name in registered_brokers:
@@ -67,7 +69,7 @@ class RootRedirectView(View):
                     if config and config.is_enabled():
                         # Check if broker has valid credentials
                         credentials = config.get_credentials
-                        if credentials and self._has_valid_credentials(broker_name, credentials):
+                        if credentials and CredentialValidator.has_valid_credentials(broker_name, credentials):
                             return True
                 except Exception as e:
                     self.logger.warning(f"Error checking broker {broker_name}: {str(e)}")
@@ -77,55 +79,6 @@ class RootRedirectView(View):
 
         except Exception as e:
             self.logger.error(f"Error checking configured brokers: {str(e)}")
-            return False
-
-    def _has_valid_credentials(self, broker_name: str, credentials) -> bool:
-        """
-        Check if broker credentials are valid (not placeholder values).
-
-        Args:
-            broker_name: Name of the broker
-            credentials: Broker credentials object
-
-        Returns:
-            True if credentials appear to be valid (not placeholders)
-        """
-        try:
-            if broker_name == "degiro":
-                return (
-                    hasattr(credentials, "username")
-                    and hasattr(credentials, "password")
-                    and credentials.username
-                    and credentials.password
-                    and credentials.username != "USERNAME"
-                    and credentials.password != "PASSWORD"
-                    and len(credentials.username) > 2
-                    and len(credentials.password) > 2
-                )
-            elif broker_name == "bitvavo":
-                return (
-                    hasattr(credentials, "apikey")
-                    and hasattr(credentials, "apisecret")
-                    and credentials.apikey
-                    and credentials.apisecret
-                    and credentials.apikey != "BITVAVO API KEY"
-                    and credentials.apisecret != "BITVAVO API SECRET"
-                    and len(credentials.apikey) > 10
-                    and len(credentials.apisecret) > 10
-                )
-            elif broker_name == "ibkr":
-                return (
-                    hasattr(credentials, "access_token")
-                    and credentials.access_token
-                    and credentials.access_token != "IBKR ACCESS TOKEN"
-                    and len(credentials.access_token) > 10
-                )
-            else:
-                # For unknown brokers, assume valid if credentials exist
-                return credentials is not None
-
-        except Exception as e:
-            self.logger.warning(f"Error validating credentials for {broker_name}: {str(e)}")
             return False
 
     def _is_user_authenticated(self, request: HttpRequest) -> bool:
