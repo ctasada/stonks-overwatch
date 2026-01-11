@@ -381,6 +381,9 @@ class TestAuthenticationService(TestCase):
         """Test should_check_connection returns True when default credentials exist."""
         self.mock_credential_service.has_default_credentials.return_value = True
         self.mock_session_manager.get_session_id.return_value = None
+        # Mock TOTP and in-app auth checks
+        self.mock_session_manager.is_totp_required.return_value = False
+        self.mock_session_manager.is_in_app_auth_required.return_value = False
 
         result = self.auth_service.should_check_connection(self.request)
 
@@ -390,6 +393,9 @@ class TestAuthenticationService(TestCase):
         """Test should_check_connection returns True when session ID exists."""
         self.mock_credential_service.has_default_credentials.return_value = False
         self.mock_session_manager.get_session_id.return_value = "test_session_123"
+        # Mock TOTP and in-app auth checks
+        self.mock_session_manager.is_totp_required.return_value = False
+        self.mock_session_manager.is_in_app_auth_required.return_value = False
 
         result = self.auth_service.should_check_connection(self.request)
 
@@ -399,6 +405,33 @@ class TestAuthenticationService(TestCase):
         """Test should_check_connection returns False when no credentials or session ID."""
         self.mock_credential_service.has_default_credentials.return_value = False
         self.mock_session_manager.get_session_id.return_value = None
+        # Mock TOTP and in-app auth checks
+        self.mock_session_manager.is_totp_required.return_value = False
+        self.mock_session_manager.is_in_app_auth_required.return_value = False
+
+        result = self.auth_service.should_check_connection(self.request)
+
+        assert result is False
+
+    def test_should_check_connection_false_when_totp_required(self):
+        """Test should_check_connection returns False when TOTP is required."""
+        self.mock_credential_service.has_default_credentials.return_value = True
+        self.mock_session_manager.get_session_id.return_value = "test_session_123"
+        # TOTP is required - should skip connection check
+        self.mock_session_manager.is_totp_required.return_value = True
+        self.mock_session_manager.is_in_app_auth_required.return_value = False
+
+        result = self.auth_service.should_check_connection(self.request)
+
+        assert result is False
+
+    def test_should_check_connection_false_when_in_app_auth_required(self):
+        """Test should_check_connection returns False when in-app auth is required."""
+        self.mock_credential_service.has_default_credentials.return_value = True
+        self.mock_session_manager.get_session_id.return_value = "test_session_123"
+        # In-app auth is required - should skip connection check
+        self.mock_session_manager.is_totp_required.return_value = False
+        self.mock_session_manager.is_in_app_auth_required.return_value = True
 
         result = self.auth_service.should_check_connection(self.request)
 

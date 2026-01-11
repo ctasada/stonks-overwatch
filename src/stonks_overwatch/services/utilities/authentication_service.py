@@ -569,6 +569,18 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
             bool: True if connection should be checked, False otherwise
         """
         try:
+            # Don't check connection if TOTP is currently required
+            # This prevents infinite loops when TOTP is needed
+            if self.session_manager.is_totp_required(request):
+                self.logger.debug("Skipping connection check - TOTP required")
+                return False
+
+            # Don't check connection if in-app authentication is currently required
+            # This prevents infinite loops when in-app auth is needed
+            if self.session_manager.is_in_app_auth_required(request):
+                self.logger.debug("Skipping connection check - in-app authentication required")
+                return False
+
             # Check if we have default credentials or session credentials
             has_default = self.credential_service.has_default_credentials()
             session_id = self.session_manager.get_session_id(request)

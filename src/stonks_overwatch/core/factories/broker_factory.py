@@ -13,6 +13,7 @@ from stonks_overwatch.core.exceptions import ServiceFactoryException
 from stonks_overwatch.core.factories.broker_registry import (
     BrokerRegistry,
 )
+from stonks_overwatch.core.interfaces.authentication_service import AuthenticationServiceInterface
 from stonks_overwatch.core.interfaces.deposit_service import DepositServiceInterface
 from stonks_overwatch.core.interfaces.dividend_service import DividendServiceInterface
 from stonks_overwatch.core.interfaces.portfolio_service import PortfolioServiceInterface
@@ -297,6 +298,22 @@ class BrokerFactory:
             return None
 
         return self.create_service(broker_name, ServiceType.ACCOUNT, **kwargs)
+
+    def create_authentication_service(self, broker_name: str, **kwargs) -> Optional[AuthenticationServiceInterface]:
+        """
+        Create an authentication service instance for the specified broker.
+
+        Args:
+            broker_name: Name of the broker
+            **kwargs: Additional arguments to pass to service constructor
+
+        Returns:
+            Authentication service instance if supported, None otherwise
+        """
+        if not self._registry.broker_supports_service(broker_name, ServiceType.AUTHENTICATION):
+            return None
+
+        return self.create_service(broker_name, ServiceType.AUTHENTICATION, **kwargs)
 
     # Convenience methods
     def create_all_services(self, broker_name: str, **kwargs) -> Dict[ServiceType, Any]:

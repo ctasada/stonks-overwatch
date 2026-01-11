@@ -10,12 +10,18 @@ from typing import Optional
 from django.http import HttpRequest
 
 from stonks_overwatch.config.bitvavo import BitvavoConfig
+from stonks_overwatch.config.degiro import DegiroCredentials
+from stonks_overwatch.core.interfaces.authentication_service import (
+    AuthenticationResponse,
+    AuthenticationResult,
+    AuthenticationServiceInterface,
+)
 from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.session_keys import SessionKeys
 
 
-class BitvavoAuthenticationService(BaseService):
+class BitvavoAuthenticationService(BaseService, AuthenticationServiceInterface):
     """
     Authentication service for Bitvavo.
 
@@ -351,3 +357,139 @@ class BitvavoAuthenticationService(BaseService):
             self.logger.error(f"Error triggering portfolio update: {str(e)}")
             # Don't raise exception - authentication succeeded even if update failed
             # The scheduled job will retry later
+
+    # Implementation of AuthenticationServiceInterface methods (DeGiro-specific, not applicable for Bitvavo)
+
+    def check_degiro_connection(self, request: HttpRequest) -> AuthenticationResponse:
+        """
+        Check connection - not applicable for Bitvavo.
+
+        This method is part of the AuthenticationServiceInterface but is specific to DeGiro.
+        For Bitvavo, we don't have a similar connection check mechanism.
+
+        Returns:
+            AuthenticationResponse indicating this is not applicable
+        """
+        return AuthenticationResponse(
+            result=AuthenticationResult.CONFIGURATION_ERROR,
+            message="DeGiro connection check is not applicable for Bitvavo",
+        )
+
+    def handle_totp_authentication(self, request: HttpRequest, one_time_password: int) -> AuthenticationResponse:
+        """
+        Handle TOTP authentication - not applicable for Bitvavo.
+
+        Bitvavo uses API keys and doesn't require TOTP authentication.
+
+        Returns:
+            AuthenticationResponse indicating this is not applicable
+        """
+        return AuthenticationResponse(
+            result=AuthenticationResult.CONFIGURATION_ERROR,
+            message="TOTP authentication is not applicable for Bitvavo",
+        )
+
+    def handle_in_app_authentication(self, request: HttpRequest) -> AuthenticationResponse:
+        """
+        Handle in-app authentication - not applicable for Bitvavo.
+
+        Bitvavo uses API keys and doesn't require in-app authentication.
+
+        Returns:
+            AuthenticationResponse indicating this is not applicable
+        """
+        return AuthenticationResponse(
+            result=AuthenticationResult.CONFIGURATION_ERROR,
+            message="In-app authentication is not applicable for Bitvavo",
+        )
+
+    def is_degiro_enabled(self) -> bool:
+        """
+        Check if DeGiro is enabled - not applicable for Bitvavo.
+
+        Returns:
+            False (this is Bitvavo, not DeGiro)
+        """
+        return False
+
+    def is_offline_mode(self) -> bool:
+        """
+        Check if offline mode is enabled.
+
+        Returns:
+            True if Bitvavo is in offline mode
+        """
+        try:
+            return self.config.offline_mode if self.config else False
+        except Exception:
+            return False
+
+    def is_maintenance_mode_allowed(self) -> bool:
+        """
+        Check if maintenance mode access is allowed - not applicable for Bitvavo.
+
+        Returns:
+            False (Bitvavo doesn't have maintenance mode)
+        """
+        return False
+
+    def should_check_connection(self, request: HttpRequest) -> bool:
+        """
+        Determine if connection check should be performed.
+
+        For Bitvavo, we don't perform periodic connection checks like DeGiro does.
+
+        Returns:
+            False (no periodic connection checks for Bitvavo)
+        """
+        return False
+
+    def get_authentication_status(self, request: HttpRequest) -> dict:
+        """
+        Get authentication status for Bitvavo.
+
+        Returns:
+            Dictionary with authentication status information
+        """
+        try:
+            return {
+                "broker": "bitvavo",
+                "is_authenticated": self.is_user_authenticated(request),
+                "offline_mode": self.is_offline_mode(),
+                "has_credentials": request.session.get(SessionKeys.get_credentials_key("bitvavo")) is not None,
+            }
+        except Exception as e:
+            self.logger.error(f"Error getting authentication status: {str(e)}")
+            return {"broker": "bitvavo", "error": str(e)}
+
+    def handle_authentication_error(
+        self, request: HttpRequest, error: Exception, credentials: Optional[DegiroCredentials] = None
+    ) -> AuthenticationResponse:
+        """
+        Handle authentication errors.
+
+        Args:
+            request: HTTP request
+            error: The exception that occurred
+            credentials: Optional credentials (not used for Bitvavo)
+
+        Returns:
+            AuthenticationResponse with error details
+        """
+        error_msg = str(error).lower()
+
+        if "unauthorized" in error_msg or "invalid" in error_msg:
+            return AuthenticationResponse(
+                result=AuthenticationResult.INVALID_CREDENTIALS,
+                message="Invalid API credentials",
+            )
+        elif "rate limit" in error_msg:
+            return AuthenticationResponse(
+                result=AuthenticationResult.CONNECTION_ERROR,
+                message="Rate limit exceeded",
+            )
+        else:
+            return AuthenticationResponse(
+                result=AuthenticationResult.CONNECTION_ERROR,
+                message=f"Authentication error: {str(error)}",
+            )

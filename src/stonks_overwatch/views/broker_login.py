@@ -106,7 +106,13 @@ class BrokerLogin(View):
         # Extract credentials based on broker type
         credentials = self._extract_credentials(request, broker_name)
         if not credentials:
-            messages.error(request, AuthenticationErrorMessages.CREDENTIALS_REQUIRED)
+            if broker_name == "ibkr":
+                messages.error(
+                    request,
+                    "OAuth credentials are required (access token, access token secret, consumer key, and DH prime).",
+                )
+            else:
+                messages.error(request, AuthenticationErrorMessages.CREDENTIALS_REQUIRED)
             return self.get(request, broker_name)
 
         # Perform authentication
@@ -116,14 +122,9 @@ class BrokerLogin(View):
         if auth_result.get("success"):
             self.logger.info(f"Login successful for broker: {broker_name}")
 
-            # Only show loading screen for brokers that need portfolio initialization
-            if broker_name in ["degiro", "bitvavo"]:
-                # Instead of redirecting immediately, show loading screen first
-                # This allows the portfolio update to happen before going to dashboard
-                return self.get(request, broker_name)
-            else:
-                # For other brokers (like IBKR placeholder), redirect directly to dashboard
-                return redirect("dashboard")
+            # Show loading screen for all brokers to allow portfolio initialization
+            # This allows the portfolio update to happen before going to dashboard
+            return self.get(request, broker_name)
         else:
             # Add error message and re-render form
             messages.error(request, auth_result.get("message", "Authentication failed"))
@@ -160,10 +161,15 @@ class BrokerLogin(View):
             }
         elif broker_name == "ibkr":
             return {
-                "username_label": "Username",
-                "password_label": "Password",
-                "supports_2fa": True,
+                "access_token_label": "Access Token",
+                "access_token_secret_label": "Access Token Secret",
+                "consumer_key_label": "Consumer Key",
+                "dh_prime_label": "DH Prime",
+                "encryption_key_label": "Encryption Key (Optional)",
+                "signature_key_label": "Signature Key (Optional)",
+                "supports_2fa": False,
                 "supports_remember_me": True,
+                "auth_type": "oauth",  # Indicate this uses OAuth instead of username/password
             }
         else:
             return {
@@ -248,15 +254,23 @@ class BrokerLogin(View):
         return None
 
     def _extract_ibkr_credentials(self, request: HttpRequest) -> Optional[dict]:
-        """Extract IBKR credentials from request."""
-        username = request.POST.get("username")
-        password = request.POST.get("password")
+        """Extract IBKR OAuth credentials from request."""
+        access_token = request.POST.get("access_token")
+        access_token_secret = request.POST.get("access_token_secret")
+        consumer_key = request.POST.get("consumer_key")
+        dh_prime = request.POST.get("dh_prime")
+        encryption_key = request.POST.get("encryption_key")
+        signature_key = request.POST.get("signature_key")
         remember_me = request.POST.get("remember_me") == "true"
 
-        if username and password:
+        if access_token and access_token_secret and consumer_key and dh_prime:
             return {
-                "username": username,
-                "password": password,
+                "access_token": access_token,
+                "access_token_secret": access_token_secret,
+                "consumer_key": consumer_key,
+                "dh_prime": dh_prime,
+                "encryption_key": encryption_key,
+                "signature_key": signature_key,
                 "remember_me": remember_me,
             }
         return None
@@ -356,21 +370,42 @@ class BrokerLogin(View):
 
     def _authenticate_ibkr(self, request: HttpRequest, credentials: dict) -> dict:
         """Authenticate with Interactive Brokers."""
-        # Placeholder for IBKR authentication
         try:
-            username = credentials["username"]
-            password = credentials["password"]
+            # Extract credentials
+            access_token = credentials.get("access_token", "")
+            access_token_secret = credentials.get("access_token_secret", "")
+            consumer_key = credentials.get("consumer_key", "")
+            dh_prime = credentials.get("dh_prime", "")
+            encryption_key = credentials.get("encryption_key")
+            signature_key = credentials.get("signature_key")
+            remember_me = credentials.get("remember_me", False)
 
-            # TODO: Implement actual IBKR authentication
-            # For now, just validate that credentials are provided
-            if len(username) >= 3 and len(password) >= 6:
+            # Import IBKR authentication service directly (not registered in factory due to different auth pattern)
+            from stonks_overwatch.services.brokers.ibkr.services.authentication_service import (
+                IbkrAuthenticationService,
+            )
+
+            # Create authentication service with config
+            config = self.factory.create_config("ibkr")
+            auth_service = IbkrAuthenticationService(config=config)
+
+            # Authenticate using the service
+            result = auth_service.authenticate_user(
+                request=request,
+                access_token=access_token,
+                access_token_secret=access_token_secret,
+                consumer_key=consumer_key,
+                dh_prime=dh_prime,
+                encryption_key=encryption_key,
+                signature_key=signature_key,
+                remember_me=remember_me,
+            )
+
+            if result["success"]:
                 request.session[SessionKeys.get_authenticated_key("ibkr")] = True
-                if credentials.get("remember_me"):
-                    # TODO: Store encrypted credentials in database
-                    pass
                 return {"success": True, "message": "Authentication successful"}
             else:
-                return {"success": False, "message": "Invalid credentials"}
+                return {"success": False, "message": result["message"]}
 
         except Exception as e:
             self.logger.error(f"IBKR authentication error: {str(e)}")

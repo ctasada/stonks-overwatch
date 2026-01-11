@@ -416,10 +416,15 @@ class TestBrokerLoginView(TestCase):
     def test_get_auth_fields_ibkr(self):
         """Test _get_auth_fields returns correct fields for IBKR."""
         fields = self.view._get_auth_fields("ibkr")
-        assert fields["username_label"] == "Username"
-        assert fields["password_label"] == "Password"
-        assert fields["supports_2fa"] is True
+        assert fields["access_token_label"] == "Access Token"
+        assert fields["access_token_secret_label"] == "Access Token Secret"
+        assert fields["consumer_key_label"] == "Consumer Key"
+        assert fields["dh_prime_label"] == "DH Prime"
+        assert fields["encryption_key_label"] == "Encryption Key (Optional)"
+        assert fields["signature_key_label"] == "Signature Key (Optional)"
+        assert fields["supports_2fa"] is False
         assert fields["supports_remember_me"] is True
+        assert fields["auth_type"] == "oauth"
 
     def test_extract_degiro_credentials_valid_data(self):
         """Test _extract_degiro_credentials with valid form data."""
@@ -477,21 +482,42 @@ class TestBrokerLoginView(TestCase):
         assert credentials is None
 
     def test_extract_ibkr_credentials_valid_data(self):
-        """Test _extract_ibkr_credentials with valid form data."""
+        """Test _extract_ibkr_credentials with valid OAuth form data."""
         request = self.factory.post(
-            "/login/ibkr/", {"username": "ibkr_user", "password": "ibkr_pass", "remember_me": "true"}
+            "/login/ibkr/",
+            {
+                "access_token": "valid_access_token_123",
+                "access_token_secret": "valid_access_token_secret_123",
+                "consumer_key": "valid_consumer_key",
+                "dh_prime": "valid_dh_prime_value",
+                "encryption_key": "optional_encryption_key",
+                "signature_key": "optional_signature_key",
+                "remember_me": "true",
+            },
         )
 
         credentials = self.view._extract_ibkr_credentials(request)
 
         assert credentials is not None
-        assert credentials["username"] == "ibkr_user"
-        assert credentials["password"] == "ibkr_pass"
+        assert credentials["access_token"] == "valid_access_token_123"
+        assert credentials["access_token_secret"] == "valid_access_token_secret_123"
+        assert credentials["consumer_key"] == "valid_consumer_key"
+        assert credentials["dh_prime"] == "valid_dh_prime_value"
+        assert credentials["encryption_key"] == "optional_encryption_key"
+        assert credentials["signature_key"] == "optional_signature_key"
         assert credentials["remember_me"] is True
 
     def test_extract_ibkr_credentials_missing_required(self):
-        """Test _extract_ibkr_credentials with missing required fields returns None."""
-        request = self.factory.post("/login/ibkr/", {"username": "ibkr_user"})
+        """Test _extract_ibkr_credentials with missing required OAuth fields returns None."""
+        request = self.factory.post(
+            "/login/ibkr/",
+            {
+                "access_token": "valid_token",
+                "access_token_secret": "",  # Missing required field
+                "consumer_key": "valid_key",
+                "dh_prime": "valid_prime",
+            },
+        )
 
         credentials = self.view._extract_ibkr_credentials(request)
 
@@ -718,51 +744,115 @@ class TestBrokerLoginView(TestCase):
         # Note: Credentials are now stored by the authentication service itself
         # in the correct session key (not "degiro_credentials")
 
-    @patch("stonks_overwatch.views.broker_login.BrokerRegistry")
-    @patch("stonks_overwatch.views.broker_login.BrokerFactory")
-    def test_authenticate_ibkr_placeholder_validation(self, mock_factory_class, mock_registry_class):
-        """Test IBKR authentication placeholder validation logic."""
-        # Mock the registry and factory
-        mock_registry = Mock()
+    @patch("stonks_overwatch.services.brokers.ibkr.services.authentication_service.IbkrAuthenticationService")
+    def test_authenticate_ibkr_success(self, mock_ibkr_auth_class):
+        """Test IBKR authentication success with OAuth credentials."""
+        # Mock the view's factory
         mock_factory = Mock()
-        mock_registry_class.return_value = mock_registry
-        mock_factory_class.return_value = mock_factory
+        mock_config = Mock()
+        mock_factory.create_config.return_value = mock_config
+        self.view.factory = mock_factory
 
-        # Mock broker validation
+        # Mock IBKR authentication service
+        mock_auth_service = Mock()
+        mock_ibkr_auth_class.return_value = mock_auth_service
+        mock_auth_service.authenticate_user.return_value = {"success": True, "message": "Authentication successful"}
+
+        # Mock the registry
+        mock_registry = Mock()
         mock_registry.get_registered_brokers.return_value = ["ibkr"]
+        self.view.registry = mock_registry
 
-        # Test valid credentials (meets minimum length requirements)
-        request = self.factory.post("/login/ibkr/", {"username": "validuser", "password": "validpass123"})
+        # Test valid OAuth credentials
+        request = self.factory.post(
+            "/login/ibkr/",
+            {
+                "access_token": "valid_access_token_123",
+                "access_token_secret": "valid_access_token_secret_123",
+                "consumer_key": "valid_consumer_key",
+                "dh_prime": "valid_dh_prime_value",
+            },
+        )
         request.session = self.session
+        self._add_messages_to_request(request)
 
         response = self.view.post(request, "ibkr")
 
-        assert response.status_code == 302
-        assert response["Location"] == "/dashboard"
+        # IBKR now shows loading screen (200) like degiro/bitvavo
+        assert response.status_code == 200
+        # Should set authentication flag in session
         assert request.session.get("ibkr_authenticated") is True
+        # Verify authentication service was called
+        mock_auth_service.authenticate_user.assert_called_once()
 
-    @patch("django.contrib.messages.error")
-    @patch("stonks_overwatch.views.broker_login.BrokerRegistry")
-    @patch("stonks_overwatch.views.broker_login.BrokerFactory")
-    def test_authenticate_ibkr_invalid_credentials(self, mock_factory_class, mock_registry_class, mock_messages):
-        """Test IBKR authentication with invalid credentials."""
-        # Mock the registry and factory
-        mock_registry = Mock()
+    @patch("stonks_overwatch.services.brokers.ibkr.services.authentication_service.IbkrAuthenticationService")
+    def test_authenticate_ibkr_invalid_credentials(self, mock_ibkr_auth_class):
+        """Test IBKR authentication with invalid OAuth credentials."""
+        # Mock the view's factory
         mock_factory = Mock()
-        mock_registry_class.return_value = mock_registry
-        mock_factory_class.return_value = mock_factory
+        mock_config = Mock()
+        mock_factory.create_config.return_value = mock_config
+        self.view.factory = mock_factory
 
-        # Mock broker validation
+        # Mock IBKR authentication service
+        mock_auth_service = Mock()
+        mock_ibkr_auth_class.return_value = mock_auth_service
+        mock_auth_service.authenticate_user.return_value = {"success": False, "message": "Invalid OAuth credentials"}
+
+        # Mock the registry
+        mock_registry = Mock()
         mock_registry.get_registered_brokers.return_value = ["ibkr"]
+        self.view.registry = mock_registry
 
-        # Test invalid credentials (too short)
-        request = self.factory.post("/login/ibkr/", {"username": "ab", "password": "123"})
+        # Test invalid credentials (all required fields present but invalid)
+        request = self.factory.post(
+            "/login/ibkr/",
+            {
+                "access_token": "invalid_token",
+                "access_token_secret": "invalid_secret",
+                "consumer_key": "invalid_key",
+                "dh_prime": "invalid_prime",
+            },
+        )
         request.session = self.session
+        self._add_messages_to_request(request)
 
         response = self.view.post(request, "ibkr")
 
         assert response.status_code == 200
-        mock_messages.assert_called_once_with(request, "Invalid credentials")
+        # Verify authentication service was called with the invalid credentials
+        mock_auth_service.authenticate_user.assert_called_once()
+
+    @patch("django.contrib.messages.error")
+    def test_authenticate_ibkr_missing_credentials(self, mock_messages):
+        """Test IBKR authentication with missing OAuth credentials."""
+        # Mock the view's factory directly (should not be called)
+        mock_factory = Mock()
+        mock_auth_service = Mock()
+        mock_factory.create_authentication_service.return_value = mock_auth_service
+        self.view.factory = mock_factory
+
+        # Mock the registry
+        mock_registry = Mock()
+        mock_registry.get_registered_brokers.return_value = ["ibkr"]
+        self.view.registry = mock_registry
+
+        # Test missing credentials (empty required fields)
+        request = self.factory.post(
+            "/login/ibkr/", {"access_token": "", "access_token_secret": "", "consumer_key": "", "dh_prime": ""}
+        )
+        request.session = self.session
+        self._add_messages_to_request(request)
+
+        response = self.view.post(request, "ibkr")
+
+        assert response.status_code == 200
+        mock_messages.assert_called_once_with(
+            request, "OAuth credentials are required (access token, access token secret, consumer key, and DH prime)."
+        )
+
+        # Verify authentication service was NOT called since credentials were missing
+        mock_auth_service.authenticate_user.assert_not_called()
 
     @patch("django.contrib.messages.error")
     @patch("stonks_overwatch.services.brokers.bitvavo.services.authentication_service.BitvavoAuthenticationService")

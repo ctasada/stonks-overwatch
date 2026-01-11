@@ -11,6 +11,9 @@ from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.core.factories.broker_registry import BrokerRegistry, BrokerRegistryValidationError
 from stonks_overwatch.core.interfaces import (
     AccountServiceInterface,
+    AuthenticationResponse,
+    AuthenticationResult,
+    AuthenticationServiceInterface,
     DepositServiceInterface,
     DividendServiceInterface,
     FeeServiceInterface,
@@ -96,6 +99,46 @@ class ValidAccountService(AccountServiceInterface):
 
     def get_account_overview(self) -> List[AccountOverview]:
         return []
+
+
+class ValidAuthenticationService(AuthenticationServiceInterface):
+    """Valid authentication service that implements the interface."""
+
+    def is_user_authenticated(self, request) -> bool:
+        return True
+
+    def authenticate_user(self, request, username=None, password=None, one_time_password=None, remember_me=False):
+        return AuthenticationResponse(result=AuthenticationResult.SUCCESS)
+
+    def check_degiro_connection(self, request):
+        return AuthenticationResponse(result=AuthenticationResult.SUCCESS)
+
+    def handle_totp_authentication(self, request, one_time_password):
+        return AuthenticationResponse(result=AuthenticationResult.SUCCESS)
+
+    def handle_in_app_authentication(self, request):
+        return AuthenticationResponse(result=AuthenticationResult.SUCCESS)
+
+    def logout_user(self, request) -> None:
+        pass
+
+    def is_degiro_enabled(self) -> bool:
+        return True
+
+    def is_offline_mode(self) -> bool:
+        return False
+
+    def is_maintenance_mode_allowed(self) -> bool:
+        return True
+
+    def should_check_connection(self, request) -> bool:
+        return True
+
+    def get_authentication_status(self, request) -> dict:
+        return {"status": "authenticated"}
+
+    def handle_authentication_error(self, request, error, credentials=None):
+        return AuthenticationResponse(result=AuthenticationResult.UNKNOWN_ERROR)
 
 
 # Invalid service implementations that don't implement the correct interfaces
@@ -345,6 +388,7 @@ class TestServiceInterfaceValidationIntegration:
             dividend=ValidDividendService,
             fee=ValidFeeService,
             account=ValidAccountService,
+            authentication=ValidAuthenticationService,
         )
 
         # Verify broker is fully registered
@@ -359,11 +403,12 @@ class TestServiceInterfaceValidationIntegration:
         assert ServiceType.DIVIDEND in capabilities
         assert ServiceType.FEE in capabilities
         assert ServiceType.ACCOUNT in capabilities
+        assert ServiceType.AUTHENTICATION in capabilities
 
         # Verify interface validation passes
         validation_result = self.registry.validate_all_service_interfaces("completebroker")
         assert validation_result["valid"] is True
-        assert len(validation_result["validated_services"]) == 6
+        assert len(validation_result["validated_services"]) == 7
 
     def test_register_complete_broker_with_interface_validation(self):
         """Test register_complete_broker method includes interface validation."""

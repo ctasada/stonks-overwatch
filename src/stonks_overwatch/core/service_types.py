@@ -17,3 +17,4 @@ class ServiceType(Enum):
     DIVIDEND = "dividend"
     FEE = "fee"
     ACCOUNT = "account"
+    AUTHENTICATION = "authentication"

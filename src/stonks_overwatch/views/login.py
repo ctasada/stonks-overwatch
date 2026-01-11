@@ -59,11 +59,21 @@ class Login(View):
                 self.logger.info(f"Auto-authentication successful for {broker_to_auto_auth}")
                 return redirect("dashboard")
             else:
-                # Auto-auth failed, redirect to broker-specific login page
-                self.logger.info(f"Auto-authentication failed for {broker_to_auto_auth}, showing login page")
-                return redirect("broker_login", broker_name=broker_to_auto_auth)
+                # Auto-auth failed - check if it's due to TOTP/2FA requirement
+                if auth_result.get("requires_totp") or auth_result.get("requires_in_app_auth"):
+                    # TOTP or in-app auth required - redirect to broker-specific login page
+                    self.logger.info(
+                        f"Auto-authentication requires 2FA for {broker_to_auto_auth}, redirecting to broker login"
+                    )
+                    return redirect("broker_login", broker_name=broker_to_auto_auth)
+                else:
+                    # Other authentication failure - show broker selector so user can choose
+                    self.logger.info(
+                        f"Auto-authentication failed for {broker_to_auto_auth}: {auth_result.get('message')}"
+                    )
+                    self.logger.info("Showing broker selector for manual selection")
 
-        # No stored credentials found, show broker selector
+        # No stored credentials found or auto-auth failed (non-2FA), show broker selector
         return self._render_broker_selector(request)
 
     def post(self, request: HttpRequest) -> HttpResponse:
@@ -206,6 +216,7 @@ class Login(View):
         """Auto-authenticate with DEGIRO stored credentials."""
         try:
             from stonks_overwatch.core.authentication_locator import get_authentication_service
+            from stonks_overwatch.core.interfaces.authentication_service import AuthenticationResult
 
             auth_service = get_authentication_service()
 
@@ -222,7 +233,16 @@ class Login(View):
                 request.session[SessionKeys.get_authenticated_key("degiro")] = True
                 return {"success": True, "message": "Auto-authentication successful"}
             else:
-                return {"success": False, "message": auth_result.message or "Authentication failed"}
+                # Check if failure is due to TOTP requirement
+                if auth_result.result == AuthenticationResult.TOTP_REQUIRED:
+                    # TOTP required - this is expected, redirect to broker login for 2FA
+                    return {"success": False, "message": "TOTP authentication required", "requires_totp": True}
+                elif auth_result.result == AuthenticationResult.IN_APP_AUTHENTICATION_REQUIRED:
+                    # In-app auth required - redirect to broker login
+                    return {"success": False, "message": "In-app authentication required", "requires_in_app_auth": True}
+                else:
+                    # Other authentication failure
+                    return {"success": False, "message": auth_result.message or "Authentication failed"}
 
         except Exception as e:
             self.logger.error(f"DEGIRO auto-authentication error: {str(e)}")
@@ -259,15 +279,45 @@ class Login(View):
 
     def _auto_authenticate_ibkr(self, request: HttpRequest, credentials) -> dict:
         """Auto-authenticate with IBKR stored credentials."""
-        # Placeholder for IBKR auto-authentication
         try:
-            # TODO: Implement actual IBKR auto-authentication
-            # For now, just validate that credentials exist
-            if hasattr(credentials, "access_token") and credentials.access_token:
-                request.session[SessionKeys.get_authenticated_key("ibkr")] = True
-                return {"success": True, "message": "Auto-authentication successful"}
-            else:
-                return {"success": False, "message": "Invalid credentials"}
+            # Import IBKR authentication service directly (not registered in factory due to different auth pattern)
+            from stonks_overwatch.services.brokers.ibkr.services.authentication_service import (
+                IbkrAuthenticationService,
+            )
+
+            # Create authentication service with config
+            config = self.factory.create_config("ibkr")
+            auth_service = IbkrAuthenticationService(config=config)
+
+            # Check if user is already authenticated
+            if auth_service.is_user_authenticated(request):
+                return {"success": True, "message": "Already authenticated"}
+
+            # Extract credentials
+            access_token = getattr(credentials, "access_token", "")
+            access_token_secret = getattr(credentials, "access_token_secret", "")
+            consumer_key = getattr(credentials, "consumer_key", "")
+            dh_prime = getattr(credentials, "dh_prime", "")
+            encryption_key = getattr(credentials, "encryption_key", None)
+            signature_key = getattr(credentials, "signature_key", None)
+
+            # Validate that we have the required credentials
+            if not all([access_token, access_token_secret, consumer_key, dh_prime]):
+                return {"success": False, "message": "Missing required OAuth credentials"}
+
+            # Authenticate using the service
+            result = auth_service.authenticate_user(
+                request=request,
+                access_token=access_token,
+                access_token_secret=access_token_secret,
+                consumer_key=consumer_key,
+                dh_prime=dh_prime,
+                encryption_key=encryption_key,
+                signature_key=signature_key,
+                remember_me=True,  # Auto-auth implies stored credentials
+            )
+
+            return result
 
         except Exception as e:
             self.logger.error(f"IBKR auto-authentication error: {str(e)}")

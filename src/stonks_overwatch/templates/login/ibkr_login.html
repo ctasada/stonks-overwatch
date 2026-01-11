@@ -41,9 +41,7 @@
         placeholder="Enter your access token" required autofocus>
 </div>
 
-{% include 'components/password_field.html' with field_id='ibkr-access-token-secret' field_name='access_token_secret'
-label='Access Token Secret' placeholder='Enter your access token secret' required=True label_class='form-label required'
-%}
+{% include 'components/password_field.html' with field_id='ibkr-access-token-secret' field_name='access_token_secret' label='Access Token Secret' placeholder='Enter your access token secret' required=True label_class='form-label required' %}
 
 <div class="form-group mb-3">
     <label for="ibkr-consumer-key" class="form-label required">

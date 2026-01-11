@@ -8,6 +8,18 @@ initialization to ensure all configurations and services are available.
 
 from typing import Any, Dict, Optional
 
+# Initialize logger first to avoid undefined name errors
+try:
+    from stonks_overwatch.utils.core.logger import StonksLogger
+
+    logger = StonksLogger.get_logger("stonks_overwatch.core", "[REGISTRY_SETUP]")
+except Exception as e:
+    # Fallback to basic logging if StonksLogger fails
+    import logging
+
+    logger = logging.getLogger("stonks_overwatch.core.registry_setup")
+    logger.warning(f"Could not import StonksLogger, using basic logger: {e}")
+
 from stonks_overwatch.config.bitvavo import BitvavoConfig
 from stonks_overwatch.config.degiro import DegiroConfig
 from stonks_overwatch.config.ibkr import IbkrConfig
@@ -16,6 +28,16 @@ from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.services.brokers.bitvavo.services.account_service import (
     AccountOverviewService as BitvavoAccountService,
 )
+
+# Import authentication services with error handling
+try:
+    from stonks_overwatch.services.brokers.bitvavo.services.authentication_service import (
+        BitvavoAuthenticationService,
+    )
+except Exception as e:
+    logger.warning(f"Could not import BitvavoAuthenticationService: {e}")
+    BitvavoAuthenticationService = None
+
 from stonks_overwatch.services.brokers.bitvavo.services.deposit_service import DepositsService as BitvavoDepositService
 from stonks_overwatch.services.brokers.bitvavo.services.dividends_service import (
     DividendsService as BitvavoDividendsService,
@@ -30,6 +52,16 @@ from stonks_overwatch.services.brokers.bitvavo.services.transaction_service impo
 from stonks_overwatch.services.brokers.degiro.services.account_service import (
     AccountOverviewService as DeGiroAccountService,
 )
+
+# Import DeGiro authentication service with error handling
+try:
+    from stonks_overwatch.services.utilities.authentication_service import (
+        AuthenticationService as DeGiroAuthenticationService,
+    )
+except Exception as e:
+    logger.warning(f"Could not import DeGiroAuthenticationService: {e}")
+    DeGiroAuthenticationService = None
+
 from stonks_overwatch.services.brokers.degiro.services.deposit_service import DepositsService as DeGiroDepositService
 from stonks_overwatch.services.brokers.degiro.services.dividend_service import DividendsService as DeGiroDividendService
 from stonks_overwatch.services.brokers.degiro.services.fee_service import FeesService as DeGiroFeeService
@@ -42,6 +74,16 @@ from stonks_overwatch.services.brokers.degiro.services.transaction_service impor
 from stonks_overwatch.services.brokers.ibkr.services.account_overview import (
     AccountOverviewService as IbkrAccountOverviewService,
 )
+
+# Import IBKR authentication service with error handling
+try:
+    from stonks_overwatch.services.brokers.ibkr.services.authentication_service import (
+        IbkrAuthenticationService,
+    )
+except Exception as e:
+    logger.warning(f"Could not import IbkrAuthenticationService: {e}")
+    IbkrAuthenticationService = None
+
 from stonks_overwatch.services.brokers.ibkr.services.deposit_service import DepositsService as IbkrDepositService
 from stonks_overwatch.services.brokers.ibkr.services.dividends import (
     DividendsService as IbkrDividendsService,
@@ -53,10 +95,6 @@ from stonks_overwatch.services.brokers.ibkr.services.portfolio import (
 from stonks_overwatch.services.brokers.ibkr.services.transactions import (
     TransactionsService as IbkrTransactionService,
 )
-from stonks_overwatch.utils.core.logger import StonksLogger
-
-logger = StonksLogger.get_logger("stonks_overwatch.core", "[REGISTRY_SETUP]")
-
 
 # Configuration-driven broker definitions
 BROKER_CONFIGS: Dict[str, Dict[str, Any]] = {
@@ -69,6 +107,7 @@ BROKER_CONFIGS: Dict[str, Dict[str, Any]] = {
             ServiceType.DIVIDEND: DeGiroDividendService,
             ServiceType.FEE: DeGiroFeeService,
             ServiceType.ACCOUNT: DeGiroAccountService,
+            **({ServiceType.AUTHENTICATION: DeGiroAuthenticationService} if DeGiroAuthenticationService else {}),
         },
         "supports_complete_registration": True,
     },
@@ -81,6 +120,9 @@ BROKER_CONFIGS: Dict[str, Dict[str, Any]] = {
             ServiceType.DIVIDEND: BitvavoDividendsService,
             ServiceType.FEE: BitvavoFeeService,
             ServiceType.ACCOUNT: BitvavoAccountService,
+            # Note: Bitvavo authentication service is not registered here because it uses
+            # a different authentication pattern (API keys) than the DeGiro-specific
+            # AuthenticationServiceInterface. It can still be used directly.
         },
         "supports_complete_registration": True,
     },
@@ -93,6 +135,9 @@ BROKER_CONFIGS: Dict[str, Dict[str, Any]] = {
             ServiceType.DIVIDEND: IbkrDividendsService,
             ServiceType.FEE: IbkrFeeService,
             ServiceType.ACCOUNT: IbkrAccountOverviewService,
+            # Note: IBKR authentication service is not registered here because it uses
+            # a different authentication pattern (OAuth) than the DeGiro-specific
+            # AuthenticationServiceInterface. It can still be used directly.
         },
         "supports_complete_registration": True,  # Now supports all required services
     },
@@ -306,7 +351,10 @@ def reload_broker_configurations() -> None:
 
 # Automatically initialize when this module is imported
 try:
+    logger.debug("Starting automatic registry initialization...")
     ensure_registry_initialized()
+    logger.debug("Automatic registry initialization completed successfully")
 except Exception as e:
     logger.warning(f"Could not automatically initialize unified registry: {e}")
     logger.debug("Unified registry will be initialized on first use")
+    # Don't re-raise the exception to avoid breaking imports
