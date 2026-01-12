@@ -2,7 +2,6 @@
 Shared loading state component.
 Parameters:
 - message: The loading message to display (default: "Updating your portfolio...")
-- button_text: The text for the continue button (default: "Continue to Dashboard")
 {% endcomment %}
 
 <!-- Loading State -->
@@ -12,7 +11,4 @@ Parameters:
     </div>
     <p class="text-muted">{{ message|default:"Updating your portfolio..." }}</p>
     <input type="hidden" name="update_portfolio" value="true">
-    {% if not hide_button %}
-    <button type="submit" class="btn btn-success w-100">{{ button_text|default:"Continue to Dashboard" }}</button>
-    {% endif %}
 </div>
