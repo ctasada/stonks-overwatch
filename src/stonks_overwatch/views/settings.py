@@ -56,8 +56,8 @@ class SettingsView(View):
             "ibkr_config": ibkr_config,
             "is_dark_mode": is_dark_mode,
             "is_standalone": not is_ajax_request,  # Wrap in HTML structure for non-AJAX requests
-            "bg_color": theme_colors["bg_color"],
-            "text_color": theme_colors["text_color"],
+            # Pass all theme colors from theme.py
+            **theme_colors,
         }
 
         # Always return the content component (it handles standalone vs fragment internally)

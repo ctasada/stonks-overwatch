@@ -17,13 +17,14 @@
     <style>
         /* Set CSS custom properties for theme colors */
         :root {
-            --settings-bg-color: {{ bg_color|default:"#f8f9fa" }};
-            --settings-text-color: {{ text_color|default:"#000000" }};
-            --settings-border-color: {% if is_dark_mode %}#555{% else %}#dee2e6{% endif %};
-            --settings-hover-bg: {% if is_dark_mode %}#4a4a4a{% else %}#f8f9fa{% endif %};
-            --settings-active-bg: {% if is_dark_mode %}#4a5568{% else %}#D0E0FF{% endif %};
-            --settings-form-bg: {% if is_dark_mode %}#4a4a4a{% else %}#fff{% endif %};
-            --settings-form-border: {% if is_dark_mode %}#555{% else %}#dee2e6{% endif %};
+            --settings-bg-color: {{ bg_color }};
+            --settings-text-color: {{ text_color }};
+            --settings-border-color: {{ border_color }};
+            --settings-hover-bg: {{ hover_bg }};
+            --settings-active-bg: {{ active_bg }};
+            --settings-form-bg: {{ form_bg }};
+            --settings-form-border: {{ form_border }};
+            --bs-secondary-color: {{ secondary_color }};
         }
         html, body {
             margin: 0;
@@ -37,13 +38,14 @@
 <style>
     /* Set CSS custom properties for theme colors (fragment mode) - scoped to settings content */
     .settings-content {
-        --settings-bg-color: {{ bg_color|default:"#f8f9fa" }};
-        --settings-text-color: {{ text_color|default:"#000000" }};
-        --settings-border-color: {% if is_dark_mode %}#555{% else %}#dee2e6{% endif %};
-        --settings-hover-bg: {% if is_dark_mode %}#4a4a4a{% else %}#f8f9fa{% endif %};
-        --settings-active-bg: {% if is_dark_mode %}#4a5568{% else %}#D0E0FF{% endif %};
-        --settings-form-bg: {% if is_dark_mode %}#4a4a4a{% else %}#fff{% endif %};
-        --settings-form-border: {% if is_dark_mode %}#555{% else %}#dee2e6{% endif %};
+        --settings-bg-color: {{ bg_color }};
+        --settings-text-color: {{ text_color }};
+        --settings-border-color: {{ border_color }};
+        --settings-hover-bg: {{ hover_bg }};
+        --settings-active-bg: {{ active_bg }};
+        --settings-form-bg: {{ form_bg }};
+        --settings-form-border: {{ form_border }};
+        --bs-secondary-color: {{ secondary_color }};
     }
 </style>
 {% endif %}
