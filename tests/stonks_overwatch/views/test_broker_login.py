@@ -172,12 +172,9 @@ class TestBrokerLoginView(TestCase):
         assert request.session.get("degiro_authenticated") is True
         mock_auth_service.authenticate_user.assert_called_once()
 
-    @patch("stonks_overwatch.services.brokers.bitvavo.services.authentication_service.BitvavoAuthenticationService")
     @patch("stonks_overwatch.views.broker_login.BrokerRegistry")
     @patch("stonks_overwatch.views.broker_login.BrokerFactory")
-    def test_post_bitvavo_successful_authentication(
-        self, mock_factory_class, mock_registry_class, mock_bitvavo_auth_class
-    ):
+    def test_post_bitvavo_successful_authentication(self, mock_factory_class, mock_registry_class):
         """Test POST request with successful Bitvavo authentication shows loading screen."""
         # Mock the registry and factory
         mock_registry = Mock()
@@ -192,15 +189,20 @@ class TestBrokerLoginView(TestCase):
         mock_config = Mock()
         mock_factory.create_config.return_value = mock_config
 
-        # Mock Bitvavo authentication service
+        # Mock Bitvavo authentication service via factory
         mock_auth_service = Mock()
-        mock_bitvavo_auth_class.return_value = mock_auth_service
+        mock_factory.create_authentication_service.return_value = mock_auth_service
 
         # Mock successful authentication
         mock_auth_service.authenticate_user.return_value = {"success": True, "message": "Authentication successful"}
 
         request = self.factory.post("/login/bitvavo/", {"username": "api_key", "password": "api_secret"})
         request.session = self.session
+        self._add_messages_to_request(request)
+
+        # Set up the view to use our mocked factory and registry
+        self.view.factory = mock_factory
+        self.view.registry = mock_registry
 
         response = self.view.post(request, "bitvavo")
 
@@ -744,24 +746,23 @@ class TestBrokerLoginView(TestCase):
         # Note: Credentials are now stored by the authentication service itself
         # in the correct session key (not "degiro_credentials")
 
-    @patch("stonks_overwatch.services.brokers.ibkr.services.authentication_service.IbkrAuthenticationService")
-    def test_authenticate_ibkr_success(self, mock_ibkr_auth_class):
+    def test_authenticate_ibkr_success(self):
         """Test IBKR authentication success with OAuth credentials."""
-        # Mock the view's factory
+        # Mock the view's factory and registry
         mock_factory = Mock()
-        mock_config = Mock()
-        mock_factory.create_config.return_value = mock_config
-        self.view.factory = mock_factory
-
-        # Mock IBKR authentication service
-        mock_auth_service = Mock()
-        mock_ibkr_auth_class.return_value = mock_auth_service
-        mock_auth_service.authenticate_user.return_value = {"success": True, "message": "Authentication successful"}
-
-        # Mock the registry
         mock_registry = Mock()
+        mock_config = Mock()
+
+        mock_factory.create_config.return_value = mock_config
         mock_registry.get_registered_brokers.return_value = ["ibkr"]
+
+        self.view.factory = mock_factory
         self.view.registry = mock_registry
+
+        # Mock IBKR authentication service via factory
+        mock_auth_service = Mock()
+        mock_factory.create_authentication_service.return_value = mock_auth_service
+        mock_auth_service.authenticate_user.return_value = {"success": True, "message": "Authentication successful"}
 
         # Test valid OAuth credentials
         request = self.factory.post(
@@ -785,24 +786,23 @@ class TestBrokerLoginView(TestCase):
         # Verify authentication service was called
         mock_auth_service.authenticate_user.assert_called_once()
 
-    @patch("stonks_overwatch.services.brokers.ibkr.services.authentication_service.IbkrAuthenticationService")
-    def test_authenticate_ibkr_invalid_credentials(self, mock_ibkr_auth_class):
+    def test_authenticate_ibkr_invalid_credentials(self):
         """Test IBKR authentication with invalid OAuth credentials."""
-        # Mock the view's factory
+        # Mock the view's factory and registry
         mock_factory = Mock()
-        mock_config = Mock()
-        mock_factory.create_config.return_value = mock_config
-        self.view.factory = mock_factory
-
-        # Mock IBKR authentication service
-        mock_auth_service = Mock()
-        mock_ibkr_auth_class.return_value = mock_auth_service
-        mock_auth_service.authenticate_user.return_value = {"success": False, "message": "Invalid OAuth credentials"}
-
-        # Mock the registry
         mock_registry = Mock()
+        mock_config = Mock()
+
+        mock_factory.create_config.return_value = mock_config
         mock_registry.get_registered_brokers.return_value = ["ibkr"]
+
+        self.view.factory = mock_factory
         self.view.registry = mock_registry
+
+        # Mock IBKR authentication service via factory
+        mock_auth_service = Mock()
+        mock_factory.create_authentication_service.return_value = mock_auth_service
+        mock_auth_service.authenticate_user.return_value = {"success": False, "message": "Invalid OAuth credentials"}
 
         # Test invalid credentials (all required fields present but invalid)
         request = self.factory.post(
@@ -855,12 +855,9 @@ class TestBrokerLoginView(TestCase):
         mock_auth_service.authenticate_user.assert_not_called()
 
     @patch("django.contrib.messages.error")
-    @patch("stonks_overwatch.services.brokers.bitvavo.services.authentication_service.BitvavoAuthenticationService")
     @patch("stonks_overwatch.views.broker_login.BrokerRegistry")
     @patch("stonks_overwatch.views.broker_login.BrokerFactory")
-    def test_authenticate_bitvavo_failure(
-        self, mock_factory_class, mock_registry_class, mock_bitvavo_auth_class, mock_messages
-    ):
+    def test_authenticate_bitvavo_failure(self, mock_factory_class, mock_registry_class, mock_messages):
         """Test Bitvavo authentication failure."""
         # Mock the registry and factory
         mock_registry = Mock()
@@ -875,15 +872,20 @@ class TestBrokerLoginView(TestCase):
         mock_config = Mock()
         mock_factory.create_config.return_value = mock_config
 
-        # Mock Bitvavo authentication service
+        # Mock Bitvavo authentication service via factory
         mock_auth_service = Mock()
-        mock_bitvavo_auth_class.return_value = mock_auth_service
+        mock_factory.create_authentication_service.return_value = mock_auth_service
 
         # Mock failed authentication
         mock_auth_service.authenticate_user.return_value = {"success": False, "message": "Invalid API credentials"}
 
         request = self.factory.post("/login/bitvavo/", {"username": "invalid_key", "password": "invalid_secret"})
         request.session = self.session
+        self._add_messages_to_request(request)
+
+        # Set up the view to use our mocked factory and registry
+        self.view.factory = mock_factory
+        self.view.registry = mock_registry
 
         response = self.view.post(request, "bitvavo")
 

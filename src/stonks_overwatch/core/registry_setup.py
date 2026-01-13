@@ -53,15 +53,10 @@ from stonks_overwatch.services.brokers.degiro.services.account_service import (
     AccountOverviewService as DeGiroAccountService,
 )
 
-# Import DeGiro authentication service with error handling
-try:
-    from stonks_overwatch.services.utilities.authentication_service import (
-        AuthenticationService as DeGiroAuthenticationService,
-    )
-except Exception as e:
-    logger.warning(f"Could not import DeGiroAuthenticationService: {e}")
-    DeGiroAuthenticationService = None
-
+# Import DeGiro authentication service
+from stonks_overwatch.services.brokers.degiro.services.authentication_service import (
+    DegiroAuthenticationService,
+)
 from stonks_overwatch.services.brokers.degiro.services.deposit_service import DepositsService as DeGiroDepositService
 from stonks_overwatch.services.brokers.degiro.services.dividend_service import DividendsService as DeGiroDividendService
 from stonks_overwatch.services.brokers.degiro.services.fee_service import FeesService as DeGiroFeeService
@@ -107,7 +102,7 @@ BROKER_CONFIGS: Dict[str, Dict[str, Any]] = {
             ServiceType.DIVIDEND: DeGiroDividendService,
             ServiceType.FEE: DeGiroFeeService,
             ServiceType.ACCOUNT: DeGiroAccountService,
-            **({ServiceType.AUTHENTICATION: DeGiroAuthenticationService} if DeGiroAuthenticationService else {}),
+            ServiceType.AUTHENTICATION: DegiroAuthenticationService,
         },
         "supports_complete_registration": True,
     },
@@ -120,9 +115,7 @@ BROKER_CONFIGS: Dict[str, Dict[str, Any]] = {
             ServiceType.DIVIDEND: BitvavoDividendsService,
             ServiceType.FEE: BitvavoFeeService,
             ServiceType.ACCOUNT: BitvavoAccountService,
-            # Note: Bitvavo authentication service is not registered here because it uses
-            # a different authentication pattern (API keys) than the DeGiro-specific
-            # AuthenticationServiceInterface. It can still be used directly.
+            ServiceType.AUTHENTICATION: BitvavoAuthenticationService,
         },
         "supports_complete_registration": True,
     },
@@ -135,9 +128,7 @@ BROKER_CONFIGS: Dict[str, Dict[str, Any]] = {
             ServiceType.DIVIDEND: IbkrDividendsService,
             ServiceType.FEE: IbkrFeeService,
             ServiceType.ACCOUNT: IbkrAccountOverviewService,
-            # Note: IBKR authentication service is not registered here because it uses
-            # a different authentication pattern (OAuth) than the DeGiro-specific
-            # AuthenticationServiceInterface. It can still be used directly.
+            ServiceType.AUTHENTICATION: IbkrAuthenticationService,
         },
         "supports_complete_registration": True,  # Now supports all required services
     },

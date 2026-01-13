@@ -342,13 +342,10 @@ class BrokerLogin(View):
     def _authenticate_bitvavo(self, request: HttpRequest, credentials: dict) -> dict:
         """Authenticate with Bitvavo."""
         try:
-            from stonks_overwatch.services.brokers.bitvavo.services.authentication_service import (
-                BitvavoAuthenticationService,
-            )
-
-            # Create Bitvavo authentication service with proper config
-            config = self.factory.create_config("bitvavo")
-            auth_service = BitvavoAuthenticationService(config=config)
+            # Create Bitvavo authentication service using factory
+            auth_service = self.factory.create_authentication_service("bitvavo")
+            if not auth_service:
+                return {"success": False, "message": "Bitvavo authentication service not available"}
 
             # Authenticate user
             auth_result = auth_service.authenticate_user(
@@ -380,14 +377,10 @@ class BrokerLogin(View):
             signature_key = credentials.get("signature_key")
             remember_me = credentials.get("remember_me", False)
 
-            # Import IBKR authentication service directly (not registered in factory due to different auth pattern)
-            from stonks_overwatch.services.brokers.ibkr.services.authentication_service import (
-                IbkrAuthenticationService,
-            )
-
-            # Create authentication service with config
-            config = self.factory.create_config("ibkr")
-            auth_service = IbkrAuthenticationService(config=config)
+            # Create IBKR authentication service using factory
+            auth_service = self.factory.create_authentication_service("ibkr")
+            if not auth_service:
+                return {"success": False, "message": "IBKR authentication service not available"}
 
             # Authenticate using the service
             result = auth_service.authenticate_user(

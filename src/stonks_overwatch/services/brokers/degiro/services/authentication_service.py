@@ -1,5 +1,5 @@
 """
-Authentication service implementation.
+DeGiro authentication service implementation.
 
 This module provides the concrete implementation of the authentication service
 that orchestrates the complete authentication flow, coordinating between session
@@ -33,13 +33,13 @@ from stonks_overwatch.utils.core.constants import (
 from stonks_overwatch.utils.core.logger import StonksLogger
 
 
-class AuthenticationService(AuthenticationServiceInterface, BaseService):
+class DegiroAuthenticationService(AuthenticationServiceInterface, BaseService):
     """
-    Concrete implementation of the authentication service.
+    DeGiro-specific authentication service implementation.
 
     This class orchestrates the complete authentication flow by coordinating
     between session management, credential handling, and DeGiro API operations.
-    It serves as the main entry point for all authentication operations and
+    It serves as the main entry point for all DeGiro authentication operations and
     ensures consistent behavior across the application.
 
     The service handles:
@@ -51,7 +51,7 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
     - Maintenance mode scenarios
     """
 
-    logger = StonksLogger.get_logger("stonks_overwatch.auth_service", "[AUTH|SERVICE]")
+    BROKER_NAME = "degiro"
 
     def __init__(
         self,
@@ -62,7 +62,7 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
         **kwargs,
     ):
         """
-        Initialize the authentication service with optional dependencies.
+        Initialize the DeGiro authentication service with optional dependencies.
 
         Args:
             session_manager: Optional session manager (defaults to AuthenticationSessionManager)
@@ -72,11 +72,17 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
             **kwargs: Additional keyword arguments
         """
         super().__init__(config, **kwargs)
+        self.logger = StonksLogger.get_logger(__name__, "[DEGIRO|AUTH]")
 
         # Initialize dependencies with defaults if not provided
         self.session_manager = session_manager or AuthenticationSessionManager(config)
         self.credential_service = credential_service or AuthenticationCredentialService(config)
         self.degiro_service = degiro_service or DeGiroService()
+
+    @property
+    def broker_name(self) -> str:
+        """Return the broker name."""
+        return self.BROKER_NAME
 
     def is_user_authenticated(self, request: HttpRequest) -> bool:
         """

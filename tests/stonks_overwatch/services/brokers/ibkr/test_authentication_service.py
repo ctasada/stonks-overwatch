@@ -286,8 +286,7 @@ class TestIbkrAuthenticationServiceIntegration:
         factory = BrokerFactory()
         config = factory.create_config("ibkr")
 
-        # IBKR auth service is not registered in factory (uses different auth pattern)
-        # but can be instantiated directly
+        # Service can be instantiated directly with config
         service = IbkrAuthenticationService(config=config)
 
         assert service is not None
