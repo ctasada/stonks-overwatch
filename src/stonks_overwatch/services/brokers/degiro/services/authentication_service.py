@@ -22,6 +22,7 @@ from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.core.interfaces.credential_service import CredentialServiceInterface
 from stonks_overwatch.core.interfaces.session_manager import SessionManagerInterface
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import CredentialsManager, DeGiroService
+from stonks_overwatch.services.brokers.models import BrokersConfigurationRepository
 from stonks_overwatch.services.utilities.authentication_credential_service import AuthenticationCredentialService
 from stonks_overwatch.services.utilities.authentication_session_manager import AuthenticationSessionManager
 from stonks_overwatch.settings import DEBUG_MODE
@@ -454,6 +455,9 @@ class DegiroAuthenticationService(AuthenticationServiceInterface, BaseService):
                 self.session_manager.set_authenticated(request, True)
                 self.session_manager.set_session_id(request, session_id)
 
+                # Enable broker in database on successful authentication
+                self._enable_broker_in_database()
+
                 # If remember_me was selected, store credentials in database
                 if credentials.remember_me:
                     self.credential_service.store_credentials_in_database(credentials.username, credentials.password)
@@ -783,6 +787,9 @@ class DegiroAuthenticationService(AuthenticationServiceInterface, BaseService):
             self.session_manager.set_authenticated(request, True)
             self.session_manager.set_session_id(request, session_id)
 
+            # Enable broker in database on successful authentication
+            self._enable_broker_in_database()
+
             return AuthenticationResponse(
                 result=AuthenticationResult.SUCCESS, message="Authentication successful", session_id=session_id
             )
@@ -831,6 +838,25 @@ class DegiroAuthenticationService(AuthenticationServiceInterface, BaseService):
     def _create_error_response(self, result: AuthenticationResult, message: str) -> AuthenticationResponse:
         """Helper to create error response."""
         return AuthenticationResponse(result=result, message=message)
+
+    def _enable_broker_in_database(self) -> None:
+        """
+        Enable the broker in the database on successful authentication.
+
+        This ensures the broker is marked as enabled regardless of remember_me setting.
+        """
+        try:
+            degiro_configuration = BrokersConfigurationRepository.get_broker_by_name("degiro")
+            if degiro_configuration:
+                degiro_configuration.enabled = True
+                BrokersConfigurationRepository.save_broker_configuration(degiro_configuration)
+                self.logger.debug("DEGIRO broker enabled in database")
+            else:
+                self.logger.warning("DEGIRO broker configuration not found in database")
+
+        except Exception as e:
+            self.logger.error(f"Failed to enable broker in database: {str(e)}")
+            # Don't raise exception - authentication succeeded even if DB update failed
 
     def _update_global_config_credentials(self, credentials):
         """
