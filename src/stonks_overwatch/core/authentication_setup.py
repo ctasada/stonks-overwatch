@@ -6,8 +6,8 @@ following the same pattern as broker service registration.
 """
 
 from stonks_overwatch.core.factories.authentication_factory import AuthenticationFactory
+from stonks_overwatch.services.brokers.degiro.services.authentication_service import DegiroAuthenticationService
 from stonks_overwatch.services.utilities.authentication_credential_service import AuthenticationCredentialService
-from stonks_overwatch.services.utilities.authentication_service import AuthenticationService
 from stonks_overwatch.services.utilities.authentication_session_manager import AuthenticationSessionManager
 from stonks_overwatch.utils.core.logger import StonksLogger
 
@@ -28,7 +28,7 @@ def register_authentication_services():
         # Register all authentication service implementations
         auth_factory.register_session_manager(AuthenticationSessionManager)
         auth_factory.register_credential_service(AuthenticationCredentialService)
-        auth_factory.register_authentication_service(AuthenticationService)
+        auth_factory.register_authentication_service(DegiroAuthenticationService)
 
         logger.info("Authentication services registered successfully")
 

@@ -4,6 +4,10 @@ from typing import Any, TypeVar
 
 T = TypeVar("T")
 
+# Global registry to track singleton instances for reset functionality
+_singleton_instances: dict[type, Any] = {}
+_singleton_locks: dict[type, Lock] = {}
+
 
 def singleton(cls: type[T]) -> type[T]:
     """
@@ -31,8 +35,12 @@ def singleton(cls: type[T]) -> type[T]:
     original_new = cls.__new__
     original_init = cls.__init__
 
-    instance = None
-    lock = Lock()
+    # Register the singleton in the global registry
+    _singleton_instances[cls] = None
+    _singleton_locks[cls] = Lock()
+
+    # Reference the lock from the registry
+    lock = _singleton_locks[cls]
 
     @wraps(cls.__new__)
     def __new__(cls_: type[T], *args: Any, **kwargs: Any) -> T:  # noqa: N807
@@ -53,13 +61,11 @@ def singleton(cls: type[T]) -> type[T]:
         Thread Safety:
             Uses a threading.Lock to ensure thread-safe instance creation
         """
-        nonlocal instance
-
         with lock:
-            if instance is None:
-                instance = original_new(cls_)
-                instance._singleton_class = cls_
-            return instance
+            if _singleton_instances[cls] is None:
+                _singleton_instances[cls] = original_new(cls_)
+                _singleton_instances[cls]._singleton_class = cls_
+            return _singleton_instances[cls]
 
     @wraps(cls.__init__)
     def __init__(self: T, *args: Any, **kwargs: Any) -> None:  # noqa: N807
@@ -88,3 +94,50 @@ def singleton(cls: type[T]) -> type[T]:
     cls.__init__ = __init__
 
     return cls
+
+
+def reset_singleton(cls: type[T]) -> None:
+    """
+    Reset a singleton instance, forcing it to be recreated on next access.
+
+    This is useful when you need to reinitialize a singleton with updated
+    configuration or credentials.
+
+    Args:
+        cls: The singleton class to reset
+
+    Example:
+        @singleton
+        class ConfigService:
+            def __init__(self):
+                self.config = load_config()
+
+        # Use the service
+        service = ConfigService()
+
+        # Update config file...
+
+        # Reset the singleton to reload config
+        reset_singleton(ConfigService)
+
+        # Next access will create a new instance with fresh config
+        service = ConfigService()
+
+    Thread Safety:
+        Uses the singleton's lock to ensure thread-safe reset
+    """
+    if cls not in _singleton_instances:
+        raise ValueError(f"Class {cls.__name__} is not registered as a singleton")
+
+    lock = _singleton_locks[cls]
+    with lock:
+        if _singleton_instances[cls] is not None:
+            # Clean up the old instance
+            old_instance = _singleton_instances[cls]
+            if hasattr(old_instance, "_initialized"):
+                delattr(old_instance, "_initialized")
+            if hasattr(old_instance, "_singleton_class"):
+                delattr(old_instance, "_singleton_class")
+
+        # Reset the instance to None
+        _singleton_instances[cls] = None

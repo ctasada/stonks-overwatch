@@ -1971,6 +1971,73 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     color: var(--primary-color);
 }
 
+/* Password Field Component Styles */
+.password-field-input {
+    padding-right: 3rem !important;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.password-toggle-btn i {
+    color: var(--color-text-muted);
+    font-size: 1rem;
+    transition: color 0.2s ease;
+}
+
+.password-toggle-btn:hover i {
+    color: var(--primary-color);
+}
+
+/* Common Utility Classes */
+.full-height-container {
+    min-height: 100vh;
+}
+
+.scrollable-messages {
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.word-break-all {
+    word-break: break-word;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    height: 40vh;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 400px;
+}
+
+.section-header {
+    padding-top: 8px;
+    padding-left: 4px;
+}
+
+.hidden {
+    display: none;
+}
+
 /* Standalone settings page styling */
 .settings-standalone {
     margin: 0;

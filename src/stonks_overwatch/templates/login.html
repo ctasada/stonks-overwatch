@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stonks Overwatch</title>
+    <title>Stonks Overwatch - Select Broker</title>
     <link rel="icon" type="image/png" href="{% static 'stonks_overwatch-32x32.png' %}" sizes="32x32">
 
     <!-- Bootstrap CSS CDN -->
@@ -30,126 +30,89 @@
             color: #0a58ca !important;
             text-decoration: underline !important;
         }
+        .broker-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .broker-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-color: #0d6efd;
+        }
+        .broker-logo {
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+        }
+        .broker-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            max-width: 900px;
+        }
     </style>
 </head>
 
 <body>
-    <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh">
-        <div class="card shadow p-4" style="width: 100%; max-width: 400px;">
-            <img src="/static/logos/degiro.svg" alt="DeGiro" width="25" height="25" class="card-img-top rounded-circle m-2">
-            {% if show_otp %}
-                <p class="h4 text-center mb-4">Please enter your 2FA code</p>
-            {% elif show_in_app_auth %}
-                <p class="h4 text-center mb-4">Open the DEGIRO app</p>
-            {% else %}
-                <h3 class="text-center mb-4">Login - DEGIRO</h3>
+    <!-- Broker Selector View -->
+    <div class="container d-flex justify-content-center align-items-center full-height-container">
+        <div class="text-center">
+            <h2 class="mb-4">Select Your Broker</h2>
+            <p class="text-muted mb-5">Choose your broker to continue with login</p>
+
+            {% if messages %}
+                <div class="messages mb-4">
+                    {% for message in messages %}
+                        <div class="alert {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}alert-danger{% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}alert-warning{% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}alert-success{% else %}alert-info{% endif %} d-flex align-items-start py-2 mb-2" role="alert">
+                            {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                                <i class="bi bi-exclamation-triangle-fill me-2 mt-1"></i>
+                            {% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
+                                <i class="bi bi-exclamation-circle-fill me-2 mt-1"></i>
+                            {% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                                <i class="bi bi-check-circle-fill me-2 mt-1"></i>
+                            {% else %}
+                                <i class="bi bi-info-circle-fill me-2 mt-1"></i>
+                            {% endif %}
+                            <div class="flex-grow-1">{{ message|safe }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
             {% endif %}
-            <form id="login-form" method="POST" action="{% url 'login' %}">
-                {% csrf_token %}
-                {% if messages %}
-                    <div class="messages mb-3" style="max-height: 150px; overflow-y: auto;">
-                        {% for message in messages %}
-                            <div class="alert {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}alert-danger{% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}alert-warning{% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}alert-success{% else %}alert-info{% endif %} d-flex align-items-start py-2 mb-2" role="alert" style="word-break: break-word;">
-                                {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
-                                    <i class="bi bi-exclamation-triangle-fill me-2 mt-1"></i>
-                                {% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
-                                    <i class="bi bi-exclamation-circle-fill me-2 mt-1"></i>
-                                {% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
-                                    <i class="bi bi-check-circle-fill me-2 mt-1"></i>
-                                {% else %}
-                                    <i class="bi bi-info-circle-fill me-2 mt-1"></i>
-                                {% endif %}
-                                <div class="flex-grow-1">{{ message|safe }}</div>
-                            </div>
-                        {% endfor %}
+
+            <div class="broker-grid mx-auto">
+                {% for broker in available_brokers %}
+                <div class="card broker-card h-100" onclick="selectBroker('{{ broker.name }}')">
+                    <div class="card-body d-flex flex-column align-items-center text-center p-4">
+                        <img src="{% static 'logos/' %}{{ broker.name }}.svg"
+                             alt="{{ broker.display_name }}"
+                             class="broker-logo mb-3">
+                        <h5 class="card-title mb-2">{{ broker.display_name }}</h5>
+                        <p class="card-text text-muted small mb-3">{{ broker.description }}</p>
+                        {% if not broker.enabled %}
+                            <span class="badge bg-warning text-dark">Experimental</span>
+                        {% endif %}
                     </div>
-                {% endif %}
-                {% if show_otp %}
-                    <div class="form-group mb-2">
-                        <input type="text" class="form-control text-center"
-                               style="letter-spacing: 1rem; line-height: 1.75em;"
-                               id="2fa_code" name="2fa_code" maxlength="6" pattern="\d{6}"
-                               placeholder="123456" aria-label="2FA code" required autofocus>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block w-100">Confirm</button>
-                {% elif show_in_app_auth %}
-                    <div class="d-flex align-items-center py-3 mb-4">
-                        <i class="bi bi-phone me-3" style="font-size: 2rem; color: #0d6efd;"></i>
-                        <div class="flex-grow-1">
-                            <p class="mb-0">To verify your login attempt, open the DEGIRO app and tap 'Yes' to approve it.</p>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-center">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Waiting...</span>
-                        </div>
-                    </div>
-                    <!-- Submit form indicating that should update the portfolio -->
-                    <input type="hidden" name="in_app_auth" id="in_app_auth" value="true">
-                    <script>
-                        $(document).ready(function() {
-                            <!-- In this scenario we want to submit the form automatically -->
-                            document.getElementById("login-form").submit();
-                        });
-                    </script>
-                {% elif show_loading %}
-                    <div class="d-flex justify-content-center">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                    </div>
-                    <p class="text-center mt-3">Updating Portfolio, please wait...</p>
-                    <!-- Submit form indicating that should update the portfolio -->
-                    <input type="hidden" name="update_portfolio" id="update_portfolio" value="true">
-                    <script>
-                        $(document).ready(function() {
-                            // Small delay to ensure loading screen is visible before form submission
-                            setTimeout(function() {
-                                document.getElementById("login-form").submit();
-                            }, 100);
-                        });
-                    </script>
-                {% else %}
-                    <div class="form-group mb-2">
-                        <label for="username">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" placeholder="Enter username"
-                               required autofocus>
-                    </div>
-                    <div class="form-group mb-2">
-                        <label for="password">Password</label>
-                        <div class="input-group">
-                            <input type="password" class="form-control" id="password" name="password"
-                                   placeholder="Enter password" required>
-                            <i class="bi bi-eye-slash-fill" id="togglePassword"></i>
-                        </div>
-                    </div>
-                    <div class="form-group mb-3">
-                        <input class="form-check-input" type="checkbox" value="true" id="remember_me" name="remember_me">
-                        <label class="form-check-label" for="remember_me">
-                            Remember me
-                        </label>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block w-100">Login</button>
-                {% endif %}
-            </form>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="mt-5">
+                <p class="text-muted small">
+                    Don't see your broker?
+                    <a href="https://github.com/ctasada/stonks-overwatch" target="_blank" class="text-decoration-none">
+                        Request support <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                </p>
+            </div>
         </div>
     </div>
+
     <script>
-        const togglePassword = document.querySelector("#togglePassword");
-        const password = document.querySelector("#password");
-
-        if (togglePassword) {
-            togglePassword.addEventListener("click", function () {
-                // toggle the type attribute
-                const type = password.getAttribute("type") === "password" ? "text" : "password";
-                password.setAttribute("type", type);
-
-                // toggle the icon
-                this.classList.toggle("bi-eye-fill");
-                this.classList.toggle("bi-eye-slash-fill");
-            });
+        function selectBroker(brokerName) {
+            // Redirect to broker-specific login
+            window.location.href = `/login/${brokerName}`;
         }
     </script>
 </body>
-
 </html>

@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 from typing import List, Optional
 
@@ -31,8 +32,35 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
 
         all_positions = self.positions_repository.get_all_positions()
 
-        account_summary = self.ibkr_service.get_account_summary()
+        # IBKR API requires querying /accounts before /account/{id}/summary
+        # This ensures the session is properly initialized
+        self.ibkr_service.get_portfolio_accounts()
+
+        # Add a small delay to ensure the API session is ready
+        time.sleep(0.2)
+
+        # Try to get account summary with retry logic
+        account_summary = None
         base_currency = self.ibkr_service.get_default_currency()
+        max_retries = 2
+
+        for attempt in range(max_retries):
+            try:
+                account_summary = self.ibkr_service.get_account_summary()
+                break
+            except Exception as e:
+                error_msg = str(e).lower()
+                if "please query /accounts first" in error_msg and attempt < max_retries - 1:
+                    self.logger.warning(
+                        f"IBKR API session not ready (attempt {attempt + 1}/{max_retries}), retrying after delay..."
+                    )
+                    # Call /accounts again and wait a bit longer
+                    self.ibkr_service.get_portfolio_accounts()
+                    time.sleep(0.5)
+                else:
+                    self.logger.error(f"Failed to get account summary after {attempt + 1} attempts: {e}")
+                    # Continue without account summary - we'll skip cash balances
+                    break
 
         portfolio = []
 
@@ -43,23 +71,27 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
             except Exception as e:
                 self.logger.error(f"Error creating portfolio entry for position {position.get('ticker', '')}: {e}")
 
-        for cash_balance in account_summary["cashBalances"]:
-            if cash_balance["currency"] in ["USD", "EUR"]:
-                value = cash_balance["balance"]
-                currency = cash_balance["currency"]
-                base_currency_value = self.ibkr_service.convert_to_default_currency(currency, value)
+        # Only process cash balances if we successfully got the account summary
+        if account_summary:
+            for cash_balance in account_summary["cashBalances"]:
+                if cash_balance["currency"] in ["USD", "EUR"]:
+                    value = cash_balance["balance"]
+                    currency = cash_balance["currency"]
+                    base_currency_value = self.ibkr_service.convert_to_default_currency(currency, value)
 
-                entry = PortfolioEntry(
-                    name=f"Cash Balance {cash_balance['currency']}",
-                    symbol=cash_balance["currency"],
-                    product_type=ProductType.CASH,
-                    product_currency=currency,
-                    value=value,
-                    base_currency_value=base_currency_value,
-                    base_currency=base_currency,
-                    is_open=True,
-                )
-                portfolio.append(entry)
+                    entry = PortfolioEntry(
+                        name=f"Cash Balance {cash_balance['currency']}",
+                        symbol=cash_balance["currency"],
+                        product_type=ProductType.CASH,
+                        product_currency=currency,
+                        value=value,
+                        base_currency_value=base_currency_value,
+                        base_currency=base_currency,
+                        is_open=True,
+                    )
+                    portfolio.append(entry)
+        else:
+            self.logger.warning("Skipping cash balances - account summary not available")
 
         return sorted(portfolio, key=lambda k: k.symbol)
 
@@ -168,13 +200,42 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         )
 
     def __get_total_cash(self) -> float:
-        account_summary = self.ibkr_service.get_account_summary()
+        # IBKR API requires querying /accounts before /account/{id}/summary
+        # This ensures the session is properly initialized
+        self.ibkr_service.get_portfolio_accounts()
 
-        for cash_balance in account_summary["cashBalances"]:
-            if cash_balance["currency"].startswith("Total "):
-                return cash_balance["balance"]
+        # Add a small delay to ensure the API session is ready
+        time.sleep(0.2)
 
-        raise ValueError("Total cash balance not found in IBKR account summary")
+        # Try to get account summary with retry logic
+        max_retries = 2
+
+        for attempt in range(max_retries):
+            try:
+                account_summary = self.ibkr_service.get_account_summary()
+
+                for cash_balance in account_summary["cashBalances"]:
+                    if cash_balance["currency"].startswith("Total "):
+                        return cash_balance["balance"]
+
+                raise ValueError("Total cash balance not found in IBKR account summary")
+
+            except Exception as e:
+                error_msg = str(e).lower()
+                if "please query /accounts first" in error_msg and attempt < max_retries - 1:
+                    self.logger.warning(
+                        f"IBKR API session not ready (attempt {attempt + 1}/{max_retries}), retrying after delay..."
+                    )
+                    # Call /accounts again and wait a bit longer
+                    self.ibkr_service.get_portfolio_accounts()
+                    time.sleep(0.5)
+                else:
+                    self.logger.error(f"Failed to get total cash after {attempt + 1} attempts: {e}")
+                    # Return 0 as fallback
+                    return 0.0
+
+        # Fallback in case loop completes without return
+        return 0.0
 
     def __get_last_quotation(self, position: dict) -> float:
         # FIXME: Retrieving the last 5 days to guarantee we have a value (for example on Mondays). There may be a better

@@ -390,9 +390,18 @@
                     const currentType = passwordInput.getAttribute('type');
                     passwordInput.setAttribute('type', currentType === 'password' ? 'text' : 'password');
 
-                    // Toggle the icon
-                    this.classList.toggle('bi-eye-fill');
-                    this.classList.toggle('bi-eye-slash-fill');
+                    // Toggle the icon - find the icon element inside the button
+                    const icon = this.querySelector('i');
+                    if (icon) {
+                        // Explicitly remove one class and add the other to prevent duplication
+                        if (icon.classList.contains('bi-eye-slash-fill')) {
+                            icon.classList.remove('bi-eye-slash-fill');
+                            icon.classList.add('bi-eye-fill');
+                        } else {
+                            icon.classList.remove('bi-eye-fill');
+                            icon.classList.add('bi-eye-slash-fill');
+                        }
+                    }
                 }
             });
         });

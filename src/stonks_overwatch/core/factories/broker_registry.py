@@ -12,6 +12,7 @@ from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.core.exceptions import ServiceFactoryException
 from stonks_overwatch.core.interfaces import (
     AccountServiceInterface,
+    AuthenticationServiceInterface,
     DepositServiceInterface,
     DividendServiceInterface,
     FeeServiceInterface,
@@ -48,6 +49,7 @@ class BrokerRegistry:
         ServiceType.DIVIDEND: DividendServiceInterface,
         ServiceType.FEE: FeeServiceInterface,
         ServiceType.ACCOUNT: AccountServiceInterface,
+        ServiceType.AUTHENTICATION: AuthenticationServiceInterface,
     }
 
     def __init__(self):

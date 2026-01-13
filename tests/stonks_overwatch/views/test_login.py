@@ -1,13 +1,10 @@
 """
-Unit tests for refactored Login view.
+Unit tests for Login view (Broker Selector).
 
-This module tests the refactored login view to ensure it maintains
-the same behavior while using AuthenticationService.
+This module tests the login view which now serves as a broker selector,
+allowing users to choose which broker they want to authenticate with.
 """
 
-from django.contrib.sessions.backends.db import SessionStore
-
-from stonks_overwatch.core.interfaces.authentication_service import AuthenticationResponse, AuthenticationResult
 from stonks_overwatch.views.login import Login
 
 import pytest
@@ -17,381 +14,177 @@ from unittest.mock import Mock, patch
 
 @pytest.mark.django_db
 class TestLoginView(TestCase):
-    """Test cases for refactored Login view."""
+    """Test cases for Login view (Broker Selector)."""
 
     def setUp(self):
         """Set up test fixtures."""
         self.factory = RequestFactory()
-        patcher = patch("stonks_overwatch.views.login.get_authentication_service")
-        self.addCleanup(patcher.stop)
-        self.mock_get_auth_service = patcher.start()
-        self.mock_auth_service = Mock()
-        self.mock_get_auth_service.return_value = self.mock_auth_service
-
         self.view = Login()
-        self.view.setup(request=Mock())
-        # The auth_service should now be set automatically via the locator
-        self.session = SessionStore()
 
-    def test_get_authenticated_user_shows_loading(self):
-        """Test GET request for authenticated user shows loading state."""
+    @patch("stonks_overwatch.views.login.BrokerRegistry")
+    @patch("stonks_overwatch.views.login.BrokerFactory")
+    def test_get_shows_broker_selector(self, mock_factory_class, mock_registry_class):
+        """Test GET request shows broker selector with available brokers."""
+        # Mock the registry and factory instances
+        mock_registry = Mock()
+        mock_factory = Mock()
+        mock_registry_class.return_value = mock_registry
+        mock_factory_class.return_value = mock_factory
+
+        # Mock registered brokers
+        mock_registry.get_registered_brokers.return_value = ["degiro", "bitvavo", "ibkr"]
+
+        # Mock broker configurations - enabled but NO stored credentials
+        mock_degiro_config = Mock()
+        mock_degiro_config.is_enabled.return_value = True
+        mock_degiro_config.get_credentials = None  # No stored credentials
+        mock_bitvavo_config = Mock()
+        mock_bitvavo_config.is_enabled.return_value = False
+        mock_bitvavo_config.get_credentials = None
+        mock_ibkr_config = Mock()
+        mock_ibkr_config.is_enabled.return_value = False
+        mock_ibkr_config.get_credentials = None
+
+        mock_factory.create_config.side_effect = lambda broker: {
+            "degiro": mock_degiro_config,
+            "bitvavo": mock_bitvavo_config,
+            "ibkr": mock_ibkr_config,
+        }.get(broker)
+
+        # Create view AFTER mocks are set up so it uses mocked factory/registry
+        view = Login()
         request = self.factory.get("/login/")
-        request.session = self.session
-
-        # Mock authenticated user
-        self.mock_auth_service.session_manager.is_totp_required.return_value = False
-        self.mock_auth_service.session_manager.is_in_app_auth_required.return_value = False
-        self.mock_auth_service.is_user_authenticated.return_value = True
-
-        response = self.view.get(request)
+        response = view.get(request)
 
         assert response.status_code == 200
-        # Check response content contains loading spinner
         content = response.content.decode("utf-8")
-        assert "Loading..." in content or "spinner-border" in content  # Check for loading element
 
-    def test_get_unauthenticated_user_normal_state(self):
-        """Test GET request for unauthenticated user shows normal state."""
+        # Check that broker selector is shown
+        assert "Select Your Broker" in content or "broker" in content.lower()
+        assert "DEGIRO" in content
+        assert "Bitvavo" in content
+        assert "Interactive Brokers" in content
+
+    @patch("stonks_overwatch.views.login.BrokerRegistry")
+    @patch("stonks_overwatch.views.login.BrokerFactory")
+    def test_get_handles_broker_config_error(self, mock_factory_class, mock_registry_class):
+        """Test GET request handles broker configuration errors gracefully."""
+        # Mock the registry and factory instances
+        mock_registry = Mock()
+        mock_factory = Mock()
+        mock_registry_class.return_value = mock_registry
+        mock_factory_class.return_value = mock_factory
+
+        # Mock registered brokers
+        mock_registry.get_registered_brokers.return_value = ["degiro", "bitvavo"]
+
+        # Mock factory to raise exception for one broker
+        def mock_create_config(broker):
+            if broker == "degiro":
+                mock_config = Mock()
+                mock_config.is_enabled.return_value = True
+                mock_config.get_credentials = None  # No stored credentials
+                return mock_config
+            elif broker == "bitvavo":
+                raise Exception("Configuration error")
+            return None
+
+        mock_factory.create_config.side_effect = mock_create_config
+
+        # Create view AFTER mocks are set up so it uses mocked factory/registry
+        view = Login()
         request = self.factory.get("/login/")
-        request.session = self.session
-
-        # Mock unauthenticated user
-        self.mock_auth_service.session_manager.is_totp_required.return_value = False
-        self.mock_auth_service.session_manager.is_in_app_auth_required.return_value = False
-        self.mock_auth_service.is_user_authenticated.return_value = False
-
-        response = self.view.get(request)
+        response = view.get(request)
 
         assert response.status_code == 200
-        # Check response content - should show normal login form
         content = response.content.decode("utf-8")
-        assert "username" in content.lower() and "password" in content.lower()  # Normal login form
 
-    def test_get_totp_required_shows_otp(self):
-        """Test GET request when TOTP is required shows OTP form."""
-        request = self.factory.get("/login/")
-        request.session = self.session
+        # Should still show broker selector with available brokers
+        assert "DEGIRO" in content
+        assert "Bitvavo" in content  # Should still be shown even with config error
 
-        # Mock TOTP required
-        self.mock_auth_service.session_manager.is_totp_required.return_value = True
-        self.mock_auth_service.session_manager.is_in_app_auth_required.return_value = False
-        self.mock_auth_service.is_user_authenticated.return_value = False
-
-        response = self.view.get(request)
-
-        assert response.status_code == 200
-        # Check response content - should show OTP form
-        content = response.content.decode("utf-8")
-        assert "2fa" in content.lower() or "otp" in content.lower()  # OTP form should be visible
-
-    @patch("stonks_overwatch.jobs.jobs_scheduler.JobsScheduler.update_portfolio")
-    def test_post_update_portfolio_redirects(self, mock_update):
-        """Test POST request with update_portfolio redirects to dashboard."""
-        request = self.factory.post("/login/", {"update_portfolio": "true"})
-        request.session = self.session
-
+    def test_post_redirects_to_login(self):
+        """Test POST request redirects back to login (broker selector)."""
+        request = self.factory.post("/login/", {})
         response = self.view.post(request)
 
         assert response.status_code == 302
-        assert response["Location"] == "/dashboard"
-        mock_update.assert_called_once()
+        assert response["Location"] == "/login"
 
-    def test_post_successful_authentication_shows_loading(self):
-        """Test POST request with successful authentication shows loading."""
-        request = self.factory.post("/login/", {"username": "testuser", "password": "testpass"})
-        request.session = self.session
+    def test_get_display_name(self):
+        """Test _get_display_name returns correct display names."""
+        assert self.view._get_display_name("degiro") == "DEGIRO"
+        assert self.view._get_display_name("bitvavo") == "Bitvavo"
+        assert self.view._get_display_name("ibkr") == "Interactive Brokers"
+        assert self.view._get_display_name("unknown") == "Unknown"
 
-        # Mock degiro_config.get_credentials.username
-        degiro_config = Mock()
-        degiro_config.get_credentials.username = "degiro_user"
-        self.mock_auth_service.degiro_config = degiro_config
+    def test_get_broker_description(self):
+        """Test _get_broker_description returns appropriate descriptions."""
+        assert "European" in self.view._get_broker_description("degiro")
+        assert "cryptocurrency" in self.view._get_broker_description("bitvavo")
+        assert "Global" in self.view._get_broker_description("ibkr")
+        assert self.view._get_broker_description("unknown") == "Investment platform"
 
-        # Mock successful authentication
-        auth_response = AuthenticationResponse(result=AuthenticationResult.SUCCESS, session_id="test_session")
-        self.mock_auth_service.authenticate_user.return_value = auth_response
+    @patch("stonks_overwatch.views.login.BrokerRegistry")
+    @patch("stonks_overwatch.views.login.BrokerFactory")
+    def test_get_available_brokers_sorting(self, mock_factory_class, mock_registry_class):
+        """Test that available brokers are sorted correctly (enabled first, then alphabetically)."""
+        # Mock the registry and factory instances
+        mock_registry = Mock()
+        mock_factory = Mock()
+        mock_registry_class.return_value = mock_registry
+        mock_factory_class.return_value = mock_factory
 
-        # Logic for remember_me - defaults to False when not provided
-        remember_me = False
+        # Mock registered brokers
+        mock_registry.get_registered_brokers.return_value = ["ibkr", "degiro", "bitvavo"]
 
-        response = self.view.post(request)
+        # Mock broker configurations - make bitvavo enabled, others disabled
+        mock_degiro_config = Mock()
+        mock_degiro_config.is_enabled.return_value = False
+        mock_bitvavo_config = Mock()
+        mock_bitvavo_config.is_enabled.return_value = True
+        mock_ibkr_config = Mock()
+        mock_ibkr_config.is_enabled.return_value = False
 
-        assert response.status_code == 200
-        # Check response content contains loading indicator
-        content = response.content.decode("utf-8")
-        assert "Loading..." in content or "spinner-border" in content
-        self.mock_auth_service.authenticate_user.assert_called_once_with(
-            request=request, username="testuser", password="testpass", one_time_password=None, remember_me=remember_me
-        )
+        mock_factory.create_config.side_effect = lambda broker: {
+            "degiro": mock_degiro_config,
+            "bitvavo": mock_bitvavo_config,
+            "ibkr": mock_ibkr_config,
+        }.get(broker)
 
-    def test_post_totp_required_shows_otp_form(self):
-        """Test POST request requiring TOTP shows OTP form."""
-        request = self.factory.post("/login/", {"username": "testuser", "password": "testpass"})
-        request.session = self.session
+        # Create view AFTER mocks are set up so it uses mocked factory/registry
+        view = Login()
+        brokers = view._get_available_brokers()
 
-        # Mock TOTP required
-        auth_response = AuthenticationResponse(result=AuthenticationResult.TOTP_REQUIRED, requires_totp=True)
-        self.mock_auth_service.authenticate_user.return_value = auth_response
+        # Should have 3 brokers
+        assert len(brokers) == 3
 
-        response = self.view.post(request)
+        # First broker should be the enabled one (Bitvavo)
+        assert brokers[0]["name"] == "bitvavo"
+        assert brokers[0]["enabled"] is True
 
-        assert response.status_code == 200
-        # Check response content shows OTP form
-        content = response.content.decode("utf-8")
-        assert "2fa" in content.lower() or "otp" in content.lower()
+        # Remaining brokers should be sorted alphabetically by display name
+        disabled_brokers = [b for b in brokers if not b["enabled"]]
+        display_names = [b["display_name"] for b in disabled_brokers]
+        assert display_names == sorted(display_names)
 
-    def test_post_totp_authentication_success(self):
-        """Test POST request with TOTP code for successful authentication."""
-        request = self.factory.post("/login/", {"2fa_code": "123456"})
-        request.session = self.session
+    @patch("stonks_overwatch.views.login.BrokerRegistry")
+    @patch("stonks_overwatch.views.login.BrokerFactory")
+    def test_render_broker_selector_exception_handling(self, mock_factory_class, mock_registry_class):
+        """Test that _render_broker_selector handles exceptions gracefully."""
+        # Mock the registry to raise an exception
+        mock_registry = Mock()
+        mock_factory = Mock()
+        mock_registry_class.return_value = mock_registry
+        mock_factory_class.return_value = mock_factory
 
-        # Mock successful TOTP authentication
-        auth_response = AuthenticationResponse(result=AuthenticationResult.SUCCESS, session_id="test_session")
-        self.mock_auth_service.handle_totp_authentication.return_value = auth_response
+        mock_registry.get_registered_brokers.side_effect = Exception("Registry error")
 
-        response = self.view.post(request)
-
-        assert response.status_code == 200
-        # Check response content shows loading indicator after successful TOTP
-        content = response.content.decode("utf-8")
-        assert "Loading..." in content or "spinner-border" in content
-        self.mock_auth_service.handle_totp_authentication.assert_called_once_with(request, 123456)
-
-    def test_post_invalid_credentials_shows_error(self):
-        """Test POST request with invalid credentials shows error."""
-        request = self.factory.post("/login/", {"username": "testuser", "password": "wrongpass"})
-        request.session = self.session
-
-        # Mock invalid credentials
-        auth_response = AuthenticationResponse(
-            result=AuthenticationResult.INVALID_CREDENTIALS, message="Invalid username or password"
-        )
-        self.mock_auth_service.authenticate_user.return_value = auth_response
-
-        with patch("django.contrib.messages.error") as mock_messages:
-            response = self.view.post(request)
-
-        assert response.status_code == 200
-        # Check that error is displayed (not loading or OTP)
-        content = response.content.decode("utf-8")
-        assert "loading" not in content.lower() or 'style="display: none"' in content
-        mock_messages.assert_called_once_with(request, "Invalid username or password")
-
-    def test_post_missing_credentials_shows_error(self):
-        """Test POST request with missing credentials shows error."""
-        request = self.factory.post("/login/", {})
-        request.session = self.session
-
-        with patch("django.contrib.messages.error") as mock_messages:
-            response = self.view.post(request)
-
-        assert response.status_code == 400
-        # Check that normal login form is shown with error (not OTP form)
-        content = response.content.decode("utf-8")
-        assert "username" in content.lower() and "password" in content.lower()
-        mock_messages.assert_called_once_with(request, "Username and password are required.")
-
-    def test_post_maintenance_mode_shows_error(self):
-        """Test POST request during maintenance mode shows error."""
-        request = self.factory.post("/login/", {"username": "testuser", "password": "testpass"})
-        request.session = self.session
-
-        # Mock maintenance mode
-        auth_response = AuthenticationResponse(
-            result=AuthenticationResult.MAINTENANCE_MODE, message="System is under maintenance"
-        )
-        self.mock_auth_service.authenticate_user.return_value = auth_response
-
-        with patch("django.contrib.messages.error") as mock_messages:
-            response = self.view.post(request)
-
-        assert response.status_code == 200
-        mock_messages.assert_called_once_with(request, "System is under maintenance")
-
-    def test_post_connection_error_shows_error(self):
-        """Test POST request with connection error shows error."""
-        request = self.factory.post("/login/", {"username": "testuser", "password": "testpass"})
-        request.session = self.session
-
-        # Mock connection error
-        auth_response = AuthenticationResponse(
-            result=AuthenticationResult.CONNECTION_ERROR, message="Network connection failed"
-        )
-        self.mock_auth_service.authenticate_user.return_value = auth_response
-
-        with patch("django.contrib.messages.error") as mock_messages:
-            response = self.view.post(request)
-
-        assert response.status_code == 200
-        mock_messages.assert_called_once_with(
-            request, "Unable to connect to the authentication service. Please check your connection and try again."
-        )
-
-    def test_post_unknown_error_shows_generic_error(self):
-        """Test POST request with unknown error shows generic error."""
-        request = self.factory.post("/login/", {"username": "testuser", "password": "testpass"})
-        request.session = self.session
-
-        # Mock unknown error
-        auth_response = AuthenticationResponse(
-            result=AuthenticationResult.UNKNOWN_ERROR, message="Unexpected error occurred"
-        )
-        self.mock_auth_service.authenticate_user.return_value = auth_response
-
-        with patch("django.contrib.messages.error") as mock_messages:
-            response = self.view.post(request)
-
-        assert response.status_code == 200
-        mock_messages.assert_called_once_with(request, "Unexpected error occurred")
-
-    def test_extract_credentials_valid_data(self):
-        """Test _extract_credentials with valid form data."""
-        request = self.factory.post(
-            "/login/", {"username": "testuser", "password": "testpass", "2fa_code": "123456", "remember_me": "true"}
-        )
-
-        credentials = self.view._extract_credentials(request)
-
-        assert credentials is not None
-        assert credentials["username"] == "testuser"
-        assert credentials["password"] == "testpass"
-        assert credentials["one_time_password"] == 123456
-        assert credentials["remember_me"] is True
-
-    def test_extract_credentials_invalid_otp(self):
-        """Test _extract_credentials with invalid OTP converts to None."""
-        request = self.factory.post("/login/", {"username": "testuser", "password": "testpass", "2fa_code": "invalid"})
-
-        credentials = self.view._extract_credentials(request)
-
-        assert credentials is not None
-        assert credentials["one_time_password"] is None
-
-    def test_extract_credentials_missing_required(self):
-        """Test _extract_credentials with missing required fields returns None."""
-        request = self.factory.post("/login/", {"password": "testpass"})
-
-        credentials = self.view._extract_credentials(request)
-
-        assert credentials is None
-
-    def test_perform_authentication_regular_login(self):
-        """Test _perform_authentication for regular login."""
-        request = self.factory.post("/login/")
-        credentials = {"username": "testuser", "password": "testpass", "one_time_password": None, "remember_me": False}
-
-        expected_response = AuthenticationResponse(result=AuthenticationResult.SUCCESS)
-        self.mock_auth_service.authenticate_user.return_value = expected_response
-
-        result = self.view._perform_authentication(request, credentials)
-
-        assert result == expected_response
-        self.mock_auth_service.authenticate_user.assert_called_once_with(
-            request=request, username="testuser", password="testpass", one_time_password=None, remember_me=False
-        )
-
-    def test_perform_authentication_totp_flow(self):
-        """Test _perform_authentication for TOTP flow."""
-        request = self.factory.post("/login/")
-        credentials = {
-            "username": "testuser",
-            "password": "testpass",
-            "one_time_password": 123456,
-            "remember_me": False,
-        }
-
-        expected_response = AuthenticationResponse(result=AuthenticationResult.SUCCESS)
-        self.mock_auth_service.handle_totp_authentication.return_value = expected_response
-
-        result = self.view._perform_authentication(request, credentials)
-
-        assert result == expected_response
-        self.mock_auth_service.handle_totp_authentication.assert_called_once_with(request, 123456)
-
-    def test_handle_auth_result_success(self):
-        """Test _handle_auth_result for successful authentication."""
-        request = self.factory.post("/login/")
-        auth_result = AuthenticationResponse(result=AuthenticationResult.SUCCESS)
-
-        show_otp, show_loading, show_in_app_auth = self.view._handle_auth_result(request, auth_result)
-
-        assert show_otp is False
-        assert show_loading is True
-        assert show_in_app_auth is False
-
-    def test_handle_auth_result_totp_required(self):
-        """Test _handle_auth_result for TOTP required."""
-        request = self.factory.post("/login/")
-        auth_result = AuthenticationResponse(result=AuthenticationResult.TOTP_REQUIRED)
-
-        show_otp, show_loading, show_in_app_auth = self.view._handle_auth_result(request, auth_result)
-
-        assert show_otp is True
-        assert show_loading is False
-        assert show_in_app_auth is False
-
-    def test_get_in_app_auth_required_shows_dialog(self):
-        """Test GET request when in-app authentication is required shows dialog."""
         request = self.factory.get("/login/")
-        request.session = self.session
+        response = self.view._render_broker_selector(request)
 
-        # Mock in-app auth required
-        self.mock_auth_service.session_manager.is_totp_required.return_value = False
-        self.mock_auth_service.session_manager.is_in_app_auth_required.return_value = True
-        self.mock_auth_service.is_user_authenticated.return_value = False
-
-        response = self.view.get(request)
-
+        # Should return 200 status with empty broker list (graceful degradation)
         assert response.status_code == 200
-        # Check response content - should show in-app auth dialog
         content = response.content.decode("utf-8")
-        assert "open the degiro app" in content.lower() or "service desk" in content.lower()
-
-    def test_handle_auth_result_in_app_auth_required(self):
-        """Test _handle_auth_result for in-app authentication required."""
-        request = self.factory.post("/login/")
-        auth_result = AuthenticationResponse(result=AuthenticationResult.IN_APP_AUTHENTICATION_REQUIRED)
-
-        show_otp, show_loading, show_in_app_auth = self.view._handle_auth_result(request, auth_result)
-
-        assert show_otp is False
-        assert show_loading is False
-        assert show_in_app_auth is True
-
-    def test_post_account_blocked_shows_error(self):
-        """Test POST request with account blocked shows error message."""
-        request = self.factory.post("/login/", {"username": "testuser", "password": "testpass"})
-        request.session = self.session
-
-        # Mock account blocked
-        auth_response = AuthenticationResponse(
-            result=AuthenticationResult.ACCOUNT_BLOCKED,
-            message="Your account has been blocked because the maximum of login attempts has been exceeded",
-        )
-        self.mock_auth_service.authenticate_user.return_value = auth_response
-
-        with patch("django.contrib.messages.error") as mock_messages:
-            response = self.view.post(request)
-
-        assert response.status_code == 200
-        # Check that the account blocked message is shown
-        mock_messages.assert_called_once()
-        call_args = mock_messages.call_args[0]
-        assert "blocked" in call_args[1].lower()
-        assert "service desk" in call_args[1].lower()
-
-    def test_render_login_error(self):
-        """Test error rendering functionality using _render_login_template."""
-        request = self.factory.post("/login/")
-
-        with patch("django.contrib.messages.error") as mock_messages:
-            # Test the equivalent functionality: adding error message and rendering template
-            from django.contrib import messages
-
-            messages.error(request, "Test error message")
-            response = self.view._render_login_template(request, status=400)
-
-        assert response.status_code == 400
-        # Check that the response is rendered (contains HTML structure)
-        content = response.content.decode("utf-8")
-        assert "<html>" in content or "<!DOCTYPE" in content  # Basic HTML structure check
-        mock_messages.assert_called_once_with(request, "Test error message")
+        # Should contain basic HTML structure even with error
+        assert "<html>" in content or "<!DOCTYPE" in content

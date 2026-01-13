@@ -1,0 +1,18 @@
+{% if messages %}
+    <div class="messages mb-3 scrollable-messages">
+        {% for message in messages %}
+            <div class="alert {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}alert-danger{% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}alert-warning{% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}alert-success{% else %}alert-info{% endif %} d-flex align-items-start py-2 mb-2 word-break-all" role="alert">
+                {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                    <i class="bi bi-exclamation-triangle-fill me-2 mt-1"></i>
+                {% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
+                    <i class="bi bi-exclamation-circle-fill me-2 mt-1"></i>
+                {% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                    <i class="bi bi-check-circle-fill me-2 mt-1"></i>
+                {% else %}
+                    <i class="bi bi-info-circle-fill me-2 mt-1"></i>
+                {% endif %}
+                <div class="flex-grow-1">{{ message|safe }}</div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}

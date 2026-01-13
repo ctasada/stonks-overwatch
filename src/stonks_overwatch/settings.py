@@ -143,6 +143,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "stonks_overwatch.middleware.authentication.AuthenticationMiddleware",
     "stonks_overwatch.middleware.degiro_auth.DeGiroAuthMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.cache.UpdateCacheMiddleware",

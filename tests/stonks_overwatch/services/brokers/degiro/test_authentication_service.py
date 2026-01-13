@@ -1,7 +1,7 @@
 """
-Unit tests for AuthenticationService.
+Unit tests for DegiroAuthenticationService.
 
-This module contains comprehensive tests for the main authentication service
+This module contains comprehensive tests for the DeGiro authentication service
 that orchestrates session management, credential handling, and DeGiro API operations.
 """
 
@@ -10,7 +10,7 @@ from django.http import HttpRequest
 
 from stonks_overwatch.config.degiro import DegiroCredentials
 from stonks_overwatch.core.interfaces.authentication_service import AuthenticationResponse, AuthenticationResult
-from stonks_overwatch.services.utilities.authentication_service import AuthenticationService
+from stonks_overwatch.services.brokers.degiro.services.authentication_service import DegiroAuthenticationService
 
 import pytest
 from django.test import TestCase
@@ -18,8 +18,8 @@ from unittest.mock import Mock, patch
 
 
 @pytest.mark.django_db
-class TestAuthenticationService(TestCase):
-    """Test cases for AuthenticationService."""
+class TestDegiroAuthenticationService(TestCase):
+    """Test cases for DegiroAuthenticationService."""
 
     def setUp(self):
         """Set up test fixtures."""
@@ -27,7 +27,7 @@ class TestAuthenticationService(TestCase):
         self.mock_credential_service = Mock()
         self.mock_degiro_service = Mock()
 
-        self.auth_service = AuthenticationService(
+        self.auth_service = DegiroAuthenticationService(
             session_manager=self.mock_session_manager,
             credential_service=self.mock_credential_service,
             degiro_service=self.mock_degiro_service,
@@ -40,6 +40,10 @@ class TestAuthenticationService(TestCase):
         request = Mock(spec=HttpRequest)
         request.session = {}
         return request
+
+    def test_broker_name_property(self):
+        """Test that broker_name property returns 'degiro'."""
+        assert self.auth_service.broker_name == "degiro"
 
     def test_is_user_authenticated_valid(self):
         """Test is_user_authenticated returns True for valid authenticated user."""
@@ -381,6 +385,9 @@ class TestAuthenticationService(TestCase):
         """Test should_check_connection returns True when default credentials exist."""
         self.mock_credential_service.has_default_credentials.return_value = True
         self.mock_session_manager.get_session_id.return_value = None
+        # Mock TOTP and in-app auth checks
+        self.mock_session_manager.is_totp_required.return_value = False
+        self.mock_session_manager.is_in_app_auth_required.return_value = False
 
         result = self.auth_service.should_check_connection(self.request)
 
@@ -390,6 +397,9 @@ class TestAuthenticationService(TestCase):
         """Test should_check_connection returns True when session ID exists."""
         self.mock_credential_service.has_default_credentials.return_value = False
         self.mock_session_manager.get_session_id.return_value = "test_session_123"
+        # Mock TOTP and in-app auth checks
+        self.mock_session_manager.is_totp_required.return_value = False
+        self.mock_session_manager.is_in_app_auth_required.return_value = False
 
         result = self.auth_service.should_check_connection(self.request)
 
@@ -399,6 +409,33 @@ class TestAuthenticationService(TestCase):
         """Test should_check_connection returns False when no credentials or session ID."""
         self.mock_credential_service.has_default_credentials.return_value = False
         self.mock_session_manager.get_session_id.return_value = None
+        # Mock TOTP and in-app auth checks
+        self.mock_session_manager.is_totp_required.return_value = False
+        self.mock_session_manager.is_in_app_auth_required.return_value = False
+
+        result = self.auth_service.should_check_connection(self.request)
+
+        assert result is False
+
+    def test_should_check_connection_false_when_totp_required(self):
+        """Test should_check_connection returns False when TOTP is required."""
+        self.mock_credential_service.has_default_credentials.return_value = True
+        self.mock_session_manager.get_session_id.return_value = "test_session_123"
+        # TOTP is required - should skip connection check
+        self.mock_session_manager.is_totp_required.return_value = True
+        self.mock_session_manager.is_in_app_auth_required.return_value = False
+
+        result = self.auth_service.should_check_connection(self.request)
+
+        assert result is False
+
+    def test_should_check_connection_false_when_in_app_auth_required(self):
+        """Test should_check_connection returns False when in-app auth is required."""
+        self.mock_credential_service.has_default_credentials.return_value = True
+        self.mock_session_manager.get_session_id.return_value = "test_session_123"
+        # In-app auth is required - should skip connection check
+        self.mock_session_manager.is_totp_required.return_value = False
+        self.mock_session_manager.is_in_app_auth_required.return_value = True
 
         result = self.auth_service.should_check_connection(self.request)
 
@@ -508,7 +545,7 @@ class TestAuthenticationService(TestCase):
             base_credentials, username="newuser", password=None, one_time_password=123456, remember_me=True
         )
 
-    @patch("stonks_overwatch.services.utilities.authentication_service.CredentialsManager")
+    @patch("stonks_overwatch.services.brokers.degiro.services.authentication_service.CredentialsManager")
     def test_authenticate_with_degiro_success(self, mock_creds_manager):
         """Test _authenticate_with_degiro successful authentication."""
         credentials = DegiroCredentials("testuser", "testpass", one_time_password=123456)
@@ -571,17 +608,19 @@ class TestAuthenticationService(TestCase):
         assert getattr(result, "is_maintenance_mode", True) is True
 
     def test_dependency_injection_defaults(self):
-        """Test AuthenticationService creates default dependencies when none provided."""
+        """Test DegiroAuthenticationService creates default dependencies when none provided."""
         with (
             patch(
-                "stonks_overwatch.services.utilities.authentication_service.AuthenticationSessionManager"
+                "stonks_overwatch.services.brokers.degiro.services.authentication_service.AuthenticationSessionManager"
             ) as mock_session,
             patch(
-                "stonks_overwatch.services.utilities.authentication_service.AuthenticationCredentialService"
+                "stonks_overwatch.services.brokers.degiro.services.authentication_service.AuthenticationCredentialService"
             ) as mock_cred,
-            patch("stonks_overwatch.services.utilities.authentication_service.DeGiroService") as mock_degiro,
+            patch(
+                "stonks_overwatch.services.brokers.degiro.services.authentication_service.DeGiroService"
+            ) as mock_degiro,
         ):
-            service = AuthenticationService()
+            service = DegiroAuthenticationService()
 
             # Verify default dependencies were created
             assert service.session_manager is not None
@@ -592,12 +631,12 @@ class TestAuthenticationService(TestCase):
             mock_degiro.assert_called_once()
 
     def test_dependency_injection_with_provided_services(self):
-        """Test AuthenticationService uses provided dependencies."""
+        """Test DegiroAuthenticationService uses provided dependencies."""
         mock_session = Mock()
         mock_cred = Mock()
         mock_degiro = Mock()
 
-        service = AuthenticationService(
+        service = DegiroAuthenticationService(
             session_manager=mock_session, credential_service=mock_cred, degiro_service=mock_degiro
         )
 
@@ -630,7 +669,7 @@ class TestAuthenticationService(TestCase):
 
         # Mock DeGiro service methods
         with patch(
-            "stonks_overwatch.services.utilities.authentication_service.CredentialsManager"
+            "stonks_overwatch.services.brokers.degiro.services.authentication_service.CredentialsManager"
         ) as mock_credentials_manager_class:
             mock_credentials_manager = Mock()
             mock_credentials_manager_class.return_value = mock_credentials_manager
@@ -653,9 +692,9 @@ class TestAuthenticationService(TestCase):
         # Mock DeGiro service methods and sleep
         with (
             patch(
-                "stonks_overwatch.services.utilities.authentication_service.CredentialsManager"
+                "stonks_overwatch.services.brokers.degiro.services.authentication_service.CredentialsManager"
             ) as mock_credentials_manager_class,
-            patch("stonks_overwatch.services.utilities.authentication_service.sleep") as mock_sleep,
+            patch("stonks_overwatch.services.brokers.degiro.services.authentication_service.sleep") as mock_sleep,
         ):
             mock_credentials_manager = Mock()
             mock_credentials_manager_class.return_value = mock_credentials_manager

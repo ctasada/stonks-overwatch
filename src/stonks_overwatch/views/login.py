@@ -1,15 +1,13 @@
-from typing import Any
+from typing import Optional
 
-from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.views import View
 
-from stonks_overwatch.core.authentication_locator import get_authentication_service
-from stonks_overwatch.core.interfaces.authentication_service import AuthenticationResponse, AuthenticationResult
-from stonks_overwatch.jobs.jobs_scheduler import JobsScheduler
-from stonks_overwatch.utils.core.constants import AuthenticationErrorMessages, LogMessages
+from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+from stonks_overwatch.core.factories.broker_registry import BrokerRegistry
 from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.utils.core.session_keys import SessionKeys
 
 
 class Login(View):
@@ -29,158 +27,291 @@ class Login(View):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # Use optimized service locator for authentication service
-        self.auth_service = get_authentication_service()
+        self.factory = BrokerFactory()
+        self.registry = BrokerRegistry()
 
-    def _render_login_template(
-        self,
-        request: HttpRequest,
-        show_otp: bool = False,
-        show_loading: bool = False,
-        show_in_app_auth: bool = False,
-        status: int = 200,
-    ) -> HttpResponse:
-        """Centralized method to render the login template with appropriate context."""
-        context = {"show_otp": show_otp, "show_loading": show_loading, "show_in_app_auth": show_in_app_auth}
-        return render(request, self.TEMPLATE_NAME, context=context, status=status)
+    def _render_broker_selector(self, request: HttpRequest) -> HttpResponse:
+        """Render the broker selector."""
+        try:
+            available_brokers = self._get_available_brokers()
 
-    def get(self, request: HttpRequest) -> HttpResponse:
-        # Use AuthenticationService to check TOTP requirement, in-app auth requirement, and authentication status
-        show_otp = False
-        show_in_app_auth = False
-        show_loading = False
-
-        # If user is already authenticated, show loading screen and skip TOTP/in-app auth checks
-        if self.auth_service.is_user_authenticated(request):
-            self.logger.info(LogMessages.USER_ALREADY_AUTHENTICATED)
-            show_loading = True
-        else:
-            # Only check for TOTP/in-app auth requirements if user is not authenticated
-            show_otp = self.auth_service.session_manager.is_totp_required(request)
-            show_in_app_auth = self.auth_service.session_manager.is_in_app_auth_required(request)
-
-        return self._render_login_template(request, show_otp, show_loading, show_in_app_auth)
-
-    def post(self, request: HttpRequest) -> HttpResponse:
-        update_portfolio = request.POST.get("update_portfolio") or False
-        if update_portfolio:
-            # Update portfolio data before loading the dashboard
-            JobsScheduler.update_portfolio()
-            return redirect("dashboard")
-
-        in_app_auth = request.POST.get("in_app_auth") or False
-        if in_app_auth:
-            # For in-app authentication, wait until the user is authenticated using DEGIRO app
-            return self._handle_in_app_authentication(request)
-
-        # Extract and validate credentials
-        credentials = self._extract_credentials(request)
-        if not credentials:
-            messages.error(request, AuthenticationErrorMessages.CREDENTIALS_REQUIRED)
-            return self._render_login_template(request, status=400)
-
-        # Perform authentication
-        auth_result = self._perform_authentication(request, credentials)
-
-        # Handle result and render response
-        show_otp, show_loading, show_in_app_auth = self._handle_auth_result(request, auth_result)
-
-        return self._render_login_template(request, show_otp, show_loading, show_in_app_auth)
-
-    def _extract_credentials(self, request: HttpRequest) -> dict[str, Any]:
-        """Extract and validate credentials from the request."""
-        username = request.POST.get("username")
-        password = request.POST.get("password")
-        one_time_password = request.POST.get("2fa_code")
-        remember_me = request.POST.get("remember_me") == "true"
-
-        # Convert 2FA code to integer if provided
-        if one_time_password:
-            try:
-                one_time_password = int(one_time_password)
-            except (ValueError, TypeError):
-                one_time_password = None
-
-        # Handle TOTP flow: if only 2FA code is provided, get credentials from session
-        if not username and not password and one_time_password:
-            # During TOTP flow, credentials should be in session
-            session_credentials = self.auth_service.session_manager.get_credentials(request)
-            if session_credentials:
-                username = session_credentials.username
-                password = session_credentials.password
-                remember_me = session_credentials.remember_me if session_credentials.remember_me is not None else False
-
-        # Return credentials if we have username and password (either from POST or session)
-        if username and password:
-            return {
-                "username": username,
-                "password": password,
-                "one_time_password": one_time_password,
-                "remember_me": remember_me,
+            context = {
+                "available_brokers": available_brokers,
             }
 
-        return None
+            self.logger.info(f"Displaying broker selector with {len(available_brokers)} brokers")
+            return render(request, self.TEMPLATE_NAME, context=context)
 
-    def _perform_authentication(self, request: HttpRequest, credentials: dict[str, Any]) -> AuthenticationResponse:
-        """Perform authentication using AuthenticationService."""
-        if credentials["one_time_password"]:
-            return self.auth_service.handle_totp_authentication(request, credentials["one_time_password"])
-        else:
-            return self.auth_service.authenticate_user(
+        except Exception as e:
+            self.logger.error(f"Error displaying broker selector: {str(e)}")
+            context = {"available_brokers": []}
+            return render(request, self.TEMPLATE_NAME, context=context, status=500)
+
+    def get(self, request: HttpRequest) -> HttpResponse:
+        # Check if we should attempt auto-authentication
+        broker_to_auto_auth = self._get_broker_with_stored_credentials()
+
+        if broker_to_auto_auth:
+            # Try to auto-authenticate
+            auth_result = self._attempt_auto_authentication(request, broker_to_auto_auth)
+
+            if auth_result.get("success"):
+                self.logger.info(f"Auto-authentication successful for {broker_to_auto_auth}")
+                return redirect("dashboard")
+            else:
+                # Auto-auth failed - check if it's due to TOTP/2FA requirement
+                if auth_result.get("requires_totp") or auth_result.get("requires_in_app_auth"):
+                    # TOTP or in-app auth required - redirect to broker-specific login page
+                    self.logger.info(
+                        f"Auto-authentication requires 2FA for {broker_to_auto_auth}, redirecting to broker login"
+                    )
+                    return redirect("broker_login", broker_name=broker_to_auto_auth)
+                else:
+                    # Other authentication failure - show broker selector so user can choose
+                    self.logger.info(
+                        f"Auto-authentication failed for {broker_to_auto_auth}: {auth_result.get('message')}"
+                    )
+                    self.logger.info("Showing broker selector for manual selection")
+
+        # No stored credentials found or auto-auth failed (non-2FA), show broker selector
+        return self._render_broker_selector(request)
+
+    def post(self, request: HttpRequest) -> HttpResponse:
+        # The login page only shows broker selector, so POST requests should redirect to broker-specific login
+        # This is a fallback in case someone tries to POST to /login directly
+        return redirect("login")
+
+    def _get_available_brokers(self) -> list:
+        """
+        Get list of available brokers with their metadata.
+
+        Returns:
+            List of broker dictionaries with name, display_name, description, and enabled status
+        """
+        brokers = []
+
+        # Get all registered brokers from the registry
+        registered_brokers = self.registry.get_registered_brokers()
+
+        for broker_name in registered_brokers:
+            try:
+                # Get broker configuration to check if it's enabled
+                config = self.factory.create_config(broker_name)
+
+                broker_info = {
+                    "name": broker_name,
+                    "display_name": self._get_display_name(broker_name),
+                    "description": self._get_broker_description(broker_name),
+                    "enabled": config.is_enabled() if config else False,
+                }
+
+                brokers.append(broker_info)
+
+            except Exception as e:
+                self.logger.warning(f"Error getting info for broker {broker_name}: {str(e)}")
+                # Still add the broker but mark as not enabled
+                brokers.append(
+                    {
+                        "name": broker_name,
+                        "display_name": self._get_display_name(broker_name),
+                        "description": "Configuration error",
+                        "enabled": False,
+                    }
+                )
+
+        # Sort brokers: enabled first, then alphabetically
+        brokers.sort(key=lambda x: (not x["enabled"], x["display_name"]))
+
+        return brokers
+
+    def _get_display_name(self, broker_name: str) -> str:
+        """Get the display name for a broker."""
+        display_names = {
+            "degiro": "DEGIRO",
+            "bitvavo": "Bitvavo",
+            "ibkr": "Interactive Brokers",
+        }
+        return display_names.get(broker_name, broker_name.title())
+
+    def _get_broker_description(self, broker_name: str) -> str:
+        """Get a description for a broker."""
+        descriptions = {
+            "degiro": "European online broker with low fees",
+            "bitvavo": "Dutch cryptocurrency exchange platform",
+            "ibkr": "Global investment platform with advanced tools",
+        }
+        return descriptions.get(broker_name, "Investment platform")
+
+    def _get_broker_with_stored_credentials(self) -> Optional[str]:
+        """
+        Find a broker with stored credentials for auto-authentication.
+
+        Returns:
+            Broker name if found, None otherwise
+        """
+        try:
+            from stonks_overwatch.services.utilities.credential_validator import CredentialValidator
+
+            available_brokers = self._get_available_brokers()
+
+            # Only attempt auto-auth for enabled brokers
+            enabled_brokers = [b for b in available_brokers if b["enabled"]]
+
+            for broker_info in enabled_brokers:
+                broker_name = broker_info["name"]
+                config = self.factory.create_config(broker_name)
+
+                if config and config.is_enabled():
+                    credentials = config.get_credentials
+
+                    # Check if credentials are valid (not placeholders)
+                    if credentials and CredentialValidator.has_valid_credentials(broker_name, credentials):
+                        self.logger.debug(f"Found stored credentials for broker: {broker_name}")
+                        return broker_name
+
+            return None
+
+        except Exception as e:
+            self.logger.error(f"Error checking for stored credentials: {str(e)}")
+            return None
+
+    def _attempt_auto_authentication(self, request: HttpRequest, broker_name: str) -> dict:
+        """
+        Attempt automatic authentication with stored credentials.
+
+        Args:
+            request: The HTTP request
+            broker_name: Name of the broker to authenticate with
+
+        Returns:
+            Dictionary with success status and message
+        """
+        try:
+            self.logger.info(f"Attempting auto-authentication for broker: {broker_name}")
+
+            # Get broker configuration
+            config = self.factory.create_config(broker_name)
+            if not config:
+                return {"success": False, "message": f"Broker {broker_name} not configured"}
+
+            credentials = config.get_credentials
+            if not credentials:
+                return {"success": False, "message": "No credentials found"}
+
+            # Perform authentication based on broker type
+            if broker_name == "degiro":
+                return self._auto_authenticate_degiro(request, credentials)
+            elif broker_name == "bitvavo":
+                return self._auto_authenticate_bitvavo(request, credentials)
+            elif broker_name == "ibkr":
+                return self._auto_authenticate_ibkr(request, credentials)
+            else:
+                return {"success": False, "message": f"Auto-authentication not supported for {broker_name}"}
+
+        except Exception as e:
+            self.logger.error(f"Error during auto-authentication for {broker_name}: {str(e)}")
+            return {"success": False, "message": f"Auto-authentication failed: {str(e)}"}
+
+    def _auto_authenticate_degiro(self, request: HttpRequest, credentials) -> dict:
+        """Auto-authenticate with DEGIRO stored credentials."""
+        try:
+            from stonks_overwatch.core.authentication_locator import get_authentication_service
+            from stonks_overwatch.core.interfaces.authentication_service import AuthenticationResult
+
+            auth_service = get_authentication_service()
+
+            # Authenticate with stored credentials
+            auth_result = auth_service.authenticate_user(
                 request=request,
-                username=credentials["username"],
-                password=credentials["password"],
-                one_time_password=credentials["one_time_password"],
-                remember_me=credentials["remember_me"],
+                username=credentials.username,
+                password=credentials.password,
+                one_time_password=None,
+                remember_me=False,
             )
 
-    def _handle_auth_result(self, request: HttpRequest, auth_result: AuthenticationResponse):
-        """Handle authentication result and set UI state."""
-        show_otp = False
-        show_loading = False
-        show_in_app_auth = False
-
-        if auth_result.is_success:
-            self.logger.info(LogMessages.LOGIN_SUCCESSFUL)
-            show_loading = True
-        elif auth_result.result == AuthenticationResult.TOTP_REQUIRED:
-            self.logger.info(LogMessages.TOTP_REQUIRED_USER)
-            show_otp = True
-        elif auth_result.result == AuthenticationResult.IN_APP_AUTHENTICATION_REQUIRED:
-            self.logger.info(LogMessages.IN_APP_AUTH_REQUIRED_USER)
-            show_in_app_auth = True
-        elif auth_result.result == AuthenticationResult.ACCOUNT_BLOCKED:
-            self.logger.warning(LogMessages.ACCOUNT_BLOCKED_USER)
-            messages.error(request, AuthenticationErrorMessages.ACCOUNT_BLOCKED)
-        elif auth_result.result == AuthenticationResult.INVALID_CREDENTIALS:
-            messages.error(request, auth_result.message or AuthenticationErrorMessages.INVALID_CREDENTIALS)
-        elif auth_result.result == AuthenticationResult.MAINTENANCE_MODE:
-            messages.error(request, auth_result.message or AuthenticationErrorMessages.MAINTENANCE_MODE)
-        elif auth_result.result == AuthenticationResult.CONNECTION_ERROR:
-            self.logger.error(f"Connection error: {auth_result.message}")
-            messages.error(request, AuthenticationErrorMessages.CONNECTION_ERROR)
-        else:
-            self.logger.error(f"Authentication failed: {auth_result.message}")
-            messages.error(request, auth_result.message or AuthenticationErrorMessages.UNEXPECTED_ERROR)
-
-        return show_otp, show_loading, show_in_app_auth
-
-    def _handle_in_app_authentication(self, request: HttpRequest) -> HttpResponse:
-        """Handle in-app authentication by delegating to the authentication service."""
-        # Use the authentication service to handle in-app authentication
-        auth_result = self.auth_service.handle_in_app_authentication(request)
-
-        if auth_result.is_success:
-            self.logger.info(LogMessages.LOGIN_SUCCESSFUL)
-            return self._render_login_template(request, show_loading=True)
-        else:
-            # Handle errors from authentication service
-            self.logger.error(f"In-app authentication failed: {auth_result.message}")
-            if auth_result.result == AuthenticationResult.CONFIGURATION_ERROR:
-                messages.error(request, AuthenticationErrorMessages.CONFIGURATION_ERROR)
-            elif auth_result.result == AuthenticationResult.CONNECTION_ERROR:
-                messages.error(request, AuthenticationErrorMessages.CONNECTION_ERROR)
+            if auth_result.is_success:
+                request.session[SessionKeys.get_authenticated_key("degiro")] = True
+                return {"success": True, "message": "Auto-authentication successful"}
             else:
-                messages.error(request, auth_result.message or AuthenticationErrorMessages.UNEXPECTED_ERROR)
+                # Check if failure is due to TOTP requirement
+                if auth_result.result == AuthenticationResult.TOTP_REQUIRED:
+                    # TOTP required - this is expected, redirect to broker login for 2FA
+                    return {"success": False, "message": "TOTP authentication required", "requires_totp": True}
+                elif auth_result.result == AuthenticationResult.IN_APP_AUTHENTICATION_REQUIRED:
+                    # In-app auth required - redirect to broker login
+                    return {"success": False, "message": "In-app authentication required", "requires_in_app_auth": True}
+                else:
+                    # Other authentication failure
+                    return {"success": False, "message": auth_result.message or "Authentication failed"}
 
-            return self._render_login_template(request, show_in_app_auth=False, status=400)
+        except Exception as e:
+            self.logger.error(f"DEGIRO auto-authentication error: {str(e)}")
+            return {"success": False, "message": "Auto-authentication failed"}
+
+    def _auto_authenticate_bitvavo(self, request: HttpRequest, credentials) -> dict:
+        """Auto-authenticate with Bitvavo stored credentials."""
+        try:
+            # Create Bitvavo authentication service using factory
+            auth_service = self.factory.create_authentication_service("bitvavo")
+            if not auth_service:
+                return {"success": False, "message": "Bitvavo authentication service not available"}
+
+            # Authenticate with stored credentials
+            auth_result = auth_service.authenticate_user(
+                request=request,
+                api_key=credentials.apikey,
+                api_secret=credentials.apisecret,
+                remember_me=False,
+            )
+
+            if auth_result["success"]:
+                request.session[SessionKeys.get_authenticated_key("bitvavo")] = True
+                return {"success": True, "message": "Auto-authentication successful"}
+            else:
+                return {"success": False, "message": auth_result["message"]}
+
+        except Exception as e:
+            self.logger.error(f"Bitvavo auto-authentication error: {str(e)}")
+            return {"success": False, "message": "Auto-authentication failed"}
+
+    def _auto_authenticate_ibkr(self, request: HttpRequest, credentials) -> dict:
+        """Auto-authenticate with IBKR stored credentials."""
+        try:
+            # Create IBKR authentication service using factory
+            auth_service = self.factory.create_authentication_service("ibkr")
+            if not auth_service:
+                return {"success": False, "message": "IBKR authentication service not available"}
+
+            # Check if user is already authenticated
+            if auth_service.is_user_authenticated(request):
+                return {"success": True, "message": "Already authenticated"}
+
+            # Extract credentials
+            access_token = getattr(credentials, "access_token", "")
+            access_token_secret = getattr(credentials, "access_token_secret", "")
+            consumer_key = getattr(credentials, "consumer_key", "")
+            dh_prime = getattr(credentials, "dh_prime", "")
+            encryption_key = getattr(credentials, "encryption_key", None)
+            signature_key = getattr(credentials, "signature_key", None)
+
+            # Validate that we have the required credentials
+            if not all([access_token, access_token_secret, consumer_key, dh_prime]):
+                return {"success": False, "message": "Missing required OAuth credentials"}
+
+            # Authenticate using the service
+            result = auth_service.authenticate_user(
+                request=request,
+                access_token=access_token,
+                access_token_secret=access_token_secret,
+                consumer_key=consumer_key,
+                dh_prime=dh_prime,
+                encryption_key=encryption_key,
+                signature_key=signature_key,
+                remember_me=True,  # Auto-auth implies stored credentials
+            )
+
+            return result
+
+        except Exception as e:
+            self.logger.error(f"IBKR auto-authentication error: {str(e)}")
+            return {"success": False, "message": "Auto-authentication failed"}

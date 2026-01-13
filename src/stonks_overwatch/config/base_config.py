@@ -178,25 +178,34 @@ class BaseConfig(ABC):
         """
         Merge database and JSON configuration data with JSON taking precedence.
 
+        Priority order (highest to lowest):
+        1. JSON file configuration (config.json) - Takes precedence for overrides
+        2. Database configuration - Used as base when JSON doesn't specify a value
+
+        This allows config.json to override database defaults, which is useful for:
+        - Development/testing environments
+        - Temporary configuration changes
+        - Environment-specific overrides
+
         Args:
-            db_data: Configuration data from database
-            json_data: Configuration data from JSON file
+            db_data: Configuration data from database (base defaults)
+            json_data: Configuration data from JSON file (overrides)
 
         Returns:
             Merged configuration dictionary
         """
-        # Start with DB data
+        # Start with DB data as base
         merged = db_data.copy()
 
-        # Override with JSON data
+        # Override with JSON data (JSON has priority for overrides)
         for key, value in json_data.items():
             if key == "credentials" and isinstance(value, dict) and isinstance(merged.get(key), dict):
-                # Merge credentials dictionaries
+                # Merge credentials dictionaries (JSON credentials override DB)
                 merged_credentials = merged.get(key, {}).copy()
                 merged_credentials.update(value)
                 merged[key] = merged_credentials
             else:
-                # Direct override for other fields
+                # Direct override for other fields (JSON value wins)
                 merged[key] = value
 
         return merged

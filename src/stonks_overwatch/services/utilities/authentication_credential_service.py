@@ -246,9 +246,10 @@ class AuthenticationCredentialService(CredentialServiceInterface, BaseService):
 
             degiro_configuration.credentials["username"] = username
             degiro_configuration.credentials["password"] = password
+            degiro_configuration.enabled = True  # Enable broker on successful authentication
             self._get_brokers_repository().save_broker_configuration(degiro_configuration)
 
-            self.logger.debug("Successfully stored credentials in database")
+            self.logger.debug("Successfully stored credentials in database and enabled broker")
             return True
 
         except Exception as e:

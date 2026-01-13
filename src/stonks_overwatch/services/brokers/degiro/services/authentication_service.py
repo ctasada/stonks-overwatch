@@ -1,5 +1,5 @@
 """
-Authentication service implementation.
+DeGiro authentication service implementation.
 
 This module provides the concrete implementation of the authentication service
 that orchestrates the complete authentication flow, coordinating between session
@@ -22,6 +22,7 @@ from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.core.interfaces.credential_service import CredentialServiceInterface
 from stonks_overwatch.core.interfaces.session_manager import SessionManagerInterface
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import CredentialsManager, DeGiroService
+from stonks_overwatch.services.brokers.models import BrokersConfigurationRepository
 from stonks_overwatch.services.utilities.authentication_credential_service import AuthenticationCredentialService
 from stonks_overwatch.services.utilities.authentication_session_manager import AuthenticationSessionManager
 from stonks_overwatch.settings import DEBUG_MODE
@@ -33,13 +34,13 @@ from stonks_overwatch.utils.core.constants import (
 from stonks_overwatch.utils.core.logger import StonksLogger
 
 
-class AuthenticationService(AuthenticationServiceInterface, BaseService):
+class DegiroAuthenticationService(AuthenticationServiceInterface, BaseService):
     """
-    Concrete implementation of the authentication service.
+    DeGiro-specific authentication service implementation.
 
     This class orchestrates the complete authentication flow by coordinating
     between session management, credential handling, and DeGiro API operations.
-    It serves as the main entry point for all authentication operations and
+    It serves as the main entry point for all DeGiro authentication operations and
     ensures consistent behavior across the application.
 
     The service handles:
@@ -51,7 +52,7 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
     - Maintenance mode scenarios
     """
 
-    logger = StonksLogger.get_logger("stonks_overwatch.auth_service", "[AUTH|SERVICE]")
+    BROKER_NAME = "degiro"
 
     def __init__(
         self,
@@ -62,7 +63,7 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
         **kwargs,
     ):
         """
-        Initialize the authentication service with optional dependencies.
+        Initialize the DeGiro authentication service with optional dependencies.
 
         Args:
             session_manager: Optional session manager (defaults to AuthenticationSessionManager)
@@ -72,11 +73,17 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
             **kwargs: Additional keyword arguments
         """
         super().__init__(config, **kwargs)
+        self.logger = StonksLogger.get_logger(__name__, "[DEGIRO|AUTH]")
 
         # Initialize dependencies with defaults if not provided
         self.session_manager = session_manager or AuthenticationSessionManager(config)
         self.credential_service = credential_service or AuthenticationCredentialService(config)
         self.degiro_service = degiro_service or DeGiroService()
+
+    @property
+    def broker_name(self) -> str:
+        """Return the broker name."""
+        return self.BROKER_NAME
 
     def is_user_authenticated(self, request: HttpRequest) -> bool:
         """
@@ -448,6 +455,9 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
                 self.session_manager.set_authenticated(request, True)
                 self.session_manager.set_session_id(request, session_id)
 
+                # Enable broker in database on successful authentication
+                self._enable_broker_in_database()
+
                 # If remember_me was selected, store credentials in database
                 if credentials.remember_me:
                     self.credential_service.store_credentials_in_database(credentials.username, credentials.password)
@@ -569,6 +579,18 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
             bool: True if connection should be checked, False otherwise
         """
         try:
+            # Don't check connection if TOTP is currently required
+            # This prevents infinite loops when TOTP is needed
+            if self.session_manager.is_totp_required(request):
+                self.logger.debug("Skipping connection check - TOTP required")
+                return False
+
+            # Don't check connection if in-app authentication is currently required
+            # This prevents infinite loops when in-app auth is needed
+            if self.session_manager.is_in_app_auth_required(request):
+                self.logger.debug("Skipping connection check - in-app authentication required")
+                return False
+
             # Check if we have default credentials or session credentials
             has_default = self.credential_service.has_default_credentials()
             session_id = self.session_manager.get_session_id(request)
@@ -765,6 +787,9 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
             self.session_manager.set_authenticated(request, True)
             self.session_manager.set_session_id(request, session_id)
 
+            # Enable broker in database on successful authentication
+            self._enable_broker_in_database()
+
             return AuthenticationResponse(
                 result=AuthenticationResult.SUCCESS, message="Authentication successful", session_id=session_id
             )
@@ -813,6 +838,25 @@ class AuthenticationService(AuthenticationServiceInterface, BaseService):
     def _create_error_response(self, result: AuthenticationResult, message: str) -> AuthenticationResponse:
         """Helper to create error response."""
         return AuthenticationResponse(result=result, message=message)
+
+    def _enable_broker_in_database(self) -> None:
+        """
+        Enable the broker in the database on successful authentication.
+
+        This ensures the broker is marked as enabled regardless of remember_me setting.
+        """
+        try:
+            degiro_configuration = BrokersConfigurationRepository.get_broker_by_name("degiro")
+            if degiro_configuration:
+                degiro_configuration.enabled = True
+                BrokersConfigurationRepository.save_broker_configuration(degiro_configuration)
+                self.logger.debug("DEGIRO broker enabled in database")
+            else:
+                self.logger.warning("DEGIRO broker configuration not found in database")
+
+        except Exception as e:
+            self.logger.error(f"Failed to enable broker in database: {str(e)}")
+            # Don't raise exception - authentication succeeded even if DB update failed
 
     def _update_global_config_credentials(self, credentials):
         """

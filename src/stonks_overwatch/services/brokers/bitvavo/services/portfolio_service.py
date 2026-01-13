@@ -138,7 +138,12 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
 
         total_cash = float(total_cash)
 
-        roi = (portfolio_total_value / total_deposit_withdrawal - 1) * 100
+        # Handle division by zero case when no deposits exist yet
+        if total_deposit_withdrawal and total_deposit_withdrawal > 0:
+            roi = (portfolio_total_value / total_deposit_withdrawal - 1) * 100
+        else:
+            roi = 0.0  # No deposits yet, so no ROI to calculate
+
         total_profit_loss = portfolio_total_value - total_deposit_withdrawal
 
         return TotalPortfolio(

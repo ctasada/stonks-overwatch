@@ -7,6 +7,7 @@ from degiro_connector.quotecast.models.chart import Interval
 from degiro_connector.trading.models.account import OverviewRequest
 from degiro_connector.trading.models.transaction import HistoryRequest
 from django.core.cache import cache
+from django.utils import timezone as django_timezone
 
 from stonks_overwatch.config.degiro import DegiroConfig
 from stonks_overwatch.core.interfaces.base_service import BaseService
@@ -92,33 +93,45 @@ class UpdateService(BaseService, AbstractUpdateService):
         last_transaction = self._get_last_transactions_import()
         last_quotation = ProductQuotationsRepository.get_last_update()
 
-        return max([last_cash_movement, last_transaction, last_quotation])
+        # Filter out None values to handle cases where no data exists yet
+        non_null_dates = [date for date in [last_cash_movement, last_transaction, last_quotation] if date is not None]
+
+        if not non_null_dates:
+            # If no data exists yet, return a timezone-aware default date
+            return django_timezone.now()
+
+        return max(non_null_dates)
 
     def _get_last_cash_movement_import(self) -> datetime:
         last_movement = CashMovementsRepository.get_last_movement()
-        if last_movement is None:
-            degiro_config = self._injected_config
-
-            if degiro_config:
-                last_movement = datetime.combine(degiro_config.start_date, time.min)
-            else:
-                # Fallback to a reasonable default if no config available
-                last_movement = datetime.now() - timedelta(days=365)
-
-        return last_movement
+        return self._ensure_timezone_aware_datetime(last_movement)
 
     def _get_last_transactions_import(self) -> datetime:
         last_movement = TransactionsRepository.get_last_movement()
-        if last_movement is None:
-            degiro_config = self._injected_config
+        return self._ensure_timezone_aware_datetime(last_movement)
 
-            if degiro_config:
-                last_movement = datetime.combine(degiro_config.start_date, time.min)
-            else:
-                # Fallback to a reasonable default if no config available
-                last_movement = datetime.now() - timedelta(days=365)
+    def _ensure_timezone_aware_datetime(self, last_movement: Optional[datetime]) -> datetime:
+        """
+        Ensure the datetime is timezone-aware, providing fallbacks for None values.
 
-        return last_movement
+        Args:
+            last_movement: Optional datetime that might be None
+
+        Returns:
+            Timezone-aware datetime
+        """
+        if last_movement is not None:
+            return last_movement
+
+        degiro_config = self._injected_config
+
+        if degiro_config:
+            # Convert naive date to timezone-aware datetime
+            naive_datetime = datetime.combine(degiro_config.start_date, time.min)
+            return django_timezone.make_aware(naive_datetime)
+        else:
+            # Fallback to a reasonable default if no config available
+            return django_timezone.now() - timedelta(days=365)
 
     def update_all(self):
         if not DeGiroSessionChecker.has_active_session():

@@ -203,6 +203,19 @@ class DeGiroService:
                 self.logger.warning("DeGiro is in maintenance mode. Connection will not be established.")
                 self.is_maintenance_mode = True
             except DeGiroConnectionError as error:
+                # Check if this is a TOTP or in-app authentication requirement
+                if hasattr(error, "error_details"):
+                    if (
+                        error.error_details.status_text == "totpNeeded"
+                        or error.error_details.status_text == "inAppTOTPNeeded"
+                        or error.error_details.status == 6
+                        or error.error_details.status == 12
+                    ):
+                        # TOTP or in-app auth required - don't continue checking connection
+                        # Re-raise the error so middleware can handle it properly
+                        self.logger.debug(f"Authentication required: {error.error_details.status_text}")
+                        raise error
+                # For other DeGiro connection errors, re-raise them
                 raise error
             except ConnectionError:
                 # Try to connect and validate the connection.

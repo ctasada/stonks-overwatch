@@ -156,6 +156,9 @@ def _import_real_services():
     from stonks_overwatch.services.brokers.ibkr.services.account_overview import (
         AccountOverviewService as IbkrAccountService,
     )
+    from stonks_overwatch.services.brokers.ibkr.services.authentication_service import (
+        IbkrAuthenticationService,
+    )
     from stonks_overwatch.services.brokers.ibkr.services.dividends import (
         DividendsService as IbkrDividendService,
     )
@@ -188,6 +191,7 @@ def _import_real_services():
             "transaction": IbkrTransactionService,
             "dividend": IbkrDividendService,
             "account": IbkrAccountService,
+            "authentication": IbkrAuthenticationService,
         },
     }
 

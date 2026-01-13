@@ -23,14 +23,7 @@
                value="{% if ibkr_config.credentials.access_token %}{{ ibkr_config.credentials.access_token }}{% endif %}">
     </div>
 
-    <div class="settings-form-group">
-        <label for="ibkr-access-token-secret" class="required">Access Token Secret</label>
-        <div class="input-group">
-            <input type="password" class="form-control" id="ibkr-access-token-secret" required
-                   value="{% if ibkr_config.credentials.access_token_secret %}{{ ibkr_config.credentials.access_token_secret }}{% endif %}">
-            <i class="bi bi-eye-slash-fill toggle-password" data-target="ibkr-access-token-secret"></i>
-        </div>
-    </div>
+    {% include 'components/password_field.html' with field_id='ibkr-access-token-secret' label='Access Token Secret' field_name='ibkr-access-token-secret' placeholder='' required=True value=ibkr_config.credentials.access_token_secret|default:'' wrapper_class='settings-form-group' label_class='required' %}
 
     <div class="settings-form-group">
         <label for="ibkr-consumer-key" class="required">

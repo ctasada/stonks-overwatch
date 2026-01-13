@@ -23,14 +23,7 @@
                value="{% if bitvavo_config.credentials.apikey %}{{ bitvavo_config.credentials.apikey }}{% endif %}">
     </div>
 
-    <div class="settings-form-group">
-        <label for="bitvavo-apisecret" class="required">API Secret</label>
-        <div class="input-group">
-            <input type="password" class="form-control" id="bitvavo-apisecret"
-                   value="{% if bitvavo_config.credentials.apisecret %}{{ bitvavo_config.credentials.apisecret }}{% endif %}">
-            <i class="bi bi-eye-slash-fill toggle-password" data-target="bitvavo-apisecret"></i>
-        </div>
-    </div>
+    {% include 'components/password_field.html' with field_id='bitvavo-apisecret' label='API Secret' value=bitvavo_config.credentials.apisecret wrapper_class='settings-form-group' %}
 
     <hr class="my-3">
 

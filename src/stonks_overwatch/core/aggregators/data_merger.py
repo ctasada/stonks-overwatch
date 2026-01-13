@@ -159,11 +159,11 @@ class DataMerger:
         # Use the base currency from the first portfolio
         base_currency = total_portfolios[0].base_currency
 
-        # Sum all the values
-        total_pl = sum(portfolio.total_pl for portfolio in total_portfolios)
-        total_cash = sum(portfolio.total_cash for portfolio in total_portfolios)
-        current_value = sum(portfolio.current_value for portfolio in total_portfolios)
-        total_deposit_withdrawal = sum(portfolio.total_deposit_withdrawal for portfolio in total_portfolios)
+        # Sum all the values, handling None cases
+        total_pl = sum(portfolio.total_pl or 0 for portfolio in total_portfolios)
+        total_cash = sum(portfolio.total_cash or 0 for portfolio in total_portfolios)
+        current_value = sum(portfolio.current_value or 0 for portfolio in total_portfolios)
+        total_deposit_withdrawal = sum(portfolio.total_deposit_withdrawal or 0 for portfolio in total_portfolios)
 
         # Calculate combined ROI
         roi = 0.0
