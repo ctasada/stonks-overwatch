@@ -89,7 +89,7 @@
                              class="broker-logo mb-3">
                         <h5 class="card-title mb-2">{{ broker.display_name }}</h5>
                         <p class="card-text text-muted small mb-3">{{ broker.description }}</p>
-                        {% if not broker.enabled %}
+                        {% if not broker.stable %}
                             <span class="badge bg-warning text-dark">Experimental</span>
                         {% endif %}
                     </div>

@@ -10,6 +10,7 @@ from django.core.cache import cache
 from django.utils import timezone as django_timezone
 
 from stonks_overwatch.config.degiro import DegiroConfig
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.core.interfaces.update_service import AbstractUpdateService
 from stonks_overwatch.services.brokers.degiro.client.constants import CurrencyFX
@@ -67,7 +68,7 @@ class UpdateService(BaseService, AbstractUpdateService):
             If True, the service will attempt to connect to DeGiro upon initialization.
         """
         # Initialize AbstractUpdateService first (has no super() calls to interfere)
-        AbstractUpdateService.__init__(self, "DEGIRO", import_folder, debug_mode, config)
+        AbstractUpdateService.__init__(self, BrokerName.DEGIRO, import_folder, debug_mode, config)
         # Then manually set BaseService attributes without calling its __init__
         self._global_config = None
         self._injected_config = config
@@ -75,7 +76,7 @@ class UpdateService(BaseService, AbstractUpdateService):
             from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 
             broker_factory = BrokerFactory()
-            self._injected_config = broker_factory.create_config("degiro")
+            self._injected_config = broker_factory.create_config(BrokerName.DEGIRO)
 
         # Pass injected config to DeGiro service for proper credential access
         self.degiro_service = DeGiroService(config=self._injected_config)

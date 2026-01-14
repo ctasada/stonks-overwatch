@@ -4,6 +4,7 @@ from typing import Any, Optional
 from python_bitvavo_api.bitvavo import Bitvavo, createPostfix
 
 from stonks_overwatch.config.bitvavo import BitvavoConfig
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.singleton import singleton
 
@@ -46,7 +47,7 @@ class BitvavoService:
                 from stonks_overwatch.config.base_config import resolve_config_from_factory
 
                 # Get and resolve Bitvavo configuration
-                self.bitvavo_config = resolve_config_from_factory("bitvavo", BitvavoConfig)
+                self.bitvavo_config = resolve_config_from_factory(BrokerName.BITVAVO, BitvavoConfig)
             except ImportError as e:
                 raise ImportError(f"Failed to import BrokerFactory: {e}") from e
 

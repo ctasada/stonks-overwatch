@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.base_credentials import BaseCredentials
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 
 
@@ -98,7 +99,7 @@ class IbkrCredentials(BaseCredentials):
 
 
 class IbkrConfig(BaseConfig):
-    config_key = "ibkr"
+    config_key = BrokerName.IBKR.value
     # As per https://www.interactivebrokers.com/campus/ibkr-api-page/cpapi-v1/#pacing-limitations
     # Some endpoints have a limit of 15 requests per minute: ie: /pa/transactions
     DEFAULT_IBKR_UPDATE_FREQUENCY = 15
@@ -159,7 +160,7 @@ class IbkrConfig(BaseConfig):
     @classmethod
     def default(cls) -> "IbkrConfig":
         try:
-            return cls.from_db_with_json_override("ibkr")
+            return cls.from_db_with_json_override(BrokerName.IBKR)
         except Exception:
             cls.logger.debug("Cannot find IBKR configuration file. Using default values")
             return IbkrConfig(

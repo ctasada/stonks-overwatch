@@ -2,6 +2,7 @@ from django import template
 from django.template import RequestContext
 from django.utils import timezone
 
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.services.aggregators.portfolio_aggregator import PortfolioAggregatorService
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroOfflineModeError, DeGiroService
 from stonks_overwatch.services.brokers.degiro.services.update_service import UpdateService
@@ -34,7 +35,7 @@ def is_connected_to_degiro() -> bool:
         from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 
         broker_factory = BrokerFactory()
-        degiro_config = broker_factory.create_config("degiro")
+        degiro_config = broker_factory.create_config(BrokerName.DEGIRO)
 
         if degiro_config and degiro_config.is_enabled():
             degiro_client = DeGiroService()

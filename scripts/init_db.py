@@ -12,6 +12,7 @@ import textwrap
 from argparse import Namespace
 
 from scripts.common import setup_script_environment
+from stonks_overwatch.constants import BrokerName
 
 # Set up Django environment and logging
 setup_script_environment()
@@ -174,22 +175,22 @@ def bitvavo_transactions(update_service: BitvavoUpdateService) -> None:
 
 
 def get_degiro_update_service(args, broker_factory):
-    degiro_import_folder = os.path.join(args.import_folder, "degiro")
-    degiro_config = broker_factory.create_config("degiro")
+    degiro_import_folder = os.path.join(args.import_folder, BrokerName.DEGIRO.lower())
+    degiro_config = broker_factory.create_config(BrokerName.DEGIRO)
     return DegiroUpdateService(
         import_folder=degiro_import_folder, debug_mode=args.debug, config=degiro_config, force_connect=True
     )
 
 
 def get_ibkr_update_service(args, broker_factory):
-    ibkr_import_folder = os.path.join(args.import_folder, "ibkr")
-    ibkr_config = broker_factory.create_config("ibkr")
+    ibkr_import_folder = os.path.join(args.import_folder, BrokerName.IBKR.lower())
+    ibkr_config = broker_factory.create_config(BrokerName.IBKR)
     return IbkrUpdateService(import_folder=ibkr_import_folder, debug_mode=args.debug, config=ibkr_config)
 
 
 def get_bitvavo_update_service(args, broker_factory):
-    bitvavo_import_folder = os.path.join(args.import_folder, "bitvavo")
-    bitvavo_config = broker_factory.create_config("bitvavo")
+    bitvavo_import_folder = os.path.join(args.import_folder, BrokerName.BITVAVO.lower())
+    bitvavo_config = broker_factory.create_config(BrokerName.BITVAVO)
     return BitvavoUpdateService(import_folder=bitvavo_import_folder, debug_mode=args.debug, config=bitvavo_config)
 
 

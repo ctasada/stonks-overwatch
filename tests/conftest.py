@@ -105,10 +105,11 @@ def _register_config_classes(registry):
     from stonks_overwatch.config.bitvavo import BitvavoConfig
     from stonks_overwatch.config.degiro import DegiroConfig
     from stonks_overwatch.config.ibkr import IbkrConfig
+    from stonks_overwatch.constants import BrokerName
 
-    registry.register_broker_config("degiro", DegiroConfig)
-    registry.register_broker_config("bitvavo", BitvavoConfig)
-    registry.register_broker_config("ibkr", IbkrConfig)
+    registry.register_broker_config(BrokerName.DEGIRO, DegiroConfig)
+    registry.register_broker_config(BrokerName.BITVAVO, BitvavoConfig)
+    registry.register_broker_config(BrokerName.IBKR, IbkrConfig)
 
 
 def _import_real_services():

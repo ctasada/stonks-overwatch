@@ -10,6 +10,7 @@ from ibind import IbkrClient
 from ibind.oauth.oauth1a import OAuth1aConfig
 
 from stonks_overwatch.config.ibkr import IbkrConfig
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.singleton import singleton
 
@@ -48,7 +49,7 @@ class IbkrService:
                 from stonks_overwatch.config.base_config import resolve_config_from_factory
 
                 # Get and resolve IBKR configuration
-                ibkr_config = resolve_config_from_factory("ibkr", IbkrConfig)
+                ibkr_config = resolve_config_from_factory(BrokerName.IBKR, IbkrConfig)
             except ImportError as e:
                 raise ImportError(f"Failed to import BrokerFactory: {e}") from e
 

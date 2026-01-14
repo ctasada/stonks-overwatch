@@ -11,6 +11,7 @@ from typing import Optional, Tuple
 from django.http import HttpRequest
 
 from stonks_overwatch.config.degiro import DegiroCredentials
+from stonks_overwatch.constants.brokers import BrokerName
 from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.core.interfaces.credential_service import CredentialServiceInterface
 
@@ -128,7 +129,7 @@ class AuthenticationCredentialService(CredentialServiceInterface, BaseService):
             Optional[DegiroCredentials]: Credentials if found in database, None otherwise
         """
         try:
-            degiro_configuration = self._get_brokers_repository().get_broker_by_name("degiro")
+            degiro_configuration = self._get_brokers_repository().get_broker_by_name(BrokerName.DEGIRO)
             if degiro_configuration and degiro_configuration.credentials:
                 credentials_data = degiro_configuration.credentials
                 username = credentials_data.get("username")
@@ -164,7 +165,7 @@ class AuthenticationCredentialService(CredentialServiceInterface, BaseService):
             from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 
             broker_factory = BrokerFactory()
-            degiro_config = broker_factory.create_config("degiro")
+            degiro_config = broker_factory.create_config(BrokerName.DEGIRO)
 
             if degiro_config and degiro_config.credentials:
                 config_credentials = degiro_config.get_credentials
@@ -240,7 +241,7 @@ class AuthenticationCredentialService(CredentialServiceInterface, BaseService):
             bool: True if credentials were stored successfully, False otherwise
         """
         try:
-            degiro_configuration = self._get_brokers_repository().get_broker_by_name("degiro")
+            degiro_configuration = self._get_brokers_repository().get_broker_by_name(BrokerName.DEGIRO)
             if degiro_configuration.credentials is None:
                 degiro_configuration.credentials = {}
 
@@ -425,7 +426,7 @@ class AuthenticationCredentialService(CredentialServiceInterface, BaseService):
             bool: True if credentials were cleared successfully, False otherwise
         """
         try:
-            degiro_configuration = self._get_brokers_repository().get_broker_by_name("degiro")
+            degiro_configuration = self._get_brokers_repository().get_broker_by_name(BrokerName.DEGIRO)
             if degiro_configuration.credentials:
                 # Clear the credentials but keep the configuration object
                 degiro_configuration.credentials = {}

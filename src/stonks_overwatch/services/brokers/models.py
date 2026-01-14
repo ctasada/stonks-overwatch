@@ -4,6 +4,7 @@ from django.db import models
 from stonks_overwatch.utils.core.logger import StonksLogger
 
 from .encryption_utils import decrypt_dict, encrypt_dict
+from ...constants import BrokerName
 
 
 class BrokersConfiguration(models.Model):
@@ -55,11 +56,11 @@ class BrokersConfigurationRepository:
 
     @staticmethod
     @sync_to_async
-    def get_broker_by_name_async(broker_name) -> BrokersConfiguration | None:
+    def get_broker_by_name_async(broker_name: BrokerName) -> BrokersConfiguration | None:
         return BrokersConfigurationRepository.get_broker_by_name(broker_name)
 
     @staticmethod
-    def get_broker_by_name(broker_name) -> BrokersConfiguration | None:
+    def get_broker_by_name(broker_name: BrokerName) -> BrokersConfiguration | None:
         try:
             return BrokersConfiguration.objects.get(broker_name=broker_name)
         except BrokersConfiguration.DoesNotExist:

@@ -9,6 +9,7 @@ from degiro_connector.core.exceptions import DeGiroConnectionError, MaintenanceE
 from django.http import HttpRequest
 
 from stonks_overwatch.config.degiro import DegiroCredentials
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.core.interfaces.authentication_service import AuthenticationResponse, AuthenticationResult
 from stonks_overwatch.services.brokers.degiro.services.authentication_service import DegiroAuthenticationService
 
@@ -43,7 +44,7 @@ class TestDegiroAuthenticationService(TestCase):
 
     def test_broker_name_property(self):
         """Test that broker_name property returns 'degiro'."""
-        assert self.auth_service.broker_name == "degiro"
+        assert self.auth_service.broker_name == BrokerName.DEGIRO
 
     def test_is_user_authenticated_valid(self):
         """Test is_user_authenticated returns True for valid authenticated user."""

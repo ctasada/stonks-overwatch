@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Optional
 
 from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 from stonks_overwatch.services.models import PortfolioId
 from stonks_overwatch.utils.core.logger import StonksLogger
@@ -34,7 +35,7 @@ class Config:
         self.base_currency = base_currency or self.DEFAULT_BASE_CURRENCY
         self._factory = BrokerFactory()
 
-    def get_broker_config(self, broker_name: str) -> Optional[BaseConfig]:
+    def get_broker_config(self, broker_name: BrokerName) -> Optional[BaseConfig]:
         """
         Get a broker configuration using unified BrokerFactory.
 
@@ -67,7 +68,7 @@ class Config:
         except (AttributeError, TypeError):
             return False
 
-    def _is_broker_enabled(self, broker_name: str) -> bool:
+    def _is_broker_enabled(self, broker_name: BrokerName) -> bool:
         """
         Check if a specific broker is enabled.
 

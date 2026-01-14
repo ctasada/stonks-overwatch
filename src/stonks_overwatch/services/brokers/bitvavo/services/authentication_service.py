@@ -11,6 +11,7 @@ from django.http import HttpRequest
 
 from stonks_overwatch.config.bitvavo import BitvavoConfig
 from stonks_overwatch.config.degiro import DegiroCredentials
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.core.interfaces.authentication_service import (
     AuthenticationResponse,
     AuthenticationResult,
@@ -28,8 +29,6 @@ class BitvavoAuthenticationService(BaseService, AuthenticationServiceInterface):
     Handles API key validation and connection testing for Bitvavo accounts.
     """
 
-    BROKER_NAME = "bitvavo"
-
     def __init__(self, config: Optional[BitvavoConfig] = None, **kwargs):
         """
         Initialize the Bitvavo authentication service.
@@ -42,9 +41,9 @@ class BitvavoAuthenticationService(BaseService, AuthenticationServiceInterface):
         self.logger = StonksLogger.get_logger(__name__, "[BITVAVO|AUTH]")
 
     @property
-    def broker_name(self) -> str:
+    def broker_name(self) -> BrokerName:
         """Return the broker name."""
-        return self.BROKER_NAME
+        return BrokerName.BITVAVO
 
     def validate_credentials(self, api_key: str, api_secret: str) -> dict:
         """
@@ -121,8 +120,8 @@ class BitvavoAuthenticationService(BaseService, AuthenticationServiceInterface):
                 return validation_result
 
             # Store credentials in session
-            request.session[SessionKeys.get_authenticated_key("bitvavo")] = True
-            request.session[SessionKeys.get_credentials_key("bitvavo")] = {
+            request.session[SessionKeys.get_authenticated_key(BrokerName.BITVAVO)] = True
+            request.session[SessionKeys.get_credentials_key(BrokerName.BITVAVO)] = {
                 "apikey": api_key,
                 "apisecret": api_secret,
             }
@@ -166,11 +165,11 @@ class BitvavoAuthenticationService(BaseService, AuthenticationServiceInterface):
         """
         try:
             # Check session authentication
-            if not request.session.get(SessionKeys.get_authenticated_key("bitvavo"), False):
+            if not request.session.get(SessionKeys.get_authenticated_key(BrokerName.BITVAVO), False):
                 return False
 
             # Verify credentials are still valid
-            credentials = request.session.get(SessionKeys.get_credentials_key("bitvavo"))
+            credentials = request.session.get(SessionKeys.get_credentials_key(BrokerName.BITVAVO))
             if not credentials:
                 return False
 
@@ -196,10 +195,10 @@ class BitvavoAuthenticationService(BaseService, AuthenticationServiceInterface):
         try:
             # Clear session data
             # Clear session data
-            request.session.pop(SessionKeys.get_authenticated_key("bitvavo"), None)
-            request.session.pop(SessionKeys.get_credentials_key("bitvavo"), None)
-            request.session.pop(SessionKeys.get_totp_required_key("bitvavo"), None)
-            request.session.pop(SessionKeys.get_in_app_auth_required_key("bitvavo"), None)
+            request.session.pop(SessionKeys.get_authenticated_key(BrokerName.BITVAVO), None)
+            request.session.pop(SessionKeys.get_credentials_key(BrokerName.BITVAVO), None)
+            request.session.pop(SessionKeys.get_totp_required_key(BrokerName.BITVAVO), None)
+            request.session.pop(SessionKeys.get_in_app_auth_required_key(BrokerName.BITVAVO), None)
 
             self.logger.info("Bitvavo user logged out successfully")
             return True
@@ -225,7 +224,7 @@ class BitvavoAuthenticationService(BaseService, AuthenticationServiceInterface):
 
             # Get or create broker configuration
             broker_config, created = BrokersConfiguration.objects.get_or_create(
-                broker_name=self.BROKER_NAME,
+                broker_name=BrokerName.BITVAVO,
                 defaults={
                     "enabled": True,
                     "start_date": self.config.start_date if self.config else BitvavoConfig.DEFAULT_BITVAVO_START_DATE,
@@ -350,7 +349,7 @@ class BitvavoAuthenticationService(BaseService, AuthenticationServiceInterface):
             from stonks_overwatch.jobs.jobs_scheduler import JobsScheduler
 
             self.logger.info("Triggering immediate Bitvavo portfolio update")
-            JobsScheduler._update_broker_portfolio(self.BROKER_NAME)
+            JobsScheduler._update_broker_portfolio(BrokerName.BITVAVO)
             self.logger.info("Bitvavo portfolio update completed")
 
         except Exception as e:
@@ -453,14 +452,14 @@ class BitvavoAuthenticationService(BaseService, AuthenticationServiceInterface):
         """
         try:
             return {
-                "broker": "bitvavo",
+                "broker": BrokerName.BITVAVO.value,
                 "is_authenticated": self.is_user_authenticated(request),
                 "offline_mode": self.is_offline_mode(),
-                "has_credentials": request.session.get(SessionKeys.get_credentials_key("bitvavo")) is not None,
+                "has_credentials": request.session.get(SessionKeys.get_credentials_key(BrokerName.BITVAVO)) is not None,
             }
         except Exception as e:
             self.logger.error(f"Error getting authentication status: {str(e)}")
-            return {"broker": "bitvavo", "error": str(e)}
+            return {"broker": BrokerName.BITVAVO.value, "error": str(e)}
 
     def handle_authentication_error(
         self, request: HttpRequest, error: Exception, credentials: Optional[DegiroCredentials] = None

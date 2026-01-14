@@ -8,6 +8,7 @@ from typing import Any, Dict, Optional, TypedDict
 import pycountry
 from iso10383 import MICEntry
 
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.domain.constants import ProductType, Sector
 
@@ -347,29 +348,183 @@ class PortfolioEntry:
 
 
 class PortfolioId(Enum):
-    ALL = ("all", "Portfolios", "/static/stonks_overwatch.svg")
-    DEGIRO = ("degiro", "DEGIRO", "/static/logos/degiro.svg")
-    BITVAVO = ("bitvavo", "Bitvavo", "/static/logos/bitvavo.svg", False)
-    IBKR = ("ibkr", "IBKR", "/static/logos/ibkr.svg", False)
+    """Portfolio identifiers with UI metadata.
 
-    def __init__(self, id: str, long_name: str, logo: str, stable: bool = True):
-        self.id = id
-        self.long_name = long_name
+    This enum stores only UI-specific metadata (logo, stability flag).
+    Display names and IDs are computed from BrokerName, making BrokerName
+    the true single source of truth.
+
+    The `ALL` value is a special portfolio ID used for aggregating data
+    across all brokers in the UI.
+
+    Architecture:
+    - Stores: BrokerName (or None for ALL), logo path, stable flag
+    - Computes: id (from BrokerName.value), long_name (from BrokerName.short_name)
+    - Benefits: No duplication, type-safe, guaranteed consistency
+
+    Example:
+        >>> portfolio = PortfolioId.DEGIRO
+        >>> portfolio.id  # "degiro" (computed from BrokerName)
+        >>> portfolio.long_name  # "DEGIRO" (computed from BrokerName)
+        >>> portfolio.broker_name  # BrokerName.DEGIRO (stored directly)
+        >>>
+        >>> # Convert from BrokerName
+        >>> portfolio = PortfolioId.from_broker_name(BrokerName.DEGIRO)
+    """
+
+    # Store: (broker_or_none, logo_path, stable_flag)
+    ALL = (None, "/static/stonks_overwatch.svg", True)
+    DEGIRO = (BrokerName.DEGIRO, "/static/logos/degiro.svg", True)
+    BITVAVO = (BrokerName.BITVAVO, "/static/logos/bitvavo.svg", False)
+    IBKR = (BrokerName.IBKR, "/static/logos/ibkr.svg", False)
+
+    def __init__(self, broker: Optional[BrokerName], logo: str, stable: bool = True):
+        """
+        Initialize a PortfolioId enum member.
+
+        Args:
+            broker: BrokerName enum (None for ALL portfolio)
+            logo: Path to logo image
+            stable: Whether this broker integration is stable (default: True)
+        """
+        self._broker = broker
         self.logo = logo
         self.stable = stable
 
+    @property
+    def id(self) -> str:
+        """
+        Compute ID from broker name.
+
+        Returns:
+            Broker identifier string (e.g., "degiro", "all")
+
+        Example:
+            >>> PortfolioId.DEGIRO.id
+            'degiro'
+            >>> PortfolioId.ALL.id
+            'all'
+        """
+        return self._broker.value if self._broker else "all"
+
+    @property
+    def long_name(self) -> str:
+        """
+        Compute display name from BrokerName.
+
+        Returns:
+            Display name for UI (e.g., "DEGIRO", "Portfolios")
+
+        Example:
+            >>> PortfolioId.DEGIRO.long_name
+            'DEGIRO'
+            >>> PortfolioId.ALL.long_name
+            'Portfolios'
+        """
+        return self._broker.short_name if self._broker else "Portfolios"
+
+    @property
+    def broker_name(self) -> Optional[BrokerName]:
+        """
+        Get the corresponding BrokerName enum, or None for ALL.
+
+        Returns:
+            BrokerName enum if this is a broker portfolio, None if this is ALL
+
+        Example:
+            >>> PortfolioId.DEGIRO.broker_name
+            BrokerName.DEGIRO
+            >>> PortfolioId.ALL.broker_name
+            None
+        """
+        return self._broker
+
+    @classmethod
+    def from_broker_name(cls, broker: BrokerName) -> "PortfolioId":
+        """
+        Create PortfolioId from BrokerName.
+
+        Args:
+            broker: BrokerName enum value
+
+        Returns:
+            Corresponding PortfolioId
+
+        Raises:
+            ValueError: If no PortfolioId exists for the given BrokerName
+
+        Example:
+            >>> portfolio = PortfolioId.from_broker_name(BrokerName.DEGIRO)
+            >>> portfolio == PortfolioId.DEGIRO
+            True
+        """
+        return cls.from_id(broker.value)
+
+    @classmethod
+    def get_broker_portfolios(cls) -> list["PortfolioId"]:
+        """
+        Get all portfolio IDs that represent actual brokers (excludes ALL).
+
+        Returns:
+            List of PortfolioId values excluding ALL
+
+        Example:
+            >>> portfolios = PortfolioId.get_broker_portfolios()
+            >>> PortfolioId.ALL in portfolios
+            False
+            >>> PortfolioId.DEGIRO in portfolios
+            True
+        """
+        return [p for p in cls if p != cls.ALL]
+
     @classmethod
     def values(cls) -> list["PortfolioId"]:
+        """
+        Get all PortfolioId values including ALL.
+
+        Returns:
+            List of all PortfolioId enum members
+
+        Example:
+            >>> all_portfolios = PortfolioId.values()
+            >>> len(all_portfolios) >= 4  # ALL + brokers
+            True
+        """
         return list(cls)
 
     @classmethod
-    def from_id(cls, broker_id: str):
+    def from_id(cls, broker_id: str) -> "PortfolioId":
+        """
+        Get PortfolioId from string identifier.
+
+        Args:
+            broker_id: String identifier (e.g., "degiro", "bitvavo", "all")
+
+        Returns:
+            Matching PortfolioId, or ALL if not found
+
+        Example:
+            >>> PortfolioId.from_id("degiro")
+            PortfolioId.DEGIRO
+            >>> PortfolioId.from_id("invalid")
+            PortfolioId.ALL
+        """
         for portfolio in cls:
             if portfolio.id == broker_id:
                 return portfolio
         return cls.ALL
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
+        """
+        Convert PortfolioId to dictionary for serialization.
+
+        Returns:
+            Dictionary with id, name, logo, and stable fields
+
+        Example:
+            >>> PortfolioId.DEGIRO.to_dict()
+            {'id': 'degiro', 'name': 'DEGIRO', 'logo': '/static/logos/degiro.svg', 'stable': True}
+        """
         return {"id": self.id, "name": self.long_name, "logo": self.logo, "stable": self.stable}
 
 

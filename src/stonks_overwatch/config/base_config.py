@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Type, TypeVar, cast
 
 from stonks_overwatch.config.base_credentials import BaseCredentials
+from stonks_overwatch.constants.brokers import BrokerName
 from stonks_overwatch.settings import PROJECT_PATH
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.logger_constants import LOGGER_CONFIG, TAG_BASE_CONFIG
@@ -65,7 +66,7 @@ class BaseConfig(ABC):
     # e.g., config_key = "broker_name"
 
     @classmethod
-    def load_config(cls, broker_name: str, json_override_path: str | Path = None) -> "BaseConfig":
+    def load_config(cls, broker_name: BrokerName, json_override_path: str | Path = None) -> "BaseConfig":
         """
         Loads configuration from database with optional JSON file override.
 
@@ -79,6 +80,9 @@ class BaseConfig(ABC):
         Returns:
             BaseConfig instance with merged configuration
         """
+        # Normalize at the boundary - convert enum to string if needed
+        broker_name = BrokerName.normalize(broker_name)
+
         if json_override_path is None:
             json_override_path = cls.CONFIG_PATH
 
@@ -117,7 +121,7 @@ class BaseConfig(ABC):
         return cls.from_dict(merged_config)
 
     @classmethod
-    def from_db_with_json_override(cls, broker_name: str) -> "LazyConfig":
+    def from_db_with_json_override(cls, broker_name: BrokerName) -> "LazyConfig":
         """
         Loads configuration from database with optional JSON file override using lazy loading.
 
@@ -220,7 +224,7 @@ class LazyConfig(BaseConfig):
     """
 
     # noinspection PyMissingConstructor
-    def __init__(self, config_class, broker_name: str):
+    def __init__(self, config_class, broker_name: BrokerName):
         """
         Initialize lazy config wrapper.
 
@@ -278,8 +282,12 @@ class LazyConfig(BaseConfig):
                 return self._loaded_config == other
             return False
 
-        # Both are LazyConfig - compare class and broker name
-        if self._config_class != other._config_class or self._broker_name != other._broker_name:
+        # Both are LazyConfig - normalize broker names for comparison
+        # (since _broker_name can be BrokerName enum or str)
+        self_broker = BrokerName.normalize(self._broker_name)
+        other_broker = BrokerName.normalize(other._broker_name)
+
+        if self._config_class != other._config_class or self_broker != other_broker:
             return False
 
         # If both are loaded, compare loaded configs
@@ -331,7 +339,7 @@ def resolve_config(config: BaseConfig, expected_type: Type[ConfigType]) -> Confi
         raise TypeError(f"Expected {expected_type.__name__} or LazyConfig, got {type(config).__name__}")
 
 
-def resolve_config_from_factory(broker_name: str, expected_type: Type[ConfigType]) -> ConfigType:
+def resolve_config_from_factory(broker_name: BrokerName, expected_type: Type[ConfigType]) -> ConfigType:
     """
     Create and resolve a configuration from BrokerFactory.
 

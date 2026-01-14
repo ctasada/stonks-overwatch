@@ -5,6 +5,7 @@ This module tests the IBKR authentication service implementation.
 """
 
 from stonks_overwatch.config.ibkr import IbkrConfig, IbkrCredentials
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.core.interfaces.authentication_service import (
     AuthenticationResult,
 )
@@ -48,7 +49,7 @@ class TestIbkrAuthenticationService:
 
     def test_broker_name(self):
         """Test that broker name is correctly set."""
-        assert self.service.broker_name == "ibkr"
+        assert self.service.broker_name == BrokerName.IBKR
 
     def test_validate_credentials_success(self):
         """Test successful credential validation."""
@@ -231,7 +232,7 @@ class TestIbkrAuthenticationService:
 
         status = self.service.get_authentication_status(self.request)
 
-        assert status["broker"] == "ibkr"
+        assert status["broker"] == BrokerName.IBKR
         assert status["is_authenticated"] is True
         assert status["has_session_credentials"] is True
         assert status["has_consumer_key"] is True
@@ -273,22 +274,22 @@ class TestIbkrAuthenticationServiceIntegration:
         from stonks_overwatch.core.service_types import ServiceType
 
         factory = BrokerFactory()
-        service = factory.create_service("ibkr", ServiceType.AUTHENTICATION)
+        service = factory.create_service(BrokerName.IBKR, ServiceType.AUTHENTICATION)
 
         assert service is not None
         assert isinstance(service, IbkrAuthenticationService)
-        assert service.broker_name == "ibkr"
+        assert service.broker_name == BrokerName.IBKR
 
     def test_can_be_created_directly_with_config(self):
         """Test that the service can be created directly with config."""
         from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 
         factory = BrokerFactory()
-        config = factory.create_config("ibkr")
+        config = factory.create_config(BrokerName.IBKR)
 
         # Service can be instantiated directly with config
         service = IbkrAuthenticationService(config=config)
 
         assert service is not None
         assert isinstance(service, IbkrAuthenticationService)
-        assert service.broker_name == "ibkr"
+        assert service.broker_name == BrokerName.IBKR

@@ -10,6 +10,7 @@ from typing import Optional
 from django.http import HttpRequest
 
 from stonks_overwatch.config.ibkr import IbkrConfig, IbkrCredentials
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.core.interfaces.authentication_service import (
     AuthenticationResponse,
     AuthenticationResult,
@@ -27,8 +28,6 @@ class IbkrAuthenticationService(BaseService, AuthenticationServiceInterface):
     Handles OAuth token validation and connection testing for IBKR accounts.
     """
 
-    BROKER_NAME = "ibkr"
-
     def __init__(self, config: Optional[IbkrConfig] = None, **kwargs):
         """
         Initialize the IBKR authentication service.
@@ -41,9 +40,9 @@ class IbkrAuthenticationService(BaseService, AuthenticationServiceInterface):
         self.logger = StonksLogger.get_logger(__name__, "[IBKR|AUTH]")
 
     @property
-    def broker_name(self) -> str:
+    def broker_name(self) -> BrokerName:
         """Return the broker name."""
-        return self.BROKER_NAME
+        return BrokerName.IBKR
 
     def validate_credentials(
         self,
@@ -152,8 +151,8 @@ class IbkrAuthenticationService(BaseService, AuthenticationServiceInterface):
                 return validation_result
 
             # Store credentials in session
-            request.session[SessionKeys.get_authenticated_key("ibkr")] = True
-            request.session[SessionKeys.get_credentials_key("ibkr")] = {
+            request.session[SessionKeys.get_authenticated_key(BrokerName.IBKR.value)] = True
+            request.session[SessionKeys.get_credentials_key(BrokerName.IBKR.value)] = {
                 "access_token": access_token,
                 "access_token_secret": access_token_secret,
                 "consumer_key": consumer_key,
@@ -202,11 +201,11 @@ class IbkrAuthenticationService(BaseService, AuthenticationServiceInterface):
         """
         try:
             # Check session authentication
-            if not request.session.get(SessionKeys.get_authenticated_key("ibkr"), False):
+            if not request.session.get(SessionKeys.get_authenticated_key(BrokerName.IBKR.value), False):
                 return False
 
             # Verify credentials are still valid
-            credentials = request.session.get(SessionKeys.get_credentials_key("ibkr"))
+            credentials = request.session.get(SessionKeys.get_credentials_key(BrokerName.IBKR.value))
             if not credentials:
                 return False
 
@@ -238,10 +237,10 @@ class IbkrAuthenticationService(BaseService, AuthenticationServiceInterface):
         """
         try:
             # Clear session data
-            request.session.pop(SessionKeys.get_authenticated_key("ibkr"), None)
-            request.session.pop(SessionKeys.get_credentials_key("ibkr"), None)
-            request.session.pop(SessionKeys.get_totp_required_key("ibkr"), None)
-            request.session.pop(SessionKeys.get_in_app_auth_required_key("ibkr"), None)
+            request.session.pop(SessionKeys.get_authenticated_key(BrokerName.IBKR.value), None)
+            request.session.pop(SessionKeys.get_credentials_key(BrokerName.IBKR.value), None)
+            request.session.pop(SessionKeys.get_totp_required_key(BrokerName.IBKR.value), None)
+            request.session.pop(SessionKeys.get_in_app_auth_required_key(BrokerName.IBKR.value), None)
 
             self.logger.info("IBKR user logged out successfully")
             return True
@@ -350,10 +349,10 @@ class IbkrAuthenticationService(BaseService, AuthenticationServiceInterface):
         """
         try:
             is_authenticated = self.is_user_authenticated(request)
-            credentials = request.session.get(SessionKeys.get_credentials_key("ibkr"))
+            credentials = request.session.get(SessionKeys.get_credentials_key(BrokerName.IBKR.value))
 
             return {
-                "broker": self.BROKER_NAME,
+                "broker": BrokerName.IBKR,
                 "is_authenticated": is_authenticated,
                 "has_session_credentials": bool(credentials),
                 "has_consumer_key": bool(credentials and credentials.get("consumer_key")) if credentials else False,
@@ -364,7 +363,7 @@ class IbkrAuthenticationService(BaseService, AuthenticationServiceInterface):
         except Exception as e:
             self.logger.error(f"Error getting authentication status: {str(e)}")
             return {
-                "broker": self.BROKER_NAME,
+                "broker": BrokerName.IBKR,
                 "is_authenticated": False,
                 "error": str(e),
             }
@@ -435,7 +434,7 @@ class IbkrAuthenticationService(BaseService, AuthenticationServiceInterface):
 
             # Get or create broker configuration
             broker_config, created = BrokersConfiguration.objects.get_or_create(
-                broker_name=self.BROKER_NAME,
+                broker_name=BrokerName.IBKR,
                 defaults={
                     "enabled": True,
                     "start_date": self.config.start_date if self.config else None,
@@ -515,7 +514,7 @@ class IbkrAuthenticationService(BaseService, AuthenticationServiceInterface):
         try:
             from stonks_overwatch.jobs.jobs_scheduler import JobsScheduler
 
-            JobsScheduler._update_broker_portfolio("ibkr")
+            JobsScheduler._update_broker_portfolio(BrokerName.IBKR)
             self.logger.debug("Triggered IBKR portfolio update")
 
         except Exception as e:

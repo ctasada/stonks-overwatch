@@ -5,6 +5,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.views import View
 
+from stonks_overwatch.constants.brokers import BrokerName
 from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 from stonks_overwatch.core.factories.broker_registry import BrokerRegistry
 from stonks_overwatch.jobs.jobs_scheduler import JobsScheduler
@@ -29,30 +30,32 @@ class BrokerLogin(View):
         self.factory = BrokerFactory()
         self.registry = BrokerRegistry()
 
-    def _get_template_name(self, broker_name: str) -> str:
+    def _get_template_name(self, broker_name: BrokerName) -> str:
         """Get the template name for the specific broker."""
         template_mapping = {
-            "degiro": "login/degiro_login.html",
-            "bitvavo": "login/bitvavo_login.html",
-            "ibkr": "login/ibkr_login.html",
+            BrokerName.DEGIRO: "login/degiro_login.html",
+            BrokerName.BITVAVO: "login/bitvavo_login.html",
+            BrokerName.IBKR: "login/ibkr_login.html",
         }
         return template_mapping.get(broker_name, "login/degiro_login.html")
 
-    def get(self, request: HttpRequest, broker_name: str) -> HttpResponse:
+    def get(self, request: HttpRequest, broker_name_str: str) -> HttpResponse:
         """
         Display the broker-specific login page.
 
         Args:
             request: The HTTP request
-            broker_name: Name of the broker (degiro, bitvavo, ibkr)
+            broker_name_str: Name of the broker (degiro, bitvavo, ibkr)
 
         Returns:
             HttpResponse: Rendered login template or redirect to broker selector
         """
         # Validate broker
-        if not self._is_valid_broker(broker_name):
-            messages.error(request, f"Broker '{broker_name}' is not supported")
+        if not self._is_valid_broker(broker_name_str):
+            messages.error(request, f"Broker '{broker_name_str}' is not supported")
             return redirect("login")
+
+        broker_name = BrokerName.from_string(broker_name_str)
 
         # Get broker configuration
         config = self.factory.create_config(broker_name)
@@ -67,7 +70,7 @@ class BrokerLogin(View):
 
         context = {
             "broker_name": broker_name,
-            "broker_display_name": self._get_display_name(broker_name),
+            "broker_display_name": broker_name.display_name,
             "broker_logo": f"logos/{broker_name}.svg",
             "show_otp": show_otp,
             "show_loading": show_loading,
@@ -78,21 +81,23 @@ class BrokerLogin(View):
         template_name = self._get_template_name(broker_name)
         return render(request, template_name, context=context)
 
-    def post(self, request: HttpRequest, broker_name: str) -> HttpResponse:
+    def post(self, request: HttpRequest, broker_name_str: str) -> HttpResponse:
         """
         Handle broker-specific login form submission.
 
         Args:
             request: The HTTP request
-            broker_name: Name of the broker
+            broker_name_str: Name of the broker
 
         Returns:
             HttpResponse: Rendered template or redirect
         """
         # Validate broker
-        if not self._is_valid_broker(broker_name):
-            messages.error(request, f"Broker '{broker_name}' is not supported")
+        if not self._is_valid_broker(broker_name_str):
+            messages.error(request, f"Broker '{broker_name_str}' is not supported")
             return redirect("login")
+
+        broker_name = BrokerName.from_string(broker_name_str)
 
         # Handle portfolio update request
         if request.POST.get("update_portfolio"):
@@ -106,7 +111,7 @@ class BrokerLogin(View):
         # Extract credentials based on broker type
         credentials = self._extract_credentials(request, broker_name)
         if not credentials:
-            if broker_name == "ibkr":
+            if broker_name == BrokerName.IBKR:
                 messages.error(
                     request,
                     "OAuth credentials are required (access token, access token secret, consumer key, and DH prime).",
@@ -132,34 +137,31 @@ class BrokerLogin(View):
 
     def _is_valid_broker(self, broker_name: str) -> bool:
         """Check if the broker is registered and supported."""
-        return broker_name in self.registry.get_registered_brokers()
+        # Convert registered brokers (BrokerName enums) to strings for comparison
+        registered_brokers = self.registry.get_registered_brokers()
+        # Handle both BrokerName enums and strings (for test mocking compatibility)
+        registered_broker_names = [
+            broker.value if isinstance(broker, BrokerName) else broker for broker in registered_brokers
+        ]
+        return broker_name in registered_broker_names
 
-    def _get_display_name(self, broker_name: str) -> str:
-        """Get the display name for a broker."""
-        display_names = {
-            "degiro": "DEGIRO",
-            "bitvavo": "Bitvavo",
-            "ibkr": "Interactive Brokers",
-        }
-        return display_names.get(broker_name, broker_name.title())
-
-    def _get_auth_fields(self, broker_name: str) -> dict:
+    def _get_auth_fields(self, broker_name: BrokerName) -> dict:
         """Get the authentication fields required for each broker."""
-        if broker_name == "degiro":
+        if broker_name == BrokerName.DEGIRO:
             return {
                 "username_label": "Username",
                 "password_label": "Password",
                 "supports_2fa": True,
                 "supports_remember_me": True,
             }
-        elif broker_name == "bitvavo":
+        elif broker_name == BrokerName.BITVAVO:
             return {
                 "username_label": "API Key",
                 "password_label": "API Secret",
                 "supports_2fa": False,
                 "supports_remember_me": True,
             }
-        elif broker_name == "ibkr":
+        elif broker_name == BrokerName.IBKR:
             return {
                 "access_token_label": "Access Token",
                 "access_token_secret_label": "Access Token Secret",
@@ -179,33 +181,33 @@ class BrokerLogin(View):
                 "supports_remember_me": False,
             }
 
-    def _check_totp_required(self, request: HttpRequest, broker_name: str) -> bool:
+    def _check_totp_required(self, request: HttpRequest, broker_name: BrokerName) -> bool:
         """Check if TOTP is required for this broker."""
         # For now, only DEGIRO supports TOTP
-        if broker_name == "degiro":
+        if broker_name == BrokerName.DEGIRO:
             # Check session for TOTP requirement
             return request.session.get(SessionKeys.get_totp_required_key(broker_name), False)
         return False
 
-    def _check_in_app_auth_required(self, request: HttpRequest, broker_name: str) -> bool:
+    def _check_in_app_auth_required(self, request: HttpRequest, broker_name: BrokerName) -> bool:
         """Check if in-app authentication is required for this broker."""
         # For now, only DEGIRO supports in-app auth
-        if broker_name == "degiro":
+        if broker_name == BrokerName.DEGIRO:
             return request.session.get(SessionKeys.get_in_app_auth_required_key(broker_name), False)
         return False
 
-    def _check_authenticated(self, request: HttpRequest, broker_name: str) -> bool:
+    def _check_authenticated(self, request: HttpRequest, broker_name: BrokerName) -> bool:
         """Check if user is authenticated for this broker."""
         # Check session for authentication status
         return request.session.get(SessionKeys.get_authenticated_key(broker_name), False)
 
-    def _extract_credentials(self, request: HttpRequest, broker_name: str) -> Optional[dict]:
+    def _extract_credentials(self, request: HttpRequest, broker_name: BrokerName) -> Optional[dict]:
         """Extract credentials from request based on broker type."""
-        if broker_name == "degiro":
+        if broker_name == BrokerName.DEGIRO:
             return self._extract_degiro_credentials(request)
-        elif broker_name == "bitvavo":
+        elif broker_name == BrokerName.BITVAVO:
             return self._extract_bitvavo_credentials(request)
-        elif broker_name == "ibkr":
+        elif broker_name == BrokerName.IBKR:
             return self._extract_ibkr_credentials(request)
         return None
 
@@ -275,14 +277,14 @@ class BrokerLogin(View):
             }
         return None
 
-    def _perform_authentication(self, request: HttpRequest, broker_name: str, credentials: dict) -> dict:
+    def _perform_authentication(self, request: HttpRequest, broker_name: BrokerName, credentials: dict) -> dict:
         """Perform authentication for the specified broker."""
         try:
-            if broker_name == "degiro":
+            if broker_name == BrokerName.DEGIRO:
                 return self._authenticate_degiro(request, credentials)
-            elif broker_name == "bitvavo":
+            elif broker_name == BrokerName.BITVAVO:
                 return self._authenticate_bitvavo(request, credentials)
-            elif broker_name == "ibkr":
+            elif broker_name == BrokerName.IBKR:
                 return self._authenticate_ibkr(request, credentials)
             else:
                 return {"success": False, "message": f"Authentication not implemented for {broker_name}"}
@@ -314,9 +316,9 @@ class BrokerLogin(View):
 
             if auth_result.is_success:
                 # Clear any pending auth flags since authentication succeeded
-                request.session[SessionKeys.get_authenticated_key("degiro")] = True
-                request.session[SessionKeys.get_totp_required_key("degiro")] = False
-                request.session[SessionKeys.get_in_app_auth_required_key("degiro")] = False
+                request.session[SessionKeys.get_authenticated_key(BrokerName.DEGIRO)] = True
+                request.session[SessionKeys.get_totp_required_key(BrokerName.DEGIRO)] = False
+                request.session[SessionKeys.get_in_app_auth_required_key(BrokerName.DEGIRO)] = False
                 return {"success": True, "message": "Authentication successful"}
             else:
                 # Handle different authentication results
@@ -324,13 +326,13 @@ class BrokerLogin(View):
                     from stonks_overwatch.core.interfaces.authentication_service import AuthenticationResult
 
                     if auth_result.result == AuthenticationResult.TOTP_REQUIRED:
-                        request.session[SessionKeys.get_totp_required_key("degiro")] = True
-                        request.session[SessionKeys.get_in_app_auth_required_key("degiro")] = False
+                        request.session[SessionKeys.get_totp_required_key(BrokerName.DEGIRO)] = True
+                        request.session[SessionKeys.get_in_app_auth_required_key(BrokerName.DEGIRO)] = False
                         # Note: credentials are already stored by authentication service in the correct session key
                         return {"success": False, "message": "2FA code required"}
                     elif auth_result.result == AuthenticationResult.IN_APP_AUTHENTICATION_REQUIRED:
-                        request.session[SessionKeys.get_in_app_auth_required_key("degiro")] = True
-                        request.session[SessionKeys.get_totp_required_key("degiro")] = False
+                        request.session[SessionKeys.get_in_app_auth_required_key(BrokerName.DEGIRO)] = True
+                        request.session[SessionKeys.get_totp_required_key(BrokerName.DEGIRO)] = False
                         return {"success": False, "message": "In-app authentication required"}
 
                 return {"success": False, "message": auth_result.message or "Authentication failed"}
@@ -343,7 +345,7 @@ class BrokerLogin(View):
         """Authenticate with Bitvavo."""
         try:
             # Create Bitvavo authentication service using factory
-            auth_service = self.factory.create_authentication_service("bitvavo")
+            auth_service = self.factory.create_authentication_service(BrokerName.BITVAVO)
             if not auth_service:
                 return {"success": False, "message": "Bitvavo authentication service not available"}
 
@@ -356,7 +358,7 @@ class BrokerLogin(View):
             )
 
             if auth_result["success"]:
-                request.session[SessionKeys.get_authenticated_key("bitvavo")] = True
+                request.session[SessionKeys.get_authenticated_key(BrokerName.BITVAVO)] = True
                 return {"success": True, "message": "Authentication successful"}
             else:
                 return {"success": False, "message": auth_result["message"]}
@@ -378,7 +380,7 @@ class BrokerLogin(View):
             remember_me = credentials.get("remember_me", False)
 
             # Create IBKR authentication service using factory
-            auth_service = self.factory.create_authentication_service("ibkr")
+            auth_service = self.factory.create_authentication_service(BrokerName.IBKR)
             if not auth_service:
                 return {"success": False, "message": "IBKR authentication service not available"}
 
@@ -395,7 +397,7 @@ class BrokerLogin(View):
             )
 
             if result["success"]:
-                request.session[SessionKeys.get_authenticated_key("ibkr")] = True
+                request.session[SessionKeys.get_authenticated_key(BrokerName.IBKR)] = True
                 return {"success": True, "message": "Authentication successful"}
             else:
                 return {"success": False, "message": result["message"]}
@@ -404,9 +406,9 @@ class BrokerLogin(View):
             self.logger.error(f"IBKR authentication error: {str(e)}")
             return {"success": False, "message": "Authentication failed"}
 
-    def _handle_in_app_authentication(self, request: HttpRequest, broker_name: str) -> HttpResponse:
+    def _handle_in_app_authentication(self, request: HttpRequest, broker_name: BrokerName) -> HttpResponse:
         """Handle in-app authentication for supported brokers."""
-        if broker_name == "degiro":
+        if broker_name == BrokerName.DEGIRO:
             # Use existing DEGIRO in-app authentication
             try:
                 from stonks_overwatch.core.authentication_locator import get_authentication_service
@@ -415,7 +417,7 @@ class BrokerLogin(View):
                 auth_result = auth_service.handle_in_app_authentication(request)
 
                 if auth_result.is_success:
-                    request.session[SessionKeys.get_authenticated_key("degiro")] = True
+                    request.session[SessionKeys.get_authenticated_key(BrokerName.DEGIRO)] = True
                     return redirect("dashboard")
                 else:
                     messages.error(request, auth_result.message or "In-app authentication failed")
