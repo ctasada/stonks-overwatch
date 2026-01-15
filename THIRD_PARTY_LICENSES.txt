@@ -894,7 +894,7 @@ under the terms of *both* these licenses.
 
 
 polars
-1.36.1
+1.37.1
 MIT License
 Copyright (c) 2025 Ritchie Vink
 Some portions Copyright (c) 2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
@@ -1959,7 +1959,7 @@ Apache Software License
 
 
 @babel/runtime
-7.28.4
+7.28.6
 MIT
 MIT License
 
@@ -5895,7 +5895,7 @@ SOFTWARE.
 
 
 which-typed-array
-1.1.19
+1.1.20
 MIT
 The MIT License (MIT)
 
