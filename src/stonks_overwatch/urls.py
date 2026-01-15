@@ -39,7 +39,7 @@ from stonks_overwatch.views.transactions import Transactions
 urlpatterns = [
     path("", RootRedirectView.as_view(), name="root"),
     path("login", Login.as_view(), name="login"),
-    path("login/<str:broker_name>", BrokerLogin.as_view(), name="broker_login"),
+    path("login/<str:broker_name_str>", BrokerLogin.as_view(), name="broker_login"),
     path("account_overview", AccountOverview.as_view(), name="account_overview"),
     path("dashboard", Dashboard.as_view(), name="dashboard"),
     path("deposits", Deposits.as_view(), name="deposits"),
