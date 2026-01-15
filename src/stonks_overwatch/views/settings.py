@@ -5,6 +5,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views import View
 
+from stonks_overwatch.constants.brokers import BrokerName
 from stonks_overwatch.services.brokers.models import BrokersConfigurationRepository
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.theme import get_theme_colors
@@ -40,9 +41,9 @@ class SettingsView(View):
         is_ajax_request = request.headers.get("X-Requested-With") == "XMLHttpRequest"
 
         # Load broker configurations
-        degiro_config = self.repository.get_broker_by_name("degiro")
-        bitvavo_config = self.repository.get_broker_by_name("bitvavo")
-        ibkr_config = self.repository.get_broker_by_name("ibkr")
+        degiro_config = self.repository.get_broker_by_name(BrokerName.DEGIRO.value)
+        bitvavo_config = self.repository.get_broker_by_name(BrokerName.BITVAVO.value)
+        ibkr_config = self.repository.get_broker_by_name(BrokerName.IBKR.value)
 
         # Handle dark mode (for native app WebView)
         dark_mode_param = request.GET.get("dark_mode", "0")

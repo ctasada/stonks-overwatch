@@ -5,6 +5,7 @@ This module tests the login view which now serves as a broker selector,
 allowing users to choose which broker they want to authenticate with.
 """
 
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.views.login import Login
 
 import pytest
@@ -32,7 +33,7 @@ class TestLoginView(TestCase):
         mock_factory_class.return_value = mock_factory
 
         # Mock registered brokers
-        mock_registry.get_registered_brokers.return_value = ["degiro", "bitvavo", "ibkr"]
+        mock_registry.get_registered_brokers.return_value = [BrokerName.DEGIRO, BrokerName.BITVAVO, BrokerName.IBKR]
 
         # Mock broker configurations - enabled but NO stored credentials
         mock_degiro_config = Mock()
@@ -46,9 +47,9 @@ class TestLoginView(TestCase):
         mock_ibkr_config.get_credentials = None
 
         mock_factory.create_config.side_effect = lambda broker: {
-            "degiro": mock_degiro_config,
-            "bitvavo": mock_bitvavo_config,
-            "ibkr": mock_ibkr_config,
+            BrokerName.DEGIRO: mock_degiro_config,
+            BrokerName.BITVAVO: mock_bitvavo_config,
+            BrokerName.IBKR: mock_ibkr_config,
         }.get(broker)
 
         # Create view AFTER mocks are set up so it uses mocked factory/registry
@@ -76,16 +77,16 @@ class TestLoginView(TestCase):
         mock_factory_class.return_value = mock_factory
 
         # Mock registered brokers
-        mock_registry.get_registered_brokers.return_value = ["degiro", "bitvavo"]
+        mock_registry.get_registered_brokers.return_value = [BrokerName.DEGIRO, BrokerName.BITVAVO]
 
         # Mock factory to raise exception for one broker
         def mock_create_config(broker):
-            if broker == "degiro":
+            if broker == BrokerName.DEGIRO:
                 mock_config = Mock()
                 mock_config.is_enabled.return_value = True
                 mock_config.get_credentials = None  # No stored credentials
                 return mock_config
-            elif broker == "bitvavo":
+            elif broker == BrokerName.BITVAVO:
                 raise Exception("Configuration error")
             return None
 
@@ -111,24 +112,33 @@ class TestLoginView(TestCase):
         assert response.status_code == 302
         assert response["Location"] == "/login"
 
-    def test_get_display_name(self):
-        """Test _get_display_name returns correct display names."""
-        assert self.view._get_display_name("degiro") == "DEGIRO"
-        assert self.view._get_display_name("bitvavo") == "Bitvavo"
-        assert self.view._get_display_name("ibkr") == "Interactive Brokers"
-        assert self.view._get_display_name("unknown") == "Unknown"
+    def test_broker_display_names(self):
+        """Test BrokerName enum provides correct display names."""
+        assert BrokerName.DEGIRO.display_name == "DEGIRO"
+        assert BrokerName.BITVAVO.display_name == "Bitvavo"
+        assert BrokerName.IBKR.display_name == "Interactive Brokers"
+        # Also test short names
+        assert BrokerName.IBKR.short_name == "IBKR"
+        assert BrokerName.DEGIRO.short_name == "DEGIRO"
+        # Test __repr__() for debugging
+        assert repr(BrokerName.DEGIRO) == "BrokerName.DEGIRO"
+        assert repr(BrokerName.IBKR) == "BrokerName.IBKR"
+        # Test __str__() returns value
+        assert str(BrokerName.DEGIRO) == "degiro"
+        assert str(BrokerName.IBKR) == "ibkr"
 
     def test_get_broker_description(self):
         """Test _get_broker_description returns appropriate descriptions."""
-        assert "European" in self.view._get_broker_description("degiro")
-        assert "cryptocurrency" in self.view._get_broker_description("bitvavo")
-        assert "Global" in self.view._get_broker_description("ibkr")
+        assert "European" in self.view._get_broker_description(BrokerName.DEGIRO)
+        assert "cryptocurrency" in self.view._get_broker_description(BrokerName.BITVAVO)
+        assert "Global" in self.view._get_broker_description(BrokerName.IBKR)
         assert self.view._get_broker_description("unknown") == "Investment platform"
 
     @patch("stonks_overwatch.views.login.BrokerRegistry")
+    @patch("stonks_overwatch.views.login.PortfolioId")
     @patch("stonks_overwatch.views.login.BrokerFactory")
-    def test_get_available_brokers_sorting(self, mock_factory_class, mock_registry_class):
-        """Test that available brokers are sorted correctly (enabled first, then alphabetically)."""
+    def test_get_available_brokers_sorting(self, mock_factory_class, mock_portfolio_id, mock_registry_class):
+        """Test that available brokers are sorted alphabetically by display name."""
         # Mock the registry and factory instances
         mock_registry = Mock()
         mock_factory = Mock()
@@ -136,21 +146,29 @@ class TestLoginView(TestCase):
         mock_factory_class.return_value = mock_factory
 
         # Mock registered brokers
-        mock_registry.get_registered_brokers.return_value = ["ibkr", "degiro", "bitvavo"]
+        mock_registry.get_registered_brokers.return_value = [BrokerName.IBKR, BrokerName.DEGIRO, BrokerName.BITVAVO]
 
-        # Mock broker configurations - make bitvavo enabled, others disabled
+        # Mock broker configurations
         mock_degiro_config = Mock()
-        mock_degiro_config.is_enabled.return_value = False
+        mock_degiro_config.is_enabled.return_value = True
         mock_bitvavo_config = Mock()
-        mock_bitvavo_config.is_enabled.return_value = True
+        mock_bitvavo_config.is_enabled.return_value = False
         mock_ibkr_config = Mock()
-        mock_ibkr_config.is_enabled.return_value = False
+        mock_ibkr_config.is_enabled.return_value = True
 
         mock_factory.create_config.side_effect = lambda broker: {
-            "degiro": mock_degiro_config,
-            "bitvavo": mock_bitvavo_config,
-            "ibkr": mock_ibkr_config,
+            BrokerName.DEGIRO: mock_degiro_config,
+            BrokerName.BITVAVO: mock_bitvavo_config,
+            BrokerName.IBKR: mock_ibkr_config,
         }.get(broker)
+
+        # Mock PortfolioId.from_broker_name to return mock portfolio objects with stable attribute
+        def mock_from_broker_name(broker):
+            mock_portfolio = Mock()
+            mock_portfolio.stable = True if broker == BrokerName.DEGIRO else False
+            return mock_portfolio
+
+        mock_portfolio_id.from_broker_name.side_effect = mock_from_broker_name
 
         # Create view AFTER mocks are set up so it uses mocked factory/registry
         view = Login()
@@ -159,14 +177,14 @@ class TestLoginView(TestCase):
         # Should have 3 brokers
         assert len(brokers) == 3
 
-        # First broker should be the enabled one (Bitvavo)
-        assert brokers[0]["name"] == "bitvavo"
-        assert brokers[0]["enabled"] is True
-
-        # Remaining brokers should be sorted alphabetically by display name
-        disabled_brokers = [b for b in brokers if not b["enabled"]]
-        display_names = [b["display_name"] for b in disabled_brokers]
+        # Brokers should be sorted alphabetically by display name
+        display_names = [b["display_name"] for b in brokers]
         assert display_names == sorted(display_names)
+
+        # Verify order: Bitvavo, DEGIRO, IBKR (alphabetical)
+        assert brokers[0]["name"] == "bitvavo"
+        assert brokers[1]["name"] == "degiro"
+        assert brokers[2]["name"] == "ibkr"
 
     @patch("stonks_overwatch.views.login.BrokerRegistry")
     @patch("stonks_overwatch.views.login.BrokerFactory")

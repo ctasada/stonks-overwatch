@@ -13,6 +13,7 @@ from degiro_connector.core.exceptions import DeGiroConnectionError, MaintenanceE
 from django.http import HttpRequest
 
 from stonks_overwatch.config.degiro import DegiroCredentials
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.core.interfaces.authentication_service import (
     AuthenticationResponse,
     AuthenticationResult,
@@ -52,8 +53,6 @@ class DegiroAuthenticationService(AuthenticationServiceInterface, BaseService):
     - Maintenance mode scenarios
     """
 
-    BROKER_NAME = "degiro"
-
     def __init__(
         self,
         session_manager: Optional[SessionManagerInterface] = None,
@@ -81,9 +80,9 @@ class DegiroAuthenticationService(AuthenticationServiceInterface, BaseService):
         self.degiro_service = degiro_service or DeGiroService()
 
     @property
-    def broker_name(self) -> str:
+    def broker_name(self) -> BrokerName:
         """Return the broker name."""
-        return self.BROKER_NAME
+        return BrokerName.DEGIRO
 
     def is_user_authenticated(self, request: HttpRequest) -> bool:
         """
@@ -519,7 +518,7 @@ class DegiroAuthenticationService(AuthenticationServiceInterface, BaseService):
             from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 
             broker_factory = BrokerFactory()
-            degiro_config = broker_factory.create_config("degiro")
+            degiro_config = broker_factory.create_config(BrokerName.DEGIRO)
 
             return degiro_config is not None and degiro_config.is_enabled()
 
@@ -538,7 +537,7 @@ class DegiroAuthenticationService(AuthenticationServiceInterface, BaseService):
             from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 
             broker_factory = BrokerFactory()
-            degiro_config = broker_factory.create_config("degiro")
+            degiro_config = broker_factory.create_config(BrokerName.DEGIRO)
 
             return degiro_config is not None and degiro_config.offline_mode
 
@@ -846,7 +845,7 @@ class DegiroAuthenticationService(AuthenticationServiceInterface, BaseService):
         This ensures the broker is marked as enabled regardless of remember_me setting.
         """
         try:
-            degiro_configuration = BrokersConfigurationRepository.get_broker_by_name("degiro")
+            degiro_configuration = BrokersConfigurationRepository.get_broker_by_name(BrokerName.DEGIRO)
             if degiro_configuration:
                 degiro_configuration.enabled = True
                 BrokersConfigurationRepository.save_broker_configuration(degiro_configuration)

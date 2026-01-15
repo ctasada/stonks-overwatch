@@ -4,8 +4,10 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.views import View
 
+from stonks_overwatch.constants.brokers import BrokerName
 from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 from stonks_overwatch.core.factories.broker_registry import BrokerRegistry
+from stonks_overwatch.services.models import PortfolioId
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.session_keys import SessionKeys
 
@@ -86,63 +88,59 @@ class Login(View):
         Get list of available brokers with their metadata.
 
         Returns:
-            List of broker dictionaries with name, display_name, description, and enabled status
+            List of broker dictionaries with name, display_name, description, enabled status, and stable flag
         """
         brokers = []
 
-        # Get all registered brokers from the registry
+        # Get all registered brokers from the registry (returns BrokerName enums)
         registered_brokers = self.registry.get_registered_brokers()
 
-        for broker_name in registered_brokers:
+        for broker_enum in registered_brokers:
             try:
                 # Get broker configuration to check if it's enabled
-                config = self.factory.create_config(broker_name)
+                config = self.factory.create_config(broker_enum)
+
+                # Get PortfolioId to check stability
+                portfolio_id = PortfolioId.from_broker_name(broker_enum)
 
                 broker_info = {
-                    "name": broker_name,
-                    "display_name": self._get_display_name(broker_name),
-                    "description": self._get_broker_description(broker_name),
+                    "name": broker_enum.value,  # Convert enum to string for template
+                    "display_name": broker_enum.display_name,
+                    "description": self._get_broker_description(broker_enum),
                     "enabled": config.is_enabled() if config else False,
+                    "stable": portfolio_id.stable,  # Use PortfolioId.stable for experimental badge
                 }
 
                 brokers.append(broker_info)
 
             except Exception as e:
-                self.logger.warning(f"Error getting info for broker {broker_name}: {str(e)}")
-                # Still add the broker but mark as not enabled
+                self.logger.warning(f"Error getting info for broker {broker_enum}: {str(e)}")
+                # Still add the broker but mark as not enabled and not stable
                 brokers.append(
                     {
-                        "name": broker_name,
-                        "display_name": self._get_display_name(broker_name),
+                        "name": broker_enum.value,  # Convert enum to string for template
+                        "display_name": broker_enum.display_name,
                         "description": "Configuration error",
                         "enabled": False,
+                        "stable": False,
                     }
                 )
 
-        # Sort brokers: enabled first, then alphabetically
-        brokers.sort(key=lambda x: (not x["enabled"], x["display_name"]))
+        # Sort brokers alphabetically
+        brokers.sort(key=lambda x: x["display_name"])
 
         return brokers
 
-    def _get_display_name(self, broker_name: str) -> str:
-        """Get the display name for a broker."""
-        display_names = {
-            "degiro": "DEGIRO",
-            "bitvavo": "Bitvavo",
-            "ibkr": "Interactive Brokers",
-        }
-        return display_names.get(broker_name, broker_name.title())
-
-    def _get_broker_description(self, broker_name: str) -> str:
+    def _get_broker_description(self, broker_name: BrokerName) -> str:
         """Get a description for a broker."""
         descriptions = {
-            "degiro": "European online broker with low fees",
-            "bitvavo": "Dutch cryptocurrency exchange platform",
-            "ibkr": "Global investment platform with advanced tools",
+            BrokerName.DEGIRO: "European online broker with low fees",
+            BrokerName.BITVAVO: "Dutch cryptocurrency exchange platform",
+            BrokerName.IBKR: "Global investment platform with advanced tools",
         }
         return descriptions.get(broker_name, "Investment platform")
 
-    def _get_broker_with_stored_credentials(self) -> Optional[str]:
+    def _get_broker_with_stored_credentials(self) -> Optional[BrokerName]:
         """
         Find a broker with stored credentials for auto-authentication.
 
@@ -175,7 +173,7 @@ class Login(View):
             self.logger.error(f"Error checking for stored credentials: {str(e)}")
             return None
 
-    def _attempt_auto_authentication(self, request: HttpRequest, broker_name: str) -> dict:
+    def _attempt_auto_authentication(self, request: HttpRequest, broker_name: BrokerName) -> dict:
         """
         Attempt automatic authentication with stored credentials.
 
@@ -199,11 +197,11 @@ class Login(View):
                 return {"success": False, "message": "No credentials found"}
 
             # Perform authentication based on broker type
-            if broker_name == "degiro":
+            if broker_name == BrokerName.DEGIRO:
                 return self._auto_authenticate_degiro(request, credentials)
-            elif broker_name == "bitvavo":
+            elif broker_name == BrokerName.BITVAVO:
                 return self._auto_authenticate_bitvavo(request, credentials)
-            elif broker_name == "ibkr":
+            elif broker_name == BrokerName.IBKR:
                 return self._auto_authenticate_ibkr(request, credentials)
             else:
                 return {"success": False, "message": f"Auto-authentication not supported for {broker_name}"}
@@ -230,7 +228,7 @@ class Login(View):
             )
 
             if auth_result.is_success:
-                request.session[SessionKeys.get_authenticated_key("degiro")] = True
+                request.session[SessionKeys.get_authenticated_key(BrokerName.DEGIRO)] = True
                 return {"success": True, "message": "Auto-authentication successful"}
             else:
                 # Check if failure is due to TOTP requirement
@@ -252,7 +250,7 @@ class Login(View):
         """Auto-authenticate with Bitvavo stored credentials."""
         try:
             # Create Bitvavo authentication service using factory
-            auth_service = self.factory.create_authentication_service("bitvavo")
+            auth_service = self.factory.create_authentication_service(BrokerName.BITVAVO)
             if not auth_service:
                 return {"success": False, "message": "Bitvavo authentication service not available"}
 
@@ -265,7 +263,7 @@ class Login(View):
             )
 
             if auth_result["success"]:
-                request.session[SessionKeys.get_authenticated_key("bitvavo")] = True
+                request.session[SessionKeys.get_authenticated_key(BrokerName.BITVAVO)] = True
                 return {"success": True, "message": "Auto-authentication successful"}
             else:
                 return {"success": False, "message": auth_result["message"]}
@@ -278,7 +276,7 @@ class Login(View):
         """Auto-authenticate with IBKR stored credentials."""
         try:
             # Create IBKR authentication service using factory
-            auth_service = self.factory.create_authentication_service("ibkr")
+            auth_service = self.factory.create_authentication_service(BrokerName.IBKR)
             if not auth_service:
                 return {"success": False, "message": "IBKR authentication service not available"}
 

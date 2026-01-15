@@ -23,6 +23,7 @@ except Exception as e:
 from stonks_overwatch.config.bitvavo import BitvavoConfig
 from stonks_overwatch.config.degiro import DegiroConfig
 from stonks_overwatch.config.ibkr import IbkrConfig
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.core.factories.broker_registry import BrokerRegistry
 from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.services.brokers.bitvavo.services.account_service import (
@@ -92,8 +93,8 @@ from stonks_overwatch.services.brokers.ibkr.services.transactions import (
 )
 
 # Configuration-driven broker definitions
-BROKER_CONFIGS: Dict[str, Dict[str, Any]] = {
-    "degiro": {
+BROKER_CONFIGS: Dict[BrokerName, Dict[str, Any]] = {
+    BrokerName.DEGIRO: {
         "config": DegiroConfig,
         "services": {
             ServiceType.PORTFOLIO: DeGiroPortfolioService,
@@ -106,7 +107,7 @@ BROKER_CONFIGS: Dict[str, Dict[str, Any]] = {
         },
         "supports_complete_registration": True,
     },
-    "bitvavo": {
+    BrokerName.BITVAVO: {
         "config": BitvavoConfig,
         "services": {
             ServiceType.PORTFOLIO: BitvavoPortfolioService,
@@ -119,7 +120,7 @@ BROKER_CONFIGS: Dict[str, Dict[str, Any]] = {
         },
         "supports_complete_registration": True,
     },
-    "ibkr": {
+    BrokerName.IBKR: {
         "config": IbkrConfig,
         "services": {
             ServiceType.PORTFOLIO: IbkrPortfolioService,
@@ -135,7 +136,7 @@ BROKER_CONFIGS: Dict[str, Dict[str, Any]] = {
 }
 
 
-def get_broker_config(broker_name: str) -> Optional[Dict[str, Any]]:
+def get_broker_config(broker_name: BrokerName) -> Optional[Dict[str, Any]]:
     """
     Get the configuration for a specific broker.
 
@@ -148,7 +149,7 @@ def get_broker_config(broker_name: str) -> Optional[Dict[str, Any]]:
     return BROKER_CONFIGS.get(broker_name)
 
 
-def get_all_broker_names() -> list[str]:
+def get_all_broker_names() -> list[BrokerName]:
     """
     Get all available broker names from the configuration.
 

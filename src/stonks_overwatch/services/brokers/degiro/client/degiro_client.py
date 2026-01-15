@@ -14,6 +14,7 @@ from degiro_connector.trading.models.credentials import Credentials
 import stonks_overwatch.settings
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.degiro import DegiroConfig, DegiroCredentials
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.settings import TIME_ZONE
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.core.logger import StonksLogger
@@ -46,7 +47,7 @@ class CredentialsManager:
                 from stonks_overwatch.config.base_config import resolve_config_from_factory
 
                 # Get and resolve DeGiro configuration
-                degiro_config = resolve_config_from_factory("degiro", DegiroConfig)
+                degiro_config = resolve_config_from_factory(BrokerName.DEGIRO, DegiroConfig)
             except ImportError as e:
                 raise ImportError(f"Failed to import BrokerFactory: {e}") from e
 
@@ -148,7 +149,7 @@ class DeGiroService:
                 from stonks_overwatch.config.base_config import resolve_config_from_factory
 
                 # Get and resolve DeGiro configuration
-                self.degiro_config = resolve_config_from_factory("degiro", DegiroConfig)
+                self.degiro_config = resolve_config_from_factory(BrokerName.DEGIRO, DegiroConfig)
             except ImportError:
                 # If BrokerFactory is not available, AuthenticationService should provide config
                 pass

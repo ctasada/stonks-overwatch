@@ -1,5 +1,6 @@
 from typing import Any, Callable, Dict
 
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.utils.core.logger import StonksLogger
 
 
@@ -12,7 +13,7 @@ class CredentialValidator:
     logger = StonksLogger.get_logger("stonks_overwatch.utils.credential_validator", "[CRED_VALIDATOR]")
 
     @classmethod
-    def has_valid_credentials(cls, broker_name: str, credentials: Any) -> bool:
+    def has_valid_credentials(cls, broker_name: BrokerName, credentials: Any) -> bool:
         """
         Validate that broker credentials are not placeholders and meet minimum requirements.
 
@@ -28,9 +29,9 @@ class CredentialValidator:
 
         try:
             validators: Dict[str, Callable[[Any], bool]] = {
-                "degiro": cls._validate_degiro,
-                "bitvavo": cls._validate_bitvavo,
-                "ibkr": cls._validate_ibkr,
+                BrokerName.DEGIRO: cls._validate_degiro,
+                BrokerName.BITVAVO: cls._validate_bitvavo,
+                BrokerName.IBKR: cls._validate_ibkr,
             }
 
             validator = validators.get(broker_name)

@@ -9,6 +9,7 @@ eliminating the need for separate factory systems.
 from typing import Any, Dict, Optional
 
 from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.core.exceptions import ServiceFactoryException
 from stonks_overwatch.core.factories.broker_registry import (
     BrokerRegistry,
@@ -59,7 +60,7 @@ class BrokerFactory:
         self._cache_enabled = True
 
     # Configuration creation methods
-    def create_config(self, broker_name: str, **kwargs) -> Optional[BaseConfig]:
+    def create_config(self, broker_name: BrokerName, **kwargs) -> Optional[BaseConfig]:
         """
         Create broker configuration instance with caching.
 
@@ -102,12 +103,13 @@ class BrokerFactory:
             self.logger.error(f"Failed to create configuration for broker {broker_name}: {e}")
             raise BrokerFactoryError(f"Failed to create configuration for broker '{broker_name}': {e}") from e
 
-    def create_default_config(self, broker_name: str) -> Optional[BaseConfig]:
+    def create_default_config(self, broker_name: BrokerName) -> Optional[BaseConfig]:
         """
         Create default broker configuration instance.
 
         Args:
             broker_name: Name of the broker
+            **kwargs: Additional arguments to pass to the configuration constructor
 
         Returns:
             Default configuration instance if broker is registered, None otherwise
@@ -125,7 +127,7 @@ class BrokerFactory:
             self.logger.error(f"Failed to create default configuration for broker {broker_name}: {e}")
             raise BrokerFactoryError(f"Failed to create default configuration for broker '{broker_name}': {e}") from e
 
-    def create_config_from_dict(self, broker_name: str, data: dict) -> Optional[BaseConfig]:
+    def create_config_from_dict(self, broker_name: BrokerName, data: dict) -> Optional[BaseConfig]:
         """
         Create broker configuration instance from dictionary data.
 
@@ -150,7 +152,7 @@ class BrokerFactory:
             raise BrokerFactoryError(f"Failed to create configuration from dict for broker '{broker_name}': {e}") from e
 
     # Service creation methods with dependency injection
-    def create_service(self, broker_name: str, service_type: ServiceType, **kwargs) -> Optional[Any]:
+    def create_service(self, broker_name: BrokerName, service_type: ServiceType, **kwargs) -> Optional[Any]:
         """
         Create service instance with automatic configuration dependency injection.
 
@@ -162,6 +164,7 @@ class BrokerFactory:
         Returns:
             Service instance if available, None otherwise
         """
+
         # Check cache first
         if (
             self._cache_enabled
@@ -203,7 +206,7 @@ class BrokerFactory:
             ) from e
 
     # Typed service creation methods
-    def create_portfolio_service(self, broker_name: str, **kwargs) -> Optional[PortfolioServiceInterface]:
+    def create_portfolio_service(self, broker_name: BrokerName, **kwargs) -> Optional[PortfolioServiceInterface]:
         """
         Create a portfolio service instance for the specified broker.
 
@@ -219,7 +222,7 @@ class BrokerFactory:
 
         return self.create_service(broker_name, ServiceType.PORTFOLIO, **kwargs)
 
-    def create_transaction_service(self, broker_name: str, **kwargs) -> Optional[TransactionServiceInterface]:
+    def create_transaction_service(self, broker_name: BrokerName, **kwargs) -> Optional[TransactionServiceInterface]:
         """
         Create a transaction service instance for the specified broker.
 
@@ -230,12 +233,13 @@ class BrokerFactory:
         Returns:
             Transaction service instance if available, None otherwise
         """
+
         if not self._registry.broker_supports_service(broker_name, ServiceType.TRANSACTION):
             raise BrokerFactoryError(f"Broker '{broker_name}' does not support transaction service")
 
         return self.create_service(broker_name, ServiceType.TRANSACTION, **kwargs)
 
-    def create_deposit_service(self, broker_name: str, **kwargs) -> Optional[DepositServiceInterface]:
+    def create_deposit_service(self, broker_name: BrokerName, **kwargs) -> Optional[DepositServiceInterface]:
         """
         Create a deposit service instance for the specified broker.
 
@@ -251,7 +255,7 @@ class BrokerFactory:
 
         return self.create_service(broker_name, ServiceType.DEPOSIT, **kwargs)
 
-    def create_dividend_service(self, broker_name: str, **kwargs) -> Optional[DividendServiceInterface]:
+    def create_dividend_service(self, broker_name: BrokerName, **kwargs) -> Optional[DividendServiceInterface]:
         """
         Create a dividend service instance for the specified broker.
 
@@ -267,7 +271,7 @@ class BrokerFactory:
 
         return self.create_service(broker_name, ServiceType.DIVIDEND, **kwargs)
 
-    def create_fee_service(self, broker_name: str, **kwargs) -> Optional[Any]:
+    def create_fee_service(self, broker_name: BrokerName, **kwargs) -> Optional[Any]:
         """
         Create a fee service instance for the specified broker.
 
@@ -283,7 +287,7 @@ class BrokerFactory:
 
         return self.create_service(broker_name, ServiceType.FEE, **kwargs)
 
-    def create_account_service(self, broker_name: str, **kwargs) -> Optional[Any]:
+    def create_account_service(self, broker_name: BrokerName, **kwargs) -> Optional[Any]:
         """
         Create an account service instance for the specified broker.
 
@@ -299,7 +303,9 @@ class BrokerFactory:
 
         return self.create_service(broker_name, ServiceType.ACCOUNT, **kwargs)
 
-    def create_authentication_service(self, broker_name: str, **kwargs) -> Optional[AuthenticationServiceInterface]:
+    def create_authentication_service(
+        self, broker_name: BrokerName, **kwargs
+    ) -> Optional[AuthenticationServiceInterface]:
         """
         Create an authentication service instance for the specified broker.
 
@@ -316,7 +322,7 @@ class BrokerFactory:
         return self.create_service(broker_name, ServiceType.AUTHENTICATION, **kwargs)
 
     # Convenience methods
-    def create_all_services(self, broker_name: str, **kwargs) -> Dict[ServiceType, Any]:
+    def create_all_services(self, broker_name: BrokerName, **kwargs) -> Dict[ServiceType, Any]:
         """
         Create all supported services for a broker.
 
@@ -340,16 +346,16 @@ class BrokerFactory:
 
         return services
 
-    def get_available_brokers(self) -> list[str]:
+    def get_available_brokers(self) -> list[BrokerName]:
         """
         Get brokers available for both config and services.
 
         Returns:
-            List of broker names with both config and service registrations
+            List of BrokerName enums with both config and service registrations
         """
         return self._registry.get_fully_registered_brokers()
 
-    def is_broker_available(self, broker_name: str) -> bool:
+    def is_broker_available(self, broker_name: BrokerName) -> bool:
         """
         Check if a broker is fully available (both config and services registered).
 
@@ -359,9 +365,10 @@ class BrokerFactory:
         Returns:
             True if broker is fully available, False otherwise
         """
-        return broker_name in self._registry.get_fully_registered_brokers()
+        broker_str = BrokerName.normalize(broker_name)
+        return broker_str in self._registry.get_fully_registered_brokers()
 
-    def get_broker_capabilities(self, broker_name: str) -> list[ServiceType]:
+    def get_broker_capabilities(self, broker_name: BrokerName) -> list[ServiceType]:
         """
         Get the capabilities (service types) of a specific broker.
 
@@ -373,7 +380,7 @@ class BrokerFactory:
         """
         return self._registry.get_broker_capabilities(broker_name)
 
-    def broker_supports_service(self, broker_name: str, service_type: ServiceType) -> bool:
+    def broker_supports_service(self, broker_name: BrokerName, service_type: ServiceType) -> bool:
         """
         Check if a broker supports a specific service type.
 
@@ -387,7 +394,7 @@ class BrokerFactory:
         return self._registry.broker_supports_service(broker_name, service_type)
 
     # Cache management
-    def clear_cache(self, broker_name: Optional[str] = None) -> None:
+    def clear_cache(self, broker_name: Optional[BrokerName] = None) -> None:
         """
         Clear cached instances.
 
@@ -396,15 +403,16 @@ class BrokerFactory:
                         If None, clears all cached instances.
         """
         if broker_name:
-            self._config_instances.pop(broker_name, None)
-            self._service_instances.pop(broker_name, None)
-            self.logger.debug(f"Cleared cache for broker: {broker_name}")
+            broker_str = BrokerName.normalize(broker_name)
+            self._config_instances.pop(broker_str, None)
+            self._service_instances.pop(broker_str, None)
+            self.logger.debug(f"Cleared cache for broker: {broker_str}")
         else:
             self._config_instances.clear()
             self._service_instances.clear()
             self.logger.debug("Cleared all cached instances")
 
-    def update_broker_credentials(self, broker_name: str, **credentials) -> None:
+    def update_broker_credentials(self, broker_name: BrokerName, **credentials) -> None:
         """
         Update credentials for a specific broker.
 
@@ -424,12 +432,12 @@ class BrokerFactory:
             if config.credentials is None:
                 # Use a simple mapping for credential classes to avoid complexity
                 credential_classes = {
-                    "degiro": "stonks_overwatch.config.degiro.DegiroCredentials",
-                    "bitvavo": "stonks_overwatch.config.bitvavo.BitvavoCredentials",
-                    "ibkr": "stonks_overwatch.config.ibkr.IbkrCredentials",
+                    BrokerName.DEGIRO: "stonks_overwatch.config.degiro.DegiroCredentials",
+                    BrokerName.BITVAVO: "stonks_overwatch.config.bitvavo.BitvavoCredentials",
+                    BrokerName.IBKR: "stonks_overwatch.config.ibkr.IbkrCredentials",
                 }
 
-                credential_class_path = credential_classes.get(broker_name.lower())
+                credential_class_path = credential_classes.get(broker_name)
                 if not credential_class_path:
                     raise BrokerFactoryError(f"No credential class mapping for broker: {broker_name}")
 
@@ -486,7 +494,7 @@ class BrokerFactory:
         """
         try:
             self.update_broker_credentials(
-                "degiro",
+                BrokerName.DEGIRO,
                 username=username,
                 password=password,
                 int_account=int_account,

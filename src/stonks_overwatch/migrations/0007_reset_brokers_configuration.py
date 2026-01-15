@@ -2,9 +2,11 @@ import datetime
 
 from django.db import migrations
 
+from stonks_overwatch.constants import BrokerName
+
 # With the introduction to allow login with different brokers, DEGIRO is not a default anymore
 # This forces to reset all the brokers configuration
-BROKERS = ["degiro", "bitvavo", "ibkr"]
+BROKERS = BrokerName.all()
 
 
 def load_broker_config(apps, schema_editor):
@@ -13,7 +15,7 @@ def load_broker_config(apps, schema_editor):
         enabled = False
         credentials = {}
         start_date = datetime.date(2020, 1, 1)
-        update_frequency = 15 if broker == "ibkr" else 5
+        update_frequency = 15 if broker == BrokerName.IBKR else 5
 
         broker_configuration.objects.update_or_create(
             broker_name=broker,

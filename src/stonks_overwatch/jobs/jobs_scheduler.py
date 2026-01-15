@@ -3,6 +3,7 @@ from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
+from stonks_overwatch.constants.brokers import BrokerName
 from stonks_overwatch.core.exceptions import CredentialsException
 from stonks_overwatch.services.brokers.bitvavo.services.update_service import UpdateService as BitvavoUpdateService
 from stonks_overwatch.services.brokers.degiro.services.update_service import UpdateService as DegiroUpdateService
@@ -21,7 +22,7 @@ class JobsScheduler:
 
     # Broker configuration mapping
     BROKER_CONFIGS = {
-        "degiro": {
+        BrokerName.DEGIRO.value: {
             "job_id": "update_degiro_portfolio",
             "check_offline": True,
             "update_service_class": DegiroUpdateService,
@@ -29,7 +30,7 @@ class JobsScheduler:
             "connection_check": "is_connected",
             "connection_method": "connect",
         },
-        "bitvavo": {
+        BrokerName.BITVAVO.value: {
             "job_id": "update_bitvavo_portfolio",
             "check_offline": True,
             "update_service_class": BitvavoUpdateService,
@@ -37,7 +38,7 @@ class JobsScheduler:
             "connection_check": "get_client",
             "connection_method": None,  # Handled during initialization
         },
-        "ibkr": {
+        BrokerName.IBKR.value: {
             "job_id": "update_ibkr_portfolio",
             "check_offline": False,
             "update_service_class": IbkrUpdateService,
@@ -61,7 +62,7 @@ class JobsScheduler:
         ]
 
     @classmethod
-    def _create_update_method(cls, broker_name):
+    def _create_update_method(cls, broker_name: BrokerName):
         """Create a generic update method for a specific broker"""
 
         def update_method():
@@ -70,7 +71,7 @@ class JobsScheduler:
         return update_method
 
     @classmethod
-    def _update_broker_portfolio(cls, broker_name):
+    def _update_broker_portfolio(cls, broker_name: BrokerName):
         """Generic method to update any broker portfolio"""
         broker_config = cls.BROKER_CONFIGS.get(broker_name)
         if not broker_config:

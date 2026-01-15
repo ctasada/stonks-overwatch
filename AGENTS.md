@@ -57,6 +57,31 @@ make collectstatic     # After editing static files
 - ❌ Don't use bare `except:` - Always catch specific exceptions
 - ❌ Don't hardcode paths - Use environment variables or Django settings
 - ❌ Don't use HTML in Markdown files - Use pure Markdown syntax only
+- ❌ Don't run `python` directly - Use `poetry run python` or `make` commands
+
+### 🐍 Python Execution
+
+**CRITICAL:** This project uses Poetry for dependency management. Always use Poetry to run Python commands:
+
+- ✅ **CORRECT:** `poetry run python script.py`
+- ✅ **CORRECT:** `make test` (uses Poetry internally)
+- ✅ **CORRECT:** `make lint-fix` (uses Poetry internally)
+- ❌ **WRONG:** `python script.py` (may use wrong Python version or missing dependencies)
+- ❌ **WRONG:** `python3 script.py` (bypasses Poetry environment)
+
+**Why Poetry?**
+- Ensures correct Python version (3.13+)
+- Activates virtual environment with all dependencies
+- Maintains consistent environment across development and CI/CD
+
+**Common Commands:**
+```bash
+poetry run python manage.py <command>  # Run Django management commands
+poetry run pytest                       # Run tests directly
+poetry shell                            # Activate Poetry shell for interactive work
+```
+
+**Best Practice:** Use `make` commands when available, as they handle Poetry automatically.
 
 ---
 

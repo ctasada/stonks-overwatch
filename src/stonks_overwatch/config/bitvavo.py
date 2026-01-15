@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.base_credentials import BaseCredentials
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 
 
@@ -31,7 +32,7 @@ class BitvavoCredentials(BaseCredentials):
 
 
 class BitvavoConfig(BaseConfig):
-    config_key = "bitvavo"
+    config_key = BrokerName.BITVAVO.value
     DEFAULT_BITVAVO_UPDATE_FREQUENCY = 5
     DEFAULT_BITVAVO_START_DATE_STR = "2020-01-01"
     DEFAULT_BITVAVO_START_DATE = LocalizationUtility.convert_string_to_date(DEFAULT_BITVAVO_START_DATE_STR)
@@ -90,7 +91,7 @@ class BitvavoConfig(BaseConfig):
     @classmethod
     def default(cls) -> "BitvavoConfig":
         try:
-            return cls.from_db_with_json_override("bitvavo")
+            return cls.from_db_with_json_override(BrokerName.BITVAVO)
         except Exception:
             cls.logger.debug("Cannot find BITVAVO configuration file. Using default values")
             return BitvavoConfig(

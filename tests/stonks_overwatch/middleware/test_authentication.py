@@ -7,6 +7,7 @@ authentication logic for all brokers.
 
 from django.http import HttpRequest, HttpResponse
 
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.middleware.authentication import AuthenticationMiddleware
 
 from django.test import TestCase
@@ -78,8 +79,8 @@ class TestAuthenticationMiddleware(TestCase):
         """Test middleware checks authentication when brokers are configured."""
         mock_resolve.return_value.url_name = "dashboard"
 
-        # Mock configured broker
-        self.mock_registry.get_registered_brokers.return_value = ["degiro"]
+        # Mock configured broker - return BrokerName enum
+        self.mock_registry.get_registered_brokers.return_value = [BrokerName.DEGIRO]
         mock_config = Mock()
         mock_config.is_enabled.return_value = True
         mock_credentials = Mock()
@@ -106,8 +107,8 @@ class TestAuthenticationMiddleware(TestCase):
         mock_resolve.return_value.url_name = "dashboard"
         mock_redirect.return_value = HttpResponse(status=302)
 
-        # Mock configured broker
-        self.mock_registry.get_registered_brokers.return_value = ["degiro"]
+        # Mock configured broker - return BrokerName enum
+        self.mock_registry.get_registered_brokers.return_value = [BrokerName.DEGIRO]
         mock_config = Mock()
         mock_config.is_enabled.return_value = True
         mock_credentials = Mock()

@@ -10,6 +10,7 @@ from typing import Optional
 from django.shortcuts import redirect
 from django.urls import resolve
 
+from stonks_overwatch.constants.brokers import BrokerName
 from stonks_overwatch.core.authentication_locator import get_authentication_service
 from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 from stonks_overwatch.core.factories.broker_registry import BrokerRegistry
@@ -107,7 +108,7 @@ class AuthenticationMiddleware:
 
             for broker_name in registered_brokers:
                 # Skip DEGIRO as it's already checked above
-                if broker_name == "degiro":
+                if broker_name == BrokerName.DEGIRO:
                     continue
 
                 # Check broker-specific session key

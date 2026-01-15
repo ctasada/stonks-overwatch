@@ -6,6 +6,7 @@ from typing import Optional
 from django.db.utils import OperationalError
 
 from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.settings import STONKS_OVERWATCH_DATA_DIR
 from stonks_overwatch.utils.core.logger import StonksLogger
 
@@ -33,7 +34,7 @@ class AbstractUpdateService(ABC):
 
     def __init__(
         self,
-        broker_name: str,
+        broker_name: BrokerName,
         import_folder: Optional[str] = None,
         debug_mode: Optional[bool] = None,
         config: Optional[BaseConfig] = None,

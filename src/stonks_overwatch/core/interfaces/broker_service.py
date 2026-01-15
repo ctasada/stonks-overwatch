@@ -7,6 +7,8 @@ All broker services should implement this interface to ensure consistency.
 
 from abc import ABC, abstractmethod
 
+from stonks_overwatch.constants import BrokerName
+
 
 class BrokerServiceInterface(ABC):
     """
@@ -44,12 +46,12 @@ class BrokerServiceInterface(ABC):
 
     @property
     @abstractmethod
-    def broker_name(self) -> str:
+    def broker_name(self) -> BrokerName:
         """
         Returns the name of the broker (e.g., 'DeGiro', 'Bitvavo').
 
         Returns:
-            str: The broker name
+            BrokerName: The broker name
         """
         pass
 

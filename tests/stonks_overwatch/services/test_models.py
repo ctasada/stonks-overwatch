@@ -2,6 +2,7 @@ from datetime import datetime
 
 from iso10383 import MIC
 
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.services.models import (
     AccountOverview,
     Country,
@@ -30,6 +31,48 @@ def test_portfolio_ids():
         assert as_dict["stable"] == portfolio_id.stable
 
     assert PortfolioId.from_id("XXX") == PortfolioId.ALL
+
+
+def test_portfolio_id_broker_name_property():
+    """Test that PortfolioId.broker_name returns correct BrokerName."""
+    # Broker portfolios should return their BrokerName
+    assert PortfolioId.DEGIRO.broker_name == BrokerName.DEGIRO
+    assert PortfolioId.BITVAVO.broker_name == BrokerName.BITVAVO
+    assert PortfolioId.IBKR.broker_name == BrokerName.IBKR
+
+    # ALL should return None
+    assert PortfolioId.ALL.broker_name is None
+
+
+def test_portfolio_id_from_broker_name():
+    """Test creating PortfolioId from BrokerName."""
+    assert PortfolioId.from_broker_name(BrokerName.DEGIRO) == PortfolioId.DEGIRO
+    assert PortfolioId.from_broker_name(BrokerName.BITVAVO) == PortfolioId.BITVAVO
+    assert PortfolioId.from_broker_name(BrokerName.IBKR) == PortfolioId.IBKR
+
+
+def test_portfolio_id_get_broker_portfolios():
+    """Test getting only broker portfolios (excluding ALL)."""
+    broker_portfolios = PortfolioId.get_broker_portfolios()
+
+    # Should not include ALL
+    assert PortfolioId.ALL not in broker_portfolios
+
+    # Should include all broker portfolios
+    assert PortfolioId.DEGIRO in broker_portfolios
+    assert PortfolioId.BITVAVO in broker_portfolios
+    assert PortfolioId.IBKR in broker_portfolios
+
+    # Should have exactly 3 broker portfolios
+    assert len(broker_portfolios) == 3
+
+
+def test_portfolio_id_uses_broker_name_values():
+    """Test that PortfolioId uses BrokerName as source of truth for IDs."""
+    # Verify that portfolio IDs match BrokerName values
+    assert PortfolioId.DEGIRO.id == BrokerName.DEGIRO.value
+    assert PortfolioId.BITVAVO.id == BrokerName.BITVAVO.value
+    assert PortfolioId.IBKR.id == BrokerName.IBKR.value
 
 
 def test_default_account_overview():

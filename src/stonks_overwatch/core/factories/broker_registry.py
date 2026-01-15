@@ -9,6 +9,7 @@ import threading
 from typing import Any, Dict, List, Optional, Type
 
 from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.constants.brokers import BrokerName
 from stonks_overwatch.core.exceptions import ServiceFactoryException
 from stonks_overwatch.core.interfaces import (
     AccountServiceInterface,
@@ -59,14 +60,14 @@ class BrokerRegistry:
         Sets up empty dictionaries for managing broker configurations and services,
         and initializes logging for registry operations.
         """
-        self._config_classes: Dict[str, Type[BaseConfig]] = {}
-        self._service_classes: Dict[str, Dict[ServiceType, Type]] = {}
-        self._broker_capabilities: Dict[str, List[ServiceType]] = {}
+        self._config_classes: Dict[BrokerName, Type[BaseConfig]] = {}
+        self._service_classes: Dict[BrokerName, Dict[ServiceType, Type]] = {}
+        self._broker_capabilities: Dict[BrokerName, List[ServiceType]] = {}
         self._lock = threading.RLock()
 
         self.logger = StonksLogger.get_logger("stonks_overwatch.core", "[BROKER_REGISTRY]")
 
-    def register_broker_config(self, broker_name: str, config_class: Type[BaseConfig]) -> None:
+    def register_broker_config(self, broker_name: BrokerName, config_class: Type[BaseConfig]) -> None:
         """
         Register a broker configuration class.
 
@@ -78,7 +79,6 @@ class BrokerRegistry:
             BrokerRegistryValidationError: If validation fails
         """
         with self._lock:
-            self._validate_broker_name(broker_name)
             self._validate_config_class(config_class)
 
             if broker_name in self._config_classes:
@@ -87,7 +87,7 @@ class BrokerRegistry:
             self._config_classes[broker_name] = config_class
             self.logger.debug(f"Registered configuration for broker: {broker_name}")
 
-    def get_config_class(self, broker_name: str) -> Optional[Type[BaseConfig]]:
+    def get_config_class(self, broker_name: BrokerName) -> Optional[Type[BaseConfig]]:
         """
         Get configuration class for a broker.
 
@@ -99,7 +99,7 @@ class BrokerRegistry:
         """
         return self._config_classes.get(broker_name)
 
-    def is_config_registered(self, broker_name: str) -> bool:
+    def is_config_registered(self, broker_name: BrokerName) -> bool:
         """
         Check if a broker configuration is registered.
 
@@ -111,7 +111,7 @@ class BrokerRegistry:
         """
         return broker_name in self._config_classes
 
-    def register_broker_services(self, broker_name: str, **services) -> None:
+    def register_broker_services(self, broker_name: BrokerName, **services) -> None:
         """
         Register broker service classes.
 
@@ -123,8 +123,6 @@ class BrokerRegistry:
             BrokerRegistryValidationError: If validation fails
         """
         with self._lock:
-            self._validate_broker_name(broker_name)
-
             if not services:
                 raise BrokerRegistryValidationError("At least one service must be provided")
 
@@ -155,7 +153,7 @@ class BrokerRegistry:
             service_list = [service_type.value for service_type in service_dict.keys()]
             self.logger.debug(f"Registered services for broker: {broker_name} - {service_list}")
 
-    def get_service_class(self, broker_name: str, service_type: ServiceType) -> Optional[Type]:
+    def get_service_class(self, broker_name: BrokerName, service_type: ServiceType) -> Optional[Type]:
         """
         Get service class for a broker and service type.
 
@@ -169,7 +167,7 @@ class BrokerRegistry:
         broker_services = self._service_classes.get(broker_name, {})
         return broker_services.get(service_type)
 
-    def broker_supports_service(self, broker_name: str, service_type: ServiceType) -> bool:
+    def broker_supports_service(self, broker_name: BrokerName, service_type: ServiceType) -> bool:
         """
         Check if a broker supports a specific service type.
 
@@ -182,7 +180,7 @@ class BrokerRegistry:
         """
         return service_type in self._broker_capabilities.get(broker_name, [])
 
-    def get_broker_capabilities(self, broker_name: str) -> List[ServiceType]:
+    def get_broker_capabilities(self, broker_name: BrokerName) -> List[ServiceType]:
         """
         Get the list of service types supported by a broker.
 
@@ -194,7 +192,7 @@ class BrokerRegistry:
         """
         return self._broker_capabilities.get(broker_name, []).copy()
 
-    def register_complete_broker(self, broker_name: str, config_class: Type[BaseConfig], **services) -> None:
+    def register_complete_broker(self, broker_name: BrokerName, config_class: Type[BaseConfig], **services) -> None:
         """
         Register both configuration and services for a broker in a single operation.
 
@@ -217,32 +215,40 @@ class BrokerRegistry:
                     self.logger.warning(f"Rolled back configuration registration for broker: {broker_name}")
                 raise
 
-    def get_registered_brokers(self) -> List[str]:
+    def get_registered_brokers(self) -> List[BrokerName]:
         """
         Get list of all registered broker names.
 
         Returns:
-            List of broker names that have configurations registered
+            List of BrokerName enums for brokers that have configurations registered
+
+        Example:
+            >>> registry.get_registered_brokers()
+            [BrokerName.DEGIRO, BrokerName.BITVAVO, BrokerName.IBKR]
         """
         return list(self._config_classes.keys())
 
-    def get_fully_registered_brokers(self) -> List[str]:
+    def get_fully_registered_brokers(self) -> List[BrokerName]:
         """
         Get list of brokers that have both configuration and services registered.
 
         Returns:
-            List of broker names that have both configuration and services
+            List of BrokerName enums for brokers that have both configuration and services
+
+        Example:
+            >>> registry.get_fully_registered_brokers()
+            [BrokerName.DEGIRO, BrokerName.BITVAVO]
         """
         config_brokers = set(self._config_classes.keys())
         service_brokers = set(self._service_classes.keys())
         return list(config_brokers.intersection(service_brokers))
 
-    def get_registration_status(self) -> Dict[str, Dict[str, bool]]:
+    def get_registration_status(self) -> Dict[BrokerName, Dict[str, bool]]:
         """
         Get registration status for all brokers.
 
         Returns:
-            Dictionary mapping broker names to their registration status
+            Dictionary mapping BrokerName enums to their registration status
         """
         all_brokers = set(self._config_classes.keys()) | set(self._service_classes.keys())
         return {
@@ -258,7 +264,7 @@ class BrokerRegistry:
         Validate all broker registrations and return detailed status.
 
         Returns:
-            Dictionary with validation results
+            Dictionary with validation results (broker names as BrokerName enums)
         """
         results = {"all_valid": True, "brokers": {}}
 
@@ -281,7 +287,7 @@ class BrokerRegistry:
 
         return results
 
-    def unregister_broker(self, broker_name: str) -> bool:
+    def unregister_broker(self, broker_name: BrokerName) -> bool:
         """
         Unregister a broker and all its services.
 
@@ -315,7 +321,7 @@ class BrokerRegistry:
             self._broker_capabilities.clear()
             self.logger.info("Cleared all broker registrations")
 
-    def validate_broker_service_compatibility(self, broker_name: str) -> Dict[str, Any]:
+    def validate_broker_service_compatibility(self, broker_name: BrokerName) -> Dict[str, Any]:
         """
         Validate that a broker's services are compatible with its configuration.
 
@@ -345,7 +351,7 @@ class BrokerRegistry:
 
         return result
 
-    def validate_all_service_interfaces(self, broker_name: str) -> Dict[str, Any]:
+    def validate_all_service_interfaces(self, broker_name: BrokerName) -> Dict[str, Any]:
         """
         Validate that all services for a broker implement their required interfaces.
 

@@ -9,6 +9,7 @@ through their API in the same way as other brokers.
 from typing import Dict, List, Optional
 
 from stonks_overwatch.config.base_config import BaseConfig
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.core.interfaces.deposit_service import DepositServiceInterface
 from stonks_overwatch.services.brokers.ibkr.client.ibkr_service import IbkrService
@@ -38,9 +39,9 @@ class DepositsService(BaseService, DepositServiceInterface):
         self.ibkr_service = IbkrService()
 
     @property
-    def broker_name(self) -> str:
+    def broker_name(self) -> BrokerName:
         """Return the broker name."""
-        return "ibkr"
+        return BrokerName.IBKR
 
     def get_cash_deposits(self) -> List[Deposit]:
         """

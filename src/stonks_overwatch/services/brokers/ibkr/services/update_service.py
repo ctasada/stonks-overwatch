@@ -4,6 +4,7 @@ from typing import Optional
 from django.core.cache import cache
 
 from stonks_overwatch.config.ibkr import IbkrConfig
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.core.interfaces.base_service import DependencyInjectionMixin
 from stonks_overwatch.core.interfaces.update_service import AbstractUpdateService
 from stonks_overwatch.services.brokers.ibkr.client.ibkr_service import IbkrService
@@ -29,7 +30,7 @@ class UpdateService(DependencyInjectionMixin, AbstractUpdateService):
         """
         # Initialize AbstractUpdateService first
         AbstractUpdateService.__init__(
-            self, broker_name="ibkr", import_folder=import_folder, debug_mode=debug_mode, config=config
+            self, broker_name=BrokerName.IBKR, import_folder=import_folder, debug_mode=debug_mode, config=config
         )
         # Set up dependency injection attributes manually to avoid super() chain conflicts
         self._injected_config = config

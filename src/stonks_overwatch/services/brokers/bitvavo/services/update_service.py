@@ -5,6 +5,7 @@ from typing import Optional
 from degiro_connector.quotecast.models.chart import Interval
 
 from stonks_overwatch.config.bitvavo import BitvavoConfig
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.core.interfaces.update_service import AbstractUpdateService
 from stonks_overwatch.services.brokers.bitvavo.client.bitvavo_client import BitvavoService
@@ -35,7 +36,7 @@ class UpdateService(BaseService, AbstractUpdateService):
             Optional configuration instance for dependency injection.
         """
         # Initialize AbstractUpdateService first (has no super() calls to interfere)
-        AbstractUpdateService.__init__(self, "Bitvavo", import_folder, debug_mode, config)
+        AbstractUpdateService.__init__(self, BrokerName.BITVAVO, import_folder, debug_mode, config)
         # Then manually set BaseService attributes without calling its __init__
         self._injected_config = config
         self._global_config = None

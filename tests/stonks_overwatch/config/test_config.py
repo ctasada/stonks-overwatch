@@ -2,6 +2,7 @@ import pathlib
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.config import Config
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 from stonks_overwatch.services.models import PortfolioId
 
@@ -27,7 +28,7 @@ def test_config_init():
     assert config.base_currency == base_currency
 
     # Test that broker configs can be retrieved via the unified factory
-    degiro_config = config.get_broker_config("degiro")
+    degiro_config = config.get_broker_config(BrokerName.DEGIRO)
     assert degiro_config is not None
     assert isinstance(degiro_config, BaseConfig)
 
@@ -51,7 +52,7 @@ def test_config_from_dict():
 
     assert config.base_currency == base_currency
     # Broker configs are loaded on-demand via BrokerFactory
-    degiro_config = config.get_broker_config("degiro")
+    degiro_config = config.get_broker_config(BrokerName.DEGIRO)
     assert degiro_config is not None
 
 
@@ -60,7 +61,7 @@ def test_config_from_dict_empty():
     config = Config.from_dict({})
     assert config.base_currency == Config.DEFAULT_BASE_CURRENCY
     # Broker configs are available via unified factory
-    assert config.get_broker_config("degiro") is not None
+    assert config.get_broker_config(BrokerName.DEGIRO) is not None
 
 
 def test_config_from_json_file():
@@ -70,7 +71,7 @@ def test_config_from_json_file():
 
     assert config.base_currency == "EUR"  # From sample config file
     # Verify broker configs can be loaded
-    assert config.get_broker_config("degiro") is not None
+    assert config.get_broker_config(BrokerName.DEGIRO) is not None
 
 
 def test_config_from_json_file_invalid():
@@ -85,8 +86,8 @@ def test_config_default():
 
     assert config.base_currency == "EUR"
     # Verify broker configs are available via unified factory
-    assert config.get_broker_config("degiro") is not None
-    assert config.get_broker_config("bitvavo") is not None
+    assert config.get_broker_config(BrokerName.DEGIRO) is not None
+    assert config.get_broker_config(BrokerName.DEGIRO) is not None
 
 
 def test_config_default_without_config_file():
@@ -95,7 +96,7 @@ def test_config_default_without_config_file():
 
     assert config.base_currency == "EUR"
     # Even without config file, broker configs should be available via defaults
-    assert config.get_broker_config("degiro") is not None
+    assert config.get_broker_config(BrokerName.DEGIRO) is not None
 
 
 def test_config_portfolio_status():
@@ -117,7 +118,7 @@ def test_config_degiro_status():
     assert isinstance(degiro_enabled, bool)
 
     # Test getting DeGiro config directly
-    degiro_config = config.get_broker_config("degiro")
+    degiro_config = config.get_broker_config(BrokerName.DEGIRO)
     assert degiro_config is not None
 
 
@@ -130,7 +131,7 @@ def test_config_bitvavo_status():
     assert isinstance(bitvavo_enabled, bool)
 
     # Test getting Bitvavo config directly
-    bitvavo_config = config.get_broker_config("bitvavo")
+    bitvavo_config = config.get_broker_config(BrokerName.BITVAVO)
     assert bitvavo_config is not None
 
 

@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.base_credentials import BaseCredentials
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 
 
@@ -34,7 +35,7 @@ class DegiroCredentials(BaseCredentials):
 
 
 class DegiroConfig(BaseConfig):
-    config_key = "degiro"
+    config_key = BrokerName.DEGIRO.value
     DEFAULT_DEGIRO_UPDATE_FREQUENCY = 5
     DEFAULT_DEGIRO_START_DATE_STR = "2020-01-01"
     DEFAULT_DEGIRO_START_DATE = LocalizationUtility.convert_string_to_date(DEFAULT_DEGIRO_START_DATE_STR)
@@ -93,7 +94,7 @@ class DegiroConfig(BaseConfig):
     @classmethod
     def default(cls) -> "DegiroConfig":
         try:
-            return cls.from_db_with_json_override("degiro")
+            return cls.from_db_with_json_override(BrokerName.DEGIRO)
         except Exception:
             cls.logger.debug("Cannot find DEGIRO configuration file. Using default values")
             return DegiroConfig(

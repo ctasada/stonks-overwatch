@@ -166,16 +166,6 @@ class TestBrokerRegistry:
         assert self.registry.is_config_registered("testbroker")
         assert self.registry.get_config_class("testbroker") == MockBrokerConfig
 
-    def test_register_broker_config_invalid_name(self):
-        """Test broker configuration registration with invalid name."""
-        with pytest.raises(BrokerRegistryValidationError, match="Broker name must be a non-empty string"):
-            self.registry.register_broker_config("", MockBrokerConfig)
-
-        with pytest.raises(
-            BrokerRegistryValidationError, match="Broker name must contain only alphanumeric characters"
-        ):
-            self.registry.register_broker_config("test-broker", MockBrokerConfig)
-
     def test_register_broker_config_invalid_class(self):
         """Test broker configuration registration with invalid config class."""
         with pytest.raises(BrokerRegistryValidationError, match="config_class must be a class type"):

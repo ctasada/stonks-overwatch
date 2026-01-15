@@ -7,6 +7,7 @@ for different brokers (DEGIRO, Bitvavo, IBKR).
 
 from django.contrib.sessions.backends.db import SessionStore
 
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.core.interfaces.authentication_service import AuthenticationResponse, AuthenticationResult
 from stonks_overwatch.views.broker_login import BrokerLogin
 
@@ -44,7 +45,11 @@ class TestBrokerLoginView(TestCase):
         mock_factory_class.return_value = mock_factory
 
         # Mock broker validation
-        mock_registry.get_registered_brokers.return_value = ["degiro", "bitvavo", "ibkr"]
+        mock_registry.get_registered_brokers.return_value = [
+            BrokerName.DEGIRO.value,
+            BrokerName.BITVAVO.value,
+            BrokerName.IBKR.value,
+        ]
 
         # Mock config
         mock_config = Mock()
@@ -71,7 +76,11 @@ class TestBrokerLoginView(TestCase):
         mock_factory_class.return_value = mock_factory
 
         # Mock broker validation
-        mock_registry.get_registered_brokers.return_value = ["degiro", "bitvavo", "ibkr"]
+        mock_registry.get_registered_brokers.return_value = [
+            BrokerName.DEGIRO.value,
+            BrokerName.BITVAVO.value,
+            BrokerName.IBKR.value,
+        ]
 
         # Mock config
         mock_config = Mock()
@@ -98,7 +107,11 @@ class TestBrokerLoginView(TestCase):
         mock_factory_class.return_value = mock_factory
 
         # Mock broker validation - invalid broker not in list
-        mock_registry.get_registered_brokers.return_value = ["degiro", "bitvavo", "ibkr"]
+        mock_registry.get_registered_brokers.return_value = [
+            BrokerName.DEGIRO.value,
+            BrokerName.BITVAVO.value,
+            BrokerName.IBKR.value,
+        ]
 
         request = self.factory.get("/login/invalid/")
         request.session = self.session
@@ -121,7 +134,7 @@ class TestBrokerLoginView(TestCase):
         mock_factory_class.return_value = mock_factory
 
         # Mock broker validation
-        mock_registry.get_registered_brokers.return_value = ["degiro"]
+        mock_registry.get_registered_brokers.return_value = [BrokerName.DEGIRO.value]
 
         request = self.factory.post("/login/degiro/", {"update_portfolio": "true"})
         request.session = self.session
@@ -146,7 +159,7 @@ class TestBrokerLoginView(TestCase):
         mock_factory_class.return_value = mock_factory
 
         # Mock broker validation
-        mock_registry.get_registered_brokers.return_value = ["degiro"]
+        mock_registry.get_registered_brokers.return_value = [BrokerName.DEGIRO.value]
 
         # Mock config
         mock_config = Mock()
@@ -183,7 +196,7 @@ class TestBrokerLoginView(TestCase):
         mock_factory_class.return_value = mock_factory
 
         # Mock broker validation
-        mock_registry.get_registered_brokers.return_value = ["bitvavo"]
+        mock_registry.get_registered_brokers.return_value = [BrokerName.BITVAVO.value]
 
         # Mock config
         mock_config = Mock()
@@ -228,7 +241,7 @@ class TestBrokerLoginView(TestCase):
         mock_factory_class.return_value = mock_factory
 
         # Mock broker validation
-        mock_registry.get_registered_brokers.return_value = ["bitvavo"]
+        mock_registry.get_registered_brokers.return_value = [BrokerName.BITVAVO.value]
 
         # Mock config
         mock_config = Mock()
@@ -261,7 +274,7 @@ class TestBrokerLoginView(TestCase):
         mock_factory_class.return_value = mock_factory
 
         # Mock broker validation
-        mock_registry.get_registered_brokers.return_value = ["degiro"]
+        mock_registry.get_registered_brokers.return_value = [BrokerName.DEGIRO.value]
 
         # Mock config
         mock_config = Mock()
@@ -299,7 +312,7 @@ class TestBrokerLoginView(TestCase):
         mock_factory_class.return_value = mock_factory
 
         # Mock broker validation
-        mock_registry.get_registered_brokers.return_value = ["degiro"]
+        mock_registry.get_registered_brokers.return_value = [BrokerName.DEGIRO.value]
 
         # Mock config
         mock_config = Mock()
@@ -343,7 +356,7 @@ class TestBrokerLoginView(TestCase):
         mock_factory_class.return_value = mock_factory
 
         # Mock broker validation
-        mock_registry.get_registered_brokers.return_value = ["degiro"]
+        mock_registry.get_registered_brokers.return_value = [BrokerName.DEGIRO.value]
 
         # Mock config
         mock_config = Mock()
@@ -379,7 +392,7 @@ class TestBrokerLoginView(TestCase):
         mock_factory_class.return_value = mock_factory
 
         # Mock broker validation
-        mock_registry.get_registered_brokers.return_value = ["degiro"]
+        mock_registry.get_registered_brokers.return_value = [BrokerName.DEGIRO.value]
 
         request = self.factory.post("/login/degiro/", {})
         request.session = self.session
@@ -392,16 +405,24 @@ class TestBrokerLoginView(TestCase):
         call_args = mock_messages.call_args[0]
         assert "required" in call_args[1].lower()
 
-    def test_get_display_name(self):
-        """Test _get_display_name returns correct display names."""
-        assert self.view._get_display_name("degiro") == "DEGIRO"
-        assert self.view._get_display_name("bitvavo") == "Bitvavo"
-        assert self.view._get_display_name("ibkr") == "Interactive Brokers"
-        assert self.view._get_display_name("unknown") == "Unknown"
+    def test_broker_display_names(self):
+        """Test BrokerName enum provides correct display names."""
+        assert BrokerName.DEGIRO.display_name == "DEGIRO"
+        assert BrokerName.BITVAVO.display_name == "Bitvavo"
+        assert BrokerName.IBKR.display_name == "Interactive Brokers"
+        # Also test short names
+        assert BrokerName.IBKR.short_name == "IBKR"
+        assert BrokerName.DEGIRO.short_name == "DEGIRO"
+        # Test __repr__() for debugging
+        assert repr(BrokerName.DEGIRO) == "BrokerName.DEGIRO"
+        assert repr(BrokerName.IBKR) == "BrokerName.IBKR"
+        # Test __str__() returns value
+        assert str(BrokerName.DEGIRO) == "degiro"
+        assert str(BrokerName.IBKR) == "ibkr"
 
     def test_get_auth_fields_degiro(self):
         """Test _get_auth_fields returns correct fields for DEGIRO."""
-        fields = self.view._get_auth_fields("degiro")
+        fields = self.view._get_auth_fields(BrokerName.DEGIRO)
         assert fields["username_label"] == "Username"
         assert fields["password_label"] == "Password"
         assert fields["supports_2fa"] is True
@@ -409,7 +430,7 @@ class TestBrokerLoginView(TestCase):
 
     def test_get_auth_fields_bitvavo(self):
         """Test _get_auth_fields returns correct fields for Bitvavo."""
-        fields = self.view._get_auth_fields("bitvavo")
+        fields = self.view._get_auth_fields(BrokerName.BITVAVO)
         assert fields["username_label"] == "API Key"
         assert fields["password_label"] == "API Secret"
         assert fields["supports_2fa"] is False
@@ -417,7 +438,7 @@ class TestBrokerLoginView(TestCase):
 
     def test_get_auth_fields_ibkr(self):
         """Test _get_auth_fields returns correct fields for IBKR."""
-        fields = self.view._get_auth_fields("ibkr")
+        fields = self.view._get_auth_fields(BrokerName.IBKR)
         assert fields["access_token_label"] == "Access Token"
         assert fields["access_token_secret_label"] == "Access Token Secret"
         assert fields["consumer_key_label"] == "Consumer Key"
@@ -539,7 +560,7 @@ class TestBrokerLoginView(TestCase):
         mock_factory_class.return_value = mock_factory
 
         # Mock broker validation
-        mock_registry.get_registered_brokers.return_value = ["degiro"]
+        mock_registry.get_registered_brokers.return_value = [BrokerName.DEGIRO.value]
 
         # Mock config
         mock_config = Mock()
@@ -569,7 +590,7 @@ class TestBrokerLoginView(TestCase):
         mock_factory_class.return_value = mock_factory
 
         # Mock broker validation
-        mock_registry.get_registered_brokers.return_value = ["degiro"]
+        mock_registry.get_registered_brokers.return_value = [BrokerName.DEGIRO.value]
 
         # Mock config
         mock_config = Mock()
@@ -608,7 +629,7 @@ class TestBrokerLoginView(TestCase):
         mock_factory_class.return_value = mock_factory
 
         # Mock broker validation
-        mock_registry.get_registered_brokers.return_value = ["degiro"]
+        mock_registry.get_registered_brokers.return_value = [BrokerName.DEGIRO.value]
 
         # Mock config
         mock_config = Mock()
@@ -647,7 +668,7 @@ class TestBrokerLoginView(TestCase):
         mock_factory_class.return_value = mock_factory
 
         # Mock broker validation
-        mock_registry.get_registered_brokers.return_value = ["degiro"]
+        mock_registry.get_registered_brokers.return_value = [BrokerName.DEGIRO.value]
 
         # Mock config
         mock_config = Mock()
@@ -712,7 +733,7 @@ class TestBrokerLoginView(TestCase):
         mock_factory_class.return_value = mock_factory
 
         # Mock broker validation
-        mock_registry.get_registered_brokers.return_value = ["degiro"]
+        mock_registry.get_registered_brokers.return_value = [BrokerName.DEGIRO.value]
 
         # Mock config
         mock_config = Mock()
@@ -754,7 +775,7 @@ class TestBrokerLoginView(TestCase):
         mock_config = Mock()
 
         mock_factory.create_config.return_value = mock_config
-        mock_registry.get_registered_brokers.return_value = ["ibkr"]
+        mock_registry.get_registered_brokers.return_value = [BrokerName.IBKR.value]
 
         self.view.factory = mock_factory
         self.view.registry = mock_registry
@@ -794,7 +815,7 @@ class TestBrokerLoginView(TestCase):
         mock_config = Mock()
 
         mock_factory.create_config.return_value = mock_config
-        mock_registry.get_registered_brokers.return_value = ["ibkr"]
+        mock_registry.get_registered_brokers.return_value = [BrokerName.IBKR.value]
 
         self.view.factory = mock_factory
         self.view.registry = mock_registry
@@ -834,7 +855,7 @@ class TestBrokerLoginView(TestCase):
 
         # Mock the registry
         mock_registry = Mock()
-        mock_registry.get_registered_brokers.return_value = ["ibkr"]
+        mock_registry.get_registered_brokers.return_value = [BrokerName.IBKR.value]
         self.view.registry = mock_registry
 
         # Test missing credentials (empty required fields)
@@ -866,7 +887,7 @@ class TestBrokerLoginView(TestCase):
         mock_factory_class.return_value = mock_factory
 
         # Mock broker validation
-        mock_registry.get_registered_brokers.return_value = ["bitvavo"]
+        mock_registry.get_registered_brokers.return_value = [BrokerName.BITVAVO.value]
 
         # Mock config
         mock_config = Mock()
@@ -898,12 +919,12 @@ class TestBrokerLoginView(TestCase):
         request.session = self.session
         request.session["degiro_totp_required"] = True
 
-        result = self.view._check_totp_required(request, "degiro")
+        result = self.view._check_totp_required(request, BrokerName.DEGIRO)
         assert result is True
 
         # Test without session flag
         request.session["degiro_totp_required"] = False
-        result = self.view._check_totp_required(request, "degiro")
+        result = self.view._check_totp_required(request, BrokerName.DEGIRO)
         assert result is False
 
     def test_check_totp_required_other_brokers(self):
@@ -911,10 +932,10 @@ class TestBrokerLoginView(TestCase):
         request = self.factory.get("/login/bitvavo/")
         request.session = self.session
 
-        result = self.view._check_totp_required(request, "bitvavo")
+        result = self.view._check_totp_required(request, BrokerName.BITVAVO)
         assert result is False
 
-        result = self.view._check_totp_required(request, "ibkr")
+        result = self.view._check_totp_required(request, BrokerName.IBKR)
         assert result is False
 
     def test_check_in_app_auth_required_degiro(self):
@@ -923,12 +944,12 @@ class TestBrokerLoginView(TestCase):
         request.session = self.session
         request.session["degiro_in_app_auth_required"] = True
 
-        result = self.view._check_in_app_auth_required(request, "degiro")
+        result = self.view._check_in_app_auth_required(request, BrokerName.DEGIRO)
         assert result is True
 
         # Test without session flag
         request.session["degiro_in_app_auth_required"] = False
-        result = self.view._check_in_app_auth_required(request, "degiro")
+        result = self.view._check_in_app_auth_required(request, BrokerName.DEGIRO)
         assert result is False
 
     def test_check_in_app_auth_required_other_brokers(self):
@@ -936,10 +957,10 @@ class TestBrokerLoginView(TestCase):
         request = self.factory.get("/login/bitvavo/")
         request.session = self.session
 
-        result = self.view._check_in_app_auth_required(request, "bitvavo")
+        result = self.view._check_in_app_auth_required(request, BrokerName.BITVAVO)
         assert result is False
 
-        result = self.view._check_in_app_auth_required(request, "ibkr")
+        result = self.view._check_in_app_auth_required(request, BrokerName.IBKR)
         assert result is False
 
     def test_check_authenticated(self):
@@ -949,20 +970,20 @@ class TestBrokerLoginView(TestCase):
 
         # Test DEGIRO
         request.session["degiro_authenticated"] = True
-        result = self.view._check_authenticated(request, "degiro")
+        result = self.view._check_authenticated(request, BrokerName.DEGIRO)
         assert result is True
 
         # Test Bitvavo
         request.session["bitvavo_authenticated"] = True
-        result = self.view._check_authenticated(request, "bitvavo")
+        result = self.view._check_authenticated(request, BrokerName.BITVAVO)
         assert result is True
 
         # Test IBKR
         request.session["ibkr_authenticated"] = True
-        result = self.view._check_authenticated(request, "ibkr")
+        result = self.view._check_authenticated(request, BrokerName.BITVAVO)
         assert result is True
 
         # Test without authentication
         request.session.clear()
-        result = self.view._check_authenticated(request, "degiro")
+        result = self.view._check_authenticated(request, BrokerName.DEGIRO)
         assert result is False
