@@ -78,93 +78,61 @@ Before configuring Bitvavo in Stonks Overwatch, you need to:
 
 ---
 
-## Configuration
+## Getting Started
 
-### Basic Configuration
+### Initial Setup
 
-**Minimal setup with API credentials:**
+When you first launch Stonks Overwatch, you'll be presented with a broker selection screen. Select Bitvavo to begin the authentication process.
 
-```json
-{
-  "bitvavo": {
-    "enabled": true,
-    "credentials": {
-      "apikey": "YOUR_BITVAVO_API_KEY",
-      "apisecret": "YOUR_BITVAVO_API_SECRET"
-    }
-  }
-}
-```
+### Authentication
 
-### Advanced Configuration
+![Login](images/screenshots/login-bitvavo.png)
 
-**Complete configuration with all options:**
+Bitvavo uses API key authentication for secure access to your portfolio data.
 
-```json
-{
-  "bitvavo": {
-    "enabled": true,
-    "credentials": {
-      "apikey": "YOUR_BITVAVO_API_KEY",
-      "apisecret": "YOUR_BITVAVO_API_SECRET"
-    },
-    "update_frequency_minutes": 5
-  }
-}
-```
+1. Enter your **API Key**
+2. Enter your **API Secret**
+3. Click "Login"
 
-### Configuration Options
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `enabled` | boolean | `true` | Enable/disable Bitvavo integration |
-| `credentials.apikey` | string | *required* | Your Bitvavo API key |
-| `credentials.apisecret` | string | *required* | Your Bitvavo API secret |
-| `update_frequency_minutes` | integer | `5` | Data refresh interval in minutes |
+Your credentials will be validated and you'll be redirected to the dashboard.
 
 ---
 
-## Setup Instructions
+## Configuring Credentials
 
-### 1. Copy Configuration Template
+After your initial login, you can configure Bitvavo to automatically authenticate on startup.
 
-```bash
-cp config/config.json.template config/config.json
-```
+![Settings](images/screenshots/settings-bitvavo.png)
 
-### 2. Edit Configuration
+### Via Settings (Web Application)
 
-Open `config/config.json` and add your Bitvavo credentials:
+1. Navigate to the **Settings** page (sidebar menu)
+2. Locate the **Bitvavo** section
+3. Enter your credentials:
+   - API Key
+   - API Secret
+4. Configure additional options:
+   - Enable/disable the broker
+   - Set update frequency
+5. Click **Save**
 
-```json
-{
-  "bitvavo": {
-    "enabled": true,
-    "credentials": {
-      "apikey": "1234567890abcdef",
-      "apisecret": "fedcba0987654321"
-    }
-  }
-}
-```
+### Via Preferences (Native Application)
 
-### 3. Restart Application
+1. Open **Preferences** from the application menu
+2. Select the **Brokers** tab
+3. Configure Bitvavo credentials and settings
+4. Click **Save**
 
-```bash
-make run
-```
-
-### 4. Verify Connection
-
-Check the dashboard - you should see your Bitvavo portfolio data.
+Your credentials are encrypted and stored securely in the local database.
 
 ---
 
-## Features & Usage
+## Advanced Settings
 
 ### Portfolio Tracking
 
 View all your cryptocurrency holdings in one place:
+
 - Current balances
 - Available vs locked amounts
 - Real-time value in your base currency
@@ -172,17 +140,10 @@ View all your cryptocurrency holdings in one place:
 
 ### Update Frequency
 
-Control how often crypto prices are refreshed:
-
-```json
-{
-  "bitvavo": {
-    "update_frequency_minutes": 2
-  }
-}
-```
+Control how often crypto prices are refreshed. Configure this in Settings (default: 5 minutes).
 
 **Recommendations:**
+
 - **1-2 minutes** - Active trading
 - **5 minutes** (default) - Regular monitoring
 - **15-30 minutes** - Long-term holding
@@ -190,6 +151,7 @@ Control how often crypto prices are refreshed:
 ### Unified Dashboard
 
 Bitvavo integrates seamlessly with other brokers:
+
 - Combined portfolio view
 - Total value across all assets
 - Unified transaction history
@@ -206,7 +168,8 @@ Bitvavo integrates seamlessly with other brokers:
 **Symptoms:** "Invalid API key" or authentication fails
 
 **Solutions:**
-1. Verify API key and secret in `config.json`
+
+1. Verify API key and secret in Settings
 2. Check if you copied the full key (no extra spaces)
 3. Ensure API key is still active in Bitvavo account
 4. Generate new API credentials if needed
@@ -236,7 +199,8 @@ Bitvavo integrates seamlessly with other brokers:
 **Symptoms:** "Rate limit exceeded" errors
 
 **Solutions:**
-1. Increase `update_frequency_minutes` to reduce API calls
+
+1. Increase update frequency in Settings to reduce API calls
 2. Wait a few minutes before retrying
 3. Check if other applications are using the same API key
 
@@ -249,6 +213,88 @@ make run debug=true
 ```
 
 Check logs at: `data/logs/stonks-overwatch.log`
+
+---
+
+## For Developers
+
+### Manual Configuration via config.json
+
+Developers can configure Bitvavo credentials directly in the `config/config.json` file for testing and development purposes.
+
+#### Basic Configuration
+
+**Minimal setup with API credentials:**
+
+```json
+{
+  "bitvavo": {
+    "enabled": true,
+    "credentials": {
+      "apikey": "YOUR_BITVAVO_API_KEY",
+      "apisecret": "YOUR_BITVAVO_API_SECRET"
+    }
+  }
+}
+```
+
+#### Advanced Configuration
+
+**Complete configuration with all options:**
+
+```json
+{
+  "bitvavo": {
+    "enabled": true,
+    "credentials": {
+      "apikey": "YOUR_BITVAVO_API_KEY",
+      "apisecret": "YOUR_BITVAVO_API_SECRET"
+    },
+    "update_frequency_minutes": 5
+  }
+}
+```
+
+#### Configuration Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `enabled` | boolean | `true` | Enable/disable Bitvavo integration |
+| `credentials.apikey` | string | *required* | Your Bitvavo API key |
+| `credentials.apisecret` | string | *required* | Your Bitvavo API secret |
+| `update_frequency_minutes` | integer | `5` | Data refresh interval in minutes |
+
+#### Setup Steps
+
+1. Copy the configuration template:
+
+   ```bash
+   cp config/config.json.template config/config.json
+   ```
+
+2. Edit `config/config.json` and add your Bitvavo credentials:
+
+   ```json
+   {
+     "bitvavo": {
+       "enabled": true,
+       "credentials": {
+         "apikey": "1234567890abcdef",
+         "apisecret": "fedcba0987654321"
+       }
+     }
+   }
+   ```
+
+3. Start the application:
+
+   ```bash
+   make run
+   ```
+
+4. Verify connection - check the dashboard for your Bitvavo portfolio data
+
+**Note:** The `config.json` file is encrypted and never committed to version control. For production use, configure credentials via the Settings UI instead.
 
 ### Test Configuration
 
@@ -280,10 +326,10 @@ The database model is defined in:
 ### Architecture
 
 ```text
-┌────────────┐      ┌──────────────────┐      ┌─────────────┐
+┌────────────┐     ┌──────────────────┐     ┌─────────────┐
 │   Stonks   │────▶│  Bitvavo API     │────▶│  Bitvavo    │
 │  Overwatch │◀────│  Client(Python)  │◀────│  Platform   │
-└────────────┘      └──────────────────┘      └─────────────┘
+└────────────┘     └──────────────────┘     └─────────────┘
        │
        ▼
 ┌────────────┐

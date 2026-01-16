@@ -18,6 +18,7 @@ DEGIRO is the primary broker supported by **Stonks Overwatch** with full-feature
 ### Supported Markets
 
 DEGIRO provides access to international markets including:
+
 - European exchanges (Euronext, XETRA, etc.)
 - US exchanges (NYSE, NASDAQ)
 - Asian markets
@@ -25,71 +26,85 @@ DEGIRO provides access to international markets including:
 
 ---
 
-## Authentication Methods
+## Getting Started
 
-DEGIRO offers two authentication methods in Stonks Overwatch:
+### Initial Setup
 
-### Method 1: Manual Login (No Storage)
+When you first launch Stonks Overwatch, you'll be presented with a broker selection screen. Select DEGIRO to begin the authentication process.
 
-**Use this if you prefer not to store credentials.**
+### Authentication
 
-1. Open your browser at [http://127.0.0.1:8000](http://127.0.0.1:8000)
-2. Enter your DEGIRO username and password
-3. Enter your OTP (One-Time-Password) if 2FA is enabled
-4. Click login
+DEGIRO supports multiple authentication methods to suit your security preferences:
 
-**Note:** You'll need to login each time you start the application.
+#### Standard Login (Username & Password)
 
-### Method 2: Automatic Login (Stored Credentials)
+![Login](images/screenshots/login-degiro.png)
 
-**Use this for convenience - credentials stored in encrypted config file.**
+1. Enter your DEGIRO username and password
+2. Click "Login"
+3. If 2FA is enabled, you'll be prompted for additional verification
 
-1. Copy the configuration template:
+#### Two-Factor Authentication (2FA)
 
-   ```bash
-   cp config/config.json.template config/config.json
-   ```
+DEGIRO supports two types of 2FA:
 
-2. Edit `config/config.json` with your DEGIRO credentials
+**TOTP (Time-based One-Time Password)**
+
+![Login 2FA](images/screenshots/login-degiro-2fa.png)
+
+- Enter the 6-digit code from your authenticator app when prompted
+- The code refreshes every 30 seconds
+
+**In-App Authentication**
+
+- After entering your credentials, you'll see a waiting screen
+- Open the DEGIRO mobile app on your phone
+- Approve the login notification
+- The dashboard will load automatically once approved
+
+**Troubleshooting In-App Authentication:**
+
+- No notification? Ensure the DEGIRO app is up to date and notifications are enabled
+- Stuck waiting? Check if you approved the request, or refresh and try again
+- Wait up to 30 seconds for confirmation
 
 ---
 
-## Configuration
+## Configuring Credentials
 
-### Basic Configuration
+After your initial login, you can configure DEGIRO to automatically authenticate on startup.
 
-**Minimal setup (username and password only):**
+![Settings](images/screenshots/settings-degiro.png)
 
-```json
-{
-  "degiro": {
-    "enabled": true,
-    "credentials": {
-      "username": "your_degiro_username",
-      "password": "your_degiro_password"
-    }
-  }
-}
-```
+### Via Settings (Web Application)
 
-### Configuration with 2FA (TOTP)
+1. Navigate to the **Settings** page (sidebar menu)
+2. Locate the **DEGIRO** section
+3. Enter your credentials:
+   - Username
+   - Password
+   - TOTP Secret Key (optional, for automatic 2FA)
+4. Configure additional options:
+   - Enable/disable the broker
+   - Set update frequency
+5. Click **Save**
 
-**For accounts with TOTP 2FA enabled:**
+### Via Preferences (Native Application)
 
-```json
-{
-  "degiro": {
-    "enabled": true,
-    "credentials": {
-      "username": "your_degiro_username",
-      "password": "your_degiro_password",
-      "totp_secret_key": "YOUR_TOTP_SECRET_KEY"
-    }
-  }
-}
-```
+1. Open **Preferences** from the application menu
+2. Select the **Brokers** tab
+3. Configure DEGIRO credentials and settings
+4. Click **Save**
 
-**How to get your TOTP secret key:**
+Your credentials are encrypted and stored securely in the local database.
+
+---
+
+## TOTP Secret Key (Optional)
+
+If you have TOTP 2FA enabled and want automatic authentication, you'll need to provide your TOTP secret key.
+
+### How to Get Your TOTP Secret
 
 The TOTP secret is required for automatic 2FA authentication. Here's how to extract it:
 
@@ -101,98 +116,24 @@ The TOTP secret is required for automatic 2FA authentication. Here's how to extr
    - **Option B**: Use an authenticator app that shows the secret (like Aegis Authenticator)
    - **Option C**: Use a tool like [qr-scanner](https://github.com/sayanarijit/qrscan) to decode the QR
 5. The secret looks like: `BASE32ENCODEDSTRING` (e.g., `JBSWY3DPEHPK3PXP`)
-6. Add this secret to your `config.json` as `totp_secret_key`
+6. Add this secret to the Settings page in the TOTP Secret Key field
 
 **Important:** Once you extract the secret, complete the 2FA setup in the DEGIRO app to keep your account secure.
 
 **Need more help?** See the [DEGIRO Connector 2FA Guide](https://github.com/Chavithra/degiro-connector#how-to-use-2fa) for additional methods and troubleshooting.
 
-**Alternative:** If you don't configure the TOTP secret, the application will prompt you for the OTP code each time.
-
-### Advanced Configuration
-
-**Complete configuration with all options:**
-
-```json
-{
-  "degiro": {
-    "enabled": true,
-    "offline_mode": false,
-    "credentials": {
-      "username": "your_degiro_username",
-      "password": "your_degiro_password",
-      "totp_secret_key": "YOUR_TOTP_SECRET_KEY"
-    },
-    "base_currency": "EUR",
-    "start_date": "2020-01-01",
-    "update_frequency_minutes": 5
-  }
-}
-```
-
-### Configuration Options
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `enabled` | boolean | `true` | Enable/disable DEGIRO integration |
-| `offline_mode` | boolean | `false` | Use cached data only (no API calls) |
-| `credentials.username` | string | *required* | Your DEGIRO username |
-| `credentials.password` | string | *required* | Your DEGIRO password |
-| `credentials.totp_secret_key` | string | optional | TOTP secret for automatic 2FA |
-| `base_currency` | string | DEGIRO default | Base currency for calculations (EUR, USD, etc.) |
-| `start_date` | string | `2020-01-01` | Portfolio tracking start date (YYYY-MM-DD) |
-| `update_frequency_minutes` | integer | `5` | Data refresh interval in minutes |
+**Alternative:** If you don't configure the TOTP secret, the application will prompt you for the OTP code each time you log in.
 
 ---
 
-## In-App Authentication
-
-If you don't have TOTP 2FA enabled, DEGIRO may require **In-App authentication** through their mobile app.
-
-### How It Works
-
-1. **Login attempt** - You enter username/password
-2. **In-App required** - DEGIRO requests mobile confirmation
-3. **Open DEGIRO app** - Notification appears in your DEGIRO mobile app
-4. **Approve** - Tap to approve the login request
-5. **Automatic login** - Dashboard loads automatically
-
-### What You'll See
-
-The application will show:
-- "Open the DEGIRO app to continue"
-- Animated spinner while waiting
-- Automatic redirect once approved
-
-### Troubleshooting In-App Auth
-
-**No notification in app?**
-- Ensure DEGIRO mobile app is up to date
-- Check app notification settings
-- Try force-closing and reopening the app
-
-**Stuck on waiting screen?**
-- Check if you approved the request in the app
-- Wait up to 30 seconds for confirmation
-- If still stuck, refresh the page and try again
-
----
-
-## Features & Usage
+## Advanced Settings
 
 ### Offline Mode
 
-Work with cached data without internet connection:
-
-```json
-{
-  "degiro": {
-    "offline_mode": true
-  }
-}
-```
+Work with cached data without internet connection. Enable this in Settings to use previously fetched data without making API calls.
 
 **Use cases:**
+
 - Testing without API calls
 - Working offline
 - Reducing API load during development
@@ -200,17 +141,10 @@ Work with cached data without internet connection:
 
 ### Update Frequency
 
-Control how often data is refreshed:
-
-```json
-{
-  "degiro": {
-    "update_frequency_minutes": 10
-  }
-}
-```
+Control how often data is refreshed from DEGIRO. Configure this in Settings (default: 5 minutes).
 
 **Recommendations:**
+
 - **5 minutes** (default) - Good balance
 - **1-2 minutes** - Active trading
 - **15-30 minutes** - Passive investing
@@ -218,15 +152,7 @@ Control how often data is refreshed:
 
 ### Base Currency
 
-Override your DEGIRO base currency:
-
-```json
-{
-  "degiro": {
-    "base_currency": "USD"
-  }
-}
-```
+Override your DEGIRO base currency for portfolio calculations. Configure this in Settings.
 
 **Supported currencies:** EUR, USD, GBP, CHF, and others available in DEGIRO
 
@@ -241,7 +167,8 @@ Override your DEGIRO base currency:
 **Symptoms:** "Invalid credentials" or login fails
 
 **Solutions:**
-1. Verify username and password in `config.json`
+
+1. Verify username and password in Settings
 2. Try logging in to [DEGIRO website](https://www.degiro.com) directly
 3. Check if your account is blocked or requires verification
 4. Clear browser cache and try again
@@ -251,10 +178,11 @@ Override your DEGIRO base currency:
 **Symptoms:** TOTP code rejected or constantly asked for OTP
 
 **Solutions:**
-1. Verify TOTP secret key is correct
+
+1. Verify TOTP secret key is correct in Settings
 2. Check system clock is synchronized (TOTP is time-based)
 3. Generate a new TOTP code and try again
-4. Try extracting the TOTP secret again (see Configuration section above)
+4. Try extracting the TOTP secret again (see TOTP Secret Key section above)
 5. See [DEGIRO Connector 2FA Guide](https://github.com/Chavithra/degiro-connector#how-to-use-2fa) for troubleshooting
 
 #### In-App Authentication Stuck
@@ -273,7 +201,8 @@ Override your DEGIRO base currency:
 **Symptoms:** Old data showing, no updates
 
 **Solutions:**
-1. Check `update_frequency_minutes` setting
+
+1. Check update frequency setting in Settings
 2. Verify internet connection
 3. Check DEGIRO API status
 4. Review logs: `data/logs/stonks-overwatch.log`
@@ -299,6 +228,99 @@ make run debug=true
 ```
 
 Check logs at: `data/logs/stonks-overwatch.log`
+
+---
+
+## For Developers
+
+### Manual Configuration via config.json
+
+Developers can configure DEGIRO credentials directly in the `config/config.json` file for testing and development purposes.
+
+#### Basic Configuration
+
+**Minimal setup (username and password only):**
+
+```json
+{
+  "degiro": {
+    "enabled": true,
+    "credentials": {
+      "username": "your_degiro_username",
+      "password": "your_degiro_password"
+    }
+  }
+}
+```
+
+#### Configuration with 2FA (TOTP)
+
+**For accounts with TOTP 2FA enabled:**
+
+```json
+{
+  "degiro": {
+    "enabled": true,
+    "credentials": {
+      "username": "your_degiro_username",
+      "password": "your_degiro_password",
+      "totp_secret_key": "YOUR_TOTP_SECRET_KEY"
+    }
+  }
+}
+```
+
+#### Advanced Configuration
+
+**Complete configuration with all options:**
+
+```json
+{
+  "degiro": {
+    "enabled": true,
+    "offline_mode": false,
+    "credentials": {
+      "username": "your_degiro_username",
+      "password": "your_degiro_password",
+      "totp_secret_key": "YOUR_TOTP_SECRET_KEY"
+    },
+    "base_currency": "EUR",
+    "start_date": "2020-01-01",
+    "update_frequency_minutes": 5
+  }
+}
+```
+
+#### Configuration Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `enabled` | boolean | `true` | Enable/disable DEGIRO integration |
+| `offline_mode` | boolean | `false` | Use cached data only (no API calls) |
+| `credentials.username` | string | *required* | Your DEGIRO username |
+| `credentials.password` | string | *required* | Your DEGIRO password |
+| `credentials.totp_secret_key` | string | optional | TOTP secret for automatic 2FA |
+| `base_currency` | string | DEGIRO default | Base currency for calculations (EUR, USD, etc.) |
+| `start_date` | string | `2020-01-01` | Portfolio tracking start date (YYYY-MM-DD) |
+| `update_frequency_minutes` | integer | `5` | Data refresh interval in minutes |
+
+#### Setup Steps
+
+1. Copy the configuration template:
+
+   ```bash
+   cp config/config.json.template config/config.json
+   ```
+
+2. Edit `config/config.json` with your DEGIRO credentials
+
+3. Start the application:
+
+   ```bash
+   make run
+   ```
+
+**Note:** The `config.json` file is encrypted and never committed to version control. For production use, configure credentials via the Settings UI instead.
 
 ### Configuration Validation
 

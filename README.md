@@ -54,6 +54,8 @@
 
 ## Screenshots
 
+![Broker Selector Screenshot](docs/images/screenshots/broker-selector.png)
+*Broker Selector and login dialog.*
 ![Dashboard Screenshot](docs/images/screenshots/dashboard.png)
 *Dashboard view showing portfolio overview and performance metrics.*
 ![Portfolio Screenshot](docs/images/screenshots/portfolio.png)

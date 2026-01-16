@@ -80,142 +80,74 @@ After setup, you'll have:
 
 ---
 
-## Configuration
+## Getting Started
 
-### Directory Structure
+### Initial Setup
 
-Create a directory for your IBKR certificates:
+When you first launch Stonks Overwatch, you'll be presented with a broker selection screen. Select IBKR to begin the authentication process.
 
-```bash
-mkdir -p config/ibkr_certs
-# Copy your .pem files here
-```
+### Authentication
 
-### Basic Configuration
+![Login](images/screenshots/login-ibkr.png)
 
-**Minimal setup with OAuth credentials:**
+IBKR uses OAuth 1.0a authentication which requires OAuth credentials and RSA certificates.
 
-```json
-{
-  "ibkr": {
-    "enabled": true,
-    "credentials": {
-      "access_token": "YOUR_ACCESS_TOKEN",
-      "access_token_secret": "YOUR_ACCESS_TOKEN_SECRET",
-      "consumer_key": "YOUR_CONSUMER_KEY",
-      "dh_prime": "YOUR_DH_PRIME_NUMBER",
-      "encryption_key_fp": "~/Documents/ibkr/private_encryption.pem",
-      "signature_key_fp": "~/Documents/ibkr/private_signature.pem"
-    }
-  }
-}
-```
+1. Enter your **Access Token**
+2. Enter your **Access Token Secret**
+3. Enter your **Consumer Key**
+4. Enter your **DH Prime**
+5. Provide your **Signature Key** (file path or direct PEM content)
+6. Provide your **Encryption Key** (file path or direct PEM content)
+7. Click "Login"
 
-### Advanced Configuration
-
-**Complete configuration with all options:**
-
-```json
-{
-  "ibkr": {
-    "enabled": true,
-    "credentials": {
-      "access_token": "YOUR_ACCESS_TOKEN",
-      "access_token_secret": "YOUR_ACCESS_TOKEN_SECRET",
-      "consumer_key": "YOUR_CONSUMER_KEY",
-      "dh_prime": "YOUR_DH_PRIME_NUMBER",
-      "encryption_key_fp": "~/Documents/ibkr/private_encryption.pem",
-      "signature_key_fp": "~/Documents/ibkr/private_signature.pem"
-    },
-    "start_date": "2020-01-01",
-    "update_frequency_minutes": 15
-  }
-}
-```
-
-### Configuration Options
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `enabled` | boolean | `true` | Enable/disable IBKR integration |
-| `credentials.access_token` | string | *required* | OAuth access token |
-| `credentials.access_token_secret` | string | *required* | OAuth access token secret |
-| `credentials.consumer_key` | string | *required* | OAuth consumer key |
-| `credentials.dh_prime` | string | *required* | Diffie-Hellman prime number |
-| `credentials.encryption_key_fp` | string | *optional* | **Option 1:** Path to encryption private key (supports `~/path`, `./path`, or `/absolute/path`) |
-| `credentials.encryption_key` | string | *optional* | **Option 2:** Direct PEM key content for encryption |
-| `credentials.signature_key_fp` | string | *optional* | **Option 1:** Path to signature private key (supports `~/path`, `./path`, or `/absolute/path`) |
-| `credentials.signature_key` | string | *optional* | **Option 2:** Direct PEM key content for signature |
-| `start_date` | string | `2020-01-01` | Portfolio tracking start date |
-| `update_frequency_minutes` | integer | `15` | Data refresh interval in minutes (minimum 15) |
-
-**Note:** For encryption and signature keys, provide **either** the file path (`*_fp`) **or** the direct key content (`*_key`), not both. Direct key values take precedence if both are provided.
+Your credentials will be validated and you'll be redirected to the dashboard.
 
 ---
 
-## Setup Instructions
+## Configuring Credentials
 
-### 1. Complete OAuth Setup
+After your initial login, you can configure IBKR to automatically authenticate on startup.
 
-Follow the [iBind OAuth Guide](https://github.com/Voyz/ibind/wiki/OAuth-1.0a) to generate your credentials and keys.
+![Settings](images/screenshots/settings-ibkr.png)
 
-### 2. Organize Certificate Files
+### Via Settings (Web Application)
 
-```bash
-# Create directory
-mkdir -p config/ibkr_certs
+1. Navigate to the **Settings** page (sidebar menu)
+2. Locate the **IBKR** section
+3. Enter your credentials:
+   - Access Token
+   - Access Token Secret
+   - Consumer Key
+   - DH Prime
+   - Signature Key (file path or PEM content)
+   - Encryption Key (file path or PEM content)
+4. Configure additional options:
+   - Enable/disable the broker
+   - Set update frequency
+5. Click **Save**
 
-# Copy your private keys
-cp /path/to/private_signature.pem config/ibkr_certs/
-cp /path/to/private_encryption.pem config/ibkr_certs/
+### Via Preferences (Native Application)
 
-# Secure the files (Unix/Mac)
-chmod 600 config/ibkr_certs/*.pem
-```
+1. Open **Preferences** from the application menu
+2. Select the **Brokers** tab
+3. Configure IBKR credentials and settings
+4. Click **Save**
 
-### 3. Copy Configuration Template
+Your credentials are encrypted and stored securely in the local database.
 
-```bash
-cp config/config.json.template config/config.json
-```
+**Note:** For encryption and signature keys, you can provide either:
 
-### 4. Edit Configuration
-
-Open `config/config.json` and add your IBKR credentials:
-
-```json
-{
-  "ibkr": {
-    "enabled": true,
-    "credentials": {
-      "access_token": "abc123...",
-      "access_token_secret": "xyz789...",
-      "consumer_key": "TESTCONS",
-      "dh_prime": "234892349823...",
-      "encryption_key_fp": "config/ibkr_certs/private_encryption.pem",
-      "signature_key_fp": "config/ibkr_certs/private_signature.pem"
-    }
-  }
-}
-```
-
-### 5. Restart Application
-
-```bash
-make run
-```
-
-### 6. Verify Connection
-
-Check the dashboard - you should see your IBKR portfolio data.
+- **File path** to your `.pem` files (supports `~/path`, `./path`, or `/absolute/path`)
+- **Direct PEM content** (paste the entire key content)
 
 ---
 
-## Features & Usage
+## Advanced Settings
 
 ### Portfolio Tracking
 
 View your global portfolio:
+
 - Current positions across all markets
 - Multi-currency support
 - Real-time valuations
@@ -223,17 +155,10 @@ View your global portfolio:
 
 ### Update Frequency
 
-Control how often data is refreshed:
-
-```json
-{
-  "ibkr": {
-    "update_frequency_minutes": 30
-  }
-}
-```
+Control how often data is refreshed from IBKR. Configure this in Settings (default: 15 minutes).
 
 **Recommendations:**
+
 - **15 minutes** (default) - Good balance
 - **5-10 minutes** - Active trading
 - **30-60 minutes** - Long-term investing
@@ -242,6 +167,7 @@ Control how often data is refreshed:
 ### Unified Dashboard
 
 IBKR integrates seamlessly with other brokers:
+
 - Combined portfolio view
 - Total value across all accounts
 - Comprehensive asset allocation
@@ -258,8 +184,9 @@ IBKR integrates seamlessly with other brokers:
 **Symptoms:** "Authentication failed" or "Invalid credentials"
 
 **Solutions:**
-1. Verify all OAuth credentials in `config.json`
-2. Check that private key files exist and are readable
+
+1. Verify all OAuth credentials in Settings
+2. Check that private key files exist and are readable (if using file paths)
 3. Ensure paths to .pem files are correct
 4. Verify access token hasn't expired
 5. Check that Web API access is enabled for your account
@@ -269,10 +196,12 @@ IBKR integrates seamlessly with other brokers:
 **Symptoms:** "File not found" error for .pem files
 
 **Solutions:**
-1. Check file paths in configuration
+
+1. Check file paths in Settings
 2. Verify files exist: `ls -l config/ibkr_certs/`
 3. Ensure file permissions: `chmod 600 config/ibkr_certs/*.pem`
 4. Use absolute paths if relative paths don't work
+5. Alternatively, paste the PEM content directly in Settings
 
 #### No Data Showing
 
@@ -300,7 +229,8 @@ IBKR integrates seamlessly with other brokers:
 **Symptoms:** "Rate limit exceeded" or "Too many requests"
 
 **Solutions:**
-1. Increase `update_frequency_minutes` to reduce API calls
+
+1. Increase update frequency in Settings to reduce API calls
 2. Default 15 minutes is usually safe
 3. Wait before retrying
 4. Check if other applications are using the same credentials
@@ -314,6 +244,135 @@ make run debug=true
 ```
 
 Check logs at: `data/logs/stonks-overwatch.log`
+
+---
+
+## For Developers
+
+### Manual Configuration via config.json
+
+Developers can configure IBKR credentials directly in the `config/config.json` file for testing and development purposes.
+
+#### Directory Structure
+
+Create a directory for your IBKR certificates:
+
+```bash
+mkdir -p config/ibkr_certs
+# Copy your .pem files here
+```
+
+#### Basic Configuration
+
+**Minimal setup with OAuth credentials:**
+
+```json
+{
+  "ibkr": {
+    "enabled": true,
+    "credentials": {
+      "access_token": "YOUR_ACCESS_TOKEN",
+      "access_token_secret": "YOUR_ACCESS_TOKEN_SECRET",
+      "consumer_key": "YOUR_CONSUMER_KEY",
+      "dh_prime": "YOUR_DH_PRIME_NUMBER",
+      "encryption_key_fp": "~/Documents/ibkr/private_encryption.pem",
+      "signature_key_fp": "~/Documents/ibkr/private_signature.pem"
+    }
+  }
+}
+```
+
+#### Advanced Configuration
+
+**Complete configuration with all options:**
+
+```json
+{
+  "ibkr": {
+    "enabled": true,
+    "credentials": {
+      "access_token": "YOUR_ACCESS_TOKEN",
+      "access_token_secret": "YOUR_ACCESS_TOKEN_SECRET",
+      "consumer_key": "YOUR_CONSUMER_KEY",
+      "dh_prime": "YOUR_DH_PRIME_NUMBER",
+      "encryption_key_fp": "~/Documents/ibkr/private_encryption.pem",
+      "signature_key_fp": "~/Documents/ibkr/private_signature.pem"
+    },
+    "start_date": "2020-01-01",
+    "update_frequency_minutes": 15
+  }
+}
+```
+
+#### Configuration Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `enabled` | boolean | `true` | Enable/disable IBKR integration |
+| `credentials.access_token` | string | *required* | OAuth access token |
+| `credentials.access_token_secret` | string | *required* | OAuth access token secret |
+| `credentials.consumer_key` | string | *required* | OAuth consumer key |
+| `credentials.dh_prime` | string | *required* | Diffie-Hellman prime number |
+| `credentials.encryption_key_fp` | string | *optional* | **Option 1:** Path to encryption private key (supports `~/path`, `./path`, or `/absolute/path`) |
+| `credentials.encryption_key` | string | *optional* | **Option 2:** Direct PEM key content for encryption |
+| `credentials.signature_key_fp` | string | *optional* | **Option 1:** Path to signature private key (supports `~/path`, `./path`, or `/absolute/path`) |
+| `credentials.signature_key` | string | *optional* | **Option 2:** Direct PEM key content for signature |
+| `start_date` | string | `2020-01-01` | Portfolio tracking start date |
+| `update_frequency_minutes` | integer | `15` | Data refresh interval in minutes (minimum 15) |
+
+**Note:** For encryption and signature keys, provide **either** the file path (`*_fp`) **or** the direct key content (`*_key`), not both. Direct key values take precedence if both are provided.
+
+#### Setup Steps
+
+1. Complete OAuth setup following the [iBind OAuth Guide](https://github.com/Voyz/ibind/wiki/OAuth-1.0a)
+
+2. Organize certificate files:
+
+   ```bash
+   # Create directory
+   mkdir -p config/ibkr_certs
+
+   # Copy your private keys
+   cp /path/to/private_signature.pem config/ibkr_certs/
+   cp /path/to/private_encryption.pem config/ibkr_certs/
+
+   # Secure the files (Unix/Mac)
+   chmod 600 config/ibkr_certs/*.pem
+   ```
+
+3. Copy the configuration template:
+
+   ```bash
+   cp config/config.json.template config/config.json
+   ```
+
+4. Edit `config/config.json` and add your IBKR credentials:
+
+   ```json
+   {
+     "ibkr": {
+       "enabled": true,
+       "credentials": {
+         "access_token": "abc123...",
+         "access_token_secret": "xyz789...",
+         "consumer_key": "TESTCONS",
+         "dh_prime": "234892349823...",
+         "encryption_key_fp": "config/ibkr_certs/private_encryption.pem",
+         "signature_key_fp": "config/ibkr_certs/private_signature.pem"
+       }
+     }
+   }
+   ```
+
+5. Start the application:
+
+   ```bash
+   make run
+   ```
+
+6. Verify connection - check the dashboard for your IBKR portfolio data
+
+**Note:** The `config.json` file is encrypted and never committed to version control. For production use, configure credentials via the Settings UI instead.
 
 ### Test Configuration
 
