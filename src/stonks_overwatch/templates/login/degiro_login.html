@@ -55,11 +55,11 @@
 <!-- Login Form -->
 <div class="form-group mb-3">
     <label for="username" class="form-label">Username</label>
-    <input type="text" class="form-control" id="username" name="username" placeholder="Enter username" required
-        autofocus>
+    <input type="text" class="form-control" id="username" name="username" placeholder="Enter username"
+        value="{{ form_data.username.0|default:'' }}" required autofocus>
 </div>
 
-{% include 'components/password_field.html' with field_id='password' field_name='password' label='Password' placeholder='Enter password' required=True %}
+{% include 'components/password_field.html' with field_id='password' field_name='password' label='Password' placeholder='Enter password' value=form_data.password.0|default:'' required=True %}
 
 <div class="form-check mb-3">
     <input class="form-check-input" type="checkbox" id="remember_me" name="remember_me" value="true">

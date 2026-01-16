@@ -38,10 +38,10 @@
 <div class="form-group mb-3">
     <label for="ibkr-access-token" class="form-label required">Access Token</label>
     <input type="text" class="form-control" id="ibkr-access-token" name="access_token"
-        placeholder="Enter your access token" required autofocus>
+        placeholder="Enter your access token" value="{{ form_data.access_token.0|default:'' }}" required autofocus>
 </div>
 
-{% include 'components/password_field.html' with field_id='ibkr-access-token-secret' field_name='access_token_secret' label='Access Token Secret' placeholder='Enter your access token secret' required=True label_class='form-label required' %}
+{% include 'components/password_field.html' with field_id='ibkr-access-token-secret' field_name='access_token_secret' label='Access Token Secret' placeholder='Enter your access token secret' value=form_data.access_token_secret.0|default:'' required=True label_class='form-label required' %}
 
 <div class="form-group mb-3">
     <label for="ibkr-consumer-key" class="form-label required">
@@ -51,7 +51,7 @@
             style="cursor: help;" aria-label="Help for Consumer Key"></i>
     </label>
     <input type="text" class="form-control" id="ibkr-consumer-key" name="consumer_key"
-        placeholder="Enter your consumer key" required>
+        placeholder="Enter your consumer key" value="{{ form_data.consumer_key.0|default:'' }}" required>
 </div>
 
 <div class="form-group mb-3">
@@ -62,7 +62,7 @@
             style="cursor: help;" aria-label="Help for DH Prime"></i>
     </label>
     <input type="text" class="form-control" id="ibkr-dh-prime" name="dh_prime" placeholder="Enter your DH prime"
-        required>
+        value="{{ form_data.dh_prime.0|default:'' }}" required>
 </div>
 
 <div class="key-section-header d-flex align-items-center mt-4 mb-2">
@@ -97,7 +97,7 @@
     <div id="ibkr-encryption-key-container" class="d-none">
         <textarea class="form-control font-monospace key-textarea" id="ibkr-encryption-key" name="encryption_key"
             rows="6" aria-describedby="ibkr-encryption-key-help"
-            placeholder="Paste your PEM key here (-----BEGIN PRIVATE KEY-----...)"></textarea>
+            placeholder="Paste your PEM key here (-----BEGIN PRIVATE KEY-----...)">{{ form_data.encryption_key.0|default:'' }}</textarea>
     </div>
     <small class="form-text text-muted" id="ibkr-encryption-key-help">
         <i class="bi bi-shield-lock" aria-hidden="true"></i> Load your private encryption key from a file or paste it
@@ -137,7 +137,7 @@
     <div id="ibkr-signature-key-container" class="d-none">
         <textarea class="form-control font-monospace key-textarea" id="ibkr-signature-key" name="signature_key" rows="6"
             aria-describedby="ibkr-signature-key-help"
-            placeholder="Paste your PEM key here (-----BEGIN PRIVATE KEY-----...)"></textarea>
+            placeholder="Paste your PEM key here (-----BEGIN PRIVATE KEY-----...)">{{ form_data.signature_key.0|default:'' }}</textarea>
     </div>
     <small class="form-text text-muted" id="ibkr-signature-key-help">
         <i class="bi bi-shield-lock" aria-hidden="true"></i> Load your private signature key from a file or paste it
@@ -318,11 +318,50 @@
         });
     }
 
+    /**
+     * Show key containers if they have pre-filled content (from form_data after error)
+     */
+    function showPrefilledKeys() {
+        // Check encryption key
+        const encryptionKey = document.getElementById('ibkr-encryption-key');
+        if (encryptionKey && encryptionKey.value.trim()) {
+            const container = document.getElementById('ibkr-encryption-key-container');
+            const toggleBtn = document.getElementById('ibkr-encryption-key-toggle');
+            if (container && container.classList.contains('d-none')) {
+                container.classList.remove('d-none');
+                container.style.display = '';
+                if (toggleBtn) {
+                    toggleBtn.innerHTML = '<i class="bi bi-eye-slash" aria-hidden="true"></i> Hide';
+                    toggleBtn.setAttribute('aria-expanded', 'true');
+                }
+            }
+        }
+
+        // Check signature key
+        const signatureKey = document.getElementById('ibkr-signature-key');
+        if (signatureKey && signatureKey.value.trim()) {
+            const container = document.getElementById('ibkr-signature-key-container');
+            const toggleBtn = document.getElementById('ibkr-signature-key-toggle');
+            if (container && container.classList.contains('d-none')) {
+                container.classList.remove('d-none');
+                container.style.display = '';
+                if (toggleBtn) {
+                    toggleBtn.innerHTML = '<i class="bi bi-eye-slash" aria-hidden="true"></i> Hide';
+                    toggleBtn.setAttribute('aria-expanded', 'true');
+                }
+            }
+        }
+    }
+
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeKeyManagementButtons);
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeKeyManagementButtons();
+            showPrefilledKeys();
+        });
     } else {
         initializeKeyManagementButtons();
+        showPrefilledKeys();
     }
 </script>
 {% endblock %}

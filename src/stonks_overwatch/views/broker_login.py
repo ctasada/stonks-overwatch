@@ -39,13 +39,14 @@ class BrokerLogin(View):
         }
         return template_mapping.get(broker_name, "login/degiro_login.html")
 
-    def get(self, request: HttpRequest, broker_name_str: str) -> HttpResponse:
+    def get(self, request: HttpRequest, broker_name_str: str, form_data: Optional[dict] = None) -> HttpResponse:
         """
         Display the broker-specific login page.
 
         Args:
             request: The HTTP request
             broker_name_str: Name of the broker (degiro, bitvavo, ibkr)
+            form_data: Optional dictionary with form data to pre-populate fields (used after validation errors)
 
         Returns:
             HttpResponse: Rendered login template or redirect to broker selector
@@ -76,6 +77,7 @@ class BrokerLogin(View):
             "show_loading": show_loading,
             "show_in_app_auth": show_in_app_auth,
             "auth_fields": self._get_auth_fields(broker_name),
+            "form_data": form_data or {},  # Include form data for re-populating fields after errors
         }
 
         template_name = self._get_template_name(broker_name)
@@ -118,7 +120,9 @@ class BrokerLogin(View):
                 )
             else:
                 messages.error(request, AuthenticationErrorMessages.CREDENTIALS_REQUIRED)
-            return self.get(request, broker_name)
+            # Preserve form data from POST request
+            form_data = dict(request.POST)
+            return self.get(request, broker_name_str, form_data=form_data)
 
         # Perform authentication
         auth_result = self._perform_authentication(request, broker_name, credentials)
@@ -129,11 +133,13 @@ class BrokerLogin(View):
 
             # Show loading screen for all brokers to allow portfolio initialization
             # This allows the portfolio update to happen before going to dashboard
-            return self.get(request, broker_name)
+            return self.get(request, broker_name_str)
         else:
-            # Add error message and re-render form
+            # Add error message and re-render form with preserved form data
             messages.error(request, auth_result.get("message", "Authentication failed"))
-            return self.get(request, broker_name)
+            # Preserve form data
+            form_data = dict(request.POST)
+            return self.get(request, broker_name_str, form_data=form_data)
 
     def _is_valid_broker(self, broker_name: str) -> bool:
         """Check if the broker is registered and supported."""
