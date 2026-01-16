@@ -1,4 +1,4 @@
-# Bitvavo Integration Guide
+# ![Bitvavo](images/brokers/bitvavo.png) Bitvavo Integration Guide
 
 > **⚠️ Bitvavo integration is not yet stable. Features and reliability may change in future releases. Use with caution.**
 

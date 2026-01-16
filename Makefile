@@ -339,6 +339,16 @@ generate-images: ## Generate images for browsers and Briefcase
 		exit 1; \
 	fi
 
+generate-docs-broker-icons: ## Generate broker icons for documentation (sidebar and docs pages)
+	@echo -e "$(BOLD)$(BLUE)Generating broker icons for documentation...$(RESET)"
+	@if [ -f "scripts/generate_docs_broker_icons.sh" ]; then \
+		chmod +x scripts/generate_docs_broker_icons.sh; \
+		./scripts/generate_docs_broker_icons.sh; \
+	else \
+		echo -e "$(RED)Error: scripts/generate_docs_broker_icons.sh not found$(RESET)"; \
+		exit 1; \
+	fi
+
 #==============================================================================
 ##@ Git Hooks
 #==============================================================================

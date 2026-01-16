@@ -54,17 +54,17 @@
 
 ## Screenshots
 
-![Dashboard Screenshot](docs/images/dashboard.png)
+![Dashboard Screenshot](docs/images/screenshots/dashboard.png)
 *Dashboard view showing portfolio overview and performance metrics.*
-![Portfolio Screenshot](docs/images/portfolio.png)
+![Portfolio Screenshot](docs/images/screenshots/portfolio.png)
 *Detailed portfolio breakdown with asset allocation and recent transactions.*
-![Diversification Screenshot](docs/images/diversification.png)
+![Diversification Screenshot](docs/images/screenshots/diversification.png)
 *Visual representation of asset diversification across different classes.*
-![Dividends Screenshot](docs/images/dividends.png)
+![Dividends Screenshot](docs/images/screenshots/dividends.png)
 *Dividend tracking and upcoming payments overview.*
-![Dividends Calendar Screenshot](docs/images/dividends-2.png)
+![Dividends Calendar Screenshot](docs/images/screenshots/dividends-2.png)
 *Calendar view of upcoming dividend payments.*
-![Fees Screenshot](docs/images/fees.png)
+![Fees Screenshot](docs/images/screenshots/fees.png)
 *Analysis of fees incurred across different brokers.*
 
 ## Quick Start

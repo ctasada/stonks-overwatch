@@ -1,4 +1,4 @@
-# DEGIRO Integration Guide
+# ![DEGIRO](images/brokers/degiro.png) DEGIRO Integration Guide
 
 DEGIRO is the primary broker supported by **Stonks Overwatch** with full-featured integration, providing real-time access to your investments, portfolio value, growth, dividends, fees, and deposits.
 

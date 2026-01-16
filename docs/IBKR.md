@@ -1,4 +1,4 @@
-# IBKR (Interactive Brokers) Integration Guide
+# ![IBKR](images/brokers/ibkr.png) IBKR (Interactive Brokers) Integration Guide
 
 > **⚠️ IBKR integration is not yet stable. Features and reliability may change in future releases. Use with caution.**
 
