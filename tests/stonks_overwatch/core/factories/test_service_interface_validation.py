@@ -122,7 +122,7 @@ class ValidAuthenticationService(AuthenticationServiceInterface):
     def logout_user(self, request) -> None:
         pass
 
-    def is_degiro_enabled(self) -> bool:
+    def is_broker_enabled(self) -> bool:
         return True
 
     def is_offline_mode(self) -> bool:

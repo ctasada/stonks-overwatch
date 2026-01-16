@@ -402,14 +402,24 @@ class BitvavoAuthenticationService(BaseService, AuthenticationServiceInterface):
             message="In-app authentication is not applicable for Bitvavo",
         )
 
-    def is_degiro_enabled(self) -> bool:
+    def is_broker_enabled(self) -> bool:
         """
-        Check if DeGiro is enabled - not applicable for Bitvavo.
+        Check if the broker authentication is enabled in the configuration.
 
         Returns:
-            False (this is Bitvavo, not DeGiro)
+            bool: True if Bitvavo is enabled, False otherwise
         """
-        return False
+        try:
+            from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+
+            broker_factory = BrokerFactory()
+            config = broker_factory.create_config(self.broker_name)
+
+            return config is not None and config.is_enabled()
+
+        except Exception as e:
+            self.logger.error(f"Error checking if {self.broker_name} is enabled: {str(e)}")
+            return False
 
     def is_offline_mode(self) -> bool:
         """
