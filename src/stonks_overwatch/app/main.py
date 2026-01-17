@@ -18,6 +18,7 @@ from toga.command import Separator
 from stonks_overwatch.app.dialogs.dialogs import DialogManager
 from stonks_overwatch.app.ui.menu import MenuManager
 from stonks_overwatch.app.webserver import StaticFilesMiddleware, ThreadedWSGIServer
+from stonks_overwatch.utils.core.demo_mode import is_demo_mode
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.platform_utils import get_flatpak_paths, is_flatpak
 
@@ -193,8 +194,14 @@ class StonksOverwatchApp(toga.App):
         # If user accepts, demo mode will be active when initial URL is set
         await self.check_demo_mode()
 
-        # Set the initial URL (will be dashboard if demo mode, login otherwise)
-        self.web_view.url = f"http://{self.host}:{self.port}"
+        # Set the initial URL - go directly to dashboard if demo mode is active
+        if is_demo_mode():
+            self.logger.info("Demo mode active - setting initial URL to dashboard")
+            self.web_view.url = f"http://{self.host}:{self.port}/dashboard"
+        else:
+            self.logger.info("Normal mode - setting initial URL to root (will show broker selector if needed)")
+            self.web_view.url = f"http://{self.host}:{self.port}"
+
         self.main_window.show()
 
         # Force layout refresh workaround for Windows
