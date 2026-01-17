@@ -644,6 +644,7 @@ class PortfolioEntry:
   - `make lint-fix` — Automatically fix Python code style issues and format code.
 - **Check Markdown files:**
   - `make markdown-check` — Check Markdown files for style issues.
+  - `make markdown-links-check` — Check links and images in Markdown files (validates URLs and local file references).
 - **Auto-fix Markdown files:**
   - `make markdown-fix` — Automatically fix Markdown style issues.
 
@@ -651,6 +652,11 @@ class PortfolioEntry:
 
 - **HTML is NOT allowed** - Use pure Markdown syntax only
 - Markdown files are linted using `pymarkdown` (run `make markdown-check` to verify)
+- **Links and images are validated** - All links and images are checked using `lychee` (run `make markdown-links-check` to verify)
+  - Broken links will fail pre-commit hooks
+  - Both local and remote links are validated
+  - Image file references are verified
+  - **Installation required**: `brew install lychee` (macOS) or see [Lychee Installation](https://github.com/lycheeverse/lychee?tab=readme-ov-file#installation) for other platforms
 - **Image sizing:** Standard Markdown does not support image sizing. To resize images:
   - Resize the actual image file itself using image editing tools
   - Use a smaller version of the image file if available
@@ -693,13 +699,19 @@ class PortfolioEntry:
    ```
    Ensures all tests pass. Fix broken tests or add new tests for new functionality.
 
-4. **Check Dependencies (RECOMMENDED)**
+4. **Check Markdown Links (REQUIRED if markdown changed)**
+   ```bash
+   make markdown-links-check
+   ```
+   Only if you modified or added markdown files. Validates all links and image references.
+
+5. **Check Dependencies (RECOMMENDED)**
    ```bash
    make check-dependencies
    ```
    Only if you added or removed dependencies.
 
-5. **Run Pre-commit Hooks (REQUIRED)**
+6. **Run Pre-commit Hooks (REQUIRED)**
    ```bash
    make pre-commit-run
    ```

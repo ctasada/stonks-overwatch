@@ -81,7 +81,7 @@ The authentication system consists of three main service layers:
 2. **Interface Layer**: Type-safe contracts for all services
 3. **Implementation Layer**: Concrete service implementations
 
-> **📖 Pattern Details:** See [Architecture Overview](ARCHITECTURE.md#factory-pattern) for more on the factory pattern implementation.
+> **📖 Pattern Details:** See [Architecture Overview](ARCHITECTURE.md#3-factory-pattern) for more on the factory pattern implementation.
 
 #### Service Interfaces
 

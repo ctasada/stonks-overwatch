@@ -114,22 +114,8 @@ Contributing to Stonks Overwatch? Check these guides:
 
 DEGIRO is the primary broker supported by Stonks Overwatch with complete feature support.
 
-**Quick Setup:**
-
-```json
-{
-  "degiro": {
-    "enabled": true,
-    "credentials": {
-      "username": "your_degiro_username",
-      "password": "your_degiro_password",
-      "totp_secret_key": "YOUR_TOTP_SECRET_KEY"
-    }
-  }
-}
-```
-
 **Features:**
+
 - Real-time portfolio data
 - Transaction history
 - Dividend tracking
@@ -137,31 +123,22 @@ DEGIRO is the primary broker supported by Stonks Overwatch with complete feature
 - 2FA support (TOTP and In-App)
 - Offline mode
 
+**Getting Started:** Select DEGIRO from the broker selection screen, enter your credentials, and configure additional settings via the Settings page.
+
 ### Bitvavo
 
 **[Full Bitvavo Documentation](Bitvavo.md)**
 
 Bitvavo is a cryptocurrency exchange integration for tracking crypto assets.
 
-**Quick Setup:**
-
-```json
-{
-  "bitvavo": {
-    "enabled": true,
-    "credentials": {
-      "apikey": "your_api_key",
-      "apisecret": "your_api_secret"
-    }
-  }
-}
-```
-
 **Features:**
+
 - Crypto portfolio tracking
 - Trade history
 - Asset information
 - Real-time prices
+
+**Getting Started:** Select Bitvavo from the broker selection screen, enter your API credentials, and configure via the Settings page.
 
 ### IBKR (Interactive Brokers)
 
@@ -169,28 +146,13 @@ Bitvavo is a cryptocurrency exchange integration for tracking crypto assets.
 
 Interactive Brokers integration for international markets.
 
-**Quick Setup:**
-
-```json
-{
-  "ibkr": {
-    "enabled": true,
-    "credentials": {
-      "access_token": "YOUR_ACCESS_TOKEN",
-      "access_token_secret": "YOUR_ACCESS_TOKEN_SECRET",
-      "consumer_key": "YOUR_CONSUMER_KEY",
-      "dh_prime": "YOUR_DH_PRIME_NUMBER",
-      "encryption_key_fp": "config/ibkr_certs/private_encryption.pem",
-      "signature_key_fp": "config/ibkr_certs/private_signature.pem"
-    }
-  }
-}
-```
-
 **Features:**
+
 - International markets support
 - Portfolio tracking
 - Position management
+
+**Getting Started:** Select IBKR from the broker selection screen, enter your OAuth credentials and certificates, and configure via the Settings page.
 
 ---
 
@@ -212,13 +174,14 @@ make run
 
 See [Quickstart Guide](Quickstart.md) for detailed instructions.
 
-### Configuration
+### Broker Configuration
 
-1. Copy template: `cp config/config.json.template config/config.json`
-2. Edit `config/config.json` with your broker credentials
-3. Restart the application
+1. Launch the application
+2. Select your broker from the broker selection screen
+3. Enter your credentials
+4. Configure additional settings via the Settings page (sidebar menu)
 
-See [Configuration Integration](Configuration-Integration.md) for advanced configuration.
+See broker-specific documentation: [DEGIRO](DEGIRO.md), [Bitvavo](Bitvavo.md), or [IBKR](IBKR.md)
 
 ### Running with Demo Data
 
@@ -266,7 +229,8 @@ See [Developer Guide](Developing-Stonks-Overwatch.md) for complete development s
 - Check logs in `data/logs/stonks-overwatch.log`
 
 **Can't login to broker**
-- Verify credentials in `config/config.json`
+
+- Verify credentials in the Settings page
 - Check broker-specific documentation
 - Enable debug mode: `make run debug=true`
 
@@ -360,7 +324,7 @@ Stonks Overwatch was created to solve a real problem: managing investments acros
 - 📝 **Contribute code** - See [Contributing Guidelines](../CONTRIBUTING.md)
 - 📢 **Share with others** - Spread the word about Stonks Overwatch
 
-For more details about the project's story and what sponsorship enables, see the [README sponsorship section](https://github.com/ctasada/stonks-overwatch#-why-sponsor-me) on GitHub.
+For more details about the project's story and what sponsorship enables, see the [README sponsorship section](https://github.com/ctasada/stonks-overwatch?tab=readme-ov-file#how-to-support) on GitHub.
 
 ---
 
@@ -409,10 +373,10 @@ make help               # Show all commands
 
 ### Key Files
 
-- `config/config.json` - Broker configuration
-- `data/db.sqlite3` - Local database
+- `data/db.sqlite3` - Local database (includes encrypted credentials)
 - `data/logs/` - Application logs
 - `Makefile` - Build and run commands
+- `config/config.json` - Optional manual configuration (for developers)
 
 ### Important Links
 

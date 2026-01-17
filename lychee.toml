@@ -1,0 +1,84 @@
+# Lychee configuration for checking links and images in markdown files
+# Documentation: https://lychee.cli.rs/
+# Example config: https://github.com/lycheeverse/lychee/blob/master/lychee.example.toml
+
+# Maximum number of concurrent network requests
+max_concurrency = 10
+
+# Check all links, including fragments (anchors like #section-name)
+include_fragments = true
+
+# Check local files referenced in links (e.g., code blocks, verbatim text)
+include_verbatim = true
+
+# Accept HTTP status codes (2xx = success)
+accept = [200, 201, 202, 203, 204, 205, 206, 207, 208, 226]
+
+# Timeout for network requests (in seconds)
+timeout = 20
+
+# Maximum number of retries for failed requests
+max_retries = 3
+
+# Retry wait time (in seconds)
+retry_wait_time = 2
+
+# Maximum number of redirects to follow
+max_redirects = 10
+
+# User agent string
+user_agent = "Mozilla/5.0 (compatible; lychee/link-checker)"
+
+# Exclude patterns (URLs to skip)
+exclude = [
+    # Skip localhost and local development URLs
+    "http://127.0.0.1*",
+
+    # Skip example domains and placeholder URLs
+    "https://example.com*",
+    "https://api.newbroker.com*",
+    "https://api.yourbroker.com*",
+    "https://github.com/YOUR_USERNAME/*",
+
+    # Brokers
+    "https://account.bitvavo.com/create",
+]
+
+# Exclude files/directories
+exclude_path = [
+    # Exclude build artifacts and dependencies
+    ".venv",
+    "venv",
+    "node_modules",
+    "build",
+    "dist",
+    ".pytest_cache",
+    "__pycache__",
+    "htmlcov",
+
+    # Exclude auto-generated files
+    "THIRD_PARTY_LICENSES.txt",
+
+    # Exclude GitHub Wiki files (use Wiki-specific link format without .md)
+    "docs/_Sidebar.md",
+
+    # Exclude git directory
+    ".git",
+]
+
+# Include mail addresses (set to false to skip checking email links)
+include_mail = false
+
+# Cache configuration (speeds up repeated checks)
+cache = true
+
+# Require HTTPS for external links (warn about HTTP links)
+# Set to false if you have legitimate HTTP-only resources
+require_https = false
+
+# Verbose output level: "error", "warn", "info", "debug", or "trace"
+# Comment out to use default (error)
+# verbose = "info"
+
+# No progress output (useful for CI/CD)
+no_progress = false

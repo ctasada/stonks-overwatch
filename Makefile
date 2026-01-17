@@ -60,7 +60,7 @@ RESET := \033[0m
 #==============================================================================
 
 .PHONY: help install update clean
-.PHONY: lint lint-check lint-fix markdown-check markdown-fix license-check generate-third-party check-dependencies scan
+.PHONY: lint lint-check lint-fix markdown-check markdown-fix markdown-links-check license-check generate-third-party check-dependencies scan
 .PHONY: migrate collectstatic runserver start run test coverage
 .PHONY: docker-build docker-run docker-shell docker-clean
 .PHONY: briefcase-create briefcase-update briefcase-run briefcase-package briefcase-clean
@@ -134,6 +134,17 @@ markdown-check: ## Check Markdown files for style issues
 markdown-fix: ## Fix Markdown files automatically
 	@echo -e "$(BOLD)$(GREEN)Fixing Markdown files...$(RESET)"
 	poetry run pymarkdown --config=pyproject.toml fix -r README.md CHANGELOG.md ./docs
+
+markdown-links-check: ## Check links and images in Markdown files
+	@echo -e "$(BOLD)$(BLUE)Checking Markdown links and images...$(RESET)"
+	@if command -v lychee >/dev/null 2>&1; then \
+		lychee --config lychee.toml README.md CHANGELOG.md docs/; \
+	else \
+		echo -e "$(BOLD)$(RED)Error: lychee is not installed$(RESET)"; \
+		echo -e "$(YELLOW)Install it with: brew install lychee (macOS) or cargo install lychee (cross-platform)$(RESET)"; \
+		echo -e "$(YELLOW)Or download from: https://github.com/lycheeverse/lychee/releases$(RESET)"; \
+		exit 1; \
+	fi
 
 license-check: ## Check license compatibility
 	@echo -e "$(BOLD)$(BLUE)Checking license compatibility...$(RESET)"
@@ -336,6 +347,16 @@ generate-images: ## Generate images for browsers and Briefcase
 		./scripts/generate-icons.sh; \
 	else \
 		echo -e "$(RED)Error: scripts/generate-icons.sh not found$(RESET)"; \
+		exit 1; \
+	fi
+
+generate-docs-broker-icons: ## Generate broker icons for documentation (sidebar and docs pages)
+	@echo -e "$(BOLD)$(BLUE)Generating broker icons for documentation...$(RESET)"
+	@if [ -f "scripts/generate_docs_broker_icons.sh" ]; then \
+		chmod +x scripts/generate_docs_broker_icons.sh; \
+		./scripts/generate_docs_broker_icons.sh; \
+	else \
+		echo -e "$(RED)Error: scripts/generate_docs_broker_icons.sh not found$(RESET)"; \
 		exit 1; \
 	fi
 

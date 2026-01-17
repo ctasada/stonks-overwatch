@@ -8,9 +8,9 @@
 
 ## Broker Setup
 
-- [🇳🇱 DEGIRO](DEGIRO)
-- [₿ Bitvavo](Bitvavo)
-- [📈 IBKR](IBKR)
+- [![DEGIRO](images/brokers/degiro_small.png) DEGIRO](DEGIRO)
+- [![Bitvavo](images/brokers/bitvavo_small.png) Bitvavo](Bitvavo)
+- [![IBKT](images/brokers/ibkr_small.png) IBKR](IBKR)
 
 ## User Guides
 

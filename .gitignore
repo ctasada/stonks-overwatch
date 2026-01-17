@@ -58,16 +58,17 @@ ENV/
 .idea/
 *.iml
 .claude/
+.vscode/
 
 # Project-specific
 config/*
 !config/config.json.template
-/import/
-portfolio-performance/*.csv
-portfolio-performance/*.pdf
 
 # IBKR certificates
 *.pem
 
 # nektos/act
 .actrc
+
+# lycheecache (Markdown Link Checker)
+.lycheecache

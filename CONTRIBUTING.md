@@ -93,7 +93,7 @@ Want to add support for a new broker? See our:
 2. **Clone your fork:**
 
    ```bash
-   git clone https://github.com/YOUR-USERNAME/stonks-overwatch.git
+   git clone https://github.com/YOUR_USERNAME/stonks-overwatch.git
    cd stonks-overwatch
    ```
 
@@ -268,7 +268,7 @@ class PortfolioService:
 - **Error handling**: Use custom exceptions with proper error messages
 - **Logging**: Use structured logging with appropriate log levels
 
-> **Note for AI Agents:** See [`AGENTS.md`](../AGENTS.md) for detailed architecture patterns, code examples, and AI-specific guidance.
+> **Note for AI Agents:** See [`AGENTS.md`](./AGENTS.md) for detailed architecture patterns, code examples, and AI-specific guidance.
 
 ## Testing
 
