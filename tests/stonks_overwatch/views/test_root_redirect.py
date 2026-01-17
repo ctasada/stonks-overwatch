@@ -29,6 +29,13 @@ class TestRootRedirectView(TestCase):
         self.view = RootRedirectView()
         self.request = self._create_mock_request()
 
+    def tearDown(self):
+        """Clean up after each test."""
+        # Clear cache to ensure tests don't interfere with each other
+        from stonks_overwatch.utils.core.demo_mode import is_demo_mode
+
+        is_demo_mode.cache_clear()
+
     def _create_mock_request(self):
         """Create a mock request with session."""
         request = Mock(spec=HttpRequest)
@@ -51,17 +58,20 @@ class TestRootRedirectView(TestCase):
 
         mock_redirect.assert_called_once_with("dashboard")
 
-    @patch("stonks_overwatch.utils.core.demo_mode.os.getenv")
-    def test_is_demo_mode_detects_environment_variable(self, mock_getenv):
+    def test_is_demo_mode_detects_environment_variable(self):
         """Test is_demo_mode correctly detects DEMO_MODE environment variable."""
+        import os
+
         from stonks_overwatch.utils.core.demo_mode import is_demo_mode
 
         # Test True cases
         for value in ["true", "True", "1", "yes"]:
-            mock_getenv.return_value = value
-            assert is_demo_mode() is True
+            is_demo_mode.cache_clear()  # Clear cache before each test
+            with patch.dict(os.environ, {"DEMO_MODE": value}):
+                assert is_demo_mode() is True, f"Failed for DEMO_MODE={value}"
 
         # Test False cases
         for value in ["false", "False", "0", "no", ""]:
-            mock_getenv.return_value = value
-            assert is_demo_mode() is False
+            is_demo_mode.cache_clear()  # Clear cache before each test
+            with patch.dict(os.environ, {"DEMO_MODE": value}):
+                assert is_demo_mode() is False, f"Failed for DEMO_MODE={value}"

@@ -1,4 +1,3 @@
-import os
 from dataclasses import dataclass
 from datetime import date
 from typing import Any, Dict, Optional
@@ -46,7 +45,9 @@ class BitvavoConfig(BaseConfig):
         offline_mode: bool = None,
     ) -> None:
         if offline_mode is None:
-            offline_mode = os.getenv("DEMO_MODE", False) in [True, "true", "True", "1"]
+            from stonks_overwatch.utils.core.demo_mode import is_demo_mode
+
+            offline_mode = is_demo_mode()
 
         self.logger.info(f"Initializing BitvavoConfig with offline_mode={offline_mode}")
         super().__init__(credentials, start_date, enabled, offline_mode, update_frequency_minutes)
@@ -79,7 +80,9 @@ class BitvavoConfig(BaseConfig):
             start_date = LocalizationUtility.convert_string_to_date(start_date)
         update_frequency_minutes = data.get("update_frequency_minutes", cls.DEFAULT_BITVAVO_UPDATE_FREQUENCY)
 
-        demo_mode = os.getenv("DEMO_MODE", False) in [True, "true", "True", "1"]
+        from stonks_overwatch.utils.core.demo_mode import is_demo_mode
+
+        demo_mode = is_demo_mode()
         if demo_mode:
             offline_mode = True
         else:

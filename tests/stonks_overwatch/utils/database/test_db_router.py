@@ -20,8 +20,19 @@ class TestDatabaseRouter(TestCase):
         """Set up test fixtures."""
         self.router = DatabaseRouter()
 
+    def tearDown(self):
+        """Clean up after each test."""
+        # Clear cache to ensure tests don't interfere with each other
+        from stonks_overwatch.utils.core.demo_mode import is_demo_mode
+
+        is_demo_mode.cache_clear()
+
     def test_production_mode_routing(self):
         """Test that production mode routes to default database."""
+        from stonks_overwatch.utils.core.demo_mode import is_demo_mode
+
+        is_demo_mode.cache_clear()
+
         with patch.dict(os.environ, {"DEMO_MODE": "False"}, clear=False):
             # Test read routing
             db_alias = self.router.db_for_read(None)
@@ -33,6 +44,10 @@ class TestDatabaseRouter(TestCase):
 
     def test_demo_mode_routing(self):
         """Test that demo mode routes to demo database."""
+        from stonks_overwatch.utils.core.demo_mode import is_demo_mode
+
+        is_demo_mode.cache_clear()
+
         with patch.dict(os.environ, {"DEMO_MODE": "True"}, clear=False):
             # Test read routing
             db_alias = self.router.db_for_read(None)
@@ -44,15 +59,22 @@ class TestDatabaseRouter(TestCase):
 
     def test_demo_mode_various_true_values(self):
         """Test that various true values for DEMO_MODE work correctly."""
+        from stonks_overwatch.utils.core.demo_mode import is_demo_mode
+
         true_values = ["true", "True", "1"]
 
         for value in true_values:
+            is_demo_mode.cache_clear()  # Clear cache before each iteration
             with patch.dict(os.environ, {"DEMO_MODE": value}, clear=False):
                 db_alias = self.router.db_for_read(None)
                 self.assertEqual(db_alias, "demo", f"Failed for DEMO_MODE={value}")
 
     def test_demo_mode_unset(self):
         """Test behavior when DEMO_MODE is not set."""
+        from stonks_overwatch.utils.core.demo_mode import is_demo_mode
+
+        is_demo_mode.cache_clear()
+
         # Remove DEMO_MODE from environment if it exists
         with patch.dict(os.environ, {}, clear=False):
             if "DEMO_MODE" in os.environ:
@@ -102,12 +124,16 @@ class TestDatabaseRouter(TestCase):
 
     def test_get_database_alias_internal_method(self):
         """Test the internal _get_database_alias method directly."""
+        from stonks_overwatch.utils.core.demo_mode import is_demo_mode
+
         # Test production mode
+        is_demo_mode.cache_clear()
         with patch.dict(os.environ, {"DEMO_MODE": "False"}, clear=False):
             alias = self.router._get_database_alias()
             self.assertEqual(alias, "default")
 
         # Test demo mode
+        is_demo_mode.cache_clear()
         with patch.dict(os.environ, {"DEMO_MODE": "True"}, clear=False):
             alias = self.router._get_database_alias()
             self.assertEqual(alias, "demo")

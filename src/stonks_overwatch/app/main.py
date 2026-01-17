@@ -312,6 +312,11 @@ class StonksOverwatchApp(toga.App):
         # Set demo mode environment variable
         os.environ["DEMO_MODE"] = "True"
 
+        # Clear demo mode cache to ensure the change is detected immediately
+        from stonks_overwatch.utils.core.demo_mode import is_demo_mode
+
+        is_demo_mode.cache_clear()
+
         # Reload broker configurations to pick up demo mode changes
         await sync_to_async(reload_broker_configurations)()
 
