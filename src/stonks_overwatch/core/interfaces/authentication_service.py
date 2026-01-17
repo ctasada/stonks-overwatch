@@ -223,12 +223,12 @@ class AuthenticationServiceInterface(ABC):
         pass
 
     @abstractmethod
-    def is_degiro_enabled(self) -> bool:
+    def is_broker_enabled(self) -> bool:
         """
-        Check if DeGiro authentication is enabled in the configuration.
+        Check if the broker authentication is enabled in the configuration.
 
         Returns:
-            bool: True if DeGiro is enabled, False otherwise
+            bool: True if the broker is enabled, False otherwise
         """
         pass
 

@@ -14,6 +14,8 @@ from pathlib import Path
 
 from tzlocal import get_localzone
 
+from stonks_overwatch.utils.core.demo_mode import is_demo_mode
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -196,7 +198,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 # Defines if the application will use the Demo DB or not
-DEMO_MODE = os.getenv("DEMO_MODE", False) in [True, "true", "True", "1"]
+DEMO_MODE = is_demo_mode()
 
 # Get database path dynamically from environment to support runtime configuration
 # Read directly from environment instead of using module-level constants

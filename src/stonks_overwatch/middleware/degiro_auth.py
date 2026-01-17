@@ -60,7 +60,7 @@ class DeGiroAuthMiddleware:
         """
         try:
             # Skip if DEGIRO is not enabled or in offline mode
-            if not self.auth_service.is_degiro_enabled() or self.auth_service.is_offline_mode():
+            if not self.auth_service.is_broker_enabled() or self.auth_service.is_offline_mode():
                 return False
 
             # Skip if connection check is not needed

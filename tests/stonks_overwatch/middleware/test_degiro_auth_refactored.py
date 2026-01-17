@@ -37,7 +37,7 @@ class TestDeGiroAuthMiddlewareRefactored(TestCase):
     def test_middleware_allows_authenticated_user(self):
         """Test middleware allows authenticated users to proceed when DEGIRO checks pass."""
         # Mock authentication service to return successful DEGIRO connection
-        self.mock_auth_service.is_degiro_enabled.return_value = True
+        self.mock_auth_service.is_broker_enabled.return_value = True
         self.mock_auth_service.is_offline_mode.return_value = False
         self.mock_auth_service.should_check_connection.return_value = True
         self.mock_auth_service.check_degiro_connection.return_value = AuthenticationResponse(
@@ -56,7 +56,7 @@ class TestDeGiroAuthMiddlewareRefactored(TestCase):
         mock_redirect.return_value = mock_redirect_response
 
         # Mock authentication service to return authentication failure
-        self.mock_auth_service.is_degiro_enabled.return_value = True
+        self.mock_auth_service.is_broker_enabled.return_value = True
         self.mock_auth_service.is_offline_mode.return_value = False
         self.mock_auth_service.should_check_connection.return_value = True
         self.mock_auth_service.check_degiro_connection.return_value = AuthenticationResponse(
@@ -72,7 +72,7 @@ class TestDeGiroAuthMiddlewareRefactored(TestCase):
     def test_middleware_skips_check_when_degiro_disabled(self):
         """Test middleware skips DEGIRO checks when DEGIRO is disabled."""
         # Mock authentication service to return DEGIRO disabled
-        self.mock_auth_service.is_degiro_enabled.return_value = False
+        self.mock_auth_service.is_broker_enabled.return_value = False
 
         response = self.middleware(self.request)
 
@@ -83,7 +83,7 @@ class TestDeGiroAuthMiddlewareRefactored(TestCase):
     def test_middleware_skips_check_in_offline_mode(self):
         """Test middleware skips DEGIRO checks in offline mode."""
         # Mock authentication service for offline mode
-        self.mock_auth_service.is_degiro_enabled.return_value = True
+        self.mock_auth_service.is_broker_enabled.return_value = True
         self.mock_auth_service.is_offline_mode.return_value = True
 
         response = self.middleware(self.request)
@@ -99,7 +99,7 @@ class TestDeGiroAuthMiddlewareRefactored(TestCase):
         mock_redirect.return_value = mock_redirect_response
 
         # Mock authentication service to return TOTP required
-        self.mock_auth_service.is_degiro_enabled.return_value = True
+        self.mock_auth_service.is_broker_enabled.return_value = True
         self.mock_auth_service.is_offline_mode.return_value = False
         self.mock_auth_service.should_check_connection.return_value = True
         self.mock_auth_service.check_degiro_connection.return_value = AuthenticationResponse(
@@ -121,7 +121,7 @@ class TestDeGiroAuthMiddlewareRefactored(TestCase):
         mock_redirect.return_value = mock_redirect_response
 
         # Mock authentication service to return in-app auth required
-        self.mock_auth_service.is_degiro_enabled.return_value = True
+        self.mock_auth_service.is_broker_enabled.return_value = True
         self.mock_auth_service.is_offline_mode.return_value = False
         self.mock_auth_service.should_check_connection.return_value = True
         self.mock_auth_service.check_degiro_connection.return_value = AuthenticationResponse(
@@ -139,7 +139,7 @@ class TestDeGiroAuthMiddlewareRefactored(TestCase):
     def test_middleware_skips_check_when_not_needed(self):
         """Test middleware skips check when connection check is not needed."""
         # Mock authentication service to indicate check not needed
-        self.mock_auth_service.is_degiro_enabled.return_value = True
+        self.mock_auth_service.is_broker_enabled.return_value = True
         self.mock_auth_service.is_offline_mode.return_value = False
         self.mock_auth_service.should_check_connection.return_value = False
 
@@ -152,7 +152,7 @@ class TestDeGiroAuthMiddlewareRefactored(TestCase):
     def test_middleware_handles_exceptions_gracefully(self):
         """Test middleware handles exceptions in authentication service gracefully."""
         # Mock authentication service to raise exception
-        self.mock_auth_service.is_degiro_enabled.side_effect = Exception("Test exception")
+        self.mock_auth_service.is_broker_enabled.side_effect = Exception("Test exception")
 
         response = self.middleware(self.request)
 

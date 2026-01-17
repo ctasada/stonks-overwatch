@@ -14,7 +14,7 @@ from stonks_overwatch.services.brokers.ibkr.services.authentication_service impo
 )
 
 from django.test import RequestFactory
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 
 class TestIbkrAuthenticationService:
@@ -262,7 +262,21 @@ class TestIbkrAuthenticationService:
         assert response.result == AuthenticationResult.CONFIGURATION_ERROR
         assert "not supported for IBKR" in response.message
 
-        assert self.service.is_degiro_enabled() is False
+    @patch("stonks_overwatch.core.factories.broker_factory.BrokerFactory")
+    def test_is_broker_enabled_returns_config_state(self, mock_factory_class):
+        """Test that is_broker_enabled returns the actual config state."""
+        mock_factory = Mock()
+        mock_factory_class.return_value = mock_factory
+
+        # Test enabled state
+        mock_config = Mock()
+        mock_config.is_enabled.return_value = True
+        mock_factory.create_config.return_value = mock_config
+        assert self.service.is_broker_enabled() is True
+
+        # Test disabled state
+        mock_config.is_enabled.return_value = False
+        assert self.service.is_broker_enabled() is False
 
 
 class TestIbkrAuthenticationServiceIntegration:

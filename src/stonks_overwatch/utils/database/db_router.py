@@ -6,8 +6,6 @@ based on the DEMO_MODE environment variable, eliminating the need to restart
 Django when switching between databases.
 """
 
-import os
-
 from stonks_overwatch.utils.core.logger import StonksLogger
 
 
@@ -23,12 +21,14 @@ class DatabaseRouter:
 
     def _get_database_alias(self):
         """
-        Determine which database to use based on DEMO_MODE environment variable.
+        Determine which database to use based on demo mode status.
 
         Returns:
-            str: 'demo' if DEMO_MODE is enabled, 'default' otherwise
+            str: 'demo' if demo mode is enabled, 'default' otherwise
         """
-        demo_mode = os.getenv("DEMO_MODE", False) in [True, "true", "True", "1"]
+        from stonks_overwatch.utils.core.demo_mode import is_demo_mode
+
+        demo_mode = is_demo_mode()
 
         return "demo" if demo_mode else "default"
 

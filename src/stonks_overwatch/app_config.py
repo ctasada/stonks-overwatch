@@ -71,7 +71,9 @@ class StonksOverwatchConfig(AppConfig):
                 self.logger.error("Failed to register authentication services: %s", e)
                 raise e
 
-            demo_mode = os.getenv("DEMO_MODE", False) in [True, "true", "True", "1"]
+            from stonks_overwatch.utils.core.demo_mode import is_demo_mode
+
+            demo_mode = is_demo_mode()
             # In Demo mode we don't want to execute the update jobs
             if not demo_mode:
                 # Schedule automatic tasks
@@ -86,7 +88,9 @@ class StonksOverwatchConfig(AppConfig):
         profile_mode = os.getenv("PROFILE_MODE", False) in [True, "true", "True", "1"]
         if profile_mode:
             self.logger.info("Enabling PROFILE_MODE: %s", profile_mode)
-        demo_mode = os.getenv("DEMO_MODE", False) in [True, "true", "True", "1"]
+        from stonks_overwatch.utils.core.demo_mode import is_demo_mode
+
+        demo_mode = is_demo_mode()
         if demo_mode:
             self.logger.info("Using DEMO database: %s", demo_mode)
 

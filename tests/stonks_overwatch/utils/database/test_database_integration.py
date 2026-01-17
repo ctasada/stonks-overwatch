@@ -42,8 +42,19 @@ class TestDatabaseIntegration(TestCase):
         call_command("migrate", database="default", verbosity=0)
         call_command("migrate", database="demo", verbosity=0)
 
+    def tearDown(self):
+        """Clean up after each test."""
+        # Clear cache to ensure tests don't interfere with each other
+        from stonks_overwatch.utils.core.demo_mode import is_demo_mode
+
+        is_demo_mode.cache_clear()
+
     def test_production_mode_uses_default_database(self):
         """Test that production mode operations use the default database."""
+        from stonks_overwatch.utils.core.demo_mode import is_demo_mode
+
+        is_demo_mode.cache_clear()
+
         with patch.dict(os.environ, {"DEMO_MODE": "False"}, clear=False):
             # Get initial counts
             initial_default_count = BrokersConfiguration.objects.using("default").count()
@@ -64,6 +75,10 @@ class TestDatabaseIntegration(TestCase):
 
     def test_demo_mode_uses_demo_database(self):
         """Test that demo mode operations use the demo database."""
+        from stonks_overwatch.utils.core.demo_mode import is_demo_mode
+
+        is_demo_mode.cache_clear()
+
         with patch.dict(os.environ, {"DEMO_MODE": "True"}, clear=False):
             # Get initial counts
             initial_default_count = BrokersConfiguration.objects.using("default").count()
@@ -84,11 +99,15 @@ class TestDatabaseIntegration(TestCase):
 
     def test_database_switching_isolation(self):
         """Test that switching between modes maintains data isolation."""
+        from stonks_overwatch.utils.core.demo_mode import is_demo_mode
+
         # Create record in production mode
+        is_demo_mode.cache_clear()
         with patch.dict(os.environ, {"DEMO_MODE": "False"}, clear=False):
             BrokersConfiguration.objects.create(broker_name="production_broker_isolation", enabled=True, credentials={})
 
         # Create record in demo mode
+        is_demo_mode.cache_clear()
         with patch.dict(os.environ, {"DEMO_MODE": "True"}, clear=False):
             BrokersConfiguration.objects.create(broker_name="demo_broker_isolation", enabled=True, credentials={})
 

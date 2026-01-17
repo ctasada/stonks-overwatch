@@ -207,7 +207,7 @@ class DegiroAuthenticationService(AuthenticationServiceInterface, BaseService):
             self.logger.debug("Checking DeGiro connection status")
 
             # Check if DeGiro is enabled
-            if not self.is_degiro_enabled():
+            if not self.is_broker_enabled():
                 return self._create_error_response(AuthenticationResult.CONFIGURATION_ERROR, "DeGiro is not enabled")
 
             # Check if in offline mode
@@ -507,23 +507,23 @@ class DegiroAuthenticationService(AuthenticationServiceInterface, BaseService):
         except Exception as e:
             self.logger.error(f"Error during logout: {str(e)}")
 
-    def is_degiro_enabled(self) -> bool:
+    def is_broker_enabled(self) -> bool:
         """
-        Check if DeGiro authentication is enabled in the configuration.
+        Check if the broker authentication is enabled in the configuration.
 
         Returns:
-            bool: True if DeGiro is enabled, False otherwise
+            bool: True if the broker is enabled, False otherwise
         """
         try:
             from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 
             broker_factory = BrokerFactory()
-            degiro_config = broker_factory.create_config(BrokerName.DEGIRO)
+            config = broker_factory.create_config(self.broker_name)
 
-            return degiro_config is not None and degiro_config.is_enabled()
+            return config is not None and config.is_enabled()
 
         except Exception as e:
-            self.logger.error(f"Error checking if DeGiro is enabled: {str(e)}")
+            self.logger.error(f"Error checking if {self.broker_name} is enabled: {str(e)}")
             return False
 
     def is_offline_mode(self) -> bool:
@@ -617,7 +617,7 @@ class DegiroAuthenticationService(AuthenticationServiceInterface, BaseService):
         try:
             status = {
                 "is_authenticated": self.is_user_authenticated(request),
-                "degiro_enabled": self.is_degiro_enabled(),
+                "broker_enabled": self.is_broker_enabled(),
                 "offline_mode": self.is_offline_mode(),
                 "maintenance_mode": self.degiro_service.is_maintenance_mode,
                 "maintenance_allowed": self.is_maintenance_mode_allowed(),

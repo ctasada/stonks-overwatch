@@ -5,6 +5,7 @@ from django.views import View
 from stonks_overwatch.constants.brokers import BrokerName
 from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 from stonks_overwatch.core.factories.broker_registry import BrokerRegistry
+from stonks_overwatch.utils.core.demo_mode import is_demo_mode
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.session_keys import SessionKeys
 
@@ -35,6 +36,11 @@ class RootRedirectView(View):
             HttpResponse: Redirect to appropriate page
         """
         try:
+            # Check if we're in demo mode (offline mode) - bypass broker selector
+            if is_demo_mode():
+                self.logger.debug("Demo mode detected - redirecting directly to dashboard")
+                return redirect("dashboard")
+
             # Check if user is already authenticated and has configured brokers
             if self._has_configured_brokers():
                 # Check if user is authenticated for any broker

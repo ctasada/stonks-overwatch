@@ -15,6 +15,7 @@ from stonks_overwatch.core.authentication_locator import get_authentication_serv
 from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 from stonks_overwatch.core.factories.broker_registry import BrokerRegistry
 from stonks_overwatch.utils.core.constants import AuthenticationErrorMessages, LogMessages
+from stonks_overwatch.utils.core.demo_mode import is_demo_mode
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.session_keys import SessionKeys
 
@@ -45,6 +46,11 @@ class AuthenticationMiddleware:
 
         # Skip authentication checks for public URLs
         if self._is_public_url(current_url):
+            return self.get_response(request)
+
+        # Check if we're in demo mode - skip authentication entirely
+        if is_demo_mode():
+            self.logger.debug("Demo mode detected - skipping authentication checks")
             return self.get_response(request)
 
         # Check if any brokers are configured first

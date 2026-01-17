@@ -307,26 +307,26 @@ class TestDegiroAuthenticationService(TestCase):
         self.auth_service.logout_user(self.request)
 
     @patch("stonks_overwatch.core.factories.broker_factory.BrokerFactory")
-    def test_is_degiro_enabled_true(self, mock_factory_class):
-        """Test is_degiro_enabled returns True when DeGiro is enabled."""
+    def test_is_broker_enabled_true(self, mock_factory_class):
+        """Test is_broker_enabled returns True when DeGiro is enabled."""
         mock_factory = Mock()
         mock_factory_class.return_value = mock_factory
         mock_config = Mock()
         mock_config.is_enabled.return_value = True
         mock_factory.create_config.return_value = mock_config
 
-        result = self.auth_service.is_degiro_enabled()
+        result = self.auth_service.is_broker_enabled()
 
         assert result is True
 
     @patch("stonks_overwatch.core.factories.broker_factory.BrokerFactory")
-    def test_is_degiro_enabled_false(self, mock_factory_class):
-        """Test is_degiro_enabled returns False when DeGiro is disabled."""
+    def test_is_broker_enabled_false(self, mock_factory_class):
+        """Test is_broker_enabled returns False when DeGiro is disabled."""
         mock_factory = Mock()
         mock_factory_class.return_value = mock_factory
         mock_factory.create_config.return_value = None
 
-        result = self.auth_service.is_degiro_enabled()
+        result = self.auth_service.is_broker_enabled()
 
         assert result is False
 
@@ -451,7 +451,7 @@ class TestDegiroAuthenticationService(TestCase):
         self.mock_degiro_service.is_maintenance_mode = False
 
         with (
-            patch.object(self.auth_service, "is_degiro_enabled") as mock_enabled,
+            patch.object(self.auth_service, "is_broker_enabled") as mock_enabled,
             patch.object(self.auth_service, "is_offline_mode") as mock_offline,
             patch.object(self.auth_service, "is_maintenance_mode_allowed") as mock_maintenance,
             patch.object(self.auth_service, "should_check_connection") as mock_should_check,
@@ -464,7 +464,7 @@ class TestDegiroAuthenticationService(TestCase):
             result = self.auth_service.get_authentication_status(self.request)
 
             assert result["is_authenticated"] is True
-            assert result["degiro_enabled"] is True
+            assert result["broker_enabled"] is True
             assert result["offline_mode"] is False
             assert result["maintenance_mode"] is False
             assert result["maintenance_allowed"] is False

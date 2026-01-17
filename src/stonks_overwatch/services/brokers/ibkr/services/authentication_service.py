@@ -296,14 +296,24 @@ class IbkrAuthenticationService(BaseService, AuthenticationServiceInterface):
             message="In-app authentication not supported for IBKR broker",
         )
 
-    def is_degiro_enabled(self) -> bool:
+    def is_broker_enabled(self) -> bool:
         """
-        Check if DeGiro is enabled - not applicable for IBKR.
+        Check if the broker authentication is enabled in the configuration.
 
         Returns:
-            False since this is IBKR service
+            bool: True if IBKR is enabled, False otherwise
         """
-        return False
+        try:
+            from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+
+            broker_factory = BrokerFactory()
+            config = broker_factory.create_config(self.broker_name)
+
+            return config is not None and config.is_enabled()
+
+        except Exception as e:
+            self.logger.error(f"Error checking if {self.broker_name} is enabled: {str(e)}")
+            return False
 
     def is_offline_mode(self) -> bool:
         """
