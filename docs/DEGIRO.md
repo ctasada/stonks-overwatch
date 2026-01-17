@@ -506,7 +506,7 @@ The DEGIRO connector is regularly updated to adapt to API changes. Update to the
 
 After setting up DEGIRO:
 
-1. **Configure other brokers** - [Bitvavo](Bitvavo.md) • [IBKR](IBKR.md)
+1. **Configure other brokers** - [Bitvavo](Bitvavo.md) • [IBKR](IBKR.md) • [MetaTrader4](MetaTrader4.md)
 2. **Explore features** - Check the [User Guide](Home.md)
 3. **Customize settings** - Adjust update frequency and preferences
 4. **Set up backups** - Backup your `data/` directory regularly

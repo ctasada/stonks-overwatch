@@ -20,7 +20,7 @@
 ### Why Stonks Overwatch?
 
 - **🔒 Privacy First**: Your financial data never leaves your computer
-- **📊 Multi-Broker Support**: Unified view across DEGIRO, Bitvavo, IBKR and more to come
+- **📊 Multi-Broker Support**: Unified view across DEGIRO, Bitvavo, IBKR, MetaTrader4 and more to come
 - **🎯 Real-Time Tracking**: Live portfolio values, dividends, and performance metrics
 - **🔌 Extensible Architecture**: Plugin system for adding new brokers
 - **💻 Cross-Platform**: Available on Windows, macOS, and Linux (native and web versions)
@@ -42,6 +42,7 @@
 - **DEGIRO** - Full support with real-time data
 - **Bitvavo (beta)** - Cryptocurrency exchange integration
 - **IBKR (beta)** (Interactive Brokers) - International markets
+- **MetaTrader 4 (beta)** - The most popular Forex trading platform
 
 ### Technical Features
 
@@ -119,7 +120,7 @@ For detailed installation instructions, see the [Quickstart Guide](docs/Quicksta
 - **🖥️ [Desktop App Guide](docs/Application.md)** - Native application installation and updates
 - **🔧 [Developer Guide](docs/Developing-Stonks-Overwatch.md)** - Contributing and development setup
 - **🤖 [AI Agent Guide](AGENTS.md)** - Guidelines for AI assistants working on this project
-- **🏦 Broker Setup**: [DEGIRO](docs/DEGIRO.md) • [Bitvavo](docs/Bitvavo.md) • [IBKR](docs/IBKR.md)
+- **🏦 Broker Setup**: [DEGIRO](docs/DEGIRO.md) • [Bitvavo](docs/Bitvavo.md) • [IBKR](docs/IBKR.md) • [MetaTrader4](docs/MetaTrader4.md)
 - **❓ [FAQ](docs/FAQ.md)** - Frequently asked questions
 
 ## Contributing
@@ -182,7 +183,7 @@ Hi, I'm Carlos—the creator and maintainer of Stonks Overwatch. Let me share wh
 
 ### The Story Behind Stonks Overwatch
 
-Like many investors, I found myself juggling multiple broker accounts—DEGIRO for stocks, Bitvavo for crypto, IBKR for international markets. Each broker had its own interface, its own way of presenting data, and none of them gave me the unified view I needed to truly understand my portfolio.
+Like many investors, I found myself juggling multiple broker accounts—DEGIRO for stocks, Bitvavo for crypto, IBKR for international markets, MetaTrader for Forex trading. Each broker had its own interface, its own way of presenting data, and none of them gave me the unified view I needed to truly understand my portfolio.
 
 The commercial alternatives? They either charged monthly fees I couldn't justify, collected and sold my financial data, or required me to trust third-party cloud services with my most sensitive information. That didn't sit right with me.
 
@@ -198,7 +199,7 @@ So I built Stonks Overwatch—a privacy-first, open-source solution that runs en
 
 **What I've Built So Far:**
 - ✅ Full integration with DEGIRO (real-time data)
-- ✅ Beta support for Bitvavo and IBKR
+- ✅ Beta support for Bitvavo, IBKR and MetaTrader 4
 - ✅ Native desktop apps for Windows, macOS, and Linux
 - ✅ Comprehensive portfolio analytics and visualization
 - ✅ Dividend tracking and forecasting

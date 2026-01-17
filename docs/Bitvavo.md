@@ -459,7 +459,7 @@ Generate a new API key pair in your Bitvavo account and update your configuratio
 
 After setting up Bitvavo:
 
-1. **Configure other brokers** - [DEGIRO](DEGIRO.md) • [IBKR](IBKR.md)
+1. **Configure other brokers** - [DEGIRO](DEGIRO.md) • [IBKR](IBKR.md) • [MetaTrader4](MetaTrader4.md)
 2. **Explore features** - Check the [User Guide](Home.md)
 3. **Customize settings** - Adjust update frequency
 4. **Set up backups** - Backup your `data/` directory regularly

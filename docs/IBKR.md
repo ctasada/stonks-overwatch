@@ -587,7 +587,7 @@ OAuth credentials should not expire unless revoked. If they do, regenerate them 
 
 After setting up IBKR:
 
-1. **Configure other brokers** - [DEGIRO](DEGIRO.md) • [Bitvavo](Bitvavo.md)
+1. **Configure other brokers** - [DEGIRO](DEGIRO.md) • [Bitvavo](Bitvavo.md) • [MetaTrader4](MetaTrader4.md)
 2. **Explore features** - Check the [User Guide](Home.md)
 3. **Customize settings** - Adjust update frequency
 4. **Set up backups** - Backup your `data/` directory and certificates
