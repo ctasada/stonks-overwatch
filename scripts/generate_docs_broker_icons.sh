@@ -74,9 +74,25 @@ echo "Target: $TARGET_DIR"
 echo "Sizes: $SIDEBAR_SIZE (sidebar) and $DOC_SIZE (documentation)"
 echo ""
 
-for icon in bitvavo.png degiro.png ibkr.png; do
-  # Extract base name without extension
+# Check if source directory exists
+if [ ! -d "$SOURCE_DIR" ]; then
+  echo "Error: Source directory not found: $SOURCE_DIR"
+  exit 1
+fi
+
+# Process all PNG files in the brokers directory
+for icon_path in "$SOURCE_DIR"/*.png; do
+  # Check if any PNG files exist
+  if [ ! -f "$icon_path" ]; then
+    echo "No PNG files found in $SOURCE_DIR"
+    exit 1
+  fi
+
+  # Extract filename and base name
+  icon=$(basename "$icon_path")
   base_name=$(basename "$icon" .png)
+
+  echo "Processing: $icon"
 
   # Determine vertical offset for visual alignment (DOCUMENTATION ONLY)
   # DEGIRO and Bitvavo need to sit lower to align with text baseline
@@ -89,6 +105,9 @@ for icon in bitvavo.png degiro.png ibkr.png; do
       ;;
     bitvavo)
       doc_offset="1"
+      ;;
+    metatrader4)
+      doc_offset="2"
       ;;
     *)
       doc_offset="0"
