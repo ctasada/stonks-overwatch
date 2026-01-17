@@ -36,6 +36,17 @@ repos:
         language: system
         stages: [pre-commit]
 
+  - repo: https://github.com/lycheeverse/lychee
+    rev: lychee-v0.22.0
+    hooks:
+      - id: lychee
+        name: Check Markdown Links
+        types: [markdown]
+        args:
+          - --config=lychee.toml
+          - --no-progress
+        stages: [pre-commit]
+
   # Optional: Check Django migrations
   - repo: local
     hooks:

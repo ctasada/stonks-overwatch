@@ -120,7 +120,7 @@ The TOTP secret is required for automatic 2FA authentication. Here's how to extr
 
 **Important:** Once you extract the secret, complete the 2FA setup in the DEGIRO app to keep your account secure.
 
-**Need more help?** See the [DEGIRO Connector 2FA Guide](https://github.com/Chavithra/degiro-connector#how-to-use-2fa) for additional methods and troubleshooting.
+**Need more help?** See the [DEGIRO Connector 2FA Guide](https://github.com/Chavithra/degiro-connector?tab=readme-ov-file#35-how-to-use-2fa-) for additional methods and troubleshooting.
 
 **Alternative:** If you don't configure the TOTP secret, the application will prompt you for the OTP code each time you log in.
 
@@ -183,7 +183,7 @@ Override your DEGIRO base currency for portfolio calculations. Configure this in
 2. Check system clock is synchronized (TOTP is time-based)
 3. Generate a new TOTP code and try again
 4. Try extracting the TOTP secret again (see TOTP Secret Key section above)
-5. See [DEGIRO Connector 2FA Guide](https://github.com/Chavithra/degiro-connector#how-to-use-2fa) for troubleshooting
+5. See [DEGIRO Connector 2FA Guide](https://github.com/Chavithra/degiro-connector?tab=readme-ov-file#35-how-to-use-2fa-) for troubleshooting
 
 #### In-App Authentication Stuck
 
@@ -491,7 +491,7 @@ The DEGIRO connector is regularly updated to adapt to API changes. Update to the
 ### DEGIRO Resources
 
 - **[DEGIRO Website](https://www.degiro.com)** - Official site
-- **[DEGIRO Help Center](https://www.degiro.com/helpcenter)** - DEGIRO support
+- **[DEGIRO Help Center](https://www.degiro.nl/helpdesk/)** - DEGIRO support
 - **[DEGIRO Connector GitHub](https://github.com/Chavithra/degiro-connector)** - API client
 
 ### Community Support

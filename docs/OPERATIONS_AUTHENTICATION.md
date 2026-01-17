@@ -532,7 +532,7 @@ print(f"Session ID: {result.session_id}")
 **If issues persist:**
 1. Verify DEGIRO mobile app is up to date
 2. Check network connectivity to DEGIRO API
-3. Review [Authentication Architecture](ARCHITECTURE_AUTHENTICATION.md#in-app-authentication-implementation-details-2025) for flow details
+3. Review [Authentication Architecture](ARCHITECTURE_AUTHENTICATION.md#in-app-authentication) for flow details
 
 ---
 

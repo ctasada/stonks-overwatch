@@ -156,7 +156,7 @@ Example `plugin_manifest.json` structure:
     "description": "DeGiro broker integration for Stonks Overwatch",
     "author": "Stonks Overwatch Team",
     "license": "MIT",
-    "homepage": "https://github.com/stonks-overwatch/degiro-plugin"
+    "homepage": "https://example.com/degiro-plugin"
   },
   "api": {
     "min_version": "1.0.0",

@@ -562,7 +562,7 @@ OAuth credentials should not expire unless revoked. If they do, regenerate them 
 - **[IBKR Web API Docs](https://www.interactivebrokers.com/campus/ibkr-api-page/cpapi-v1/)** - API documentation
 - **[iBind GitHub](https://github.com/Voyz/ibind)** - OAuth client
 - **[iBind OAuth Guide](https://github.com/Voyz/ibind/wiki/OAuth-1.0a)** - Setup instructions
-- **[IBKR Support](https://www.interactivebrokers.com/en/support/cstools/cstools.php)** - IBKR help
+- **[IBKR Support](https://www.interactivebrokers.ie/en/general/contact/ibot-container.php)** - IBKR help
 
 ### Community Support
 

@@ -324,7 +324,7 @@ Stonks Overwatch was created to solve a real problem: managing investments acros
 - 📝 **Contribute code** - See [Contributing Guidelines](../CONTRIBUTING.md)
 - 📢 **Share with others** - Spread the word about Stonks Overwatch
 
-For more details about the project's story and what sponsorship enables, see the [README sponsorship section](https://github.com/ctasada/stonks-overwatch#-why-sponsor-me) on GitHub.
+For more details about the project's story and what sponsorship enables, see the [README sponsorship section](https://github.com/ctasada/stonks-overwatch?tab=readme-ov-file#how-to-support) on GitHub.
 
 ---
 

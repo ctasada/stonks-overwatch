@@ -33,7 +33,7 @@ See the [full list on Bitvavo](https://bitvavo.com/en/markets).
 
 Before configuring Bitvavo in Stonks Overwatch, you need to:
 
-1. **Have a Bitvavo account** - [Sign up](https://bitvavo.com/en/register) if you don't have one
+1. **Have a Bitvavo account** - [Sign up](https://account.bitvavo.com/create) if you don't have one
 2. **Create API credentials** - Generate API key and secret (see below)
 3. **Enable API access** - Ensure API access is enabled in your account
 
@@ -443,7 +443,7 @@ Generate a new API key pair in your Bitvavo account and update your configuratio
 - **[Bitvavo Website](https://bitvavo.com/en/)** - Official site
 - **[Bitvavo API Docs](https://docs.bitvavo.com/)** - API documentation
 - **[Create API Key](https://account.bitvavo.com/user/api)** - Generate credentials
-- **[Bitvavo Support](https://bitvavo.com/en/support)** - Bitvavo help center
+- **[Bitvavo Support](https://support.bitvavo.com/hc/en-us)** - Bitvavo help center
 
 ### Community Support
 
