@@ -52,6 +52,9 @@ class Dividends(View):
         filtered_dividends = self._filter_dividends_by_option(dividends_overview, diversification_option)
         dividends_diversification = self._get_diversification(filtered_dividends)
 
+        # Calculate growth and filter calendar for the selected year
+        dividends_growth = self._get_dividends_growth(dividends_calendar["calendar"])
+
         # Filter calendar for the selected year
         filtered_calendar = self._filter_calendar_by_year(dividends_calendar["calendar"], calendar_year)
         total_year_dividends: float = sum(month_data.get("total", 0) for month_data in filtered_calendar.values())
@@ -68,9 +71,6 @@ class Dividends(View):
                 diversification_options,
                 total_year_dividends,
             )
-
-        # Calculate growth and filter calendar for the selected year
-        dividends_growth = self._get_dividends_growth(dividends_calendar["calendar"])
 
         context = {
             "totalNetDividends": LocalizationUtility.format_money_value(
