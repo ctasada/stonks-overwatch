@@ -23,6 +23,11 @@ jobs:
       - name: Markdown Check
         run: |
           make markdown-check
+      - name: Check links in Markdown files
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --config lychee.toml README.md CHANGELOG.md docs/
+          fail: true
 
   test:
     name: Tests

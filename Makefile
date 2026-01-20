@@ -374,7 +374,9 @@ pre-commit-run: ## Run pre-commit hooks on all files
 
 pre-commit-update: ## Update pre-commit hook versions
 	@echo -e "$(BOLD)$(YELLOW)Updating pre-commit hooks...$(RESET)"
-	poetry run pre-commit autoupdate
+	@echo -e "$(BOLD)$(BLUE)Note: Excluding lychee (uses non-standard tag format)$(RESET)"
+	poetry run pre-commit autoupdate --repo https://github.com/pre-commit/pre-commit-hooks
+	poetry run pre-commit autoupdate --repo https://github.com/astral-sh/ruff-pre-commit
 
 #==============================================================================
 ##@ CI/CD Operations
@@ -382,12 +384,18 @@ pre-commit-update: ## Update pre-commit hook versions
 
 cicd: _check-docker _check-act ## Run CI/CD pipeline (use job=<name> or workflow=<name>)
 	@echo -e  "$(BOLD)$(BLUE)Running CI/CD pipeline...$(RESET)"
-	@if [ -n "$(workflow)" ]; then \
+	@ACT_SECRETS=""; \
+	if [ -f .secrets ]; then \
+		ACT_SECRETS="--secret-file .secrets"; \
+	else \
+		echo -e "$(YELLOW)Warning: .secrets file not found. Create one from .secrets.example for GitHub Actions to work.$(RESET)"; \
+	fi; \
+	if [ -n "$(workflow)" ]; then \
 		echo -e "$(YELLOW)Running workflow: $(workflow)$(RESET)"; \
-		act -W "$(WORKFLOWS_DIR)/$(workflow).yml" --container-architecture $(ACT_ARCH) -P $(ACT_PLATFORM); \
+		act -W "$(WORKFLOWS_DIR)/$(workflow).yml" --container-architecture $(ACT_ARCH) -P $(ACT_PLATFORM) $$ACT_SECRETS; \
 	elif [ -n "$(job)" ]; then \
 		echo -e "$(YELLOW)Running job: $(job)$(RESET)"; \
-		act --job $(job) --container-architecture $(ACT_ARCH) -P $(ACT_PLATFORM); \
+		act --job $(job) --container-architecture $(ACT_ARCH) -P $(ACT_PLATFORM) $$ACT_SECRETS; \
 	else \
 		echo -e "$(YELLOW)Available jobs and workflows:$(RESET)"; \
 		act --list --container-architecture $(ACT_ARCH); \

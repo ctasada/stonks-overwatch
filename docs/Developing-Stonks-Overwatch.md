@@ -142,6 +142,39 @@ These commands will check the code linting or do the best effort to properly for
 Make sure to execute `make pre-commit-install` to install the pre-commit hooks, so the code is automatically checked
 before committing.
 
+#### Pre-commit Hooks
+
+The project uses pre-commit hooks to maintain code quality. The hooks include:
+
+- Code formatting (Ruff)
+- Python linting (Ruff)
+- YAML validation
+- Markdown linting
+- Link checking (Lychee)
+- Poetry validation
+- Django system checks
+- Test execution
+
+**Installing hooks:**
+
+```shell
+make pre-commit-install
+```
+
+**Running hooks manually:**
+
+```shell
+make pre-commit-run
+```
+
+**Updating hook versions:**
+
+```shell
+make pre-commit-update
+```
+
+> **Note on Lychee**: The link checker (Lychee) uses a non-standard tag format (`lychee-vX.Y.Z`) which is excluded from automatic updates. The `make pre-commit-update` command only updates the `pre-commit-hooks` and `ruff-pre-commit` repositories to prevent reverting Lychee to a mutable `nightly` branch reference. If you need to update Lychee, manually edit `.pre-commit-config.yaml` and change the `rev` to the desired stable tag (e.g., `lychee-v0.22.0`).
+
 ### Test
 
 ```shell
@@ -202,7 +235,86 @@ As before, only the application for the current OS will be created and executed.
 make cicd
 ```
 
-Will execute the GitHub Actions locally. It's a good way of validating changes in the CI/CD code
+Will execute the GitHub Actions locally using [ACT](https://github.com/nektos/act). It's a good way of validating changes in the CI/CD code before pushing to GitHub.
+
+#### Setting up ACT for Local CI/CD Testing
+
+ACT requires a GitHub Personal Access Token to clone GitHub Actions (like `actions/setup-python`, `actions/cache`, etc.).
+
+**Initial Setup:**
+
+1. **Create a GitHub Personal Access Token:**
+   - Go to: [https://github.com/settings/tokens/new](https://github.com/settings/tokens/new)
+   - Token name: "ACT Local Testing"
+   - Expiration: Your choice (90 days recommended)
+   - Select scopes: Check **"public_repo"** (for public repositories)
+   - Click "Generate token"
+   - Copy the token (you won't see it again!)
+
+2. **Create `.secrets` file:**
+
+   ```shell
+   cp .secrets.example .secrets
+   ```
+
+3. **Edit `.secrets` and add your token:**
+
+   ```bash
+   GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   ```
+
+   Replace `ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` with your actual token.
+
+4. **Test it:**
+
+   ```shell
+   make cicd job=lint
+   ```
+
+> **Security Note**: The `.secrets` file is already in `.gitignore` and will never be committed to the repository.
+
+**Running Specific Jobs:**
+
+```shell
+# Run the lint job
+make cicd job=lint
+
+# Run the test job
+make cicd job=test
+
+# List all available jobs
+make cicd
+```
+
+**Running Specific Workflows:**
+
+```shell
+# Run the entire CI/CD workflow
+make cicd workflow=cicd
+
+# Run the pre-commit autoupdate workflow
+make cicd workflow=precommit-autoupdate
+```
+
+**Troubleshooting ACT:**
+
+If you see authentication errors like `authentication required: Invalid username or token`, ensure:
+- Your `.secrets` file exists and contains a valid `GITHUB_TOKEN`
+- The token has the `public_repo` scope enabled
+- You've copied the token correctly (no extra spaces or newlines)
+
+**Note on Lychee Link Checking:**
+The link checking step (lychee) is automatically skipped when running with ACT due to architecture compatibility issues (ARM64 vs x86_64). The lychee check will still run in the actual GitHub Actions environment. You can verify links locally by running:
+
+```shell
+make markdown-links-check
+```
+
+Or through pre-commit hooks:
+
+```shell
+make pre-commit-run
+```
 
 ## Troubleshooting
 

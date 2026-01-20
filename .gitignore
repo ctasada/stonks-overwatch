@@ -69,6 +69,8 @@ config/*
 
 # nektos/act
 .actrc
+# ACT secrets
+.secrets
 
 # lycheecache (Markdown Link Checker)
 .lycheecache
