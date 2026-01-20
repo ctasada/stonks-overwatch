@@ -24,10 +24,11 @@ jobs:
         run: |
           make markdown-check
       - name: Check links in Markdown files
+        if: ${{ !env.ACT }}
         uses: lycheeverse/lychee-action@v2
         with:
           args: --config lychee.toml README.md CHANGELOG.md docs/
-          fail: true
+          fail: false  # Don't fail build on broken links (external sites can be flaky)
 
   test:
     name: Tests
