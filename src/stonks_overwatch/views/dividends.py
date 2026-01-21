@@ -6,15 +6,18 @@ from django.shortcuts import render
 from django.views import View
 
 from stonks_overwatch.config.config import Config
+from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.services.aggregators.dividends_aggregator import DividendsAggregatorService
 from stonks_overwatch.services.brokers.degiro.client.constants import ProductType
 from stonks_overwatch.services.models import Dividend
 from stonks_overwatch.services.utilities.session_manager import SessionManager
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.views.mixins import CapabilityRequiredMixin
 
 
-class Dividends(View):
+class Dividends(CapabilityRequiredMixin, View):
+    required_capability = ServiceType.DIVIDEND
     logger = StonksLogger.get_logger("stonks_overwatch.dividends.views", "[VIEW|DIVIDENDS]")
     ALL_TIME_OPTION = "All Time"
 

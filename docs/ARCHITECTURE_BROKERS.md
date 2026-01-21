@@ -346,12 +346,22 @@ BROKER_CONFIGS = {
             # ServiceType.DIVIDEND: NewBrokerDividendService,
             # ServiceType.FEE: NewBrokerFeeService,
         },
-        "supports_complete_registration": True,  # Set to False if missing required services
     },
 }
 ```
 
-### 5. Add Credential Support (Optional)
+### 5. Dynamic Capabilities Support
+
+Stonks Overwatch uses a capability-based architecture. You only need to register the services that your broker actually supports.
+
+- **Required**: `ServiceType.PORTFOLIO` is the only strictly required service.
+- **Optional**: `TRANSACTION`, `ACCOUNT`, `DEPOSIT`, `DIVIDEND`, `FEE`, and `AUTHENTICATION` are optional.
+
+The application automatically handles missing services:
+1. **Backend**: Aggregator services skip brokers that don't provide the requested service.
+2. **Frontend**: The sidebar navigation dynamically hides links (e.g., "Dividends", "Fees") if the currently selected portfolio doesn't support them.
+
+### 6. Add Credential Support (Optional)
 
 If your broker needs credential update functionality, add it to the BrokerFactory mapping:
 

@@ -172,7 +172,10 @@ class BaseAggregator(ABC):
         """
         enabled_brokers = self._get_enabled_brokers(selected_portfolio)
         if not enabled_brokers:
-            raise DataAggregationException("Failed to find any enabled broker")
+            self._logger.debug(
+                f"No brokers enabled for service {self._service_type.value} with selection {selected_portfolio}"
+            )
+            return {}
 
         broker_data = {}
         broker_errors = {}
