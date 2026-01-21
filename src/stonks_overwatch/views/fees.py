@@ -2,14 +2,17 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
 
+from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.services.aggregators.fees_aggregator import FeesAggregatorService
 from stonks_overwatch.services.models import FeeType
 from stonks_overwatch.services.utilities.session_manager import SessionManager
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.views.mixins import CapabilityRequiredMixin
 
 
-class Fees(View):
+class Fees(CapabilityRequiredMixin, View):
+    required_capability = ServiceType.FEE
     logger = StonksLogger.get_logger("stonks_overwatch.fees.views", "[VIEW|FEES]")
 
     def __init__(self, **kwargs):

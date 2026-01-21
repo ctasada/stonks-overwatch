@@ -19,6 +19,8 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 ### Changed
 
 - **Configuration:** Different UI/UX improvements
+- **Brokers:** Hidden not supported broker capabilities
+  - When a broker does not support a certain feature, it will not be shown in the UI
 
 ### Fixed
 

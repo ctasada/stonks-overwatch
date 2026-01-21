@@ -122,9 +122,6 @@ def _import_real_services():
     from stonks_overwatch.services.brokers.bitvavo.services.deposit_service import (
         DepositsService as BitvavoDepositService,
     )
-    from stonks_overwatch.services.brokers.bitvavo.services.dividends_service import (
-        DividendsService as BitvavoDividendService,
-    )
     from stonks_overwatch.services.brokers.bitvavo.services.fee_service import (
         FeeService as BitvavoFeeService,
     )
@@ -183,7 +180,6 @@ def _import_real_services():
             "portfolio": BitvavoPortfolioService,
             "transaction": BitvavoTransactionService,
             "deposit": BitvavoDepositService,
-            "dividend": BitvavoDividendService,
             "fee": BitvavoFeeService,
             "account": BitvavoAccountService,
         },
@@ -269,7 +265,7 @@ class MockAccountService(AccountServiceInterface):
         self.config = config
 
     def get_account_overview(self):
-        return {}
+        return []
 
 
 def _create_mock_services():
@@ -287,7 +283,6 @@ def _create_mock_services():
             "portfolio": MockPortfolioService,
             "transaction": MockTransactionService,
             "deposit": MockDepositService,
-            "dividend": MockDividendService,
             "fee": MockFeeService,
             "account": MockAccountService,
         },

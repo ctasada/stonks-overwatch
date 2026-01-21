@@ -342,9 +342,41 @@
                     }
                 });
 
+                // Update navigation visibility based on capabilities
+                updateNavigationVisibility(data.selected_portfolio.capabilities);
+
                 // Restore sidebar state after portfolio data is loaded
                 restoreSidebarState();
             });
+
+        // Update navigation visibility based on broker capabilities
+        function updateNavigationVisibility(capabilities) {
+            const pageToServiceMap = {
+                'portfolio': 'portfolio',
+                'diversification': 'portfolio',
+                'dividends': 'dividend',
+                'fees': 'fee',
+                'deposits': 'deposit',
+                'transactions': 'transaction',
+                'account_overview': 'account'
+            };
+
+            const navLinks = document.querySelectorAll('.sidebar-nav-link[data-page]');
+            navLinks.forEach(link => {
+                const page = link.getAttribute('data-page');
+                const requiredService = pageToServiceMap[page];
+
+                if (requiredService) {
+                    if (capabilities.includes(requiredService)) {
+                        link.style.display = 'flex';
+                        link.classList.remove('d-none');
+                    } else {
+                        link.style.display = 'none';
+                        link.classList.add('d-none');
+                    }
+                }
+            });
+        }
 
         // Set active navigation state
         function setActiveNavigation() {

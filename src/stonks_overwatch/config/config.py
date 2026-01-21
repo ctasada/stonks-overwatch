@@ -5,6 +5,7 @@ from typing import Optional
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.services.models import PortfolioId
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.logger_constants import LOGGER_CONFIG, TAG_CONFIG
@@ -80,6 +81,28 @@ class Config:
         """
         config = self.get_broker_config(broker_name)
         return config.is_enabled() if config else False
+
+    def get_capabilities(self, portfolio_id: PortfolioId) -> list[ServiceType]:
+        """
+        Get the capabilities (service types) for a portfolio.
+
+        Args:
+            portfolio_id: The portfolio to get capabilities for
+
+        Returns:
+            List of supported ServiceType enums
+        """
+        if portfolio_id == PortfolioId.ALL:
+            capabilities = set()
+            for broker_name in self._factory.get_available_brokers():
+                if self._is_broker_enabled(broker_name):
+                    capabilities.update(self._factory.get_broker_capabilities(broker_name))
+            return sorted(capabilities, key=lambda x: x.value)
+
+        if portfolio_id.broker_name:
+            return self._factory.get_broker_capabilities(portfolio_id.broker_name)
+
+        return []
 
     def __eq__(self, value: object) -> bool:
         if isinstance(value, Config):

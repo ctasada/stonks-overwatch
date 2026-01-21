@@ -40,9 +40,6 @@ except Exception as e:
     BitvavoAuthenticationService = None
 
 from stonks_overwatch.services.brokers.bitvavo.services.deposit_service import DepositsService as BitvavoDepositService
-from stonks_overwatch.services.brokers.bitvavo.services.dividends_service import (
-    DividendsService as BitvavoDividendsService,
-)
 from stonks_overwatch.services.brokers.bitvavo.services.fee_service import FeeService as BitvavoFeeService
 from stonks_overwatch.services.brokers.bitvavo.services.portfolio_service import (
     PortfolioService as BitvavoPortfolioService,
@@ -80,11 +77,9 @@ except Exception as e:
     logger.warning(f"Could not import IbkrAuthenticationService: {e}")
     IbkrAuthenticationService = None
 
-from stonks_overwatch.services.brokers.ibkr.services.deposit_service import DepositsService as IbkrDepositService
 from stonks_overwatch.services.brokers.ibkr.services.dividends import (
     DividendsService as IbkrDividendsService,
 )
-from stonks_overwatch.services.brokers.ibkr.services.fee_service import FeeService as IbkrFeeService
 from stonks_overwatch.services.brokers.ibkr.services.portfolio import (
     PortfolioService as IbkrPortfolioService,
 )
@@ -105,7 +100,6 @@ BROKER_CONFIGS: Dict[BrokerName, Dict[str, Any]] = {
             ServiceType.ACCOUNT: DeGiroAccountService,
             ServiceType.AUTHENTICATION: DegiroAuthenticationService,
         },
-        "supports_complete_registration": True,
     },
     BrokerName.BITVAVO: {
         "config": BitvavoConfig,
@@ -113,25 +107,20 @@ BROKER_CONFIGS: Dict[BrokerName, Dict[str, Any]] = {
             ServiceType.PORTFOLIO: BitvavoPortfolioService,
             ServiceType.TRANSACTION: BitvavoTransactionService,
             ServiceType.DEPOSIT: BitvavoDepositService,
-            ServiceType.DIVIDEND: BitvavoDividendsService,
             ServiceType.FEE: BitvavoFeeService,
             ServiceType.ACCOUNT: BitvavoAccountService,
             ServiceType.AUTHENTICATION: BitvavoAuthenticationService,
         },
-        "supports_complete_registration": True,
     },
     BrokerName.IBKR: {
         "config": IbkrConfig,
         "services": {
             ServiceType.PORTFOLIO: IbkrPortfolioService,
             ServiceType.TRANSACTION: IbkrTransactionService,
-            ServiceType.DEPOSIT: IbkrDepositService,
             ServiceType.DIVIDEND: IbkrDividendsService,
-            ServiceType.FEE: IbkrFeeService,
             ServiceType.ACCOUNT: IbkrAccountOverviewService,
             ServiceType.AUTHENTICATION: IbkrAuthenticationService,
         },
-        "supports_complete_registration": True,  # Now supports all required services
     },
 }
 
@@ -177,24 +166,15 @@ def register_all_brokers() -> None:
         try:
             config_class = broker_config["config"]
             services = broker_config["services"]
-            supports_complete = broker_config.get("supports_complete_registration", False)
 
-            if supports_complete:
-                # Use complete registration for brokers with all required services
-                registry.register_complete_broker(
-                    broker_name,
-                    config_class,
-                    **{service_type.value: service_class for service_type, service_class in services.items()},
-                )
-                logger.debug(f"Registered {broker_name} broker using complete registration")
-            else:
-                # Use separate registration for brokers missing required services
-                registry.register_broker_config(broker_name, config_class)
-                registry.register_broker_services(
-                    broker_name,
-                    **{service_type.value: service_class for service_type, service_class in services.items()},
-                )
-                logger.debug(f"Registered {broker_name} broker using separate registration")
+            # Register configuration and services together
+            # This is cleaner and includes automatic rollback on failure
+            registry.register_complete_broker(
+                broker_name,
+                config_class,
+                **{service_type.value: service_class for service_type, service_class in services.items()},
+            )
+            logger.debug(f"Registered {broker_name} broker successfully")
 
             successfully_registered.append(broker_name)
 
@@ -256,22 +236,13 @@ def ensure_registry_initialized() -> None:
         try:
             config_class = broker_config["config"]
             services = broker_config["services"]
-            supports_complete = broker_config.get("supports_complete_registration", False)
 
-            if supports_complete:
-                registry.register_complete_broker(
-                    broker_name,
-                    config_class,
-                    **{service_type.value: service_class for service_type, service_class in services.items()},
-                )
-                logger.debug(f"Registered {broker_name} broker successfully")
-            else:
-                registry.register_broker_config(broker_name, config_class)
-                registry.register_broker_services(
-                    broker_name,
-                    **{service_type.value: service_class for service_type, service_class in services.items()},
-                )
-                logger.debug(f"Registered {broker_name} broker successfully (separate registration)")
+            registry.register_complete_broker(
+                broker_name,
+                config_class,
+                **{service_type.value: service_class for service_type, service_class in services.items()},
+            )
+            logger.debug(f"Registered {broker_name} broker successfully")
 
         except Exception as e:
             logger.warning(f"Failed to register {broker_name}: {e}")
