@@ -1,5 +1,6 @@
 {
-    "base_currency": "EUR By default",
+    "base_currency": "Currency code for portfolio consolidation (e.g., EUR, USD). Defaults to EUR",
+    "appearance": "UI theme: light, dark, or auto. Defaults to auto",
     "degiro": {
         "enabled": true,
         "credentials": {

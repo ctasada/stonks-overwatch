@@ -5,6 +5,7 @@ from typing import Optional
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+from stonks_overwatch.core.models import GlobalConfiguration
 from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.services.models import PortfolioId
 from stonks_overwatch.utils.core.logger import StonksLogger
@@ -33,8 +34,72 @@ class Config:
         if base_currency and not isinstance(base_currency, str):
             raise TypeError("base_currency must be a string")
 
-        self.base_currency = base_currency or self.DEFAULT_BASE_CURRENCY
+        self._base_currency = base_currency
         self._factory = BrokerFactory()
+        self._settings_cache = {}
+        self._loaded_from_db = False
+
+    @property
+    def base_currency(self) -> str:
+        """
+        Get the base currency for calculations.
+        Priority: 1. JSON override, 2. DB setting, 3. Default
+        """
+        # 1. Check if it was passed in __init__ (usually from JSON file loading)
+        if self._base_currency and self._base_currency != self.DEFAULT_BASE_CURRENCY:
+            return self._base_currency
+
+        # 2. Check DB setting
+        db_value = self.get_setting("base_currency")
+        if db_value:
+            return db_value
+
+        return self.DEFAULT_BASE_CURRENCY
+
+    @base_currency.setter
+    def base_currency(self, value: str) -> None:
+        if not isinstance(value, str):
+            raise TypeError("base_currency must be a string")
+        self.save_setting("base_currency", value)
+
+    @property
+    def appearance(self) -> str:
+        """
+        Get the appearance setting (light, dark, auto).
+        Priority: 1. JSON override (later), 2. DB setting, 3. Default
+        """
+        return self.get_setting("appearance", "auto")
+
+    @appearance.setter
+    def appearance(self, value: str) -> None:
+        if value not in ["light", "dark", "auto"]:
+            raise ValueError("appearance must be one of: light, dark, auto")
+        self.save_setting("appearance", value)
+
+    def get_setting(self, key: str, default: any = None) -> any:
+        """
+        Get an application-level setting.
+        """
+        if key not in self._settings_cache:
+            try:
+                # Use GlobalConfiguration model to fetch from DB
+                self._settings_cache[key] = GlobalConfiguration.get_setting(key, default)
+            except Exception as e:
+                self.logger.warning(f"Failed to fetch setting '{key}' from database: {e}")
+                return default
+        return self._settings_cache.get(key, default)
+
+    def save_setting(self, key: str, value: any) -> None:
+        """
+        Save an application-level setting.
+        """
+        try:
+            GlobalConfiguration.set_setting(key, value)
+            self._settings_cache[key] = value
+            self.logger.info(f"Saved setting '{key}' with value '{value}'")
+        except Exception as e:
+            self.logger.error(f"Failed to save setting '{key}': {e}")
+            raise
 
     def get_broker_config(self, broker_name: BrokerName) -> Optional[BaseConfig]:
         """
