@@ -37,7 +37,7 @@ repos:
         stages: [pre-commit]
 
   - repo: https://github.com/lycheeverse/lychee
-    rev: nightly
+    rev: lychee-v0.22.0  # Not auto-updated
     hooks:
       - id: lychee
         name: Check Markdown Links
