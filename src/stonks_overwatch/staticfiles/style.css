@@ -39,6 +39,8 @@
     --sidebar-hover-bg: rgba(255, 255, 255, 0.1);
     --sidebar-active-bg: rgba(255, 255, 255, 0.2);
     --sidebar-border-color: rgba(255, 255, 255, 0.3);
+    --sidebar-bg: var(--primary-color);
+    --sidebar-dropdown-bg: var(--primary-dark);
 
     /* Toggle button positioning */
     --toggle-position-desktop: -14px;
@@ -86,6 +88,9 @@
     --z-index-popover: 1050;
     --z-index-tooltip: 1070;
     --z-index-toast: 1100;
+    --z-index-table-header: 10;
+    --z-index-table-toolbar: 1051;
+    --z-index-table-dropdown: 1070;
 
     /* Common colors */
     --color-white: #ffffff;
@@ -116,6 +121,7 @@
     --color-secondary-darkest: #4e555b;
     --color-primary-hover-dark: #5a6cb2;
     --color-bg-hover-light: #e9ecef;
+    --color-permanent-white: #ffffff;
 
     /* Max widths */
     --max-width-sm: 200px;
@@ -127,20 +133,339 @@
     --shadow-primary-medium: 0 6px 20px rgba(115, 134, 213, 0.25);
     --focus-ring-primary: 0 0 0 0.2rem rgba(115, 134, 213, 0.25);
     --focus-ring-secondary: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+
+    /* Theme-aware variables */
+    --bg-body: var(--color-bg-base);
+    --bg-card: var(--color-white);
+    --bg-navbar: var(--color-white);
+    --text-main: var(--color-text);
+    --text-muted-custom: var(--color-text-muted);
+    --border-main: var(--color-border-light);
+    --shadow-main: rgba(0, 0, 0, 0.1);
+    --shadow-rgb: 0, 0, 0;
+    --diversification-bar: var(--primary-light);
+
+    /* Bootstrap Table Control Variables */
+    --table-btn-bg: var(--primary-color);
+    --table-btn-hover-bg: var(--primary-hover);
+    --table-btn-color: var(--color-white);
+    --table-paging-bg: var(--bg-card);
+    --table-paging-color: var(--primary-color);
+    --table-paging-active-bg: var(--primary-color);
+    --table-paging-active-color: var(--color-white);
+}
+
+[data-bs-theme="dark"] {
+    --color-white: #2b3035;
+    --color-black: #f8f9fa;
+    --color-bg-light: #343a40;
+    --color-bg-base: #212529;
+    --color-text: #dee2e6;
+    --color-text-muted: #adb5bd;
+    --color-border-light: #495057;
+    --color-text-muted-light: #6c757d;
+    --color-bg-hover-light: #3c4146;
+
+    --bg-body: #121212;
+    --bg-card: #1e1e1e;
+    --bg-navbar: #1e1e1e;
+    --text-main: #e0e0e0;
+    --text-muted-custom: #a0a0a0;
+    --border-main: #333333;
+    --shadow-main: rgba(0, 0, 0, 0.5);
+    --shadow-rgb: 0, 0, 0;
+    --table-header-bg: #1c1f23;
+
+    /* Override dropdown custom for dark mode */
+    --dropdown-custom-bg: #2b3035;
+    --dropdown-custom-hover-bg: #3c4146;
+    --dropdown-custom-hover-color: #f8f9fa;
+
+    /* Sidebar specific variables (settings and main sidebar) */
+    --sidebar-bg: #41508a;
+    --sidebar-dropdown-bg: #4d5da1;
+    --diversification-bar: rgba(65, 80, 138, 0.4);
+
+    /* Bootstrap Table Control Variables - Dark Mode Refined */
+    --table-btn-bg: #41508a;
+    --table-btn-hover-bg: #4d5da1;
+    --table-btn-color: var(--color-permanent-white);
+    --table-paging-bg: #2b3035;
+    --table-paging-color: var(--color-permanent-white);
+    --table-paging-active-bg: #41508a;
+    --table-paging-active-color: var(--color-permanent-white);
+    --table-paging-border: #495057;
+
+    /* Status Pill Overrides - Dark Mode */
+    --pill-success-bg: rgba(40, 167, 69, 0.2);
+    --pill-success-text: #75d08b;
+    --pill-danger-bg: rgba(220, 53, 69, 0.2);
+    --pill-danger-text: #f18c96;
+}
+
+/* Theme Selector Styles */
+.theme-selector-container {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.theme-option {
+    flex: 1;
+    min-width: 120px;
+    position: relative;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.theme-option.selected {
+    opacity: 1;
+}
+
+.theme-option:hover {
+    opacity: 1;
+}
+
+.theme-radio {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.theme-label {
+    display: block;
+    padding: 1rem;
+    border: 2px solid var(--border-main);
+    border-radius: var(--border-radius-lg);
+    background: var(--bg-card);
+    cursor: pointer;
+    transition: var(--transition-standard);
+    text-align: center;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.theme-label:hover {
+    border-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-primary-light);
+    background: var(--color-bg-hover-light);
+}
+
+/* SELECTED STATE - Make it very obvious */
+.theme-radio:checked + .theme-label,
+.theme-option.selected .theme-label {
+    border-color: var(--primary-color) !important;
+    border-width: 3px !important;
+    background: var(--primary-lighter) !important;
+    box-shadow: var(--shadow-primary-medium) !important;
+    transform: scale(1.02) !important;
+}
+
+.theme-radio:checked + .theme-label::before,
+.theme-option.selected .theme-label::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    z-index: 10;
+}
+
+.theme-radio:checked + .theme-label::after,
+.theme-option.selected .theme-label::after {
+    content: '✓';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 11;
+}
+
+[data-bs-theme="dark"] .theme-radio:checked + .theme-label,
+[data-bs-theme="dark"] .theme-option.selected .theme-label {
+    background: rgba(65, 80, 138, 0.4) !important;
+    border-color: var(--primary-color) !important;
+}
+
+/* Enhanced visual feedback for selected theme */
+.theme-radio:checked + .theme-label .theme-name,
+.theme-option.selected .theme-label .theme-name {
+    color: var(--primary-color) !important;
+    font-weight: 700 !important;
+}
+
+.theme-radio:checked + .theme-label .theme-preview,
+.theme-option.selected .theme-label .theme-preview {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(115, 134, 213, 0.4);
+}
+
+/* Visual feedback - opacity already defined on .theme-option above */
+
+.theme-preview {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 0.75rem;
+    border-radius: var(--border-radius-standard);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.theme-icon {
+    font-size: 1.5rem;
+    z-index: 2;
+    position: relative;
+}
+
+.light-preview {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border: 1px solid #dee2e6;
+}
+
+.light-preview .theme-icon {
+    color: #ffc107;
+}
+
+.dark-preview {
+    background: linear-gradient(135deg, #212529 0%, #343a40 100%);
+    border: 1px solid #495057;
+}
+
+.dark-preview .theme-icon {
+    color: #6f42c1;
+}
+
+.auto-preview {
+    background: linear-gradient(135deg, #ffffff 0%, #ffffff 50%, #212529 50%, #212529 100%);
+    border: 1px solid #dee2e6;
+    position: relative;
+}
+
+.auto-preview .theme-icon {
+    color: var(--primary-color);
+}
+
+.auto-preview .theme-gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, transparent 0%, transparent 45%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.3) 100%);
+    pointer-events: none;
+}
+
+.theme-info {
+    text-align: center;
+}
+
+.theme-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    margin-bottom: 0.25rem;
+}
+
+.theme-description {
+    font-size: 0.75rem;
+    color: var(--text-muted-custom);
+    line-height: 1.2;
+}
+
+/* Responsive adjustments for theme selector */
+@media (max-width: 768px) {
+    .theme-selector-container {
+        flex-direction: column;
+    }
+
+    .theme-option {
+        min-width: unset;
+    }
+
+    .theme-label {
+        display: flex;
+        align-items: center;
+        text-align: left;
+        padding: 0.75rem;
+    }
+
+    .theme-preview {
+        width: 40px;
+        height: 40px;
+        margin: 0 0.75rem 0 0;
+        flex-shrink: 0;
+    }
+
+    .theme-icon {
+        font-size: 1.25rem;
+    }
+}
+
+/* Animation for theme switching */
+.theme-radio:checked + .theme-label,
+.theme-option.selected .theme-label {
+    animation: selectTheme 0.4s ease-out;
+}
+
+@keyframes selectTheme {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1.02);
+    }
+}
+
+/* Focus styles for accessibility */
+.theme-radio:focus + .theme-label {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .theme-label {
+        border-width: 3px;
+    }
+
+    .theme-option.selected .theme-label {
+        border-width: 4px;
+    }
 }
 
 /* Base Styles */
 body {
     font-family: 'Poppins', sans-serif;
-    background: var(--color-bg-base);
+    background: var(--bg-body);
+    color: var(--text-main);
 }
 
 p {
-    font-family: inherit; /* Inherit from body */
+    font-family: inherit;
+    /* Inherit from body */
     font-size: 1.1em;
     font-weight: 300;
     line-height: 1.7em;
-    color: var(--color-text-muted);
+    color: var(--text-muted-custom);
 }
 
 a,
@@ -153,11 +478,11 @@ a:focus {
 
 .navbar {
     padding: var(--spacing-sm) var(--spacing-sm);
-    background: var(--color-white);
+    background: var(--bg-navbar);
     border: none;
     border-radius: 0;
     margin-bottom: var(--spacing-sm);
-    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 1px 1px 3px var(--shadow-main);
 }
 
 .navbar-btn {
@@ -169,7 +494,7 @@ a:focus {
 .line {
     width: 100%;
     height: 1px;
-    border-bottom: 1px dashed var(--color-border-light);
+    border-bottom: 1px dashed var(--border-main);
     margin: 2.5rem 0;
 }
 
@@ -184,12 +509,13 @@ span {
 
 /* Sidebar Container */
 #sidebar {
-    background: var(--primary-color);
+    background: var(--sidebar-bg);
     min-width: var(--sidebar-width-desktop);
     max-width: var(--sidebar-width-desktop);
     transition: var(--transition-standard);
     position: relative;
-    z-index: var(--z-index-toast); /* Use existing z-index scale - ensures sidebar is above Bootstrap Table */
+    z-index: var(--z-index-toast);
+    /* Use existing z-index scale - ensures sidebar is above Bootstrap Table */
 }
 
 /* Immediate collapsed state from localStorage (prevents flash) */
@@ -230,8 +556,8 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar #sidebar-po
 /* Immediate collapsed state rules consolidated above */
 
 /* Connection status centering when sidebar is collapsed - shared styles */
-html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .mt-auto > div.px-3,
-#sidebar.sidebar-collapsed .mt-auto > div.px-3 {
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .mt-auto>div.px-3,
+#sidebar.sidebar-collapsed .mt-auto>div.px-3 {
     padding-left: var(--sidebar-margin) !important;
     padding-right: var(--sidebar-margin) !important;
     display: flex !important;
@@ -239,8 +565,8 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .mt-auto > 
     align-items: center !important;
 }
 
-html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .mt-auto > div > div.d-flex,
-#sidebar.sidebar-collapsed .mt-auto > div > div.d-flex {
+html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar .mt-auto>div>div.d-flex,
+#sidebar.sidebar-collapsed .mt-auto>div>div.d-flex {
     justify-content: center !important;
     align-items: center !important;
     margin: 0 auto !important;
@@ -352,7 +678,8 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.dropdow
     padding: 0;
     margin: 0 var(--sidebar-margin);
     position: relative;
-    z-index: calc(var(--z-index-toast) + 10); /* Ensure collapsed dropdowns are also above Bootstrap Table */
+    z-index: calc(var(--z-index-toast) + 10);
+    /* Ensure collapsed dropdowns are also above Bootstrap Table */
 }
 
 /* Shared collapsed state styles for sidebar dropdown parent containers */
@@ -381,6 +708,18 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     margin: 0 !important;
 }
 
+/* Dark mode: fix portfolio selector icon visibility */
+[data-bs-theme="dark"] #sidebar-portfolio-selector .sidebar-icon,
+[data-bs-theme="dark"] #sidebar-portfolio-selector img,
+[data-bs-theme="dark"] #selectPortfolio img,
+[data-bs-theme="dark"] #sidebar-portfolio-menu img,
+[data-bs-theme="dark"] #sidebar-portfolio-menu .dropdown-item img,
+[data-bs-theme="dark"] .dropdown-menu img.rounded-circle {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    border-radius: 50% !important;
+    padding: 2px !important;
+}
+
 /* Adjust brand section when collapsed */
 #sidebar.sidebar-collapsed .navbar-brand {
     padding: 1rem 0.5rem !important;
@@ -395,7 +734,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 /* Connection status centering rules consolidated above */
 
 /* Version number styling - ensure it fits */
-#sidebar .mt-auto > div.text-center.text-white-50 {
+#sidebar .mt-auto>div.text-center.text-white-50 {
     font-size: 0.7rem !important;
     line-height: 1.2;
     padding-left: 0.5rem !important;
@@ -405,19 +744,36 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     text-overflow: ellipsis;
 }
 
+#sidebar .text-white,
+#sidebar .sidebar-text,
+#sidebar .sidebar-nav-link,
+#sidebar .sidebar-nav-link i {
+    color: var(--sidebar-text-color) !important;
+}
+
+#sidebar .sidebar-nav-link.active,
+#sidebar .sidebar-nav-link.active i,
+#sidebar .sidebar-nav-link.active .sidebar-text {
+    color: var(--color-permanent-white) !important;
+}
+
+#sidebar .text-white-50 {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
 /* Version number when collapsed - even smaller */
-#sidebar.sidebar-collapsed .mt-auto > div.text-center.text-white-50 {
+#sidebar.sidebar-collapsed .mt-auto>div.text-center.text-white-50 {
     font-size: 0.65rem !important;
     padding: 0.25rem 0 !important;
 }
 
 #sidebar .navbar {
-    background: var(--primary-color) !important;
+    background: var(--sidebar-bg) !important;
     width: 100%;
 }
 
 #sidebar .navbar-brand {
-    color: var(--color-white) !important;
+    color: var(--color-permanent-white) !important;
     border-color: rgba(255, 255, 255, 0.25);
     width: 100%;
     margin: 0;
@@ -447,9 +803,11 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     flex-shrink: 0;
 }
 
+
 /* Reduce logo margin when sidebar is expanded for better spacing */
 #sidebar:not(.sidebar-collapsed) .sidebar-logo {
-    margin-right: 0.5rem !important; /* Reduce from me-3 (1rem) to 0.5rem */
+    margin-right: 0.5rem !important;
+    /* Reduce from me-3 (1rem) to 0.5rem */
 }
 
 /* Two-line navigation text */
@@ -480,8 +838,8 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     align-items: center;
     justify-content: center;
     transition: var(--transition-standard);
-    background-color: var(--color-white) !important;
-    border: none !important;
+    background-color: var(--bg-card) !important;
+    border: 2px solid var(--border-main) !important;
     box-shadow: var(--shadow-light);
     top: 15px;
     right: var(--toggle-position-desktop);
@@ -499,6 +857,17 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     outline-offset: 2px;
 }
 
+/* Dark mode: enhance toggle button visibility */
+[data-bs-theme="dark"] .sidebar-toggle {
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    background-color: rgba(30, 30, 30, 0.8) !important;
+}
+
+[data-bs-theme="dark"] .sidebar-toggle:hover {
+    border-color: rgba(255, 255, 255, 0.5) !important;
+    background-color: rgba(30, 30, 30, 0.95) !important;
+}
+
 .sidebar-nav-link:hover {
     background-color: var(--sidebar-hover-bg) !important;
     color: #fff !important;
@@ -512,7 +881,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 .sidebar-nav-link.active {
     background-color: var(--sidebar-active-bg) !important;
-    color: var(--color-white) !important;
+    color: var(--color-permanent-white) !important;
 }
 
 /* Disable transform when collapsed */
@@ -529,7 +898,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 /* Custom tooltip styling for consistent theming */
 .info-tooltip {
     --bs-tooltip-bg: var(--primary-dark);
-    --bs-tooltip-color: var(--color-white);
+    --bs-tooltip-color: var(--color-permanent-white);
     --bs-tooltip-border-radius: var(--border-radius-standard);
     --bs-tooltip-font-size: var(--font-size-sm);
     --bs-tooltip-padding-x: var(--spacing-sm);
@@ -543,7 +912,8 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     box-shadow: none;
     border-radius: var(--border-radius-standard);
     color: var(--sidebar-text-color);
-    margin: 0; /* Remove margin from button since parent handles it */
+    margin: 0;
+    /* Remove margin from button since parent handles it */
     position: relative;
 }
 
@@ -551,7 +921,8 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 #sidebar:not(.sidebar-collapsed) div.dropdown#sidebar-portfolio-selector {
     margin: 0 var(--sidebar-margin);
     position: relative;
-    z-index: calc(var(--z-index-toast) + 10); /* Slightly above sidebar container */
+    z-index: calc(var(--z-index-toast) + 10);
+    /* Slightly above sidebar container */
 }
 
 /* When portfolio selector is non-clickable (single portfolio), remove dropdown container margin */
@@ -573,14 +944,16 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 #sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle:hover {
     background-color: var(--sidebar-hover-bg);
     color: var(--color-white);
-    transform: none; /* Prevent rightward movement on hover */
+    transform: none;
+    /* Prevent rightward movement on hover */
 }
 
 #sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle:focus {
     background-color: var(--sidebar-hover-bg);
     color: var(--color-white);
     box-shadow: none;
-    transform: none; /* Prevent rightward movement on focus */
+    transform: none;
+    /* Prevent rightward movement on focus */
     outline: 2px solid rgba(255, 255, 255, 0.5);
     outline-offset: 2px;
 }
@@ -597,7 +970,8 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     box-shadow: none;
     border-radius: var(--border-radius-standard);
     color: var(--sidebar-text-color);
-    margin: 0; /* Remove margin from link since parent handles it */
+    margin: 0;
+    /* Remove margin from link since parent handles it */
     position: relative;
 }
 
@@ -605,7 +979,8 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 #sidebar:not(.sidebar-collapsed) div.dropdown#sidebar-settings-selector {
     margin: 0 var(--sidebar-margin);
     position: relative;
-    z-index: calc(var(--z-index-toast) + 10); /* Slightly above sidebar container */
+    z-index: calc(var(--z-index-toast) + 10);
+    /* Slightly above sidebar container */
 }
 
 /* Ensure settings selector parent container has no extra padding */
@@ -617,14 +992,16 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 #sidebar-settings-selector a.sidebar-nav-link.dropdown-toggle:hover {
     background-color: var(--sidebar-hover-bg);
     color: var(--color-white);
-    transform: none; /* Prevent rightward movement on hover */
+    transform: none;
+    /* Prevent rightward movement on hover */
 }
 
 #sidebar-settings-selector a.sidebar-nav-link.dropdown-toggle:focus {
     background-color: var(--sidebar-hover-bg);
     color: var(--color-white);
     box-shadow: none;
-    transform: none; /* Prevent rightward movement on focus */
+    transform: none;
+    /* Prevent rightward movement on focus */
     outline: 2px solid rgba(255, 255, 255, 0.5);
     outline-offset: 2px;
 }
@@ -632,16 +1009,17 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 /* Shared styles for sidebar dropdown menus */
 #sidebar-portfolio-menu,
 #sidebar-settings-menu {
-    background: var(--primary-dark);
+    background: var(--sidebar-dropdown-bg);
     border: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.15);
     backdrop-filter: blur(10px);
-    z-index: calc(var(--z-index-toast) + 20) !important; /* Ensure sidebar dropdowns appear above Bootstrap Table footer */
+    z-index: calc(var(--z-index-toast) + 20) !important;
+    /* Ensure sidebar dropdowns appear above Bootstrap Table footer */
 }
 
 #sidebar-portfolio-menu .dropdown-item,
 #sidebar-settings-menu .dropdown-item {
-    color: var(--color-white);
+    color: var(--color-permanent-white);
     padding: var(--spacing-sm) var(--spacing-md);
 }
 
@@ -649,8 +1027,8 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 #sidebar-portfolio-menu .dropdown-item:focus,
 #sidebar-settings-menu .dropdown-item:hover,
 #sidebar-settings-menu .dropdown-item:focus {
-    background-color: var(--primary-color);
-    color: var(--color-white);
+    background-color: var(--sidebar-hover-bg);
+    color: var(--color-permanent-white);
 }
 
 #sidebar-portfolio-menu .dropdown-item img,
@@ -663,8 +1041,10 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 #sidebar-portfolio-selector .sidebar-nav-link.non-clickable {
     cursor: default !important;
     pointer-events: none;
-    padding: 0.5rem !important; /* Match nav link padding */
-    margin-bottom: 0.25rem; /* Match nav link spacing */
+    padding: 0.5rem !important;
+    /* Match nav link padding */
+    margin-bottom: 0.25rem;
+    /* Match nav link spacing */
 }
 
 #sidebar-portfolio-selector .sidebar-nav-link.non-clickable:hover {
@@ -741,17 +1121,19 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
     /* Tablet - override base collapsed styles with smaller padding */
     #sidebar.sidebar-collapsed #sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle {
-        padding: 0.25rem 0.4rem; /* Tablet-specific smaller padding */
+        padding: 0.25rem 0.4rem;
+        /* Tablet-specific smaller padding */
     }
 
     /* Tablet - settings selector collapsed state */
     #sidebar.sidebar-collapsed #sidebar-settings-selector a.sidebar-nav-link.dropdown-toggle {
-        padding: 0.25rem 0.4rem; /* Tablet-specific smaller padding */
+        padding: 0.25rem 0.4rem;
+        /* Tablet-specific smaller padding */
     }
 
     /* Tablet - connection status centering rules consolidated in main collapsed state rules */
 
-        #sidebar .navbar-brand span {
+    #sidebar .navbar-brand span {
         font-size: 0.9rem;
     }
 
@@ -811,12 +1193,14 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
     /* Mobile - override base collapsed styles with smaller padding */
     #sidebar.sidebar-collapsed #sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle {
-        padding: 0.2rem 0.3rem; /* Mobile-specific smaller padding */
+        padding: 0.2rem 0.3rem;
+        /* Mobile-specific smaller padding */
     }
 
     /* Mobile - settings selector collapsed state */
     #sidebar.sidebar-collapsed #sidebar-settings-selector a.sidebar-nav-link.dropdown-toggle {
-        padding: 0.2rem 0.3rem; /* Mobile-specific smaller padding */
+        padding: 0.2rem 0.3rem;
+        /* Mobile-specific smaller padding */
     }
 
     /* Mobile - connection status centering rules consolidated in main collapsed state rules */
@@ -862,17 +1246,21 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 ----------------------------------------------------- */
 
 .green-pill {
-    background-color: var(--color-success-bg);
-    color: var(--color-success-dark);
+    background-color: var(--pill-success-bg, var(--color-success-light));
+    color: var(--pill-success-text, var(--color-success-dark));
     border-radius: var(--border-radius-xs);
     padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.85rem;
+    font-weight: 500;
 }
 
 .red-pill {
-    background-color: var(--color-danger-light);
-    color: var(--color-danger-dark);
+    background-color: var(--pill-danger-bg, var(--color-danger-light));
+    color: var(--pill-danger-text, var(--color-danger-dark));
     border-radius: var(--border-radius-xs);
     padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.85rem;
+    font-weight: 500;
 }
 
 .progress-bar-background {
@@ -880,8 +1268,26 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     top: 0;
     left: 0;
     height: 100%;
-    background-color: var(--primary-light);
+    background-color: var(--diversification-bar);
     z-index: 0;
+}
+
+.diversification-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-main);
+    box-shadow: var(--shadow-main);
+}
+
+.list-group-item {
+    background-color: transparent !important;
+    border-color: var(--border-main) !important;
+    color: var(--text-main) !important;
+}
+
+.content-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-main);
+    box-shadow: var(--shadow-main);
 }
 
 .diversification-chart-container {
@@ -911,13 +1317,17 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 .upcoming-dividends {
-    background: repeating-linear-gradient(
-        135deg,         /* Angle of the stripes */
-        var(--primary-light),        /* Color of the stripes */
-        var(--primary-light) 2px,    /* End color of the stripe */
-        var(--primary-lighter) 2px,    /* Background color between stripes */
-        var(--primary-lighter) 4px     /* End color of the stripe */
-    );
+    background: repeating-linear-gradient(135deg,
+            /* Angle of the stripes */
+            var(--primary-light),
+            /* Color of the stripes */
+            var(--primary-light) 2px,
+            /* End color of the stripe */
+            var(--primary-lighter) 2px,
+            /* Background color between stripes */
+            var(--primary-lighter) 4px
+            /* End color of the stripe */
+        );
 }
 
 .forecasted-dividends {
@@ -926,6 +1336,24 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 .ex_dividend-dividends {
     background-color: transparent;
+}
+
+/* Dark mode: darken pill backgrounds to maintain white text and theme consistency */
+[data-bs-theme="dark"] .dividends {
+    background-color: #4a5e8f;
+}
+
+[data-bs-theme="dark"] .upcoming-dividends {
+    background: repeating-linear-gradient(135deg,
+            #4a5e8f,
+            #4a5e8f 2px,
+            #5a6ea5 2px,
+            #5a6ea5 4px
+        );
+}
+
+[data-bs-theme="dark"] .forecasted-dividends {
+    background: #5a6ea5;
 }
 
 #togglePassword {
@@ -943,7 +1371,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     position: relative;
     width: 2.8rem;
     height: 2.8rem;
-    background: linear-gradient(135deg, var(--color-white) 0%, var(--color-bg-light) 100%);
+    background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-body) 100%);
     border: 2px solid var(--primary-color);
     border-radius: 50%;
     display: flex;
@@ -960,20 +1388,22 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     clip-path: circle(50%);
 }
 
-.country-flag-container:hover {
+/* Shared hover effects for all circular icon containers */
+.country-flag-container:hover,
+.asset-icon-container:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-primary-medium);
     border-color: var(--primary-dark);
 }
 
-.country-flag-container::before {
+.country-flag-container::before,
+.asset-icon-container::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
     border-radius: 50%;
     pointer-events: none;
 }
@@ -1013,23 +1443,36 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     background-size: 160% 160%;
 }
 
-/* Enhanced styling for all asset icons in diversification - hover effects */
-.asset-icon-container:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-primary-medium);
-    border-color: var(--primary-dark);
+/* Light mode: keep it white */
+[data-bs-theme="light"] .asset-icon-container,
+[data-bs-theme="light"] .country-flag-container {
+    background: #ffffff;
 }
 
-.asset-icon-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+[data-bs-theme="light"] .asset-icon-container::before,
+[data-bs-theme="light"] .country-flag-container::before {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
-    border-radius: 50%;
-    pointer-events: none;
+}
+
+/* Dark mode: white center with darker outer ring for better contrast with dark icons */
+[data-bs-theme="dark"] .asset-icon-container,
+[data-bs-theme="dark"] .country-flag-container {
+    background: radial-gradient(circle, #ffffff 0%, #ffffff 30%, #a8b0bc 70%, #4a525e 100%);
+}
+
+[data-bs-theme="dark"] .asset-icon-container::before,
+[data-bs-theme="dark"] .country-flag-container::before {
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 30%, rgba(0, 0, 0, 0.25) 100%);
+}
+
+/* Dark mode: ensure icons and symbols are dark for contrast against white background */
+[data-bs-theme="dark"] .asset-icon-container i,
+[data-bs-theme="dark"] .asset-icon-container .currency-symbol {
+    color: #2b3035 !important;
+}
+
+[data-bs-theme="dark"] .asset-icon-container:hover .currency-symbol {
+    color: #1a1d20 !important;
 }
 
 .asset-icon-container img,
@@ -1054,7 +1497,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     font-size: 1.5rem;
     font-weight: 400;
     font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, monospace;
-    color: #000;
+    color: var(--text-main);
     text-align: center;
     line-height: 1;
     /* Force optical centering */
@@ -1109,6 +1552,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 /* Responsive design for smaller screens */
 @media (max-width: 768px) {
+
     .country-flag-container,
     .asset-icon-container {
         width: 2.4rem;
@@ -1128,6 +1572,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 /* Responsive design for asset icons - Mobile */
 @media (max-width: 576px) {
+
     .country-flag-container,
     .asset-icon-container {
         width: 2.2rem;
@@ -1156,18 +1601,24 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .country-flag-image[src=""],
 .country-flag-image:not([src]) {
     background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%) 0 0 / 8px 8px,
-                linear-gradient(-45deg, #f0f0f0 25%, transparent 25%) 0 4px / 8px 8px,
-                linear-gradient(45deg, transparent 75%, #f0f0f0 75%) 4px -4px / 8px 8px,
-                linear-gradient(-45deg, transparent 75%, #f0f0f0 75%) -4px 0 / 8px 8px;
+        linear-gradient(-45deg, #f0f0f0 25%, transparent 25%) 0 4px / 8px 8px,
+        linear-gradient(45deg, transparent 75%, #f0f0f0 75%) 4px -4px / 8px 8px,
+        linear-gradient(-45deg, transparent 75%, #f0f0f0 75%) -4px 0 / 8px 8px;
 }
 
 /* Bootstrap Table Pagination Styles */
-.bootstrap-table .btn:focus, .bootstrap-table .btn:hover {
-    background-color: var(--primary-hover);
-}
 .bootstrap-table .btn {
-    background-color: var(--primary-color);
+    background-color: var(--table-btn-bg);
+    color: var(--table-btn-color) !important;
+    border-color: var(--table-btn-bg);
     z-index: 1;
+}
+
+.bootstrap-table .btn:focus,
+.bootstrap-table .btn:hover {
+    background-color: var(--table-btn-hover-bg);
+    border-color: var(--table-btn-hover-bg);
+    color: var(--table-btn-color) !important;
 }
 
 .bootstrap-table .pagination {
@@ -1194,35 +1645,46 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 .bootstrap-table .pagination .page-item.active {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-    color: var(--color-white);
+    background-color: var(--table-paging-active-bg);
+    border-color: var(--table-paging-active-bg);
+    color: var(--table-paging-active-color) !important;
 }
 
+/* Pagination - Active Page Button */
 .bootstrap-table .page-item.active .page-link {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-    color: var(--color-white);
+    background-color: var(--table-paging-active-bg);
+    border-color: var(--table-paging-active-bg);
+    color: var(--table-paging-active-color) !important;
 }
 
+/* Pagination - Default Page Button */
 .bootstrap-table .page-link {
-    color: var(--primary-color);
+    color: var(--table-paging-color) !important;
+    background-color: var(--table-paging-bg);
+    border-color: var(--table-paging-border, var(--border-main));
 }
 
-.bootstrap-table .page-link:hover {
-    color: var(--color-primary-hover-dark);
-    background-color: var(--color-bg-hover-light);
-    border-color: var(--color-border-light);
+/* Pagination - Hover and Focus States */
+.bootstrap-table .page-link:hover,
+.bootstrap-table .page-link:focus {
+    background-color: var(--table-btn-hover-bg);
+    color: var(--table-btn-color) !important;
+    border-color: var(--table-btn-hover-bg);
+    box-shadow: none;
 }
 
+/* Pagination - Disabled Buttons (includes "..." ellipsis) */
 .bootstrap-table .page-item.disabled .page-link {
-    color: var(--color-text-muted);
+    color: var(--table-paging-color) !important;
+    background-color: var(--table-paging-bg);
+    border-color: var(--table-paging-border, var(--border-main));
+    opacity: 1;
 }
 
 .bootstrap-table .page-size-selector {
-    color: var(--primary-color);
-    border-color: var(--color-border-light);
-    background-color: var(--color-white);
+    color: var(--table-paging-color);
+    border-color: var(--border-main);
+    background-color: var(--table-paging-bg);
 }
 
 .bootstrap-table .page-size-selector:focus {
@@ -1242,7 +1704,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 /* Reduce height of pagination container div (but not the ul inside) */
-.bootstrap-table .fixed-table-pagination .float-right.pagination > div {
+.bootstrap-table .fixed-table-pagination .float-right.pagination>div {
     height: var(--bootstrap-table-control-height);
     display: inline-flex;
     align-items: center;
@@ -1250,13 +1712,16 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 /* Reduce height of input inside pagination container div */
-.bootstrap-table .fixed-table-pagination .float-right.pagination > div > input {
+.bootstrap-table .fixed-table-pagination .float-right.pagination>div>input {
     height: var(--bootstrap-table-control-height);
     padding: var(--spacing-xs) var(--spacing-sm);
     font-size: var(--font-size-sm);
     line-height: 1.5;
-    width: 60px; /* Width sufficient for page numbers */
+    width: 60px;
     text-align: center;
+    background-color: var(--table-paging-bg) !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--border-main) !important;
 }
 
 /* Bootstrap Table Page Jump To Component Styling */
@@ -1278,11 +1743,11 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     padding: 0.375rem 0.75rem;
     font-size: 1rem;
     line-height: 1.5;
-    color: var(--primary-color);
-    border-color: var(--color-border-light);
-    background-color: var(--color-white);
+    color: var(--text-main) !important;
+    border-color: var(--border-main) !important;
+    background-color: var(--table-paging-bg) !important;
     border-radius: var(--border-radius-xs) 0 0 var(--border-radius-xs);
-    width: 60px; /* Narrow width for page number input */
+    width: 60px;
     text-align: center;
 }
 
@@ -1297,9 +1762,9 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     padding: 0.375rem 0.75rem;
     font-size: var(--font-size-base);
     line-height: 1.5;
-    background-color: var(--primary-color);
-    color: var(--color-white);
-    border-color: var(--primary-color);
+    background-color: var(--table-btn-bg);
+    color: var(--table-btn-color);
+    border-color: var(--table-btn-bg);
     border-radius: 0 var(--border-radius-xs) var(--border-radius-xs) 0;
     border-left: none;
     display: flex;
@@ -1320,9 +1785,10 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     color: white;
 }
 
-.table td, .table th {
-  border-right: none !important;
-  border-left: none !important;
+.table td,
+.table th {
+    border-right: none !important;
+    border-left: none !important;
 }
 
 .dropdown-custom {
@@ -1338,14 +1804,14 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     color: var(--dropdown-custom-hover-color) !important;
 }
 
-.dropdown-custom + .dropdown-menu .dropdown-item.active,
-.dropdown-custom + .dropdown-menu .dropdown-item:active {
+.dropdown-custom+.dropdown-menu .dropdown-item.active,
+.dropdown-custom+.dropdown-menu .dropdown-item:active {
     background-color: var(--dropdown-custom-active-bg) !important;
     color: var(--dropdown-custom-active-color) !important;
 }
 
-.dropdown-custom + .dropdown-menu .dropdown-item:hover,
-.dropdown-custom + .dropdown-menu .dropdown-item:focus {
+.dropdown-custom+.dropdown-menu .dropdown-item:hover,
+.dropdown-custom+.dropdown-menu .dropdown-item:focus {
     background-color: var(--dropdown-custom-hover-bg) !important;
     color: var(--dropdown-custom-hover-color) !important;
 }
@@ -1417,11 +1883,13 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 /* Connection Status Icons - Better contrast against dark sidebar */
 #sidebar .text-success {
-    color: var(--color-success-light) !important; /* Light green for better contrast */
+    color: var(--color-success-light) !important;
+    /* Light green for better contrast */
 }
 
 #sidebar .text-warning {
-    color: var(--color-warning-light) !important; /* Gold/bright yellow for better contrast */
+    color: var(--color-warning-light) !important;
+    /* Gold/bright yellow for better contrast */
 }
 
 /* ---------------------------------------------------
@@ -1546,7 +2014,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .bootstrap-table select {
     -webkit-appearance: none !important;
     appearance: none !important;
-    background: white url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3E%3C/svg%3E") no-repeat right 0.75rem center !important;
+    background: var(--bg-card) url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23adb5bd' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3E%3C/svg%3E") no-repeat right 0.75rem center !important;
     background-size: 16px 12px !important;
     padding-right: 2.25rem !important;
 }
@@ -1557,12 +2025,49 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     position: relative;
     z-index: 10;
     pointer-events: auto;
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border-color: var(--border-main);
 }
 
-/* Ensure Bootstrap table toolbar stays below modals */
+.bootstrap-table .fixed-table-container,
+.bootstrap-table .fixed-table-toolbar,
+.bootstrap-table .fixed-table-pagination {
+    background-color: transparent;
+    color: var(--text-main);
+}
+
+/* Bootstrap Table Z-Index and Layout */
+.bootstrap-table thead th {
+    background-color: var(--table-header-bg, #f8f9fa);
+    position: relative;
+    z-index: var(--z-index-table-header);
+}
+
+.bootstrap-table .fixed-table-header {
+    z-index: var(--z-index-table-header) !important;
+}
+
+.table-striped>tbody>tr:nth-of-type(odd)>* {
+    --bs-table-accent-bg: rgba(255, 255, 255, 0.03);
+}
+
+/* Toolbar positioning: must be above table header but below modals */
 .bootstrap-table .fixed-table-toolbar {
     position: relative;
-    z-index: 10;
+    z-index: var(--z-index-table-toolbar) !important;
+    overflow: visible !important;
+}
+
+/* Column selector container: elevated to prevent header overlap */
+.bootstrap-table .fixed-table-toolbar .columns {
+    position: relative;
+    z-index: var(--z-index-modal) !important;
+}
+
+/* Allow dropdowns to escape container clipping */
+.bootstrap-table .fixed-table-body-columns {
+    overflow: visible !important;
 }
 
 /* Ensure Bootstrap table search field doesn't appear above modals */
@@ -1605,6 +2110,45 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     margin-left: 0 !important;
 }
 
+/* Bootstrap Table Dropdown Menus - Dark Mode Support */
+/* Column selector dropdown */
+.bootstrap-table .fixed-table-toolbar .columns .dropdown-menu {
+    z-index: var(--z-index-table-dropdown) !important;
+    position: absolute !important;
+    background-color: var(--dropdown-custom-bg) !important;
+    border: 1px solid var(--border-main) !important;
+}
+
+/* Page size selector dropdown */
+.bootstrap-table .fixed-table-pagination .dropdown-menu {
+    background-color: var(--dropdown-custom-bg) !important;
+    border: 1px solid var(--border-main) !important;
+}
+
+/* Dropdown item styling - applies to both column selector and page size selector */
+.bootstrap-table .fixed-table-toolbar .columns .dropdown-menu .dropdown-item,
+.bootstrap-table .fixed-table-pagination .dropdown-menu .dropdown-item {
+    color: var(--text-main) !important;
+}
+
+/* Hover and focus states */
+.bootstrap-table .fixed-table-toolbar .columns .dropdown-menu .dropdown-item:hover,
+.bootstrap-table .fixed-table-toolbar .columns .dropdown-menu .dropdown-item:focus,
+.bootstrap-table .fixed-table-pagination .dropdown-menu .dropdown-item:hover,
+.bootstrap-table .fixed-table-pagination .dropdown-menu .dropdown-item:focus {
+    background-color: var(--dropdown-custom-hover-bg) !important;
+    color: var(--dropdown-custom-hover-color) !important;
+}
+
+/* Active states */
+.bootstrap-table .fixed-table-toolbar .columns .dropdown-menu .dropdown-item.active,
+.bootstrap-table .fixed-table-toolbar .columns .dropdown-menu .dropdown-item:active,
+.bootstrap-table .fixed-table-pagination .dropdown-menu .dropdown-item.active,
+.bootstrap-table .fixed-table-pagination .dropdown-menu .dropdown-item:active {
+    background-color: var(--dropdown-custom-active-bg) !important;
+    color: var(--dropdown-custom-active-color) !important;
+}
+
 /* ---------------------------------------------------
     END BOOTSTRAP TABLE FIXES
 ----------------------------------------------------- */
@@ -1613,19 +2157,39 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     RELEASE NOTES STYLING
 ----------------------------------------------------- */
 
-/* Release Notes Content - uses CSS custom properties for theming */
+/* Settings - override Bootstrap card defaults for theme support */
+.settings-content .card-body,
+.settings-content .settings-card {
+    background: var(--bg-card);
+    color: var(--text-main);
+    border: 1px solid var(--border-main);
+    border-radius: var(--border-radius-md);
+}
+
+.settings-content .card-body {
+    padding: var(--spacing-lg);
+}
+
+.settings-main {
+    background: transparent;
+    color: var(--text-main);
+}
+
+/* Release Notes Content - uses theme-aware CSS custom properties */
 .release-notes-content {
-    background: var(--release-notes-bg-color, #FFFFFF);
-    color: var(--release-notes-text-color, #000000);
+    background: var(--bg-body);
+    color: var(--text-main);
     font-family: -apple-system, system-ui, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     line-height: 1.5;
     font-size: var(--font-size-sm);
     padding: 1.25rem var(--spacing-lg);
 }
 
-/* Ensure release notes styles work in modal context */
+/* Modal context: remove nested box effect and sidebars */
 .modal-body .release-notes-content {
-    padding: 1.25rem var(--spacing-lg);
+    background: transparent;
+    padding: 0;
+    margin: 0;
 }
 
 .release-notes-content h1,
@@ -1634,7 +2198,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .release-notes-content h4,
 .release-notes-content h5,
 .release-notes-content h6 {
-    color: var(--release-notes-text-color, #000000);
+    color: var(--text-main);
 }
 
 .release-notes-content p {
@@ -1667,34 +2231,36 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 .release-notes-content code {
-    background: var(--release-notes-code-bg, #F5F5F5);
-    color: var(--release-notes-text-color, #000000);
+    background: var(--bg-card);
+    color: var(--text-main);
     padding: 0.15em 0.4em;
     border-radius: var(--border-radius-xs);
     font-size: 0.95em;
+    border: 1px solid var(--border-main);
 }
 
 .release-notes-content pre code {
     padding: 0;
     background: transparent;
+    border: none;
 }
 
 .release-notes-content pre {
-    background: var(--release-notes-code-bg, #F5F5F5);
+    background: var(--bg-card);
     padding: 0.85rem var(--spacing-md);
     border-radius: var(--border-radius-sm);
     overflow-x: auto;
     font-size: 0.9em;
     line-height: 1.4;
-    border: 1px solid var(--color-border-darker);
+    border: 1px solid var(--border-main);
 }
 
 .release-notes-content blockquote {
     margin: 0.9rem 0;
     padding: 0.55rem 0.9rem;
-    border-left: 4px solid #444;
-    background: var(--release-notes-blockquote-bg, #F0F0F0);
-    color: var(--color-text-muted-light);
+    border-left: 4px solid var(--primary-color);
+    background: var(--bg-card);
+    color: var(--text-muted-custom);
     border-radius: var(--border-radius-xs);
 }
 
@@ -1705,19 +2271,20 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 .release-notes-content strong {
-    color: var(--release-notes-text-color, #000000);
+    color: var(--text-main);
+    font-weight: 600;
 }
 
 .release-notes-content em {
-    color: #ddd;
+    color: var(--text-muted-custom);
 }
 
 /* Standalone release notes page styling */
 .release-notes-standalone {
     margin: 0;
     padding: 0;
-    background: var(--release-notes-bg-color, #FFFFFF);
-    color: var(--release-notes-text-color, #000000);
+    background: var(--bg-body);
+    color: var(--text-main);
     height: 100%;
 }
 
@@ -1725,12 +2292,12 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     SETTINGS STYLING
 ----------------------------------------------------- */
 
-/* Settings Content - uses CSS custom properties for theming */
+/* Settings Content - uses theme-aware CSS variables */
 .settings-content {
-    padding: var(--spacing-lg);
-    font-family: inherit; /* Inherit from body */
-    color: var(--settings-text-color, #000000);
-    background: var(--settings-bg-color, transparent);
+    padding: 0;
+    font-family: inherit;
+    color: var(--text-main);
+    background: transparent;
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -1739,7 +2306,6 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 /* Ensure settings styles work in modal context */
 .modal-body .settings-content {
-    padding: var(--spacing-lg);
     height: 70vh;
     min-height: 400px;
 }
@@ -1758,6 +2324,50 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 #settingsModal .modal-content {
     width: 100%;
+    border-radius: 12px;
+    border: 1px solid var(--border-main);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+[data-bs-theme="dark"] #settingsModal .modal-content {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+/* Settings modal header enhancements */
+#settingsModal .modal-header {
+    background: linear-gradient(135deg, rgba(115, 134, 213, 0.12), rgba(115, 134, 213, 0.05));
+    border-bottom: 2px solid var(--border-main);
+    padding: 1.25rem 1.5rem;
+}
+
+[data-bs-theme="dark"] #settingsModal .modal-header {
+    background: linear-gradient(135deg, rgba(115, 134, 213, 0.18), rgba(115, 134, 213, 0.08));
+}
+
+#settingsModal .modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Settings modal body */
+#settingsModal .modal-body {
+    padding: 0;
+}
+
+/* Settings modal footer enhancements */
+#settingsModal .modal-footer {
+    background: linear-gradient(to top, rgba(115, 134, 213, 0.08), transparent);
+    border-top: 2px solid var(--border-main);
+    padding: 1rem 1.5rem;
+    gap: 0.75rem;
+}
+
+[data-bs-theme="dark"] #settingsModal .modal-footer {
+    background: linear-gradient(to top, rgba(115, 134, 213, 0.12), transparent);
 }
 
 /* Make release notes modal responsive */
@@ -1771,19 +2381,20 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 .settings-sidebar {
-    width: 150px;
-    border-right: 1px solid var(--settings-border-color, #dee2e6);
-    padding-right: 1rem;
-    margin-right: 1.5rem;
-    overflow-y: auto;
-    height: 100%;
+    width: 200px;
+    background-color: var(--sidebar-bg);
+    border-right: 1px solid var(--border-main);
+    padding: var(--spacing-lg);
+    overflow-y: visible;
+    flex-shrink: 0;
+    align-self: stretch;
 }
 
 .settings-main {
     flex: 1;
     overflow-y: auto;
-    height: 100%;
-    padding-right: 0.5rem;
+    padding: var(--spacing-lg);
+    min-height: 0;
 }
 
 .broker-item {
@@ -1794,11 +2405,11 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     display: flex;
     align-items: center;
     transition: var(--transition-standard);
-    color: var(--settings-text-color, #000000);
+    color: var(--color-permanent-white);
 }
 
 .broker-item:hover {
-    background-color: var(--settings-hover-bg, var(--color-bg-light));
+    background-color: rgba(255, 255, 255, 0.1);
     transform: translateX(3px);
 }
 
@@ -1808,9 +2419,9 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 .broker-item.active {
-    background-color: var(--settings-active-bg, #D0E0FF);
+    background-color: rgba(255, 255, 255, 0.2);
     font-weight: 600;
-    color: var(--primary-color);
+    color: var(--color-permanent-white);
 }
 
 .broker-item img {
@@ -1857,17 +2468,17 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     margin-bottom: var(--spacing-sm);
     font-weight: 500;
     width: 250px;
-    color: var(--settings-text-color, #333);
+    color: var(--text-main);
 }
 
 .settings-form-group .form-control {
     max-width: 600px;
-    border: 1px solid var(--settings-form-border, var(--color-border-light));
+    border: 1px solid var(--border-main);
     border-radius: var(--border-radius-xs);
     padding: 0.375rem 0.75rem;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    background-color: var(--settings-form-bg, #fff);
-    color: var(--settings-text-color, #000000);
+    background-color: var(--bg-card);
+    color: var(--text-main);
 }
 
 .settings-form-group .form-control:focus {
@@ -1881,6 +2492,21 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     align-items: center;
     gap: 1rem;
     margin-top: 0.5rem;
+}
+
+.section-header {
+    color: var(--text-main);
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.card-label {
+    color: var(--primary-color);
+    font-weight: 500;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .verification-code {
@@ -2029,10 +2655,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     max-width: 400px;
 }
 
-.section-header {
-    padding-top: 8px;
-    padding-left: 4px;
-}
+
 
 .hidden {
     display: none;
@@ -2042,8 +2665,8 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .settings-standalone {
     margin: 0;
     padding: 0;
-    background: var(--settings-bg-color, #f8f9fa);
-    color: var(--settings-text-color, #000000);
+    background: var(--bg-body);
+    color: var(--text-main);
     height: 100%;
 }
 
@@ -2056,7 +2679,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .settings-page-header {
     margin-bottom: var(--spacing-md);
     padding-bottom: var(--spacing-md);
-    border-bottom: 1px solid var(--settings-border-color, var(--color-border-light));
+    border-bottom: 1px solid var(--border-main);
 }
 
 .settings-page-header h2 {
@@ -2071,7 +2694,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     align-items: center;
     margin-top: 1.5rem;
     padding-top: 1rem;
-    border-top: 1px solid var(--settings-border-color, #dee2e6);
+    border-top: 1px solid var(--border-main);
 }
 
 /* Toast positioning for standalone settings page */
@@ -2167,6 +2790,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .modal-header {
     border-bottom: 1px solid var(--color-border-light);
     padding: var(--spacing-md) var(--spacing-lg);
+    background: linear-gradient(to bottom, var(--bg-card), var(--bg-body));
 }
 
 .modal-header.border-0 {
@@ -2176,8 +2800,9 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 .modal-title {
     color: var(--primary-color);
-    font-weight: 600;
-    font-size: var(--font-size-lg);
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
 }
 
 /* Modal content styling */
@@ -2215,13 +2840,20 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 .modal-footer {
-    padding: var(--spacing-md) var(--spacing-lg);
-    background-color: var(--color-bg-light);
+    padding: var(--spacing-lg);
+    background: linear-gradient(to top, var(--bg-card), var(--bg-body));
+    border-top: 1px solid var(--border-main);
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+}
+
+[data-bs-theme="dark"] .modal-footer {
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .modal-footer.border-0 {
     border-top: none;
     padding-top: var(--spacing-md);
+    box-shadow: none;
 }
 
 /* Required field indicator */
@@ -2263,7 +2895,7 @@ label.required::after {
 .key-section-title {
     font-size: 1rem;
     font-weight: 600;
-    color: var(--settings-text-color, #333);
+    color: var(--text-main);
 }
 
 /* Key management - IBKR settings */
@@ -2319,6 +2951,29 @@ label.required::after {
     background-color: var(--color-danger-dark, #c82333);
     border-color: var(--color-danger-dark, #bd2130);
     color: var(--color-white, white);
+}
+
+/* Dark mode: fix button text visibility */
+[data-bs-theme="dark"] .btn-key-action {
+    background-color: #2b3035;
+    border-color: #495057;
+    color: #e0e0e0;
+}
+
+[data-bs-theme="dark"] .btn-key-action:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+    color: #ffffff;
+}
+
+[data-bs-theme="dark"] .btn-key-action.btn-key-danger {
+    color: #ff6b6b;
+}
+
+[data-bs-theme="dark"] .btn-key-action.btn-key-danger:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: #ffffff;
 }
 
 /* Responsive design for settings modal */

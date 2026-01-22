@@ -8,11 +8,32 @@
         overflow-x: hidden !important;
     }
 
+    /* Allow toolbar dropdowns to overflow without clipping */
+    #{{ table_id }} + .bootstrap-table {
+        overflow: visible !important;
+    }
+
+    #{{ table_id }} + .bootstrap-table .fixed-table-toolbar {
+        overflow: visible !important;
+        position: relative;
+        z-index: var(--z-index-popover);
+    }
+
     /* Fix sticky header positioning within Bootstrap Table's scroll container */
     .fixed-table-header {
         position: sticky !important;
         top: 0 !important;
-        z-index: 1000 !important;
-        background-color: white !important;
+        z-index: var(--z-index-dropdown) !important;
+        background-color: var(--table-header-bg, #f8f9fa) !important;
+    }
+
+    /* Ensure column selector dropdown appears above sticky header */
+    #{{ table_id }} + .bootstrap-table .fixed-table-toolbar .columns {
+        position: relative;
+        z-index: var(--z-index-modal) !important;
+    }
+
+    #{{ table_id }} + .bootstrap-table .fixed-table-toolbar .columns .dropdown-menu {
+        z-index: var(--z-index-table-dropdown) !important;
     }
 </style>

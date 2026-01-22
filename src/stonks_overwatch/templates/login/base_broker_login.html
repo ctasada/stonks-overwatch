@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="{% if APPEARANCE == 'auto' %}auto{% else %}{{ APPEARANCE }}{% endif %}">
 
 <head>
     <meta charset="UTF-8">
@@ -21,23 +21,23 @@
 
     <style>
         .alert a {
-            color: #0d6efd !important;
+            color: var(--bs-link-color) !important;
             text-decoration: underline !important;
             font-weight: 500;
         }
         .alert a:hover {
-            color: #0a58ca !important;
+            color: var(--bs-link-hover-color) !important;
         }
         .back-link {
             position: absolute;
             top: 1rem;
             left: 1rem;
-            color: #6c757d;
+            color: var(--text-muted-custom);
             text-decoration: none;
             z-index: 1000;
         }
         .back-link:hover {
-            color: #0d6efd;
+            color: var(--bs-primary);
         }
     </style>
     {% block extra_css %}{% endblock %}
@@ -121,5 +121,8 @@
             initializePasswordToggles();
         }
     </script>
+
+    <!-- Theme Manager -->
+    <script src="{% static 'js/theme-manager.js' %}"></script>
 </body>
 </html>

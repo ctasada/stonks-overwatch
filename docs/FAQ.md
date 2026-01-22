@@ -226,6 +226,31 @@ poetry run python ./scripts/dump_db.py dump --output portfolio.json
 Navigate to Settings > Export Data
 ```
 
+### Can I change the theme or appearance?
+
+Yes! Stonks Overwatch supports three theme options:
+
+- **Light Theme** - Traditional bright interface
+- **Dark Theme** - Modern dark interface that's easier on the eyes
+- **System Theme** - Automatically follows your OS theme preference
+
+**To change themes:**
+
+**Native App:**
+1. Open Preferences from the application menu
+2. Go to General tab
+3. Select your preferred theme
+
+**Web Version:**
+1. Click Settings in the sidebar
+2. Navigate to Preferences section
+3. Choose your theme preference
+
+The system theme option will automatically switch between light and dark modes when your operating system changes its theme, providing a seamless experience.
+
+![UI Mode](./images/screenshots/settings-general.png)
+*UI Mode Selector*
+
 ## Troubleshooting
 
 ### The application won't start

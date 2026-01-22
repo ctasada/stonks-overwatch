@@ -23,6 +23,8 @@ function drawDoughnutChart(chartId, pieTitle, chartLabels, chartValues) {
         ]
     };
 
+    const textColor = window.CHART_TEXT_COLOR || '#333';
+
     const configDoughnut = {
         type: 'doughnut',
         data: data,
@@ -45,7 +47,8 @@ function drawDoughnutChart(chartId, pieTitle, chartLabels, chartValues) {
                 title: {
                     display: true,
                     text: pieTitle,
-                    font: { size: 20 }
+                    font: { size: 20 },
+                    color: textColor
                 },
                 autocolors: { mode: 'data', offset: 5 }
             }

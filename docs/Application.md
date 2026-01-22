@@ -193,7 +193,24 @@ Configure application behavior:
 - **Auto-refresh interval** - How often to sync data
 - **Startup behavior** - Launch on system startup
 - **Notifications** - Enable/disable alerts
-- **Theme** - Light/dark mode (follows system)
+- **Theme** - Choose between light, dark, or system-adaptive themes
+
+#### Theme Options
+
+Stonks Overwatch supports three theme modes:
+
+- **Light Theme** - Traditional light interface with bright backgrounds
+- **Dark Theme** - Modern dark interface that's easier on the eyes
+- **System Theme** - Automatically follows your operating system's theme preference
+
+The theme setting is available in:
+- **Native App**: Menu → Preferences → General → Theme
+- **Web Version**: Settings page (sidebar) → Preferences → Theme
+
+![UI Mode](./images/screenshots/settings-general.png)
+*UI Mode Selector*
+
+The system theme option will automatically switch between light and dark modes based on your OS settings, providing a seamless experience that matches your system preferences.
 
 ---
 

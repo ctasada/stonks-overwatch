@@ -1,7 +1,7 @@
 {% load static %}
 {% load custom_tags %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="{% if APPEARANCE == 'auto' %}auto{% else %}{{ APPEARANCE }}{% endif %}">
 
 <head>
     <meta charset="utf-8">
@@ -26,14 +26,52 @@
 
     {% block extra_css %}{% endblock %}
 
-    <!-- Inline script to prevent sidebar flash - runs before DOM is rendered -->
+    <!-- Theme Management - runs before DOM is rendered to prevent flashes -->
     <script>
+        window.ThemeManager = {
+            appearance: "{{ APPEARANCE }}",
+
+            apply: function (newAppearance) {
+                if (newAppearance) {
+                    this.appearance = newAppearance;
+                }
+
+                const htmlElement = document.documentElement;
+                const update = () => {
+                    if (this.appearance === 'auto') {
+                        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                        htmlElement.setAttribute('data-bs-theme', systemTheme);
+                    } else {
+                        htmlElement.setAttribute('data-bs-theme', this.appearance);
+                    }
+                };
+
+                // Remove existing listener if any to prevent duplicates
+                if (this._listener) {
+                    window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', this._listener);
+                    this._listener = null;
+                }
+
+                update();
+
+                // Set global chart text color
+                window.CHART_TEXT_COLOR = (htmlElement.getAttribute('data-bs-theme') === 'dark') ? '#e0e0e0' : '#333';
+
+                if (this.appearance === 'auto') {
+                    this._listener = update;
+                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this._listener);
+                }
+            }
+        };
+
         (function () {
-            // Check localStorage immediately when head loads
+            // 1. Sidebar state preservation
             if (localStorage.getItem('sidebarCollapsed') === 'true') {
-                // Add CSS to immediately apply collapsed state before page renders
                 document.documentElement.style.setProperty('--sidebar-immediate-state', 'sidebar-collapsed');
             }
+
+            // 2. Initial theme application
+            window.ThemeManager.apply();
         })();
     </script>
 </head>
@@ -159,7 +197,7 @@
                                 id="select-settings" data-bs-toggle="dropdown" aria-expanded="false"
                                 data-bs-popper-config='{"placement":"right","modifiers":[{"name":"offset","options":{"offset":[0,2]}}]}'
                                 title="Configuration" data-tooltip-text="Configuration">
-                                <i class="bi bi-gear fs-5 sidebar-icon me-3"></i>
+                                <i class="bi bi-gear-fill fs-5 sidebar-icon me-3"></i>
                                 <span class="sidebar-text">Configuration</span>
                             </a>
                             <ul class="dropdown-menu shadow" id="sidebar-settings-menu"
@@ -210,7 +248,7 @@
             <!-- Main Content -->
             <div class="col py-3" id="content">
                 <!-- Top Navigation Bar -->
-                <nav class="navbar navbar-expand-lg navbar-light bg-light" aria-label="Top navigation">
+                <nav class="navbar navbar-expand-lg" aria-label="Top navigation">
                     <div class="container-fluid justify-content-start">
                         <!-- Shows Total Portfolio -->
                         {% show_total_portfolio %}
@@ -535,11 +573,15 @@
     <div class="modal fade" id="releaseNotesModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
-                <div class="modal-header border-0 pb-0">
+                <div class="modal-header">
+                    <h5 class="modal-title">Release Notes</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 0;">
+                <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                     <!-- Content will be loaded via AJAX -->
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -553,7 +595,7 @@
                     <h5 class="modal-title fw-bold"><i class="bi bi-sliders me-2"></i>Settings</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 0;">
+                <div class="modal-body" style="max-height: 70vh; overflow: hidden; padding: 0;">
                     <!-- Content will be loaded via AJAX -->
                 </div>
                 <div class="modal-footer border-0 pt-3">
@@ -879,7 +921,18 @@
                 broker_name: brokerName
             };
 
-            if (brokerName === 'degiro') {
+            if (brokerName === 'general') {
+                const appearanceEl = document.querySelector('input[name="appearance"]:checked');
+                const baseCurrencyEl = document.getElementById('base-currency');
+
+                if (!appearanceEl || !baseCurrencyEl) {
+                    BootstrapAlertHelper.error('<strong>Error:</strong> General configuration elements not found');
+                    return JSON.stringify({ success: false, message: 'General configuration elements not found' });
+                }
+
+                payload.appearance = appearanceEl.value;
+                payload.base_currency = baseCurrencyEl.value;
+            } else if (brokerName === 'degiro') {
                 const enabledEl = document.getElementById('degiro-enabled');
                 const usernameEl = document.getElementById('degiro-username');
                 const passwordEl = document.getElementById('degiro-password');
@@ -956,6 +1009,9 @@
                 const data = await response.json();
 
                 if (data.success) {
+                    if (brokerName === 'general' && payload.appearance) {
+                        window.ThemeManager?.apply(payload.appearance);
+                    }
                     BootstrapAlertHelper.success('<strong>Success!</strong> Configuration saved successfully.');
                     return JSON.stringify({ success: true, message: 'Configuration saved successfully' });
                 } else {

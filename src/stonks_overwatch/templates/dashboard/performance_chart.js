@@ -25,7 +25,7 @@ function drawPerformance(performanceGroup, timeRange) {
         datasets: [
             {
                 data: [],
-                backgroundColor: function(context) {
+                backgroundColor: function (context) {
                     if (!context || !context.parsed)
                         return
                     const value = context.parsed.y;
@@ -44,10 +44,22 @@ function drawPerformance(performanceGroup, timeRange) {
             maintainAspectRatio: false,
             scales: {
                 y: {
+                    grid: {
+                        color: (window.CHART_TEXT_COLOR === '#e0e0e0') ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                    },
                     ticks: {
                         callback: function (value, index, ticks) {
                             return (value * 100).toFixed(2) + "%";
                         },
+                        color: window.CHART_TEXT_COLOR || '#666'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: (window.CHART_TEXT_COLOR === '#e0e0e0') ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                    },
+                    ticks: {
+                        color: window.CHART_TEXT_COLOR || '#666'
                     }
                 }
             },
@@ -84,11 +96,11 @@ function drawPerformance(performanceGroup, timeRange) {
 
     let url = HOST + URL + "?interval=" + timeRange
     // Fetch JSON data from a URL and update the chart
-    fetch(url,{
-            headers: {
-                'Accept': 'application/json'
-            }
-        })
+    fetch(url, {
+        headers: {
+            'Accept': 'application/json'
+        }
+    })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok ' + response.statusText);

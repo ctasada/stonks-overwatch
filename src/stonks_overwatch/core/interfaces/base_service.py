@@ -9,7 +9,6 @@ service implementations.
 from typing import Optional
 
 from stonks_overwatch.config.base_config import BaseConfig
-from stonks_overwatch.config.config import Config
 
 
 class DependencyInjectionMixin:
@@ -52,6 +51,9 @@ class DependencyInjectionMixin:
 
         # Fallback to global config for backward compatibility
         if self._global_config is None:
+            # Lazy import to avoid loading Django models before apps are ready
+            from stonks_overwatch.config.config import Config
+
             self._global_config = Config.get_global()
         return self._global_config
 
@@ -77,6 +79,9 @@ class DependencyInjectionMixin:
         # Fallback to global config
         # Get fresh global config (don't use self.config to avoid circular reference)
         if self._global_config is None:
+            # Lazy import to avoid loading Django models before apps are ready
+            from stonks_overwatch.config.config import Config
+
             self._global_config = Config.get_global()
         return self._global_config.base_currency
 

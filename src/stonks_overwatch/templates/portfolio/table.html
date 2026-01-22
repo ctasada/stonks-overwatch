@@ -31,7 +31,11 @@
         <tbody>
         {% for item in items %}
             <tr>
-                <td class="text-center align-middle"><img src="{% url 'asset_logo' product_type=item.product_type|lower symbol=item.symbol|lower %}" width="30" height="30" alt="{{ item.symbol }} logo" onerror="this.style.display='none'"></td>
+                <td class="text-center align-middle">
+                    <div class="asset-icon-container">
+                        <img src="{% url 'asset_logo' product_type=item.product_type|lower symbol=item.symbol|lower %}" width="30" height="30" alt="{{ item.symbol }} logo" onerror="this.style.display='none'">
+                    </div>
+                </td>
                 <td>{{ item.symbol }}<br><small class="fw-lighter">{{ item.name }}</small></td>
                 {% if show_columns.category %}
                 <td>

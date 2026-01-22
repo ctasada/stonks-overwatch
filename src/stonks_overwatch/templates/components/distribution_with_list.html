@@ -1,44 +1,41 @@
-<div class="row align-items-stretch w-100 {% if show_border != False %}border border-primary-subtle bg-light rounded mb-3{% else %}mx-0{% endif %} pb-3">
+<div
+    class="row align-items-stretch w-100 {% if show_border != False %}diversification-card rounded mb-3{% else %}mx-0{% endif %} pb-3">
     <div class="col-sm diversification-chart-container">
         <canvas id="{{ chart_id }}"></canvas>
     </div>
     <div class="col-sm diversification-scrollable-list list-group mt-3 w-100">
         {% for item in items %}
-            <div class="list-group-item rounded m-1">
-                <div class="progress-bar-background" style="width: {{ item.weight }}%;"></div>
-                <div class="diversification-weight">
-                    <div class="d-flex align-items-center">
-                        {% if item.product_type %}
-                            {% if item.product_type == 'country' %}
-                                <div class="country-flag-container">
-                                    <img src="{% url 'asset_logo' product_type=item.product_type|lower symbol=item.symbol|lower %}"
-                                         class="country-flag-image"
-                                         alt="{{ item.name }} flag"
-                                         onerror="this.style.display='none';">
-                                </div>
-                            {% else %}
-                                <div class="asset-icon-container">
-                                    {% if item.product_type == 'sector' %}
-                                        <i class="bi bi-{{ item.symbol }} fs-4"></i>
-                                    {% elif item.product_type == 'cash' %}
-                                        <span class="currency-symbol" data-currency="{{ item.name|lower }}">{{ item.symbol }}</span>
-                                    {% else %}
-                                        <img src="{% url 'asset_logo' product_type=item.product_type|lower symbol=item.symbol|lower %}"
-                                             width="30" height="30"
-                                             alt="{{ item.symbol }} logo"
-                                             onerror="this.style.display='none'">
-                                    {% endif %}
-                                </div>
-                            {% endif %}
+        <div class="list-group-item rounded m-1">
+            <div class="progress-bar-background" style="width: {{ item.weight }}%;"></div>
+            <div class="diversification-weight">
+                <div class="d-flex align-items-center">
+                    {% if item.product_type %}
+                    {% if item.product_type == 'country' %}
+                    <div class="country-flag-container">
+                        <img src="{% url 'asset_logo' product_type=item.product_type|lower symbol=item.symbol|lower %}"
+                            class="country-flag-image" alt="{{ item.name }} flag" onerror="this.style.display='none';">
+                    </div>
+                    {% else %}
+                    <div class="asset-icon-container">
+                        {% if item.product_type == 'sector' %}
+                        <i class="bi bi-{{ item.symbol }} fs-4"></i>
+                        {% elif item.product_type == 'cash' %}
+                        <span class="currency-symbol" data-currency="{{ item.name|lower }}">{{ item.symbol }}</span>
+                        {% else %}
+                        <img src="{% url 'asset_logo' product_type=item.product_type|lower symbol=item.symbol|lower %}"
+                            width="30" height="30" alt="{{ item.symbol }} logo" onerror="this.style.display='none'">
                         {% endif %}
                     </div>
-                    <div class="p-2 me-auto">{{ item.name }}</div>
-                    <div class="d-flex flex-column text-center">
-                        <div>{{ item.formatted_size }}</div>
-                        <small class="fw-lighter">{{ item.formatted_value }}</small>
-                    </div>
+                    {% endif %}
+                    {% endif %}
+                </div>
+                <div class="p-2 me-auto">{{ item.name }}</div>
+                <div class="d-flex flex-column text-center">
+                    <div>{{ item.formatted_size }}</div>
+                    <small class="fw-lighter">{{ item.formatted_value }}</small>
                 </div>
             </div>
+        </div>
         {% endfor %}
     </div>
 </div>

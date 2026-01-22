@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.views import View
 
-from stonks_overwatch.utils.core.theme import get_theme_colors
+from stonks_overwatch.config.config import Config
 
 
 class ReleaseNotesView(View):
@@ -34,9 +34,9 @@ class ReleaseNotesView(View):
         with open(changelog_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
 
-        # Replace CHANGELOG starting lines with "Release Notes" header
+        # Extract changelog content starting from first version heading
         start_idx = next((i for i, line in enumerate(lines) if line.strip().startswith("##")), 0)
-        markdown_content = "# Release Notes\n" + "".join(lines[start_idx:])
+        markdown_content = "".join(lines[start_idx:])
 
         html_fragment = markdown.markdown(
             markdown_content,
@@ -46,14 +46,14 @@ class ReleaseNotesView(View):
             output_format="html",
         )
 
-        dark_mode_param = request.GET.get("dark_mode", "0")
-        is_dark_mode = dark_mode_param in ["1", "true", "True"]
-        theme_colors = get_theme_colors(is_dark_mode)
+        # Get global appearance setting
+        config = Config.get_global()
+        appearance = config.appearance
 
         context = {
             "html_fragment": html_fragment,
             "is_standalone": not is_ajax_request,  # Wrap in HTML structure for non-AJAX requests
-            **theme_colors,
+            "APPEARANCE": appearance,
         }
 
         # Always return the content component (it handles standalone vs fragment internally)
