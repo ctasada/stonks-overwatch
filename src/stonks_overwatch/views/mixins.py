@@ -1,6 +1,5 @@
 from django.shortcuts import redirect
 
-from stonks_overwatch.config.config import Config
 from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.services.utilities.session_manager import SessionManager
 
@@ -16,6 +15,9 @@ class CapabilityRequiredMixin:
 
     def dispatch(self, request, *args, **kwargs):
         if self.required_capability:
+            # Lazy import to avoid loading Django models before apps are ready
+            from stonks_overwatch.config.config import Config
+
             selected_portfolio = SessionManager.get_selected_portfolio(request)
             # Use specific portfolio ID if it's not ALL
             capabilities = Config.get_global().get_capabilities(selected_portfolio)

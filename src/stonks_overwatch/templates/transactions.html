@@ -7,29 +7,43 @@
 
 {% block content %}
 <div class="container-fluid row-gap-5">
-    <div class="row border border-primary-subtle bg-light rounded mb-3 position-relative">
-        <p class="h4 position-absolute top-0 start-0 z-2 px-3" style="padding-top: 8px; padding-left: 4px">Transactions</p>
+    <div class="row content-card rounded mb-3">
+        <div class="section-header pb-0">Transactions</div>
         <table id="transactions-table">
             <thead>
                 <tr>
-                    <th data-field="date" data-sortable="true" data-width="100" data-width-unit="px" data-formatter="dateTimeFormatter">Date</th>
-                    <th data-field="time" data-sortable="true" data-width="100" data-width-unit="px" data-visible="false">Time</th>
+                    <th data-field="date" data-sortable="true" data-width="100" data-width-unit="px"
+                        data-formatter="dateTimeFormatter">Date</th>
+                    <th data-field="time" data-sortable="true" data-width="100" data-width-unit="px"
+                        data-visible="false">Time</th>
                     <th data-field="buy_sell" data-sortable="true" data-width="100" data-width-unit="px">Action</th>
                     <th data-field="symbol" data-sortable="true" data-formatter="symbolNameFormatter">Stock</th>
                     <th data-field="name" data-sortable="true" data-visible="false">Name</th>
                     <th data-field="quantity" data-sortable="true" data-width="100" data-width-unit="px">Quantity</th>
-                    <th data-field="price" data-sortable="true" data-width="120" data-width-unit="px" data-formatter="priceFormatter">Price</th>
-                    <th data-field="formatted_price" data-sortable="false" data-width="120" data-width-unit="px" data-visible="false" data-switchable="false">Formatted Price</th>
-                    <th data-field="currency" data-sortable="true" data-width="80" data-width-unit="px" data-visible="false">Currency</th>
-                    <th data-field="total" data-sortable="true" data-width="100" data-width-unit="px" data-formatter="totalFormatter">Local Value</th>
-                    <th data-field="formatted_total" data-sortable="false" data-width="100" data-width-unit="px" data-visible="false" data-switchable="false">Formatted Local Value</th>
-                    <th data-field="total_currency" data-sortable="true" data-width="80" data-width-unit="px" data-visible="false">Local Currency</th>
-                    <th data-field="total_in_base_currency" data-sortable="true" data-width="120" data-width-unit="px" data-formatter="totalInBaseCurrencyFormatter">Value</th>
-                    <th data-field="formatted_total_in_base_currency" data-sortable="false" data-width="120" data-width-unit="px" data-visible="false" data-switchable="false">Formatted Value</th>
-                    <th data-field="base_currency" data-sortable="true" data-width="80" data-width-unit="px" data-visible="false">Base Currency</th>
-                    <th data-field="fees" data-sortable="true" data-width="100" data-width-unit="px" data-formatter="feesFormatter">Fees</th>
-                    <th data-field="formatted_fees" data-sortable="false" data-width="100" data-width-unit="px" data-visible="false" data-switchable="false">Formatted Fees</th>
-                    <th data-field="fees_currency" data-sortable="true" data-width="80" data-width-unit="px" data-visible="false">Fees Currency</th>
+                    <th data-field="price" data-sortable="true" data-width="120" data-width-unit="px"
+                        data-formatter="priceFormatter">Price</th>
+                    <th data-field="formatted_price" data-sortable="false" data-width="120" data-width-unit="px"
+                        data-visible="false" data-switchable="false">Formatted Price</th>
+                    <th data-field="currency" data-sortable="true" data-width="80" data-width-unit="px"
+                        data-visible="false">Currency</th>
+                    <th data-field="total" data-sortable="true" data-width="100" data-width-unit="px"
+                        data-formatter="totalFormatter">Local Value</th>
+                    <th data-field="formatted_total" data-sortable="false" data-width="100" data-width-unit="px"
+                        data-visible="false" data-switchable="false">Formatted Local Value</th>
+                    <th data-field="total_currency" data-sortable="true" data-width="80" data-width-unit="px"
+                        data-visible="false">Local Currency</th>
+                    <th data-field="total_in_base_currency" data-sortable="true" data-width="120" data-width-unit="px"
+                        data-formatter="totalInBaseCurrencyFormatter">Value</th>
+                    <th data-field="formatted_total_in_base_currency" data-sortable="false" data-width="120"
+                        data-width-unit="px" data-visible="false" data-switchable="false">Formatted Value</th>
+                    <th data-field="base_currency" data-sortable="true" data-width="80" data-width-unit="px"
+                        data-visible="false">Base Currency</th>
+                    <th data-field="fees" data-sortable="true" data-width="100" data-width-unit="px"
+                        data-formatter="feesFormatter">Fees</th>
+                    <th data-field="formatted_fees" data-sortable="false" data-width="100" data-width-unit="px"
+                        data-visible="false" data-switchable="false">Formatted Fees</th>
+                    <th data-field="fees_currency" data-sortable="true" data-width="80" data-width-unit="px"
+                        data-visible="false">Fees Currency</th>
                 </tr>
             </thead>
             <tbody>
@@ -72,7 +86,7 @@
     function isTimeColumnVisible() {
         try {
             let visibleColumns = $('#transactions-table').bootstrapTable('getVisibleColumns');
-            return visibleColumns && visibleColumns.some(function(col) { return col.field === 'time'; });
+            return visibleColumns && visibleColumns.some(function (col) { return col.field === 'time'; });
         } catch (e) {
             return false;
         }
@@ -89,7 +103,7 @@
     function isNameColumnVisible() {
         try {
             let visibleColumns = $('#transactions-table').bootstrapTable('getVisibleColumns');
-            return visibleColumns && visibleColumns.some(function(col) { return col.field === 'name'; });
+            return visibleColumns && visibleColumns.some(function (col) { return col.field === 'name'; });
         } catch (e) {
             return false;
         }
@@ -106,7 +120,7 @@
     function isCurrencyColumnVisible() {
         try {
             let visibleColumns = $('#transactions-table').bootstrapTable('getVisibleColumns');
-            return visibleColumns && visibleColumns.some(function(col) { return col.field === 'currency'; });
+            return visibleColumns && visibleColumns.some(function (col) { return col.field === 'currency'; });
         } catch (e) {
             return false;
         }
@@ -115,7 +129,7 @@
     function isTotalCurrencyColumnVisible() {
         try {
             let visibleColumns = $('#transactions-table').bootstrapTable('getVisibleColumns');
-            return visibleColumns && visibleColumns.some(function(col) { return col.field === 'total_currency'; });
+            return visibleColumns && visibleColumns.some(function (col) { return col.field === 'total_currency'; });
         } catch (e) {
             return false;
         }
@@ -124,7 +138,7 @@
     function isBaseCurrencyColumnVisible() {
         try {
             let visibleColumns = $('#transactions-table').bootstrapTable('getVisibleColumns');
-            return visibleColumns && visibleColumns.some(function(col) { return col.field === 'base_currency'; });
+            return visibleColumns && visibleColumns.some(function (col) { return col.field === 'base_currency'; });
         } catch (e) {
             return false;
         }
@@ -133,7 +147,7 @@
     function isFeesCurrencyColumnVisible() {
         try {
             let visibleColumns = $('#transactions-table').bootstrapTable('getVisibleColumns');
-            return visibleColumns && visibleColumns.some(function(col) { return col.field === 'fees_currency'; });
+            return visibleColumns && visibleColumns.some(function (col) { return col.field === 'fees_currency'; });
         } catch (e) {
             return false;
         }

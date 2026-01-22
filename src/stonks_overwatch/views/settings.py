@@ -5,10 +5,10 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views import View
 
+from stonks_overwatch.config.config import Config
 from stonks_overwatch.constants.brokers import BrokerName
 from stonks_overwatch.services.brokers.models import BrokersConfigurationRepository
 from stonks_overwatch.utils.core.logger import StonksLogger
-from stonks_overwatch.utils.core.theme import get_theme_colors
 
 
 class SettingsView(View):
@@ -39,26 +39,21 @@ class SettingsView(View):
                 - Full HTML page for regular requests (native app WebView)
         """
         is_ajax_request = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        config = Config.get_global()
 
         # Load broker configurations
         degiro_config = self.repository.get_broker_by_name(BrokerName.DEGIRO.value)
         bitvavo_config = self.repository.get_broker_by_name(BrokerName.BITVAVO.value)
         ibkr_config = self.repository.get_broker_by_name(BrokerName.IBKR.value)
 
-        # Handle dark mode (for native app WebView)
-        dark_mode_param = request.GET.get("dark_mode", "0")
-        is_dark_mode = dark_mode_param.lower() in ["1", "true"]
-        theme_colors = get_theme_colors(is_dark_mode)
-
         # Prepare context data
         context = {
             "degiro_config": degiro_config,
             "bitvavo_config": bitvavo_config,
             "ibkr_config": ibkr_config,
-            "is_dark_mode": is_dark_mode,
             "is_standalone": not is_ajax_request,  # Wrap in HTML structure for non-AJAX requests
-            # Pass all theme colors from theme.py
-            **theme_colors,
+            "APPEARANCE": config.appearance,
+            "BASE_CURRENCY": config.base_currency,
         }
 
         # Always return the content component (it handles standalone vs fragment internally)
@@ -102,42 +97,12 @@ class SettingsView(View):
             if data.get("action") == "generate_totp":
                 return self._generate_totp_code(data)
 
+            # Handle general settings save
+            if data.get("action") == "save_general":
+                return self._save_general_settings(data)
+
             # Handle broker configuration save
-            broker_name = data.get("broker_name")
-
-            if not broker_name:
-                self.logger.error("broker_name is missing from request data")
-                return JsonResponse({"error": "broker_name is required"}, status=400)
-
-            broker_config = self.repository.get_broker_by_name(broker_name)
-
-            if not broker_config:
-                self.logger.error(f"Broker '{broker_name}' not found in database")
-                return JsonResponse({"error": f"Broker '{broker_name}' not found"}, status=404)
-
-            # Update credentials if provided
-            if "credentials" in data:
-                self.repository.update_broker_credentials(broker_config, data["credentials"])
-
-            # Update enabled if provided
-            if "enabled" in data:
-                broker_config.enabled = data["enabled"]
-
-            # Update update_frequency if provided
-            if "update_frequency" in data:
-                broker_config.update_frequency = data["update_frequency"]
-
-            # Save configuration
-            self.repository.save_broker_configuration(broker_config)
-            self.logger.info(f"Configuration saved successfully for broker: {broker_name}")
-
-            # Clear broker factory cache so it picks up the updated configuration
-            self._clear_broker_cache(broker_name)
-
-            # Reconfigure job scheduler to pick up the updated settings
-            self._reconfigure_jobs()
-
-            return JsonResponse({"success": True, "message": "Configuration saved successfully"})
+            return self._save_broker_configuration(data)
 
         except json.JSONDecodeError:
             self.logger.error("Failed to parse JSON data in settings POST request", exc_info=True)
@@ -145,6 +110,73 @@ class SettingsView(View):
         except Exception as e:
             self.logger.error(f"Failed to process request: {e}", exc_info=True)
             return JsonResponse({"error": "Failed to process request. Please try again later."}, status=500)
+
+    def _save_broker_configuration(self, data: dict) -> JsonResponse:
+        """
+        Handle saving of broker configuration.
+
+        Args:
+            data: Request data dictionary containing broker configuration
+
+        Returns:
+            JsonResponse: Success or error response
+        """
+        broker_name = data.get("broker_name")
+
+        if not broker_name:
+            self.logger.error("broker_name is missing from request data")
+            return JsonResponse({"error": "broker_name is required"}, status=400)
+
+        if broker_name == "general":
+            return self._save_general_settings(data)
+
+        broker_config = self.repository.get_broker_by_name(broker_name)
+
+        if not broker_config:
+            self.logger.error(f"Broker '{broker_name}' not found in database")
+            return JsonResponse({"error": f"Broker '{broker_name}' not found"}, status=404)
+
+        # Update credentials if provided
+        if "credentials" in data:
+            self.repository.update_broker_credentials(broker_config, data["credentials"])
+
+        # Update enabled if provided
+        if "enabled" in data:
+            broker_config.enabled = data["enabled"]
+
+        # Update update_frequency if provided
+        if "update_frequency" in data:
+            broker_config.update_frequency = data["update_frequency"]
+
+        # Save configuration
+        self.repository.save_broker_configuration(broker_config)
+        self.logger.info(f"Configuration saved successfully for broker: {broker_name}")
+
+        # Clear broker factory cache so it picks up the updated configuration
+        self._clear_broker_cache(broker_name)
+
+        # Reconfigure job scheduler to pick up the updated settings
+        self._reconfigure_jobs()
+
+        return JsonResponse({"success": True, "message": "Configuration saved successfully"})
+
+    def _save_general_settings(self, data: dict) -> JsonResponse:
+        """
+        Handle saving of general application settings (appearance, base_currency).
+
+        Args:
+            data: Request data dictionary containing general settings
+
+        Returns:
+            JsonResponse: Success response
+        """
+        config = Config.get_global()
+        if "appearance" in data:
+            config.appearance = data["appearance"]
+        if "base_currency" in data:
+            config.base_currency = data["base_currency"]
+
+        return JsonResponse({"success": True, "message": "General settings saved successfully"})
 
     def _clear_broker_cache(self, broker_name: str) -> None:
         """

@@ -16,12 +16,10 @@
     <div class="row mt-2">
         {% include 'components/summary_card.html' with label="Total Deposits" value=total_deposits %}
     </div>
-    <div class="row border border-primary-subtle bg-light rounded mb-3">
+    <div class="row content-card rounded mb-3">
         <div class="row mt-2">
             <div class="col">
-                <span>
-                    <p class="h5 mb-1">Deposits</p>
-                </span>
+                <div class="section-header pb-0">Deposits</div>
             </div>
             <div class="col float-end text-end">
                 <div class="btn-group btn-group-sm" role="group">
@@ -46,8 +44,8 @@
             <canvas id="deposits-chart"></canvas>
         </div>
     </div>
-    <div class="row border border-primary-subtle bg-light rounded mb-3 position-relative">
-        <p class="h4 position-absolute top-0 start-0 z-2 px-3" style="padding-top: 8px; padding-left: 4px">Deposits</p>
+    <div class="row content-card rounded mb-3">
+        <div class="section-header pb-0">Deposits</div>
         <table id="deposits-table">
             <thead>
                 <tr>
@@ -179,6 +177,12 @@
                         type: 'time',
                         min: timeRangeConfig.minDate,
                         max: timeRangeConfig.maxDate,
+                        grid: {
+                            color: (window.CHART_TEXT_COLOR === '#e0e0e0') ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                        },
+                        ticks: {
+                            color: window.CHART_TEXT_COLOR || '#666'
+                        },
                         time: {
                             // Luxon format string
                             tooltipFormat: 'DD',
@@ -188,6 +192,9 @@
                     },
                     y: {
                         beginAtZero: false,
+                        grid: {
+                            color: (window.CHART_TEXT_COLOR === '#e0e0e0') ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                        },
                     }
                 },
                 elements: {

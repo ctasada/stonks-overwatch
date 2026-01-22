@@ -46,7 +46,7 @@
 ### Technical Features
 
 - **Local-first architecture** - All data stored locally
-- **Modern web UI** - Built with Bootstrap and Charts.js
+- **Modern web UI** - Built with Bootstrap and Charts.js with dark/light theme support
 - **Native applications** - Desktop apps for all major platforms
 - **Offline mode** - Work without internet connection
 - **Automated backups** - Never lose your data

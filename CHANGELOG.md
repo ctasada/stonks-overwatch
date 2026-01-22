@@ -15,6 +15,8 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
   - When starting now it's possible to choose the broker. This allows to use any of the available brokers, and removes
   a limitation that was enforcing to have a DEGIRO account
   - Adds possibility to use *only** DEGIRO, Bitvavo or IBKR
+- **UI:**
+  - Added a new Dark theme. Now it's possible to choose between dark/light/system themes
 
 ### Changed
 

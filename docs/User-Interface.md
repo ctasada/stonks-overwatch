@@ -13,6 +13,47 @@ The templates are written in HTML and use the Jinja2 templating engine to render
 
 The necessary static files (CSS, JS, images) are located in the `src/stonks_overwatch/static` directory.
 
+## User Interface and Themes
+
+Stonks Overwatch features a modern, responsive web interface built with Bootstrap that adapts to different screen sizes and user preferences.
+
+### Theme Support
+
+The application supports three theme modes to suit different preferences and environments:
+
+#### Light Theme
+
+- Traditional bright interface with light backgrounds
+- Optimal for well-lit environments
+- High contrast for easy readability
+
+#### Dark Theme
+
+- Modern dark interface with dark backgrounds and light text
+- Reduces eye strain in low-light conditions
+- Popular for extended usage sessions
+
+#### System Theme (Automatic)
+
+- Automatically follows your operating system's theme preference
+- Switches between light and dark based on system settings
+- Provides seamless integration with your desktop environment
+
+### Accessing Theme Settings
+
+**Native Application:**
+1. Open the application menu
+2. Select **Preferences** (macOS) or **Settings** (Windows/Linux)
+3. Navigate to **General** tab
+4. Choose your preferred theme from the dropdown
+
+**Web Version:**
+1. Click the **Settings** option in the sidebar
+2. Navigate to **Preferences** section
+3. Select your preferred theme
+
+The theme change takes effect immediately without requiring an application restart.
+
 ## Technical details
 
 The requested path will be resolved to a view using the `src/stonks_overwatch/urls.py` file. The view will then render

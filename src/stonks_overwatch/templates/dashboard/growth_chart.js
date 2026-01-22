@@ -200,7 +200,7 @@ function getTooltipLabel(portfolioType) {
                 label += ': ';
             }
             if (context.parsed.y !== null) {
-                label += new Intl.NumberFormat('nl-NL', {style: 'currency', currency: 'EUR'}).format(context.parsed.y);
+                label += new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(context.parsed.y);
             }
             return label;
         }
@@ -214,7 +214,7 @@ function getYAxisTicksCallback(portfolioType) {
         }
     } else {
         return function (value, index, ticks) {
-            return new Intl.NumberFormat('nl-NL', {style: 'currency', currency: 'EUR'}).format(value);
+            return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(value);
         }
     }
 }
@@ -229,7 +229,7 @@ function getPortfolioConfiguration(portfolioType) {
                     stepped: false,
                     lineTension: 0.1
                 },
-                ...(portfolioType === PortfolioTypes.VALUE ? [{data: [], stepped: true}] : [])
+                ...(portfolioType === PortfolioTypes.VALUE ? [{ data: [], stepped: true }] : [])
             ],
         },
         options: {
@@ -238,8 +238,20 @@ function getPortfolioConfiguration(portfolioType) {
             scales: {
                 y: {
                     beginAtZero: false,
+                    grid: {
+                        color: (window.CHART_TEXT_COLOR === '#e0e0e0') ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                    },
                     ticks: {
                         callback: getYAxisTicksCallback(portfolioType),
+                        color: window.CHART_TEXT_COLOR || '#666'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: (window.CHART_TEXT_COLOR === '#e0e0e0') ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                    },
+                    ticks: {
+                        color: window.CHART_TEXT_COLOR || '#666'
                     }
                 }
             },
@@ -271,9 +283,9 @@ function getPortfolioConfiguration(portfolioType) {
                             let visibility = [];
                             for (let i = 0; i < chart.data.datasets.length; i++) {
                                 if (chart.isDatasetVisible(i) === true) {
-                                    visibility.push('rgba(102, 102, 102, 1)');
+                                    visibility.push(window.CHART_TEXT_COLOR || '#666');
                                 } else {
-                                    visibility.push('rgba(102, 102, 102, 0.5)');
+                                    visibility.push((window.CHART_TEXT_COLOR === '#e0e0e0') ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.3)');
                                 }
                             }
                             const items = Chart.defaults.plugins.legend.labels.generateLabels(chart);
@@ -311,7 +323,7 @@ function getPortfolioConfiguration(portfolioType) {
                             enabled: true
                         },
                         mode: 'x',
-                        onZoomComplete({chart}) {
+                        onZoomComplete({ chart }) {
                             // FIXME: Here we can eventually update the axis labels
                             chart.update('none');
                         }
@@ -345,11 +357,11 @@ function drawPortfolio(portfolioType, timeRange) {
 
     let url = HOST + URL + "?type=" + portfolioType + "&interval=" + timeRange
     // Fetch JSON data from a URL and update the chart
-    fetch(url,{
-            headers: {
-                'Accept': 'application/json'
-            }
-        })
+    fetch(url, {
+        headers: {
+            'Accept': 'application/json'
+        }
+    })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok ' + response.statusText);

@@ -1,6 +1,5 @@
 from django.http import HttpRequest
 
-from stonks_overwatch.config.config import Config
 from stonks_overwatch.services.models import PortfolioId
 
 
@@ -23,6 +22,9 @@ class SessionManager:
 
     @staticmethod
     def __get_available_portfolios() -> list[PortfolioId]:
+        # Lazy import to avoid loading Django models before apps are ready
+        from stonks_overwatch.config.config import Config
+
         portfolios = []
         for value in PortfolioId:
             if value == PortfolioId.ALL:

@@ -29,8 +29,8 @@ class TestBaseAggregator:
         # Clear any singleton instances (legacy BrokerRegistry removed - using unified system)
 
     @patch("stonks_overwatch.core.aggregators.base_aggregator.BrokerFactory")
-    @patch("stonks_overwatch.core.aggregators.base_aggregator.Config")
-    def test_initialization(self, mock_config, mock_factory_class):
+    @patch("stonks_overwatch.config.config.Config.get_global")
+    def test_initialization(self, mock_get_global, mock_factory_class):
         """Test aggregator initialization."""
         # Setup
         mock_factory = MagicMock()
@@ -43,14 +43,14 @@ class TestBaseAggregator:
         assert aggregator._service_type == ServiceType.PORTFOLIO
         assert aggregator._factory is not None
 
-    @patch("stonks_overwatch.core.aggregators.base_aggregator.Config")
+    @patch("stonks_overwatch.config.config.Config.get_global")
     @patch("stonks_overwatch.core.aggregators.base_aggregator.BrokerFactory")
-    def test_collect_broker_data_success(self, mock_config, mock_factory_class):
+    def test_collect_broker_data_success(self, mock_factory_class, mock_get_global):
         """Test successful data collection from multiple brokers."""
         # Setup
         mock_factory = MagicMock()
         mock_factory_class.return_value = mock_factory
-        mock_config.get_global.return_value = MagicMock()
+        mock_get_global.return_value = MagicMock()
 
         # Create aggregator
         aggregator = ConcreteAggregator(ServiceType.PORTFOLIO)
@@ -76,14 +76,14 @@ class TestBaseAggregator:
             assert result["broker1"] == ["data1", "data2"]
             assert result["broker2"] == ["data3", "data4"]
 
-    @patch("stonks_overwatch.core.aggregators.base_aggregator.Config")
+    @patch("stonks_overwatch.config.config.Config.get_global")
     @patch("stonks_overwatch.core.aggregators.base_aggregator.BrokerFactory")
-    def test_collect_and_merge_lists(self, mock_config, mock_factory_class):
+    def test_collect_and_merge_lists(self, mock_factory_class, mock_get_global):
         """Test collecting and merging data from multiple brokers."""
         # Setup
         mock_factory = MagicMock()
         mock_factory_class.return_value = mock_factory
-        mock_config.get_global.return_value = MagicMock()
+        mock_get_global.return_value = MagicMock()
 
         # Create aggregator
         aggregator = ConcreteAggregator(ServiceType.PORTFOLIO)
