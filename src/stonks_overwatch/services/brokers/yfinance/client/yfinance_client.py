@@ -32,7 +32,7 @@ class YFinanceClient:
 
     def __init__(self, enable_debug: bool = False):
         if enable_debug:
-            yf.enable_debug_mode()
+            yf.config.debug.logging = True
 
     def __convert_to_ticker(self, ticker: Ticker | str) -> Ticker:
         if isinstance(ticker, str):

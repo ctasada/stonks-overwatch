@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from yfinance.exceptions import YFRateLimitError
+
 from stonks_overwatch.services.brokers.yfinance.client.yfinance_client import StockSplit
 from stonks_overwatch.services.brokers.yfinance.services.market_data_service import YFinance
 from stonks_overwatch.services.models import Country
@@ -225,3 +227,123 @@ def test_get_sector_industry_invalid_data(yfinance_service, mock_yfinance_reposi
     # Verify
     assert sector == Sector.UNKNOWN
     assert industry is None
+
+
+def test_rate_limit_retry_success_on_second_attempt(yfinance_service, mock_yfinance_client, mock_yfinance_repository):
+    """Test that rate limit error triggers retry and succeeds on second attempt."""
+    # Setup
+    symbol = "AAPL"
+    mock_yfinance_repository.get_ticker_info.return_value = None
+    mock_ticker_info = {"sector": "Technology", "industry": "Consumer Electronics"}
+
+    # Create multiple mock tickers - first raises error, second succeeds
+    mock_ticker1 = MagicMock()
+    type(mock_ticker1).info = property(lambda self: (_ for _ in ()).throw(YFRateLimitError()))
+
+    mock_ticker2 = MagicMock()
+    mock_ticker2.info = mock_ticker_info
+
+    # Return different tickers on each call
+    mock_yfinance_client.get_ticker.side_effect = [mock_ticker1, mock_ticker2]
+
+    # Execute with patched time.sleep to avoid actual delays in tests
+    with patch("stonks_overwatch.services.brokers.yfinance.services.market_data_service.time.sleep"):
+        sector, industry = yfinance_service.get_sector_industry(symbol)
+
+    # Verify
+    assert sector == Sector.TECHNOLOGY
+    assert industry == "Consumer Electronics"
+    assert mock_yfinance_client.get_ticker.call_count == 2  # Should have retried once
+
+
+def test_rate_limit_exhausts_retries(yfinance_service, mock_yfinance_client, mock_yfinance_repository):
+    """Test that rate limit error returns default values after exhausting retries."""
+    # Setup
+    symbol = "AAPL"
+    mock_yfinance_repository.get_ticker_info.return_value = None
+
+    # Create mock tickers that always raise rate limit error
+    def create_error_ticker():
+        mock_ticker = MagicMock()
+        type(mock_ticker).info = property(lambda self: (_ for _ in ()).throw(YFRateLimitError()))
+        return mock_ticker
+
+    # Return a new ticker that raises error on each call
+    mock_yfinance_client.get_ticker.side_effect = lambda symbol: create_error_ticker()
+
+    # Execute with patched time.sleep to avoid actual delays in tests
+    with patch("stonks_overwatch.services.brokers.yfinance.services.market_data_service.time.sleep"):
+        sector, industry = yfinance_service.get_sector_industry(symbol)
+
+    # Verify - should return defaults after max retries
+    assert sector == Sector.UNKNOWN
+    assert industry is None
+    # get_ticker should be called 3 times (max_retries)
+    assert mock_yfinance_client.get_ticker.call_count == 3
+
+
+def test_rate_limit_exponential_backoff(yfinance_service, mock_yfinance_client, mock_yfinance_repository):
+    """Test that exponential backoff is applied correctly on retries."""
+    # Setup
+    symbol = "AAPL"
+    mock_yfinance_repository.get_ticker_info.return_value = None
+
+    # Create mock tickers that always raise rate limit error
+    def create_error_ticker():
+        mock_ticker = MagicMock()
+        type(mock_ticker).info = property(lambda self: (_ for _ in ()).throw(YFRateLimitError()))
+        return mock_ticker
+
+    # Return a new ticker that raises error on each call
+    mock_yfinance_client.get_ticker.side_effect = lambda symbol: create_error_ticker()
+
+    # Execute with patched time.sleep to capture sleep calls
+    with patch("stonks_overwatch.services.brokers.yfinance.services.market_data_service.time.sleep") as mock_sleep:
+        sector, industry = yfinance_service.get_sector_industry(symbol)
+
+    # Verify exponential backoff: 1s, 2s (only 2 sleeps for 3 attempts)
+    assert mock_sleep.call_count == 2
+    # First retry: 2^0 = 1 second
+    mock_sleep.assert_any_call(1)
+    # Second retry: 2^1 = 2 seconds
+    mock_sleep.assert_any_call(2)
+
+
+def test_rate_limit_get_country_returns_none(yfinance_service, mock_yfinance_client, mock_yfinance_repository):
+    """Test that get_country returns None after rate limit errors."""
+    # Setup
+    symbol = "AAPL"
+    mock_yfinance_repository.get_ticker_info.return_value = None
+
+    # Create mock tickers that always raise rate limit error
+    def create_error_ticker():
+        mock_ticker = MagicMock()
+        type(mock_ticker).info = property(lambda self: (_ for _ in ()).throw(YFRateLimitError()))
+        return mock_ticker
+
+    # Return a new ticker that raises error on each call
+    mock_yfinance_client.get_ticker.side_effect = lambda symbol: create_error_ticker()
+
+    # Execute with patched time.sleep to avoid actual delays in tests
+    with patch("stonks_overwatch.services.brokers.yfinance.services.market_data_service.time.sleep"):
+        result = yfinance_service.get_country(symbol)
+
+    # Verify
+    assert result is None
+
+
+def test_rate_limit_respects_cached_data(yfinance_service, mock_yfinance_client, mock_yfinance_repository):
+    """Test that cached data bypasses rate limit checks."""
+    # Setup
+    symbol = "AAPL"
+    mock_ticker_info = {"sector": "Technology", "industry": "Consumer Electronics"}
+    mock_yfinance_repository.get_ticker_info.return_value = mock_ticker_info
+
+    # Execute - should not trigger any API calls
+    sector, industry = yfinance_service.get_sector_industry(symbol)
+
+    # Verify
+    assert sector == Sector.TECHNOLOGY
+    assert industry == "Consumer Electronics"
+    # get_ticker should not be called since data was cached
+    mock_yfinance_client.get_ticker.assert_not_called()

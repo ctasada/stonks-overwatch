@@ -20,6 +20,7 @@ dependencies = [
     "tzlocal >= 5.3.1",
     "python-bitvavo-api >= 1.4.3",
     "yfinance >= 1.0",
+    "pandas >= 2.3.3, < 3.0.0", #Force version until yfinance is updated
     "iso10383 >=2025.2.10",
     "requests >=2.32.4",
     "ibind[oauth] >=0.1.22",
@@ -79,7 +80,7 @@ include = [
 ]
 
 [tool.poetry.requires-plugins]
-poetry-plugin-export = ">=1.9.0"
+poetry-plugin-export = ">=1.10.0"
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
