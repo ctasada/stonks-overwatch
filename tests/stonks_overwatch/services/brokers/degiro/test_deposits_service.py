@@ -21,9 +21,7 @@ class TestDepositsService(TestCase):
         self.fixture_cash_movements_repository()
         self.degiro_service = DeGiroServiceTest(CredentialsManager(self.fixture_credentials()))
 
-        self.deposits_service = DepositsService(
-            degiro_service=self.degiro_service,
-        )
+        self.deposits_service = DepositsService()
 
     def fixture_cash_movements_repository(self):
         data_file = pathlib.Path("tests/resources/stonks_overwatch/repositories/degiro/cash_movements_data.json")

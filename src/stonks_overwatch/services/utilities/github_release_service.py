@@ -34,11 +34,6 @@ class GitHubReleaseService:
         if github_token:
             headers["Authorization"] = f"token {github_token}"
             GitHubReleaseService.logger.debug("Using GitHub authentication token")
-        else:
-            GitHubReleaseService.logger.debug(
-                "No GITHUB_TOKEN found in environment. "
-                "Set GITHUB_TOKEN environment variable for private repositories or higher rate limits."
-            )
 
         return headers
 

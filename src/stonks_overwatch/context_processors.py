@@ -60,3 +60,12 @@ def appearance_processor(request: HttpRequest) -> dict[str, str]:
 
     config = Config.get_global()
     return {"APPEARANCE": config.appearance}
+
+
+def demo_processor(request: HttpRequest) -> dict[str, str]:
+    """Add global appearance setting to template context."""
+    # Lazy import to avoid loading Django models before apps are ready
+
+    from stonks_overwatch.utils.core.demo_mode import is_demo_mode
+
+    return {"DEMO_MODE": is_demo_mode()}
