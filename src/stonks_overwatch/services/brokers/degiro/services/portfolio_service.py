@@ -24,6 +24,7 @@ from stonks_overwatch.services.brokers.yfinance.services.market_data_service imp
 from stonks_overwatch.services.models import Country, DailyValue, PortfolioEntry, TotalPortfolio
 from stonks_overwatch.settings import TIME_ZONE
 from stonks_overwatch.utils.core.datetime import DateTimeUtility
+from stonks_overwatch.utils.core.demo_mode import is_demo_mode
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.domain.constants import ProductType, Sector
@@ -61,9 +62,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         self.degiro_service = degiro_service or DeGiroService()
         self.currency_service = CurrencyConverterService()
         # Use base_currency property from BaseService which handles dependency injection
-        self.deposits = DepositsService(
-            degiro_service=self.degiro_service,
-        )
+        self.deposits = DepositsService()
         self.transactions = TransactionsRepository()
         self.product_info = ProductInfoRepository()
         self.yfinance = YFinance()
@@ -373,6 +372,9 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         return total_cash
 
     def __get_realtime_portfolio_total(self) -> dict | None:
+        if is_demo_mode():
+            return None
+
         try:
             update = self.degiro_service.get_client().get_update(
                 request_list=[
@@ -394,6 +396,9 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
             return None
 
     def __get_portfolio_products(self) -> list[dict]:
+        if is_demo_mode():
+            return self._get_local_portfolio(offline=True)
+
         try:
             update = self.degiro_service.get_client().get_update(
                 request_list=[
@@ -431,11 +436,16 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
             entry["value"] = self.DEFAULT_PORTFOLIO_VALUE  # FIXME: Use actual portfolio value
         return local_portfolio
 
-    def __get_products_info(self, products_ids: list) -> dict:
-        # Handle offline mode immediately
-        products_info: dict | None = None
+    def __get_products_info(self, products_ids: list[int]) -> dict:
+        if is_demo_mode():
+            return ProductInfoRepository.get_products_info_raw(products_ids)
+
         try:
             products_info = self.degiro_service.get_products_info(products_ids)
+            if products_info is None:
+                self.logger.warning("DeGiro service returned None, falling back to last known data")
+                return ProductInfoRepository.get_products_info_raw(products_ids)
+            return products_info
         except DeGiroOfflineModeError:
             self.logger.info("Running in offline mode, using last known data")
         except (ConnectionError, TimeoutError) as e:
@@ -443,12 +453,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         except Exception as e:
             self.logger.error(f"Unexpected error getting products info: {e}")
 
-        # Handle None result (internal failures were caught)
-        if products_info is None:
-            self.logger.warning("DeGiro service returned None, falling back to last known data")
-            return ProductInfoRepository.get_products_info_raw(products_ids)
-
-        return products_info
+        return ProductInfoRepository.get_products_info_raw(products_ids)
 
     def __get_product_config(self) -> dict:
         """Get product configuration with retry mechanism."""

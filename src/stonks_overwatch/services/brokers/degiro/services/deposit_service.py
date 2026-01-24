@@ -5,7 +5,6 @@ import polars as pl
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.core.interfaces.deposit_service import DepositServiceInterface
-from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
 from stonks_overwatch.services.brokers.degiro.repositories.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.services.models import Deposit, DepositType
 from stonks_overwatch.utils.core.logger import StonksLogger
@@ -17,11 +16,9 @@ class DepositsService(BaseService, DepositServiceInterface):
 
     def __init__(
         self,
-        degiro_service: Optional[DeGiroService] = None,
         config: Optional[BaseConfig] = None,
     ):
         super().__init__(config)
-        self.degiro_service = degiro_service or DeGiroService()
 
     # Note: base_currency property is inherited from BaseService and handles
     # dependency injection automatically

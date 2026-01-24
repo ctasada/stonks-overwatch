@@ -317,6 +317,11 @@ class StonksOverwatchApp(toga.App):
 
         is_demo_mode.cache_clear()
 
+        # Stop Jobs Scheduled. No updates while in Demo Mode
+        from stonks_overwatch.jobs.jobs_scheduler import JobsScheduler
+
+        JobsScheduler.stop()
+
         # Reload broker configurations to pick up demo mode changes
         await sync_to_async(reload_broker_configurations)()
 

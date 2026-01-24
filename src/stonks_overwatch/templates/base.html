@@ -222,8 +222,13 @@
                                 </li>
                             </ul>
                         </div>
-                        <!-- Connection Status -->
                         <div class="px-3 pt-3 pb-1 border-top border-light border-opacity-25 w-100">
+                        {% if DEMO_MODE %}
+                        <!-- Demo Mode -->
+                            <i class="bi-robot me-3 fs-5 text-success sidebar-icon"></i>
+                            <span class="small sidebar-text">Demo Mode</span>
+                        {% else %}
+                        <!-- Connection Status -->
                             {% is_connected_to_degiro as is_degiro_connected %}
                             {% get_connected_tooltip as get_connected_tooltip %}
                             <div class="d-flex align-items-center text-white" data-bs-toggle="tooltip"
@@ -236,6 +241,7 @@
                                 <span class="small sidebar-text">Disconnected</span>
                                 {% endif %}
                             </div>
+                        {% endif %}
                         </div>
                         <!-- App Version at Bottom -->
                         <div class="text-center text-white-50 small px-3 pb-2">

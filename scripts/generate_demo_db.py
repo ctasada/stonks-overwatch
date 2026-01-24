@@ -25,7 +25,9 @@ setup_script_environment()
 # Import Django and application modules after setup
 from degiro_connector.quotecast.models.chart import Interval  # noqa: E402
 from django.core.management import call_command  # noqa: E402
+from django.db import connections  # noqa: E402
 
+from stonks_overwatch.constants import BrokerName  # noqa: E402
 from stonks_overwatch.services.brokers.degiro.client.constants import TransactionType  # noqa: E402
 
 # The import is defined here, so all the Django configuration can be executed
@@ -558,12 +560,110 @@ class DBDemoGenerator:
                     order_id=None,
                 )
 
+    def enable_broker(self, broker_name: BrokerName) -> None:
+        """Enable a broker in the BrokersConfiguration table.
+
+        Args:
+            broker_name: Name of the broker to enable
+        """
+        from stonks_overwatch.services.brokers.models import BrokersConfiguration
+
+        logging.info(f"Enabling broker: {broker_name}")
+        try:
+            broker_config = BrokersConfiguration.objects.using("demo").get(broker_name=broker_name)
+            broker_config.enabled = True
+            broker_config.save(using="demo")
+            logging.info(f"Successfully enabled {broker_name}")
+        except BrokersConfiguration.DoesNotExist:
+            logging.warning(f"BrokersConfiguration for {broker_name} does not exist - will be created by migrations")
+
+    def update_quotations(self) -> None:
+        """Update quotations for all products in the existing demo database."""
+        logging.info("Updating quotations for existing demo database...")
+
+        # Get all existing products from the database
+        products = DeGiroProductInfo.objects.using("demo").all()
+
+        if not products.exists():
+            logging.warning("No products found in demo database. Nothing to update.")
+            return
+
+        # Get the earliest transaction date to determine the start date for quotations
+        earliest_transaction = DeGiroTransactions.objects.using("demo").order_by("date").first()
+        if earliest_transaction:
+            start_date = earliest_transaction.date.strftime(LocalizationUtility.DATE_FORMAT)
+            logging.info(f"Earliest transaction date: {start_date}")
+        else:
+            # If no transactions, use a default start date (e.g., 1 year ago)
+            start_date = (datetime.now() - timedelta(days=365)).strftime(LocalizationUtility.DATE_FORMAT)
+            logging.info(f"No transactions found, using default start date: {start_date}")
+
+        interval = DateTimeUtility.calculate_interval(start_date)
+        updated_count = 0
+        skipped_count = 0
+
+        for product in products:
+            symbol = product.symbol
+            product_id = str(product.id)
+
+            # Determine which identifier to use
+            identifier_type = product.vwd_identifier_type_secondary
+            identifier_value = product.vwd_id_secondary
+            if identifier_type is None:
+                identifier_type = product.vwd_identifier_type
+                identifier_value = product.vwd_id
+
+            # Skip if no valid identifier is available
+            if identifier_value is None:
+                logging.warning(f"No valid identifier for '{symbol}' (ID: {product_id}), skipping")
+                skipped_count += 1
+                continue
+
+            try:
+                logging.info(f"Updating quotations for '{symbol}' (ID: {product_id})...")
+                quotes_dict = self.degiro_service.get_product_quotation(
+                    identifier_type, identifier_value, interval, symbol
+                )
+
+                # Update the data ONLY if we get something back from DeGiro
+                if quotes_dict:
+                    # Filter quotes to only include dates after start_date
+                    filtered_quotes = {
+                        k: v
+                        for k, v in quotes_dict.items()
+                        if datetime.strptime(k, LocalizationUtility.DATE_FORMAT)
+                        >= datetime.strptime(start_date, LocalizationUtility.DATE_FORMAT)
+                    }
+
+                    DeGiroProductQuotation.objects.using("demo").update_or_create(
+                        id=int(product_id),
+                        defaults={
+                            "interval": Interval.P1D,
+                            "last_import": LocalizationUtility.now(),
+                            "quotations": filtered_quotes,
+                        },
+                    )
+                    updated_count += 1
+                    logging.info(f"  ✓ Updated {len(filtered_quotes)} quotations for '{symbol}'")
+                else:
+                    logging.warning(f"  ✗ No quotes found for '{symbol}' (ID: {product_id})")
+                    skipped_count += 1
+
+            except Exception as e:
+                logging.error(f"  ✗ Error updating quotations for '{symbol}' (ID: {product_id}): {e}")
+                skipped_count += 1
+
+        logging.info(f"Quotation update complete: {updated_count} updated, {skipped_count} skipped")
+
     def generate(self, from_date: str, num_transactions: int, initial_deposit: float, monthly_deposit: float) -> None:
         # Parse start date
         start_date = datetime.strptime(from_date, LocalizationUtility.DATE_FORMAT)
 
         logging.info("Creating demo DB with random data ...")
         call_command("migrate", database="demo")
+
+        # Enable DEGIRO broker
+        self.enable_broker(BrokerName.DEGIRO)
 
         # Create ProductsInfo
         logging.info("Creating products info ...")
@@ -589,39 +689,49 @@ def parse_args() -> Namespace:
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent("""
-        Creates a demo DB with random data.
+        Creates or updates a demo DB with random data.
 
         Supported brokers are:
             * DeGiro
+
+        Modes:
+            1. Create mode (default): Creates a new demo database from scratch
+            2. Update mode (--update): Updates quotations in existing demo database
         """),
+    )
+
+    parser.add_argument(
+        "--update",
+        action="store_true",
+        help="Update quotations in existing demo database instead of creating a new one",
     )
 
     parser.add_argument(
         "--start-date",
         type=str,
-        required=True,
-        help="Start date for generating transactions (YYYY-MM-DD)",
+        required=False,
+        help="Start date for generating transactions (YYYY-MM-DD). Required for create mode.",
     )
 
     parser.add_argument(
         "--num-transactions",
         type=int,
-        required=True,
-        help="Number of transactions to generate",
+        required=False,
+        help="Number of transactions to generate. Required for create mode.",
     )
 
     parser.add_argument(
         "--initial-deposit",
         type=int,
-        required=True,
-        help="Initial deposit amount in EUR",
+        required=False,
+        help="Initial deposit amount in EUR. Required for create mode.",
     )
 
     parser.add_argument(
         "--monthly-deposit",
         type=int,
-        required=True,
-        help="Monthly deposit in EUR",
+        required=False,
+        help="Monthly deposit in EUR. Required for create mode.",
     )
 
     return parser.parse_args()
@@ -630,16 +740,51 @@ def parse_args() -> Namespace:
 def main():
     args = parse_args()
 
-    if os.path.exists(DATABASES["demo"]["NAME"]):
+    # Validate arguments based on mode
+    if args.update:
+        # Update mode: check if demo DB exists
+        if not os.path.exists(DATABASES["demo"]["NAME"]):
+            logging.error("Cannot update: Demo database does not exist")
+            logging.error(f"Expected location: {DATABASES['demo']['NAME']}")
+            logging.error("Please create a demo database first without the --update flag")
+            return
+
+        logging.info("Running in UPDATE mode - updating quotations only")
         demo_db_path = Path(DATABASES["demo"]["NAME"]).resolve()
-        logging.info(f"Deleting existing Demo DB: {demo_db_path}")
-        os.remove(demo_db_path)
+        logging.info(f"Using existing Demo DB: {demo_db_path}")
 
-    """Main function to run the script."""
-    generator = DBDemoGenerator()
-    generator.generate(args.start_date, args.num_transactions, args.initial_deposit, args.monthly_deposit)
+        # Ensure migrations are applied
+        call_command("migrate", database="demo")
 
-    # Copy the generated database to fixtures for distribution with Briefcase
+        # Update quotations
+        generator = DBDemoGenerator()
+        generator.update_quotations()
+    else:
+        # Create mode: validate required arguments
+        if not all([args.start_date, args.num_transactions, args.initial_deposit, args.monthly_deposit]):
+            logging.error(
+                "Create mode requires: --start-date, --num-transactions, --initial-deposit, --monthly-deposit"
+            )
+            logging.error("Use --help for more information")
+            return
+
+        logging.info("Running in CREATE mode - generating new demo database")
+
+        # Delete existing database if it exists
+        if os.path.exists(DATABASES["demo"]["NAME"]):
+            demo_db_path = Path(DATABASES["demo"]["NAME"]).resolve()
+            logging.info(f"Deleting existing Demo DB: {demo_db_path}")
+            os.remove(demo_db_path)
+
+        # Generate new database
+        generator = DBDemoGenerator()
+        generator.generate(args.start_date, args.num_transactions, args.initial_deposit, args.monthly_deposit)
+
+    # Close all database connections to ensure all data is written to disk
+    logging.info("Closing database connections to flush data to disk...")
+    connections.close_all()
+
+    # Copy the generated/updated database to fixtures for distribution with Briefcase
     dev_demo_db = Path(DATABASES["demo"]["NAME"]).resolve()
     fixtures_demo_db = Path(__file__).parent.parent / "src" / "stonks_overwatch" / "fixtures" / "demo_db.sqlite3"
 
