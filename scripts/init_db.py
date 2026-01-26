@@ -12,7 +12,6 @@ import textwrap
 from argparse import Namespace
 
 from scripts.common import setup_script_environment
-from stonks_overwatch.constants import BrokerName
 
 # Set up Django environment and logging
 setup_script_environment()
@@ -20,6 +19,7 @@ setup_script_environment()
 # Import Django and application modules after setup
 from django.core.management import call_command  # noqa: E402
 
+from stonks_overwatch.constants import BrokerName  # noqa: E402
 from stonks_overwatch.core.factories.broker_factory import BrokerFactory  # noqa: E402
 
 # The import is defined here, so all the Django configuration can be executed
