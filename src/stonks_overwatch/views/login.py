@@ -12,13 +12,40 @@ from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.session_keys import SessionKeys
 
 
+class BrokerAuthStrategy:
+    """
+    Strategy pattern for broker-specific authentication logic.
+
+    This class encapsulates broker-specific authentication configuration,
+    reducing code duplication in the Login view.
+    """
+
+    def __init__(
+        self,
+        broker_name: BrokerName,
+        use_factory: bool = True,
+        handles_totp: bool = False,
+    ):
+        """
+        Initialize authentication strategy for a broker.
+
+        Args:
+            broker_name: The broker name
+            use_factory: Whether to use BrokerFactory (False for DEGIRO which uses locator)
+            handles_totp: Whether this broker supports TOTP/2FA
+        """
+        self.broker_name = broker_name
+        self.use_factory = use_factory
+        self.handles_totp = handles_totp
+
+
 class Login(View):
     """
     View for the login page.
-    Handles user authentication and connection to DeGiro.
+    Handles user authentication and connection to brokers.
 
     The view has 4 states:
-    * Initial state: The user is prompted to enter their username and password.
+    * Initial state: The user is prompted to select a broker.
     * TOTP required: The user is prompted to enter their 2FA code.
     * In-app authentication required: The user is prompted to complete authentication in their mobile app.
     * Loading: The user is shown a loading indicator while the portfolio is updated.
@@ -26,6 +53,25 @@ class Login(View):
 
     TEMPLATE_NAME = "login.html"
     logger = StonksLogger.get_logger("stonks_overwatch.login", "[VIEW|LOGIN]")
+
+    # Configuration for broker-specific authentication strategies
+    BROKER_AUTH_STRATEGIES = {
+        BrokerName.DEGIRO: BrokerAuthStrategy(
+            broker_name=BrokerName.DEGIRO,
+            use_factory=False,
+            handles_totp=True,
+        ),
+        BrokerName.BITVAVO: BrokerAuthStrategy(
+            broker_name=BrokerName.BITVAVO,
+            use_factory=True,
+            handles_totp=False,
+        ),
+        BrokerName.IBKR: BrokerAuthStrategy(
+            broker_name=BrokerName.IBKR,
+            use_factory=True,
+            handles_totp=False,
+        ),
+    }
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -196,120 +242,100 @@ class Login(View):
             if not credentials:
                 return {"success": False, "message": "No credentials found"}
 
-            # Perform authentication based on broker type
-            if broker_name == BrokerName.DEGIRO:
-                return self._auto_authenticate_degiro(request, credentials)
-            elif broker_name == BrokerName.BITVAVO:
-                return self._auto_authenticate_bitvavo(request, credentials)
-            elif broker_name == BrokerName.IBKR:
-                return self._auto_authenticate_ibkr(request, credentials)
-            else:
+            # Get authentication strategy for this broker
+            strategy = self.BROKER_AUTH_STRATEGIES.get(broker_name)
+            if not strategy:
                 return {"success": False, "message": f"Auto-authentication not supported for {broker_name}"}
+
+            # Use generic authentication method with strategy
+            return self._auto_authenticate_with_strategy(request, strategy, credentials)
 
         except Exception as e:
             self.logger.error(f"Error during auto-authentication for {broker_name}: {str(e)}")
             return {"success": False, "message": f"Auto-authentication failed: {str(e)}"}
 
-    def _auto_authenticate_degiro(self, request: HttpRequest, credentials) -> dict:
-        """Auto-authenticate with DEGIRO stored credentials."""
+    def _auto_authenticate_with_strategy(self, request: HttpRequest, strategy: BrokerAuthStrategy, credentials) -> dict:
+        """
+        Generic auto-authentication method using strategy pattern.
+
+        Args:
+            request: The HTTP request
+            strategy: The broker-specific authentication strategy
+            credentials: The stored credentials object
+
+        Returns:
+            Dictionary with success status and message
+        """
         try:
-            from stonks_overwatch.core.authentication_locator import get_authentication_service
-            from stonks_overwatch.core.interfaces.authentication_service import AuthenticationResult
+            broker_name = strategy.broker_name
 
-            auth_service = get_authentication_service()
-
-            # Authenticate with stored credentials
-            auth_result = auth_service.authenticate_user(
-                request=request,
-                username=credentials.username,
-                password=credentials.password,
-                one_time_password=None,
-                remember_me=False,
-            )
-
-            if auth_result.is_success:
-                request.session[SessionKeys.get_authenticated_key(BrokerName.DEGIRO)] = True
-                return {"success": True, "message": "Auto-authentication successful"}
+            # Get authentication service based on strategy
+            if strategy.use_factory:
+                auth_service = self.factory.create_authentication_service(broker_name)
+                if not auth_service:
+                    return {"success": False, "message": f"{broker_name} authentication service not available"}
             else:
-                # Check if failure is due to TOTP requirement
-                if auth_result.result == AuthenticationResult.TOTP_REQUIRED:
-                    # TOTP required - this is expected, redirect to broker login for 2FA
-                    return {"success": False, "message": "TOTP authentication required", "requires_totp": True}
-                elif auth_result.result == AuthenticationResult.IN_APP_AUTHENTICATION_REQUIRED:
-                    # In-app auth required - redirect to broker login
-                    return {"success": False, "message": "In-app authentication required", "requires_in_app_auth": True}
-                else:
-                    # Other authentication failure
-                    return {"success": False, "message": auth_result.message or "Authentication failed"}
+                # Special case for DEGIRO which uses authentication locator
+                from stonks_overwatch.core.authentication_locator import get_authentication_service
 
-        except Exception as e:
-            self.logger.error(f"DEGIRO auto-authentication error: {str(e)}")
-            return {"success": False, "message": "Auto-authentication failed"}
+                auth_service = get_authentication_service()
 
-    def _auto_authenticate_bitvavo(self, request: HttpRequest, credentials) -> dict:
-        """Auto-authenticate with Bitvavo stored credentials."""
-        try:
-            # Create Bitvavo authentication service using factory
-            auth_service = self.factory.create_authentication_service(BrokerName.BITVAVO)
-            if not auth_service:
-                return {"success": False, "message": "Bitvavo authentication service not available"}
-
-            # Authenticate with stored credentials
-            auth_result = auth_service.authenticate_user(
-                request=request,
-                api_key=credentials.apikey,
-                api_secret=credentials.apisecret,
-                remember_me=False,
-            )
-
-            if auth_result["success"]:
-                request.session[SessionKeys.get_authenticated_key(BrokerName.BITVAVO)] = True
-                return {"success": True, "message": "Auto-authentication successful"}
-            else:
-                return {"success": False, "message": auth_result["message"]}
-
-        except Exception as e:
-            self.logger.error(f"Bitvavo auto-authentication error: {str(e)}")
-            return {"success": False, "message": "Auto-authentication failed"}
-
-    def _auto_authenticate_ibkr(self, request: HttpRequest, credentials) -> dict:
-        """Auto-authenticate with IBKR stored credentials."""
-        try:
-            # Create IBKR authentication service using factory
-            auth_service = self.factory.create_authentication_service(BrokerName.IBKR)
-            if not auth_service:
-                return {"success": False, "message": "IBKR authentication service not available"}
-
-            # Check if user is already authenticated
-            if auth_service.is_user_authenticated(request):
+            # Check if already authenticated (IBKR optimization)
+            if broker_name == BrokerName.IBKR and auth_service.is_user_authenticated(request):
                 return {"success": True, "message": "Already authenticated"}
 
-            # Extract credentials
-            access_token = getattr(credentials, "access_token", "")
-            access_token_secret = getattr(credentials, "access_token_secret", "")
-            consumer_key = getattr(credentials, "consumer_key", "")
-            dh_prime = getattr(credentials, "dh_prime", "")
-            encryption_key = getattr(credentials, "encryption_key", None)
-            signature_key = getattr(credentials, "signature_key", None)
+            # Extract credentials using credential's to_auth_params method
+            auth_params = credentials.to_auth_params()
 
-            # Validate that we have the required credentials
-            if not all([access_token, access_token_secret, consumer_key, dh_prime]):
-                return {"success": False, "message": "Missing required OAuth credentials"}
+            # Validate required credentials for IBKR
+            if broker_name == BrokerName.IBKR:
+                required_fields = ["access_token", "access_token_secret", "consumer_key", "dh_prime"]
+                if not all(auth_params.get(field) for field in required_fields):
+                    return {"success": False, "message": "Missing required OAuth credentials"}
 
-            # Authenticate using the service
-            result = auth_service.authenticate_user(
-                request=request,
-                access_token=access_token,
-                access_token_secret=access_token_secret,
-                consumer_key=consumer_key,
-                dh_prime=dh_prime,
-                encryption_key=encryption_key,
-                signature_key=signature_key,
-                remember_me=True,  # Auto-auth implies stored credentials
-            )
+            # Authenticate with broker-specific parameters
+            auth_result = auth_service.authenticate_user(request=request, **auth_params)
 
-            return result
+            # Handle response based on broker type
+            return self._process_auth_result(request, broker_name, auth_result, strategy.handles_totp)
 
         except Exception as e:
-            self.logger.error(f"IBKR auto-authentication error: {str(e)}")
+            self.logger.error(f"{strategy.broker_name} auto-authentication error: {str(e)}")
             return {"success": False, "message": "Auto-authentication failed"}
+
+    def _process_auth_result(
+        self, request: HttpRequest, broker_name: BrokerName, auth_result, handles_totp: bool
+    ) -> dict:
+        """
+        Process authentication result and convert to standard format.
+
+        Args:
+            request: The HTTP request
+            broker_name: The broker name
+            auth_result: Authentication result (AuthenticationResponse or dict)
+            handles_totp: Whether this broker supports TOTP
+
+        Returns:
+            Standardized dictionary with success status and message
+        """
+        # DEGIRO returns AuthenticationResponse object, others return dict
+        if hasattr(auth_result, "is_success"):
+            # AuthenticationResponse object (DEGIRO)
+            from stonks_overwatch.core.interfaces.authentication_service import AuthenticationResult
+
+            if auth_result.is_success:
+                request.session[SessionKeys.get_authenticated_key(broker_name)] = True
+                return {"success": True, "message": "Auto-authentication successful"}
+            elif handles_totp and auth_result.result == AuthenticationResult.TOTP_REQUIRED:
+                return {"success": False, "message": "TOTP authentication required", "requires_totp": True}
+            elif handles_totp and auth_result.result == AuthenticationResult.IN_APP_AUTHENTICATION_REQUIRED:
+                return {"success": False, "message": "In-app authentication required", "requires_in_app_auth": True}
+            else:
+                return {"success": False, "message": auth_result.message or "Authentication failed"}
+        else:
+            # Dict response (Bitvavo, IBKR, MetaTrader4)
+            if auth_result.get("success"):
+                request.session[SessionKeys.get_authenticated_key(broker_name)] = True
+                return {"success": True, "message": "Auto-authentication successful"}
+            else:
+                return {"success": False, "message": auth_result.get("message", "Authentication failed")}

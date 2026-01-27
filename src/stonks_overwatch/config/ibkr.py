@@ -96,6 +96,27 @@ class IbkrCredentials(BaseCredentials):
         filtered_data = {k: v for k, v in data.items() if k in valid_fields}
         return cls(**filtered_data)
 
+    def to_auth_params(self) -> dict:
+        """
+        Convert credentials to authentication parameters.
+
+        Returns:
+            Dictionary with authentication parameters for IBKR auth service
+
+        Note:
+            remember_me is intentionally omitted as this method is used for
+            auto-authentication with already-stored credentials. The auth service
+            will use its default value (False).
+        """
+        return {
+            "access_token": getattr(self, "access_token", ""),
+            "access_token_secret": getattr(self, "access_token_secret", ""),
+            "consumer_key": getattr(self, "consumer_key", ""),
+            "dh_prime": getattr(self, "dh_prime", ""),
+            "encryption_key": getattr(self, "encryption_key", None),
+            "signature_key": getattr(self, "signature_key", None),
+        }
+
 
 class IbkrConfig(BaseConfig):
     config_key = BrokerName.IBKR.value
