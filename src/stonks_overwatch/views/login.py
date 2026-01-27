@@ -67,7 +67,7 @@ class Login(View):
                     self.logger.info(
                         f"Auto-authentication requires 2FA for {broker_to_auto_auth}, redirecting to broker login"
                     )
-                    return redirect("broker_login", broker_name=broker_to_auto_auth)
+                    return redirect("broker_login", broker_name_str=broker_to_auto_auth)
                 else:
                     # Other authentication failure - show broker selector so user can choose
                     self.logger.info(
