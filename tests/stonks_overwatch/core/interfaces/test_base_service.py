@@ -20,6 +20,13 @@ class MockCredentials(BaseCredentials):
         self.username = username
         self.password = password
 
+    def to_auth_params(self) -> dict:
+        """Convert credentials to authentication parameters."""
+        return {
+            "username": self.username,
+            "password": self.password,
+        }
+
 
 class MockConfig(BaseConfig):
     """Mock configuration for testing."""

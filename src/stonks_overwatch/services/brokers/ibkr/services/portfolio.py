@@ -66,6 +66,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
 
         for position in all_positions:
             try:
+                self.logger.debug(f"Position: {position}")
                 entry = self.__create_portfolio_entry(position, base_currency)
                 portfolio.append(entry)
             except Exception as e:
