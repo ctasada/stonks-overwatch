@@ -203,9 +203,41 @@ class BrokerLogin(View):
         return False
 
     def _check_authenticated(self, request: HttpRequest, broker_name: BrokerName) -> bool:
-        """Check if user is authenticated for this broker."""
-        # Check session for authentication status
-        return request.session.get(SessionKeys.get_authenticated_key(broker_name), False)
+        """
+        Check if user is authenticated for this broker.
+        A broker is only considered fully authenticated if they have an active session
+        AND (if not in offline mode) valid credentials in the database.
+        """
+        # 1. Check session for authentication status
+        if not request.session.get(SessionKeys.get_authenticated_key(broker_name), False):
+            return False
+
+        # 2. Check if broker is in offline/demo mode - session is enough
+        from stonks_overwatch.utils.core.demo_mode import is_demo_mode
+
+        if is_demo_mode():
+            return True
+
+        # 3. Check if broker has valid credentials in database
+        # This ensures that if credentials were wiped/lost, we show the login form
+        # instead of a loading screen that redirects to a broken state.
+        try:
+            from stonks_overwatch.services.utilities.credential_validator import CredentialValidator
+
+            config = self.factory.create_config(broker_name)
+            if not config or not config.is_enabled():
+                return False
+
+            credentials = config.get_credentials
+            if not credentials or not CredentialValidator.has_valid_credentials(broker_name, credentials):
+                # Session exists but DB config is broken - force re-login to fix it
+                self.logger.warning(f"Session exists for {broker_name} but DB configuration is invalid")
+                return False
+
+            return True
+        except Exception as e:
+            self.logger.error(f"Error checking broker configuration for {broker_name}: {e}")
+            return False
 
     def _extract_credentials(self, request: HttpRequest, broker_name: BrokerName) -> Optional[dict]:
         """Extract credentials from request based on broker type."""

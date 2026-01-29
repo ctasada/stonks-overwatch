@@ -31,6 +31,9 @@ class TestAuthenticationMiddleware(TestCase):
         mock_factory_class.return_value = self.mock_factory
         mock_registry_class.return_value = self.mock_registry
 
+        # Default mock behavior
+        self.mock_registry.get_registered_brokers.return_value = []
+
         self.middleware = AuthenticationMiddleware(self.get_response)
         self.request = self._create_mock_request()
 
@@ -60,17 +63,19 @@ class TestAuthenticationMiddleware(TestCase):
         # Should not check authentication for public URLs
 
     @patch("stonks_overwatch.middleware.authentication.resolve")
-    def test_middleware_allows_access_when_no_brokers_configured(self, mock_resolve):
-        """Test middleware allows access when no brokers are configured."""
+    @patch("stonks_overwatch.middleware.authentication.redirect")
+    def test_middleware_redirects_to_login_when_no_brokers_configured(self, mock_redirect, mock_resolve):
+        """Test middleware redirects even if session is 'ok' but no brokers are validly configured."""
         mock_resolve.return_value.url_name = "dashboard"
+        mock_redirect.return_value = HttpResponse(status=302)
 
         # Mock no configured brokers
         self.mock_registry.get_registered_brokers.return_value = []
 
         response = self.middleware(self.request)
 
-        assert response == self.get_response.return_value
-        # Should not check authentication when no brokers configured
+        assert response.status_code == 302
+        mock_redirect.assert_called_once_with("login")
 
     @patch("stonks_overwatch.middleware.authentication.resolve")
     @patch("stonks_overwatch.services.utilities.credential_validator.CredentialValidator.has_valid_credentials")
@@ -144,13 +149,13 @@ class TestAuthenticationMiddleware(TestCase):
         self.mock_auth_service.logout_user.assert_called_once_with(self.request)
 
     @patch("stonks_overwatch.middleware.authentication.resolve")
-    def test_middleware_bypasses_authentication_in_demo_mode(self, mock_resolve):
+    @patch("stonks_overwatch.middleware.authentication.is_demo_mode")
+    def test_middleware_bypasses_authentication_in_demo_mode(self, mock_is_demo_mode, mock_resolve):
         """Test middleware bypasses authentication checks when in demo mode."""
         mock_resolve.return_value.url_name = "dashboard"
+        mock_is_demo_mode.return_value = True
 
-        # Mock demo mode detection to return True
-        with patch("stonks_overwatch.utils.core.demo_mode.is_demo_mode", return_value=True):
-            response = self.middleware(self.request)
+        response = self.middleware(self.request)
 
         assert response == self.get_response.return_value
         # Should not check authentication in demo mode

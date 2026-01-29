@@ -70,9 +70,9 @@ class DepositsService(BaseService, DepositServiceInterface):
         filled_data = {}
         last_known_value = None
 
-        # Convert string dates to datetime objects for manipulation
-        start_date = datetime.fromisoformat(sorted(sorted_data.keys())[0])
-        end_date = django_timezone.now()
+        # Convert string dates to date objects for manipulation (avoid tz-aware vs naive comparisons)
+        start_date = datetime.fromisoformat(sorted(sorted_data.keys())[0]).date()
+        end_date = django_timezone.now().date()
 
         # Iterate over the full date range
         current_date = start_date

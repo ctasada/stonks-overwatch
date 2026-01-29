@@ -963,8 +963,20 @@ class TestBrokerLoginView(TestCase):
         result = self.view._check_in_app_auth_required(request, BrokerName.IBKR)
         assert result is False
 
-    def test_check_authenticated(self):
+    @patch("stonks_overwatch.services.utilities.credential_validator.CredentialValidator.has_valid_credentials")
+    @patch("stonks_overwatch.views.broker_login.BrokerFactory")
+    def test_check_authenticated(self, mock_factory_class, mock_has_valid_credentials):
         """Test _check_authenticated for all brokers."""
+        # Setup mocks
+        mock_factory = Mock()
+        mock_factory_class.return_value = mock_factory
+        self.view.factory = mock_factory
+
+        mock_config = Mock()
+        mock_config.is_enabled.return_value = True
+        mock_factory.create_config.return_value = mock_config
+        mock_has_valid_credentials.return_value = True
+
         request = self.factory.get("/login/degiro/")
         request.session = self.session
 
@@ -980,10 +992,16 @@ class TestBrokerLoginView(TestCase):
 
         # Test IBKR
         request.session["ibkr_authenticated"] = True
-        result = self.view._check_authenticated(request, BrokerName.BITVAVO)
+        result = self.view._check_authenticated(request, BrokerName.IBKR)
         assert result is True
 
         # Test without authentication
         request.session.clear()
+        result = self.view._check_authenticated(request, BrokerName.DEGIRO)
+        assert result is False
+
+        # Test with session but without valid credentials
+        request.session["degiro_authenticated"] = True
+        mock_has_valid_credentials.return_value = False
         result = self.view._check_authenticated(request, BrokerName.DEGIRO)
         assert result is False
