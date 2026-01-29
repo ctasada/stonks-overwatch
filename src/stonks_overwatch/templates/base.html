@@ -133,6 +133,15 @@
                             <span class="sidebar-text">Transactions</span>
                         </a>
 
+                        {% url 'trading_journal' as url %}
+                        <a href="{{ url }}"
+                            class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white"
+                            data-page="trading_journal" data-bs-toggle="tooltip" data-bs-placement="right"
+                            title="Trading Journal">
+                            <i class="bi bi-journal-text me-3 fs-5 sidebar-icon"></i>
+                            <span class="sidebar-text">Trading Journal</span>
+                        </a>
+
                         {% url 'account_overview' as url %}
                         <a href="{{ url }}"
                             class="nav-link sidebar-nav-link d-flex align-items-center py-2 mb-1 text-white"
@@ -358,6 +367,7 @@
                 'fees': 'fee',
                 'deposits': 'deposit',
                 'transactions': 'transaction',
+                'trading_journal': 'trading_journal',
                 'account_overview': 'account'
             };
 

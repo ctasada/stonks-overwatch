@@ -18,4 +18,5 @@ class ServiceType(Enum):
     FEE = "fee"
     ACCOUNT = "account"
     AUTHENTICATION = "authentication"
+    TRADING_JOURNAL = "trading_journal"
     UPDATE = "update"

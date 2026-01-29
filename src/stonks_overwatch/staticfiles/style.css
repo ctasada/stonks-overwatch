@@ -11,9 +11,9 @@
     --primary-lighter: #D0E0FF;
 
     /* Sidebar dimensions */
-    --sidebar-width-desktop: 185px;
-    --sidebar-width-tablet: 180px;
-    --sidebar-width-mobile: 165px;
+    --sidebar-width-desktop: 200px;
+    --sidebar-width-tablet: 195px;
+    --sidebar-width-mobile: 180px;
     --sidebar-collapsed-desktop: 80px;
     --sidebar-collapsed-tablet: 75px;
     --sidebar-collapsed-mobile: 70px;
@@ -43,7 +43,7 @@
     --border-radius-full: 9999px;   /* Pill shape / circular */
 
     /* Sidebar spacing */
-    --sidebar-margin: 0.25rem;
+    --sidebar-margin: 0.2rem;
 
     /* Sidebar colors */
     --sidebar-text-color: rgba(255, 255, 255, 0.8);
@@ -692,7 +692,7 @@ html.standalone-root body {
 }
 
 /* SELECTED STATE - Make it very obvious */
-.theme-radio:checked + .theme-label,
+.theme-radio:checked+.theme-label,
 .theme-option.selected .theme-label {
     border-color: var(--primary-color) !important;
     border-width: 3px !important;
@@ -701,7 +701,7 @@ html.standalone-root body {
     transform: scale(1.02) !important;
 }
 
-.theme-radio:checked + .theme-label::before,
+.theme-radio:checked+.theme-label::before,
 .theme-option.selected .theme-label::before {
     content: '';
     position: absolute;
@@ -714,7 +714,7 @@ html.standalone-root body {
     z-index: 10;
 }
 
-.theme-radio:checked + .theme-label::after,
+.theme-radio:checked+.theme-label::after,
 .theme-option.selected .theme-label::after {
     content: '✓';
     position: absolute;
@@ -731,20 +731,20 @@ html.standalone-root body {
     z-index: 11;
 }
 
-[data-bs-theme="dark"] .theme-radio:checked + .theme-label,
+[data-bs-theme="dark"] .theme-radio:checked+.theme-label,
 [data-bs-theme="dark"] .theme-option.selected .theme-label {
     background: rgba(65, 80, 138, 0.4) !important;
     border-color: var(--primary-color) !important;
 }
 
 /* Enhanced visual feedback for selected theme */
-.theme-radio:checked + .theme-label .theme-name,
+.theme-radio:checked+.theme-label .theme-name,
 .theme-option.selected .theme-label .theme-name {
     color: var(--primary-color) !important;
     font-weight: 700 !important;
 }
 
-.theme-radio:checked + .theme-label .theme-preview,
+.theme-radio:checked+.theme-label .theme-preview,
 .theme-option.selected .theme-label .theme-preview {
     transform: scale(1.1);
     box-shadow: 0 4px 12px rgba(115, 134, 213, 0.4);
@@ -804,7 +804,7 @@ html.standalone-root body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, transparent 0%, transparent 45%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.3) 100%);
+    background: linear-gradient(135deg, transparent 0%, transparent 45%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.3) 100%);
     pointer-events: none;
 }
 
@@ -855,7 +855,7 @@ html.standalone-root body {
 }
 
 /* Animation for theme switching */
-.theme-radio:checked + .theme-label,
+.theme-radio:checked+.theme-label,
 .theme-option.selected .theme-label {
     animation: selectTheme 0.4s ease-out;
 }
@@ -864,16 +864,18 @@ html.standalone-root body {
     0% {
         transform: scale(1);
     }
+
     50% {
         transform: scale(1.05);
     }
+
     100% {
         transform: scale(1.02);
     }
 }
 
 /* Focus styles for accessibility */
-.theme-radio:focus + .theme-label {
+.theme-radio:focus+.theme-label {
     outline: 2px solid var(--primary-color);
     outline-offset: 2px;
 }
@@ -1817,8 +1819,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
             #4a5e8f,
             #4a5e8f 2px,
             #5a6ea5 2px,
-            #5a6ea5 4px
-        );
+            #5a6ea5 4px);
 }
 
 [data-bs-theme="dark"] .forecasted-dividends {
@@ -3509,4 +3510,49 @@ label.required::after {
     .settings-form-group {
         margin-bottom: 1.5rem;
     }
+}
+
+/* Trading Journal Calendar Styles */
+.calendar-weekday-header {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted-custom);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0.5rem;
+}
+
+.calendar-day-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: var(--border-radius-standard) !important;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-main) !important;
+    background: var(--bg-card) !important;
+}
+
+.calendar-day-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium) !important;
+}
+
+.calendar-empty-day {
+    min-height: 100px;
+    background: rgba(var(--shadow-rgb), 0.02);
+    border: 1px dashed var(--border-main);
+    opacity: 0.2;
+    border-radius: var(--border-radius-standard);
+}
+
+.text-profit-positive {
+    color: var(--color-success) !important;
+}
+
+.text-profit-negative {
+    color: var(--color-danger) !important;
+}
+
+.text-profit-neutral {
+    color: var(--text-main) !important;
 }

@@ -105,6 +105,9 @@ from stonks_overwatch.services.brokers.metatrader4.services.fee_service import (
 from stonks_overwatch.services.brokers.metatrader4.services.portfolio_service import (
     PortfolioService as Metatrader4PortfolioService,
 )
+from stonks_overwatch.services.brokers.metatrader4.services.trading_journal_service import (
+    TradingJournalService as Metatrader4TradingJournalService,
+)
 from stonks_overwatch.services.brokers.metatrader4.services.transaction_service import (
     TransactionService as Metatrader4TransactionService,
 )
@@ -160,6 +163,7 @@ BROKER_CONFIGS: Dict[BrokerName, Dict[str, Any]] = {
             ServiceType.DEPOSIT: Metatrader4DepositService,
             ServiceType.FEE: Metatrader4FeeService,
             ServiceType.AUTHENTICATION: Metatrader4AuthenticationService,
+            ServiceType.TRADING_JOURNAL: Metatrader4TradingJournalService,
         },
     },
 }

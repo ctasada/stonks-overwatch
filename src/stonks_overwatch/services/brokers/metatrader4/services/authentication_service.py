@@ -2,12 +2,14 @@
 MetaTrader 4 authentication service implementation.
 
 This module provides authentication functionality for MetaTrader 4.
-MT4 uses FTP-based data access and doesn't require interactive authentication.
+MT4 uses SFTP-based data access and doesn't require interactive authentication.
 """
 
 from typing import Optional
 
+import paramiko
 from django.http import HttpRequest
+from paramiko import SFTPClient
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.constants import BrokerName
@@ -25,7 +27,7 @@ class Metatrader4AuthenticationService(BaseService, AuthenticationServiceInterfa
     """
     Authentication service for MetaTrader 4.
 
-    MT4 uses FTP-based data access and doesn't require interactive user authentication.
+    MT4 uses SFTP-based data access and doesn't require interactive user authentication.
     This service provides minimal authentication support for consistency with other brokers.
     """
 
@@ -45,172 +47,146 @@ class Metatrader4AuthenticationService(BaseService, AuthenticationServiceInterfa
         """Return the broker name."""
         return BrokerName.METATRADER4
 
-    def _validate_ftp_file_path(self, ftp, path: str) -> tuple[list, dict]:
+    def _validate_sftp_file_path(self, sftp_client: SFTPClient, path: str) -> tuple[list, dict]:
         """
-        Validate FTP file path by checking directory and optionally file existence.
+        Validate SFTP file path by checking if file exists.
 
         Args:
-            ftp: Active FTP connection
+            sftp_client: Active SFTP client connection
             path: File path to validate
 
         Returns:
             Tuple of (file_list, error_dict or None)
         """
-        import os
-
-        directory = os.path.dirname(path)
-        filename = os.path.basename(path)
-
-        # Verify directory exists
         try:
-            if directory:  # Only change directory if there's a parent directory
-                ftp.cwd(directory)
-                self.logger.debug(f"FTP directory verified: {directory}")
-            else:
-                # Path is in root directory
-                ftp.cwd("/")
-                self.logger.debug("Using FTP root directory")
-        except Exception:
-            ftp.quit()
-            self.logger.warning(f"FTP directory does not exist: {directory}")
-            return [], {"success": False, "message": f"Directory '{directory}' does not exist on FTP server"}
+            # Try to get file stats to verify it exists
+            sftp_client.stat(path)
+            filename = path.split("/")[-1]
+            self.logger.debug(f"SFTP file verified: {path}")
+            return [filename], None
+        except FileNotFoundError:
+            self.logger.warning(
+                f"File '{path}' not found on SFTP server, but this may be normal if reports haven't been generated yet"
+            )
+            return [], None
+        except Exception as e:
+            self.logger.warning(f"Cannot verify SFTP file existence: {str(e)}")
+            return [], None
 
-        # Try to verify file exists (optional - not critical)
-        file_list = []
-        try:
-            file_list = ftp.nlst()
-            if filename not in file_list:
-                self.logger.warning(
-                    f"File '{filename}' not found in directory, "
-                    "but this may be normal if reports haven't been generated yet"
-                )
-            else:
-                self.logger.debug(f"FTP file verified: {filename}")
-        except Exception as list_error:
-            self.logger.warning(f"Cannot verify file existence: {str(list_error)}")
-            # Not a critical error - file might not exist yet
-
-        return file_list, None
-
-    def _validate_ftp_directory_path(self, ftp, path: str) -> tuple[list, dict]:
+    def _validate_sftp_directory_path(self, sftp_client: SFTPClient, path: str) -> tuple[list, dict]:
         """
-        Validate FTP directory path by checking directory existence and listing files.
+        Validate SFTP directory path by checking directory existence and listing files.
 
         Args:
-            ftp: Active FTP connection
+            sftp_client: Active SFTP client connection
             path: Directory path to validate
 
         Returns:
             Tuple of (file_list, error_dict or None)
         """
         try:
-            ftp.cwd(path)
-            self.logger.debug(f"FTP directory verified: {path}")
-
-            # List directory to verify we can read files
-            file_list = []
-            try:
-                file_list = ftp.nlst()
-                self.logger.debug(f"FTP directory listing successful: {len(file_list)} items found")
-            except Exception as list_error:
-                self.logger.warning(f"Cannot list FTP directory: {str(list_error)}")
-                # Not a critical error - just log it
-
+            # SFTP directory listing
+            file_list = sftp_client.listdir(path)
+            self.logger.debug(f"SFTP directory verified: {path}")
+            self.logger.debug(f"SFTP directory listing successful: {len(file_list)} items found")
             return file_list, None
-        except Exception:
-            ftp.quit()
-            self.logger.warning(f"FTP path does not exist: {path}")
-            return [], {"success": False, "message": f"Path '{path}' does not exist on FTP server"}
+        except FileNotFoundError:
+            self.logger.warning(f"SFTP path does not exist: {path}")
+            return [], {"success": False, "message": f"Path '{path}' does not exist on server"}
+        except Exception as e:
+            self.logger.warning(f"SFTP directory validation failed: {str(e)}")
+            return [], {"success": False, "message": f"Cannot access path '{path}': {str(e)}"}
 
     def validate_credentials(self, ftp_server: str, username: str, password: str, path: str) -> dict:
         """
-        Validate MetaTrader 4 FTP credentials by attempting to connect.
+        Validate MetaTrader 4 SFTP credentials by attempting to connect.
 
-        This method tests the FTP connection to ensure credentials are valid
+        This method tests the SFTP connection to ensure credentials are valid
         and the specified path exists before storing them.
 
         Args:
-            ftp_server: FTP server address
-            username: FTP username
-            password: FTP password
-            path: Path to reports directory on FTP server
+            ftp_server: SFTP server address
+            username: Username
+            password: Password
+            path: Path to reports directory or file on server
 
         Returns:
             Dictionary with validation result and message
         """
         try:
-            from ftplib import FTP
-
             # Validate that all required fields are provided
             if not all([ftp_server, username, password, path]):
                 return {
                     "success": False,
-                    "message": "All FTP credentials are required (server, username, password, path)",
+                    "message": "All credentials are required (server, username, password, path)",
                 }
 
-            self.logger.debug(f"Validating FTP connection to {ftp_server}")
+            self.logger.debug(f"Validating SFTP connection to {ftp_server}")
 
-            # Attempt to connect to FTP server with timeout
-            ftp = FTP()
-            ftp.connect(ftp_server, timeout=10)
-            self.logger.debug("FTP connection established")
+            # Use SFTP for secure connection
+            with paramiko.SSHClient() as ssh_client:
+                # Configure SSH client security
+                ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-            # Attempt to login
-            ftp.login(username, password)
-            self.logger.debug("FTP login successful")
+                # Connect to server with explicit port (default 22 for SFTP)
+                port = 22  # SFTP standard port
+                ssh_client.connect(hostname=ftp_server, port=port, username=username, password=password, timeout=30)
 
-            # Determine if path is a file or directory
-            # Check if path has a file extension (e.g., .htm, .html, .csv)
-            path_parts = path.split("/")
-            last_part = path_parts[-1] if path_parts else ""
-            is_file_path = "." in last_part  # Simple check for file extension
+                # Open SFTP session
+                with ssh_client.open_sftp() as sftp_client:
+                    self.logger.debug("SFTP connection established")
 
-            # Validate path based on type (file vs directory)
-            if is_file_path:
-                file_list, error = self._validate_ftp_file_path(ftp, path)
-            else:
-                file_list, error = self._validate_ftp_directory_path(ftp, path)
+                    # Determine if path is a file or directory
+                    # Check if path has a file extension (e.g., .htm, .html, .csv)
+                    path_parts = path.split("/")
+                    last_part = path_parts[-1] if path_parts else ""
+                    is_file_path = "." in last_part  # Simple check for file extension
 
-            # If validation failed, return error
-            if error:
-                return error
+                    # Validate path based on type (file vs directory)
+                    if is_file_path:
+                        file_list, error = self._validate_sftp_file_path(sftp_client, path)
+                    else:
+                        file_list, error = self._validate_sftp_directory_path(sftp_client, path)
 
-            # Close connection
-            ftp.quit()
+                    # If validation failed, return error
+                    if error:
+                        return error
 
-            self.logger.info("MetaTrader 4 FTP credentials validated successfully")
-            return {
-                "success": True,
-                "message": "FTP credentials validated successfully",
-                "connection_info": {
-                    "server": ftp_server,
-                    "path": path,
-                    "file_count": len(file_list),
-                },
-            }
+                    self.logger.info("MetaTrader 4 SFTP credentials validated successfully")
+                    return {
+                        "success": True,
+                        "message": "SFTP credentials validated successfully",
+                        "connection_info": {
+                            "server": ftp_server,
+                            "path": path,
+                            "file_count": len(file_list),
+                            "connection_type": "SFTP (secure)",
+                            "is_secure": True,
+                        },
+                    }
 
         except Exception as e:
             error_msg = str(e).lower()
 
-            # Handle specific FTP error types
-            if "authentication" in error_msg or "login" in error_msg or "530" in error_msg:
-                self.logger.warning(f"FTP authentication failed: {str(e)}")
+            # Handle specific error types
+            if "authentication" in error_msg or "login" in error_msg or "auth" in error_msg:
+                self.logger.warning(f"SFTP authentication failed: {str(e)}")
                 return {
                     "success": False,
-                    "message": "Invalid FTP username or password - please check your credentials",
+                    "message": "Invalid username or password - please check your credentials",
                 }
             elif "connection" in error_msg or "timeout" in error_msg or "refused" in error_msg:
-                self.logger.warning(f"FTP connection failed: {str(e)}")
+                self.logger.warning(f"SFTP connection failed: {str(e)}")
                 return {
                     "success": False,
-                    "message": f"Cannot connect to FTP server '{ftp_server}' - please check the server address",
+                    "message": f"Cannot connect to SFTP server '{ftp_server}' - please check the server address",
                 }
             elif "timed out" in error_msg:
-                self.logger.warning(f"FTP connection timeout: {str(e)}")
+                self.logger.warning(f"SFTP connection timeout: {str(e)}")
                 return {"success": False, "message": "Connection timeout - please try again or check your network"}
             else:
-                self.logger.error(f"FTP validation error: {str(e)}")
-                return {"success": False, "message": f"FTP validation error: {str(e)}"}
+                self.logger.error(f"SFTP validation error: {str(e)}")
+                return {"success": False, "message": f"SFTP validation error: {str(e)}"}
 
     def authenticate_user(
         self,
@@ -222,20 +198,20 @@ class Metatrader4AuthenticationService(BaseService, AuthenticationServiceInterfa
         remember_me: bool = False,
     ) -> dict:
         """
-        Authenticate a user with MT4 by validating and storing FTP credentials.
+        Authenticate a user with MT4 by validating and storing FTP/SFTP credentials.
 
         Args:
             request: The HTTP request containing session data
-            ftp_server: FTP server address
-            username: FTP username
-            password: FTP password
-            path: Path to reports directory on FTP server
+            ftp_server: FTP/SFTP server address
+            username: Username
+            password: Password
+            path: Path to reports directory on server
             remember_me: Whether to store credentials permanently
 
         Returns:
             Dictionary with authentication result
         """
-        self.logger.debug("Authenticating MT4 user with FTP credentials")
+        self.logger.debug("Authenticating MT4 user with FTP/SFTP credentials")
 
         try:
             # Validate credentials first by testing FTP connection

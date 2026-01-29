@@ -20,6 +20,7 @@ from stonks_overwatch.core.interfaces import (
     PortfolioServiceInterface,
     TransactionServiceInterface,
 )
+from stonks_overwatch.core.interfaces.trading_journal_service import TradingJournalServiceInterface
 from stonks_overwatch.core.interfaces.update_service import AbstractUpdateService
 from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.utils.core.logger import StonksLogger
@@ -52,6 +53,7 @@ class BrokerRegistry:
         ServiceType.FEE: FeeServiceInterface,
         ServiceType.ACCOUNT: AccountServiceInterface,
         ServiceType.AUTHENTICATION: AuthenticationServiceInterface,
+        ServiceType.TRADING_JOURNAL: TradingJournalServiceInterface,
         ServiceType.UPDATE: AbstractUpdateService,
     }
 

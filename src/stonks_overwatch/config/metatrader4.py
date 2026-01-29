@@ -11,10 +11,10 @@ from stonks_overwatch.utils.core.localization import LocalizationUtility
 
 @dataclass
 class Metatrader4Credentials(BaseCredentials):
-    ftp_server: str
-    username: str
-    password: str
-    path: str
+    ftp_server: str  # SFTP server address
+    username: str  # Username for SFTP authentication
+    password: str  # Password for SFTP authentication
+    path: str  # Path to reports directory or file on server
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Metatrader4Credentials":

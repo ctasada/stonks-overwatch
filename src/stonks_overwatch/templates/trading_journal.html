@@ -1,0 +1,408 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid row-gap-5">
+    <div class="row content-card rounded mb-3">
+        <div class="row my-2 align-items-center">
+            <div class="col-auto">
+                <div class="section-header pb-0">Trading Journal</div>
+            </div>
+
+            <!-- Granularity Selector -->
+            <div class="col-auto">
+                <div class="btn-group btn-group-sm" role="group" aria-label="Granularity">
+                    {% if granularity == "year" %}
+                    <input type="radio" class="btn-check" name="granularity" id="yearGranularity" autocomplete="off"
+                        checked>
+                    {% else %}
+                    <input type="radio" class="btn-check" name="granularity" id="yearGranularity" autocomplete="off">
+                    {% endif %}
+                    <label class="btn btn-outline-primary" for="yearGranularity">Year</label>
+
+                    {% if granularity == "month" %}
+                    <input type="radio" class="btn-check" name="granularity" id="monthGranularity" autocomplete="off"
+                        checked>
+                    {% else %}
+                    <input type="radio" class="btn-check" name="granularity" id="monthGranularity" autocomplete="off">
+                    {% endif %}
+                    <label class="btn btn-outline-primary" for="monthGranularity">Month</label>
+                </div>
+            </div>
+
+            <!-- Year Selector (Visible when granularity is Year) -->
+            {% if granularity == "year" %}
+            <div class="col-auto" id="yearSelectorContainer">
+                {% else %}
+                <div class="col-auto" id="yearSelectorContainer" style="display: none;">
+                    {% endif %}
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Year navigation">
+                        <button class="btn btn-outline-secondary dropdown-custom rounded-end-0" type="button"
+                            id="prevYearButton" title="Previous year">
+                            <i class="bi bi-chevron-left"></i>
+                        </button>
+                        <div class="dropdown dropdown-custom" id="yearsDropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle dropdown-custom rounded-0"
+                                type="button" id="yearsDropdownButton" data-bs-toggle="dropdown" aria-expanded="false"
+                                style="min-width: 80px;">
+                                {{ selectedYear }}
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="yearsDropdownButton"
+                                style="min-width: 100%; width: auto;">
+                                {% for year in availableYears %}
+                                <li>
+                                    <a class="dropdown-item {% if year == selectedYear %}active{% endif %}" href="#">
+                                        {{ year }}
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <button class="btn btn-outline-secondary dropdown-custom rounded-start-0" type="button"
+                            id="nextYearButton" title="Next year">
+                            <i class="bi bi-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Month Selector (Visible when granularity is Month) -->
+                {% if granularity == "month" %}
+                <div class="col-auto" id="monthSelectorContainer">
+                    {% else %}
+                    <div class="col-auto" id="monthSelectorContainer" style="display: none;">
+                        {% endif %}
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Month navigation">
+                            <!-- Year drop down in month mode -->
+                            <div class="dropdown dropdown-custom" id="monthModeYearsDropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle dropdown-custom rounded-end-0"
+                                    type="button" id="monthModeYearsDropdownButton" data-bs-toggle="dropdown"
+                                    aria-expanded="false" style="min-width: 80px;">
+                                    {{ selectedYear }}
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="monthModeYearsDropdownButton"
+                                    style="min-width: 100%; width: auto;">
+                                    {% for year in availableYears %}
+                                    <li>
+                                        <a class="dropdown-item {% if year == selectedYear %}active{% endif %}"
+                                            href="#">
+                                            {{ year }}
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+
+                            <button class="btn btn-outline-secondary dropdown-custom rounded-0" type="button"
+                                id="prevMonthButton" title="Previous month">
+                                <i class="bi bi-chevron-left"></i>
+                            </button>
+                            <div class="dropdown dropdown-custom" id="monthsDropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle dropdown-custom rounded-0"
+                                    type="button" id="monthsDropdownButton" data-bs-toggle="dropdown"
+                                    aria-expanded="false" style="min-width: 100px;">
+                                    {{ selectedMonthName }}
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="monthsDropdownButton"
+                                    style="min-width: 100%; width: auto;">
+                                    {% for month_num, month_name in availableMonths %}
+                                    <li><a class="dropdown-item {% if month_num == selectedMonth %}active{% endif %}"
+                                            href="#" data-month="{{ month_num }}">{{ month_name }}</a></li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <button class="btn btn-outline-secondary dropdown-custom rounded-start-0" type="button"
+                                id="nextMonthButton" title="Next month">
+                                <i class="bi bi-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="col-auto ms-1 px-3 py-1 border rounded-pill d-flex align-items-center"
+                        style="background-color: var(--primary-color); color: white; height: 31px;">
+                        <span>Total Profit:</span>
+                        <span id="periodTotalValue" class="ms-2" data-base="{{ totalPeriodProfit }}"
+                            data-original="{{ totalOriginalPeriodProfit|default:'' }}">
+                            {{ totalPeriodProfit }}
+                        </span>
+                    </div>
+
+                    <!-- Currency Selector -->
+                    <div class="col-auto ms-auto">
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Currency Selector">
+                            <input type="radio" class="btn-check" name="displayCurrency" id="baseCurrency"
+                                autocomplete="off" checked value="base">
+                            <label class="btn btn-outline-primary" for="baseCurrency">
+                                {{ base_currency|default:"EUR" }}
+                            </label>
+
+                            <input type="radio" class="btn-check" name="displayCurrency" id="originalCurrency"
+                                autocomplete="off" value="original" {% if not originalCurrency %}disabled{% endif %}>
+                            <label class="btn btn-outline-primary" for="originalCurrency">
+                                {{ originalCurrency|default:"USD" }}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row px-3 pb-3" id="trades-calendar-container">
+                    {% include 'trading_journal/calendar.html' with tradesCalendar=tradesCalendar %}
+                </div>
+            </div>
+        </div>
+
+        {{ granularity|json_script:"granularity-data" }}
+        {{ selectedYear|json_script:"selected-year-data" }}
+        {{ selectedMonth|json_script:"selected-month-data" }}
+        {{ availableYears|json_script:"available-years-data" }}
+        {{ minYear|json_script:"min-year-data" }}
+        {{ minMonth|json_script:"min-month-data" }}
+        {{ maxYear|json_script:"max-year-data" }}
+        {{ maxMonth|json_script:"max-month-data" }}
+
+        <script>
+            const URL = "{% url 'trading_journal' %}"
+            const HOST = window.location.protocol + "//" + window.location.host
+
+            let currentGranularity = JSON.parse(document.getElementById('granularity-data').textContent);
+            let currentYear = JSON.parse(document.getElementById('selected-year-data').textContent);
+            let currentMonth = JSON.parse(document.getElementById('selected-month-data').textContent);
+            const availableYearsItems = JSON.parse(document.getElementById('available-years-data').textContent);
+            const minYear = JSON.parse(document.getElementById('min-year-data').textContent);
+            const minMonth = JSON.parse(document.getElementById('min-month-data').textContent);
+            const maxYear = JSON.parse(document.getElementById('max-year-data').textContent);
+            const maxMonth = JSON.parse(document.getElementById('max-month-data').textContent);
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+            function updateNavigationButtons() {
+                if (currentGranularity === 'year') {
+                    const yearIndex = availableYearsItems.indexOf(currentYear);
+                    // Prev button (older year - higher index)
+                    $('#prevYearButton').prop('disabled', yearIndex >= availableYearsItems.length - 1).toggleClass('disabled', yearIndex >= availableYearsItems.length - 1);
+                    // Next button (newer year - lower index)
+                    const isFutureYear = currentYear >= maxYear;
+                    $('#nextYearButton').prop('disabled', isFutureYear).toggleClass('disabled', isFutureYear);
+                } else {
+                    // Month mode
+                    // Prev month button: disable if we are at or before minMonth/minYear
+                    const isMinMonthYear = (currentYear < minYear) || (currentYear === minYear && currentMonth <= minMonth);
+                    $('#prevMonthButton').prop('disabled', isMinMonthYear).toggleClass('disabled', isMinMonthYear);
+
+                    // Next month button: disable if we are at or after maxMonth/maxYear
+                    const isMaxMonthYear = (currentYear > maxYear) || (currentYear === maxYear && currentMonth >= maxMonth);
+                    $('#nextMonthButton').prop('disabled', isMaxMonthYear).toggleClass('disabled', isMaxMonthYear);
+                }
+            }
+
+            function loadCalendar() {
+                const url = `${HOST}${URL}?granularity=${currentGranularity}&calendar_year=${currentYear}&calendar_month=${currentMonth}&html_only=true`;
+
+                console.log('Fetching calendar:', url);
+
+                fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    }
+                })
+                    .then(response => response.text())
+                    .then(html => {
+                        const container = document.getElementById('trades-calendar-container');
+                        if (container) {
+                            container.innerHTML = html;
+
+                            // Update total profit
+                            const totalElem = container.querySelector('#calendar-year-total');
+                            const periodTotalElem = $('#periodTotalValue');
+                            const originalIndicator = $('#originalCurrency');
+
+                            if (totalElem) {
+                                periodTotalElem.data('base', totalElem.dataset.yearTotal);
+                                const orig = totalElem.dataset.yearTotalOriginal;
+                                if (orig && orig !== '') {
+                                    periodTotalElem.data('original', orig);
+                                    originalIndicator.prop('disabled', false);
+                                } else {
+                                    periodTotalElem.removeData('original');
+                                    originalIndicator.prop('disabled', true);
+                                    // If we were showing original but now it's not available, switch back to base
+                                    if ($('input[name="displayCurrency"]:checked').val() === 'original') {
+                                        $('#baseCurrency').prop('checked', true);
+                                    }
+                                }
+                            }
+
+                            // Update the display based on current selected currency
+                            updateCurrencyDisplay();
+                        }
+                        updateNavigationButtons();
+                    })
+                    .catch(error => console.error('Error fetching calendar:', error));
+            }
+
+            // Granularity change
+            $('input[name="granularity"]').on('change', function () {
+                currentGranularity = $(this).attr('id') === 'yearGranularity' ? 'year' : 'month';
+
+                if (currentGranularity === 'year') {
+                    $('#yearSelectorContainer').show();
+                    $('#monthSelectorContainer').hide();
+                } else {
+                    $('#yearSelectorContainer').hide();
+                    $('#monthSelectorContainer').show();
+                }
+
+                loadCalendar();
+            });
+
+            // Year navigation (Year mode)
+            $('#prevYearButton').on('click', function (e) {
+                e.preventDefault();
+                const yearIndex = availableYearsItems.indexOf(currentYear);
+                if (yearIndex < availableYearsItems.length - 1) {
+                    currentYear = availableYearsItems[yearIndex + 1];
+                    $('#yearsDropdownButton').text(currentYear);
+                    $('#monthModeYearsDropdownButton').text(currentYear);
+                    loadCalendar();
+                }
+            });
+
+            $('#nextYearButton').on('click', function (e) {
+                e.preventDefault();
+                const now = new Date();
+                const nowYear = now.getFullYear();
+
+                if (currentYear >= nowYear) {
+                    return;
+                }
+
+                const yearIndex = availableYearsItems.indexOf(currentYear);
+                if (yearIndex > 0) {
+                    currentYear = availableYearsItems[yearIndex - 1];
+                    $('#yearsDropdownButton').text(currentYear);
+                    $('#monthModeYearsDropdownButton').text(currentYear);
+                    loadCalendar();
+                }
+            });
+
+            // Year dropdown selection
+            $('#yearsDropdown .dropdown-item, #monthModeYearsDropdown .dropdown-item').on('click', function (e) {
+                e.preventDefault();
+                currentYear = parseInt($(this).text());
+                $('#yearsDropdownButton').text(currentYear);
+                $('#monthModeYearsDropdownButton').text(currentYear);
+
+                $('.dropdown-item').removeClass('active');
+                $(this).addClass('active');
+
+                loadCalendar();
+            });
+
+            // Month navigation (Month mode)
+            $('#prevMonthButton').on('click', function (e) {
+                e.preventDefault();
+
+                if (currentYear < minYear || (currentYear === minYear && currentMonth <= minMonth)) {
+                    return;
+                }
+
+                if (currentMonth > 1) {
+                    currentMonth--;
+                } else {
+                    const yearIndex = availableYearsItems.indexOf(currentYear);
+                    if (yearIndex < availableYearsItems.length - 1) {
+                        currentYear = availableYearsItems[yearIndex + 1];
+                        currentMonth = 12;
+                        $('#monthModeYearsDropdownButton').text(currentYear);
+                        $('#yearsDropdownButton').text(currentYear);
+                    }
+                }
+                $('#monthsDropdownButton').text(monthNames[currentMonth - 1]);
+                loadCalendar();
+            });
+
+            $('#nextMonthButton').on('click', function (e) {
+                e.preventDefault();
+
+                if (currentYear > maxYear || (currentYear === maxYear && currentMonth >= maxMonth)) {
+                    return;
+                }
+
+                if (currentMonth < 12) {
+                    currentMonth++;
+                } else {
+                    const yearIndex = availableYearsItems.indexOf(currentYear);
+                    if (yearIndex > 0) {
+                        currentYear = availableYearsItems[yearIndex - 1];
+                        currentMonth = 1;
+                        $('#monthModeYearsDropdownButton').text(currentYear);
+                        $('#yearsDropdownButton').text(currentYear);
+                    }
+                }
+                $('#monthsDropdownButton').text(monthNames[currentMonth - 1]);
+                loadCalendar();
+            });
+
+            // Month dropdown selection
+            $('#monthsDropdown .dropdown-item').on('click', function (e) {
+                e.preventDefault();
+                currentMonth = parseInt($(this).data('month'));
+                $('#monthsDropdownButton').text($(this).text());
+
+                $('#monthsDropdown .dropdown-item').removeClass('active');
+                $(this).addClass('active');
+
+                loadCalendar();
+            });
+
+            // Currency Selector change
+            $('input[name="displayCurrency"]').on('change', function () {
+                updateCurrencyDisplay();
+            });
+
+            function updateCurrencyDisplay() {
+                const displayType = $('input[name="displayCurrency"]:checked').val();
+
+                // Update Period Total
+                const totalElem = $('#periodTotalValue');
+                if (displayType === 'base') {
+                    totalElem.text(totalElem.data('base'));
+                } else {
+                    totalElem.text(totalElem.data('original') || totalElem.data('base'));
+                }
+
+                // Update all items in the calendar
+                $('.profit-value-display').each(function () {
+                    const $item = $(this);
+                    const baseVal = $item.data('base');
+                    const originalVal = $item.data('original');
+
+                    // Dispose existing tooltip if any
+                    const tooltip = bootstrap.Tooltip.getInstance(this);
+                    if (tooltip) {
+                        tooltip.dispose();
+                    }
+
+                    if (displayType === 'base') {
+                        $item.text(baseVal);
+                        if (originalVal) {
+                            $item.attr('title', originalVal);
+                            new bootstrap.Tooltip(this);
+                        }
+                    } else {
+                        $item.text(originalVal || baseVal);
+                        if (originalVal) {
+                            $item.attr('title', baseVal);
+                            new bootstrap.Tooltip(this);
+                        }
+                    }
+                });
+            }
+
+            // Init
+            updateNavigationButtons();
+            updateCurrencyDisplay();
+        </script>
+    </div>
+</div>
+{% endblock %}
