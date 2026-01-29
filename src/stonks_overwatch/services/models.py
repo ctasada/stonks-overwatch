@@ -578,6 +578,22 @@ class TotalPortfolio:
 
 
 @dataclass
+class Trade:
+    name: str
+    datetime: datetime
+    profit: float  # Base currency profit
+    currency: str  # Base currency
+    original_profit: Optional[float] = None
+    original_currency: Optional[str] = None
+
+    def day(self) -> str:
+        return LocalizationUtility.get_date_day(self.datetime)
+
+    def month_year(self) -> str:
+        return LocalizationUtility.format_date_to_month_year(self.datetime)
+
+
+@dataclass
 class Transaction:
     name: str
     symbol: str

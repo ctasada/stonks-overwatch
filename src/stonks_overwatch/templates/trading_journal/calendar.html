@@ -1,0 +1,108 @@
+<!-- Hidden element to store period total for AJAX updates -->
+<div id="calendar-year-total" data-year-total="{{ totalPeriodProfit }}"
+     {% if totalOriginalPeriodProfit %}
+     data-year-total-original="{{ totalOriginalPeriodProfit }}"
+     {% endif %} class="hidden"></div>
+
+{% if granularity == "year" %}
+<div class="col-12 mt-2">
+    <div class="row g-3">
+        {% for key, value in tradesCalendar.calendar.items %}
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card h-100 p-2 border-0 shadow-sm calendar-day-card">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="fw-bold text-primary" style="font-size: 0.9rem;">{{ key }}</span>
+                </div>
+                <div class="mt-auto text-center">
+                    {% if value.tps > 0 %}
+                    <div class="fw-bold profit-value-display {% if value.total > 0 %}text-profit-positive{% elif value.total < 0 %}text-profit-negative{% else %}text-profit-neutral{% endif %}"
+                        style="font-size: 1rem;" data-base="{{ value.formatedTotal }}"
+                            {% if value.formatedOriginalTotal %}
+                         data-original="{{ value.formatedOriginalTotal }}" data-bs-toggle="tooltip" data-bs-html="true" data-bs-custom-class="info-tooltip" title="{{ value.formatedOriginalTotal }}"
+                            {% endif %}>
+                        {{ value.formatedTotal }}
+                    </div>
+                    <div class="text-muted" style="font-size: 0.8rem;">{{ value.tps }} trades</div>
+                    {% else %}
+                    <div class="text-muted" style="font-size: 0.95rem;">No trades</div>
+                    <div class="text-muted" style="font-size: 0.8rem;">---</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<div class="col-12 mt-2">
+    <div class="row g-2 text-center mb-3">
+        <div class="col calendar-weekday-header">Mon</div>
+        <div class="col calendar-weekday-header">Tue</div>
+        <div class="col calendar-weekday-header">Wed</div>
+        <div class="col calendar-weekday-header">Thu</div>
+        <div class="col calendar-weekday-header">Fri</div>
+        <div class="col calendar-weekday-header text-warning">Sat</div>
+        <div class="col calendar-weekday-header text-warning">Sun</div>
+        <div class="col calendar-weekday-header text-primary fw-bold"
+            style="border-left: 1px solid var(--border-main);">WEEK</div>
+    </div>
+    {% for week in monthGrid %}
+    <div class="row g-2 mb-2">
+        {% for day in week.days %}
+        <div class="col" style="min-width: 0;">
+            {% if day %}
+            <div class="card h-100 p-2 border-0 shadow-sm calendar-day-card">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="fw-bold {% if day.tps > 0 %}text-primary{% else %}text-muted{% endif %}"
+                        style="font-size: 0.9rem;">{{ day.day }}</span>
+                </div>
+                <div class="mt-auto text-center">
+                    {% if day.tps > 0 %}
+                    <div class="fw-bold profit-value-display {% if day.total > 0 %}text-profit-positive{% elif day.total < 0 %}text-profit-negative{% else %}text-profit-neutral{% endif %}"
+                        style="font-size: 0.95rem;" data-base="{{ day.formatedTotal }}"
+                            {% if day.formatedOriginalTotal %}
+                         data-original="{{ day.formatedOriginalTotal }}" data-bs-toggle="tooltip" data-bs-html="true" data-bs-custom-class="info-tooltip" title="{{ day.formatedOriginalTotal }}"
+                            {% endif %}>
+                        {{ day.formatedTotal }}
+                    </div>
+                    <div class="text-muted" style="font-size: 0.75rem;">{{ day.tps }} trades</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div class="h-100 calendar-empty-day"></div>
+            {% endif %}
+        </div>
+        {% endfor %}
+        <!-- Weekly Total Column -->
+        <div class="col" style="min-width: 0; border-left: 1px solid var(--border-main);">
+            <div class="card h-100 p-2 border-0 shadow-sm"
+                style="background: rgba(var(--primary-color-rgb, 115, 134, 213), 0.05); border: 1px solid var(--primary-color) !important; opacity: 0.9;">
+                <div class="text-center mt-auto mb-auto">
+                    <div class="small text-muted mb-1"
+                        style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px;">Week Profit</div>
+                    <div class="fw-bold profit-value-display
+                        {% if week.weeklyTotal > 0 %}
+                        text-profit-positive
+                        {% elif week.weeklyTotal < 0 %}
+                        text-profit-negative
+                        {% else %}
+                        text-profit-neutral
+                        {% endif %}"
+                        style="font-size: 1rem;" data-base="{{ week.formatedWeeklyTotal }}"
+                        {% if week.formatedWeeklyOriginalTotal %}
+                            data-original="{{ week.formatedWeeklyOriginalTotal }}"
+                            data-bs-toggle="tooltip"
+                            data-bs-html="true"
+                            data-bs-custom-class="info-tooltip"
+                            title="{{ week.formatedWeeklyOriginalTotal }}"
+                        {% endif %}>
+                        {{ week.formatedWeeklyTotal }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}

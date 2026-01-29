@@ -34,6 +34,7 @@ from stonks_overwatch.views.release_notes import ReleaseNotesView
 from stonks_overwatch.views.root_redirect import RootRedirectView
 from stonks_overwatch.views.settings import SettingsView
 from stonks_overwatch.views.static import RootStaticFileView
+from stonks_overwatch.views.trading_journal import TradingJournal
 from stonks_overwatch.views.transactions import Transactions
 
 urlpatterns = [
@@ -47,6 +48,7 @@ urlpatterns = [
     path("dividends", Dividends.as_view(), name="dividends"),
     path("fees", Fees.as_view(), name="fees"),
     path("portfolio", Portfolio.as_view(), name="portfolio"),
+    path("trading_journal", TradingJournal.as_view(), name="trading_journal"),
     path("transactions", Transactions.as_view(), name="transactions"),
     path("configuration", ConfigurationView.as_view(), name="configuration"),
     path("release_notes", ReleaseNotesView.as_view(), name="release_notes"),
