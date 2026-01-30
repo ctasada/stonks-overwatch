@@ -121,6 +121,52 @@ The authentication system consists of three main service layers:
   - `get_effective_credentials()`: Resolve credentials from multiple sources
   - `store_credentials_in_database()`: Handle "remember me" functionality
 
+#### AuthenticationHelper
+
+- **Location**: `src/stonks_overwatch/core/authentication_helper.py`
+- **Purpose**: Centralized broker authentication readiness checks
+- **Pattern**: Stateless utility class with class methods
+- **Key Methods**:
+  - `is_broker_ready()`: Check if broker is enabled and has valid credentials
+  - `get_first_ready_broker()`: Find first broker ready for auto-authentication
+  - `has_configured_brokers()`: Check if any brokers are usable
+  - `clear_broken_session()`: Clean up invalid session state
+
+The `AuthenticationHelper` provides a unified interface for checking broker authentication status across middleware and views. It encapsulates complex logic for determining if a broker is ready for use, eliminating duplication across the codebase.
+
+**Architecture Position:**
+
+The helper sits between the presentation layer (views/middleware) and the service layer (authentication services). It provides a simplified API for common authentication checks without requiring direct service instantiation.
+
+```text
+Views/Middleware
+      ↓
+AuthenticationHelper  ← Simplified API for readiness checks
+      ↓
+AuthenticationService ← Full service layer
+      ↓
+BrokerFactory/Configs
+```
+
+**Usage Pattern:**
+
+```python
+from stonks_overwatch.core.authentication_helper import AuthenticationHelper
+from stonks_overwatch.constants import BrokerName
+
+# Check if broker is ready for use
+if AuthenticationHelper.is_broker_ready(BrokerName.DEGIRO):
+    # Broker is enabled and has valid credentials
+    pass
+
+# Clear broken session data
+AuthenticationHelper.clear_broken_session(request, BrokerName.DEGIRO)
+```
+
+**Generic Credential Support:**
+
+The helper works with any broker's credential class through polymorphic validation. As of Task 39, authentication interfaces use generic `object` types for credentials instead of broker-specific types, supporting the future plugin architecture where each broker provides its own credential class.
+
 ### Service Access Patterns
 
 #### Service Locator Pattern (Recommended)
@@ -402,6 +448,50 @@ class AuthenticationResult(Enum):
     CONNECTION_ERROR = "connection_error"
     MAINTENANCE_MODE = "maintenance_mode"
     CONFIGURATION_ERROR = "configuration_error"
+```
+
+### Generic Credential Types (Task 39 Enhancement)
+
+**Important**: As of Task 39, authentication interfaces use generic `object` types for credentials instead of broker-specific types (e.g., `DegiroCredentials`). This change supports the plugin architecture where each broker provides its own credential class.
+
+**Before (broker-specific):**
+
+```python
+def handle_authentication_error(
+    self, request: HttpRequest, error: Exception,
+    credentials: Optional[DegiroCredentials] = None  # ← Broker-specific!
+) -> AuthenticationResponse:
+```
+
+**After (generic, plugin-ready):**
+
+```python
+def handle_authentication_error(
+    self, request: HttpRequest, error: Exception,
+    credentials: Optional[object] = None  # ← Generic!
+) -> AuthenticationResponse:
+```
+
+**Benefits:**
+- **Plugin Support**: New brokers can provide custom credential classes without modifying core interfaces
+- **Type Safety**: Polymorphic validation through `has_minimal_credentials()` method
+- **Flexibility**: Each broker implements its own credential validation logic
+- **Future-Proof**: Aligns with the plugin architecture proposal (see [PLUGIN_ARCHITECTURE.md](PLUGIN_ARCHITECTURE.md))
+
+**Validation Pattern:**
+
+The `CredentialValidator` now supports polymorphic validation:
+
+```python
+# Credential classes can implement their own validation
+class BitvavoCredentials(BaseCredentials):
+    def has_minimal_credentials(self) -> bool:
+        return bool(self.api_key and self.api_secret)
+
+# Validator delegates to credential object
+if hasattr(credentials, "has_minimal_credentials"):
+    if not credentials.has_minimal_credentials():
+        return False
 ```
 
 ## Service Registration

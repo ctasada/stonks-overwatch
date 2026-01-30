@@ -134,31 +134,6 @@ class AuthenticationMiddleware:
         Returns:
             True if at least one broker is usable (configured or authenticated)
         """
-        try:
-            from stonks_overwatch.services.utilities.credential_validator import CredentialValidator
+        from stonks_overwatch.core.authentication_helper import AuthenticationHelper
 
-            registered_brokers = self.registry.get_registered_brokers()
-
-            for broker_name in registered_brokers:
-                try:
-                    # 1. Check if user has an active session for this broker (fastest)
-                    if request and request.session.get(SessionKeys.get_authenticated_key(broker_name), False):
-                        return True
-
-                    # 2. Check if broker is enabled and has valid credentials in database
-                    config = self.factory.create_config(broker_name)
-                    if config and config.is_enabled():
-                        # Check if broker has valid credentials
-                        credentials = config.get_credentials
-                        if credentials and CredentialValidator.has_valid_credentials(broker_name, credentials):
-                            return True
-                except Exception as e:
-                    self.logger.warning(f"Error checking broker {broker_name}: {str(e)}")
-                    continue
-
-            return False
-
-        except Exception as e:
-            self.logger.error(f"Error checking configured brokers: {str(e)}")
-            # Default to False to redirect to broker selector when in doubt
-            return False
+        return AuthenticationHelper.has_configured_brokers(request)

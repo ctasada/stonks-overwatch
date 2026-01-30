@@ -193,31 +193,9 @@ class Login(View):
         Returns:
             Broker name if found, None otherwise
         """
-        try:
-            from stonks_overwatch.services.utilities.credential_validator import CredentialValidator
+        from stonks_overwatch.core.authentication_helper import AuthenticationHelper
 
-            available_brokers = self._get_available_brokers()
-
-            # Only attempt auto-auth for enabled brokers
-            enabled_brokers = [b for b in available_brokers if b["enabled"]]
-
-            for broker_info in enabled_brokers:
-                broker_name = broker_info["name"]
-                config = self.factory.create_config(broker_name)
-
-                if config and config.is_enabled():
-                    credentials = config.get_credentials
-
-                    # Check if credentials are valid (not placeholders)
-                    if credentials and CredentialValidator.has_valid_credentials(broker_name, credentials):
-                        self.logger.debug(f"Found stored credentials for broker: {broker_name}")
-                        return broker_name
-
-            return None
-
-        except Exception as e:
-            self.logger.error(f"Error checking for stored credentials: {str(e)}")
-            return None
+        return AuthenticationHelper.get_first_ready_broker()
 
     def _attempt_auto_authentication(self, request: HttpRequest, broker_name: BrokerName) -> dict:
         """

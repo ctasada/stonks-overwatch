@@ -115,8 +115,8 @@ class TestAuthenticationMiddleware(TestCase):
 
     @patch("stonks_overwatch.middleware.authentication.resolve")
     @patch("stonks_overwatch.middleware.authentication.redirect")
-    @patch("stonks_overwatch.services.utilities.credential_validator.CredentialValidator.has_valid_credentials")
-    def test_middleware_redirects_unauthenticated_user(self, mock_has_valid_credentials, mock_redirect, mock_resolve):
+    @patch("stonks_overwatch.core.authentication_helper.AuthenticationHelper.has_configured_brokers")
+    def test_middleware_redirects_unauthenticated_user(self, mock_has_configured_brokers, mock_redirect, mock_resolve):
         """Test middleware redirects unauthenticated users to login."""
         mock_resolve.return_value.url_name = "dashboard"
         mock_redirect.return_value = HttpResponse(status=302)
@@ -133,8 +133,8 @@ class TestAuthenticationMiddleware(TestCase):
         mock_config.offline_mode = False
         self.mock_factory.create_config.return_value = mock_config
 
-        # Mock valid credentials
-        mock_has_valid_credentials.return_value = True
+        # Mock that broker is configured (has valid credentials)
+        mock_has_configured_brokers.return_value = True
 
         # Leave session without authentication key to simulate unauthenticated user
         # (request.session is empty by default)

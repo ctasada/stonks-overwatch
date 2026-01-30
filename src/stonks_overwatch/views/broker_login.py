@@ -222,16 +222,12 @@ class BrokerLogin(View):
         # This ensures that if credentials were wiped/lost, we show the login form
         # instead of a loading screen that redirects to a broken state.
         try:
-            from stonks_overwatch.services.utilities.credential_validator import CredentialValidator
+            from stonks_overwatch.core.authentication_helper import AuthenticationHelper
 
-            config = self.factory.create_config(broker_name)
-            if not config or not config.is_enabled():
-                return False
-
-            credentials = config.get_credentials
-            if not credentials or not CredentialValidator.has_valid_credentials(broker_name, credentials):
-                # Session exists but DB config is broken - force re-login to fix it
-                self.logger.warning(f"Session exists for {broker_name} but DB configuration is invalid")
+            if not AuthenticationHelper.is_broker_ready(broker_name):
+                # Session exists but DB config is broken - clear session and force re-login
+                self.logger.warning(f"Session exists for {broker_name} but configuration is invalid - clearing session")
+                AuthenticationHelper.clear_broken_session(request, broker_name)
                 return False
 
             return True

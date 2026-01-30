@@ -185,9 +185,12 @@ class TestBrokerLoginView(TestCase):
         assert request.session.get("degiro_authenticated") is True
         mock_auth_service.authenticate_user.assert_called_once()
 
+    @patch("stonks_overwatch.core.authentication_helper.AuthenticationHelper.is_broker_ready")
     @patch("stonks_overwatch.views.broker_login.BrokerRegistry")
     @patch("stonks_overwatch.views.broker_login.BrokerFactory")
-    def test_post_bitvavo_successful_authentication(self, mock_factory_class, mock_registry_class):
+    def test_post_bitvavo_successful_authentication(
+        self, mock_factory_class, mock_registry_class, mock_is_broker_ready
+    ):
         """Test POST request with successful Bitvavo authentication shows loading screen."""
         # Mock the registry and factory
         mock_registry = Mock()
@@ -208,6 +211,9 @@ class TestBrokerLoginView(TestCase):
 
         # Mock successful authentication
         mock_auth_service.authenticate_user.return_value = {"success": True, "message": "Authentication successful"}
+
+        # Mock broker is ready (has valid credentials)
+        mock_is_broker_ready.return_value = True
 
         request = self.factory.post("/login/bitvavo/", {"username": "api_key", "password": "api_secret"})
         request.session = self.session
@@ -767,7 +773,8 @@ class TestBrokerLoginView(TestCase):
         # Note: Credentials are now stored by the authentication service itself
         # in the correct session key (not "degiro_credentials")
 
-    def test_authenticate_ibkr_success(self):
+    @patch("stonks_overwatch.core.authentication_helper.AuthenticationHelper.is_broker_ready")
+    def test_authenticate_ibkr_success(self, mock_is_broker_ready):
         """Test IBKR authentication success with OAuth credentials."""
         # Mock the view's factory and registry
         mock_factory = Mock()
@@ -784,6 +791,9 @@ class TestBrokerLoginView(TestCase):
         mock_auth_service = Mock()
         mock_factory.create_authentication_service.return_value = mock_auth_service
         mock_auth_service.authenticate_user.return_value = {"success": True, "message": "Authentication successful"}
+
+        # Mock broker is ready (has valid credentials)
+        mock_is_broker_ready.return_value = True
 
         # Test valid OAuth credentials
         request = self.factory.post(
@@ -963,9 +973,9 @@ class TestBrokerLoginView(TestCase):
         result = self.view._check_in_app_auth_required(request, BrokerName.IBKR)
         assert result is False
 
-    @patch("stonks_overwatch.services.utilities.credential_validator.CredentialValidator.has_valid_credentials")
+    @patch("stonks_overwatch.core.authentication_helper.AuthenticationHelper.is_broker_ready")
     @patch("stonks_overwatch.views.broker_login.BrokerFactory")
-    def test_check_authenticated(self, mock_factory_class, mock_has_valid_credentials):
+    def test_check_authenticated(self, mock_factory_class, mock_is_broker_ready):
         """Test _check_authenticated for all brokers."""
         # Setup mocks
         mock_factory = Mock()
@@ -975,7 +985,7 @@ class TestBrokerLoginView(TestCase):
         mock_config = Mock()
         mock_config.is_enabled.return_value = True
         mock_factory.create_config.return_value = mock_config
-        mock_has_valid_credentials.return_value = True
+        mock_is_broker_ready.return_value = True
 
         request = self.factory.get("/login/degiro/")
         request.session = self.session
@@ -1002,6 +1012,6 @@ class TestBrokerLoginView(TestCase):
 
         # Test with session but without valid credentials
         request.session["degiro_authenticated"] = True
-        mock_has_valid_credentials.return_value = False
+        mock_is_broker_ready.return_value = False
         result = self.view._check_authenticated(request, BrokerName.DEGIRO)
         assert result is False

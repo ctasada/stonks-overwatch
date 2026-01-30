@@ -19,7 +19,7 @@ class CredentialValidator:
 
         Args:
             broker_name: Name of the broker (e.g., 'degiro', 'bitvavo')
-            credentials: Credential object or dictionary containing credentials
+            credentials: Credential object containing credentials
 
         Returns:
             True if credentials appear valid, False otherwise
@@ -28,6 +28,12 @@ class CredentialValidator:
             return False
 
         try:
+            # First check if credentials have basic fields (use existing method if available)
+            if hasattr(credentials, "has_minimal_credentials"):
+                if not credentials.has_minimal_credentials():
+                    return False
+
+            # Then check for placeholders using broker-specific validation
             validators: Dict[str, Callable[[Any], bool]] = {
                 BrokerName.DEGIRO: cls._validate_degiro,
                 BrokerName.BITVAVO: cls._validate_bitvavo,
@@ -40,7 +46,6 @@ class CredentialValidator:
 
             # For unknown brokers, assume valid if credentials exist
             # This allows plugin brokers to work without modifying this core class
-            # Ideally plugins would register their own validators
             return True
 
         except Exception as e:
@@ -51,7 +56,7 @@ class CredentialValidator:
     def _validate_degiro(credentials: Any) -> bool:
         """
         Validate DEGIRO credentials.
-        Checks username and password validation.
+        Checks username and password are not placeholders and meet minimum length.
         """
         return (
             hasattr(credentials, "username")
@@ -68,7 +73,7 @@ class CredentialValidator:
     def _validate_bitvavo(credentials: Any) -> bool:
         """
         Validate Bitvavo credentials.
-        Checks API key and secret.
+        Checks API key and secret are not placeholders and meet minimum length.
         """
         return (
             hasattr(credentials, "apikey")
@@ -85,7 +90,7 @@ class CredentialValidator:
     def _validate_ibkr(credentials: Any) -> bool:
         """
         Validate IBKR credentials.
-        Checks access token.
+        Checks access token is not placeholder and meets minimum length.
         """
         return (
             hasattr(credentials, "access_token")
