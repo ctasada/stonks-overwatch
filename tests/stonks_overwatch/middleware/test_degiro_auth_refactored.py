@@ -40,14 +40,14 @@ class TestDeGiroAuthMiddlewareRefactored(TestCase):
         self.mock_auth_service.is_broker_enabled.return_value = True
         self.mock_auth_service.is_offline_mode.return_value = False
         self.mock_auth_service.should_check_connection.return_value = True
-        self.mock_auth_service.check_degiro_connection.return_value = AuthenticationResponse(
+        self.mock_auth_service.check_broker_connection.return_value = AuthenticationResponse(
             result=AuthenticationResult.SUCCESS, session_id="test_session"
         )
 
         response = self.middleware(self.request)
 
         assert response == self.get_response.return_value
-        self.mock_auth_service.check_degiro_connection.assert_called_once_with(self.request)
+        self.mock_auth_service.check_broker_connection.assert_called_once_with(self.request)
 
     @patch("stonks_overwatch.middleware.degiro_auth.redirect")
     def test_middleware_redirects_on_degiro_failure(self, mock_redirect):
@@ -59,7 +59,7 @@ class TestDeGiroAuthMiddlewareRefactored(TestCase):
         self.mock_auth_service.is_broker_enabled.return_value = True
         self.mock_auth_service.is_offline_mode.return_value = False
         self.mock_auth_service.should_check_connection.return_value = True
-        self.mock_auth_service.check_degiro_connection.return_value = AuthenticationResponse(
+        self.mock_auth_service.check_broker_connection.return_value = AuthenticationResponse(
             result=AuthenticationResult.INVALID_CREDENTIALS, message="Invalid credentials"
         )
 
@@ -102,7 +102,7 @@ class TestDeGiroAuthMiddlewareRefactored(TestCase):
         self.mock_auth_service.is_broker_enabled.return_value = True
         self.mock_auth_service.is_offline_mode.return_value = False
         self.mock_auth_service.should_check_connection.return_value = True
-        self.mock_auth_service.check_degiro_connection.return_value = AuthenticationResponse(
+        self.mock_auth_service.check_broker_connection.return_value = AuthenticationResponse(
             result=AuthenticationResult.TOTP_REQUIRED
         )
 
@@ -124,7 +124,7 @@ class TestDeGiroAuthMiddlewareRefactored(TestCase):
         self.mock_auth_service.is_broker_enabled.return_value = True
         self.mock_auth_service.is_offline_mode.return_value = False
         self.mock_auth_service.should_check_connection.return_value = True
-        self.mock_auth_service.check_degiro_connection.return_value = AuthenticationResponse(
+        self.mock_auth_service.check_broker_connection.return_value = AuthenticationResponse(
             result=AuthenticationResult.IN_APP_AUTHENTICATION_REQUIRED
         )
 
@@ -147,7 +147,7 @@ class TestDeGiroAuthMiddlewareRefactored(TestCase):
 
         assert response == self.get_response.return_value
         # Should not check connection when not needed
-        self.mock_auth_service.check_degiro_connection.assert_not_called()
+        self.mock_auth_service.check_broker_connection.assert_not_called()
 
     def test_middleware_handles_exceptions_gracefully(self):
         """Test middleware handles exceptions in authentication service gracefully."""

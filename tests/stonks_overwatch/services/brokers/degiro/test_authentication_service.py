@@ -162,8 +162,8 @@ class TestDegiroAuthenticationService(TestCase):
             # Exception is handled gracefully and error result is returned
 
     @patch("stonks_overwatch.core.factories.broker_factory.BrokerFactory")
-    def test_check_degiro_connection_success(self, mock_factory_class):
-        """Test check_degiro_connection successful flow."""
+    def test_check_broker_connection_success(self, mock_factory_class):
+        """Test check_broker_connection successful flow."""
         # Mock broker factory
         mock_factory = Mock()
         mock_factory_class.return_value = mock_factory
@@ -175,7 +175,7 @@ class TestDegiroAuthenticationService(TestCase):
         self.mock_degiro_service.check_connection.return_value = True
         self.mock_degiro_service.get_session_id.return_value = "test_session_123"
 
-        result = self.auth_service.check_degiro_connection(self.request)
+        result = self.auth_service.check_broker_connection(self.request)
 
         assert result.result == AuthenticationResult.SUCCESS
         assert result.session_id == "test_session_123"
@@ -183,20 +183,20 @@ class TestDegiroAuthenticationService(TestCase):
         self.mock_session_manager.set_authenticated.assert_called_once_with(self.request, True)
 
     @patch("stonks_overwatch.core.factories.broker_factory.BrokerFactory")
-    def test_check_degiro_connection_not_enabled(self, mock_factory_class):
-        """Test check_degiro_connection when DeGiro is not enabled."""
+    def test_check_broker_connection_not_enabled(self, mock_factory_class):
+        """Test check_broker_connection when DeGiro is not enabled."""
         mock_factory = Mock()
         mock_factory_class.return_value = mock_factory
         mock_factory.create_config.return_value = None
 
-        result = self.auth_service.check_degiro_connection(self.request)
+        result = self.auth_service.check_broker_connection(self.request)
 
         assert result.result == AuthenticationResult.CONFIGURATION_ERROR
         assert "not enabled" in result.message
 
     @patch("stonks_overwatch.core.factories.broker_factory.BrokerFactory")
-    def test_check_degiro_connection_offline_mode(self, mock_factory_class):
-        """Test check_degiro_connection in offline mode."""
+    def test_check_broker_connection_offline_mode(self, mock_factory_class):
+        """Test check_broker_connection in offline mode."""
         mock_factory = Mock()
         mock_factory_class.return_value = mock_factory
         mock_config = Mock()
@@ -204,14 +204,14 @@ class TestDegiroAuthenticationService(TestCase):
         mock_config.offline_mode = True
         mock_factory.create_config.return_value = mock_config
 
-        result = self.auth_service.check_degiro_connection(self.request)
+        result = self.auth_service.check_broker_connection(self.request)
 
         assert result.result == AuthenticationResult.SUCCESS
         assert "offline mode" in result.message
 
     @patch("stonks_overwatch.core.factories.broker_factory.BrokerFactory")
-    def test_check_degiro_connection_maintenance_mode(self, mock_factory_class):
-        """Test check_degiro_connection during maintenance mode."""
+    def test_check_broker_connection_maintenance_mode(self, mock_factory_class):
+        """Test check_broker_connection during maintenance mode."""
         mock_factory = Mock()
         mock_factory_class.return_value = mock_factory
         mock_config = Mock()
@@ -238,7 +238,7 @@ class TestDegiroAuthenticationService(TestCase):
             MaintenanceError.__init__ = original_init
         self.mock_degiro_service.check_connection.side_effect = error
 
-        result = self.auth_service.check_degiro_connection(self.request)
+        result = self.auth_service.check_broker_connection(self.request)
 
         assert result.result == AuthenticationResult.MAINTENANCE_MODE
         assert result.is_maintenance_mode is True

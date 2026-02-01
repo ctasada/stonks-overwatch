@@ -392,7 +392,7 @@ print(f"Authentication status after clear: {is_auth}")  # Should be False
 #### TOTP Credentials Lost
 
 **Symptoms**: "Username and password required" during two-factor authentication
-**Solution**: Check if `store_credentials()` is called in `check_degiro_connection()`
+**Solution**: Check if `store_credentials()` is called in `check_broker_connection()`
 **Related**: See [Session State Management](#common-patterns)
 
 ```python

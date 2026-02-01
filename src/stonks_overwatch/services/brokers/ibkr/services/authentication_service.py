@@ -250,7 +250,7 @@ class IbkrAuthenticationService(BaseService, AuthenticationServiceInterface):
             return False
 
     # Implementation of AuthenticationServiceInterface methods
-    def check_degiro_connection(self, request: HttpRequest) -> AuthenticationResponse:
+    def check_broker_connection(self, request: HttpRequest) -> AuthenticationResponse:
         """
         Check connection - not applicable for IBKR.
 
@@ -262,7 +262,7 @@ class IbkrAuthenticationService(BaseService, AuthenticationServiceInterface):
         """
         return AuthenticationResponse(
             result=AuthenticationResult.CONFIGURATION_ERROR,
-            message="DeGiro connection check not applicable for IBKR broker",
+            message="Broker connection check not applicable for IBKR broker",
         )
 
     def handle_totp_authentication(self, request: HttpRequest, one_time_password: int) -> AuthenticationResponse:

@@ -110,7 +110,7 @@ class ValidAuthenticationService(AuthenticationServiceInterface):
     def authenticate_user(self, request, username=None, password=None, one_time_password=None, remember_me=False):
         return AuthenticationResponse(result=AuthenticationResult.SUCCESS)
 
-    def check_degiro_connection(self, request):
+    def check_broker_connection(self, request):
         return AuthenticationResponse(result=AuthenticationResult.SUCCESS)
 
     def handle_totp_authentication(self, request, one_time_password):

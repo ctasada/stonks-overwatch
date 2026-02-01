@@ -248,9 +248,9 @@ class TestIbkrAuthenticationService:
         assert "Invalid OAuth credentials" in response.message
 
     def test_degiro_specific_methods_not_applicable(self):
-        """Test that DeGiro-specific methods return appropriate responses."""
+        """Test that broker-specific methods return appropriate responses."""
         # These methods should indicate they're not applicable for IBKR
-        response = self.service.check_degiro_connection(self.request)
+        response = self.service.check_broker_connection(self.request)
         assert response.result == AuthenticationResult.CONFIGURATION_ERROR
         assert "not applicable for IBKR" in response.message
 

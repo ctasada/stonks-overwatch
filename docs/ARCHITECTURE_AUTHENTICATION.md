@@ -99,7 +99,7 @@ The authentication system consists of three main service layers:
   - `authenticate_user()`: Handle username/password authentication
   - `handle_totp_authentication()`: Handle 2FA flow
   - `handle_in_app_authentication()`: Handle in-app authentication flow
-  - `check_degiro_connection()`: Verify DEGIRO connectivity
+  - `check_broker_connection()`: Verify broker connectivity
   - `logout_user()`: Clear authentication state
 
 #### AuthenticationSessionManager

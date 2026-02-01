@@ -156,7 +156,7 @@ class AuthenticationServiceInterface(ABC):
         pass
 
     @abstractmethod
-    def check_degiro_connection(self, request: HttpRequest) -> AuthenticationResponse:
+    def check_broker_connection(self, request: HttpRequest) -> AuthenticationResponse:
         """
         Check the connection to the broker without performing full authentication.
 
