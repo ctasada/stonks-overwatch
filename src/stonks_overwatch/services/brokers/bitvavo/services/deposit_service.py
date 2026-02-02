@@ -1,5 +1,7 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone as dt_timezone
 from typing import List, Optional
+
+from django.utils import timezone as django_timezone
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.core.interfaces.base_service import BaseService
@@ -31,7 +33,7 @@ class DepositsService(BaseService, DepositServiceInterface):
             amount = float(entry["amount"])
             history.append(
                 Deposit(
-                    datetime=datetime.fromtimestamp(entry["timestamp"] / 1000),
+                    datetime=datetime.fromtimestamp(entry["timestamp"] / 1000, tz=dt_timezone.utc),
                     type=DepositType.DEPOSIT,
                     change=amount,
                     currency=entry["symbol"],
@@ -43,7 +45,7 @@ class DepositsService(BaseService, DepositServiceInterface):
             amount = float(entry["amount"])
             history.append(
                 Deposit(
-                    datetime=datetime.fromtimestamp(entry["timestamp"] / 1000),
+                    datetime=datetime.fromtimestamp(entry["timestamp"] / 1000, tz=dt_timezone.utc),
                     type=DepositType.WITHDRAWAL,
                     change=-amount,
                     currency=entry["symbol"],
@@ -70,7 +72,7 @@ class DepositsService(BaseService, DepositServiceInterface):
 
         # Convert string dates to datetime objects for manipulation
         start_date = datetime.fromisoformat(sorted(sorted_data.keys())[0])
-        end_date = datetime.today()
+        end_date = django_timezone.now()
 
         # Iterate over the full date range
         current_date = start_date

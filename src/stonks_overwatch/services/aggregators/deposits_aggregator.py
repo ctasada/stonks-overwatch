@@ -1,7 +1,8 @@
-from datetime import date
+from datetime import timezone as dt_timezone
 from typing import List
 
 import polars as pl
+from django.utils import timezone
 
 from stonks_overwatch.core.aggregators.base_aggregator import BaseAggregator
 from stonks_overwatch.core.service_types import ServiceType
@@ -18,9 +19,12 @@ class DepositsAggregatorService(BaseAggregator):
 
         # Convert list of Deposit objects to polars DataFrame
         # Extract the data we need from Deposit objects
+        # Normalize all datetimes to UTC to avoid timezone mismatch in Polars
         deposit_data = []
         for deposit in cash_contributions:
-            deposit_data.append({"datetime": deposit.datetime, "change": deposit.change})
+            # Convert to UTC to ensure consistent timezone across all deposits
+            dt_utc = deposit.datetime.astimezone(dt_timezone.utc) if deposit.datetime.tzinfo else deposit.datetime
+            deposit_data.append({"datetime": dt_utc, "change": deposit.change})
 
         if not deposit_data:
             return []
@@ -56,7 +60,7 @@ class DepositsAggregatorService(BaseAggregator):
         if cash_contributions:
             dataset.append(
                 {
-                    "date": LocalizationUtility.format_date_from_date(date.today()),
+                    "date": LocalizationUtility.format_date_from_date(timezone.now().date()),
                     "total_deposit": cash_contributions[-1]["contributed"],
                 }
             )

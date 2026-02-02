@@ -119,15 +119,16 @@ target-version = "py313"
 
 [tool.ruff.lint]
 select = [
-    "C",  # pylint convention
-    "E",  # pycodestyle errors
-    "W",  # pycodestyle warnings
-    "F",  # pyflakes
-    "I",  # isort
-    "B",  # flake8-bugbear
-    "C4", # flake8-comprehensions
-    "N",  # PEP8 naming conventions
-    "W",  # pylint warning
+    "C",   # pylint convention
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "N",   # PEP8 naming conventions
+    "W",   # pylint warning
+    "DTZ", # flake8-datetimez (prevent naive datetime usage)
 ]
 ignore = []
 
@@ -137,6 +138,11 @@ unfixable = []
 
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.per-file-ignores]
+# Ignore timezone-awareness rules in tests and scripts (they don't interact with Django models)
+"tests/**/*.py" = ["DTZ"]
+"scripts/**/*.py" = ["DTZ"]
 
 [tool.ruff.lint.isort]
 order-by-type = true

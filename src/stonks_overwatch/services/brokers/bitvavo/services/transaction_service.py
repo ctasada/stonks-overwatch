@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone as dt_timezone
 from typing import List, Optional
 
 from stonks_overwatch.config.base_config import BaseConfig
@@ -78,7 +78,7 @@ class TransactionsService(BaseService, TransactionServiceInterface):
         Parses a date time string to a datetime object.
         """
         try:
-            return datetime.strptime(value, TransactionsService.TIME_DATE_FORMAT)
+            return datetime.strptime(value, TransactionsService.TIME_DATE_FORMAT).replace(tzinfo=dt_timezone.utc)
         except ValueError as e:
             raise ValueError(
                 f"Invalid date format: {value}. Expected format is {TransactionsService.TIME_DATE_FORMAT}."

@@ -1,7 +1,6 @@
-from datetime import datetime
-
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
+from django.utils import timezone
 
 from stonks_overwatch.constants.brokers import BrokerName
 from stonks_overwatch.core.exceptions import CredentialsException
@@ -147,7 +146,7 @@ class JobsScheduler:
             JobsScheduler._configure_jobs,
             id="configure_jobs",
             trigger="date",
-            run_date=datetime.now(),
+            run_date=timezone.now(),
             max_instances=1,
             replace_existing=True,
         )
@@ -185,7 +184,7 @@ class JobsScheduler:
                     trigger=IntervalTrigger(minutes=config.update_frequency_minutes),
                     max_instances=1,
                     replace_existing=True,
-                    next_run_time=datetime.now(),
+                    next_run_time=timezone.now(),
                 ),
             )
 

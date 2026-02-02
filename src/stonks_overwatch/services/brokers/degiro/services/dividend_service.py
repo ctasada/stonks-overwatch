@@ -1,6 +1,8 @@
 from datetime import datetime, time
 from typing import List, Optional
 
+from django.utils import timezone
+
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.core.interfaces.dividend_service import DividendServiceInterface
@@ -197,7 +199,7 @@ class DividendsService(BaseService, DividendServiceInterface):
 
                     if (
                         forecasted_dividends["exDividendDate"]
-                        and forecasted_dividends["exDividendDate"].date() > datetime.now().date()
+                        and forecasted_dividends["exDividendDate"].date() > timezone.now().date()
                     ):
                         result.append(
                             Dividend(

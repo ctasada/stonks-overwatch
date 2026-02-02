@@ -1,6 +1,6 @@
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone as dt_timezone
 from typing import Dict, List, Optional
 
 import polars as pl
@@ -8,6 +8,7 @@ from dateutil.relativedelta import relativedelta
 from django.core.cache import cache
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
+from django.utils import timezone
 from django.views import View
 
 from stonks_overwatch.services.aggregators.deposits_aggregator import DepositsAggregatorService
@@ -88,7 +89,7 @@ class Dashboard(View):
         else:
             # Handle empty portfolio data gracefully
             self.logger.warning("No portfolio data available for dashboard")
-            start_date = datetime.now().strftime("%Y-%m-%d")
+            start_date = timezone.now().strftime("%Y-%m-%d")
 
         performance_twr = self._calculate_portfolio_performance(selected_portfolio, portfolio_value, start_date)
         return {
@@ -122,7 +123,7 @@ class Dashboard(View):
     @staticmethod
     def _get_interval_start_date(interval: str) -> str | None:  # noqa: C901
         """Get start date for the given interval."""
-        today = datetime.today()
+        today = timezone.now()
         match interval:
             case "YTD":
                 return today.replace(month=1, day=1).strftime(LocalizationUtility.DATE_FORMAT)
@@ -211,7 +212,10 @@ class Dashboard(View):
             raise ValueError("Need at least two periods to calculate returns")
 
         # Convert dates to datetime if they're strings
-        dates = [d if isinstance(d, datetime) else datetime.strptime(d, "%Y-%m-%d") for d in dates]
+        dates = [
+            d if isinstance(d, datetime) else datetime.strptime(d, "%Y-%m-%d").replace(tzinfo=dt_timezone.utc)
+            for d in dates
+        ]
 
         # Calculate sub-period returns
         cumulative_returns = {}
@@ -370,8 +374,8 @@ class Dashboard(View):
     def _get_business_date_range(start_date: str, end_date: str) -> list[str]:
         """Generate business day range using polars."""
         # Convert strings to datetime objects
-        start_dt = datetime.strptime(start_date, "%Y-%m-%d")
-        end_dt = datetime.strptime(end_date, "%Y-%m-%d")
+        start_dt = datetime.strptime(start_date, "%Y-%m-%d").replace(tzinfo=dt_timezone.utc)
+        end_dt = datetime.strptime(end_date, "%Y-%m-%d").replace(tzinfo=dt_timezone.utc)
 
         # Generate business day range using polars
         date_range = pl.date_range(start=start_dt, end=end_dt, interval="1d", eager=True)
