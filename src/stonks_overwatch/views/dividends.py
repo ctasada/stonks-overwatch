@@ -1,8 +1,9 @@
-from datetime import datetime
+from datetime import datetime, timezone as dt_timezone
 from typing import List
 
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.utils import timezone
 from django.views import View
 
 from stonks_overwatch.config.config import Config
@@ -105,7 +106,7 @@ class Dividends(CapabilityRequiredMixin, View):
 
     def _parse_request_calendar_year(self, request) -> int:
         """Parse calendar year from request query parameters."""
-        calendar_year = request.GET.get("calendar_year", datetime.now().year)
+        calendar_year = request.GET.get("calendar_year", timezone.now().year)
         return int(calendar_year)
 
     def _get_diversification_years(self, dividends: List[Dividend]) -> List[int]:
@@ -243,8 +244,9 @@ class Dividends(CapabilityRequiredMixin, View):
         dividends_growth = {}
 
         for month_year in dividends_calendar.keys():
-            month_number = int(datetime.strptime(month_year, LocalizationUtility.MONTH_YEAR_FORMAT).strftime("%m"))
-            year = int(datetime.strptime(month_year, LocalizationUtility.MONTH_YEAR_FORMAT).strftime("%Y"))
+            dt = datetime.strptime(month_year, LocalizationUtility.MONTH_YEAR_FORMAT).replace(tzinfo=dt_timezone.utc)
+            month_number = int(dt.strftime("%m"))
+            year = int(dt.strftime("%Y"))
 
             if year not in dividends_growth:
                 dividends_growth[year] = [0] * 12
@@ -345,8 +347,8 @@ class Dividends(CapabilityRequiredMixin, View):
 
         # Set period_start to January 1st of the minimum year in the data
         min_year = min_date.year
-        period_start = datetime(year=min_year, month=1, day=1)
-        today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        period_start = LocalizationUtility.ensure_aware(datetime(year=min_year, month=1, day=1, tzinfo=dt_timezone.utc))
+        today = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
         period_end = max(max_date, today)
 
         # Generate monthly periods using simple date arithmetic

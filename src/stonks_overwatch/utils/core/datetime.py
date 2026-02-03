@@ -2,6 +2,7 @@ from datetime import date, timedelta
 from typing import Optional
 
 from degiro_connector.quotecast.models.chart import Interval
+from django.utils import timezone
 
 
 class DateTimeUtility:
@@ -22,7 +23,7 @@ class DateTimeUtility:
                                 Returns None if the date_from is invalid or in the future.
         """
         d1 = date.fromisoformat(date_from)
-        today = date.today()
+        today = timezone.now().date()
 
         if d1 > today:
             return None
@@ -98,6 +99,6 @@ class DateTimeUtility:
             case Interval.P50Y:
                 return 50 * 365
             case Interval.YTD:
-                return (date.today() - date(date.today().year, 1, 1)).days
+                return (timezone.now().date() - date(timezone.now().date().year, 1, 1)).days
             case _:
                 raise ValueError(f"Invalid interval: {interval}")

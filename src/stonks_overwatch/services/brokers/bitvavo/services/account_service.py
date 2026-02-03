@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone as dt_timezone
 from typing import List, Optional
 
 from stonks_overwatch.config.base_config import BaseConfig
@@ -55,7 +55,7 @@ class AccountOverviewService(AccountServiceInterface, BaseService):
         """
         Parses a date time string to datetime object.
         """
-        return datetime.strptime(value, AccountOverviewService.TIME_DATE_FORMAT)
+        return datetime.strptime(value, AccountOverviewService.TIME_DATE_FORMAT).replace(tzinfo=dt_timezone.utc)
 
     @staticmethod
     def __get_description(item: dict) -> str:

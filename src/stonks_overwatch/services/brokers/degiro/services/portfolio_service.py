@@ -1,8 +1,9 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone as dt_timezone
 from typing import List, Optional
 from zoneinfo import ZoneInfo
 
 from degiro_connector.trading.models.account import UpdateOption, UpdateRequest
+from django.utils import timezone
 from django.utils.functional import cached_property
 from iso10383 import MIC
 
@@ -548,7 +549,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         if date_str == 0:
             return LocalizationUtility.convert_string_to_date(date_str)
         else:
-            return datetime.today().date()
+            return timezone.now().date()
 
     def _calculate_position_growth(self, entry: dict) -> dict:
         """Calculate position growth with stock split adjustments."""
@@ -784,6 +785,6 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
     @staticmethod
     def _is_weekend(date_str: str):
         # Parse the date string into a datetime object
-        day = datetime.strptime(date_str, "%Y-%m-%d")
+        day = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=dt_timezone.utc)
         # Check if the day of the week is Saturday (5) or Sunday (6)
         return day.weekday() >= 5
