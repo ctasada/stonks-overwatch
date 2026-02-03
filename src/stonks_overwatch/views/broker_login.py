@@ -65,9 +65,16 @@ class BrokerLogin(View):
             return redirect("login")
 
         # Check authentication state for this broker
-        show_otp = self._check_totp_required(request, broker_name)
-        show_in_app_auth = self._check_in_app_auth_required(request, broker_name)
         show_loading = self._check_authenticated(request, broker_name)
+
+        # If already authenticated, clear any pending auth flags
+        if show_loading:
+            self._clear_pending_auth_flags(request, broker_name)
+            show_otp = False
+            show_in_app_auth = False
+        else:
+            show_otp = self._check_totp_required(request, broker_name)
+            show_in_app_auth = self._check_in_app_auth_required(request, broker_name)
 
         context = {
             "broker_name": broker_name,
@@ -201,6 +208,20 @@ class BrokerLogin(View):
         if broker_name == BrokerName.DEGIRO:
             return request.session.get(SessionKeys.get_in_app_auth_required_key(broker_name), False)
         return False
+
+    def _clear_pending_auth_flags(self, request: HttpRequest, broker_name: BrokerName) -> None:
+        """
+        Clear any pending TOTP or in-app authentication flags for a broker.
+
+        This should be called when authentication succeeds or when showing
+        the loading screen for an already-authenticated user.
+
+        Args:
+            request: The HTTP request with session
+            broker_name: The broker to clear flags for
+        """
+        request.session[SessionKeys.get_totp_required_key(broker_name)] = False
+        request.session[SessionKeys.get_in_app_auth_required_key(broker_name)] = False
 
     def _check_authenticated(self, request: HttpRequest, broker_name: BrokerName) -> bool:
         """
@@ -351,8 +372,7 @@ class BrokerLogin(View):
             if auth_result.is_success:
                 # Clear any pending auth flags since authentication succeeded
                 request.session[SessionKeys.get_authenticated_key(BrokerName.DEGIRO)] = True
-                request.session[SessionKeys.get_totp_required_key(BrokerName.DEGIRO)] = False
-                request.session[SessionKeys.get_in_app_auth_required_key(BrokerName.DEGIRO)] = False
+                self._clear_pending_auth_flags(request, BrokerName.DEGIRO)
                 return {"success": True, "message": "Authentication successful"}
             else:
                 # Handle different authentication results
