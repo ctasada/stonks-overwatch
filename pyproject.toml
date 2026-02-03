@@ -12,7 +12,7 @@ dependencies = [
     "pycountry >= 24.6.1",
     "currency-symbols >= 2.0.4",
     "polars >=1.37.1",
-    "requests-cache >= 1.2.1",
+    "requests-cache >= 1.3.0",
     "django-extensions >= 4.1.0",
     "currencyconverter >= 0.18.14",
     "django-node-assets >= 0.9.15",
@@ -41,7 +41,7 @@ briefcase = [
 python = ">=3.13,<3.14"
 
 [build-system]
-requires = ["poetry-core>=2.3.0,<3.0.0"]
+requires = ["poetry-core>=2.3.1,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.group.dev.dependencies]
