@@ -41,9 +41,11 @@ class DataMerger:
                 merged[symbol] = entry
             else:
                 if entry.product_type == ProductType.CASH:
-                    # For cash entries, simply add the values
-                    merged[symbol].value += entry.value
-                    merged[symbol].base_currency_value += entry.base_currency_value
+                    # For cash entries, simply add the values (convert to float to handle Decimal)
+                    merged[symbol].value = float(merged[symbol].value) + float(entry.value)
+                    merged[symbol].base_currency_value = float(merged[symbol].base_currency_value) + float(
+                        entry.base_currency_value
+                    )
                 else:
                     # For other assets, merge using detailed logic
                     merged[symbol] = DataMerger._merge_single_portfolio_entry(merged[symbol], entry)
@@ -69,6 +71,7 @@ class DataMerger:
             raise ValueError(f"Cannot merge entries with different symbols: {entry1.symbol} vs {entry2.symbol}")
 
         # Create merged entry with combined values
+        # Convert to float to handle both Decimal and float types
         merged_entry = PortfolioEntry(
             name=entry1.name or entry2.name,
             symbol=entry1.symbol,
@@ -79,36 +82,37 @@ class DataMerger:
             exchange=entry1.exchange or entry2.exchange,
             country=entry1.country or entry2.country,
             product_type=entry1.product_type,
-            shares=entry1.shares + entry2.shares,
+            shares=float(entry1.shares) + float(entry2.shares),
             product_currency=entry1.product_currency,
-            price=entry1.price,  # Use price from first entry (they should be the same)
-            base_currency_price=entry1.base_currency_price,
+            price=float(entry1.price),  # Use price from first entry (they should be the same)
+            base_currency_price=float(entry1.base_currency_price),
             base_currency=entry1.base_currency,
-            value=entry1.value + entry2.value,
-            base_currency_value=entry1.base_currency_value + entry2.base_currency_value,
+            value=float(entry1.value) + float(entry2.value),
+            base_currency_value=float(entry1.base_currency_value) + float(entry2.base_currency_value),
             is_open=entry1.is_open or entry2.is_open,  # Open if either is open
-            unrealized_gain=(entry1.unrealized_gain or 0) + (entry2.unrealized_gain or 0),
-            realized_gain=(entry1.realized_gain or 0) + (entry2.realized_gain or 0),
-            total_costs=(entry1.total_costs or 0) + (entry2.total_costs or 0),
+            unrealized_gain=float(entry1.unrealized_gain or 0) + float(entry2.unrealized_gain or 0),
+            realized_gain=float(entry1.realized_gain or 0) + float(entry2.realized_gain or 0),
+            total_costs=float(entry1.total_costs or 0) + float(entry2.total_costs or 0),
         )
 
         # Handle break-even prices based on which positions are open
         if entry1.is_open and not entry2.is_open:
-            merged_entry.break_even_price = entry1.break_even_price
-            merged_entry.base_currency_break_even_price = entry1.base_currency_break_even_price
+            merged_entry.break_even_price = float(entry1.break_even_price)
+            merged_entry.base_currency_break_even_price = float(entry1.base_currency_break_even_price)
         elif not entry1.is_open and entry2.is_open:
-            merged_entry.break_even_price = entry2.break_even_price
-            merged_entry.base_currency_break_even_price = entry2.base_currency_break_even_price
+            merged_entry.break_even_price = float(entry2.break_even_price)
+            merged_entry.base_currency_break_even_price = float(entry2.base_currency_break_even_price)
         elif entry1.is_open and entry2.is_open:
             # Both are open - calculate weighted average break-even price
-            total_shares = entry1.shares + entry2.shares
+            total_shares = float(entry1.shares) + float(entry2.shares)
             if total_shares > 0:
                 weighted_break_even = (
-                    (entry1.break_even_price or 0) * entry1.shares + (entry2.break_even_price or 0) * entry2.shares
+                    float(entry1.break_even_price or 0) * float(entry1.shares)
+                    + float(entry2.break_even_price or 0) * float(entry2.shares)
                 ) / total_shares
                 weighted_base_break_even = (
-                    (entry1.base_currency_break_even_price or 0) * entry1.shares
-                    + (entry2.base_currency_break_even_price or 0) * entry2.shares
+                    float(entry1.base_currency_break_even_price or 0) * float(entry1.shares)
+                    + float(entry2.base_currency_break_even_price or 0) * float(entry2.shares)
                 ) / total_shares
 
                 merged_entry.break_even_price = weighted_break_even
