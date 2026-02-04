@@ -1,75 +1,17 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="{% if APPEARANCE == 'auto' %}auto{% else %}{{ APPEARANCE }}{% endif %}">
+<html lang="en" data-appearance="{{ APPEARANCE|default:'auto' }}" data-bs-theme="{% if APPEARANCE == 'auto' %}auto{% else %}{{ APPEARANCE }}{% endif %}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stonks Overwatch - Server Error</title>
-    <link rel="icon" type="image/png" href="{% static 'stonks_overwatch-32x32.png' %}" sizes="32x32">
-
-    <!-- Bootstrap CSS CDN -->
-    <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
-    <link href="{% static 'bootstrap-icons/font/bootstrap-icons.css' %}" rel="stylesheet">
+    {% include 'components/head_standalone.html' %}
     <!-- JavaScript Bundle with Popper -->
     <script src="{% static 'bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
-    <!-- jQuery CDN - Slim version (=without AJAX) -->
-    <script src="{% static 'jquery/dist/jquery.slim.min.js' %}"></script>
 
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{% static 'style.css' %}">
-
-    <style>
-        body {
-            background: var(--bs-body-bg, #ffffff);
-            background-attachment: fixed;
-        }
-
-        /* Dark mode: subtle gradient background */
-        [data-bs-theme="dark"] body {
-            background: linear-gradient(135deg, #1a1d20 0%, #212529 50%, #2b2f35 100%);
-            background-attachment: fixed;
-        }
-    </style>
-
-    <script>
-        // Theme switcher for auto mode
-        window.themeSwitcher = {
-            appearance: "{% if APPEARANCE %}{{ APPEARANCE }}{% else %}auto{% endif %}",
-            init: function() {
-                const htmlElement = document.documentElement;
-                const update = () => {
-                    if (this.appearance === 'auto') {
-                        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                        htmlElement.setAttribute('data-bs-theme', systemTheme);
-                    } else {
-                        htmlElement.setAttribute('data-bs-theme', this.appearance);
-                    }
-                };
-
-                // Remove existing listener if any to prevent duplicates
-                if (this._listener) {
-                    window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', this._listener);
-                    this._listener = null;
-                }
-
-                update();
-
-                if (this.appearance === 'auto') {
-                    this._listener = update;
-                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this._listener);
-                }
-            }
-        };
-
-        // Initialize theme on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            window.themeSwitcher.init();
-        });
-    </script>
+    <script src="{% static 'js/theme-manager.js' %}"></script>
 </head>
-<body class="min-vh-100 d-flex align-items-center justify-content-center">
+<body class="min-vh-100 d-flex align-items-center justify-content-center error-page">
     <div class="container py-2">
-        <div class="card rounded-4 shadow p-4 mx-auto" style="max-width: 600px;">
+        <div class="card rounded-4 shadow p-4 mx-auto error-card">
             <img class="d-block mx-auto mb-1" src="{% static 'stonks_overwatch-512.png' %}" alt="Stonks Overwatch" width="120" height="120" />
 
             <div class="row mb-1 align-items-center">
@@ -102,7 +44,7 @@
             <div class="alert alert-secondary mb-4">
                 <strong>Technical Details:</strong>
                 <div class="mt-2">
-                    <code class="small" style="white-space: pre-wrap; max-height: 200px; overflow-y: auto; display: block;">{{ traceback }}</code>
+                    <code class="small code-block-scroll">{{ traceback }}</code>
                 </div>
             </div>
             {% endif %}

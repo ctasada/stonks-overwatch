@@ -45,35 +45,9 @@
     </div>
 </div>
 
-<script>
-    function isTimeColumnVisible() {
-        let visibleColumns = $('#account-overview-table').bootstrapTable('getVisibleColumns');
-        return visibleColumns.some(function (col) { return col.field === 'time'; });
-    }
-
-    function dateTimeFormatter(value, row, index) {
-        if (isTimeColumnVisible()) {
-            return value;
-        } else {
-            return value + '<br><small class="fw-lighter">' + row.time + '</small>';
-        }
-    }
-
-    function isNameColumnVisible() {
-        let visibleColumns = $('#account-overview-table').bootstrapTable('getVisibleColumns');
-        return visibleColumns.some(function (col) { return col.field === 'name'; });
-    }
-
-    function symbolNameFormatter(value, row, index) {
-        if (isNameColumnVisible()) {
-            return value;
-        } else {
-            return value + '<br><small class="fw-lighter">' + row.name + '</small>';
-        }
-    }
-</script>
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'js/account-overview-table.js' %}"></script>
 {% include 'components/bootstrap_table_sticky_header_js.html' with table_id='account-overview-table' export_filename='account_overview_export' %}
 {% endblock %}

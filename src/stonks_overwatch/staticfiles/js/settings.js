@@ -576,9 +576,23 @@ function initializeTooltips() {
         return;
     }
 
+    const sidebar = document.getElementById('sidebar');
+    const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true'
+        || (sidebar && sidebar.classList.contains('sidebar-collapsed'));
+
     // Initialize all tooltips
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => {
+        const existing = bootstrap.Tooltip.getInstance(tooltipTriggerEl);
+        const tooltip = existing || new bootstrap.Tooltip(tooltipTriggerEl);
+
+        // Sidebar nav tooltips should only show when sidebar is collapsed
+        if (tooltipTriggerEl.classList.contains('sidebar-nav-link') && !sidebarCollapsed) {
+            tooltip.disable();
+        }
+
+        return tooltip;
+    });
 
     console.log(`Initialized ${tooltipList.length} tooltips`);
 }

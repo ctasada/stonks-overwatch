@@ -1,7 +1,7 @@
 {% load static %}
 {% load custom_tags %}
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="{% if APPEARANCE == 'auto' %}auto{% else %}{{ APPEARANCE }}{% endif %}">
+<html lang="en" data-appearance="{{ APPEARANCE }}" data-bs-theme="{% if APPEARANCE == 'auto' %}auto{% else %}{{ APPEARANCE }}{% endif %}">
 
 <head>
     <meta charset="utf-8">
@@ -10,6 +10,9 @@
     <title>Stonks Overwatch</title>
 
     <link rel="icon" type="image/png" href="{%  static 'stonks_overwatch-32x32.png' %}" sizes="32x32">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- jQuery CDN - Full version -->
     <script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
@@ -22,58 +25,14 @@
     <link href="{% static 'bootstrap-table/dist/bootstrap-table.min.css' %}" rel="stylesheet">
     <link href="{% static 'bootstrap-table/dist/themes/bootstrap-table/bootstrap-table.min.css' %}" rel="stylesheet">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
 
     {% block extra_css %}{% endblock %}
 
     <!-- Theme Management - runs before DOM is rendered to prevent flashes -->
-    <script>
-        window.ThemeManager = {
-            appearance: "{{ APPEARANCE }}",
-
-            apply: function (newAppearance) {
-                if (newAppearance) {
-                    this.appearance = newAppearance;
-                }
-
-                const htmlElement = document.documentElement;
-                const update = () => {
-                    if (this.appearance === 'auto') {
-                        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                        htmlElement.setAttribute('data-bs-theme', systemTheme);
-                    } else {
-                        htmlElement.setAttribute('data-bs-theme', this.appearance);
-                    }
-                };
-
-                // Remove existing listener if any to prevent duplicates
-                if (this._listener) {
-                    window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', this._listener);
-                    this._listener = null;
-                }
-
-                update();
-
-                // Set global chart text color
-                window.CHART_TEXT_COLOR = (htmlElement.getAttribute('data-bs-theme') === 'dark') ? '#e0e0e0' : '#333';
-
-                if (this.appearance === 'auto') {
-                    this._listener = update;
-                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this._listener);
-                }
-            }
-        };
-
-        (function () {
-            // 1. Sidebar state preservation
-            if (localStorage.getItem('sidebarCollapsed') === 'true') {
-                document.documentElement.style.setProperty('--sidebar-immediate-state', 'sidebar-collapsed');
-            }
-
-            // 2. Initial theme application
-            window.ThemeManager.apply();
-        })();
-    </script>
+    <script src="{% static 'js/sidebar-state.js' %}"></script>
+    <script src="{% static 'js/theme-manager.js' %}"></script>
+    <script src="{% static 'js/key-field-utils.js' %}"></script>
 </head>
 
 <body>
@@ -261,7 +220,7 @@
                     </div>
                 </nav>
 
-                <div class="scrollable-area" style="height: calc(100vh - 100px)">
+                <div class="scrollable-area scrollable-area-tall">
                     {% block content %}
                     {% endblock %}
                 </div>
@@ -583,7 +542,7 @@
                     <h5 class="modal-title">Release Notes</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                <div class="modal-body modal-body-scroll">
                     <!-- Content will be loaded via AJAX -->
                 </div>
                 <div class="modal-footer border-top">
@@ -601,7 +560,7 @@
                     <h5 class="modal-title fw-bold"><i class="bi bi-sliders me-2"></i>Settings</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body" style="max-height: 70vh; overflow: hidden; padding: 0;">
+                <div class="modal-body modal-body-plain">
                     <!-- Content will be loaded via AJAX -->
                 </div>
                 <div class="modal-footer border-0 pt-3">

@@ -1,67 +1,17 @@
 {% load static %}
 {% if is_standalone %}
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="{% if APPEARANCE == 'auto' %}auto{% else %}{{ APPEARANCE }}{% endif %}">
+<html lang="en" class="standalone-root" data-appearance="{{ APPEARANCE }}" data-bs-theme="{% if APPEARANCE == 'auto' %}auto{% else %}{{ APPEARANCE }}{% endif %}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Release Notes</title>
+
     <link rel="icon" type="image/png" href="{% static 'stonks_overwatch-32x32.png' %}" sizes="32x32">
     <link rel="stylesheet" href="{% static 'style.css' %}">
-    <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            background: var(--bg-body);
-            color: var(--text-main);
-            height: 100%;
-        }
-    </style>
-
     <!-- Theme Management - runs before DOM is rendered to prevent flashes -->
-    <script>
-        window.ThemeManager = {
-            appearance: "{{ APPEARANCE }}",
-
-            apply: function (newAppearance) {
-                if (newAppearance) {
-                    this.appearance = newAppearance;
-                }
-
-                const htmlElement = document.documentElement;
-                const update = () => {
-                    if (this.appearance === 'auto') {
-                        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                        htmlElement.setAttribute('data-bs-theme', systemTheme);
-                    } else {
-                        htmlElement.setAttribute('data-bs-theme', this.appearance);
-                    }
-                };
-
-                // Remove existing listener if any to prevent duplicates
-                if (this._listener) {
-                    window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', this._listener);
-                    this._listener = null;
-                }
-
-                update();
-
-                if (this.appearance === 'auto') {
-                    this._listener = update;
-                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this._listener);
-                }
-            }
-        };
-
-        (function () {
-            // Initial theme application
-            window.ThemeManager.apply();
-        })();
-    </script>
-
-    <script>
-        document.addEventListener('contextmenu', event => event.preventDefault());
-    </script>
+    <script src="{% static 'js/theme-manager.js' %}"></script>
+    <script src="{% static 'js/release-notes.js' %}"></script>
 </head>
 <body class="min-vh-100 release-notes-standalone">
 {% endif %}

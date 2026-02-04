@@ -1,71 +1,14 @@
 {% load static %}
 {% if is_standalone %}
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="{% if APPEARANCE == 'auto' %}auto{% else %}{{ APPEARANCE }}{% endif %}">
+<html lang="en" class="standalone-root" data-appearance="{{ APPEARANCE }}" data-bs-theme="{% if APPEARANCE == 'auto' %}auto{% else %}{{ APPEARANCE }}{% endif %}">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings - Stonks Overwatch</title>
-    <link rel="icon" type="image/png" href="{% static 'stonks_overwatch-32x32.png' %}" sizes="32x32">
-
-    <!-- Bootstrap CSS -->
-    <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
-    <link href="{% static 'bootstrap-icons/font/bootstrap-icons.css' %}" rel="stylesheet">
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{% static 'style.css' %}">
-    <style>
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            background: var(--bg-body);
-            color: var(--text-main);
-        }
-    </style>
-
+    {% include 'components/head_standalone.html' %}
     <!-- Theme Management - runs before DOM is rendered to prevent flashes -->
-    <script>
-        window.ThemeManager = {
-            appearance: "{{ APPEARANCE }}",
-
-            apply: function (newAppearance) {
-                if (newAppearance) {
-                    this.appearance = newAppearance;
-                }
-
-                const htmlElement = document.documentElement;
-                const update = () => {
-                    if (this.appearance === 'auto') {
-                        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                        htmlElement.setAttribute('data-bs-theme', systemTheme);
-                    } else {
-                        htmlElement.setAttribute('data-bs-theme', this.appearance);
-                    }
-                };
-
-                // Remove existing listener if any to prevent duplicates
-                if (this._listener) {
-                    window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', this._listener);
-                    this._listener = null;
-                }
-
-                update();
-
-                if (this.appearance === 'auto') {
-                    this._listener = update;
-                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this._listener);
-                }
-            }
-        };
-
-        (function () {
-            // Initial theme application
-            window.ThemeManager.apply();
-        })();
-    </script>
+    <script src="{% static 'js/theme-manager.js' %}"></script>
+    <script src="{% static 'js/key-field-utils.js' %}"></script>
     {% endif %}
     {% if is_standalone %}
 </head>
@@ -86,9 +29,11 @@
         </div>
     </div>
     <div class="settings-page-container">
+        {% if is_webapp %}
         <div class="settings-page-header">
             <h2><i class="bi bi-sliders me-2"></i>Settings</h2>
         </div>
+        {% endif %}
         {% endif %}
         <div class="settings-content">
             <div class="d-flex settings-layout">
@@ -145,12 +90,14 @@
             </div>
         </div>
         {% if is_standalone %}
+        {% if is_webapp %}
         <!-- Save button hidden - buttons are provided by the containing dialog/modal -->
-        <div class="settings-page-footer" style="display: none;">
+        <div class="settings-page-footer settings-footer-hidden">
             <button type="button" class="btn btn-primary" id="settings-page-save-btn" onclick="saveSettings()">
                 <i class="bi bi-check-lg me-1"></i>Save
             </button>
         </div>
+        {% endif %}
     </div>
 
     <!-- Bootstrap JS -->
@@ -445,6 +392,18 @@
         }
 
         /**
+         * Show pre-filled IBKR keys using shared utility
+         * Uses KeyFieldUtils for consistent behavior across login and settings
+         */
+        function showPrefilledKeys() {
+            if (window.KeyFieldUtils) {
+                window.KeyFieldUtils.showPrefilledIbkrKeys();
+            } else {
+                console.warn('KeyFieldUtils not loaded - IBKR keys may not display correctly');
+            }
+        }
+
+        /**
          * Initializes the settings manager and password toggles.
          *
          * This function performs the initial setup required for the settings page to function
@@ -455,6 +414,7 @@
         function initializeSettings() {
             settingsManager.initialize();
             initializePasswordToggles();
+            showPrefilledKeys();
         }
 
         {% if is_standalone %}
