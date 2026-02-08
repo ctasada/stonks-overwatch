@@ -14,6 +14,8 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 ### Fixed
 
+- Distribution: Fixed bug while showing distributions at Dividends or Diversification
+
 ### Security
 
 ---

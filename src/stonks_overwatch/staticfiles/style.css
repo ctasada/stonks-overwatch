@@ -1732,6 +1732,16 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     overflow-y: auto;
 }
 
+/* Match list height to chart area so bars use the full vertical space */
+.distribution-with-list .diversification-chart-container {
+    height: 100%;
+}
+
+.distribution-with-list .diversification-scrollable-list {
+    max-height: min(40vw, 40vh, 400px);
+    align-self: stretch;
+}
+
 .diversification-weight {
     position: relative;
     z-index: 1;
