@@ -229,7 +229,7 @@ Apache License
 
 
 Django
-6.0.1
+6.0.2
 BSD-3-Clause
 The MIT License (MIT)
 
@@ -290,7 +290,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 asgiref
-3.11.0
+3.11.1
 BSD License
 Copyright (c) Django Software Foundation and individual contributors.
 All rights reserved.
@@ -894,7 +894,7 @@ under the terms of *both* these licenses.
 
 
 polars
-1.37.1
+1.38.1
 MIT License
 Copyright (c) 2025 Ritchie Vink
 Some portions Copyright (c) 2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
