@@ -9,7 +9,7 @@
 <script src="{% static '@seahsky/chartjs-plugin-autocolors/dist/chartjs-plugin-autocolors.min.js' %}"></script>
 <script src="{% static 'chartjs-plugin-zoom/dist/chartjs-plugin-zoom.js' %}"></script>
 
-<div class="container-fluid row-gap-5">
+<div class="container-fluid row-gap-5" id="dashboard-page" data-url="{% url 'dashboard' %}">
     <div class="row content-card rounded mb-3">
         <div class="row mt-2">
             <div class="col">
@@ -88,16 +88,5 @@
     </div>
 </div>
 
-<script>
-    const URL = "{% url 'dashboard' %}"
-    const HOST = window.location.protocol + "//" + window.location.host
-
-    const RED = 'rgba(239, 83, 67, 0.75)'
-    const GREEN = 'rgba(38, 169, 79, 0.75)'
-    const BLUE = 'rgba(92, 157, 233, 0.75)'
-
-    {% include 'dashboard/growth_chart.js' %}
-
-    {% include 'dashboard/performance_chart.js' %}
-</script>
+<script src="{% static 'js/dashboard.js' %}"></script>
 {% endblock %}

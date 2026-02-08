@@ -1,10 +1,9 @@
-@import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700&display=swap";
-
 /*
     Stocks Portfolio Style
     CSS Variables
 */
 :root {
+    color-scheme: light;
     --primary-color: #7386D5;
     --primary-dark: #6D7FCC;
     --primary-hover: #6A7ED2;
@@ -22,14 +21,26 @@
     /* Common transitions */
     --transition-standard: all 0.3s ease;
 
-    /* Common border radius */
-    --border-radius-xs: 0.25rem;
-    --border-radius-sm: 0.375rem;
-    --border-radius-standard: 0.5rem;
-    --border-radius-md: 0.5rem;
-    --border-radius-lg: 0.75rem;
-    --border-radius-xl: 1rem;
-    --border-radius-large: 8px;
+    /* ============================================================================
+       BORDER RADIUS SCALE
+       ============================================================================
+       T-shirt sizing for border radius values.
+       Uses rem units for responsive scaling with root font size.
+
+       Usage Guidelines:
+       - xs (4px):  Minimal rounding, subtle corners
+       - sm (6px):  Small elements, tags, badges
+       - md (8px):  DEFAULT - buttons, inputs, cards (most common)
+       - lg (12px): Large containers, modals, panels
+       - xl (16px): Extra large elements, feature cards
+       - full:      Pills, circular avatars, rounded buttons
+       ============================================================================ */
+    --border-radius-xs: 0.25rem;    /* 4px  */
+    --border-radius-sm: 0.375rem;   /* 6px  */
+    --border-radius-md: 0.5rem;     /* 8px - DEFAULT */
+    --border-radius-lg: 0.75rem;    /* 12px */
+    --border-radius-xl: 1rem;       /* 16px */
+    --border-radius-full: 9999px;   /* Pill shape / circular */
 
     /* Sidebar spacing */
     --sidebar-margin: 0.25rem;
@@ -134,16 +145,97 @@
     --focus-ring-primary: 0 0 0 0.2rem rgba(115, 134, 213, 0.25);
     --focus-ring-secondary: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
 
-    /* Theme-aware variables */
-    --bg-body: var(--color-bg-base);
-    --bg-card: var(--color-white);
-    --bg-navbar: var(--color-white);
-    --text-main: var(--color-text);
-    --text-muted-custom: var(--color-text-muted);
-    --border-main: var(--color-border-light);
-    --shadow-main: rgba(0, 0, 0, 0.1);
-    --shadow-rgb: 0, 0, 0;
-    --diversification-bar: var(--primary-light);
+    /* ============================================================================
+       LEGACY TOKENS - MIGRATION IN PROGRESS
+       ============================================================================
+       These tokens are DEPRECATED and maintained only for backward compatibility.
+       They are aliased to semantic tokens below.
+
+       📊 Migration Status (as of 2026-02-05):
+           ✅ --bg-body:          MIGRATED (was 6 usages)
+           ✅ --text-main:        MIGRATED (was 38 usages)
+           ✅ --text-muted-custom: MIGRATED (was 2 usages)
+           ⏳ --bg-card:          13 usages remaining
+           ⏳ --bg-navbar:        1 usage remaining
+           ⏳ --border-main:      23 usages remaining
+
+       🎯 Target: Complete migration by Q2 2026 (April 30, 2026)
+
+       ❌ DO NOT use these tokens in new code
+       ✅ When refactoring existing code, replace with semantic equivalents:
+
+       Migration Map:
+       --bg-card           → --surface-1          (cards, modals, panels)
+       --bg-navbar         → --surface-1          (navigation bars)
+       --border-main       → --border-subtle      (soft borders)
+
+       🔍 Track remaining usage:
+           grep -r "var(--bg-card)" src/ --include="*.css" --include="*.html"
+           grep -r "var(--border-main)" src/ --include="*.css" --include="*.html"
+
+       📝 Bulk migration script available at:
+           scripts/migrate-legacy-tokens.sh
+       ============================================================================ */
+
+    /* Aliased to semantic tokens - safe to use but DISCOURAGED */
+    --bg-card: var(--color-white);          /* Use --surface-1 instead */
+    --bg-navbar: var(--color-white);        /* Use --surface-1 instead */
+    --border-main: var(--color-border-light);      /* Use --border-subtle instead */
+    --shadow-main: rgba(0, 0, 0, 0.1);      /* Theme-specific, keep for now */
+    --shadow-rgb: 0, 0, 0;                  /* Theme-specific, keep for now */
+    --diversification-bar: var(--primary-light);   /* Theme-specific, keep for now */
+
+    /* ============================================================================
+       SEMANTIC DESIGN TOKENS (Recommended for new code)
+       ============================================================================
+       These tokens provide clear, context-aware naming that aligns with modern
+       design system practices. They make it obvious where and how colors should
+       be used, improving maintainability and theming.
+
+       Migration Strategy:
+       - New code: Use semantic tokens below
+       - Existing code: Gradually migrate during refactors
+       - Legacy tokens above are aliased to semantic tokens for compatibility
+       ============================================================================ */
+
+    /* Surface colors - for backgrounds and containers */
+    --surface-1: var(--color-white);           /* Primary surface (cards, modals) */
+    --surface-2: var(--color-bg-base);         /* Secondary surface (page background) */
+    --surface-3: var(--color-bg-light);        /* Tertiary surface (nested elements) */
+
+    /* Text colors - context-aware for different backgrounds */
+    --text-on-surface: var(--color-text);              /* Text on surface backgrounds */
+    --text-on-surface-muted: var(--color-text-muted);  /* Muted text on surfaces */
+    --text-on-primary: var(--color-permanent-white);   /* Text on primary color */
+    --text-on-secondary: var(--color-permanent-white); /* Text on secondary color */
+
+    /* Border colors - semantic intensity levels */
+    --border-subtle: var(--color-border-light);  /* Soft, de-emphasized borders */
+    --border-medium: var(--color-border-dark);   /* Standard borders */
+    --border-strong: var(--color-border-darker); /* Emphasized borders */
+
+    /* Link colors - semantic naming */
+    --link-color: var(--color-link);
+    --link-hover-color: var(--bs-link-hover-color, #3d8cd9);
+
+    /* State surfaces - for alerts, notifications, and status indicators */
+    --surface-success: var(--color-success-bg);      /* Success state background */
+    --surface-error: #f8d7da;                         /* Error state background */
+    --surface-warning: #fff3cd;                       /* Warning state background */
+    --surface-info: #d1ecf1;                          /* Info state background */
+
+    /* Text colors for state surfaces */
+    --text-on-success: var(--color-success-dark);    /* Text on success backgrounds */
+    --text-on-error: #721c24;                         /* Text on error backgrounds */
+    --text-on-warning: #856404;                       /* Text on warning backgrounds */
+    --text-on-info: #0c5460;                          /* Text on info backgrounds */
+
+    /* Border colors for states */
+    --border-success: var(--color-success);           /* Success state borders */
+    --border-error: var(--color-danger);              /* Error state borders */
+    --border-warning: var(--color-warning);           /* Warning state borders */
+    --border-info: var(--color-info);                 /* Info state borders */
+    --border-focus: rgba(115, 134, 213, 0.5);        /* Focused input borders */
 
     /* Bootstrap Table Control Variables */
     --table-btn-bg: var(--primary-color);
@@ -156,8 +248,10 @@
 }
 
 [data-bs-theme="dark"] {
+    color-scheme: dark;
     --color-white: #2b3035;
     --color-black: #f8f9fa;
+    --color-link: #8fc3ff;
     --color-bg-light: #343a40;
     --color-bg-base: #212529;
     --color-text: #dee2e6;
@@ -166,15 +260,52 @@
     --color-text-muted-light: #6c757d;
     --color-bg-hover-light: #3c4146;
 
-    --bg-body: #121212;
-    --bg-card: #1e1e1e;
-    --bg-navbar: #1e1e1e;
-    --text-main: #e0e0e0;
-    --text-muted-custom: #a0a0a0;
-    --border-main: #333333;
-    --shadow-main: rgba(0, 0, 0, 0.5);
-    --shadow-rgb: 0, 0, 0;
-    --table-header-bg: #1c1f23;
+    /* Legacy tokens - Dark mode overrides (DEPRECATED - see migration guide above) */
+    --bg-card: #1e1e1e;                 /* Use --surface-1 instead */
+    --bg-navbar: #1e1e1e;               /* Use --surface-1 instead */
+    --border-main: #333333;             /* Use --border-subtle instead */
+    --shadow-main: rgba(0, 0, 0, 0.5);  /* Theme-specific, keep for now */
+    --shadow-rgb: 0, 0, 0;              /* Theme-specific, keep for now */
+    --table-header-bg: #1c1f23;         /* Component-specific, keep for now */
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.35);
+    --shadow-medium: 0 6px 16px rgba(0, 0, 0, 0.45);
+    --shadow-dark: 0 8px 20px rgba(0, 0, 0, 0.5);
+    --shadow-modal: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.6);
+    --focus-ring-primary: 0 0 0 0.2rem rgba(115, 134, 213, 0.5);
+    --focus-ring-secondary: 0 0 0 0.2rem rgba(108, 117, 125, 0.5);
+
+    /* Semantic design tokens - Dark mode overrides */
+    --surface-1: #1e1e1e;                     /* Primary surface (cards, modals) */
+    --surface-2: #121212;                     /* Secondary surface (page background) */
+    --surface-3: #2b2b2b;                     /* Tertiary surface (nested elements) */
+    --text-on-surface: #e0e0e0;               /* Text on surface backgrounds */
+    --text-on-surface-muted: #a0a0a0;         /* Muted text on surfaces */
+    --text-on-primary: var(--color-permanent-white);  /* Text on primary color */
+    --text-on-secondary: var(--color-permanent-white); /* Text on secondary color */
+    --border-subtle: #333333;                 /* Soft, de-emphasized borders */
+    --border-medium: #444444;                 /* Standard borders */
+    --border-strong: #555555;                 /* Emphasized borders */
+    --link-color: #8fc3ff;                    /* Link color for dark mode */
+    --link-hover-color: #a8d5ff;              /* Link hover color for dark mode */
+
+    /* State surfaces - Dark mode optimized */
+    --surface-success: rgba(40, 167, 69, 0.2);  /* Success state background */
+    --surface-error: rgba(220, 53, 69, 0.2);    /* Error state background */
+    --surface-warning: rgba(255, 193, 7, 0.2);  /* Warning state background */
+    --surface-info: rgba(23, 162, 184, 0.2);    /* Info state background */
+
+    /* Text colors for state surfaces - Dark mode */
+    --text-on-success: #75d08b;                 /* Text on success backgrounds */
+    --text-on-error: #f18c96;                   /* Text on error backgrounds */
+    --text-on-warning: #ffc107;                 /* Text on warning backgrounds */
+    --text-on-info: #5bc0de;                    /* Text on info backgrounds */
+
+    /* Border colors for states - Dark mode */
+    --border-success: #75d08b;                  /* Success state borders */
+    --border-error: #f18c96;                    /* Error state borders */
+    --border-warning: #ffc107;                  /* Warning state borders */
+    --border-info: #5bc0de;                     /* Info state borders */
+    --border-focus: rgba(143, 195, 255, 0.5);  /* Focused input borders (brighter for dark) */
 
     /* Override dropdown custom for dark mode */
     --dropdown-custom-bg: #2b3035;
@@ -189,11 +320,11 @@
     /* Bootstrap Table Control Variables - Dark Mode Refined */
     --table-btn-bg: #41508a;
     --table-btn-hover-bg: #4d5da1;
-    --table-btn-color: var(--color-permanent-white);
+    --table-btn-color: var(--text-on-primary);
     --table-paging-bg: #2b3035;
-    --table-paging-color: var(--color-permanent-white);
+    --table-paging-color: var(--text-on-primary);
     --table-paging-active-bg: #41508a;
-    --table-paging-active-color: var(--color-permanent-white);
+    --table-paging-active-color: var(--text-on-primary);
     --table-paging-border: #495057;
 
     /* Status Pill Overrides - Dark Mode */
@@ -201,6 +332,298 @@
     --pill-success-text: #75d08b;
     --pill-danger-bg: rgba(220, 53, 69, 0.2);
     --pill-danger-text: #f18c96;
+}
+
+/* ============================================================================
+   UTILITY CLASSES - Naming Convention
+   ============================================================================
+   This project uses a hybrid approach for utility classes:
+
+   1. COMPONENT-BASED (BEM-style for multi-part components):
+      - .component-name { } for base
+      - .component-name--modifier { } for variants
+      Example: .chart-container, .chart-container--sm
+
+   2. UTILITY-BASED (single-purpose utilities):
+      - .property-value format
+      Example: .cursor-help, .text-lg
+
+   3. SEMANTIC COMPONENTS (state-aware):
+      - .component-state format
+      Example: .pill-primary, .pill-success
+   ============================================================================ */
+
+/* Chart containers - component-based */
+.chart-container {
+    position: relative;
+    width: 100%;
+}
+
+.chart-container--sm {
+    height: 25vh;
+}
+
+.chart-container--md {
+    height: 40vh;
+}
+
+/* DEPRECATED: Use .chart-container--sm and .chart-container--md instead */
+.chart-container-sm { height: 25vh; }
+.chart-container-md { height: 40vh; }
+
+/* Dropdown utilities - component-based */
+.dropdown--min-width {
+    min-width: 80px;
+}
+
+.dropdown--auto-width {
+    min-width: 100%;
+    width: auto;
+}
+
+/* DEPRECATED: Use .dropdown--min-width and .dropdown--auto-width instead */
+.dropdown-min-width { min-width: 80px; }
+.dropdown-menu-auto { min-width: 100%; width: auto; }
+
+/* Status pills - semantic components */
+.pill-primary {
+    background-color: var(--primary-color);
+    color: var(--text-on-primary);
+}
+
+/* Chart legend - component */
+.legend-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 5px;
+}
+
+/* Summary card - component */
+.summary-card {
+    padding: 0.5rem 1rem 0.25rem 0.75rem;
+}
+
+/* Broker selection components - reusable across different contexts
+   NOTE: Uses semantic tokens as recommended pattern for new components */
+.broker-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    cursor: pointer;
+    border: 2px solid transparent;
+    background-color: var(--surface-1);
+    color: var(--text-on-surface);
+}
+
+.broker-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(var(--shadow-rgb, 0, 0, 0), 0.15);
+    border-color: var(--bs-primary);
+}
+
+.broker-logo {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+}
+
+.broker-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    max-width: 900px;
+}
+
+/* Login page specific styles - increased specificity instead of !important */
+.login-page .alert.alert-danger a,
+.login-page .alert.alert-warning a,
+.login-page .alert.alert-success a,
+.login-page .alert.alert-info a {
+    color: var(--link-color);
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+.login-page .alert.alert-danger a:hover,
+.login-page .alert.alert-warning a:hover,
+.login-page .alert.alert-success a:hover,
+.login-page .alert.alert-info a:hover {
+    color: var(--link-hover-color);
+    text-decoration: underline;
+}
+
+.back-link {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    color: var(--text-on-surface-muted);
+    text-decoration: none;
+    z-index: 1000;
+}
+
+.back-link:hover {
+    color: var(--bs-primary);
+}
+
+.error-page {
+    background: var(--bs-body-bg, #ffffff);
+    background-attachment: fixed;
+}
+
+[data-bs-theme="dark"] .error-page {
+    background: linear-gradient(135deg, #1a1d20 0%, #212529 50%, #2b2f35 100%);
+    background-attachment: fixed;
+}
+
+.error-card {
+    max-width: 600px;
+}
+
+/* Code block utilities - component-based */
+.code-block--scroll {
+    white-space: pre-wrap;
+    max-height: 200px;
+    overflow-y: auto;
+    display: block;
+}
+
+/* DEPRECATED: Use .code-block--scroll instead */
+.code-block-scroll {
+    white-space: pre-wrap;
+    max-height: 200px;
+    overflow-y: auto;
+    display: block;
+}
+
+/* Single-purpose utilities - property-value naming */
+.cursor-help {
+    cursor: help;
+}
+
+.text-2xl {
+    font-size: 2rem;
+}
+
+/* DEPRECATED: Use .cursor-help and .text-2xl instead */
+.help-cursor { cursor: help; }
+.icon-lg { font-size: 2rem; }
+
+/* Input styling - component-based */
+.input--otp {
+    letter-spacing: 1rem;
+    line-height: 1.75em;
+}
+
+/* DEPRECATED: Use .input--otp instead */
+.otp-code-input {
+    letter-spacing: 1rem;
+    line-height: 1.75em;
+}
+
+/* Scrollable areas - component-based */
+.scrollable-area--tall {
+    height: calc(100vh - 100px);
+}
+
+/* DEPRECATED: Use .scrollable-area--tall instead */
+.scrollable-area-tall {
+    height: calc(100vh - 100px);
+}
+
+/* Modal body variants - component-based */
+.modal-body--scroll {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.modal-body--plain {
+    max-height: 70vh;
+    overflow: hidden;
+    padding: 0;
+}
+
+/* DEPRECATED: Use .modal-body--scroll and .modal-body--plain instead */
+.modal-body-scroll {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.modal-body-plain {
+    max-height: 70vh;
+    overflow: hidden;
+    padding: 0;
+}
+
+/* Display utilities */
+.display-none {
+    display: none;
+}
+
+/* DEPRECATED: Use .display-none instead */
+.settings-footer-hidden {
+    display: none;
+}
+
+/* Progress bar utilities */
+.progress-bar--dynamic {
+    width: var(--progress-width, 0%);
+}
+
+/* DEPRECATED: Use .progress-bar--dynamic instead */
+.progress-bar-background {
+    width: var(--progress-width, 0%);
+}
+
+/* Standalone pages (settings, release notes) */
+html.standalone-root,
+html.standalone-root body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: var(--surface-2);
+    color: var(--text-on-surface);
+}
+
+/* Login card variants - component-based */
+.login-card--wide {
+    max-width: 650px;
+}
+
+/* DEPRECATED: Use .login-card--wide instead */
+.login-card-wide {
+    max-width: 650px;
+}
+
+/* Bootstrap Table sticky header behavior (global) */
+.bootstrap-table .fixed-table-container {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+.bootstrap-table {
+    overflow: visible !important;
+}
+
+.bootstrap-table .fixed-table-toolbar {
+    overflow: visible !important;
+    position: relative;
+    z-index: var(--z-index-popover);
+}
+
+.bootstrap-table .fixed-table-toolbar .columns {
+    position: relative;
+    z-index: var(--z-index-modal) !important;
+}
+
+.bootstrap-table .fixed-table-toolbar .columns .dropdown-menu {
+    z-index: var(--z-index-table-dropdown) !important;
+}
+
+.fixed-table-header {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: var(--z-index-dropdown) !important;
+    background-color: var(--table-header-bg, #f8f9fa) !important;
 }
 
 /* Theme Selector Styles */
@@ -319,7 +742,7 @@
     width: 48px;
     height: 48px;
     margin: 0 auto 0.75rem;
-    border-radius: var(--border-radius-standard);
+    border-radius: var(--border-radius-md);
     position: relative;
     display: flex;
     align-items: center;
@@ -378,13 +801,13 @@
 .theme-name {
     font-weight: 600;
     font-size: 0.9rem;
-    color: var(--text-main);
+    color: var(--text-on-surface);
     margin-bottom: 0.25rem;
 }
 
 .theme-description {
     font-size: 0.75rem;
-    color: var(--text-muted-custom);
+    color: var(--text-on-surface-muted);
     line-height: 1.2;
 }
 
@@ -455,8 +878,8 @@
 /* Base Styles */
 body {
     font-family: 'Poppins', sans-serif;
-    background: var(--bg-body);
-    color: var(--text-main);
+    background: var(--surface-2);
+    color: var(--text-on-surface);
 }
 
 p {
@@ -465,7 +888,7 @@ p {
     font-size: 1.1em;
     font-weight: 300;
     line-height: 1.7em;
-    color: var(--text-muted-custom);
+    color: var(--text-on-surface-muted);
 }
 
 a,
@@ -639,7 +1062,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar #sidebar-se
     justify-content: center;
     margin: 0;
     padding: 0.3rem 0.5rem;
-    border-radius: var(--border-radius-standard);
+    border-radius: var(--border-radius-md);
     text-align: center;
     display: flex;
     align-items: center;
@@ -701,7 +1124,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     justify-content: center;
     margin: 0 var(--sidebar-margin);
     padding: 0.4rem 1rem !important;
-    border-radius: var(--border-radius-standard);
+    border-radius: var(--border-radius-md);
 }
 
 #sidebar.sidebar-collapsed .sidebar-icon {
@@ -754,7 +1177,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 #sidebar .sidebar-nav-link.active,
 #sidebar .sidebar-nav-link.active i,
 #sidebar .sidebar-nav-link.active .sidebar-text {
-    color: var(--color-permanent-white) !important;
+    color: var(--text-on-primary) !important;
 }
 
 #sidebar .text-white-50 {
@@ -773,7 +1196,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 #sidebar .navbar-brand {
-    color: var(--color-permanent-white) !important;
+    color: var(--text-on-primary) !important;
     border-color: rgba(255, 255, 255, 0.25);
     width: 100%;
     margin: 0;
@@ -781,7 +1204,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 /* Sidebar Navigation Links */
 .sidebar-nav-link {
-    border-radius: var(--border-radius-standard);
+    border-radius: var(--border-radius-md);
     transition: var(--transition-standard);
     color: var(--sidebar-text-color) !important;
     margin: 0 var(--sidebar-margin);
@@ -797,7 +1220,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 /* Sidebar logo styling */
 .sidebar-logo {
     transition: var(--transition-standard);
-    border-radius: var(--border-radius-large);
+    border-radius: var(--border-radius-md);
     max-width: 48px;
     height: auto;
     flex-shrink: 0;
@@ -881,7 +1304,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 .sidebar-nav-link.active {
     background-color: var(--sidebar-active-bg) !important;
-    color: var(--color-permanent-white) !important;
+    color: var(--text-on-primary) !important;
 }
 
 /* Disable transform when collapsed */
@@ -898,11 +1321,16 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 /* Custom tooltip styling for consistent theming */
 .info-tooltip {
     --bs-tooltip-bg: var(--primary-dark);
-    --bs-tooltip-color: var(--color-permanent-white);
-    --bs-tooltip-border-radius: var(--border-radius-standard);
+    --bs-tooltip-color: var(--text-on-primary);
+    --bs-tooltip-border-radius: var(--border-radius-md);
     --bs-tooltip-font-size: var(--font-size-sm);
     --bs-tooltip-padding-x: var(--spacing-sm);
     --bs-tooltip-padding-y: var(--spacing-xs);
+}
+
+/* Keep tooltips above the sidebar and other elevated UI */
+.tooltip {
+    z-index: calc(var(--z-index-toast) + 30);
 }
 
 /* Portfolio Selector Styling - account for extra div nesting */
@@ -910,7 +1338,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     border: none;
     background: none;
     box-shadow: none;
-    border-radius: var(--border-radius-standard);
+    border-radius: var(--border-radius-md);
     color: var(--sidebar-text-color);
     margin: 0;
     /* Remove margin from button since parent handles it */
@@ -943,14 +1371,14 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 #sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle:hover {
     background-color: var(--sidebar-hover-bg);
-    color: var(--color-white);
+    color: var(--text-on-primary);
     transform: none;
     /* Prevent rightward movement on hover */
 }
 
 #sidebar-portfolio-selector button.sidebar-nav-link.dropdown-toggle:focus {
     background-color: var(--sidebar-hover-bg);
-    color: var(--color-white);
+    color: var(--text-on-primary);
     box-shadow: none;
     transform: none;
     /* Prevent rightward movement on focus */
@@ -959,7 +1387,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 #sidebar-portfolio-selector button img {
-    background: var(--color-white);
+    background: var(--color-permanent-white);
     border: 2px solid var(--sidebar-border-color);
 }
 
@@ -968,7 +1396,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     border: none;
     background: none;
     box-shadow: none;
-    border-radius: var(--border-radius-standard);
+    border-radius: var(--border-radius-md);
     color: var(--sidebar-text-color);
     margin: 0;
     /* Remove margin from link since parent handles it */
@@ -991,14 +1419,14 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 #sidebar-settings-selector a.sidebar-nav-link.dropdown-toggle:hover {
     background-color: var(--sidebar-hover-bg);
-    color: var(--color-white);
+    color: var(--text-on-primary);
     transform: none;
     /* Prevent rightward movement on hover */
 }
 
 #sidebar-settings-selector a.sidebar-nav-link.dropdown-toggle:focus {
     background-color: var(--sidebar-hover-bg);
-    color: var(--color-white);
+    color: var(--text-on-primary);
     box-shadow: none;
     transform: none;
     /* Prevent rightward movement on focus */
@@ -1019,7 +1447,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 #sidebar-portfolio-menu .dropdown-item,
 #sidebar-settings-menu .dropdown-item {
-    color: var(--color-permanent-white);
+    color: var(--text-on-primary);
     padding: var(--spacing-sm) var(--spacing-md);
 }
 
@@ -1028,12 +1456,12 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 #sidebar-settings-menu .dropdown-item:hover,
 #sidebar-settings-menu .dropdown-item:focus {
     background-color: var(--sidebar-hover-bg);
-    color: var(--color-permanent-white);
+    color: var(--text-on-primary);
 }
 
 #sidebar-portfolio-menu .dropdown-item img,
 #sidebar-settings-menu .dropdown-item img {
-    background: var(--color-white);
+    background: var(--color-permanent-white);
     border: 2px solid var(--sidebar-border-color);
 }
 
@@ -1183,7 +1611,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     #sidebar.sidebar-collapsed #sidebar-portfolio-selector .sidebar-nav-link {
         padding: 0.3rem 0.75rem !important;
         margin: 0 var(--sidebar-margin);
-        border-radius: var(--border-radius-standard);
+        border-radius: var(--border-radius-md);
     }
 
     /* Mobile - portfolio selector image centering when collapsed */
@@ -1281,7 +1709,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .list-group-item {
     background-color: transparent !important;
     border-color: var(--border-main) !important;
-    color: var(--text-main) !important;
+    color: var(--text-on-surface) !important;
 }
 
 .content-card {
@@ -1371,7 +1799,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     position: relative;
     width: 2.8rem;
     height: 2.8rem;
-    background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-body) 100%);
+    background: linear-gradient(135deg, var(--bg-card) 0%, var(--surface-2) 100%);
     border: 2px solid var(--primary-color);
     border-radius: 50%;
     display: flex;
@@ -1497,7 +1925,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     font-size: 1.5rem;
     font-weight: 400;
     font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, monospace;
-    color: var(--text-main);
+    color: var(--text-on-surface);
     text-align: center;
     line-height: 1;
     /* Force optical centering */
@@ -1720,7 +2148,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     width: 60px;
     text-align: center;
     background-color: var(--table-paging-bg) !important;
-    color: var(--text-main) !important;
+    color: var(--text-on-surface) !important;
     border: 1px solid var(--border-main) !important;
 }
 
@@ -1743,7 +2171,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     padding: 0.375rem 0.75rem;
     font-size: 1rem;
     line-height: 1.5;
-    color: var(--text-main) !important;
+    color: var(--text-on-surface) !important;
     border-color: var(--border-main) !important;
     background-color: var(--table-paging-bg) !important;
     border-radius: var(--border-radius-xs) 0 0 var(--border-radius-xs);
@@ -1776,13 +2204,13 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .bootstrap-table .fixed-table-pagination .page-jump-to .input-group .btn:focus {
     background-color: var(--primary-hover);
     border-color: var(--primary-hover);
-    color: var(--color-white);
+    color: var(--text-on-primary);
 }
 
 .bootstrap-table .fixed-table-pagination .page-jump-to .input-group .btn:active {
     background-color: var(--primary-dark);
     border-color: var(--primary-dark);
-    color: white;
+    color: var(--text-on-primary);
 }
 
 .table td,
@@ -2026,7 +2454,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     z-index: 10;
     pointer-events: auto;
     background-color: var(--bg-card);
-    color: var(--text-main);
+    color: var(--text-on-surface);
     border-color: var(--border-main);
 }
 
@@ -2034,7 +2462,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .bootstrap-table .fixed-table-toolbar,
 .bootstrap-table .fixed-table-pagination {
     background-color: transparent;
-    color: var(--text-main);
+    color: var(--text-on-surface);
 }
 
 /* Bootstrap Table Z-Index and Layout */
@@ -2128,7 +2556,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 /* Dropdown item styling - applies to both column selector and page size selector */
 .bootstrap-table .fixed-table-toolbar .columns .dropdown-menu .dropdown-item,
 .bootstrap-table .fixed-table-pagination .dropdown-menu .dropdown-item {
-    color: var(--text-main) !important;
+    color: var(--text-on-surface) !important;
 }
 
 /* Hover and focus states */
@@ -2161,7 +2589,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .settings-content .card-body,
 .settings-content .settings-card {
     background: var(--bg-card);
-    color: var(--text-main);
+    color: var(--text-on-surface);
     border: 1px solid var(--border-main);
     border-radius: var(--border-radius-md);
 }
@@ -2172,13 +2600,14 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 .settings-main {
     background: transparent;
-    color: var(--text-main);
+    color: var(--text-on-surface);
 }
 
 /* Release Notes Content - uses theme-aware CSS custom properties */
+/* Release notes styling - uses semantic tokens for better theming */
 .release-notes-content {
-    background: var(--bg-body);
-    color: var(--text-main);
+    background: var(--surface-2);
+    color: var(--text-on-surface);
     font-family: -apple-system, system-ui, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     line-height: 1.5;
     font-size: var(--font-size-sm);
@@ -2198,7 +2627,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .release-notes-content h4,
 .release-notes-content h5,
 .release-notes-content h6 {
-    color: var(--text-main);
+    color: var(--text-on-surface);
 }
 
 .release-notes-content p {
@@ -2206,7 +2635,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 .release-notes-content a {
-    color: var(--color-link);
+    color: var(--link-color);
     text-decoration: none;
 }
 
@@ -2216,7 +2645,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 .release-notes-content hr {
     border: 0;
-    border-top: 1px solid var(--color-border-dark);
+    border-top: 1px solid var(--border-subtle);
     margin: 1.8em 0;
 }
 
@@ -2231,12 +2660,12 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 .release-notes-content code {
-    background: var(--bg-card);
-    color: var(--text-main);
+    background: var(--surface-1);
+    color: var(--text-on-surface);
     padding: 0.15em 0.4em;
     border-radius: var(--border-radius-xs);
     font-size: 0.95em;
-    border: 1px solid var(--border-main);
+    border: 1px solid var(--border-subtle);
 }
 
 .release-notes-content pre code {
@@ -2246,21 +2675,21 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 .release-notes-content pre {
-    background: var(--bg-card);
+    background: var(--surface-1);
     padding: 0.85rem var(--spacing-md);
     border-radius: var(--border-radius-sm);
     overflow-x: auto;
     font-size: 0.9em;
     line-height: 1.4;
-    border: 1px solid var(--border-main);
+    border: 1px solid var(--border-subtle);
 }
 
 .release-notes-content blockquote {
     margin: 0.9rem 0;
     padding: 0.55rem 0.9rem;
     border-left: 4px solid var(--primary-color);
-    background: var(--bg-card);
-    color: var(--text-muted-custom);
+    background: var(--surface-1);
+    color: var(--text-on-surface-muted);
     border-radius: var(--border-radius-xs);
 }
 
@@ -2271,20 +2700,20 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 .release-notes-content strong {
-    color: var(--text-main);
+    color: var(--text-on-surface);
     font-weight: 600;
 }
 
 .release-notes-content em {
-    color: var(--text-muted-custom);
+    color: var(--text-on-surface-muted);
 }
 
 /* Standalone release notes page styling */
 .release-notes-standalone {
     margin: 0;
     padding: 0;
-    background: var(--bg-body);
-    color: var(--text-main);
+    background: var(--surface-2);
+    color: var(--text-on-surface);
     height: 100%;
 }
 
@@ -2296,7 +2725,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .settings-content {
     padding: 0;
     font-family: inherit;
-    color: var(--text-main);
+    color: var(--text-on-surface);
     background: transparent;
     display: flex;
     flex-direction: column;
@@ -2405,7 +2834,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     display: flex;
     align-items: center;
     transition: var(--transition-standard);
-    color: var(--color-permanent-white);
+    color: var(--text-on-primary);
 }
 
 .broker-item:hover {
@@ -2421,7 +2850,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .broker-item.active {
     background-color: rgba(255, 255, 255, 0.2);
     font-weight: 600;
-    color: var(--color-permanent-white);
+    color: var(--text-on-primary);
 }
 
 .broker-item img {
@@ -2468,7 +2897,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     margin-bottom: var(--spacing-sm);
     font-weight: 500;
     width: 250px;
-    color: var(--text-main);
+    color: var(--text-on-surface);
 }
 
 .settings-form-group .form-control {
@@ -2478,7 +2907,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     padding: 0.375rem 0.75rem;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
     background-color: var(--bg-card);
-    color: var(--text-main);
+    color: var(--text-on-surface);
 }
 
 .settings-form-group .form-control:focus {
@@ -2495,7 +2924,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 }
 
 .section-header {
-    color: var(--text-main);
+    color: var(--text-on-surface);
     font-weight: 600;
     margin-bottom: var(--spacing-md);
     padding: var(--spacing-md) var(--spacing-lg);
@@ -2665,8 +3094,8 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .settings-standalone {
     margin: 0;
     padding: 0;
-    background: var(--bg-body);
-    color: var(--text-main);
+    background: var(--surface-2);
+    color: var(--text-on-surface);
     height: 100%;
 }
 
@@ -2737,7 +3166,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .modal-footer .btn-primary {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
-    color: var(--color-white);
+    color: var(--text-on-primary);
     font-weight: 500;
     font-size: var(--font-size-sm);
     padding: 0.375rem var(--spacing-md);
@@ -2749,14 +3178,14 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .modal-footer .btn-primary:focus {
     background-color: var(--primary-hover);
     border-color: var(--primary-hover);
-    color: var(--color-white);
+    color: var(--text-on-primary);
     box-shadow: var(--focus-ring-primary);
 }
 
 .modal-footer .btn-primary:active {
     background-color: var(--primary-dark);
     border-color: var(--primary-dark);
-    color: var(--color-white);
+    color: var(--text-on-primary);
 }
 
 /* Secondary button uses a complementary gray that works well with the purple-blue primary */
@@ -2764,7 +3193,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .modal-footer .btn-secondary {
     background-color: var(--color-text-muted);
     border-color: var(--color-text-muted);
-    color: var(--color-white);
+    color: var(--text-on-primary);
     font-weight: 500;
     font-size: var(--font-size-sm);
     padding: 0.375rem var(--spacing-md);
@@ -2776,21 +3205,21 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 .modal-footer .btn-secondary:focus {
     background-color: var(--color-secondary-dark, #5a6268);
     border-color: var(--color-secondary-darker, #545b62);
-    color: var(--color-white);
+    color: var(--text-on-primary);
     box-shadow: var(--focus-ring-secondary);
 }
 
 .modal-footer .btn-secondary:active {
     background-color: var(--color-secondary-darker, #545b62);
     border-color: var(--color-secondary-darkest, #4e555b);
-    color: var(--color-white);
+    color: var(--text-on-primary);
 }
 
 /* Modal header styling */
 .modal-header {
     border-bottom: 1px solid var(--color-border-light);
     padding: var(--spacing-md) var(--spacing-lg);
-    background: linear-gradient(to bottom, var(--bg-card), var(--bg-body));
+    background: linear-gradient(to bottom, var(--bg-card), var(--surface-2));
 }
 
 .modal-header.border-0 {
@@ -2841,7 +3270,7 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
 
 .modal-footer {
     padding: var(--spacing-lg);
-    background: linear-gradient(to top, var(--bg-card), var(--bg-body));
+    background: linear-gradient(to top, var(--bg-card), var(--surface-2));
     border-top: 1px solid var(--border-main);
     box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
 }
@@ -2873,7 +3302,7 @@ label.required::after {
 
 .status-badge-loaded {
     background-color: var(--color-success, #28a745);
-    color: var(--color-white, #ffffff);
+    color: var(--text-on-primary);
 }
 
 .status-badge-warning {
@@ -2883,7 +3312,7 @@ label.required::after {
 
 .status-badge-not-set {
     background-color: var(--color-secondary, #6c757d);
-    color: var(--color-white, #ffffff);
+    color: var(--text-on-primary);
 }
 
 /* Key section header styling */
@@ -2895,7 +3324,7 @@ label.required::after {
 .key-section-title {
     font-size: 1rem;
     font-weight: 600;
-    color: var(--text-main);
+    color: var(--text-on-surface);
 }
 
 /* Key management - IBKR settings */
@@ -2913,7 +3342,7 @@ label.required::after {
 .btn-key-action:hover {
     background-color: var(--primary-hover);
     border-color: var(--primary-hover);
-    color: var(--color-white);
+    color: var(--text-on-primary);
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(115, 134, 213, 0.3);
 }
@@ -2921,7 +3350,7 @@ label.required::after {
 .btn-key-action:active {
     background-color: var(--primary-dark);
     border-color: var(--primary-dark);
-    color: var(--color-white);
+    color: var(--text-on-primary);
     transform: translateY(0);
     box-shadow: 0 1px 2px rgba(115, 134, 213, 0.2);
 }
@@ -2944,13 +3373,13 @@ label.required::after {
 .btn-key-action.btn-key-danger:hover {
     background-color: var(--color-danger, #dc3545);
     border-color: var(--color-danger, #dc3545);
-    color: var(--color-white, white);
+    color: var(--text-on-primary);
 }
 
 .btn-key-action.btn-key-danger:active {
     background-color: var(--color-danger-dark, #c82333);
     border-color: var(--color-danger-dark, #bd2130);
-    color: var(--color-white, white);
+    color: var(--text-on-primary);
 }
 
 /* Dark mode: fix button text visibility */

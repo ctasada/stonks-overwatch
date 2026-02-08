@@ -28,11 +28,10 @@
     <div class="settings-form-group">
         <label for="ibkr-consumer-key" class="required">
             Consumer Key
-            <i class="bi bi-question-circle-fill text-muted ms-1"
+            <i class="bi bi-question-circle-fill text-muted ms-1 help-cursor"
                data-bs-toggle="tooltip"
                data-bs-placement="top"
                title="Your IBKR OAuth consumer key. This identifies your application to the IBKR API."
-               style="cursor: help;"
                aria-label="Help for Consumer Key"></i>
         </label>
         <input type="text" class="form-control" id="ibkr-consumer-key" required
@@ -42,11 +41,10 @@
     <div class="settings-form-group">
         <label for="ibkr-dh-prime" class="required">
             DH Prime
-            <i class="bi bi-question-circle-fill text-muted ms-1"
+            <i class="bi bi-question-circle-fill text-muted ms-1 help-cursor"
                data-bs-toggle="tooltip"
                data-bs-placement="top"
                title="Diffie-Hellman prime parameter for secure key exchange. Found in your IBKR OAuth configuration page."
-               style="cursor: help;"
                aria-label="Help for DH Prime"></i>
         </label>
         <input type="text" class="form-control" id="ibkr-dh-prime" required
@@ -56,11 +54,10 @@
     <div class="key-section-header d-flex align-items-center mt-4 mb-2">
         <span class="key-section-title fw-bold required" id="encryption-key-label">
             Encryption Key
-            <i class="bi bi-question-circle-fill text-muted ms-1"
+            <i class="bi bi-question-circle-fill text-muted ms-1 help-cursor"
                data-bs-toggle="tooltip"
                data-bs-placement="top"
                title="RSA private key for encrypting OAuth requests. Upload a PEM file or paste the key content."
-               style="cursor: help;"
                aria-label="Help for Encryption Key"></i>
         </span>
         <span class="badge status-badge ms-2 {% if ibkr_config.credentials.encryption_key %}status-badge-loaded{% else %}status-badge-not-set{% endif %}"
@@ -128,11 +125,10 @@
     <div class="key-section-header d-flex align-items-center mt-4 mb-2">
         <span class="key-section-title fw-bold required" id="signature-key-label">
             Signature Key
-            <i class="bi bi-question-circle-fill text-muted ms-1"
+            <i class="bi bi-question-circle-fill text-muted ms-1 help-cursor"
                data-bs-toggle="tooltip"
                data-bs-placement="top"
                title="RSA private key for signing OAuth requests. Upload a PEM file or paste the key content."
-               style="cursor: help;"
                aria-label="Help for Signature Key"></i>
         </span>
         <span class="badge status-badge ms-2 {% if ibkr_config.credentials.signature_key %}status-badge-loaded{% else %}status-badge-not-set{% endif %}"

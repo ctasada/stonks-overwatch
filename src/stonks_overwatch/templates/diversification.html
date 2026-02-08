@@ -27,63 +27,28 @@
 <script src="{% static 'chartjs-adapter-luxon/dist/chartjs-adapter-luxon.umd.min.js' %}"></script>
 <script src="{% static '@seahsky/chartjs-plugin-autocolors/dist/chartjs-plugin-autocolors.min.js' %}"></script>
 {{ currencySymbol|json_script:"currency-symbol" }}
+{{ productTypes.chart.labels|json_script:"diversification-type-labels" }}
+{{ productTypes.chart.values|json_script:"diversification-type-values" }}
+{% if stocks and stocks.table %}
+{{ stocks.chart.labels|json_script:"diversification-stocks-labels" }}
+{{ stocks.chart.values|json_script:"diversification-stocks-values" }}
+{% endif %}
+{% if etfs and etfs.table %}
+{{ etfs.chart.labels|json_script:"diversification-etfs-labels" }}
+{{ etfs.chart.values|json_script:"diversification-etfs-values" }}
+{% endif %}
+{% if crypto and crypto.table %}
+{{ crypto.chart.labels|json_script:"diversification-crypto-labels" }}
+{{ crypto.chart.values|json_script:"diversification-crypto-values" }}
+{% endif %}
+{{ sectors.chart.labels|json_script:"diversification-sectors-labels" }}
+{{ sectors.chart.values|json_script:"diversification-sectors-values" }}
+{{ currencies.chart.labels|json_script:"diversification-currencies-labels" }}
+{{ currencies.chart.values|json_script:"diversification-currencies-values" }}
+{% if countries and countries.table %}
+{{ countries.chart.labels|json_script:"diversification-countries-labels" }}
+{{ countries.chart.values|json_script:"diversification-countries-values" }}
+{% endif %}
 <script src="{% static 'js/distribution-chart-utils.js' %}"></script>
-<script>
-    drawDoughnutChart(
-        "type-chart",
-        "Type",
-        {{ productTypes.chart.labels|safe }},
-        {{ productTypes.chart.values|safe }}
-    );
-
-    {% if stocks and stocks.table %}
-    drawDoughnutChart(
-        "stocks-chart",
-        "Stocks",
-        {{ stocks.chart.labels|safe }},
-        {{ stocks.chart.values|safe }}
-    );
-    {% endif %}
-
-    {% if etfs and etfs.table %}
-        drawDoughnutChart(
-            "etfs-chart",
-            "ETFs",
-            {{ etfs.chart.labels|safe }},
-            {{ etfs.chart.values|safe }}
-        );
-    {% endif %}
-
-    {% if crypto and crypto.table %}
-    drawDoughnutChart(
-        "crypto-chart",
-        "Crypto",
-        {{ crypto.chart.labels|safe }},
-        {{ crypto.chart.values|safe }}
-    );
-    {% endif %}
-
-    drawDoughnutChart(
-        "sectors-chart",
-        "Sectors",
-        {{ sectors.chart.labels|safe }},
-        {{ sectors.chart.values|safe }}
-    );
-
-    drawDoughnutChart(
-        "currencies-chart",
-        "Currencies",
-        {{ currencies.chart.labels|safe }},
-        {{ currencies.chart.values|safe }}
-    );
-
-    {% if countries and countries.table %}
-    drawDoughnutChart(
-        "countries-chart",
-        "Countries",
-        {{ countries.chart.labels|safe }},
-        {{ countries.chart.values|safe }}
-    );
-    {% endif %}
-</script>
+<script src="{% static 'js/diversification.js' %}"></script>
 {% endblock %}
