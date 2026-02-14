@@ -17,6 +17,7 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 ### Fixed
 
 - Distribution: Fixed bug while showing distributions at Dividends or Diversification
+- Diversification: Fixed rendering of some country flags
 - Fixed potential error while aggregating data from different brokers
   - Fixed error aggregating numeric types
   - Fixed error sorting dates

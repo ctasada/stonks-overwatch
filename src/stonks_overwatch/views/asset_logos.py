@@ -47,7 +47,7 @@ class AssetLogoView(View):
     SVG_CONTENT_TYPE = "image/svg+xml"
 
     # Twemoji CDN base URL. See https://github.com/jdecked/twemoji
-    TWEMOJI_CDN_BASE_URL = "https://cdnjs.cloudflare.com/ajax/libs/twemoji/17.0.2/svg"
+    TWEMOJI_CDN_BASE_URL = "https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg"
 
     # Keep track of alternatives as NVSTly
     # return f"https://raw.githubusercontent.com/nvstly/icons/main/ticker_icons/{symbol.upper()}.png"
