@@ -9,24 +9,24 @@ requires-python = ">=3.13"
 dependencies = [
     "degiro-connector[quotecast] >= 3.0.35",
     "django >= 6.0.2",
-    "pycountry >= 24.6.1",
+    "pycountry >= 26.2.16",
     "currency-symbols >= 2.0.4",
     "polars >=1.37.2",
     "requests-cache >= 1.3.0",
     "django-extensions >= 4.1.0",
-    "currencyconverter >= 0.18.14",
+    "currencyconverter >= 0.18.15",
     "django-node-assets >= 0.9.15",
     "apscheduler >= 3.11.2",
     "tzlocal >= 5.3.1",
     "python-bitvavo-api >= 1.4.3",
-    "yfinance >= 1.1.0",
+    "yfinance >= 1.2.0",
     "iso10383 >=2025.2.10",
     "requests >=2.32.4",
     "ibind[oauth] >=0.1.22",
     "cryptography >=46.0.4",
     "packaging >=25.0",
     "python-dateutil >=2.9.0.post0",
-    "markdown >=3.9",
+    "markdown >=3.10.2",
     "pyotp >= 2.9.0",
 ]
 
@@ -48,7 +48,7 @@ build-backend = "poetry.core.masonry.api"
 ruff = "^0.12.12"
 pytest = "^8.4.2"
 pytest-cov = "^6.3.0"
-pytest-django = "^4.11.1"
+pytest-django = "^4.12.0"
 pook = "^2.1.4"
 pyinstrument = "^5.1.2"
 licensecheck = "^2025.1.0"
