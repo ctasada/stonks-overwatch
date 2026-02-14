@@ -428,16 +428,29 @@ The database model is defined in:
 4. **Store** - Save to local database
 5. **Display** - Show in dashboard
 
-### API Limitations
+### Known API Limitations
 
-> **Note:** IBKR Web API has some limitations:
+> **Note:** IBKR Web API has several known limitations:
+
+#### Transaction History & Account Data
 
 - **Transaction History**: Only last 90 days available
 - **Deposits/Withdrawals**: Not provided by API
 - **Fee Information**: Limited fee data available
 - **Historical Data**: Depends on your account data subscription
 
-These are API limitations, not application limitations.
+#### Incomplete Position Contract Data
+
+The IBKR Web API `/portfolio` endpoints frequently return incomplete contract details. Fields like `ticker`, `name`, `sector`, `listingExchange`, and `countryCode` are often `None`.
+
+**Workaround**: Stonks Overwatch uses `contractDesc` (which contains the ticker) as a fallback when these fields are missing.
+
+**Impact**:
+- ✅ Portfolio displays correctly with ticker symbols
+- ✅ Position values and P&L calculations work properly
+- ⚠️ Sector/geographic diversification may show generic values ("Unknown", "US")
+
+These are IBKR API limitations, not application limitations. The application handles them gracefully with defensive fallback logic.
 
 ---
 

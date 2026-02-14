@@ -97,6 +97,19 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         return sorted(portfolio, key=lambda k: k.symbol)
 
     def __create_portfolio_entry(self, position: dict, base_currency: str) -> PortfolioEntry:
+        """
+        Create a portfolio entry from IBKR position data.
+
+        Note: IBKR API often returns None for ticker, name, sector, etc.
+        Uses contractDesc as fallback. See docs/IBKR.md for details.
+
+        Args:
+            position: Position data from IBKR (may contain None values)
+            base_currency: Base currency for conversions
+
+        Returns:
+            PortfolioEntry with defensive fallback values
+        """
         currency = position["currency"]
         price = self.__get_last_quotation(position)
         value = position["position"] * price
@@ -116,14 +129,22 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
 
         is_open = position["position"] > 0
 
+        # Defensive handling: IBKR API limitation - use contractDesc as fallback
+        ticker = position.get("ticker") or position.get("contractDesc") or "UNKNOWN"
+        name = position.get("name") or position.get("contractDesc") or ticker
+        sector_str = position.get("sector") or "Unknown"
+        industry = position.get("group") or "Others"
+        listing_exchange = position.get("listingExchange")
+        country_code = position.get("countryCode") or "US"
+
         return PortfolioEntry(
-            name=position["name"],
-            symbol=position["ticker"],
-            sector=Sector.from_str(position["sector"]),
-            industry=position["group"] if position["group"] else "Others",
+            name=name,
+            symbol=ticker,
+            sector=Sector.from_str(sector_str),
+            industry=industry,
             # FIXME: Add stock class category
-            exchange=self.__find_exchange(position["listingExchange"]),
-            country=Country(position["countryCode"]),
+            exchange=self.__find_exchange(listing_exchange) if listing_exchange else None,
+            country=Country(country_code),
             product_type=self.__get_product_type(position),
             shares=position["position"],
             product_currency=currency,
