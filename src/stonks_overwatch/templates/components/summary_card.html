@@ -1,8 +1,9 @@
-<div class="col-md-auto border border-primary-subtle bg-light rounded mb-3 position-relative" style="padding: 0.5rem 1rem 0.25rem 0.75rem;">
+<div class="col-md-auto content-card rounded mb-3 position-relative summary-card">
     <div class="d-flex justify-content-between align-items-start w-100">
-        <label class="fs-6 text-primary mb-0">{{ label }}</label>
+        <label class="card-label mb-0">{{ label }}</label>
         {% if tooltip %}
-        <span class="ms-2" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="info-tooltip" title="{{ tooltip }}">
+        <span class="ms-2" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="info-tooltip"
+            title="{{ tooltip }}">
             <i class="bi bi-info-circle text-secondary"></i>
         </span>
         {% endif %}

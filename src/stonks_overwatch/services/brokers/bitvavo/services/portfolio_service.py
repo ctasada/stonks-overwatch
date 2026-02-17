@@ -1,6 +1,8 @@
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone as dt_timezone
 from typing import List, Optional
+
+from django.utils import timezone
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.core.interfaces import PortfolioServiceInterface
@@ -178,7 +180,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         if date_str == 0:
             return LocalizationUtility.convert_string_to_date(date_str)
         else:
-            return datetime.today().date()
+            return timezone.now().date()
 
     def _calculate_position_growth(self, entry: dict) -> dict:
         product_history_dates = list(entry["history"].keys())
@@ -311,7 +313,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
     @staticmethod
     def _is_weekend(date_str: str) -> bool:
         # Parse the date string into a datetime object
-        day = datetime.strptime(date_str, "%Y-%m-%d")
+        day = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=dt_timezone.utc)
         # Check if the day of the week is Saturday (5) or Sunday (6)
         return day.weekday() >= 5
 

@@ -1,8 +1,9 @@
 import os
-from datetime import date, timedelta
+from datetime import timedelta
 from typing import Optional
 
 from degiro_connector.quotecast.models.chart import Interval
+from django.utils import timezone
 
 from stonks_overwatch.config.bitvavo import BitvavoConfig
 from stonks_overwatch.constants import BrokerName
@@ -103,7 +104,7 @@ class UpdateService(BaseService, AbstractUpdateService):
         product_growth = self.portfolio_data.calculate_product_growth()
 
         delete_keys = []
-        today = LocalizationUtility.format_date_from_date(date.today())
+        today = LocalizationUtility.format_date_from_date(timezone.now().date())
 
         for key in product_growth.keys():
             # Calculate Quotation Range
@@ -148,7 +149,9 @@ class UpdateService(BaseService, AbstractUpdateService):
     def _create_products_quotation(self, symbol: str, data: dict) -> dict:
         product_history_dates = list(data["history"].keys())
 
-        start_date = LocalizationUtility.convert_string_to_datetime(product_history_dates[0])
+        start_date = LocalizationUtility.ensure_aware(
+            LocalizationUtility.convert_string_to_datetime(product_history_dates[0])
+        )
         candles = self.bitvavo_service.candles(f"{symbol}-{self.currency}", "1d", start_date)
         # Creates the dictionary with the date as key and the value as the close price
         date_to_value = {

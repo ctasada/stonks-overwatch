@@ -1,20 +1,24 @@
-from datetime import datetime
+from datetime import datetime, timezone as dt_timezone
 from typing import List
 
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.utils import timezone
 from django.views import View
 
 from stonks_overwatch.config.config import Config
+from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.services.aggregators.dividends_aggregator import DividendsAggregatorService
 from stonks_overwatch.services.brokers.degiro.client.constants import ProductType
 from stonks_overwatch.services.models import Dividend
 from stonks_overwatch.services.utilities.session_manager import SessionManager
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.views.mixins import CapabilityRequiredMixin
 
 
-class Dividends(View):
+class Dividends(CapabilityRequiredMixin, View):
+    required_capability = ServiceType.DIVIDEND
     logger = StonksLogger.get_logger("stonks_overwatch.dividends.views", "[VIEW|DIVIDENDS]")
     ALL_TIME_OPTION = "All Time"
 
@@ -102,7 +106,7 @@ class Dividends(View):
 
     def _parse_request_calendar_year(self, request) -> int:
         """Parse calendar year from request query parameters."""
-        calendar_year = request.GET.get("calendar_year", datetime.now().year)
+        calendar_year = request.GET.get("calendar_year", timezone.now().year)
         return int(calendar_year)
 
     def _get_diversification_years(self, dividends: List[Dividend]) -> List[int]:
@@ -240,8 +244,9 @@ class Dividends(View):
         dividends_growth = {}
 
         for month_year in dividends_calendar.keys():
-            month_number = int(datetime.strptime(month_year, LocalizationUtility.MONTH_YEAR_FORMAT).strftime("%m"))
-            year = int(datetime.strptime(month_year, LocalizationUtility.MONTH_YEAR_FORMAT).strftime("%Y"))
+            dt = datetime.strptime(month_year, LocalizationUtility.MONTH_YEAR_FORMAT).replace(tzinfo=dt_timezone.utc)
+            month_number = int(dt.strftime("%m"))
+            year = int(dt.strftime("%Y"))
 
             if year not in dividends_growth:
                 dividends_growth[year] = [0] * 12
@@ -342,8 +347,8 @@ class Dividends(View):
 
         # Set period_start to January 1st of the minimum year in the data
         min_year = min_date.year
-        period_start = datetime(year=min_year, month=1, day=1)
-        today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        period_start = LocalizationUtility.ensure_aware(datetime(year=min_year, month=1, day=1, tzinfo=dt_timezone.utc))
+        today = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
         period_end = max(max_date, today)
 
         # Generate monthly periods using simple date arithmetic

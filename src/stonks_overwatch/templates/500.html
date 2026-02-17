@@ -1,73 +1,50 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-appearance="{{ APPEARANCE|default:'auto' }}" data-bs-theme="{% if APPEARANCE == 'auto' %}auto{% else %}{{ APPEARANCE }}{% endif %}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stonks Overwatch - Server Error</title>
-    <link rel="icon" type="image/png" href="{% static 'stonks_overwatch-32x32.png' %}" sizes="32x32">
-
-    <!-- Bootstrap CSS CDN -->
-    <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
-    <link href="{% static 'bootstrap-icons/font/bootstrap-icons.css' %}" rel="stylesheet">
+    {% include 'components/head_standalone.html' %}
     <!-- JavaScript Bundle with Popper -->
     <script src="{% static 'bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
-    <!-- jQuery CDN - Slim version (=without AJAX) -->
-    <script src="{% static 'jquery/dist/jquery.slim.min.js' %}"></script>
 
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{% static 'style.css' %}">
-
-    <style>
-        body {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-            background-attachment: fixed;
-        }
-
-        /* Ensure the gradient works in dark mode too */
-        @media (prefers-color-scheme: dark) {
-            body {
-                background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-            }
-        }
-    </style>
+    <script src="{% static 'js/theme-manager.js' %}"></script>
 </head>
-<body class="min-vh-100 d-flex align-items-center justify-content-center">
+<body class="min-vh-100 d-flex align-items-center justify-content-center error-page">
     <div class="container py-2">
-        <div class="bg-white rounded-4 shadow p-4 mx-auto" style="max-width: 600px;">
+        <div class="card rounded-4 shadow p-4 mx-auto error-card">
             <img class="d-block mx-auto mb-1" src="{% static 'stonks_overwatch-512.png' %}" alt="Stonks Overwatch" width="120" height="120" />
 
             <div class="row mb-1 align-items-center">
                 <div class="col-6 text-end fs-1">⚠️</div>
-                <div class="col-6 text-start fs-1 text-dark">Error</div>
+                <div class="col-6 text-start fs-1">Error</div>
             </div>
 
             {% if exception_type %}
-            <div class="bg-light rounded p-3 mb-2">
+            <div class="bg-body-secondary rounded p-3 mb-2">
                 <div class="row mb-2">
-                    <div class="col-4 fw-semibold text-dark">Error Type:</div>
-                    <div class="col-8 text-secondary">{{ exception_type }}</div>
+                    <div class="col-4 fw-semibold">Error Type:</div>
+                    <div class="col-8 text-body-secondary">{{ exception_type }}</div>
                 </div>
                 {% if exception_message %}
                 <div class="row mb-2">
-                    <div class="col-4 fw-semibold text-dark">Error Message:</div>
-                    <div class="col-8 text-secondary">
+                    <div class="col-4 fw-semibold">Error Message:</div>
+                    <div class="col-8 text-body-secondary">
                         <code class="small">{{ exception_message|truncatechars:120 }}</code>
                     </div>
                 </div>
                 {% endif %}
                 <div class="row">
-                    <div class="col-4 fw-semibold text-dark">Timestamp:</div>
-                    <div class="col-8 text-secondary" id="timestamp">{{ timestamp }}</div>
+                    <div class="col-4 fw-semibold">Timestamp:</div>
+                    <div class="col-8 text-body-secondary" id="timestamp">{{ timestamp }}</div>
                 </div>
             </div>
             {% endif %}
 
             {% if traceback %}
-            <div class="alert alert-warning mb-4">
+            <div class="alert alert-secondary mb-4">
                 <strong>Technical Details:</strong>
                 <div class="mt-2">
-                    <code class="small" style="white-space: pre-wrap; max-height: 200px; overflow-y: auto; display: block;">{{ traceback }}</code>
+                    <code class="small code-block-scroll">{{ traceback }}</code>
                 </div>
             </div>
             {% endif %}

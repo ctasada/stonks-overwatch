@@ -2,11 +2,15 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
 
+from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.services.aggregators.account_overview_aggregator import AccountOverviewAggregatorService
 from stonks_overwatch.services.utilities.session_manager import SessionManager
+from stonks_overwatch.views.mixins import CapabilityRequiredMixin
 
 
-class AccountOverview(View):
+class AccountOverview(CapabilityRequiredMixin, View):
+    required_capability = ServiceType.ACCOUNT
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.account_overview = AccountOverviewAggregatorService()

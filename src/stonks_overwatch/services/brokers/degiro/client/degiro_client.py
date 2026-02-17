@@ -1,5 +1,5 @@
 import os
-from datetime import date, datetime, timedelta
+from datetime import timedelta
 from typing import Any, List, Optional
 
 import polars as pl
@@ -10,6 +10,7 @@ from degiro_connector.quotecast.tools.chart_fetcher import ChartFetcher
 from degiro_connector.trading.api import API as TradingApi  # noqa: N811
 from degiro_connector.trading.models.agenda import AgendaRequest, CalendarType
 from degiro_connector.trading.models.credentials import Credentials
+from django.utils import timezone
 
 import stonks_overwatch.settings
 from stonks_overwatch.config.base_config import BaseConfig
@@ -346,7 +347,7 @@ class DeGiroService:
             if series.type != "time":
                 continue
 
-            current_date_str = LocalizationUtility.format_date_from_date(date.today())
+            current_date_str = LocalizationUtility.format_date_from_date(timezone.now().date())
             data_frame = pl.DataFrame(data=series.data, orient="row")
             if "column_1" in data_frame.columns:
                 quotes[current_date_str] = data_frame["column_1"][-1]
@@ -399,10 +400,10 @@ class DeGiroService:
         agenda = self.get_client().get_agenda(
             agenda_request=AgendaRequest(
                 calendar_type=CalendarType.DIVIDEND_CALENDAR,
-                start_date=datetime.now(),
+                start_date=timezone.now(),
                 # DEGIRO API seems to limit the agenda to 6 months in the future
                 #  even with that limitation doesn't show the whole agenda
-                end_date=datetime.now() + timedelta(days=180),
+                end_date=timezone.now() + timedelta(days=180),
                 offset=0,
                 limit=25,
                 isin=isin,

@@ -1,18 +1,3 @@
 {% load static %}
 <!-- Bootstrap Table Sticky Header CSS -->
 <link href="{% static 'bootstrap-table/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.css' %}" rel="stylesheet">
-<style>
-    /* Ensure Bootstrap Table's own scroll container works - this is the key for sticky headers */
-    #{{ table_id }} + .bootstrap-table .fixed-table-container {
-        overflow-y: auto !important;
-        overflow-x: hidden !important;
-    }
-
-    /* Fix sticky header positioning within Bootstrap Table's scroll container */
-    .fixed-table-header {
-        position: sticky !important;
-        top: 0 !important;
-        z-index: 1000 !important;
-        background-color: white !important;
-    }
-</style>

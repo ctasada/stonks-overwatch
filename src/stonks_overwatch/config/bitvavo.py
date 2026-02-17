@@ -29,6 +29,23 @@ class BitvavoCredentials(BaseCredentials):
         """Check if minimal credentials are provided."""
         return bool(self.apikey and self.apisecret)
 
+    def to_auth_params(self) -> dict:
+        """
+        Convert credentials to authentication parameters.
+
+        Returns:
+            Dictionary with authentication parameters for Bitvavo auth service
+
+        Note:
+            remember_me is intentionally omitted as this method is used for
+            auto-authentication with already-stored credentials. The auth service
+            will use its default value (False).
+        """
+        return {
+            "api_key": self.apikey,
+            "api_secret": self.apisecret,
+        }
+
 
 class BitvavoConfig(BaseConfig):
     config_key = BrokerName.BITVAVO.value

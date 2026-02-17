@@ -2,13 +2,16 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
 
+from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.services.aggregators.deposits_aggregator import DepositsAggregatorService
 from stonks_overwatch.services.aggregators.portfolio_aggregator import PortfolioAggregatorService
 from stonks_overwatch.services.utilities.session_manager import SessionManager
 from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.views.mixins import CapabilityRequiredMixin
 
 
-class Deposits(View):
+class Deposits(CapabilityRequiredMixin, View):
+    required_capability = ServiceType.DEPOSIT
     logger = StonksLogger.get_logger("stonks_overwatch.deposits.views", "[VIEW|DEPOSITS]")
 
     def __init__(self, **kwargs):

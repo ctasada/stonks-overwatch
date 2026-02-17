@@ -89,7 +89,7 @@ class PortfolioAggregatorService(BaseAggregator):
             return merged_total
         else:
             # Return empty portfolio if no data
-            base_currency = self._config.base_currency
+            base_currency = self.config.base_currency
             return TotalPortfolio(
                 base_currency=base_currency,
                 total_pl=0.0,

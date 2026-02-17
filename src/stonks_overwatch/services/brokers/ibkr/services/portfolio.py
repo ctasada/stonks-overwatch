@@ -1,7 +1,7 @@
 import time
-from datetime import datetime
 from typing import List, Optional
 
+from django.utils import timezone
 from django.utils.functional import cached_property
 from iso10383 import MIC
 
@@ -66,6 +66,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
 
         for position in all_positions:
             try:
+                self.logger.debug(f"Position: {position}")
                 entry = self.__create_portfolio_entry(position, base_currency)
                 portfolio.append(entry)
             except Exception as e:
@@ -277,7 +278,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         try:
             # Get current portfolio total
             portfolio_total = self.get_portfolio_total()
-            current_date = datetime.now().strftime("%Y-%m-%d")
+            current_date = timezone.now().strftime("%Y-%m-%d")
 
             # Return minimal historical data with current value
             return [DailyValue(x=current_date, y=portfolio_total.current_value)]

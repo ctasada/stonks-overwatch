@@ -1,88 +1,30 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-appearance="{{ APPEARANCE }}" data-bs-theme="{% if APPEARANCE == 'auto' %}auto{% else %}{{ APPEARANCE }}{% endif %}">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stonks Overwatch - Select Broker</title>
-    <link rel="icon" type="image/png" href="{% static 'stonks_overwatch-32x32.png' %}" sizes="32x32">
-
-    <!-- Bootstrap CSS CDN -->
-    <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
-    <link href="{% static 'bootstrap-icons/font/bootstrap-icons.css' %}" rel="stylesheet">
+    {% include 'components/head_standalone.html' %}
     <!-- JavaScript Bundle with Popper -->
     <script src="{% static 'bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
-    <!-- jQuery CDN - Slim version (=without AJAX) -->
-    <script src="{% static 'jquery/dist/jquery.slim.min.js' %}"></script>
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="/static/style.css">
-
-    <!-- Ensure links in alerts are properly styled -->
-    <style>
-        .alert a {
-            color: #0d6efd !important;
-            text-decoration: underline !important;
-            font-weight: 500;
-        }
-        .alert a:hover {
-            color: #0a58ca !important;
-            text-decoration: underline !important;
-        }
-        .broker-card {
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-            cursor: pointer;
-            border: 2px solid transparent;
-        }
-        .broker-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            border-color: #0d6efd;
-        }
-        .broker-logo {
-            width: 64px;
-            height: 64px;
-            object-fit: contain;
-        }
-        .broker-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            max-width: 900px;
-        }
-    </style>
 </head>
 
-<body>
+<body class="login-page">
     <!-- Broker Selector View -->
     <div class="container d-flex justify-content-center align-items-center full-height-container">
         <div class="text-center">
             <h2 class="mb-4">Select Your Broker</h2>
             <p class="text-muted mb-5">Choose your broker to continue with login</p>
 
-            {% if messages %}
-                <div class="messages mb-4">
-                    {% for message in messages %}
-                        <div class="alert {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}alert-danger{% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}alert-warning{% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}alert-success{% else %}alert-info{% endif %} d-flex align-items-start py-2 mb-2" role="alert">
-                            {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
-                                <i class="bi bi-exclamation-triangle-fill me-2 mt-1"></i>
-                            {% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
-                                <i class="bi bi-exclamation-circle-fill me-2 mt-1"></i>
-                            {% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
-                                <i class="bi bi-check-circle-fill me-2 mt-1"></i>
-                            {% else %}
-                                <i class="bi bi-info-circle-fill me-2 mt-1"></i>
-                            {% endif %}
-                            <div class="flex-grow-1">{{ message|safe }}</div>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
+            {% include 'components/messages.html' %}
 
             <div class="broker-grid mx-auto">
                 {% for broker in available_brokers %}
-                <div class="card broker-card h-100" onclick="selectBroker('{{ broker.name }}')">
+                <div class="card broker-card h-100"
+                     data-broker="{{ broker.name }}"
+                     data-url="{% url 'broker_login' broker.name %}"
+                     role="button"
+                     tabindex="0">
                     <div class="card-body d-flex flex-column align-items-center text-center p-4">
                         <img src="{% static 'logos/' %}{{ broker.name }}.svg"
                              alt="{{ broker.display_name }}"
@@ -108,11 +50,8 @@
         </div>
     </div>
 
-    <script>
-        function selectBroker(brokerName) {
-            // Redirect to broker-specific login
-            window.location.href = `/login/${brokerName}`;
-        }
-    </script>
+    <script src="{% static 'js/login.js' %}"></script>
+    <!-- Theme Manager -->
+    <script src="{% static 'js/theme-manager.js' %}"></script>
 </body>
 </html>

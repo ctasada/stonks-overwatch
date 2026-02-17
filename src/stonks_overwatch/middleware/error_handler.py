@@ -1,9 +1,9 @@
 import traceback
-from datetime import datetime
 
 from django.conf import settings
 from django.http import HttpResponseServerError
 from django.shortcuts import render
+from django.utils import timezone
 from django.utils.deprecation import MiddlewareMixin
 
 
@@ -33,7 +33,7 @@ class CustomErrorHandlerMiddleware(MiddlewareMixin):
             "support_url": support_url,
             # Only include traceback in development
             "traceback": traceback.format_exc() if settings.DEBUG else None,
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "timestamp": timezone.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
 
         try:

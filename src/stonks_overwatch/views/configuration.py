@@ -14,8 +14,13 @@ class ConfigurationView(View):
 
     def get(self, request) -> JsonResponse:
         selected_portfolio = SessionManager.get_selected_portfolio(request)
+        capabilities = Config.get_global().get_capabilities(selected_portfolio)
+
+        portfolio_dict = selected_portfolio.to_dict()
+        portfolio_dict["capabilities"] = [c.value for c in capabilities]
+
         data = {
-            "selected_portfolio": selected_portfolio.to_dict(),
+            "selected_portfolio": portfolio_dict,
             "available_portfolios": self.__get_portfolios(),
         }
         return JsonResponse(data)
@@ -28,11 +33,17 @@ class ConfigurationView(View):
                 continue
             # Add only the enabled portfolios
             if Config.get_global().is_enabled(value):
-                portfolios.append(value.to_dict())
+                portfolio_dict = value.to_dict()
+                capabilities = Config.get_global().get_capabilities(value)
+                portfolio_dict["capabilities"] = [c.value for c in capabilities]
+                portfolios.append(portfolio_dict)
 
         # If there are more than one portfolio, add the "All" option
         if len(portfolios) > 1:
-            portfolios.insert(0, PortfolioId.ALL.to_dict())
+            all_portfolio_dict = PortfolioId.ALL.to_dict()
+            all_capabilities = Config.get_global().get_capabilities(PortfolioId.ALL)
+            all_portfolio_dict["capabilities"] = [c.value for c in all_capabilities]
+            portfolios.insert(0, all_portfolio_dict)
 
         return portfolios
 

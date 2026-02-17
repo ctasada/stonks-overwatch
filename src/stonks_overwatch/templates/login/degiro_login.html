@@ -4,7 +4,7 @@
 {% block page_title %}DEGIRO Login{% endblock %}
 
 {% block broker_logo %}
-<img src="/static/logos/degiro.svg" alt="DEGIRO" width="32" height="32" class="mb-2">
+<img src="{% static 'logos/degiro.svg' %}" alt="DEGIRO" width="32" height="32" class="mb-2">
 {% endblock %}
 
 {% block page_header %}
@@ -28,15 +28,15 @@
 <!-- 2FA Code Input -->
 <div class="form-group mb-3">
     <label for="2fa_code" class="form-label">2FA Code</label>
-    <input type="text" class="form-control text-center" style="letter-spacing: 1rem; line-height: 1.75em;" id="2fa_code"
-        name="2fa_code" maxlength="6" pattern="\d{6}" placeholder="123456" aria-label="2FA code" required autofocus>
+    <input type="text" class="form-control text-center otp-code-input" id="2fa_code" name="2fa_code" maxlength="6"
+        pattern="\d{6}" placeholder="123456" aria-label="2FA code" required autofocus>
 </div>
 <button type="submit" class="btn btn-primary w-100">Confirm</button>
 
 {% elif show_in_app_auth %}
 <!-- In-App Authentication -->
 <div class="d-flex align-items-center py-3 mb-4">
-    <i class="bi bi-phone me-3" style="font-size: 2rem; color: #0d6efd;"></i>
+    <i class="bi bi-phone me-3 text-primary icon-lg"></i>
     <div class="flex-grow-1">
         <p class="mb-0">To verify your login attempt, open the DEGIRO app and tap 'Yes' to approve it.</p>
     </div>

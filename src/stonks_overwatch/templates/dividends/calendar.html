@@ -3,14 +3,14 @@
 
 {% for key, value in dividendsCalendar.calendar.items %}
 <div class="col-sm-4 border">
-    <div class="row-sm mt-1 fs-5">
+    <div class="row mt-1 fs-5">
         {{ key }}
     </div>
     <div class="row m-2">
-        <div class="col text-left">
+        <div class="col text-start">
             {{ value.payouts }} payouts
         </div>
-        <div class="col-md-auto text-right border rounded-pill" style="background-color: var(--primary-color); color: white">
+        <div class="col-md-auto text-end border rounded-pill pill-primary">
             {{ value.formatedTotal }}
         </div>
     </div>
@@ -34,14 +34,14 @@
                          data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-custom-class="info-tooltip"
                          data-bs-title="{{ dividend.tooltip }}">
                 {% endif %}
-                    <div class="col-sm-1 text-left">
+                    <div class="col-sm-1 text-start">
                         {{ day }}
                     </div>
                     <div class="col-sm-8 text-truncate">
                         {{ dividend.formatted_name }}
                     </div>
                     {% if not dividend.is_ex_dividend %}
-                    <div class="col-sm-3 text-right">
+                    <div class="col-sm-3 text-end">
                         {{ dividend.formated_net_amount }}
                     </div>
                     {% endif %}

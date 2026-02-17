@@ -1,7 +1,7 @@
 {% load static %}
 {% load custom_tags %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-appearance="{{ APPEARANCE }}" data-bs-theme="{% if APPEARANCE == 'auto' %}auto{% else %}{{ APPEARANCE }}{% endif %}">
 
 <head>
     <meta charset="utf-8">
@@ -10,6 +10,9 @@
     <title>Stonks Overwatch</title>
 
     <link rel="icon" type="image/png" href="{%  static 'stonks_overwatch-32x32.png' %}" sizes="32x32">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- jQuery CDN - Full version -->
     <script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
@@ -22,20 +25,14 @@
     <link href="{% static 'bootstrap-table/dist/bootstrap-table.min.css' %}" rel="stylesheet">
     <link href="{% static 'bootstrap-table/dist/themes/bootstrap-table/bootstrap-table.min.css' %}" rel="stylesheet">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
 
     {% block extra_css %}{% endblock %}
 
-    <!-- Inline script to prevent sidebar flash - runs before DOM is rendered -->
-    <script>
-        (function () {
-            // Check localStorage immediately when head loads
-            if (localStorage.getItem('sidebarCollapsed') === 'true') {
-                // Add CSS to immediately apply collapsed state before page renders
-                document.documentElement.style.setProperty('--sidebar-immediate-state', 'sidebar-collapsed');
-            }
-        })();
-    </script>
+    <!-- Theme Management - runs before DOM is rendered to prevent flashes -->
+    <script src="{% static 'js/sidebar-state.js' %}"></script>
+    <script src="{% static 'js/theme-manager.js' %}"></script>
+    <script src="{% static 'js/key-field-utils.js' %}"></script>
 </head>
 
 <body>
@@ -159,7 +156,7 @@
                                 id="select-settings" data-bs-toggle="dropdown" aria-expanded="false"
                                 data-bs-popper-config='{"placement":"right","modifiers":[{"name":"offset","options":{"offset":[0,2]}}]}'
                                 title="Configuration" data-tooltip-text="Configuration">
-                                <i class="bi bi-gear fs-5 sidebar-icon me-3"></i>
+                                <i class="bi bi-gear-fill fs-5 sidebar-icon me-3"></i>
                                 <span class="sidebar-text">Configuration</span>
                             </a>
                             <ul class="dropdown-menu shadow" id="sidebar-settings-menu"
@@ -184,8 +181,13 @@
                                 </li>
                             </ul>
                         </div>
-                        <!-- Connection Status -->
                         <div class="px-3 pt-3 pb-1 border-top border-light border-opacity-25 w-100">
+                        {% if DEMO_MODE %}
+                        <!-- Demo Mode -->
+                            <i class="bi-robot me-3 fs-5 text-success sidebar-icon"></i>
+                            <span class="small sidebar-text">Demo Mode</span>
+                        {% else %}
+                        <!-- Connection Status -->
                             {% is_connected_to_degiro as is_degiro_connected %}
                             {% get_connected_tooltip as get_connected_tooltip %}
                             <div class="d-flex align-items-center text-white" data-bs-toggle="tooltip"
@@ -198,6 +200,7 @@
                                 <span class="small sidebar-text">Disconnected</span>
                                 {% endif %}
                             </div>
+                        {% endif %}
                         </div>
                         <!-- App Version at Bottom -->
                         <div class="text-center text-white-50 small px-3 pb-2">
@@ -210,14 +213,14 @@
             <!-- Main Content -->
             <div class="col py-3" id="content">
                 <!-- Top Navigation Bar -->
-                <nav class="navbar navbar-expand-lg navbar-light bg-light" aria-label="Top navigation">
+                <nav class="navbar navbar-expand-lg" aria-label="Top navigation">
                     <div class="container-fluid justify-content-start">
                         <!-- Shows Total Portfolio -->
                         {% show_total_portfolio %}
                     </div>
                 </nav>
 
-                <div class="scrollable-area" style="height: calc(100vh - 100px)">
+                <div class="scrollable-area scrollable-area-tall">
                     {% block content %}
                     {% endblock %}
                 </div>
@@ -342,9 +345,41 @@
                     }
                 });
 
+                // Update navigation visibility based on capabilities
+                updateNavigationVisibility(data.selected_portfolio.capabilities);
+
                 // Restore sidebar state after portfolio data is loaded
                 restoreSidebarState();
             });
+
+        // Update navigation visibility based on broker capabilities
+        function updateNavigationVisibility(capabilities) {
+            const pageToServiceMap = {
+                'portfolio': 'portfolio',
+                'diversification': 'portfolio',
+                'dividends': 'dividend',
+                'fees': 'fee',
+                'deposits': 'deposit',
+                'transactions': 'transaction',
+                'account_overview': 'account'
+            };
+
+            const navLinks = document.querySelectorAll('.sidebar-nav-link[data-page]');
+            navLinks.forEach(link => {
+                const page = link.getAttribute('data-page');
+                const requiredService = pageToServiceMap[page];
+
+                if (requiredService) {
+                    if (capabilities.includes(requiredService)) {
+                        link.style.display = 'flex';
+                        link.classList.remove('d-none');
+                    } else {
+                        link.style.display = 'none';
+                        link.classList.add('d-none');
+                    }
+                }
+            });
+        }
 
         // Set active navigation state
         function setActiveNavigation() {
@@ -503,11 +538,15 @@
     <div class="modal fade" id="releaseNotesModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
-                <div class="modal-header border-0 pb-0">
+                <div class="modal-header">
+                    <h5 class="modal-title">Release Notes</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 0;">
+                <div class="modal-body modal-body-scroll">
                     <!-- Content will be loaded via AJAX -->
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -521,7 +560,7 @@
                     <h5 class="modal-title fw-bold"><i class="bi bi-sliders me-2"></i>Settings</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 0;">
+                <div class="modal-body modal-body-plain">
                     <!-- Content will be loaded via AJAX -->
                 </div>
                 <div class="modal-footer border-0 pt-3">
@@ -847,7 +886,18 @@
                 broker_name: brokerName
             };
 
-            if (brokerName === 'degiro') {
+            if (brokerName === 'general') {
+                const appearanceEl = document.querySelector('input[name="appearance"]:checked');
+                const baseCurrencyEl = document.getElementById('base-currency');
+
+                if (!appearanceEl || !baseCurrencyEl) {
+                    BootstrapAlertHelper.error('<strong>Error:</strong> General configuration elements not found');
+                    return JSON.stringify({ success: false, message: 'General configuration elements not found' });
+                }
+
+                payload.appearance = appearanceEl.value;
+                payload.base_currency = baseCurrencyEl.value;
+            } else if (brokerName === 'degiro') {
                 const enabledEl = document.getElementById('degiro-enabled');
                 const usernameEl = document.getElementById('degiro-username');
                 const passwordEl = document.getElementById('degiro-password');
@@ -924,6 +974,9 @@
                 const data = await response.json();
 
                 if (data.success) {
+                    if (brokerName === 'general' && payload.appearance) {
+                        window.ThemeManager?.apply(payload.appearance);
+                    }
                     BootstrapAlertHelper.success('<strong>Success!</strong> Configuration saved successfully.');
                     return JSON.stringify({ success: true, message: 'Configuration saved successfully' });
                 } else {

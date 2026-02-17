@@ -181,6 +181,8 @@ TEMPLATES = [
                 "stonks_overwatch.context_processors.app_mode_processor",
                 "stonks_overwatch.context_processors.version_processor",
                 "stonks_overwatch.context_processors.support_url_processor",
+                "stonks_overwatch.context_processors.appearance_processor",
+                "stonks_overwatch.context_processors.demo_processor",
             ],
             # With the flattening of the prj structure, the auto register doesn't seem to work anymore.
             "libraries": {

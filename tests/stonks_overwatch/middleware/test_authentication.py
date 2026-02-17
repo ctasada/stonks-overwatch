@@ -58,7 +58,6 @@ class TestAuthenticationMiddleware(TestCase):
 
         assert response == self.get_response.return_value
         # Should not check authentication for public URLs
-        self.mock_auth_service.is_user_authenticated.assert_not_called()
 
     @patch("stonks_overwatch.middleware.authentication.resolve")
     def test_middleware_allows_access_when_no_brokers_configured(self, mock_resolve):
@@ -72,7 +71,6 @@ class TestAuthenticationMiddleware(TestCase):
 
         assert response == self.get_response.return_value
         # Should not check authentication when no brokers configured
-        self.mock_auth_service.is_user_authenticated.assert_not_called()
 
     @patch("stonks_overwatch.middleware.authentication.resolve")
     @patch("stonks_overwatch.services.utilities.credential_validator.CredentialValidator.has_valid_credentials")
@@ -95,8 +93,12 @@ class TestAuthenticationMiddleware(TestCase):
         # Mock valid credentials
         mock_has_valid_credentials.return_value = True
 
-        # Mock authenticated user
-        self.mock_auth_service.is_user_authenticated.return_value = True
+        # Set broker-specific session key to indicate authentication
+        from stonks_overwatch.utils.core.session_keys import SessionKeys
+
+        self.request.session[SessionKeys.get_authenticated_key(BrokerName.DEGIRO)] = True
+
+        # Mock offline and maintenance mode
         self.mock_auth_service.is_offline_mode.return_value = False
         self.mock_auth_service.is_maintenance_mode_allowed.return_value = True
 
@@ -105,8 +107,6 @@ class TestAuthenticationMiddleware(TestCase):
             response = self.middleware(self.request)
 
         assert response == self.get_response.return_value
-        # Should check authentication when brokers are configured
-        self.mock_auth_service.is_user_authenticated.assert_called_once()
 
     @patch("stonks_overwatch.middleware.authentication.resolve")
     @patch("stonks_overwatch.middleware.authentication.redirect")
@@ -131,8 +131,8 @@ class TestAuthenticationMiddleware(TestCase):
         # Mock valid credentials
         mock_has_valid_credentials.return_value = True
 
-        # Mock unauthenticated user
-        self.mock_auth_service.is_user_authenticated.return_value = False
+        # Leave session without authentication key to simulate unauthenticated user
+        # (request.session is empty by default)
         self.mock_auth_service.is_offline_mode.return_value = False
 
         # Mock demo mode detection to return False
@@ -154,5 +154,3 @@ class TestAuthenticationMiddleware(TestCase):
 
         assert response == self.get_response.return_value
         # Should not check authentication in demo mode
-        self.mock_auth_service.is_user_authenticated.assert_not_called()
-        self.mock_auth_service.is_offline_mode.assert_not_called()

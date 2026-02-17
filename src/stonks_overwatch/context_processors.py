@@ -51,3 +51,21 @@ def support_url_processor(request: HttpRequest) -> dict[str, str]:
     """Add support URL to template context."""
     support_url = settings.STONKS_OVERWATCH_SUPPORT_URL
     return {"STONKS_OVERWATCH_SUPPORT_URL": support_url}
+
+
+def appearance_processor(request: HttpRequest) -> dict[str, str]:
+    """Add global appearance setting to template context."""
+    # Lazy import to avoid loading Django models before apps are ready
+    from stonks_overwatch.config.config import Config
+
+    config = Config.get_global()
+    return {"APPEARANCE": config.appearance}
+
+
+def demo_processor(request: HttpRequest) -> dict[str, str]:
+    """Add global appearance setting to template context."""
+    # Lazy import to avoid loading Django models before apps are ready
+
+    from stonks_overwatch.utils.core.demo_mode import is_demo_mode
+
+    return {"DEMO_MODE": is_demo_mode()}

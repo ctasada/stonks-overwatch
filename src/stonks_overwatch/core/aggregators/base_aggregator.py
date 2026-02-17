@@ -8,7 +8,7 @@ offering common patterns for broker service management and data aggregation.
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 
-from stonks_overwatch.config.config import Config
+from stonks_overwatch.constants import BrokerName
 from stonks_overwatch.core.exceptions import DataAggregationException
 from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 from stonks_overwatch.core.service_types import ServiceType
@@ -35,14 +35,29 @@ class BaseAggregator(ABC):
         """
         self._service_type = service_type
         self._factory = BrokerFactory()
-        self._config = Config.get_global()
+        self._global_config = None
         self._logger = StonksLogger.get_logger(
             f"stonks_overwatch.aggregators.{self.__class__.__name__.lower()}",
             f"[AGGREGATOR|{service_type.value.upper()}]",
         )
 
-        self._broker_services: Dict[str, Any] = {}
+        self._broker_services: Dict[BrokerName, Any] = {}
         self._initialize_broker_services()
+
+    @property
+    def config(self):
+        """
+        Get the global configuration instance (lazy loaded).
+
+        Returns:
+            Global Config instance
+        """
+        if self._global_config is None:
+            # Lazy import to avoid loading Django models before apps are ready
+            from stonks_overwatch.config.config import Config
+
+            self._global_config = Config.get_global()
+        return self._global_config
 
     def _initialize_broker_services(self) -> None:
         """
@@ -62,20 +77,19 @@ class BaseAggregator(ABC):
                 except Exception as e:
                     self._logger.warning(f"Failed to initialize {broker_name} service: {e}")
 
-    def _broker_supports_service(self, broker_name: str) -> bool:
+    def _broker_supports_service(self, broker_name: BrokerName) -> bool:
         """
         Check if a broker supports a specific service type.
 
         Args:
             broker_name: Name of the broker
-            service_type: Type of service to check
 
         Returns:
             True if broker supports the service, False otherwise
         """
         return self._factory.broker_supports_service(broker_name, self._service_type)
 
-    def _get_broker_service(self, broker_name: str) -> Optional[Any]:
+    def _get_broker_service(self, broker_name: BrokerName) -> Optional[Any]:
         """
         Get a broker service instance for the specified broker.
 
@@ -97,7 +111,7 @@ class BaseAggregator(ABC):
             self._logger.error(f"Failed to create {self._service_type.value} service for {broker_name}: {e}")
             return None
 
-    def _is_broker_enabled(self, broker_name: str, selected_portfolio: PortfolioId) -> bool:
+    def _is_broker_enabled(self, broker_name: BrokerName, selected_portfolio: PortfolioId) -> bool:
         """
         Check if a broker is enabled for the selected portfolio.
 
@@ -126,8 +140,8 @@ class BaseAggregator(ABC):
 
             # Fallback to legacy config method using dynamic method names
             legacy_method_name = f"is_{broker_name}_enabled"
-            if hasattr(self._config, legacy_method_name):
-                legacy_method = getattr(self._config, legacy_method_name)
+            if hasattr(self.config, legacy_method_name):
+                legacy_method = getattr(self.config, legacy_method_name)
                 return legacy_method(selected_portfolio)
 
             # Final fallback: assume enabled if broker has services
@@ -138,7 +152,7 @@ class BaseAggregator(ABC):
             # Fallback: assume enabled if broker has services
             return broker_name in self._broker_services
 
-    def _get_enabled_brokers(self, selected_portfolio: PortfolioId) -> List[str]:
+    def _get_enabled_brokers(self, selected_portfolio: PortfolioId) -> List[BrokerName]:
         """
         Get the list of brokers that are enabled for the selected portfolio.
 
@@ -156,7 +170,7 @@ class BaseAggregator(ABC):
             if self._is_broker_enabled(broker_name, selected_portfolio)
         ]
 
-    def _collect_broker_data(self, selected_portfolio: PortfolioId, method_name: str) -> Dict[str, Any]:
+    def _collect_broker_data(self, selected_portfolio: PortfolioId, method_name: str) -> Dict[BrokerName, Any]:
         """
         Collect data from all enabled brokers using the specified method.
 
@@ -172,7 +186,10 @@ class BaseAggregator(ABC):
         """
         enabled_brokers = self._get_enabled_brokers(selected_portfolio)
         if not enabled_brokers:
-            raise DataAggregationException("Failed to find any enabled broker")
+            self._logger.debug(
+                f"No brokers enabled for service {self._service_type.value} with selection {selected_portfolio}"
+            )
+            return {}
 
         broker_data = {}
         broker_errors = {}

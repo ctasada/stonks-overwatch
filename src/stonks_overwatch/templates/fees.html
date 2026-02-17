@@ -13,13 +13,15 @@
         {% include 'components/summary_card.html' with label="Financial Transaction Tax" value=ftt_fees %}
         {% include 'components/summary_card.html' with label="ADR/GDR Passthrough Fees" value=adr_fees %}
     </div>
-    <div class="row border border-primary-subtle bg-light rounded mb-3 position-relative">
-        <p class="h4 position-absolute top-0 start-0 z-2 px-3" style="padding-top: 8px; padding-left: 4px">Fees</p>
+    <div class="row content-card rounded mb-3">
+        <div class="section-header pb-0">Fees</div>
         <table id="fees-table">
             <thead>
                 <tr>
-                    <th data-field="date" data-sortable="true" data-width="100" data-width-unit="px" data-formatter="dateTimeFormatter">Date</th>
-                    <th data-field="time" data-sortable="true" data-width="100" data-width-unit="px" data-visible="false">Time</th>
+                    <th data-field="date" data-sortable="true" data-width="100" data-width-unit="px"
+                        data-formatter="dateTimeFormatter">Date</th>
+                    <th data-field="time" data-sortable="true" data-width="100" data-width-unit="px"
+                        data-visible="false">Time</th>
                     <th data-field="type" data-sortable="true" data-width="100" data-width-unit="px">Type</th>
                     <th data-field="description" data-sortable="true">Description</th>
                     <th data-field="fees" data-sortable="true" data-width="100" data-width-unit="px">Fee Amount</th>
@@ -40,22 +42,9 @@
     </div>
 </div>
 
-<script>
-    function isTimeColumnVisible() {
-        let visibleColumns = $('#fees-table').bootstrapTable('getVisibleColumns');
-        return visibleColumns.some(function(col) { return col.field === 'time'; });
-    }
-
-    function dateTimeFormatter(value, row, index) {
-        if (isTimeColumnVisible()) {
-            return value;
-        } else {
-            return value + '<br><small class="fw-lighter">' + row.time + '</small>';
-        }
-    }
-</script>
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'js/fees-table.js' %}"></script>
 {% include 'components/bootstrap_table_sticky_header_js.html' with table_id='fees-table' export_filename='fees_export' %}
 {% endblock %}

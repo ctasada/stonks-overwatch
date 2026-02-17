@@ -35,6 +35,8 @@ local_settings.py
 *.sqlite3
 *.sqlite3-journal
 !src/stonks_overwatch/fixtures/demo_db.sqlite3
+/src/stonks_overwatch/fixtures/demo_db.sqlite3-shm
+/src/stonks_overwatch/fixtures/demo_db.sqlite3-wal
 
 # Static/collected files
 /src/stonks_overwatch/static/
@@ -69,6 +71,8 @@ config/*
 
 # nektos/act
 .actrc
+# ACT secrets
+.secrets
 
 # lycheecache (Markdown Link Checker)
 .lycheecache

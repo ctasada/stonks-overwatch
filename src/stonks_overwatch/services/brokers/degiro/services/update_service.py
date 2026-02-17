@@ -1,5 +1,5 @@
 import os
-from datetime import date, datetime, time, timedelta, timezone
+from datetime import date, datetime, time, timedelta, timezone as dt_timezone
 from typing import Dict, List, Optional
 
 import polars as pl
@@ -163,7 +163,7 @@ class UpdateService(BaseService, AbstractUpdateService):
         self._log_message("Updating Account Data....")
 
         now = LocalizationUtility.now()
-        last_movement = self._get_last_cash_movement_import().replace(tzinfo=timezone.utc)
+        last_movement = self._get_last_cash_movement_import().replace(tzinfo=dt_timezone.utc)
 
         if last_movement >= now:
             return
@@ -184,7 +184,7 @@ class UpdateService(BaseService, AbstractUpdateService):
         self._log_message("Updating Transactions Data....")
 
         now = LocalizationUtility.now()
-        last_movement = self._get_last_transactions_import().replace(tzinfo=timezone.utc)
+        last_movement = self._get_last_transactions_import().replace(tzinfo=dt_timezone.utc)
 
         if last_movement >= now:
             return
@@ -270,7 +270,7 @@ class UpdateService(BaseService, AbstractUpdateService):
         """
         trading_api = self.degiro_service.get_client()
 
-        request = OverviewRequest(from_date=from_date, to_date=date.today())
+        request = OverviewRequest(from_date=from_date, to_date=django_timezone.now().date())
 
         # FETCH DATA
         account_overview = trading_api.get_account_overview(
@@ -367,7 +367,7 @@ class UpdateService(BaseService, AbstractUpdateService):
 
         # FETCH DATA
         return trading_api.get_transactions_history(
-            transaction_request=HistoryRequest(from_date=from_date, to_date=date.today()),
+            transaction_request=HistoryRequest(from_date=from_date, to_date=django_timezone.now().date()),
             raw=True,
         )
 
@@ -483,9 +483,7 @@ class UpdateService(BaseService, AbstractUpdateService):
             start_date = degiro_config.start_date.strftime(LocalizationUtility.DATE_FORMAT)
         else:
             # Fallback to a reasonable default date if config is unavailable
-            from datetime import datetime, timedelta
-
-            default_start = datetime.now() - timedelta(days=365)  # 1 year ago
+            default_start = django_timezone.now() - timedelta(days=365)  # 1 year ago
             start_date = default_start.strftime(LocalizationUtility.DATE_FORMAT)
         for currency in CurrencyFX.to_list():
             if currency not in product_growth:
@@ -493,7 +491,7 @@ class UpdateService(BaseService, AbstractUpdateService):
                 product_growth[currency]["history"][start_date] = 1
 
         delete_keys = []
-        today = LocalizationUtility.format_date_from_date(date.today())
+        today = LocalizationUtility.format_date_from_date(django_timezone.now().date())
 
         for key in product_growth.keys():
             product = ProductInfoRepository.get_product_info_from_id(key)

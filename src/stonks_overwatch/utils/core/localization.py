@@ -1,5 +1,5 @@
 import calendar
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timezone as dt_timezone
 from typing import Optional
 
 from currency_symbols import CurrencySymbols
@@ -30,7 +30,7 @@ class LocalizationUtility:
         if isinstance(value, datetime):
             return value
         if isinstance(value, date):
-            return datetime(value.year, value.month, value.day)
+            return datetime(value.year, value.month, value.day, tzinfo=dt_timezone.utc)
         if isinstance(value, str):
             return dateutil_parser.parse(value)
         raise TypeError(f"Unsupported type: {type(value)}. Expected str, date or datetime.")
@@ -171,4 +171,4 @@ class LocalizationUtility:
 
     @staticmethod
     def now() -> datetime:
-        return datetime.now(timezone.utc)
+        return datetime.now(dt_timezone.utc)

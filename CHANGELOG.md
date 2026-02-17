@@ -10,15 +10,34 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 ### Added
 
+### Changed
+
+### Fixed
+
+- Distribution: Fixed bug while showing distributions at Dividends or Diversification
+
+### Security
+
+---
+
+## [0.3.0] - 2026-01-29
+
+### Added
+
 - **Configuration:** Added support to configure IBKR broker
 - **Broker Selector:**
   - When starting now it's possible to choose the broker. This allows to use any of the available brokers, and removes
   a limitation that was enforcing to have a DEGIRO account
   - Adds possibility to use *only** DEGIRO, Bitvavo or IBKR
+- **UI:**
+  - Added a new Dark theme. Now it's possible to choose between dark/light/system themes
 
 ### Changed
 
 - **Configuration:** Different UI/UX improvements
+- **Brokers:** Hidden not supported broker capabilities
+  - When a broker does not support a certain feature, it will not be shown in the UI
+- **Demo Mode:** Demo mode has now some minor visual improvements
 
 ### Fixed
 

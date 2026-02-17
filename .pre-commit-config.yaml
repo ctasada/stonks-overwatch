@@ -10,7 +10,7 @@ repos:
       - id: check-merge-conflict
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.13
+    rev: v0.15.1
     hooks:
       # Run the linter
       - id: ruff
@@ -37,7 +37,7 @@ repos:
         stages: [pre-commit]
 
   - repo: https://github.com/lycheeverse/lychee
-    rev: nightly
+    rev: lychee-v0.22.0  # Not auto-updated
     hooks:
       - id: lychee
         name: Check Markdown Links

@@ -89,6 +89,16 @@ class BrokerRegistry:
 - Dynamic broker registration
 - Configuration validation on startup
 
+### Capability-Driven Architecture
+
+The system uses a capability-based discovery mechanism. Brokers are not required to implement all service interfaces; they only implement those that they actually support.
+
+**Key Features**:
+- **Dynamic Discovery**: The `BrokerRegistry` tracks which services each broker provides.
+- **Graceful Adaptation**: Aggregator services automatically skip brokers that don't support a requested feature.
+- **Adaptive UI**: The frontend dynamically hides navigation links (e.g., "Dividends", "Fees") if the currently selected portfolio doesn't support them.
+- **Lean Implementation**: Reduces boilerplate by eliminating "hollow" services that only return empty data.
+
 ### Exception Management
 
 Professional exception hierarchy with structured error handling:

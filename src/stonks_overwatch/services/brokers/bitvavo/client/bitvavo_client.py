@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone as dt_timezone
 from typing import Any, Optional
 
 from python_bitvavo_api.bitvavo import Bitvavo, createPostfix
@@ -132,7 +132,7 @@ class BitvavoService:
         for candle in response:
             result.append(
                 {
-                    "timestamp": datetime.fromtimestamp(candle[0] / 1000),
+                    "timestamp": datetime.fromtimestamp(candle[0] / 1000, tz=dt_timezone.utc),
                     "open": candle[1],
                     "high": candle[2],
                     "low": candle[3],

@@ -10,7 +10,6 @@ from typing import Optional
 from django.shortcuts import redirect
 from django.urls import resolve
 
-from stonks_overwatch.constants.brokers import BrokerName
 from stonks_overwatch.core.authentication_locator import get_authentication_service
 from stonks_overwatch.core.factories.broker_factory import BrokerFactory
 from stonks_overwatch.core.factories.broker_registry import BrokerRegistry
@@ -94,8 +93,8 @@ class AuthenticationMiddleware:
         """
         Check if user is authenticated with any broker.
 
-        This method checks for authentication across all registered brokers,
-        including broker-specific session keys.
+        This method checks for authentication across all registered brokers
+        using their broker-specific session keys.
 
         Args:
             request: The HTTP request containing session data
@@ -104,19 +103,9 @@ class AuthenticationMiddleware:
             True if authenticated with at least one broker, False otherwise
         """
         try:
-            # Check DEGIRO authentication (backward compatibility)
-            if self.auth_service.is_user_authenticated(request):
-                self.logger.debug("User authenticated with DEGIRO")
-                return True
-
-            # Check broker-specific authentication for other brokers
             registered_brokers = self.registry.get_registered_brokers()
 
             for broker_name in registered_brokers:
-                # Skip DEGIRO as it's already checked above
-                if broker_name == BrokerName.DEGIRO:
-                    continue
-
                 # Check broker-specific session key
                 broker_auth_key = SessionKeys.get_authenticated_key(broker_name)
                 if request.session.get(broker_auth_key, False):

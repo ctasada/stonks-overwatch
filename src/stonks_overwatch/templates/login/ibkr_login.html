@@ -3,14 +3,9 @@
 
 {% block page_title %}Interactive Brokers Login{% endblock %}
 
-{% block extra_css %}
-<style>
-    /* IBKR-specific: wider login card for OAuth fields */
-    .login-card {
-        max-width: 650px;
-    }
-</style>
-{% endblock %}
+{% block extra_css %}{% endblock %}
+
+{% block login_card_class %}login-card-wide{% endblock %}
 
 {% block broker_logo %}
 <img src="{% static 'logos/ibkr.svg' %}" alt="Interactive Brokers" width="32" height="32" class="mb-2"
@@ -46,9 +41,10 @@
 <div class="form-group mb-3">
     <label for="ibkr-consumer-key" class="form-label required">
         Consumer Key
-        <i class="bi bi-question-circle-fill text-muted ms-1" data-bs-toggle="tooltip" data-bs-placement="top"
+        <i class="bi bi-question-circle-fill text-muted ms-1 help-cursor" data-bs-toggle="tooltip"
+            data-bs-placement="top"
             title="Your IBKR OAuth consumer key. This identifies your application to the IBKR API."
-            style="cursor: help;" aria-label="Help for Consumer Key"></i>
+            aria-label="Help for Consumer Key"></i>
     </label>
     <input type="text" class="form-control" id="ibkr-consumer-key" name="consumer_key"
         placeholder="Enter your consumer key" value="{{ form_data.consumer_key.0|default:'' }}" required>
@@ -57,9 +53,10 @@
 <div class="form-group mb-3">
     <label for="ibkr-dh-prime" class="form-label required">
         DH Prime
-        <i class="bi bi-question-circle-fill text-muted ms-1" data-bs-toggle="tooltip" data-bs-placement="top"
+        <i class="bi bi-question-circle-fill text-muted ms-1 help-cursor" data-bs-toggle="tooltip"
+            data-bs-placement="top"
             title="Diffie-Hellman prime parameter for secure key exchange. Found in your IBKR OAuth configuration page."
-            style="cursor: help;" aria-label="Help for DH Prime"></i>
+            aria-label="Help for DH Prime"></i>
     </label>
     <input type="text" class="form-control" id="ibkr-dh-prime" name="dh_prime" placeholder="Enter your DH prime"
         value="{{ form_data.dh_prime.0|default:'' }}" required>
@@ -68,9 +65,10 @@
 <div class="key-section-header d-flex align-items-center mt-4 mb-2">
     <span class="key-section-title fw-bold required form-label" id="encryption-key-label">
         Encryption Key
-        <i class="bi bi-question-circle-fill text-muted ms-1" data-bs-toggle="tooltip" data-bs-placement="top"
+        <i class="bi bi-question-circle-fill text-muted ms-1 help-cursor" data-bs-toggle="tooltip"
+            data-bs-placement="top"
             title="RSA private key for encrypting OAuth requests. Upload a PEM file or paste the key content."
-            style="cursor: help;" aria-label="Help for Encryption Key"></i>
+            aria-label="Help for Encryption Key"></i>
     </span>
 </div>
 
@@ -108,9 +106,10 @@
 <div class="key-section-header d-flex align-items-center mt-4 mb-2">
     <span class="key-section-title fw-bold required form-label" id="signature-key-label">
         Signature Key
-        <i class="bi bi-question-circle-fill text-muted ms-1" data-bs-toggle="tooltip" data-bs-placement="top"
+        <i class="bi bi-question-circle-fill text-muted ms-1 help-cursor" data-bs-toggle="tooltip"
+            data-bs-placement="top"
             title="RSA private key for signing OAuth requests. Upload a PEM file or paste the key content."
-            style="cursor: help;" aria-label="Help for Signature Key"></i>
+            aria-label="Help for Signature Key"></i>
     </span>
 </div>
 
@@ -167,201 +166,5 @@
 {% if show_loading %}
 <script src="{% static 'js/auto_submit.js' %}"></script>
 {% endif %}
-
-<script>
-    /**
-     * Load key content from a PEM file
-     */
-    function loadKeyFromFile(fileInput, textareaId) {
-        const file = fileInput.files[0];
-        if (!file) {
-            return;
-        }
-
-        // Validate file extension
-        const validExtensions = ['.pem', '.key', '.crt'];
-        const fileName = file.name.toLowerCase();
-        const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
-
-        if (!hasValidExtension) {
-            alert('Invalid file type. Please select a PEM, KEY, or CRT file.');
-            fileInput.value = '';
-            return;
-        }
-
-        // Read file content
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            const content = e.target.result;
-            const textarea = document.getElementById(textareaId);
-            if (textarea) {
-                textarea.value = content;
-
-                // Show the container after loading
-                const container = document.getElementById(textareaId + '-container');
-                const toggleBtn = document.getElementById(textareaId + '-toggle');
-
-                if (container && container.classList.contains('d-none')) {
-                    container.classList.remove('d-none');
-                    container.style.display = '';
-                    if (toggleBtn) {
-                        toggleBtn.innerHTML = '<i class="bi bi-eye-slash" aria-hidden="true"></i> Hide';
-                        toggleBtn.setAttribute('aria-expanded', 'true');
-                    }
-                }
-            }
-        };
-
-        reader.onerror = function () {
-            alert('Error reading file. Please try again.');
-            fileInput.value = '';
-        };
-
-        reader.readAsText(file);
-    }
-
-    /**
-     * Clear key content from textarea
-     */
-    function clearKey(textareaId) {
-        const textarea = document.getElementById(textareaId);
-        if (!textarea) {
-            return;
-        }
-
-        if (textarea.value && !confirm('Are you sure you want to clear the key? This action cannot be undone.')) {
-            return;
-        }
-
-        textarea.value = '';
-
-        // Hide the container and reset the toggle button after clearing
-        const container = document.getElementById(textareaId + '-container');
-        const toggleBtn = document.getElementById(textareaId + '-toggle');
-
-        if (container) {
-            container.classList.add('d-none');
-            container.style.display = 'none';
-        }
-
-        if (toggleBtn) {
-            toggleBtn.innerHTML = '<i class="bi bi-eye" aria-hidden="true"></i> Show';
-            toggleBtn.setAttribute('aria-expanded', 'false');
-        }
-    }
-
-    /**
-     * Initialize key management buttons
-     */
-    function initializeKeyManagementButtons() {
-        // Load key from file buttons
-        document.querySelectorAll('[data-action="load-key-file"]').forEach(btn => {
-            if (btn.dataset.initialized === 'true') return;
-            btn.dataset.initialized = 'true';
-
-            btn.addEventListener('click', function (e) {
-                const fileInput = document.getElementById(e.currentTarget.dataset.target);
-                if (fileInput) {
-                    fileInput.click();
-                }
-            });
-        });
-
-        // File input change handlers
-        document.querySelectorAll('input[type="file"][data-textarea-target]').forEach(fileInput => {
-            if (fileInput.dataset.initialized === 'true') return;
-            fileInput.dataset.initialized = 'true';
-
-            fileInput.addEventListener('change', function () {
-                const textareaId = this.dataset.textareaTarget;
-                if (textareaId) {
-                    loadKeyFromFile(this, textareaId);
-                }
-            });
-        });
-
-        // Toggle key visibility buttons
-        document.querySelectorAll('[data-action="toggle-key"]').forEach(btn => {
-            if (btn.dataset.initialized === 'true') return;
-            btn.dataset.initialized = 'true';
-
-            btn.addEventListener('click', function (e) {
-                const button = e.currentTarget;
-                const container = document.getElementById(button.dataset.container);
-
-                if (!container) return;
-
-                const isHidden = container.classList.contains('d-none');
-
-                if (isHidden) {
-                    container.classList.remove('d-none');
-                    container.style.display = '';
-                    button.innerHTML = '<i class="bi bi-eye-slash" aria-hidden="true"></i> Hide';
-                    button.setAttribute('aria-expanded', 'true');
-                } else {
-                    container.classList.add('d-none');
-                    container.style.display = 'none';
-                    button.innerHTML = '<i class="bi bi-eye" aria-hidden="true"></i> Show';
-                    button.setAttribute('aria-expanded', 'false');
-                }
-            });
-        });
-
-        // Clear key buttons
-        document.querySelectorAll('[data-action="clear-key"]').forEach(btn => {
-            if (btn.dataset.initialized === 'true') return;
-            btn.dataset.initialized = 'true';
-
-            btn.addEventListener('click', function (e) {
-                clearKey(e.currentTarget.dataset.target);
-            });
-        });
-    }
-
-    /**
-     * Show key containers if they have pre-filled content (from form_data after error)
-     */
-    function showPrefilledKeys() {
-        // Check encryption key
-        const encryptionKey = document.getElementById('ibkr-encryption-key');
-        if (encryptionKey && encryptionKey.value.trim()) {
-            const container = document.getElementById('ibkr-encryption-key-container');
-            const toggleBtn = document.getElementById('ibkr-encryption-key-toggle');
-            if (container && container.classList.contains('d-none')) {
-                container.classList.remove('d-none');
-                container.style.display = '';
-                if (toggleBtn) {
-                    toggleBtn.innerHTML = '<i class="bi bi-eye-slash" aria-hidden="true"></i> Hide';
-                    toggleBtn.setAttribute('aria-expanded', 'true');
-                }
-            }
-        }
-
-        // Check signature key
-        const signatureKey = document.getElementById('ibkr-signature-key');
-        if (signatureKey && signatureKey.value.trim()) {
-            const container = document.getElementById('ibkr-signature-key-container');
-            const toggleBtn = document.getElementById('ibkr-signature-key-toggle');
-            if (container && container.classList.contains('d-none')) {
-                container.classList.remove('d-none');
-                container.style.display = '';
-                if (toggleBtn) {
-                    toggleBtn.innerHTML = '<i class="bi bi-eye-slash" aria-hidden="true"></i> Hide';
-                    toggleBtn.setAttribute('aria-expanded', 'true');
-                }
-            }
-        }
-    }
-
-    // Initialize when DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeKeyManagementButtons();
-            showPrefilledKeys();
-        });
-    } else {
-        initializeKeyManagementButtons();
-        showPrefilledKeys();
-    }
-</script>
+<script src="{% static 'js/ibkr-login.js' %}"></script>
 {% endblock %}

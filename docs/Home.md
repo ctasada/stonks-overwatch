@@ -14,6 +14,7 @@ Stonks Overwatch is an open-source investment portfolio tracker that helps you m
 - **🎯 Comprehensive**: Dividends, fees, deposits, and diversification tracking
 - **🔌 Extensible**: Plugin architecture for adding new brokers
 - **💻 Cross-Platform**: Web and native apps for all major platforms
+- **🌙 Theme Support**: Dark, light, and system-adaptive themes
 
 ---
 

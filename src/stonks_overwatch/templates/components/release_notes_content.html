@@ -1,44 +1,19 @@
 {% load static %}
 {% if is_standalone %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="standalone-root" data-appearance="{{ APPEARANCE }}" data-bs-theme="{% if APPEARANCE == 'auto' %}auto{% else %}{{ APPEARANCE }}{% endif %}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Release Notes</title>
+
     <link rel="icon" type="image/png" href="{% static 'stonks_overwatch-32x32.png' %}" sizes="32x32">
     <link rel="stylesheet" href="{% static 'style.css' %}">
-    <style>
-        /* Set CSS custom properties for theme colors */
-        :root {
-            --release-notes-bg-color: {{ bg_color }};
-            --release-notes-text-color: {{ text_color }};
-            --release-notes-code-bg: {{ code_bg }};
-            --release-notes-blockquote-bg: {{ blockquote_bg }};
-        }
-        html, body {
-            margin: 0;
-            padding: 0;
-            background: var(--release-notes-bg-color);
-            color: var(--release-notes-text-color);
-            height: 100%;
-        }
-    </style>
-    <script>
-        document.addEventListener('contextmenu', event => event.preventDefault());
-    </script>
+    <!-- Theme Management - runs before DOM is rendered to prevent flashes -->
+    <script src="{% static 'js/theme-manager.js' %}"></script>
+    <script src="{% static 'js/release-notes.js' %}"></script>
 </head>
 <body class="min-vh-100 release-notes-standalone">
-{% else %}
-<style>
-    /* Set CSS custom properties for theme colors (fragment mode) */
-    .release-notes-content {
-        --release-notes-bg-color: {{ bg_color }};
-        --release-notes-text-color: {{ text_color }};
-        --release-notes-code-bg: {{ code_bg }};
-        --release-notes-blockquote-bg: {{ blockquote_bg }};
-    }
-</style>
 {% endif %}
 <div class="release-notes-content">
     {{ html_fragment|safe }}

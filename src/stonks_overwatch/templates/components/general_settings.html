@@ -1,0 +1,208 @@
+<div class="broker-section" id="broker-general">
+    <div class="section-header d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0">General Settings</h5>
+    </div>
+    <div class="settings-card mb-4">
+        <div class="card-body">
+            <div class="setting-item mb-4">
+                <label id="appearance-label" class="form-label fw-bold d-block mb-3">Appearance</label>
+                <div class="theme-selector-container" role="radiogroup" aria-labelledby="appearance-label">
+                    <div class="theme-option" data-theme="auto">
+                        <input type="radio" class="theme-radio" name="appearance" id="appearance-auto" value="auto"{% if APPEARANCE == 'auto' %} checked{% endif %} aria-describedby="appearance-auto-desc">
+                        <label class="theme-label" for="appearance-auto">
+                            <div class="theme-preview auto-preview">
+                                <div class="theme-icon">
+                                    <i class="bi bi-circle-half"></i>
+                                </div>
+                                <div class="theme-gradient"></div>
+                            </div>
+                            <div class="theme-info">
+                                <div class="theme-name">Auto</div>
+                                <div class="theme-description" id="appearance-auto-desc">System preference</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="theme-option" data-theme="light">
+                        <input type="radio" class="theme-radio" name="appearance" id="appearance-light" value="light"{% if APPEARANCE == 'light' %} checked{% endif %} aria-describedby="appearance-light-desc">
+                        <label class="theme-label" for="appearance-light">
+                            <div class="theme-preview light-preview">
+                                <div class="theme-icon">
+                                    <i class="bi bi-sun-fill"></i>
+                                </div>
+                            </div>
+                            <div class="theme-info">
+                                <div class="theme-name">Light</div>
+                                <div class="theme-description" id="appearance-light-desc">Bright interface</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="theme-option" data-theme="dark">
+                        <input type="radio" class="theme-radio" name="appearance" id="appearance-dark" value="dark"{% if APPEARANCE == 'dark' %} checked{% endif %} aria-describedby="appearance-dark-desc">
+                        <label class="theme-label" for="appearance-dark">
+                            <div class="theme-preview dark-preview">
+                                <div class="theme-icon">
+                                    <i class="bi bi-moon-stars-fill"></i>
+                                </div>
+                            </div>
+                            <div class="theme-info">
+                                <div class="theme-name">Dark</div>
+                                <div class="theme-description" id="appearance-dark-desc">Easy on the eyes</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="setting-item">
+                <label for="base-currency" class="form-label fw-bold mb-2">Portfolio Currency</label>
+                <select class="form-select" id="base-currency">
+                    <option value="EUR"{% if BASE_CURRENCY == 'EUR' %} selected{% endif %}>EUR</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Guard to prevent multiple initializations
+    let generalSettingsInitialized = false;
+
+    /**
+     * Initialize General Settings UI from context variables
+     */
+    function initGeneralSettings() {
+        // Prevent duplicate initialization
+        if (generalSettingsInitialized) {
+            return;
+        }
+
+        // Find the checked radio button (set by server-side template)
+        const checkedRadio = document.querySelector('input[name="appearance"]:checked');
+
+        if (checkedRadio) {
+            // Add CSS class for visual feedback
+            const themeOption = checkedRadio.closest('.theme-option');
+            if (themeOption) {
+                // Remove selected class from all options first
+                document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('selected'));
+                // Add selected class to current option
+                themeOption.classList.add('selected');
+            }
+        }
+
+        // Add event listeners for appearance changes
+        document.querySelectorAll('input[name="appearance"]').forEach(radio => {
+            radio.addEventListener('change', handleAppearanceChange);
+        });
+
+        // Add event listener for currency changes
+        const currencySelect = document.getElementById('base-currency');
+        if (currencySelect) {
+            currencySelect.addEventListener('change', handleCurrencyChange);
+        }
+
+        generalSettingsInitialized = true;
+    }
+
+    /**
+     * Handle appearance/theme changes
+     */
+    function handleAppearanceChange(event) {
+        const newAppearance = event.target.value;
+
+        // Update visual selection with CSS class
+        document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('selected'));
+        const themeOption = event.target.closest('.theme-option');
+        if (themeOption) {
+            themeOption.classList.add('selected');
+        }
+
+        // Apply theme immediately for preview
+        if (window.ThemeManager) {
+            window.ThemeManager.apply(newAppearance);
+        }
+
+        // Save the setting
+        saveGeneralSetting('appearance', newAppearance);
+    }
+
+    /**
+     * Handle currency changes
+     */
+    function handleCurrencyChange(event) {
+        const newCurrency = event.target.value;
+        saveGeneralSetting('base_currency', newCurrency);
+    }
+
+    /**
+     * Save a general setting (appearance or currency)
+     */
+    async function saveGeneralSetting(settingName, settingValue) {
+        try {
+            const payload = {
+                action: 'save_general',
+                [settingName]: settingValue
+            };
+
+            const response = await fetch("{% url 'settings' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Show success feedback if available
+                if (typeof showToast === 'function') {
+                    showToast(`${settingName === 'appearance' ? 'Theme' : 'Currency'} updated successfully`, 'success');
+                } else if (typeof BootstrapAlertHelper !== 'undefined') {
+                    BootstrapAlertHelper.success(`${settingName === 'appearance' ? 'Theme' : 'Currency'} updated successfully`);
+                }
+            } else {
+                // Show error feedback if available
+                if (typeof showToast === 'function') {
+                    showToast(data.error || `Failed to save ${settingName}`, 'error');
+                } else if (typeof BootstrapAlertHelper !== 'undefined') {
+                    BootstrapAlertHelper.error(data.error || `Failed to save ${settingName}`);
+                }
+            }
+        } catch (error) {
+            // Show error feedback if available
+            if (typeof showToast === 'function') {
+                showToast(`Failed to save ${settingName}. Please try again.`, 'error');
+            } else if (typeof BootstrapAlertHelper !== 'undefined') {
+                BootstrapAlertHelper.error(`Failed to save ${settingName}. Please try again.`);
+            }
+        }
+    }
+
+    // Call initialization when the script loads
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initGeneralSettings);
+    } else {
+        // DOM is already ready, but add a small delay to ensure all elements are rendered
+        setTimeout(initGeneralSettings, 100);
+    }
+
+    // Export to global scope for external calls
+    window.initGeneralSettings = initGeneralSettings;
+
+    // Re-initialize when modal becomes visible (for modal-based settings)
+    setTimeout(() => {
+        const modal = document.getElementById('settingsModal');
+        if (modal) {
+            modal.addEventListener('shown.bs.modal', () => {
+                // Reset initialization guard to allow re-init when modal reopens
+                generalSettingsInitialized = false;
+                setTimeout(initGeneralSettings, 50);
+            });
+        }
+    }, 500);
+</script>

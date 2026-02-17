@@ -32,6 +32,24 @@ class DegiroCredentials(BaseCredentials):
     def has_minimal_credentials(self) -> bool:
         return bool(self.username and self.password and (self.totp_secret_key or self.one_time_password))
 
+    def to_auth_params(self) -> dict:
+        """
+        Convert credentials to authentication parameters.
+
+        Returns:
+            Dictionary with authentication parameters for DEGIRO auth service
+
+        Note:
+            remember_me is intentionally omitted as this method is used for
+            auto-authentication with already-stored credentials. The auth service
+            will use its default value (False).
+        """
+        return {
+            "username": self.username,
+            "password": self.password,
+            "one_time_password": getattr(self, "one_time_password", None),
+        }
+
 
 class DegiroConfig(BaseConfig):
     config_key = BrokerName.DEGIRO.value
