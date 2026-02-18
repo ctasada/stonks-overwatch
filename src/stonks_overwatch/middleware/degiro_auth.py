@@ -84,7 +84,7 @@ class DeGiroAuthMiddleware:
             self.logger.debug("Checking DEGIRO connection status")
 
             # Check DeGiro connection
-            connection_result = self.auth_service.check_degiro_connection(request)
+            connection_result = self.auth_service.check_broker_connection(request)
             return self._handle_connection_result(request, connection_result)
 
         except Exception as e:
@@ -97,7 +97,7 @@ class DeGiroAuthMiddleware:
 
         Args:
             request: The HTTP request
-            connection_result: The result from auth_service.check_degiro_connection()
+            connection_result: The result from auth_service.check_broker_connection()
 
         Returns:
             tuple: (should_redirect_to_login, redirect_reason, preserve_session)

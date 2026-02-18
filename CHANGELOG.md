@@ -12,11 +12,21 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 ### Changed
 
+- Internal refactor to simplify the authentication processes across different brokers
+
 ### Fixed
 
 - Distribution: Fixed bug while showing distributions at Dividends or Diversification
+- Diversification: Fixed rendering of some country flags
+- Fixed potential error while aggregating data from different brokers
+  - Fixed error aggregating numeric types
+  - Fixed error sorting dates
+- DEGIRO: Prevent authenticated users from being redirected to 2FA login screen
+- IBKR: Handle incomplete IBKR API contract data with defensive fallbacks
 
 ### Security
+
+- Routine dependency updates for security and stability
 
 ---
 

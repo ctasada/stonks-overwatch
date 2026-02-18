@@ -96,6 +96,18 @@ class Login(View):
             return render(request, self.TEMPLATE_NAME, context=context, status=500)
 
     def get(self, request: HttpRequest) -> HttpResponse:
+        # Check if user is already authenticated with any broker
+        # This prevents unnecessary re-authentication attempts and ensures
+        # already-authenticated users go straight to the dashboard
+        if hasattr(request, "session"):
+            try:
+                for broker_enum in self.registry.get_registered_brokers():
+                    if request.session.get(SessionKeys.get_authenticated_key(broker_enum), False):
+                        self.logger.info(f"User already authenticated with {broker_enum}, redirecting to dashboard")
+                        return redirect("dashboard")
+            except Exception as e:
+                self.logger.error(f"Error checking authentication status: {str(e)}")
+
         # Check if we should attempt auto-authentication
         broker_to_auto_auth = self._get_broker_with_stored_credentials()
 
@@ -193,31 +205,9 @@ class Login(View):
         Returns:
             Broker name if found, None otherwise
         """
-        try:
-            from stonks_overwatch.services.utilities.credential_validator import CredentialValidator
+        from stonks_overwatch.core.authentication_helper import AuthenticationHelper
 
-            available_brokers = self._get_available_brokers()
-
-            # Only attempt auto-auth for enabled brokers
-            enabled_brokers = [b for b in available_brokers if b["enabled"]]
-
-            for broker_info in enabled_brokers:
-                broker_name = broker_info["name"]
-                config = self.factory.create_config(broker_name)
-
-                if config and config.is_enabled():
-                    credentials = config.get_credentials
-
-                    # Check if credentials are valid (not placeholders)
-                    if credentials and CredentialValidator.has_valid_credentials(broker_name, credentials):
-                        self.logger.debug(f"Found stored credentials for broker: {broker_name}")
-                        return broker_name
-
-            return None
-
-        except Exception as e:
-            self.logger.error(f"Error checking for stored credentials: {str(e)}")
-            return None
+        return AuthenticationHelper.get_first_ready_broker()
 
     def _attempt_auto_authentication(self, request: HttpRequest, broker_name: BrokerName) -> dict:
         """
@@ -327,8 +317,10 @@ class Login(View):
                 request.session[SessionKeys.get_authenticated_key(broker_name)] = True
                 return {"success": True, "message": "Auto-authentication successful"}
             elif handles_totp and auth_result.result == AuthenticationResult.TOTP_REQUIRED:
+                request.session[SessionKeys.get_totp_required_key(broker_name)] = True
                 return {"success": False, "message": "TOTP authentication required", "requires_totp": True}
             elif handles_totp and auth_result.result == AuthenticationResult.IN_APP_AUTHENTICATION_REQUIRED:
+                request.session[SessionKeys.get_in_app_auth_required_key(broker_name)] = True
                 return {"success": False, "message": "In-app authentication required", "requires_in_app_auth": True}
             else:
                 return {"success": False, "message": auth_result.message or "Authentication failed"}

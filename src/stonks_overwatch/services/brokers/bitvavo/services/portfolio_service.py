@@ -288,7 +288,9 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
 
             product_history_dates = list(data["history"].keys())
 
-            start_date = LocalizationUtility.convert_string_to_datetime(product_history_dates[0])
+            start_date = LocalizationUtility.ensure_aware(
+                LocalizationUtility.convert_string_to_datetime(product_history_dates[0])
+            )
             candles = self.bitvavo_service.candles(f"{key}-{self.base_currency}", "1d", start_date)
             # Creates the dictionary with the date as key and the value as the close price
             date_to_value = {

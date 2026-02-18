@@ -68,10 +68,11 @@ class DepositsAggregatorService(BaseAggregator):
         return dataset
 
     def get_cash_deposits(self, selected_portfolio: PortfolioId) -> List[Deposit]:
-        # Use the new helper method to collect and sort deposit data
-        return self._collect_and_sort(
-            selected_portfolio, "get_cash_deposits", sort_key=lambda x: x.datetime, reverse=True
-        )
+        # Collect deposits from all brokers
+        combined_data = self._collect_and_merge_lists(selected_portfolio, "get_cash_deposits")
+
+        # Now sort - datetimes are already made aware by Deposit model's __post_init__
+        return sorted(combined_data, key=lambda x: x.datetime, reverse=True)
 
     def aggregate_data(self, selected_portfolio: PortfolioId) -> List[Deposit]:
         """

@@ -190,9 +190,9 @@ class DegiroAuthenticationService(AuthenticationServiceInterface, BaseService):
             self.logger.error(f"{TechnicalErrorMessages.AUTH_SERVICE_UNEXPECTED_ERROR}: {str(e)}")
             return self._create_error_response(AuthenticationResult.UNKNOWN_ERROR, UserErrorMessages.UNEXPECTED_ERROR)
 
-    def check_degiro_connection(self, request: HttpRequest) -> AuthenticationResponse:
+    def check_broker_connection(self, request: HttpRequest) -> AuthenticationResponse:
         """
-        Check the connection to DeGiro without performing full authentication.
+        Check the connection to the broker without performing full authentication.
 
         This method is used by middleware to verify existing connections
         and handle maintenance mode scenarios.

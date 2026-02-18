@@ -42,6 +42,7 @@ exclude = [
 
     # Brokers
     "https://account.bitvavo.com/create",
+    "https://support.bitvavo.com/hc/en-us",
 ]
 
 # Exclude files/directories

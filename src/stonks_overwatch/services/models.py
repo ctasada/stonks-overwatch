@@ -24,6 +24,12 @@ class AccountOverview:
     currency: str = ""
     change: float = 0.0
 
+    def __post_init__(self):
+        if self.datetime:
+            self.datetime = LocalizationUtility.ensure_aware(self.datetime)
+        if self.value_datetime:
+            self.value_datetime = LocalizationUtility.ensure_aware(self.value_datetime)
+
     def date(self) -> str:
         return LocalizationUtility.format_date_from_date(self.datetime)
 
@@ -87,6 +93,10 @@ class Deposit:
     currency: str
     description: str
 
+    def __post_init__(self):
+        if self.datetime:
+            self.datetime = LocalizationUtility.ensure_aware(self.datetime)
+
     def datetime_as_date(self) -> str:
         return self.datetime.strftime("%Y-%m-%d")
 
@@ -112,6 +122,12 @@ class Dividend:
     taxes: float = 0.0
     # Only used for EX_DIVIDEND type
     payout_date: Optional[datetime] = None
+
+    def __post_init__(self):
+        if self.payment_date:
+            self.payment_date = LocalizationUtility.ensure_aware(self.payment_date)
+        if self.payout_date:
+            self.payout_date = LocalizationUtility.ensure_aware(self.payout_date)
 
     def formatted_name(self) -> str:
         return format_stock_name(self.stock_name)

@@ -170,5 +170,18 @@ class LocalizationUtility:
         return calendar.month_name[num]
 
     @staticmethod
+    def ensure_aware(value: str | date | datetime) -> datetime:
+        """
+        Normalizes a value into a timezone-aware datetime.
+        Handles strings, date objects, and naive/aware datetime objects.
+        """
+        from django.utils import timezone
+
+        dt = LocalizationUtility._to_datetime(value)
+        if dt.tzinfo is None:
+            return timezone.make_aware(dt)
+        return dt
+
+    @staticmethod
     def now() -> datetime:
         return datetime.now(dt_timezone.utc)

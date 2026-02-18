@@ -3,7 +3,7 @@ Authentication service interface.
 
 This module defines the interface for authentication service implementations.
 The authentication service orchestrates the complete authentication flow,
-coordinating between session management, credential handling, and DeGiro API operations.
+coordinating between session management, credential handling, and broker API operations.
 """
 
 from abc import ABC, abstractmethod
@@ -12,8 +12,6 @@ from enum import Enum
 from typing import Optional
 
 from django.http import HttpRequest
-
-from stonks_overwatch.config.degiro import DegiroCredentials
 
 
 class AuthenticationResult(Enum):
@@ -158,9 +156,9 @@ class AuthenticationServiceInterface(ABC):
         pass
 
     @abstractmethod
-    def check_degiro_connection(self, request: HttpRequest) -> AuthenticationResponse:
+    def check_broker_connection(self, request: HttpRequest) -> AuthenticationResponse:
         """
-        Check the connection to DeGiro without performing full authentication.
+        Check the connection to the broker without performing full authentication.
 
         This method is used by middleware to verify existing connections
         and handle maintenance mode scenarios.
@@ -235,7 +233,7 @@ class AuthenticationServiceInterface(ABC):
     @abstractmethod
     def is_offline_mode(self) -> bool:
         """
-        Check if DeGiro is in offline mode.
+        Check if the broker is in offline mode.
 
         Returns:
             bool: True if offline mode is enabled, False otherwise
@@ -289,7 +287,7 @@ class AuthenticationServiceInterface(ABC):
 
     @abstractmethod
     def handle_authentication_error(
-        self, request: HttpRequest, error: Exception, credentials: Optional[DegiroCredentials] = None
+        self, request: HttpRequest, error: Exception, credentials: Optional[object] = None
     ) -> AuthenticationResponse:
         """
         Handle authentication errors and convert them to appropriate responses.
@@ -300,7 +298,7 @@ class AuthenticationServiceInterface(ABC):
         Args:
             request: The HTTP request containing session data
             error: The exception that occurred during authentication
-            credentials: Optional credentials that were being used
+            credentials: Optional credentials that were being used (broker-specific type)
 
         Returns:
             AuthenticationResponse: Appropriate response for the error

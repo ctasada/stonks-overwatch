@@ -1351,6 +1351,43 @@ class GenericBrokerAuthMiddleware:
 
 ---
 
+### ✅ 39. Authentication Service & Validation Refactoring (COMPLETED)
+
+**Status:** ✅ Complete
+**Completed:** January 2026
+**Effort:** 8 hours (actual)
+**Impact:** High - Improved maintainability and plugin-readiness
+**Source:** Conversation b750aff0 (Plugin Architecture Review)
+
+**Implemented Solutions:**
+1. ✅ **Generic Interface Types**: Removed `DegiroCredentials` from `AuthenticationServiceInterface`, now uses generic `object` type
+2. ✅ **Polymorphic Validation**: `CredentialValidator` supports `has_minimal_credentials()` method on credential objects
+3. ✅ **Centralized Helper**: Created `AuthenticationHelper` with unified broker readiness logic
+4. ✅ **Session Cleanup**: `clear_broken_session()` method for explicit error handling
+5. ✅ **Code Reduction**: Eliminated ~93 lines of duplicated code across 4 files
+
+**Files Modified:**
+- `src/stonks_overwatch/core/authentication_helper.py` (new file)
+- `src/stonks_overwatch/core/interfaces/authentication_service.py`
+- `src/stonks_overwatch/middleware/authentication.py`
+- `src/stonks_overwatch/services/utilities/credential_validator.py`
+- `src/stonks_overwatch/views/broker_login.py`
+- `src/stonks_overwatch/views/login.py`
+- `src/stonks_overwatch/views/root_redirect.py`
+
+**Documentation:**
+- See [ARCHITECTURE_AUTHENTICATION.md](ARCHITECTURE_AUTHENTICATION.md#authenticationhelper) for implementation details
+- See [OPERATIONS_AUTHENTICATION.md](OPERATIONS_AUTHENTICATION.md#broker-readiness-check) for debugging commands
+- See [PLUGIN_ARCHITECTURE.md](PLUGIN_ARCHITECTURE.md#phase-5-legacy-migration-2-3-weeks) for plugin architecture integration
+
+**Benefits:**
+- Prepares authentication system for plugin architecture
+- Reduces maintenance burden through code consolidation
+- Enables broker plugins to provide custom credential classes
+- Improves error handling for broken authentication states
+
+---
+
 ## Low Priority Tasks
 
 ### 28. Fix Keyboard Navigation for Broker Selector (WCAG Critical)
@@ -1648,6 +1685,7 @@ self.logger.error(f"IBKR credentials validation error: {type(e).__name__}")
 - Complete cache migration (Task 26) - 2-3 days
 - Jobs module refactoring (Task 27) - 4-5 days
 - Middleware modernization (Task 28) - 3-4 days
+- Authentication service & validation refactoring (Task 39) - 6-8h
 
 **Total: ~15-21 days**
 

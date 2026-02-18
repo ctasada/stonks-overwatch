@@ -250,6 +250,57 @@ except Exception as e:
 - ✅ **Green checkmarks** = System healthy
 - ❌ **Red X** = See [Troubleshooting](#common-maintenance-tasks) below
 
+### Broker Readiness Check
+
+Use this to quickly check if brokers are ready for authentication:
+
+```python
+# Copy-paste into Django shell
+from stonks_overwatch.core.authentication_helper import AuthenticationHelper
+from stonks_overwatch.constants import BrokerName
+from django.test import RequestFactory
+
+print("=== Broker Readiness Check ===\n")
+
+# Check specific brokers
+for broker in [BrokerName.DEGIRO, BrokerName.BITVAVO, BrokerName.IBKR]:
+    is_ready = AuthenticationHelper.is_broker_ready(broker)
+    status = "✅ Ready" if is_ready else "❌ Not Ready"
+    print(f"{broker.display_name}: {status}")
+
+# Find first ready broker (useful for auto-authentication)
+ready_broker = AuthenticationHelper.get_first_ready_broker()
+if ready_broker:
+    print(f"\n🎯 First ready broker: {ready_broker.display_name}")
+else:
+    print("\n⚠️  No brokers ready - check configuration")
+
+# Check if any brokers configured
+factory = RequestFactory()
+request = factory.get('/')
+has_any = AuthenticationHelper.has_configured_brokers(request)
+print(f"\n📋 Has configured brokers: {has_any}")
+```
+
+**Expected Output:**
+
+```text
+=== Broker Readiness Check ===
+
+DEGIRO: ✅ Ready
+Bitvavo: ✅ Ready
+Interactive Brokers: ❌ Not Ready
+
+🎯 First ready broker: DEGIRO
+
+📋 Has configured brokers: True
+```
+
+**If all brokers show "Not Ready":**
+1. Check database credentials with `get_credentials_from_database()`
+2. Verify configuration files have valid credentials
+3. Ensure brokers are enabled in settings
+
 ---
 
 ## Common Maintenance Tasks
@@ -307,6 +358,27 @@ print(f"Has config credentials: {has_config}")
 # Expected: At least one should be True for authentication to work
 ```
 
+#### Clear Broken Authentication State
+
+```python
+# Context: Use when session exists but config is invalid
+from stonks_overwatch.core.authentication_helper import AuthenticationHelper
+from stonks_overwatch.constants import BrokerName
+
+# Clear broken session for specific broker
+AuthenticationHelper.clear_broken_session(request, BrokerName.DEGIRO)
+print("✅ Cleared broken session data for DEGIRO")
+
+# Verify session cleared
+is_auth = auth_service.session_manager.is_authenticated(request)
+print(f"Authentication status after clear: {is_auth}")  # Should be False
+```
+
+**When to use this:**
+- User sees "Session exists but configuration is invalid" error
+- Authentication loops infinitely
+- Session data is corrupted or inconsistent
+
 **If issues persist:**
 1. Check [Common Issues](#2-troubleshooting-common-issues) for known problems
 2. Enable [debug logging](#enable-debug-logging) for detailed diagnostics
@@ -320,7 +392,7 @@ print(f"Has config credentials: {has_config}")
 #### TOTP Credentials Lost
 
 **Symptoms**: "Username and password required" during two-factor authentication
-**Solution**: Check if `store_credentials()` is called in `check_degiro_connection()`
+**Solution**: Check if `store_credentials()` is called in `check_broker_connection()`
 **Related**: See [Session State Management](#common-patterns)
 
 ```python

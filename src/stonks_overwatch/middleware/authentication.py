@@ -52,11 +52,11 @@ class AuthenticationMiddleware:
             self.logger.debug("Demo mode detected - skipping authentication checks")
             return self.get_response(request)
 
-        # Check if any brokers are configured first
-        if not self._has_configured_brokers():
+        # Check if any brokers are configured first (or if user is authenticated in session)
+        if not self._has_configured_brokers(request):
             # No brokers configured - allow access to login pages for initial setup
-            self.logger.info("No brokers configured - allowing access for initial setup")
-            return self.get_response(request)
+            self.logger.info("No brokers configured or authenticated - allowing access for initial setup")
+            return redirect("login")
 
         # Perform basic authentication checks
         should_redirect, redirect_reason, preserve_session = self._check_basic_authentication(request)
@@ -123,33 +123,17 @@ class AuthenticationMiddleware:
         """Check if URL is public and doesn't require authentication."""
         return url_name in self.PUBLIC_URLS
 
-    def _has_configured_brokers(self) -> bool:
+    def _has_configured_brokers(self, request=None) -> bool:
         """
-        Check if any brokers are configured and enabled with valid credentials.
+        Check if any brokers are configured and enabled with valid credentials,
+        OR if the user is currently authenticated with a broker in their session.
+
+        Args:
+            request: Optional HTTP request to check session authentication
 
         Returns:
-            True if at least one broker is configured, enabled, and has valid credentials
+            True if at least one broker is usable (configured or authenticated)
         """
-        try:
-            from stonks_overwatch.services.utilities.credential_validator import CredentialValidator
+        from stonks_overwatch.core.authentication_helper import AuthenticationHelper
 
-            registered_brokers = self.registry.get_registered_brokers()
-
-            for broker_name in registered_brokers:
-                try:
-                    config = self.factory.create_config(broker_name)
-                    if config and config.is_enabled():
-                        # Check if broker has valid credentials
-                        credentials = config.get_credentials
-                        if credentials and CredentialValidator.has_valid_credentials(broker_name, credentials):
-                            return True
-                except Exception as e:
-                    self.logger.warning(f"Error checking broker {broker_name}: {str(e)}")
-                    continue
-
-            return False
-
-        except Exception as e:
-            self.logger.error(f"Error checking configured brokers: {str(e)}")
-            # Default to False to redirect to broker selector when in doubt
-            return False
+        return AuthenticationHelper.has_configured_brokers(request)

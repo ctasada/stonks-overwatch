@@ -123,7 +123,13 @@ class UpdateService(DependencyInjectionMixin, AbstractUpdateService):
         self.__import_open_positions(open_positions)
 
     def __import_open_positions(self, open_positions: list[dict]) -> None:
-        """Store the open positions into the DB."""
+        """
+        Store open positions into the DB.
+
+        Note: IBKR API often returns None for ticker, name, sector, etc.
+        Portfolio service handles this with defensive fallbacks.
+        See docs/IBKR.md (Known API Limitations) for details.
+        """
         for row in open_positions:
             try:
                 self._retry_database_operation(

@@ -357,21 +357,21 @@ class BitvavoAuthenticationService(BaseService, AuthenticationServiceInterface):
             # Don't raise exception - authentication succeeded even if update failed
             # The scheduled job will retry later
 
-    # Implementation of AuthenticationServiceInterface methods (DeGiro-specific, not applicable for Bitvavo)
+    # Implementation of AuthenticationServiceInterface methods (broker-specific, not all applicable for Bitvavo)
 
-    def check_degiro_connection(self, request: HttpRequest) -> AuthenticationResponse:
+    def check_broker_connection(self, request: HttpRequest) -> AuthenticationResponse:
         """
         Check connection - not applicable for Bitvavo.
 
-        This method is part of the AuthenticationServiceInterface but is specific to DeGiro.
-        For Bitvavo, we don't have a similar connection check mechanism.
+        This method is part of the AuthenticationServiceInterface but is not
+        implemented for Bitvavo as we don't have a similar connection check mechanism.
 
         Returns:
             AuthenticationResponse indicating this is not applicable
         """
         return AuthenticationResponse(
             result=AuthenticationResult.CONFIGURATION_ERROR,
-            message="DeGiro connection check is not applicable for Bitvavo",
+            message="Broker connection check is not applicable for Bitvavo",
         )
 
     def handle_totp_authentication(self, request: HttpRequest, one_time_password: int) -> AuthenticationResponse:

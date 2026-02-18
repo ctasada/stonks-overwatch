@@ -65,9 +65,16 @@ class BrokerLogin(View):
             return redirect("login")
 
         # Check authentication state for this broker
-        show_otp = self._check_totp_required(request, broker_name)
-        show_in_app_auth = self._check_in_app_auth_required(request, broker_name)
         show_loading = self._check_authenticated(request, broker_name)
+
+        # If already authenticated, clear any pending auth flags
+        if show_loading:
+            self._clear_pending_auth_flags(request, broker_name)
+            show_otp = False
+            show_in_app_auth = False
+        else:
+            show_otp = self._check_totp_required(request, broker_name)
+            show_in_app_auth = self._check_in_app_auth_required(request, broker_name)
 
         context = {
             "broker_name": broker_name,
@@ -202,10 +209,52 @@ class BrokerLogin(View):
             return request.session.get(SessionKeys.get_in_app_auth_required_key(broker_name), False)
         return False
 
+    def _clear_pending_auth_flags(self, request: HttpRequest, broker_name: BrokerName) -> None:
+        """
+        Clear any pending TOTP or in-app authentication flags for a broker.
+
+        This should be called when authentication succeeds or when showing
+        the loading screen for an already-authenticated user.
+
+        Args:
+            request: The HTTP request with session
+            broker_name: The broker to clear flags for
+        """
+        request.session[SessionKeys.get_totp_required_key(broker_name)] = False
+        request.session[SessionKeys.get_in_app_auth_required_key(broker_name)] = False
+
     def _check_authenticated(self, request: HttpRequest, broker_name: BrokerName) -> bool:
-        """Check if user is authenticated for this broker."""
-        # Check session for authentication status
-        return request.session.get(SessionKeys.get_authenticated_key(broker_name), False)
+        """
+        Check if user is authenticated for this broker.
+        A broker is only considered fully authenticated if they have an active session
+        AND (if not in offline mode) valid credentials in the database.
+        """
+        # 1. Check session for authentication status
+        if not request.session.get(SessionKeys.get_authenticated_key(broker_name), False):
+            return False
+
+        # 2. Check if broker is in offline/demo mode - session is enough
+        from stonks_overwatch.utils.core.demo_mode import is_demo_mode
+
+        if is_demo_mode():
+            return True
+
+        # 3. Check if broker has valid credentials in database
+        # This ensures that if credentials were wiped/lost, we show the login form
+        # instead of a loading screen that redirects to a broken state.
+        try:
+            from stonks_overwatch.core.authentication_helper import AuthenticationHelper
+
+            if not AuthenticationHelper.is_broker_ready(broker_name):
+                # Session exists but DB config is broken - clear session and force re-login
+                self.logger.warning(f"Session exists for {broker_name} but configuration is invalid - clearing session")
+                AuthenticationHelper.clear_broken_session(request, broker_name)
+                return False
+
+            return True
+        except Exception as e:
+            self.logger.error(f"Error checking broker configuration for {broker_name}: {e}")
+            return False
 
     def _extract_credentials(self, request: HttpRequest, broker_name: BrokerName) -> Optional[dict]:
         """Extract credentials from request based on broker type."""
@@ -323,8 +372,7 @@ class BrokerLogin(View):
             if auth_result.is_success:
                 # Clear any pending auth flags since authentication succeeded
                 request.session[SessionKeys.get_authenticated_key(BrokerName.DEGIRO)] = True
-                request.session[SessionKeys.get_totp_required_key(BrokerName.DEGIRO)] = False
-                request.session[SessionKeys.get_in_app_auth_required_key(BrokerName.DEGIRO)] = False
+                self._clear_pending_auth_flags(request, BrokerName.DEGIRO)
                 return {"success": True, "message": "Authentication successful"}
             else:
                 # Handle different authentication results
