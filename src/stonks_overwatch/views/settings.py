@@ -1,14 +1,18 @@
 import json
 
 import pyotp
+from django.core.cache import cache
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views import View
 
 from stonks_overwatch.config.config import Config
 from stonks_overwatch.constants.brokers import BrokerName
+from stonks_overwatch.services.brokers.encryption_utils import decrypt_integration_config, encrypt_integration_config
 from stonks_overwatch.services.brokers.models import BrokersConfigurationRepository
 from stonks_overwatch.utils.core.logger import StonksLogger
+
+_ALLOWED_INTEGRATIONS = frozenset({"logodev"})
 
 
 class SettingsView(View):
@@ -46,11 +50,17 @@ class SettingsView(View):
         bitvavo_config = self.repository.get_broker_by_name(BrokerName.BITVAVO.value)
         ibkr_config = self.repository.get_broker_by_name(BrokerName.IBKR.value)
 
+        logodev_config = config.get_setting("integration_logodev", {})
+        if not isinstance(logodev_config, dict):
+            logodev_config = {}
+        logodev_config = decrypt_integration_config(logodev_config)
+
         # Prepare context data
         context = {
             "degiro_config": degiro_config,
             "bitvavo_config": bitvavo_config,
             "ibkr_config": ibkr_config,
+            "logodev_config": logodev_config,
             "is_standalone": not is_ajax_request,  # Wrap in HTML structure for non-AJAX requests
             "APPEARANCE": config.appearance,
             "BASE_CURRENCY": config.base_currency,
@@ -100,6 +110,10 @@ class SettingsView(View):
             # Handle general settings save
             if data.get("action") == "save_general":
                 return self._save_general_settings(data)
+
+            # Handle integration settings save
+            if data.get("action") == "save_integration":
+                return self._save_integration_settings(data)
 
             # Handle broker configuration save
             return self._save_broker_configuration(data)
@@ -159,6 +173,39 @@ class SettingsView(View):
         self._reconfigure_jobs()
 
         return JsonResponse({"success": True, "message": "Configuration saved successfully"})
+
+    def _save_integration_settings(self, data: dict) -> JsonResponse:
+        """
+        Handle saving of integration settings (e.g. Logo.dev).
+
+        Args:
+            data: Request data containing integration_name, enabled, and api_key
+
+        Returns:
+            JsonResponse: Success or error response
+        """
+        integration_name = data.get("integration_name")
+        if not integration_name:
+            return JsonResponse({"error": "integration_name is required"}, status=400)
+
+        if integration_name not in _ALLOWED_INTEGRATIONS:
+            return JsonResponse({"error": "Unknown integration"}, status=400)
+
+        config = Config.get_global()
+        config.save_setting(
+            f"integration_{integration_name}",
+            encrypt_integration_config(
+                {
+                    "enabled": bool(data.get("enabled", False)),
+                    "api_key": data.get("api_key", "").strip(),
+                }
+            ),
+        )
+
+        cache.clear()
+
+        self.logger.debug(f"Integration settings saved for: {integration_name}")
+        return JsonResponse({"success": True, "message": "Integration settings saved"})
 
     def _save_general_settings(self, data: dict) -> JsonResponse:
         """

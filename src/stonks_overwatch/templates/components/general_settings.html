@@ -63,6 +63,10 @@
             </div>
         </div>
     </div>
+
+    <hr class="my-4">
+    <h6 class="fw-bold mb-3">Integrations</h6>
+    {% include 'components/integrations/logodev_settings.html' %}
 </div>
 
 <script>
@@ -101,6 +105,16 @@
         const currencySelect = document.getElementById('base-currency');
         if (currencySelect) {
             currencySelect.addEventListener('change', handleCurrencyChange);
+        }
+
+        // Auto-save Logo.dev settings on checkbox toggle or API key blur
+        const logodevEnabled = document.getElementById('logodev-enabled');
+        if (logodevEnabled) {
+            logodevEnabled.addEventListener('change', () => saveIntegrationSettings('logodev'));
+        }
+        const logodevApiKey = document.getElementById('logodev-api-key');
+        if (logodevApiKey) {
+            logodevApiKey.addEventListener('blur', () => saveIntegrationSettings('logodev'));
         }
 
         generalSettingsInitialized = true;
@@ -191,8 +205,49 @@
         setTimeout(initGeneralSettings, 100);
     }
 
+    /**
+     * Save integration settings (e.g. Logo.dev)
+     */
+    async function saveIntegrationSettings(name) {
+        const enabled = document.getElementById(`${name}-enabled`)?.checked ?? false;
+        const apiKey = document.getElementById(`${name}-api-key`)?.value ?? '';
+
+        try {
+            const response = await fetch("{% url 'settings' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    action: 'save_integration',
+                    integration_name: name,
+                    enabled: enabled,
+                    api_key: apiKey
+                })
+            });
+
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                if (typeof showToast === 'function') {
+                    showToast(data?.error || 'Failed to save integration settings', 'error');
+                }
+                return;
+            }
+            if (typeof showToast === 'function') {
+                showToast(data.message || 'Integration settings saved', 'success');
+            }
+        } catch (error) {
+            if (typeof showToast === 'function') {
+                showToast('Failed to save integration settings. Please try again.', 'error');
+            }
+        }
+    }
+
     // Export to global scope for external calls
     window.initGeneralSettings = initGeneralSettings;
+    window.saveIntegrationSettings = saveIntegrationSettings;
 
     // Re-initialize when modal becomes visible (for modal-based settings)
     setTimeout(() => {

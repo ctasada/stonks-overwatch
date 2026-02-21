@@ -1,45 +1,16 @@
-from enum import Enum
+import re
+from html import escape
 
 import requests
-from django.http import HttpResponse, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.cache import cache_page
 from requests.exceptions import RequestException
 
-from stonks_overwatch.integrations.logos.ibkr import IbkrLogoIntegration
+from stonks_overwatch.integrations.logos.types import LogoType
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.core.logger import StonksLogger
-
-
-# Should be extending ProductType
-class LogoType(Enum):
-    STOCK = "Stock"
-    ETF = "ETF"
-    CASH = "Cash"
-    CRYPTO = "Crypto"
-    COUNTRY = "Country"
-    SECTOR = "Sector"
-
-    UNKNOWN = "Unknown"
-
-    @staticmethod
-    def from_str(label: str):
-        value = label.lower()
-        if value == "stock":
-            return LogoType.STOCK
-        elif value == "etf":
-            return LogoType.ETF
-        elif value == "cash":
-            return LogoType.CASH
-        elif value == "crypto":
-            return LogoType.CRYPTO
-        elif value == "country":
-            return LogoType.COUNTRY
-        elif value == "sector":
-            return LogoType.SECTOR
-
-        return LogoType.UNKNOWN
 
 
 @method_decorator(cache_page(60 * 60), name="get")  # Cache for 1 hour
@@ -59,48 +30,57 @@ class AssetLogoView(View):
         LogoType.CRYPTO: "https://raw.githubusercontent.com/Cryptofonts/cryptoicons/master/SVG/{}.svg",
     }
 
+    def _get_active_integrations(self):
+        from stonks_overwatch.config.config import Config
+        from stonks_overwatch.constants import BrokerName
+        from stonks_overwatch.integrations.logos.ibkr import IbkrLogoIntegration
+        from stonks_overwatch.integrations.logos.logodev import LogoDevIntegration
+        from stonks_overwatch.services.brokers.encryption_utils import decrypt_integration_config
+        from stonks_overwatch.services.brokers.models import BrokersConfigurationRepository
+
+        active_integrations = []
+        cfg = decrypt_integration_config(Config.get_global().get_setting("integration_logodev", {}))
+        if isinstance(cfg, dict) and cfg.get("enabled"):
+            api_key = cfg.get("api_key", "").strip()
+            if api_key:
+                active_integrations.append(LogoDevIntegration(api_key))
+            else:
+                self.logger.warning("Logo.dev is enabled but the API key could not be decrypted; skipping integration.")
+
+        ibkr_config = BrokersConfigurationRepository.get_broker_by_name(BrokerName.IBKR)
+        if ibkr_config and ibkr_config.enabled:
+            active_integrations.append(IbkrLogoIntegration())
+
+        return active_integrations
+
     def get(self, request, product_type: str, symbol: str):
+        from stonks_overwatch.config.config import Config
+
         self.logger.debug(f"Fetching logo for {product_type} {symbol}")
         product_type = LogoType.from_str(product_type)
         if product_type == LogoType.UNKNOWN:
             self.logger.warning(f"Invalid Logo request for {product_type.name} {symbol.upper()}")
             return HttpResponseNotFound("Invalid product type")
 
+        theme = Config.get_global().resolved_theme()
+        isin = request.GET.get("isin", "").strip()
         conid = request.GET.get("conid", "").strip()
         if conid and not conid.isdigit():
             self.logger.warning(f"Ignoring invalid conid parameter: {conid}")
             conid = ""
 
         try:
-            if product_type == LogoType.CASH:
-                return HttpResponse(
-                    content=self.__generate_symbol(LocalizationUtility.get_currency_symbol(symbol)),
-                    content_type=self.SVG_CONTENT_TYPE,
-                    status=200,
-                )
-            elif product_type == LogoType.COUNTRY:
-                # For countries, we can either use the enhanced SVG or the regular Twemoji
-                # Check if enhanced flag rendering is requested via query parameter
-                use_enhanced = request.GET.get("enhanced", "false").lower() == "true"
-                if use_enhanced:
-                    return HttpResponse(
-                        content=self.__generate_enhanced_flag_svg(symbol),
-                        content_type=self.SVG_CONTENT_TYPE,
-                        status=200,
-                    )
-                else:
-                    url = self.__emoji_to_svg(symbol)
-            elif product_type == LogoType.SECTOR:
-                url = self.__emoji_to_svg(symbol)
-            else:
-                ibkr_logo = self.__try_ibkr_logo(conid, product_type)
-                if ibkr_logo:
-                    return ibkr_logo
-                url = self.base_urls[product_type].format(symbol.lower())
+            integration_response = self._try_integration_logo(product_type, symbol, theme, isin, conid)
+            if integration_response:
+                return integration_response
 
+            inline = self._resolve_inline_logo(request, product_type, symbol)
+            if inline:
+                return inline
+
+            url = self._resolve_fallback_url(product_type, symbol)
             response = requests.get(url, timeout=5)
             response.raise_for_status()
-
             return HttpResponse(
                 content=response.content,
                 content_type=response.headers.get("Content-Type", self.SVG_CONTENT_TYPE),
@@ -112,35 +92,63 @@ class AssetLogoView(View):
                 content=self.__generate_symbol(symbol.upper()), content_type=self.SVG_CONTENT_TYPE, status=200
             )
 
-    def __try_ibkr_logo(self, conid: str, product_type: LogoType) -> HttpResponse | None:
-        """Fetch the IBKR/Benzinga logo for the given conid and return it as a proxied response.
+    def _try_integration_logo(
+        self, product_type: LogoType, symbol: str, theme: str = "light", isin: str = "", conid: str = ""
+    ) -> HttpResponseRedirect | None:
+        """Try each active integration in order; redirect the browser directly to the CDN URL.
 
-        Returns ``None`` if conid is absent, the product type is not supported, or the fetch fails,
-        so the caller can fall through to the CDN path.
+        Integration APIs (e.g. Logo.dev) are designed for hotlinking — requests must come from
+        a browser, not a server-side proxy. Returning a redirect lets the browser fetch the image
+        directly, which is both required for authentication and consistent with the intended use.
+
+        Each integration validates logo existence internally via ``get_logo_url()`` and returns
+        ``""`` when no logo is available, allowing the loop to fall through to the next integration.
         """
-        if not conid or product_type not in (LogoType.STOCK, LogoType.ETF):
-            return None
-        ibkr_url = IbkrLogoIntegration().get_logo_url(conid=conid)
-        if not ibkr_url:
-            return None
-        try:
-            ibkr_response = requests.get(ibkr_url, timeout=3)
-            ibkr_response.raise_for_status()
+        for integration in self._get_active_integrations():
+            self.logger.debug(
+                f"Trying integration {integration.__class__.__name__} for {product_type.name} {symbol.upper()}"
+            )
+            if not integration.supports(product_type):
+                self.logger.debug(f"{integration.__class__.__name__} does not support {product_type.name}")
+                continue
+            url = integration.get_logo_url(product_type, symbol, theme, isin, conid)
+            if not url:
+                self.logger.debug(f"{integration.__class__.__name__} has no logo for {symbol.upper()}, trying next.")
+                continue
+            self.logger.debug(f"{integration.__class__.__name__} redirecting to: {url}")
+            return HttpResponseRedirect(url)
+        return None
+
+    def _resolve_inline_logo(self, request, product_type: LogoType, symbol: str) -> HttpResponse | None:
+        """Return an inline SVG response for types that don't use an external URL, or None."""
+        if product_type == LogoType.CASH:
             return HttpResponse(
-                content=ibkr_response.content,
-                content_type=ibkr_response.headers.get("Content-Type", self.SVG_CONTENT_TYPE),
+                content=self.__generate_symbol(LocalizationUtility.get_currency_symbol(symbol)),
+                content_type=self.SVG_CONTENT_TYPE,
                 status=200,
             )
-        except RequestException:
-            return None  # fall through to CDN
+        if product_type == LogoType.COUNTRY and request.GET.get("enhanced", "false").lower() == "true":
+            return HttpResponse(
+                content=self.__generate_enhanced_flag_svg(symbol),
+                content_type=self.SVG_CONTENT_TYPE,
+                status=200,
+            )
+        return None
+
+    def _resolve_fallback_url(self, product_type: LogoType, symbol: str) -> str:
+        """Return the CDN/base URL to fetch for types that use an external fallback."""
+        if product_type in (LogoType.COUNTRY, LogoType.SECTOR):
+            return self.__emoji_to_svg(symbol)
+        return self.base_urls[product_type].format(symbol.lower())
 
     def __generate_symbol(self, symbol: str) -> str:
         # We need to fit the logo independently of the symbol length
         font_size = int(300 / len(symbol))
+        escaped = escape(symbol)
         return f"""
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">
                 <text x="150" y="170" dominant-baseline="middle" text-anchor="middle"
-                      font-size="{font_size}" font-family="Poppins, sans-serif">{symbol}</text>
+                      font-size="{font_size}" font-family="Poppins, sans-serif">{escaped}</text>
             </svg>
             """
 
@@ -166,8 +174,6 @@ class AssetLogoView(View):
             flag_svg_content = response.text
 
             # Remove the outer SVG wrapper from the flag content to embed it
-            import re
-
             # Extract everything between <svg...> and </svg>
             svg_match = re.search(r"<svg[^>]*>(.*?)</svg>", flag_svg_content, re.DOTALL)
             if svg_match:
@@ -204,6 +210,7 @@ class AssetLogoView(View):
             """
         except (RequestException, Exception):
             # Fallback to a simpler enhanced design with just the emoji
+            escaped_emoji = escape(emoji_char)
             return f"""
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">
                     <defs>
@@ -223,6 +230,6 @@ class AssetLogoView(View):
                         stroke-width="4"/>
                     <text x="150" y="180" dominant-baseline="middle" text-anchor="middle"
                           font-size="120" font-family="Apple Color Emoji, Segoe UI Emoji, sans-serif"
-                          filter="url(#text-shadow)">{emoji_char}</text>
+                          filter="url(#text-shadow)">{escaped_emoji}</text>
                 </svg>
             """

@@ -39,6 +39,8 @@ exclude = [
     "https://api.newbroker.com*",
     "https://api.yourbroker.com*",
     "https://github.com/YOUR_USERNAME/*",
+    "https://your-provider.com/*",
+    "https://logos.stockanalysis.com/%7Bsymbol%7D.svg",
 
     # Brokers
     "https://bitvavo.com/en",

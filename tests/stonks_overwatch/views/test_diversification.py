@@ -6,9 +6,10 @@ import pytest
 
 
 class DummyPortfolioEntry:
-    def __init__(self, name, symbol, value, product_type, product_type_share, is_open=True):
+    def __init__(self, name, symbol, value, product_type, product_type_share, is_open=True, isin=""):
         self._name = name
         self.symbol = symbol
+        self.isin = isin
         self.conid = None
         self.value = value
         self.product_type = product_type
@@ -30,8 +31,8 @@ class DummyPortfolioEntry:
 def test_get_positions_etf():
     # Create dummy ETF and STOCK entries
     entries = [
-        DummyPortfolioEntry("ETF1", "ETF1", 1000, ProductType.ETF, 0.6),
-        DummyPortfolioEntry("ETF2", "ETF2", 500, ProductType.ETF, 0.3),
+        DummyPortfolioEntry("ETF1", "ETF1", 1000, ProductType.ETF, 0.6, isin="IE00B1FZSF77"),
+        DummyPortfolioEntry("ETF2", "ETF2", 500, ProductType.ETF, 0.3, isin="IE00B4L5Y983"),
         DummyPortfolioEntry("ETF3", "ETF3", 200, ProductType.ETF, 0.1),
         DummyPortfolioEntry("STOCK1", "STOCK1", 100, ProductType.STOCK, 0.05),
     ]
@@ -43,6 +44,8 @@ def test_get_positions_etf():
     assert sizes == sorted(sizes, reverse=True)
     # Only ETF entries should be present
     assert all(row["product_type"] == "ETF" for row in table)
+    # ISIN is propagated correctly (including empty string when absent)
+    assert [row["isin"] for row in table] == ["IE00B1FZSF77", "IE00B4L5Y983", ""]
     # Chart labels and values match table order
     assert result["chart"]["labels"] == [row["name"] for row in table]
     # Compare chart values to the expected ETF base_currency_value values, sorted by product_type_share descending
@@ -54,7 +57,7 @@ def test_get_positions_etf():
 
 def test_get_positions_stock():
     entries = [
-        DummyPortfolioEntry("STOCK1", "STOCK1", 100, ProductType.STOCK, 0.5),
+        DummyPortfolioEntry("STOCK1", "STOCK1", 100, ProductType.STOCK, 0.5, isin="US0231351067"),
         DummyPortfolioEntry("STOCK2", "STOCK2", 200, ProductType.STOCK, 0.3),
         DummyPortfolioEntry("ETF1", "ETF1", 300, ProductType.ETF, 0.2),
     ]
@@ -65,6 +68,8 @@ def test_get_positions_stock():
     assert sizes == sorted(sizes, reverse=True)
     # Only STOCK entries should be present
     assert all(row["product_type"] == "STOCK" for row in table)
+    # ISIN is propagated correctly (including empty string when absent)
+    assert [row["isin"] for row in table] == ["US0231351067", ""]
     # Chart labels and values match table order
     assert result["chart"]["labels"] == [row["name"] for row in table]
     stock_entries = [e for e in entries if e.product_type == ProductType.STOCK]
