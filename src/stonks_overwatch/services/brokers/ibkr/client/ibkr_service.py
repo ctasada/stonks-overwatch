@@ -119,6 +119,8 @@ class IbkrService:
 
     def get_open_positions(self) -> list[dict]:
         self.logger.debug("Open Positions")
+        # First call primes the gateway cache with full contract details (sector, type, etc.)
+        self.client.positions(self.account.account_id)
         return self.client.positions(self.account.account_id).data
 
     def transaction_history(self, conid: str, currency: str) -> dict:

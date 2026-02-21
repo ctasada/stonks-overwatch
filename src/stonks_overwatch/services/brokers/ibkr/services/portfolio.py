@@ -100,8 +100,9 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         """
         Create a portfolio entry from IBKR position data.
 
-        Note: IBKR API often returns None for ticker, name, sector, etc.
-        Uses contractDesc as fallback. See docs/IBKR.md for details.
+        Note: Some fields (sector, group) are genuinely None for ETFs.
+        Others (ticker, name, type, etc.) are populated after the gateway cache warms up.
+        Defensive fallbacks handle both cases. See docs/IBKR.md for details.
 
         Args:
             position: Position data from IBKR (may contain None values)
@@ -129,7 +130,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
 
         is_open = position["position"] > 0
 
-        # Defensive handling: IBKR API limitation - use contractDesc as fallback
+        # Defensive handling: ETFs have null sector/group; use contractDesc as ticker fallback
         ticker = position.get("ticker") or position.get("contractDesc") or "UNKNOWN"
         name = position.get("name") or position.get("contractDesc") or ticker
         sector_str = position.get("sector") or "Unknown"

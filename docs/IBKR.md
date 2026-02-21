@@ -439,18 +439,16 @@ The database model is defined in:
 - **Fee Information**: Limited fee data available
 - **Historical Data**: Depends on your account data subscription
 
-#### Incomplete Position Contract Data
+#### Position Contract Data — Gateway Cache
 
-The IBKR Web API `/portfolio` endpoints frequently return incomplete contract details. Fields like `ticker`, `name`, `sector`, `listingExchange`, and `countryCode` are often `None`.
+The IBKR Client Portal Gateway caches position data server-side. On a cold session (fresh gateway start), contract detail fields like `ticker`, `name`, `sector`, `type`, `listingExchange`, and `countryCode` may be missing from the first response of the `GET /portfolio/{accountId}/positions/{pageId}` endpoint.
 
-**Workaround**: Stonks Overwatch uses `contractDesc` (which contains the ticker) as a fallback when these fields are missing.
+**Workaround**: Stonks Overwatch calls the positions endpoint twice — the first call primes the gateway cache with full contract details, and the second call returns the fully populated data. Defensive fallbacks are also in place for any fields that remain `None` (e.g., ETFs with no sector classification).
 
 **Impact**:
-- ✅ Portfolio displays correctly with ticker symbols
+- ✅ Portfolio displays correctly with ticker symbols, sector, and asset type
 - ✅ Position values and P&L calculations work properly
-- ⚠️ Sector/geographic diversification may show generic values ("Unknown", "US")
-
-These are IBKR API limitations, not application limitations. The application handles them gracefully with defensive fallback logic.
+- ⚠️ ETFs may still show `null` for `sector`/`group` as IBKR does not classify them
 
 ---
 
