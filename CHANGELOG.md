@@ -22,7 +22,9 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
   - Fixed error aggregating numeric types
   - Fixed error sorting dates
 - DEGIRO: Prevent authenticated users from being redirected to 2FA login screen
-- IBKR: Handle incomplete IBKR API contract data with defensive fallbacks
+- IBKR:
+  - Handle incomplete IBKR API contract data with defensive fallbacks
+  - Fixed portfolio API import. Improves identification of ETFs
 
 ### Security
 

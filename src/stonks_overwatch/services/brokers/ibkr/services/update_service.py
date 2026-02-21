@@ -126,9 +126,9 @@ class UpdateService(DependencyInjectionMixin, AbstractUpdateService):
         """
         Store open positions into the DB.
 
-        Note: IBKR API often returns None for ticker, name, sector, etc.
+        Note: ETFs have null sector/group from the IBKR API.
         Portfolio service handles this with defensive fallbacks.
-        See docs/IBKR.md (Known API Limitations) for details.
+        See docs/IBKR.md for details.
         """
         for row in open_positions:
             try:
