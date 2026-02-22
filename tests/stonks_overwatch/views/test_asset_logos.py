@@ -1,5 +1,7 @@
 from django.http import HttpResponse, HttpResponseNotFound
 
+from stonks_overwatch.integrations.logos.ibkr import IbkrLogoIntegration
+from stonks_overwatch.integrations.logos.logodev import LogoDevIntegration
 from stonks_overwatch.views.asset_logos import AssetLogoView, LogoType
 
 from django.test import RequestFactory, TestCase
@@ -59,6 +61,91 @@ class TestAssetLogoView(TestCase):
         response = self.view.get(request, product_type="invalid", symbol="appl")
         self.assertIsInstance(response, HttpResponseNotFound)
         self.assertEqual(response.content.decode(), "Invalid product type")
+
+    @patch("stonks_overwatch.integrations.logos.registry.LogoIntegrationRegistry.get_active_integrations")
+    def test_get_uses_logodev_before_ibkr(self, mock_registry):
+        """Logo.dev should be preferred, then IBKR, then fallback."""
+        logodev = MagicMock(spec=LogoDevIntegration)
+        logodev.supports.return_value = True
+        logodev.get_logo_url.return_value = "https://logo.dev/logo.png"
+
+        ibkr = MagicMock(spec=IbkrLogoIntegration)
+        ibkr.supports.return_value = True
+        ibkr.get_logo_url.return_value = "https://ibkr/logo.png"
+
+        mock_registry.return_value = [logodev, ibkr]
+
+        request = self.factory.get("/assets/stock/appl")
+        response = self.view.get(request, product_type="stock", symbol="appl")
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], "https://logo.dev/logo.png")
+        logodev.get_logo_url.assert_called_once()
+        ibkr.get_logo_url.assert_not_called()
+
+    @patch("stonks_overwatch.integrations.logos.registry.LogoIntegrationRegistry.get_active_integrations")
+    def test_get_falls_back_to_ibkr_when_logodev_missing(self, mock_registry):
+        """If Logo.dev has no logo, IBKR should be used when enabled."""
+        logodev = MagicMock(spec=LogoDevIntegration)
+        logodev.supports.return_value = True
+        logodev.get_logo_url.return_value = ""
+
+        ibkr = MagicMock(spec=IbkrLogoIntegration)
+        ibkr.supports.return_value = True
+        ibkr.get_logo_url.return_value = "https://ibkr/logo.png"
+
+        mock_registry.return_value = [logodev, ibkr]
+
+        request = self.factory.get("/assets/stock/appl")
+        response = self.view.get(request, product_type="stock", symbol="appl")
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], "https://ibkr/logo.png")
+        logodev.get_logo_url.assert_called_once()
+        ibkr.get_logo_url.assert_called_once()
+
+    @patch("requests.get")
+    @patch("stonks_overwatch.integrations.logos.registry.LogoIntegrationRegistry.get_active_integrations")
+    def test_get_falls_back_to_default_when_no_integrations(self, mock_registry, mock_get):
+        """When no integrations return a logo, fall back to the default URL."""
+        logodev = MagicMock(spec=LogoDevIntegration)
+        logodev.supports.return_value = True
+        logodev.get_logo_url.return_value = ""
+
+        ibkr = MagicMock(spec=IbkrLogoIntegration)
+        ibkr.supports.return_value = True
+        ibkr.get_logo_url.return_value = ""
+
+        mock_registry.return_value = [logodev, ibkr]
+
+        mock_response = MagicMock()
+        mock_response.content = b"<svg>test</svg>"
+        mock_response.headers = {"Content-Type": "image/svg+xml"}
+        mock_response.status_code = 200
+        mock_get.return_value = mock_response
+
+        request = self.factory.get("/assets/stock/appl")
+        response = self.view.get(request, product_type="stock", symbol="appl")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b"<svg>test</svg>")
+        mock_get.assert_called_once_with("https://logos.stockanalysis.com/appl.svg", timeout=5)
+
+    @patch("stonks_overwatch.integrations.logos.registry.LogoIntegrationRegistry.get_active_integrations")
+    def test_get_skips_invalid_conid(self, mock_registry):
+        """Invalid conid should be ignored and still attempt integrations."""
+        logodev = MagicMock(spec=LogoDevIntegration)
+        logodev.supports.return_value = True
+        logodev.get_logo_url.return_value = "https://logo.dev/logo.png"
+
+        mock_registry.return_value = [logodev]
+
+        request = self.factory.get("/assets/stock/appl?conid=abc")
+        response = self.view.get(request, product_type="stock", symbol="appl")
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], "https://logo.dev/logo.png")
+        logodev.get_logo_url.assert_called_once()
 
     @patch("requests.get")
     def test_get_stock_logo(self, mock_get):
@@ -194,78 +281,46 @@ class TestAssetLogoViewIbkr(TestCase):
         self.factory = RequestFactory()
         self.view = AssetLogoView()
 
-    @patch("stonks_overwatch.views.asset_logos.IbkrLogoIntegration.get_logo_url")
-    @patch("requests.get")
-    def test_get_stock_logo_with_conid_proxies_ibkr_content(self, mock_get, mock_ibkr_url):
-        """Valid conid on a stock request proxies the IBKR logo content."""
+    @patch("stonks_overwatch.integrations.logos.registry.LogoIntegrationRegistry.get_active_integrations")
+    def test_get_stock_logo_with_conid_redirects_to_ibkr(self, mock_registry):
+        """Valid conid on a stock request redirects to the IBKR logo URL."""
         ibkr_url = "https://www.interactivebrokers.ie/tws.proxy/public/icons/benzinga?conid=12345&type=mark_light"
-        mock_ibkr_url.return_value = ibkr_url
-        mock_response = MagicMock()
-        mock_response.content = b"<svg>ibkr-logo</svg>"
-        mock_response.headers = {"Content-Type": "image/svg+xml"}
-        mock_response.status_code = 200
-        mock_get.return_value = mock_response
+        ibkr = MagicMock(spec=IbkrLogoIntegration)
+        ibkr.supports.return_value = True
+        ibkr.get_logo_url.return_value = ibkr_url
+        mock_registry.return_value = [ibkr]
 
         request = self.factory.get("/assets/stock/aapl", {"conid": "12345"})
         response = self.view.get(request, product_type="stock", symbol="aapl")
 
-        self.assertIsInstance(response, HttpResponse)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, b"<svg>ibkr-logo</svg>")
-        mock_ibkr_url.assert_called_once_with(conid="12345")
-        mock_get.assert_called_once_with(ibkr_url, timeout=3)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], ibkr_url)
+        ibkr.get_logo_url.assert_called_once()
 
-    @patch("stonks_overwatch.views.asset_logos.IbkrLogoIntegration.get_logo_url")
-    @patch("requests.get")
-    def test_get_etf_logo_with_conid_proxies_ibkr_content(self, mock_get, mock_ibkr_url):
-        """Valid conid on an ETF request proxies the IBKR logo content."""
+    @patch("stonks_overwatch.integrations.logos.registry.LogoIntegrationRegistry.get_active_integrations")
+    def test_get_etf_logo_with_conid_redirects_to_ibkr(self, mock_registry):
+        """Valid conid on an ETF request redirects to the IBKR logo URL."""
         ibkr_url = "https://www.interactivebrokers.ie/tws.proxy/public/icons/benzinga?conid=99999&type=mark_light"
-        mock_ibkr_url.return_value = ibkr_url
-        mock_response = MagicMock()
-        mock_response.content = b"<svg>ibkr-logo</svg>"
-        mock_response.headers = {"Content-Type": "image/svg+xml"}
-        mock_response.status_code = 200
-        mock_get.return_value = mock_response
+        ibkr = MagicMock(spec=IbkrLogoIntegration)
+        ibkr.supports.return_value = True
+        ibkr.get_logo_url.return_value = ibkr_url
+        mock_registry.return_value = [ibkr]
 
         request = self.factory.get("/assets/etf/spy", {"conid": "99999"})
         response = self.view.get(request, product_type="etf", symbol="spy")
 
-        self.assertIsInstance(response, HttpResponse)
-        self.assertEqual(response.status_code, 200)
-        mock_ibkr_url.assert_called_once_with(conid="99999")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], ibkr_url)
 
-    @patch("stonks_overwatch.views.asset_logos.IbkrLogoIntegration.get_logo_url")
     @patch("requests.get")
-    def test_get_stock_logo_with_conid_falls_back_to_cdn_when_ibkr_fetch_fails(self, mock_get, mock_ibkr_url):
-        """When the IBKR fetch fails (e.g. 404), the request falls back to the CDN."""
-        from requests.exceptions import RequestException
-
-        ibkr_url = "https://www.interactivebrokers.ie/tws.proxy/public/icons/benzinga?conid=12345&type=mark_light"
-        mock_ibkr_url.return_value = ibkr_url
-
-        cdn_response = MagicMock()
-        cdn_response.content = b"<svg>cdn-logo</svg>"
-        cdn_response.headers = {"Content-Type": "image/svg+xml"}
-        cdn_response.status_code = 200
-
-        def side_effect(url, **kwargs):
-            if url == ibkr_url:
-                raise RequestException("404")
-            return cdn_response
-
-        mock_get.side_effect = side_effect
-
-        request = self.factory.get("/assets/stock/aapl", {"conid": "12345"})
-        response = self.view.get(request, product_type="stock", symbol="aapl")
-
-        self.assertIsInstance(response, HttpResponse)
-        self.assertEqual(response.content, b"<svg>cdn-logo</svg>")
-
-    @patch("stonks_overwatch.views.asset_logos.IbkrLogoIntegration.get_logo_url")
-    @patch("requests.get")
-    def test_get_stock_logo_with_conid_falls_back_to_cdn_when_ibkr_returns_empty(self, mock_get, mock_ibkr_url):
+    @patch("stonks_overwatch.integrations.logos.registry.LogoIntegrationRegistry.get_active_integrations")
+    def test_get_stock_logo_with_conid_falls_back_to_cdn_when_ibkr_returns_empty(self, mock_registry, mock_get):
         """When IBKR returns no URL, the request falls back to the CDN."""
-        mock_ibkr_url.return_value = ""
+        ibkr = MagicMock(spec=IbkrLogoIntegration)
+        ibkr.supports.return_value = True
+        ibkr.get_logo_url.return_value = ""
+        mock_registry.return_value = [ibkr]
+
         mock_response = MagicMock()
         mock_response.content = b"<svg>test</svg>"
         mock_response.headers = {"Content-Type": "image/svg+xml"}
@@ -278,10 +333,15 @@ class TestAssetLogoViewIbkr(TestCase):
         self.assertIsInstance(response, HttpResponse)
         mock_get.assert_called_once_with("https://logos.stockanalysis.com/aapl.svg", timeout=5)
 
-    @patch("stonks_overwatch.views.asset_logos.IbkrLogoIntegration.get_logo_url")
     @patch("requests.get")
-    def test_get_stock_logo_without_conid_skips_ibkr(self, mock_get, mock_ibkr_url):
-        """Requests without conid never call the IBKR integration."""
+    @patch("stonks_overwatch.integrations.logos.registry.LogoIntegrationRegistry.get_active_integrations")
+    def test_get_stock_logo_without_conid_passes_empty_conid_to_ibkr(self, mock_registry, mock_get):
+        """Requests without conid pass conid='' to integrations (IBKR will return '' for it)."""
+        ibkr = MagicMock(spec=IbkrLogoIntegration)
+        ibkr.supports.return_value = True
+        ibkr.get_logo_url.return_value = ""
+        mock_registry.return_value = [ibkr]
+
         mock_response = MagicMock()
         mock_response.content = b"<svg>test</svg>"
         mock_response.headers = {"Content-Type": "image/svg+xml"}
@@ -291,12 +351,18 @@ class TestAssetLogoViewIbkr(TestCase):
         request = self.factory.get("/assets/stock/aapl")
         self.view.get(request, product_type="stock", symbol="aapl")
 
-        mock_ibkr_url.assert_not_called()
+        _, kwargs = ibkr.get_logo_url.call_args
+        self.assertEqual(kwargs.get("conid", ""), "")
 
-    @patch("stonks_overwatch.views.asset_logos.IbkrLogoIntegration.get_logo_url")
     @patch("requests.get")
-    def test_get_stock_logo_with_invalid_conid_skips_ibkr(self, mock_get, mock_ibkr_url):
-        """Non-digit conid is rejected and IBKR integration is never called."""
+    @patch("stonks_overwatch.integrations.logos.registry.LogoIntegrationRegistry.get_active_integrations")
+    def test_get_stock_logo_with_invalid_conid_passes_empty_conid(self, mock_registry, mock_get):
+        """Non-digit conid is sanitized to '' before being passed to integrations."""
+        ibkr = MagicMock(spec=IbkrLogoIntegration)
+        ibkr.supports.return_value = True
+        ibkr.get_logo_url.return_value = ""
+        mock_registry.return_value = [ibkr]
+
         mock_response = MagicMock()
         mock_response.content = b"<svg>test</svg>"
         mock_response.headers = {"Content-Type": "image/svg+xml"}
@@ -307,12 +373,17 @@ class TestAssetLogoViewIbkr(TestCase):
         response = self.view.get(request, product_type="stock", symbol="aapl")
 
         self.assertIsInstance(response, HttpResponse)
-        mock_ibkr_url.assert_not_called()
+        _, kwargs = ibkr.get_logo_url.call_args
+        self.assertEqual(kwargs.get("conid", ""), "")
 
-    @patch("stonks_overwatch.views.asset_logos.IbkrLogoIntegration.get_logo_url")
     @patch("requests.get")
-    def test_get_crypto_logo_with_conid_skips_ibkr(self, mock_get, mock_ibkr_url):
+    @patch("stonks_overwatch.integrations.logos.registry.LogoIntegrationRegistry.get_active_integrations")
+    def test_get_crypto_logo_with_conid_skips_ibkr(self, mock_registry, mock_get):
         """conid is ignored for crypto (not STOCK or ETF); IBKR integration is not called."""
+        ibkr = MagicMock(spec=IbkrLogoIntegration)
+        ibkr.supports.return_value = False
+        mock_registry.return_value = [ibkr]
+
         mock_response = MagicMock()
         mock_response.content = b"<svg>test</svg>"
         mock_response.headers = {"Content-Type": "image/svg+xml"}
@@ -322,4 +393,4 @@ class TestAssetLogoViewIbkr(TestCase):
         request = self.factory.get("/assets/crypto/btc", {"conid": "12345"})
         self.view.get(request, product_type="crypto", symbol="btc")
 
-        mock_ibkr_url.assert_not_called()
+        ibkr.get_logo_url.assert_not_called()

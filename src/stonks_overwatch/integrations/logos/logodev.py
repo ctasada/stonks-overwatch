@@ -19,13 +19,19 @@ class LogoDevIntegration(LogoIntegration):
 
     logger = StonksLogger.get_logger("stonks_overwatch.integrations.logos", "[LOGODEV|LOGO]")
 
-    def __init__(self, api_key: str) -> None:
+    def __init__(self, api_key: str, enabled: bool = True) -> None:
         self._api_key = api_key
+        self._enabled = enabled
+
+    def is_active(self) -> bool:
+        return bool(self._api_key) and self._enabled
 
     def supports(self, logo_type: LogoType) -> bool:
         return logo_type in {LogoType.STOCK, LogoType.ETF, LogoType.CRYPTO}
 
-    def get_logo_url(self, logo_type: LogoType, symbol: str, theme: str = "light", isin: str = "") -> str:
+    def get_logo_url(
+        self, logo_type: LogoType, symbol: str, theme: str = "light", isin: str = "", conid: str = ""
+    ) -> str:
         """Build and validate the Logo.dev URL for the given asset.
 
         Performs a streaming GET request to confirm the logo exists before returning the URL.

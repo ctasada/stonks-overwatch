@@ -5,7 +5,12 @@ from stonks_overwatch.integrations.logos.types import LogoType
 
 class LogoIntegration(ABC):
     @abstractmethod
+    def is_active(self) -> bool: ...
+
+    @abstractmethod
     def supports(self, logo_type: LogoType) -> bool: ...
 
     @abstractmethod
-    def get_logo_url(self, logo_type: LogoType, symbol: str, theme: str = "light", isin: str = "") -> str: ...
+    def get_logo_url(
+        self, logo_type: LogoType, symbol: str, theme: str = "light", isin: str = "", conid: str = ""
+    ) -> str: ...

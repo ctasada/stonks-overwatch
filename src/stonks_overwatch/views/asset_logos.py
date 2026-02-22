@@ -31,27 +31,9 @@ class AssetLogoView(View):
     }
 
     def _get_active_integrations(self):
-        from stonks_overwatch.config.config import Config
-        from stonks_overwatch.constants import BrokerName
-        from stonks_overwatch.integrations.logos.ibkr import IbkrLogoIntegration
-        from stonks_overwatch.integrations.logos.logodev import LogoDevIntegration
-        from stonks_overwatch.services.brokers.encryption_utils import decrypt_integration_config
-        from stonks_overwatch.services.brokers.models import BrokersConfigurationRepository
+        from stonks_overwatch.integrations.logos.registry import LogoIntegrationRegistry
 
-        active_integrations = []
-        cfg = decrypt_integration_config(Config.get_global().get_setting("integration_logodev", {}))
-        if isinstance(cfg, dict) and cfg.get("enabled"):
-            api_key = cfg.get("api_key", "").strip()
-            if api_key:
-                active_integrations.append(LogoDevIntegration(api_key))
-            else:
-                self.logger.warning("Logo.dev is enabled but the API key could not be decrypted; skipping integration.")
-
-        ibkr_config = BrokersConfigurationRepository.get_broker_by_name(BrokerName.IBKR)
-        if ibkr_config and ibkr_config.enabled:
-            active_integrations.append(IbkrLogoIntegration())
-
-        return active_integrations
+        return LogoIntegrationRegistry.get_active_integrations()
 
     def get(self, request, product_type: str, symbol: str):
         from stonks_overwatch.config.config import Config
