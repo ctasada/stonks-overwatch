@@ -1113,10 +1113,11 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.dropdow
 #sidebar.sidebar-collapsed div.dropdown#sidebar-settings-selector,
 html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.dropdown#sidebar-settings-selector {
     padding: 0;
-    margin: 0 var(--sidebar-margin);
     position: relative;
     z-index: calc(var(--z-index-toast) + 10);
     /* Ensure collapsed dropdowns are also above Bootstrap Table */
+    /* Note: margin is intentionally NOT set here — the border spans the full sidebar width.
+       The inner .sidebar-nav-link receives margin: 0 var(--sidebar-margin) for icon centering. */
 }
 
 /* Shared collapsed state styles for sidebar dropdown parent containers */
@@ -1430,17 +1431,15 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     box-shadow: none;
     border-radius: var(--border-radius-md);
     color: var(--sidebar-text-color);
-    margin: 0;
-    /* Remove margin from link since parent handles it */
     position: relative;
+    /* margin is inherited from .sidebar-nav-link so the icon aligns with other nav items;
+       the outer container intentionally has no horizontal margin so border-top spans full width */
 }
 
-/* The dropdown container should handle the margin like regular nav items */
+/* Settings dropdown container: full-width so border-top spans edge-to-edge */
 #sidebar:not(.sidebar-collapsed) div.dropdown#sidebar-settings-selector {
-    margin: 0 var(--sidebar-margin);
     position: relative;
     z-index: calc(var(--z-index-toast) + 10);
-    /* Slightly above sidebar container */
 }
 
 /* Ensure settings selector parent container has no extra padding */
