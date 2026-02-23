@@ -59,9 +59,11 @@ class UpdateService(BaseService, AbstractUpdateService):
             self.update_transactions()
             self.update_portfolio()
             self.update_assets()
+            self._record_sync(success=True)
         except Exception as error:
             self.logger.error("Cannot Update Portfolio!")
             self.logger.error("Exception: %s", str(error), exc_info=True)
+            self._record_sync(success=False)
 
     def update_portfolio(self):
         self._log_message("Updating Portfolio Data....")

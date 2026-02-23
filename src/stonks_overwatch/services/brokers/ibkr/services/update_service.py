@@ -51,9 +51,11 @@ class UpdateService(DependencyInjectionMixin, AbstractUpdateService):
         try:
             self.update_portfolio()
             self.update_transactions()
+            self._record_sync(success=True)
         except Exception as error:
             self.logger.error("Cannot Update Portfolio!")
             self.logger.error("Exception: %s", str(error), exc_info=True)
+            self._record_sync(success=False)
 
     def update_portfolio(self):
         """Updating the Portfolio is an expensive and time-consuming task.

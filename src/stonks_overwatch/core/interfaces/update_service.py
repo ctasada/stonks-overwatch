@@ -1,9 +1,11 @@
 import os
 import time as core_time
 from abc import ABC, abstractmethod
+from datetime import datetime
 from typing import Optional
 
 from django.db.utils import OperationalError
+from django.utils import timezone
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.constants import BrokerName
@@ -131,6 +133,45 @@ class AbstractUpdateService(ABC):
                     raise
 
         raise last_exception
+
+    def _record_sync(self, success: bool = True) -> None:
+        """
+        Record that a sync attempt completed for this broker.
+
+        Should be called at the end of update_all() to track the last time the broker
+        data was refreshed from the external API, regardless of whether new data existed.
+
+        Args:
+            success: True if the sync completed without errors, False otherwise
+        """
+        from stonks_overwatch.core.models import BrokerSyncLog
+
+        try:
+            BrokerSyncLog.objects.create(
+                broker_name=self.broker_name,
+                synced_at=timezone.now(),
+                success=success,
+            )
+        except Exception as e:
+            self.logger.error("Failed to record sync log for %s: %s", self.broker_name, str(e))
+
+    def get_last_sync(self) -> Optional[datetime]:
+        """
+        Return the last time this broker was successfully synced with the external API.
+
+        Returns:
+            Datetime of the last successful sync, or None if no sync has been recorded yet
+        """
+        from stonks_overwatch.core.models import BrokerSyncLog
+
+        try:
+            entry = (
+                BrokerSyncLog.objects.filter(broker_name=self.broker_name, success=True).order_by("-synced_at").first()
+            )
+            return entry.synced_at if entry else None
+        except Exception as e:
+            self.logger.error("Failed to get last sync for %s: %s", self.broker_name, str(e))
+            return None
 
     @abstractmethod
     def update_all(self):

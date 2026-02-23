@@ -1,6 +1,30 @@
 from django.db import models
+from django.utils import timezone
 
 from stonks_overwatch.utils.core.logger import StonksLogger
+
+
+class BrokerSyncLog(models.Model):
+    """
+    Tracks the last time each broker's data was successfully refreshed from the external API.
+
+    This provides accurate "last refreshed" timestamps independent of when the most
+    recent transaction or business event occurred.
+    """
+
+    class Meta:
+        db_table = "broker_sync_log"
+        verbose_name = "Broker Sync Log"
+        verbose_name_plural = "Broker Sync Logs"
+        get_latest_by = "synced_at"
+
+    broker_name = models.CharField(max_length=50, db_index=True)
+    synced_at = models.DateTimeField(default=timezone.now)
+    success = models.BooleanField(default=True)
+
+    def __str__(self) -> str:
+        status = "success" if self.success else "failed"
+        return f"{self.broker_name}: {self.synced_at} ({status})"
 
 
 class GlobalConfiguration(models.Model):

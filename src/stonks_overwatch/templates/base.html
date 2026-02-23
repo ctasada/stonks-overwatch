@@ -188,17 +188,14 @@
                             <span class="small sidebar-text">Demo Mode</span>
                         {% else %}
                         <!-- Connection Status -->
-                            {% is_connected_to_degiro as is_degiro_connected %}
                             {% get_connected_tooltip as get_connected_tooltip %}
+                            {% get_connected_status_icon_class as connected_status_icon_class %}
+                            {% get_connected_status_icon as connected_status_icon %}
                             <div class="d-flex align-items-center text-white" data-bs-toggle="tooltip"
-                                data-bs-placement="right" data-bs-html="true" title="{{ get_connected_tooltip }}">
-                                {% if is_degiro_connected %}
-                                <i class="bi-cloud-check-fill me-3 fs-5 text-success sidebar-icon"></i>
-                                <span class="small sidebar-text">Connected</span>
-                                {% else %}
-                                <i class="bi-cloud-slash-fill me-3 fs-5 text-warning sidebar-icon"></i>
-                                <span class="small sidebar-text">Disconnected</span>
-                                {% endif %}
+                                data-bs-placement="right" data-bs-html="true" data-bs-custom-class="info-tooltip connection-tooltip"
+                                title="{{ get_connected_tooltip }}">
+                                <i class="{{ connected_status_icon }} me-3 fs-5 {{ connected_status_icon_class }} sidebar-icon"></i>
+                                <span class="small sidebar-text">Last synced</span>
                             </div>
                         {% endif %}
                         </div>

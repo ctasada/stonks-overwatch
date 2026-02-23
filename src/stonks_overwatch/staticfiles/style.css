@@ -52,6 +52,15 @@
     --sidebar-border-color: rgba(255, 255, 255, 0.3);
     --sidebar-bg: var(--primary-color);
     --sidebar-dropdown-bg: var(--primary-dark);
+    --sidebar-status-success: #6dff8c;
+    --sidebar-status-warning: #ffe14d;
+    --sidebar-status-danger: #ff2244;
+    /* Light mode: stacked white glow builds a solid halo around the icon, creating a
+       clear [blue sidebar] → [white fringe] → [vivid icon] separation layer.
+       The icon color stays saturated; the halo does the contrast work. */
+    --sidebar-status-shadow: drop-shadow(0 0 2px rgba(255, 255, 255, 1))
+                             drop-shadow(0 0 3px rgba(255, 255, 255, 0.9))
+                             drop-shadow(0 0 4px rgba(255, 255, 255, 0.6));
 
     /* Toggle button positioning */
     --toggle-position-desktop: -14px;
@@ -315,6 +324,11 @@
     /* Sidebar specific variables (settings and main sidebar) */
     --sidebar-bg: #41508a;
     --sidebar-dropdown-bg: #4d5da1;
+    --sidebar-status-success: #9ff7ad;
+    --sidebar-status-warning: #ffe680;
+    --sidebar-status-danger: #ff8f99;
+    /* Dark mode: standard dark shadow is sufficient on the deep-blue sidebar */
+    --sidebar-status-shadow: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35));
     --diversification-bar: rgba(65, 80, 138, 0.4);
 
     /* Bootstrap Table Control Variables - Dark Mode Refined */
@@ -1328,6 +1342,24 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     --bs-tooltip-padding-y: var(--spacing-xs);
 }
 
+.connection-tooltip .tooltip-inner {
+    max-width: 320px;
+    text-align: left;
+    white-space: normal;
+}
+
+.connection-tooltip .broker-status-grid {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    column-gap: 0.4em;
+    row-gap: 0.15em;
+    align-items: center;
+}
+
+.connection-tooltip .status-emoji {
+    text-align: center;
+}
+
 /* Keep tooltips above the sidebar and other elevated UI */
 .tooltip {
     z-index: calc(var(--z-index-toast) + 30);
@@ -2319,15 +2351,23 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     color: var(--dropdown-custom-color) !important;
 }
 
-/* Connection Status Icons - Better contrast against dark sidebar */
-#sidebar .text-success {
-    color: var(--color-success-light) !important;
-    /* Light green for better contrast */
+/* Connection status icon colors with stronger contrast against sidebar blue */
+#sidebar .sidebar-icon.text-success {
+    color: var(--sidebar-status-success) !important;
 }
 
-#sidebar .text-warning {
-    color: var(--color-warning-light) !important;
-    /* Gold/bright yellow for better contrast */
+#sidebar .sidebar-icon.text-warning {
+    color: var(--sidebar-status-warning) !important;
+}
+
+#sidebar .sidebar-icon.text-danger {
+    color: var(--sidebar-status-danger) !important;
+}
+
+#sidebar .sidebar-icon.text-success,
+#sidebar .sidebar-icon.text-warning,
+#sidebar .sidebar-icon.text-danger {
+    filter: var(--sidebar-status-shadow);
 }
 
 /* ---------------------------------------------------
