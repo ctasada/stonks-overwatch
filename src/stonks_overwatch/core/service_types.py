@@ -18,3 +18,4 @@ class ServiceType(Enum):
     FEE = "fee"
     ACCOUNT = "account"
     AUTHENTICATION = "authentication"
+    UPDATE = "update"

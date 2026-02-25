@@ -13,6 +13,7 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 ### Changed
 
 - Internal refactor to simplify the authentication processes across different brokers
+- Last update indicator now shows information for all the brokers
 
 ### Fixed
 

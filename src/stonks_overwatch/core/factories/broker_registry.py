@@ -20,6 +20,7 @@ from stonks_overwatch.core.interfaces import (
     PortfolioServiceInterface,
     TransactionServiceInterface,
 )
+from stonks_overwatch.core.interfaces.update_service import AbstractUpdateService
 from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.singleton import singleton
@@ -51,6 +52,7 @@ class BrokerRegistry:
         ServiceType.FEE: FeeServiceInterface,
         ServiceType.ACCOUNT: AccountServiceInterface,
         ServiceType.AUTHENTICATION: AuthenticationServiceInterface,
+        ServiceType.UPDATE: AbstractUpdateService,
     }
 
     def __init__(self):

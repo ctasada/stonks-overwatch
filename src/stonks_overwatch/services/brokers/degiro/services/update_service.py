@@ -26,9 +26,6 @@ from stonks_overwatch.services.brokers.degiro.repositories.models import (
     DeGiroUpcomingPayments,
 )
 from stonks_overwatch.services.brokers.degiro.repositories.product_info_repository import ProductInfoRepository
-from stonks_overwatch.services.brokers.degiro.repositories.product_quotations_repository import (
-    ProductQuotationsRepository,
-)
 from stonks_overwatch.services.brokers.degiro.repositories.transactions_repository import TransactionsRepository
 from stonks_overwatch.services.brokers.degiro.services.helper import is_non_tradeable_product
 from stonks_overwatch.services.brokers.degiro.services.portfolio_service import PortfolioService
@@ -89,20 +86,6 @@ class UpdateService(BaseService, AbstractUpdateService):
         )
         self.yfinance_client = YFinanceClient()
 
-    def get_last_import(self) -> datetime:
-        last_cash_movement = self._get_last_cash_movement_import()
-        last_transaction = self._get_last_transactions_import()
-        last_quotation = ProductQuotationsRepository.get_last_update()
-
-        # Filter out None values to handle cases where no data exists yet
-        non_null_dates = [date for date in [last_cash_movement, last_transaction, last_quotation] if date is not None]
-
-        if not non_null_dates:
-            # If no data exists yet, return a timezone-aware default date
-            return django_timezone.now()
-
-        return max(non_null_dates)
-
     def _get_last_cash_movement_import(self) -> datetime:
         last_movement = CashMovementsRepository.get_last_movement()
         return self._ensure_timezone_aware_datetime(last_movement)
@@ -154,9 +137,11 @@ class UpdateService(BaseService, AbstractUpdateService):
             self.update_company_profile()
             self.update_yfinance()
             self.update_dividends()
+            self._record_sync(success=True)
         except Exception as error:
             self.logger.error("Cannot Update Portfolio!")
             self.logger.error("Exception: %s", str(error), exc_info=True)
+            self._record_sync(success=False)
 
     def update_account(self):
         """Update the Account DB data. Only does it if the data is older than today."""

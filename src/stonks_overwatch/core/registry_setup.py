@@ -47,6 +47,7 @@ from stonks_overwatch.services.brokers.bitvavo.services.portfolio_service import
 from stonks_overwatch.services.brokers.bitvavo.services.transaction_service import (
     TransactionsService as BitvavoTransactionService,
 )
+from stonks_overwatch.services.brokers.bitvavo.services.update_service import UpdateService as BitvavoUpdateService
 from stonks_overwatch.services.brokers.degiro.services.account_service import (
     AccountOverviewService as DeGiroAccountService,
 )
@@ -64,6 +65,7 @@ from stonks_overwatch.services.brokers.degiro.services.portfolio_service import 
 from stonks_overwatch.services.brokers.degiro.services.transaction_service import (
     TransactionsService as DeGiroTransactionService,
 )
+from stonks_overwatch.services.brokers.degiro.services.update_service import UpdateService as DeGiroUpdateService
 from stonks_overwatch.services.brokers.ibkr.services.account_overview import (
     AccountOverviewService as IbkrAccountOverviewService,
 )
@@ -86,6 +88,7 @@ from stonks_overwatch.services.brokers.ibkr.services.portfolio import (
 from stonks_overwatch.services.brokers.ibkr.services.transactions import (
     TransactionsService as IbkrTransactionService,
 )
+from stonks_overwatch.services.brokers.ibkr.services.update_service import UpdateService as IbkrUpdateService
 
 # Configuration-driven broker definitions
 BROKER_CONFIGS: Dict[BrokerName, Dict[str, Any]] = {
@@ -99,6 +102,7 @@ BROKER_CONFIGS: Dict[BrokerName, Dict[str, Any]] = {
             ServiceType.FEE: DeGiroFeeService,
             ServiceType.ACCOUNT: DeGiroAccountService,
             ServiceType.AUTHENTICATION: DegiroAuthenticationService,
+            ServiceType.UPDATE: DeGiroUpdateService,
         },
     },
     BrokerName.BITVAVO: {
@@ -110,6 +114,7 @@ BROKER_CONFIGS: Dict[BrokerName, Dict[str, Any]] = {
             ServiceType.FEE: BitvavoFeeService,
             ServiceType.ACCOUNT: BitvavoAccountService,
             ServiceType.AUTHENTICATION: BitvavoAuthenticationService,
+            ServiceType.UPDATE: BitvavoUpdateService,
         },
     },
     BrokerName.IBKR: {
@@ -120,6 +125,7 @@ BROKER_CONFIGS: Dict[BrokerName, Dict[str, Any]] = {
             ServiceType.DIVIDEND: IbkrDividendsService,
             ServiceType.ACCOUNT: IbkrAccountOverviewService,
             ServiceType.AUTHENTICATION: IbkrAuthenticationService,
+            ServiceType.UPDATE: IbkrUpdateService,
         },
     },
 }
