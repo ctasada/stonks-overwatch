@@ -236,11 +236,10 @@ class Metatrader4AuthenticationService(BaseService, AuthenticationServiceInterfa
             # Clear the broker factory cache so it picks up the updated configuration
             self._clear_broker_cache()
 
-            # Trigger job scheduler reconfiguration to pick up the new broker
+            # Trigger job scheduler reconfiguration to pick up the new broker.
+            # This schedules the MT4 job with next_run_time=now(), so APScheduler
+            # will run the update immediately — no need to trigger it manually.
             self._reconfigure_jobs()
-
-            # Trigger immediate portfolio update so data is available right away
-            self._trigger_portfolio_update()
 
             self.logger.info("MT4 user authentication successful")
             return {
@@ -287,12 +286,13 @@ class Metatrader4AuthenticationService(BaseService, AuthenticationServiceInterfa
             self.logger.error(f"Authentication check error: {str(e)}")
             return False
 
-    def check_degiro_connection(self, request: HttpRequest) -> AuthenticationResponse:
+    def check_broker_connection(self, request: HttpRequest) -> AuthenticationResponse:
         """
         Check connection - not applicable for MetaTrader4.
 
-        This method is part of the AuthenticationServiceInterface but is specific to DeGiro.
-        For MT4, we don't have a similar connection check mechanism.
+        For MT4, we don't have the same live session connection check
+        mechanism used by DEGIRO. Returning CONFIGURATION_ERROR matches the
+        behavior used by other non-session brokers.
 
         Args:
             request: The HTTP request containing session data
@@ -300,10 +300,10 @@ class Metatrader4AuthenticationService(BaseService, AuthenticationServiceInterfa
         Returns:
             AuthenticationResponse: Not applicable response
         """
-        self.logger.debug("DeGiro connection check not applicable for MT4")
+        self.logger.debug("Broker connection check not applicable for MT4")
         return AuthenticationResponse(
             result=AuthenticationResult.CONFIGURATION_ERROR,
-            message="DeGiro connection check is not applicable for MetaTrader4",
+            message="Broker connection check is not applicable for MetaTrader4",
         )
 
     def handle_totp_authentication(self, request: HttpRequest, one_time_password: int) -> AuthenticationResponse:
@@ -493,12 +493,13 @@ class Metatrader4AuthenticationService(BaseService, AuthenticationServiceInterfa
             # If it already exists, update it
             if not created:
                 broker_config.enabled = True
-                broker_config.credentials = {
-                    "ftp_server": ftp_server if remember_me else "",
-                    "username": username if remember_me else "",
-                    "password": password if remember_me else "",
-                    "path": path if remember_me else "",
-                }
+                if remember_me:
+                    broker_config.credentials = {
+                        "ftp_server": ftp_server,
+                        "username": username,
+                        "password": password,
+                        "path": path,
+                    }
                 broker_config.save()
 
             self.logger.info(f"Broker configuration {'created' if created else 'updated'} for MetaTrader4")

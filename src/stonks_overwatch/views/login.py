@@ -106,10 +106,17 @@ class Login(View):
         # already-authenticated users go straight to the dashboard
         if hasattr(request, "session"):
             try:
+                from stonks_overwatch.core.authentication_helper import AuthenticationHelper
+
                 for broker_enum in self.registry.get_registered_brokers():
                     if request.session.get(SessionKeys.get_authenticated_key(broker_enum), False):
-                        self.logger.info(f"User already authenticated with {broker_enum}, redirecting to dashboard")
-                        return redirect("dashboard")
+                        # Verify broker is still enabled - clear stale sessions for disabled brokers
+                        if AuthenticationHelper.is_broker_ready(broker_enum):
+                            self.logger.info(f"User already authenticated with {broker_enum}, redirecting to dashboard")
+                            return redirect("dashboard")
+                        else:
+                            self.logger.info(f"Broker {broker_enum} is no longer ready, clearing stale session")
+                            AuthenticationHelper.clear_broken_session(request, broker_enum)
             except Exception as e:
                 self.logger.error(f"Error checking authentication status: {str(e)}")
 

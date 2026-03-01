@@ -50,7 +50,7 @@ class SettingsView(View):
         degiro_config = self.repository.get_broker_by_name(BrokerName.DEGIRO.value)
         bitvavo_config = self.repository.get_broker_by_name(BrokerName.BITVAVO.value)
         ibkr_config = self.repository.get_broker_by_name(BrokerName.IBKR.value)
-        mt4_config = self.repository.get_broker_by_name(BrokerName.METATRADER4)
+        mt4_config = self.repository.get_broker_by_name(BrokerName.METATRADER4.value)
 
         logo_provider_config = config.get_setting("integration_logo_provider", {})
         if not isinstance(logo_provider_config, dict):

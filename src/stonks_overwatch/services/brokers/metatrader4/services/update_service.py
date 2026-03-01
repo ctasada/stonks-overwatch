@@ -121,8 +121,11 @@ class UpdateService(BaseService, AbstractUpdateService):
             else:
                 self.logger.warning("Failed to store MT4 report data")
 
+            self._record_sync(success=True)
+
         except Exception as e:
             self.logger.error(f"MT4 update failed: {e}", exc_info=True)
+            self._record_sync(success=False)
             raise
 
     def _save_debug_files(self, parse_result, html_content: str):
@@ -190,6 +193,6 @@ class UpdateService(BaseService, AbstractUpdateService):
             return datetime.combine(self._injected_config.start_date, time.min)
 
         # Final fallback
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, timezone
 
-        return datetime.now() - timedelta(days=30)
+        return datetime.now(tz=timezone.utc) - timedelta(days=30)
