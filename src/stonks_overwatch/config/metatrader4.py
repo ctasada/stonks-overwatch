@@ -56,7 +56,7 @@ class Metatrader4Config(BaseConfig):
         credentials: Optional[Metatrader4Credentials],
         start_date: date,
         update_frequency_minutes: int = DEFAULT_MT4_UPDATE_FREQUENCY,
-        enabled: bool = True,
+        enabled: bool = False,
         offline_mode: bool = None,
     ) -> None:
         if offline_mode is None:
@@ -85,7 +85,7 @@ class Metatrader4Config(BaseConfig):
 
     @classmethod
     def from_dict(cls, data: dict) -> "Metatrader4Config":
-        enabled = data.get("enabled", True)
+        enabled = data.get("enabled", False)
         credentials_data = data.get("credentials")
         credentials = Metatrader4Credentials.from_dict(credentials_data) if credentials_data else None
         start_date = data.get("start_date", cls.DEFAULT_MT4_START_DATE)

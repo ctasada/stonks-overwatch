@@ -29,7 +29,7 @@ def reverse_metatrader4_broker_config(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("stonks_overwatch", "0009_globalconfiguration"),
+        ("stonks_overwatch", "0010_brokersynclog"),
     ]
 
     operations = [

@@ -111,6 +111,9 @@ from stonks_overwatch.services.brokers.metatrader4.services.trading_journal_serv
 from stonks_overwatch.services.brokers.metatrader4.services.transaction_service import (
     TransactionService as Metatrader4TransactionService,
 )
+from stonks_overwatch.services.brokers.metatrader4.services.update_service import (
+    UpdateService as Metatrader4UpdateService,
+)
 from stonks_overwatch.utils.core.logger import StonksLogger
 
 logger = StonksLogger.get_logger("stonks_overwatch.core", "[REGISTRY_SETUP]")
@@ -163,6 +166,7 @@ BROKER_CONFIGS: Dict[BrokerName, Dict[str, Any]] = {
             ServiceType.DEPOSIT: Metatrader4DepositService,
             ServiceType.FEE: Metatrader4FeeService,
             ServiceType.AUTHENTICATION: Metatrader4AuthenticationService,
+            ServiceType.UPDATE: Metatrader4UpdateService,
             ServiceType.TRADING_JOURNAL: Metatrader4TradingJournalService,
         },
     },

@@ -38,6 +38,7 @@ class CredentialValidator:
                 BrokerName.DEGIRO: cls._validate_degiro,
                 BrokerName.BITVAVO: cls._validate_bitvavo,
                 BrokerName.IBKR: cls._validate_ibkr,
+                BrokerName.METATRADER4: cls._validate_metatrader4,
             }
 
             validator = validators.get(broker_name)
@@ -97,4 +98,28 @@ class CredentialValidator:
             and credentials.access_token
             and credentials.access_token != "IBKR ACCESS TOKEN"
             and len(credentials.access_token) > 10
+        )
+
+    @staticmethod
+    def _validate_metatrader4(credentials: Any) -> bool:
+        """
+        Validate MetaTrader4 credentials.
+        Checks FTP server, username, password and path are not placeholders and meet minimum length.
+        """
+        return (
+            hasattr(credentials, "ftp_server")
+            and hasattr(credentials, "username")
+            and hasattr(credentials, "password")
+            and hasattr(credentials, "path")
+            and credentials.ftp_server
+            and credentials.username
+            and credentials.password
+            and credentials.path
+            and credentials.ftp_server != "FTP SERVER ADDRESS"
+            and credentials.username != "FTP USERNAME"
+            and credentials.password != "FTP PASSWORD"
+            and credentials.path != "PATH TO REPORT FILE"
+            and len(credentials.ftp_server) > 3
+            and len(credentials.username) > 2
+            and len(credentials.password) > 2
         )
