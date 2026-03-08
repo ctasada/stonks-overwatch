@@ -59,8 +59,11 @@ class ProductInfoRepository:
 
     @staticmethod
     def get_product_info_from_id(product_id: int) -> dict:
-        """Get product information from the given product id. The information is retrieved from the DB."""
-        return ProductInfoRepository.get_products_info_raw([product_id])[product_id]
+        """Get product information from the given product id. The information is retrieved from the DB.
+
+        Returns an empty dict if the product is not found.
+        """
+        return ProductInfoRepository.get_products_info_raw([product_id]).get(product_id, {})
 
     @staticmethod
     def get_product_info_from_name(name: str) -> dict:

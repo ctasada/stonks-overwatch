@@ -10,9 +10,12 @@ from stonks_overwatch.services.brokers.degiro.repositories.transactions_reposito
 from stonks_overwatch.services.brokers.degiro.services.currency_service import CurrencyConverterService
 from stonks_overwatch.services.models import Fee, FeeType
 from stonks_overwatch.utils.core.localization import LocalizationUtility
+from stonks_overwatch.utils.core.logger import StonksLogger
 
 
 class FeesService(FeeServiceInterface, BaseService):
+    logger = StonksLogger.get_logger("stonks_overwatch.fees_data.degiro", "[DEGIRO|FEES]")
+
     def __init__(
         self,
         degiro_service: Optional[DeGiroService] = None,
@@ -90,7 +93,10 @@ class FeesService(FeeServiceInterface, BaseService):
 
         my_fees = []
         for transaction in transactions_history:
-            info = products_info[transaction["productId"]]
+            info = products_info.get(transaction["productId"])
+            if not info:
+                self.logger.warning(f"Skipping fee: missing product info for id {transaction['productId']}")
+                continue
             # FIXME: # feeInBaseCurrency vs totalFeesInBaseCurrency
             fees = transaction["totalFeesInBaseCurrency"]
 

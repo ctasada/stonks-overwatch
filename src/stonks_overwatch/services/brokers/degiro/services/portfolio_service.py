@@ -751,14 +751,21 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         product_growth = self.calculate_product_growth()
         tradable_products = {}
 
+        _required_fields = {"name", "isin", "symbol", "currency"}
+
         for key, data in product_growth.items():
             product = ProductInfoRepository.get_product_info_from_id(key)
+
+            if not product or not _required_fields.issubset(product):
+                self.logger.warning(f"Skipping product with incomplete info: {key}")
+                self.logger.debug(f"Product data for {key}: {product}")
+                continue
 
             # If the product is NOT tradable, we shouldn't consider it for Growth
             # The 'tradable' attribute identifies old Stocks, like the ones that are
             # renamed for some reason, and it's not good enough to identify stocks
             # that are provided as dividends, for example.
-            if self.NON_TRADEABLE_IDENTIFIER in product.get("name", ""):
+            if is_non_tradeable_product(product):
                 continue
 
             data[self.PRODUCT_ID_FIELD] = key

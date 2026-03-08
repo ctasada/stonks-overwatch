@@ -481,6 +481,12 @@ class UpdateService(BaseService, AbstractUpdateService):
         for key in product_growth.keys():
             product = ProductInfoRepository.get_product_info_from_id(key)
 
+            if not product or not {"name", "isin", "symbol", "currency"}.issubset(product):
+                self.logger.warning(f"Skipping product with incomplete info: {key}")
+                self.logger.debug(f"Product data for {key}: {product}")
+                delete_keys.append(key)
+                continue
+
             # FIXME: Code copied from dashboard._create_products_quotation()
             if is_non_tradeable_product(product):
                 delete_keys.append(key)
