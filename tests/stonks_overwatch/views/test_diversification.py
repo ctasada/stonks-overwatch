@@ -9,6 +9,7 @@ class DummyPortfolioEntry:
     def __init__(self, name, symbol, value, product_type, product_type_share, is_open=True):
         self._name = name
         self.symbol = symbol
+        self.conid = None
         self.value = value
         self.product_type = product_type
         self.product_type_share = product_type_share

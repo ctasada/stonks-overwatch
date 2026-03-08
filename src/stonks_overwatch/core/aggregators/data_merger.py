@@ -75,6 +75,8 @@ class DataMerger:
         merged_entry = PortfolioEntry(
             name=entry1.name or entry2.name,
             symbol=entry1.symbol,
+            # conid is added just to support IBKR logos
+            conid=entry1.conid or entry2.conid,
             isin=entry1.isin or entry2.isin,
             sector=entry1.sector or entry2.sector,
             industry=entry1.industry if entry1.industry != "Unknown" else entry2.industry,
