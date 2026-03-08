@@ -17,11 +17,12 @@ def is_non_tradeable_product(product: dict) -> bool:
     renamed for some reason, and it's not good enough to identify stocks
     that are provided as dividends, for example.
     """
-    if product["symbol"].endswith(".D"):
+    if not product:
+        return False
+    if product.get("symbol", "").endswith(".D"):
         # This is a DeGiro-specific symbol, which is not tradeable
         return True
-
-    return "Non tradeable" in product["name"]
+    return "Non tradeable" in product.get("name", "")
 
 
 def retry_with_backoff(
