@@ -229,7 +229,7 @@ Apache License
 
 
 Django
-6.0.2
+6.0.3
 BSD-3-Clause
 The MIT License (MIT)
 
@@ -414,10 +414,10 @@ THE SOFTWARE.
 
 
 django-node-assets
-0.9.15
+0.9.16
 MIT License
 
-Copyright (c) 2025 Andrey Butenko
+Copyright (c) 2026 Andrey Butenko
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -439,7 +439,7 @@ SOFTWARE.
 
 MIT License
 
-Copyright (c) 2025 Andrey Butenko
+Copyright (c) 2026 Andrey Butenko
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -1665,7 +1665,7 @@ Apache Software License
 
 
 requests-cache
-1.3.0
+1.3.1
 BSD-2-Clause
 BSD 2-Clause License
 
@@ -2882,7 +2882,7 @@ MIT
 
 
 dompurify
-3.3.1
+3.3.2
 (MPL-2.0 OR Apache-2.0)
 DOMPurify
 Copyright 2025 Dr.-Ing. Mario Heiderich, Cure53
@@ -5370,7 +5370,7 @@ SOFTWARE.
 
 
 sax
-1.4.4
+1.5.0
 BlueOak-1.0.0
 # Blue Oak Model License
 
