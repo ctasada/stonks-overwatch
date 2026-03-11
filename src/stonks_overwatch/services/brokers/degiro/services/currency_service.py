@@ -48,6 +48,10 @@ class CurrencyConverterService:
 
         quotations = self.currency_maps[currency][new_currency].quotations
 
+        if not quotations:
+            self.logger.warning(f"Empty quotations for {currency}/{new_currency}, falling back to currency_converter")
+            return self.currency_converter.convert(amount, currency, new_currency, fx_date)
+
         last_known_date = list(quotations.keys())[-1]
         if fx_date is None or fx_date > last_known_date:
             fx_date = last_known_date
@@ -66,6 +70,10 @@ class CurrencyConverterService:
     def __load_quotations(self, currency: str, new_currency: str) -> Dict[date, float]:
         product_id = self.currency_maps[currency][new_currency].product_id
         tmp_quotations = ProductQuotationsRepository.get_product_quotations(product_id)
+
+        if tmp_quotations is None:
+            self.logger.warning(f"No quotations found for {currency}/{new_currency} (productId={product_id})")
+            return {}
 
         return {
             LocalizationUtility.convert_string_to_date(date_str): value for date_str, value in tmp_quotations.items()
