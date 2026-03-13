@@ -141,6 +141,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         return PortfolioEntry(
             name=name,
             symbol=ticker,
+            conid=str(position["conid"]) if position.get("conid") is not None else None,
             sector=Sector.from_str(sector_str),
             industry=industry,
             # FIXME: Add stock class category

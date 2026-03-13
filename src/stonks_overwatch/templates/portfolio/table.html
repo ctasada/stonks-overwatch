@@ -33,7 +33,8 @@
             <tr>
                 <td class="text-center align-middle">
                     <div class="asset-icon-container">
-                        <img src="{% url 'asset_logo' product_type=item.product_type|lower symbol=item.symbol|lower %}" width="30" height="30" alt="{{ item.symbol }} logo" onerror="this.style.display='none'">
+                        <img src="{% url 'asset_logo' product_type=item.product_type|lower symbol=item.symbol|lower %}{% if item.conid %}?conid={{ item.conid }}{% endif %}"
+                             width="30" height="30" alt="{{ item.symbol }} logo" onerror="this.style.display='none'">
                     </div>
                 </td>
                 <td>{{ item.symbol }}<br><small class="fw-lighter">{{ item.name }}</small></td>

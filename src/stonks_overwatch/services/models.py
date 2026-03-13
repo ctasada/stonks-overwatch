@@ -237,6 +237,8 @@ class Fee:
 class PortfolioEntry:
     name: str = ""
     symbol: str = ""
+    # conid is added just to support IBKR logos
+    conid: Optional[str] = None
     isin: str = ""
     sector: Sector = None
     industry: str = ""

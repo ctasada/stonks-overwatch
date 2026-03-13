@@ -7,6 +7,7 @@ from django.views import View
 from django.views.decorators.cache import cache_page
 from requests.exceptions import RequestException
 
+from stonks_overwatch.integrations.logos.ibkr import IbkrLogoIntegration
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.core.logger import StonksLogger
 
@@ -65,6 +66,11 @@ class AssetLogoView(View):
             self.logger.warning(f"Invalid Logo request for {product_type.name} {symbol.upper()}")
             return HttpResponseNotFound("Invalid product type")
 
+        conid = request.GET.get("conid", "").strip()
+        if conid and not conid.isdigit():
+            self.logger.warning(f"Ignoring invalid conid parameter: {conid}")
+            conid = ""
+
         try:
             if product_type == LogoType.CASH:
                 return HttpResponse(
@@ -87,6 +93,9 @@ class AssetLogoView(View):
             elif product_type == LogoType.SECTOR:
                 url = self.__emoji_to_svg(symbol)
             else:
+                ibkr_logo = self.__try_ibkr_logo(conid, product_type)
+                if ibkr_logo:
+                    return ibkr_logo
                 url = self.base_urls[product_type].format(symbol.lower())
 
             response = requests.get(url, timeout=5)
@@ -102,6 +111,28 @@ class AssetLogoView(View):
             return HttpResponse(
                 content=self.__generate_symbol(symbol.upper()), content_type=self.SVG_CONTENT_TYPE, status=200
             )
+
+    def __try_ibkr_logo(self, conid: str, product_type: LogoType) -> HttpResponse | None:
+        """Fetch the IBKR/Benzinga logo for the given conid and return it as a proxied response.
+
+        Returns ``None`` if conid is absent, the product type is not supported, or the fetch fails,
+        so the caller can fall through to the CDN path.
+        """
+        if not conid or product_type not in (LogoType.STOCK, LogoType.ETF):
+            return None
+        ibkr_url = IbkrLogoIntegration().get_logo_url(conid=conid)
+        if not ibkr_url:
+            return None
+        try:
+            ibkr_response = requests.get(ibkr_url, timeout=3)
+            ibkr_response.raise_for_status()
+            return HttpResponse(
+                content=ibkr_response.content,
+                content_type=ibkr_response.headers.get("Content-Type", self.SVG_CONTENT_TYPE),
+                status=200,
+            )
+        except RequestException:
+            return None  # fall through to CDN
 
     def __generate_symbol(self, symbol: str) -> str:
         # We need to fit the logo independently of the symbol length
