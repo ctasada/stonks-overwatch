@@ -2,7 +2,7 @@
 
 > **⚠️ Bitvavo integration is not yet stable. Features and reliability may change in future releases. Use with caution.**
 
-[Bitvavo](https://bitvavo.com/en/) is a cryptocurrency exchange supported by **Stonks Overwatch**, allowing you to track your crypto investments, portfolio value, and growth alongside your traditional investments.
+[Bitvavo](https://bitvavo.com/en) is a cryptocurrency exchange supported by **Stonks Overwatch**, allowing you to track your crypto investments, portfolio value, and growth alongside your traditional investments.
 
 ## Overview
 
@@ -44,7 +44,7 @@ Before configuring Bitvavo in Stonks Overwatch, you need to:
 ### Step-by-Step Guide
 
 1. **Login to Bitvavo**
-   - Visit [bitvavo.com](https://bitvavo.com/en/) and login
+   - Visit [bitvavo.com](https://bitvavo.com/en) and login
 
 2. **Navigate to API settings**
    - Go to **Account** → **API**
@@ -407,7 +407,7 @@ With the **View** API permission, Stonks Overwatch can:
 
 ### How do I get started with Bitvavo?
 
-1. Create a Bitvavo account at [bitvavo.com](https://bitvavo.com/en/)
+1. Create a Bitvavo account at [bitvavo.com](https://bitvavo.com/en)
 2. Complete KYC verification
 3. Generate API credentials
 4. Configure in Stonks Overwatch
@@ -418,7 +418,7 @@ Currently, one Bitvavo account per configuration. Multi-account support is plann
 
 ### Does this work in all countries?
 
-Yes, if Bitvavo supports your country. Check [Bitvavo's availability](https://bitvavo.com/en/).
+Yes, if Bitvavo supports your country. Check [Bitvavo's availability](https://bitvavo.com/en).
 
 ### Are my API keys safe?
 
@@ -440,8 +440,8 @@ Generate a new API key pair in your Bitvavo account and update your configuratio
 
 ### Bitvavo Resources
 
-- **[Bitvavo Website](https://bitvavo.com/en/)** - Official site
-- **[Bitvavo API Docs](https://docs.bitvavo.com/)** - API documentation
+- **[Bitvavo Website](https://bitvavo.com/en)** - Official site
+- **[Bitvavo API Docs](https://docs.bitvavo.com)** - API documentation
 - **[Create API Key](https://account.bitvavo.com/user/api)** - Generate credentials
 - **[Bitvavo Support](https://support.bitvavo.com/hc/en-us)** - Bitvavo help center
 

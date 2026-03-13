@@ -894,10 +894,10 @@ under the terms of *both* these licenses.
 
 
 polars
-1.38.1
+1.39.0
 MIT License
 Copyright (c) 2025 Ritchie Vink
-Some portions Copyright (c) 2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+Copyright (c) 2024 (Some portions) NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -2882,7 +2882,7 @@ MIT
 
 
 dompurify
-3.3.2
+3.3.3
 (MPL-2.0 OR Apache-2.0)
 DOMPurify
 Copyright 2025 Dr.-Ing. Mario Heiderich, Cure53
