@@ -41,8 +41,10 @@ exclude = [
     "https://github.com/YOUR_USERNAME/*",
 
     # Brokers
+    "https://bitvavo.com/en",
     "https://account.bitvavo.com/create",
     "https://support.bitvavo.com/hc/en-us",
+    "https://bitvavo.com/en/markets",
 ]
 
 # Exclude files/directories

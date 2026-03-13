@@ -71,7 +71,8 @@ class LicenseGenerator:
         # Remove extras like [quotecast] or [oauth]
         dep = re.sub(r"\[.*?\]", "", dep)
         # Extract just the package name (before version constraints)
-        name = re.split(r"[<>=!~]", dep)[0].strip()
+        # Handles both "pkg >= 1.0" and PEP 508 "pkg (>=1.0)" formats
+        name = re.split(r"[<>=!~(]", dep)[0].strip()
         # Normalize to lowercase with underscores
         return name.lower().replace("-", "_")
 

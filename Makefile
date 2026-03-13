@@ -100,6 +100,26 @@ update: ## Update all dependencies
 	cd $(SRC_DIR) && npm update
 	poetry self update
 	poetry update
+	@echo -e "$(BOLD)$(YELLOW)Updating main dependencies to latest versions...$(RESET)"
+	@OUTDATED_JSON=$$(poetry show --outdated --only main --format=json) || { echo -e "$(RED)Failed to fetch outdated main dependencies$(RESET)"; exit 1; }; \
+	DIRECT=$$(poetry show --only main --tree | grep -E '^[a-zA-Z]' | awk '{print $$1}') || { echo -e "$(RED)Failed to fetch main dependency tree$(RESET)"; exit 1; }; \
+	UPDATES=$$(echo "$$OUTDATED_JSON" | python3 -c "import json,sys; [print(p['name']+'>='+p['latest_version']) for p in json.load(sys.stdin)]" | while read pkg; do \
+		name=$$(echo "$$pkg" | sed 's/>=.*//'); \
+		echo "$$DIRECT" | grep -qx "$$name" && echo "$$pkg" || true; \
+	done); \
+	if [ -n "$$UPDATES" ]; then \
+		poetry add $$UPDATES; \
+	fi
+	@echo -e "$(BOLD)$(YELLOW)Updating dev dependencies to latest versions...$(RESET)"
+	@OUTDATED_JSON=$$(poetry show --outdated --only dev --format=json) || { echo -e "$(RED)Failed to fetch outdated dev dependencies$(RESET)"; exit 1; }; \
+	DIRECT=$$(poetry show --only dev --tree | grep -E '^[a-zA-Z]' | awk '{print $$1}') || { echo -e "$(RED)Failed to fetch dev dependency tree$(RESET)"; exit 1; }; \
+	UPDATES=$$(echo "$$OUTDATED_JSON" | python3 -c "import json,sys; [print(p['name']+'>='+p['latest_version']) for p in json.load(sys.stdin)]" | while read pkg; do \
+		name=$$(echo "$$pkg" | sed 's/>=.*//'); \
+		echo "$$DIRECT" | grep -qx "$$name" && echo "$$pkg" || true; \
+	done); \
+	if [ -n "$$UPDATES" ]; then \
+		poetry add --group dev $$UPDATES; \
+	fi
 	$(MAKE) generate-third-party
 
 clean: ## Clean temporary files and caches
