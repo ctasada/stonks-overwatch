@@ -42,6 +42,11 @@ class TestProductInfoRepository(BaseRepositoryTest):
         product = ProductInfoRepository.get_product_info_from_id(331868)
         self.assert_dict_contains(product, name="Apple Inc", symbol="AAPL", currency="USD", isin="US0378331005")
 
+    def test_get_product_by_id_not_found_returns_empty_dict(self):
+        """Test that a missing product ID returns an empty dict instead of raising KeyError."""
+        product = ProductInfoRepository.get_product_info_from_id(999999)
+        self.assertEqual(product, {})
+
     def test_get_product_info_from_name(self):
         """Test retrieving product info by company name."""
         product = ProductInfoRepository.get_product_info_from_name("Microsoft Corp")

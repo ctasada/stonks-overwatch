@@ -9,9 +9,12 @@ from stonks_overwatch.services.brokers.degiro.repositories.product_info_reposito
 from stonks_overwatch.services.brokers.degiro.repositories.transactions_repository import TransactionsRepository
 from stonks_overwatch.services.models import Transaction
 from stonks_overwatch.utils.core.localization import LocalizationUtility
+from stonks_overwatch.utils.core.logger import StonksLogger
 
 
 class TransactionsService(BaseService, TransactionServiceInterface):
+    logger = StonksLogger.get_logger("stonks_overwatch.transactions_data.degiro", "[DEGIRO|TRANSACTIONS]")
+
     def __init__(
         self,
         degiro_service: Optional[DeGiroService] = None,
@@ -40,7 +43,10 @@ class TransactionsService(BaseService, TransactionServiceInterface):
         # DISPLAY PRODUCTS_INFO
         my_transactions = []
         for transaction in transactions_history:
-            info = products_info[transaction["productId"]]
+            info = products_info.get(transaction["productId"])
+            if not info:
+                self.logger.warning(f"Skipping transaction: missing product info for id {transaction['productId']}")
+                continue
 
             fees = transaction["totalPlusFeeInBaseCurrency"] - transaction["totalInBaseCurrency"]
 

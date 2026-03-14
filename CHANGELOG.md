@@ -22,7 +22,9 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 - Fixed potential error while aggregating data from different brokers
   - Fixed error aggregating numeric types
   - Fixed error sorting dates
-- DEGIRO: Prevent authenticated users from being redirected to 2FA login screen
+- DEGIRO:
+  - Prevent authenticated users from being redirected to 2FA login screen
+  - Fixed crash when loading portfolio history, fees, or transactions for products with incomplete data
 - IBKR:
   - Handle incomplete IBKR API contract data with defensive fallbacks
   - Fixed portfolio API import. Improves identification of ETFs
