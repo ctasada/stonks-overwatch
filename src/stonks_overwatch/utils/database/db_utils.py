@@ -1,3 +1,4 @@
+import copy
 import os
 import zipfile
 
@@ -62,7 +63,29 @@ def get_models():
     return models
 
 
-def dump_database(output_file="db_dump.zip", database="default"):
+def _redact_credentials(obj):
+    """Return a copy of a BrokersConfiguration instance with credential values redacted.
+
+    Each credential key is kept, but its value is replaced with a boolean
+    indicating whether the original value was non-empty.
+    """
+    from stonks_overwatch.services.brokers.models import BrokersConfiguration
+
+    if not isinstance(obj, BrokersConfiguration):
+        return obj
+
+    redacted = copy.copy(obj)
+    if redacted.credentials:
+        redacted.credentials = {key: bool(value) for key, value in redacted.credentials.items()}
+    return redacted
+
+
+def are_credentials_redacted(credentials: dict) -> bool:
+    """Return True if all credential values are booleans, indicating a redacted dump."""
+    return bool(credentials) and all(isinstance(v, bool) for v in credentials.values())
+
+
+def dump_database(output_file="db_dump.zip", database="default", include_credentials=False):
     """Dump database content to JSON file"""
 
     if database == "demo":
@@ -74,7 +97,10 @@ def dump_database(output_file="db_dump.zip", database="default"):
     objects_to_serialize = []
     for model in get_models():
         objects = model.objects.all()
-        objects_to_serialize.extend(objects)
+        if include_credentials:
+            objects_to_serialize.extend(objects)
+        else:
+            objects_to_serialize.extend(_redact_credentials(obj) for obj in objects)
         print(f"Found {objects.count()} objects in {model._meta.app_label}.{model._meta.model_name}")
 
     # Serialize to JSON

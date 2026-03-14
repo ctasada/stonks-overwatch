@@ -27,6 +27,8 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
   - Handle incomplete IBKR API contract data with defensive fallbacks
   - Fixed portfolio API import. Improves identification of ETFs
   - Retrieve asset logos directly from IBKR using the contract ID (conid)
+- DB Dump: Credentials are redacted by default; use `--include-credentials` to include them. When loading a redacted
+dump, existing credentials are preserved
 
 ### Security
 

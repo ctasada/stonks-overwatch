@@ -25,8 +25,9 @@ from scripts.common import setup_script_environment
 # Set up Django environment and logging
 setup_script_environment()
 
+from stonks_overwatch.services.brokers.models import BrokersConfiguration  # noqa: E402
 from stonks_overwatch.settings import DATABASES  # noqa: E402
-from stonks_overwatch.utils.database.db_utils import dump_database  # noqa: E402
+from stonks_overwatch.utils.database.db_utils import are_credentials_redacted, dump_database  # noqa: E402
 
 
 def load_database(input_file, database="default"):
@@ -76,6 +77,10 @@ def load_database(input_file, database="default"):
         objects_loaded = 0
         with transaction.atomic(using=database):
             for obj in serializers.deserialize("json", data):
+                instance = obj.object
+                if isinstance(instance, BrokersConfiguration) and are_credentials_redacted(instance.credentials):
+                    existing = BrokersConfiguration.objects.using(database).filter(pk=instance.pk).first()
+                    instance.credentials = existing.credentials if existing else {}
                 obj.save(using=database)
                 objects_loaded += 1
 
@@ -100,6 +105,12 @@ def main():
         choices=["default", "demo"],
         help="Database to use (default: default, options: default, demo)",
     )
+    dump_parser.add_argument(
+        "--include-credentials",
+        action="store_true",
+        default=False,
+        help="Include actual credential values in the dump (default: redacted)",
+    )
 
     # Load command
     load_parser = subparsers.add_parser("load", help="Load database from file")
@@ -119,7 +130,7 @@ def main():
         return
 
     if args.command == "dump":
-        dump_database(output_file=args.output, database=args.database)
+        dump_database(output_file=args.output, database=args.database, include_credentials=args.include_credentials)
     elif args.command == "load":
         load_database(input_file=args.input, database=args.database)
 
