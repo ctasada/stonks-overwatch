@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 
 from stonks_overwatch.core.interfaces.account_service import AccountServiceInterface
@@ -34,7 +34,8 @@ class AccountService(BaseService, AccountServiceInterface):
                     continue
 
             # Sort by datetime descending (newest first)
-            overview.sort(key=lambda x: x.datetime if x.datetime else datetime.min, reverse=True)
+            tz_aware_min = datetime.min.replace(tzinfo=timezone.utc)
+            overview.sort(key=lambda x: x.datetime if x.datetime else tz_aware_min, reverse=True)
 
             self.logger.debug(f"Retrieved {len(overview)} account overview entries from database")
             return overview

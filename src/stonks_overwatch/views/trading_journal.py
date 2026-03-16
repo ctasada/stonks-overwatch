@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.views import View
 
 from stonks_overwatch.config.config import Config
+from stonks_overwatch.core.exceptions import DataAggregationException
 from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.services.aggregators.trading_journal_aggregator import TradingJournalAggregatorService
 from stonks_overwatch.services.models import Trade
@@ -42,11 +43,22 @@ class TradingJournal(CapabilityRequiredMixin, View):
         calendar_year = self._parse_request_calendar_year(request)
         calendar_month = self._parse_request_calendar_month(request)
 
+        # Get aggregated account summary (balance, unrealized P/L, equity) — always fault-tolerant
+        account_summary = self.trading_journal_aggregator.get_account_summary(selected_portfolio)
+
         # Get trading journal entries
-        entries = self.trading_journal_aggregator.get_closed_trades(selected_portfolio)
+        try:
+            entries = self.trading_journal_aggregator.get_closed_trades(selected_portfolio)
+        except DataAggregationException as e:
+            self.logger.warning(f"No trading journal data available: {e}")
+            entries = []
 
         if not entries:
-            return render(request, "trading_journal.html", {"tradesCalendar": {"years": [], "calendar": {}}})
+            return render(
+                request,
+                "trading_journal.html",
+                {"tradesCalendar": {"years": [], "calendar": {}}, "accountSummary": account_summary},
+            )
 
         calendar_data = self._get_trades_calendar(entries)
 
@@ -78,6 +90,7 @@ class TradingJournal(CapabilityRequiredMixin, View):
         now = timezone.now()
 
         context = {
+            "accountSummary": account_summary,
             "tradesCalendar": calendar_data,
             "monthGrid": month_grid,
             "granularity": granularity,

@@ -578,6 +578,47 @@ class TotalPortfolio:
 
 
 @dataclass
+class AccountSummary:
+    """Represents an aggregated account summary across all enabled brokers."""
+
+    balance: float
+    unrealized_pl: float
+    equity: float
+    margin: float
+    currency: str
+
+    def formatted_balance(self) -> str:
+        return LocalizationUtility.format_money_value(value=self.balance, currency=self.currency)
+
+    def formatted_unrealized_pl(self) -> str:
+        return LocalizationUtility.format_money_value(value=self.unrealized_pl, currency=self.currency)
+
+    def formatted_equity(self) -> str:
+        return LocalizationUtility.format_money_value(value=self.equity, currency=self.currency)
+
+    def unrealized_pl_class(self) -> str:
+        """Return the Bootstrap CSS class for the unrealized P/L value based on its sign."""
+        if self.unrealized_pl > 0:
+            return "text-success"
+        if self.unrealized_pl < 0:
+            return "text-danger"
+        return "text-body"
+
+    @property
+    def margin_level(self) -> Optional[float]:
+        """Calculate margin level as (equity / margin) * 100. Returns None when margin is zero."""
+        if self.margin == 0:
+            return None
+        return (self.equity / self.margin) * 100
+
+    def formatted_margin_level(self) -> str:
+        level = self.margin_level
+        if level is None:
+            return "N/A"
+        return f"{level:,.2f}%"
+
+
+@dataclass
 class Trade:
     name: str
     datetime: datetime
