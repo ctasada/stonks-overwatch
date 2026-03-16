@@ -8,7 +8,9 @@
         </span>
         {% endif %}
     </div>
-    {% if '-' in value %}
+    {% if value_class %}
+    <span class="h5 fw-semibold {{ value_class }}">{{ value }}</span>
+    {% elif '-' in value %}
     <span class="h5 fw-semibold text-danger">{{ value }}</span>
     {% else %}
     <span class="h5 fw-semibold text-success">{{ value }}</span>

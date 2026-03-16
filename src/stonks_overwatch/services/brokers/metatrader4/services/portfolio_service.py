@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime, timezone
 from typing import List, Optional
 
 import polars as pl
@@ -35,7 +35,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         summary = self.repository.get_latest_summary()
         if summary.balance:
             base_currency_value = self.currency_converter.convert(
-                float(summary.balance), self.currency, self.base_currency, date.today()
+                float(summary.balance), self.currency, self.base_currency, datetime.now(tz=timezone.utc).date()
             )
             portfolio_entries.append(
                 PortfolioEntry(
@@ -97,23 +97,24 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         try:
             summary = self.repository.get_latest_summary()
             if summary:
+                today = datetime.now(tz=timezone.utc).date()
                 total_roi = self._calculate_roi(summary)
 
                 if summary.floating_pl:
                     total_pl = self.currency_converter.convert(
-                        float(summary.closed_trade_pl), self.currency, self.base_currency, date.today()
+                        float(summary.closed_trade_pl), self.currency, self.base_currency, today
                     )
                 if summary.equity:
                     total_cash = self.currency_converter.convert(
-                        float(summary.equity), self.currency, self.base_currency, date.today()
+                        float(summary.equity), self.currency, self.base_currency, today
                     )
                 if summary.balance:
                     current_value = self.currency_converter.convert(
-                        float(summary.balance), self.currency, self.base_currency, date.today()
+                        float(summary.balance), self.currency, self.base_currency, today
                     )
                 if summary.deposit_withdrawal:
                     total_deposit_withdrawal = self.currency_converter.convert(
-                        float(summary.deposit_withdrawal), self.currency, self.base_currency, date.today()
+                        float(summary.deposit_withdrawal), self.currency, self.base_currency, today
                     )
         except Exception as e:
             self.logger.warning(f"Failed to get summary data: {e}")
@@ -169,7 +170,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
 
             # Get date range
             min_date = df["date"].min()
-            max_date = date.today()
+            max_date = datetime.now(tz=timezone.utc).date()
 
             self.logger.debug(f"Generating historical values from {min_date} to {max_date}")
 

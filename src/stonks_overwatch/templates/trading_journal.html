@@ -3,6 +3,14 @@
 
 {% block content %}
 <div class="container-fluid row-gap-5">
+    {% if accountSummary %}
+    <div class="row mt-2 column-gap-3">
+        {% include 'components/summary_card.html' with label="Balance" value=accountSummary.formatted_balance value_class="text-body" %}
+        {% include 'components/summary_card.html' with label="Unrealized P/L" value=accountSummary.formatted_unrealized_pl value_class=accountSummary.unrealized_pl_class %}
+        {% include 'components/summary_card.html' with label="Equity" value=accountSummary.formatted_equity value_class="text-body" %}
+        {% include 'components/summary_card.html' with label="Margin Level (%)" value=accountSummary.formatted_margin_level value_class="text-body" %}
+    </div>
+    {% endif %}
     <div class="row content-card rounded mb-3">
         <div class="row my-2 align-items-center">
             <div class="col-auto">

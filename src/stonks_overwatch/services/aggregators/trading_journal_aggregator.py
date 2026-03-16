@@ -1,10 +1,11 @@
-from typing import List
+from typing import List, Optional
 
 from django.utils import timezone
 
 from stonks_overwatch.core.aggregators.base_aggregator import BaseAggregator
+from stonks_overwatch.core.exceptions import DataAggregationException
 from stonks_overwatch.core.service_types import ServiceType
-from stonks_overwatch.services.models import PortfolioId, Trade
+from stonks_overwatch.services.models import AccountSummary, PortfolioId, Trade
 
 
 class TradingJournalAggregatorService(BaseAggregator):
@@ -41,6 +42,36 @@ class TradingJournalAggregatorService(BaseAggregator):
 
         # Now sort with normalized timezone-aware datetimes
         return sorted(combined_data, key=lambda x: x.datetime, reverse=True)
+
+    def get_account_summary(self, selected_portfolio: PortfolioId) -> Optional[AccountSummary]:
+        """
+        Get an aggregated account summary across all enabled brokers that support it.
+
+        Numeric fields (balance, unrealized P/L, equity, margin) are summed across brokers.
+        The currency of the first available summary is used.
+
+        Args:
+            selected_portfolio: The selected portfolio to get the summary for
+
+        Returns:
+            Aggregated AccountSummary, or None if no broker provides summary data
+        """
+        try:
+            broker_data = self._collect_broker_data(selected_portfolio, "get_account_summary")
+        except DataAggregationException:
+            return None
+
+        summaries = [s for s in broker_data.values() if isinstance(s, AccountSummary)]
+        if not summaries:
+            return None
+
+        return AccountSummary(
+            balance=sum(s.balance for s in summaries),
+            unrealized_pl=sum(s.unrealized_pl for s in summaries),
+            equity=sum(s.equity for s in summaries),
+            margin=sum(s.margin for s in summaries),
+            currency=summaries[0].currency,
+        )
 
     def aggregate_data(self, selected_portfolio: PortfolioId) -> List[Trade]:
         """
