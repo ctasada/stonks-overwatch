@@ -154,3 +154,34 @@ def test_config_repr():
     assert "base_currency" in repr_str
     assert "degiro" in repr_str
     assert "bitvavo" in repr_str
+
+
+def test_supported_currencies_default():
+    """supported_currencies returns a copy of the default list when no DB value is set."""
+    config = Config._default()
+    result = config.supported_currencies
+    assert result == Config.DEFAULT_SUPPORTED_CURRENCIES
+    # Must be a copy, not the class-level list itself
+    result.append("DKK")
+    assert "DKK" not in Config.DEFAULT_SUPPORTED_CURRENCIES
+
+
+def test_supported_currencies_setter_rejects_empty_list():
+    """Setting an empty list must raise ValueError."""
+    config = Config._default()
+    with pytest.raises(ValueError, match="must not be empty"):
+        config.supported_currencies = []
+
+
+def test_supported_currencies_setter_rejects_non_list():
+    """Setting a non-list value must raise TypeError."""
+    config = Config._default()
+    with pytest.raises(TypeError, match="must be a list of strings"):
+        config.supported_currencies = "EUR"
+
+
+def test_supported_currencies_setter_rejects_non_string_elements():
+    """Setting a list that contains non-string elements must raise TypeError."""
+    config = Config._default()
+    with pytest.raises(TypeError, match="must be a list of strings"):
+        config.supported_currencies = ["EUR", 42]

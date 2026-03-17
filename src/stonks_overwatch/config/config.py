@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.constants import BrokerName
@@ -23,6 +23,7 @@ class Config:
     logger = StonksLogger.get_logger(LOGGER_CONFIG, TAG_CONFIG)
 
     DEFAULT_BASE_CURRENCY: str = "EUR"
+    DEFAULT_SUPPORTED_CURRENCIES: list[str] = ["CAD", "CHF", "EUR", "GBP", "NOK", "USD"]
 
     def __init__(self, base_currency: Optional[str] = DEFAULT_BASE_CURRENCY) -> None:
         """
@@ -63,6 +64,27 @@ class Config:
         self.save_setting("base_currency", value)
 
     @property
+    def supported_currencies(self) -> list[str]:
+        """
+        Get the list of supported currencies for cash accounts and conversions.
+        Priority: 1. DB setting, 2. Default
+        """
+        db_value = self.get_setting("supported_currencies")
+        if db_value:
+            return list(db_value)
+        return list(self.DEFAULT_SUPPORTED_CURRENCIES)
+
+    @supported_currencies.setter
+    def supported_currencies(self, value: list[str]) -> None:
+        if not isinstance(value, list) or not all(isinstance(c, str) for c in value):
+            raise TypeError("supported_currencies must be a list of strings")
+        if not value:
+            raise ValueError("supported_currencies must not be empty")
+        # Note: _settings_cache is process-local. In multi-process deployments other
+        # workers won't see this change until their process restarts or cache expires.
+        self.save_setting("supported_currencies", value)
+
+    @property
     def appearance(self) -> str:
         """
         Get the appearance setting (light, dark, auto).
@@ -76,7 +98,7 @@ class Config:
             raise ValueError("appearance must be one of: light, dark, auto")
         self.save_setting("appearance", value)
 
-    def get_setting(self, key: str, default: any = None) -> any:
+    def get_setting(self, key: str, default: Any = None) -> Any:
         """
         Get an application-level setting.
         """
@@ -89,7 +111,7 @@ class Config:
                 return default
         return self._settings_cache.get(key, default)
 
-    def save_setting(self, key: str, value: any) -> None:
+    def save_setting(self, key: str, value: Any) -> None:
         """
         Save an application-level setting.
         """

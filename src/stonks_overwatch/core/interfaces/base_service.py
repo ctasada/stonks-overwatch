@@ -34,6 +34,13 @@ class DependencyInjectionMixin:
         self._injected_config = config
         self._global_config = None
 
+    def _ensure_global_config(self) -> None:
+        """Lazily initialise _global_config, avoiding circular imports at module load time."""
+        if self._global_config is None:
+            from stonks_overwatch.config.config import Config
+
+            self._global_config = Config.get_global()
+
     @property
     def config(self) -> BaseConfig:
         """
@@ -49,12 +56,7 @@ class DependencyInjectionMixin:
         if self._injected_config is not None:
             return self._injected_config
 
-        # Fallback to global config for backward compatibility
-        if self._global_config is None:
-            # Lazy import to avoid loading Django models before apps are ready
-            from stonks_overwatch.config.config import Config
-
-            self._global_config = Config.get_global()
+        self._ensure_global_config()
         return self._global_config
 
     @property
@@ -65,10 +67,7 @@ class DependencyInjectionMixin:
         Returns:
             str: The base currency (e.g., 'EUR', 'USD')
         """
-        # Try to get from injected config first
         if self._injected_config is not None:
-            # For broker-specific configs, we might need to get base currency differently
-            # This assumes the broker config has access to base currency
             if hasattr(self._injected_config, "base_currency"):
                 base_currency = self._injected_config.base_currency
                 # If base_currency is None, fall back to global config
@@ -76,14 +75,25 @@ class DependencyInjectionMixin:
                 if base_currency is not None:
                     return base_currency
 
-        # Fallback to global config
-        # Get fresh global config (don't use self.config to avoid circular reference)
-        if self._global_config is None:
-            # Lazy import to avoid loading Django models before apps are ready
-            from stonks_overwatch.config.config import Config
-
-            self._global_config = Config.get_global()
+        self._ensure_global_config()
         return self._global_config.base_currency
+
+    @property
+    def supported_currencies(self) -> list[str]:
+        """
+        Get the list of supported currencies from configuration.
+
+        Returns:
+            list[str]: The supported currencies (e.g., ['EUR', 'GBP', 'NOK', 'USD'])
+        """
+        if self._injected_config is not None:
+            if hasattr(self._injected_config, "supported_currencies"):
+                currencies = self._injected_config.supported_currencies
+                if currencies is not None:
+                    return currencies
+
+        self._ensure_global_config()
+        return self._global_config.supported_currencies
 
     def is_dependency_injection_enabled(self) -> bool:
         """

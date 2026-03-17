@@ -10,6 +10,7 @@ from stonks_overwatch.services.brokers.degiro.repositories.product_quotations_re
 )
 from stonks_overwatch.utils.core.localization import LocalizationUtility
 from stonks_overwatch.utils.core.logger import StonksLogger
+from stonks_overwatch.utils.currency import get_standard_currency, normalize
 
 
 @dataclass
@@ -28,8 +29,29 @@ class CurrencyConverterService:
         self.currency_maps = self.__calculate_maps()
 
     def convert(self, amount: float, currency: str, new_currency: str = "EUR", fx_date: datetime.date = None) -> float:
+        """
+        Convert an amount from one currency to another.
+
+        Derived currencies (e.g. GBX pence) are normalised to their standard ISO
+        equivalent before conversion. If new_currency is a derived currency it is
+        also normalised, so the result is always in the standard (e.g. GBP), not
+        the derived unit. Callers should never pass a derived currency as new_currency.
+
+        Args:
+            amount: The amount to convert.
+            currency: Source currency code (may be a derived currency like GBX).
+            new_currency: Target currency code. Must be a standard ISO code.
+            fx_date: Optional date for the FX rate lookup.
+
+        Returns:
+            Converted amount in new_currency.
+        """
         if amount is None:
             amount = 0.0
+
+        # Normalize derived currencies (e.g. GBX pence → GBP pounds)
+        amount, currency = normalize(amount, currency)
+        new_currency = get_standard_currency(new_currency)
 
         # If both currencies are the same, no conversion is needed
         if currency == new_currency:
