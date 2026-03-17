@@ -634,11 +634,9 @@ def dataclass_to_dict(obj) -> dict:
     return result
 
 
-# Currency codes commonly found in stock names that should remain uppercase.
-# Keep in sync with Config.DEFAULT_SUPPORTED_CURRENCIES when adding new currencies.
-_STOCK_NAME_CURRENCY_CODES: frozenset[str] = frozenset(
-    {"AUD", "CAD", "CHF", "DKK", "EUR", "GBP", "GBX", "HKD", "JPY", "NOK", "NZD", "SEK", "SGD", "USD"}
-)
+# Currency codes commonly found in stock names that should remain uppercase during formatting.
+# This is for display purposes only and is independent of FX conversion configuration.
+_STOCK_NAME_CURRENCY_CODES: frozenset[str] = frozenset({"EUR", "USD"})
 
 
 def format_stock_name(name: str) -> str:

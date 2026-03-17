@@ -68,6 +68,11 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         self.yfinance = YFinance()
 
     @cached_property
+    def _cash_currencies(self) -> list[str]:
+        """Distinct currencies with a FLATEX_CASH_SWEEP entry. Cached per instance to avoid repeated DB queries."""
+        return CashMovementsRepository.get_distinct_currencies()
+
+    @cached_property
     def get_portfolio(self) -> List[PortfolioEntry]:
         self.logger.debug("Get Portfolio")
 
@@ -87,12 +92,13 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         """Create portfolio entries for stock/ETF products."""
         stock_entries = []
         processed_symbols = set()
+        missing_info_ids = []
 
         for product_data in portfolio_products:
             product_id = product_data[self.PRODUCT_ID_FIELD]
             product_info = products_info.get(product_id)
             if product_info is None:
-                self.logger.warning(f"No product info found for product ID {product_id}, skipping")
+                missing_info_ids.append(product_id)
                 continue
 
             if product_info.get("productType") == self.CASH_PRODUCT_TYPE:
@@ -108,6 +114,12 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
             # Create portfolio entry
             entry = self._create_portfolio_entry(product_data, product_info, products_config, correlated_products)
             stock_entries.append(entry)
+
+        if missing_info_ids:
+            self.logger.warning(
+                f"Skipped {len(missing_info_ids)} product(s) with no product info: {missing_info_ids}. "
+                "These positions are excluded from the portfolio."
+            )
 
         return stock_entries
 
@@ -234,7 +246,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         """Create portfolio entries for cash balances."""
         cash_entries = []
 
-        for currency in self.supported_currencies:
+        for currency in self._cash_currencies:
             total_cash = CashMovementsRepository.get_total_cash(currency)
             if total_cash is None:
                 self.logger.debug(f"No cash movements found for currency {currency}, skipping")
@@ -351,7 +363,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
 
     def __get_total_cash(self) -> float:
         total_cash = 0.0
-        for currency in self.supported_currencies:
+        for currency in self._cash_currencies:
             cash = CashMovementsRepository.get_total_cash(currency)
             if cash is None:
                 self.logger.debug(f"No cash movements found for currency {currency}, skipping")

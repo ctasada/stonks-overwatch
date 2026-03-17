@@ -13,7 +13,7 @@ _DERIVED_CURRENCIES: dict[str, tuple[str, float]] = {
 }
 
 
-def normalize(amount: float, currency: str) -> tuple[float, str]:
+def normalize(amount: float, currency: str | None) -> tuple[float, str | None]:
     """
     Normalize a derived currency to its standard equivalent.
 
@@ -27,13 +27,13 @@ def normalize(amount: float, currency: str) -> tuple[float, str]:
     Returns:
         Tuple of (normalized_amount, standard_currency_code).
     """
-    if currency in _DERIVED_CURRENCIES:
+    if currency and currency in _DERIVED_CURRENCIES:
         standard_currency, factor = _DERIVED_CURRENCIES[currency]
         return amount * factor, standard_currency
     return amount, currency
 
 
-def get_standard_currency(currency: str) -> str:
+def get_standard_currency(currency: str | None) -> str | None:
     """
     Get the standard ISO currency code for a given currency.
 
@@ -43,12 +43,12 @@ def get_standard_currency(currency: str) -> str:
     Returns:
         Standard ISO currency code (e.g. GBP for GBX), or the input unchanged.
     """
-    if currency in _DERIVED_CURRENCIES:
+    if currency and currency in _DERIVED_CURRENCIES:
         return _DERIVED_CURRENCIES[currency][0]
     return currency
 
 
-def is_derived(currency: str) -> bool:
+def is_derived(currency: str | None) -> bool:
     """
     Check if a currency is a derived (non-standard) currency.
 
@@ -58,4 +58,4 @@ def is_derived(currency: str) -> bool:
     Returns:
         True if the currency is derived (e.g. GBX), False otherwise.
     """
-    return currency in _DERIVED_CURRENCIES
+    return bool(currency) and currency in _DERIVED_CURRENCIES
