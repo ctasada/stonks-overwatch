@@ -35,7 +35,6 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
     logger = StonksLogger.get_logger("stonks_overwatch.portfolio_data.degiro", "[DEGIRO|PORTFOLIO]")
 
     # Configuration constants
-    SUPPORTED_CURRENCY_ACCOUNTS = ["EUR", "USD", "GBP"]
     DEBUG_SYMBOL = "NVDA"  # Change this to debug other symbols
     DEBUG_DATES = ["2021-07-18", "2021-07-19", "2021-07-20"]  # Adjust for specific date ranges
 
@@ -90,7 +89,11 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         processed_symbols = set()
 
         for product_data in portfolio_products:
-            product_info = products_info[product_data[self.PRODUCT_ID_FIELD]]
+            product_id = product_data[self.PRODUCT_ID_FIELD]
+            product_info = products_info.get(product_id)
+            if product_info is None:
+                self.logger.warning(f"No product info found for product ID {product_id}, skipping")
+                continue
 
             if product_info.get("productType") == self.CASH_PRODUCT_TYPE:
                 continue
@@ -231,7 +234,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         """Create portfolio entries for cash balances."""
         cash_entries = []
 
-        for currency in self.SUPPORTED_CURRENCY_ACCOUNTS:
+        for currency in self.supported_currencies:
             total_cash = CashMovementsRepository.get_total_cash(currency)
             if total_cash is None:
                 self.logger.debug(f"No cash movements found for currency {currency}, skipping")
@@ -348,7 +351,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
 
     def __get_total_cash(self) -> float:
         total_cash = 0.0
-        for currency in self.SUPPORTED_CURRENCY_ACCOUNTS:
+        for currency in self.supported_currencies:
             cash = CashMovementsRepository.get_total_cash(currency)
             if cash is None:
                 self.logger.debug(f"No cash movements found for currency {currency}, skipping")

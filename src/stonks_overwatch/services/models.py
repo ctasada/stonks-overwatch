@@ -634,10 +634,17 @@ def dataclass_to_dict(obj) -> dict:
     return result
 
 
+# Currency codes commonly found in stock names that should remain uppercase.
+# Keep in sync with Config.DEFAULT_SUPPORTED_CURRENCIES when adding new currencies.
+_STOCK_NAME_CURRENCY_CODES: frozenset[str] = frozenset(
+    {"AUD", "CAD", "CHF", "DKK", "EUR", "GBP", "GBX", "HKD", "JPY", "NOK", "NZD", "SEK", "SGD", "USD"}
+)
+
+
 def format_stock_name(name: str) -> str:
     words = name.split()
     special_cases = {"jpmorgan": "JPMorgan", "ishares": "iShares"}
-    preserve = {"SA", "SA.", "SA-B", "UCITS", "ETF", "USD", "EUR"}
+    preserve = {"SA", "SA.", "SA-B", "UCITS", "ETF"} | _STOCK_NAME_CURRENCY_CODES
     preserve_lower_to_original = {p.lower(): p for p in preserve}
     capitalized_words = []
 

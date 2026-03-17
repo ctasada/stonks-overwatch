@@ -75,7 +75,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         # Only process cash balances if we successfully got the account summary
         if account_summary:
             for cash_balance in account_summary["cashBalances"]:
-                if cash_balance["currency"] in ["USD", "EUR"]:
+                if cash_balance["currency"] in self.supported_currencies:
                     value = cash_balance["balance"]
                     currency = cash_balance["currency"]
                     base_currency_value = self.ibkr_service.convert_to_default_currency(currency, value)
