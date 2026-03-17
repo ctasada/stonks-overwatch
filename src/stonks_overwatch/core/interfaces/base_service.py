@@ -78,23 +78,6 @@ class DependencyInjectionMixin:
         self._ensure_global_config()
         return self._global_config.base_currency
 
-    @property
-    def supported_currencies(self) -> list[str]:
-        """
-        Get the list of supported currencies from configuration.
-
-        Returns:
-            list[str]: The supported currencies (e.g., ['EUR', 'GBP', 'NOK', 'USD'])
-        """
-        if self._injected_config is not None:
-            if hasattr(self._injected_config, "supported_currencies"):
-                currencies = self._injected_config.supported_currencies
-                if currencies is not None:
-                    return currencies
-
-        self._ensure_global_config()
-        return self._global_config.supported_currencies
-
     def is_dependency_injection_enabled(self) -> bool:
         """
         Check if dependency injection is being used.
