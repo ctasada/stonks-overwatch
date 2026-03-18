@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from stonks_overwatch.services.brokers.degiro.descriptions import DEPOSIT_DESCRIPTIONS
 from stonks_overwatch.services.brokers.degiro.repositories.models import DeGiroCashMovements
 from stonks_overwatch.utils.database.db_utils import dictfetchall, get_connection_for_model
 
@@ -21,17 +22,19 @@ class CashMovementsRepository:
 
     @staticmethod
     def get_cash_deposits_raw() -> list[dict]:
-        # FIXME: DeGiro doesn't have a consistent description or type.
         connection = get_connection_for_model(DeGiroCashMovements)
+        descriptions = tuple(DEPOSIT_DESCRIPTIONS)
+        placeholders = ", ".join(["%s"] * len(descriptions))
         with connection.cursor() as cursor:
             cursor.execute(
-                """
+                f"""
                 SELECT date, description, change
                 FROM degiro_cashmovements
                 WHERE currency = 'EUR'
-                    AND description IN ('iDEAL storting', 'iDEAL Deposit', 'Terugstorting', 'flatex terugstorting')
+                  AND description IN ({placeholders})
                 ORDER BY date
-                """
+                """,
+                descriptions,
             )
             return dictfetchall(cursor)
 
@@ -60,17 +63,39 @@ class CashMovementsRepository:
     @staticmethod
     def get_total_cash_deposits_raw() -> float:
         connection = get_connection_for_model(DeGiroCashMovements)
+        descriptions = tuple(DEPOSIT_DESCRIPTIONS)
+        placeholders = ", ".join(["%s"] * len(descriptions))
         with connection.cursor() as cursor:
             cursor.execute(
-                """
+                f"""
                 SELECT SUM(change)
                 FROM degiro_cashmovements
                 WHERE currency = 'EUR'
-                  AND description IN ('iDEAL storting', 'iDEAL Deposit', 'Terugstorting', 'flatex terugstorting')
+                  AND description IN ({placeholders})
                 ORDER BY date, id
-                """
+                """,
+                descriptions,
             )
             return cursor.fetchone()[0]
+
+    @staticmethod
+    def get_distinct_currencies() -> list[str]:
+        """Return all distinct currencies that have a FLATEX_CASH_SWEEP entry.
+
+        Note: currencies that were deposited but not yet settled via a FLATEX_CASH_SWEEP
+        will not appear here, and will be absent from the portfolio until a sweep occurs.
+        The same constraint applies to get_total_cash().
+        """
+        connection = get_connection_for_model(DeGiroCashMovements)
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT DISTINCT currency
+                FROM degiro_cashmovements
+                WHERE type = 'FLATEX_CASH_SWEEP'
+                """
+            )
+            return [row[0] for row in cursor.fetchall()]
 
     @staticmethod
     def get_total_cash(currency: str) -> float | None:

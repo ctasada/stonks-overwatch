@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.constants import BrokerName
@@ -76,7 +76,7 @@ class Config:
             raise ValueError("appearance must be one of: light, dark, auto")
         self.save_setting("appearance", value)
 
-    def get_setting(self, key: str, default: any = None) -> any:
+    def get_setting(self, key: str, default: Any = None) -> Any:
         """
         Get an application-level setting.
         """
@@ -89,7 +89,7 @@ class Config:
                 return default
         return self._settings_cache.get(key, default)
 
-    def save_setting(self, key: str, value: any) -> None:
+    def save_setting(self, key: str, value: Any) -> None:
         """
         Save an application-level setting.
         """

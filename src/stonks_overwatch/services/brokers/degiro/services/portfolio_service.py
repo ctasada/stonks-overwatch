@@ -35,7 +35,6 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
     logger = StonksLogger.get_logger("stonks_overwatch.portfolio_data.degiro", "[DEGIRO|PORTFOLIO]")
 
     # Configuration constants
-    SUPPORTED_CURRENCY_ACCOUNTS = ["EUR", "USD", "GBP"]
     DEBUG_SYMBOL = "NVDA"  # Change this to debug other symbols
     DEBUG_DATES = ["2021-07-18", "2021-07-19", "2021-07-20"]  # Adjust for specific date ranges
 
@@ -69,6 +68,11 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         self.yfinance = YFinance()
 
     @cached_property
+    def _cash_currencies(self) -> list[str]:
+        """Distinct currencies with a FLATEX_CASH_SWEEP entry. Cached per instance to avoid repeated DB queries."""
+        return CashMovementsRepository.get_distinct_currencies()
+
+    @cached_property
     def get_portfolio(self) -> List[PortfolioEntry]:
         self.logger.debug("Get Portfolio")
 
@@ -88,9 +92,14 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         """Create portfolio entries for stock/ETF products."""
         stock_entries = []
         processed_symbols = set()
+        missing_info_ids = []
 
         for product_data in portfolio_products:
-            product_info = products_info[product_data[self.PRODUCT_ID_FIELD]]
+            product_id = product_data[self.PRODUCT_ID_FIELD]
+            product_info = products_info.get(product_id)
+            if product_info is None:
+                missing_info_ids.append(product_id)
+                continue
 
             if product_info.get("productType") == self.CASH_PRODUCT_TYPE:
                 continue
@@ -105,6 +114,12 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
             # Create portfolio entry
             entry = self._create_portfolio_entry(product_data, product_info, products_config, correlated_products)
             stock_entries.append(entry)
+
+        if missing_info_ids:
+            self.logger.warning(
+                f"Skipped {len(missing_info_ids)} product(s) with no product info: {missing_info_ids}. "
+                "These positions are excluded from the portfolio."
+            )
 
         return stock_entries
 
@@ -231,7 +246,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         """Create portfolio entries for cash balances."""
         cash_entries = []
 
-        for currency in self.SUPPORTED_CURRENCY_ACCOUNTS:
+        for currency in self._cash_currencies:
             total_cash = CashMovementsRepository.get_total_cash(currency)
             if total_cash is None:
                 self.logger.debug(f"No cash movements found for currency {currency}, skipping")
@@ -348,7 +363,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
 
     def __get_total_cash(self) -> float:
         total_cash = 0.0
-        for currency in self.SUPPORTED_CURRENCY_ACCOUNTS:
+        for currency in self._cash_currencies:
             cash = CashMovementsRepository.get_total_cash(currency)
             if cash is None:
                 self.logger.debug(f"No cash movements found for currency {currency}, skipping")
@@ -751,14 +766,21 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         product_growth = self.calculate_product_growth()
         tradable_products = {}
 
+        _required_fields = {"name", "isin", "symbol", "currency"}
+
         for key, data in product_growth.items():
             product = ProductInfoRepository.get_product_info_from_id(key)
+
+            if not product or not _required_fields.issubset(product):
+                self.logger.warning(f"Skipping product with incomplete info: {key}")
+                self.logger.debug(f"Product data for {key}: {product}")
+                continue
 
             # If the product is NOT tradable, we shouldn't consider it for Growth
             # The 'tradable' attribute identifies old Stocks, like the ones that are
             # renamed for some reason, and it's not good enough to identify stocks
             # that are provided as dividends, for example.
-            if self.NON_TRADEABLE_IDENTIFIER in product.get("name", ""):
+            if is_non_tradeable_product(product):
                 continue
 
             data[self.PRODUCT_ID_FIELD] = key
