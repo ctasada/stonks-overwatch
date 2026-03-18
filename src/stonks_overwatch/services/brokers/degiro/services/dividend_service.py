@@ -7,6 +7,7 @@ from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.core.interfaces.dividend_service import DividendServiceInterface
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
+from stonks_overwatch.services.brokers.degiro.descriptions import DIVIDEND_DESCRIPTIONS
 from stonks_overwatch.services.brokers.degiro.repositories.dividends_repository import DividendsRepository
 from stonks_overwatch.services.brokers.degiro.repositories.product_info_repository import ProductInfoRepository
 from stonks_overwatch.services.brokers.degiro.services.account_service import AccountOverviewService
@@ -19,9 +20,6 @@ from stonks_overwatch.utils.domain.constants import ProductType
 
 class DividendsService(BaseService, DividendServiceInterface):
     logger = StonksLogger.get_logger("stonks_overwatch.dividends_service", "[DEGIRO|DIVIDENDS]")
-
-    # Constants for dividend transaction descriptions
-    DIVIDEND_DESCRIPTIONS = ["Dividend", "Dividendbelasting", "Vermogenswinst"]
 
     def __init__(
         self,
@@ -58,7 +56,7 @@ class DividendsService(BaseService, DividendServiceInterface):
         dividend_groups = {}
 
         for transaction in overview:
-            if transaction.description in self.DIVIDEND_DESCRIPTIONS:
+            if transaction.description in DIVIDEND_DESCRIPTIONS:
                 # Create a key to group by date and stock symbol
                 key = (transaction.value_datetime.date(), transaction.stock_symbol)
 

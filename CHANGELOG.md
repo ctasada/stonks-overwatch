@@ -14,6 +14,7 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 - Internal refactor to simplify the authentication processes across different brokers
 - Last update indicator now shows information for all the brokers
+- DEGIRO: Centralised transaction description patterns into a single file, making it easy to add support for new languages
 
 ### Fixed
 
