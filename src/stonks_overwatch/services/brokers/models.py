@@ -21,7 +21,7 @@ class BrokersConfiguration(models.Model):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.credentials:
+        if self.credentials and isinstance(self.credentials, str):
             try:
                 self.credentials = decrypt_dict(self.credentials)
             except Exception as e:
