@@ -4,6 +4,7 @@ from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.core.interfaces.fee_service import FeeServiceInterface
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroService
+from stonks_overwatch.services.brokers.degiro.descriptions import FEE_TYPE_PATTERNS
 from stonks_overwatch.services.brokers.degiro.repositories.cash_movements_repository import CashMovementsRepository
 from stonks_overwatch.services.brokers.degiro.repositories.product_info_repository import ProductInfoRepository
 from stonks_overwatch.services.brokers.degiro.repositories.transactions_repository import TransactionsRepository
@@ -66,17 +67,10 @@ class FeesService(FeeServiceInterface, BaseService):
         return my_fees
 
     def __get_fee_type(self, description: str) -> FeeType | None:
-        # description = "Spanish Transaction Tax" -> FTT (Finance Transaction Tax)
-        # description = "ADR/GDR Externe Kosten" -> ADR/GDR
-        # description = "DEGIRO Aansluitingskosten" -> Connection
-        if "Transaction Tax" in description:
-            return FeeType.FINANCE_TRANSACTION_TAX
-        elif "DEGIRO Aansluitingskosten" in description:
-            return FeeType.CONNECTION
-        elif "ADR/GDR Externe Kosten" in description:
-            return FeeType.ADR_GDR
-        else:
-            return None
+        for fee_type, patterns in FEE_TYPE_PATTERNS.items():
+            if any(pattern in description for pattern in patterns):
+                return fee_type
+        return None
 
     def get_transaction_fees(self) -> list[Fee]:
         transactions_history = TransactionsRepository.get_transactions_raw()
