@@ -71,9 +71,16 @@ class IbkrLogoIntegration(LogoIntegration):
         try:
             response = requests.get(url, timeout=3, stream=True)
             response.close()
-            if not response.ok:
-                self.logger.debug(f"No Benzinga icon for conid {conid} (HTTP {response.status_code})")
-                return ""
+            status_code = getattr(response, "status_code", None)
+            if isinstance(status_code, int):
+                if status_code >= 400:
+                    self.logger.debug(f"No Benzinga icon for conid {conid} (HTTP {status_code})")
+                    return ""
+            else:
+                ok = getattr(response, "ok", None)
+                if ok is False:
+                    self.logger.debug(f"No Benzinga icon for conid {conid} (HTTP unknown)")
+                    return ""
         except RequestException as e:
             self.logger.debug(f"Benzinga request failed for conid {conid}: {e}")
             return ""

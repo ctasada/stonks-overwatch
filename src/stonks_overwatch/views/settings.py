@@ -12,7 +12,8 @@ from stonks_overwatch.services.brokers.encryption_utils import decrypt_integrati
 from stonks_overwatch.services.brokers.models import BrokersConfigurationRepository
 from stonks_overwatch.utils.core.logger import StonksLogger
 
-_ALLOWED_INTEGRATIONS = frozenset({"logodev"})
+_ALLOWED_INTEGRATIONS = frozenset({"logo_provider"})
+_ALLOWED_LOGO_PROVIDERS = frozenset({"none", "logodev", "logostream"})
 
 
 class SettingsView(View):
@@ -50,17 +51,17 @@ class SettingsView(View):
         bitvavo_config = self.repository.get_broker_by_name(BrokerName.BITVAVO.value)
         ibkr_config = self.repository.get_broker_by_name(BrokerName.IBKR.value)
 
-        logodev_config = config.get_setting("integration_logodev", {})
-        if not isinstance(logodev_config, dict):
-            logodev_config = {}
-        logodev_config = decrypt_integration_config(logodev_config)
+        logo_provider_config = config.get_setting("integration_logo_provider", {})
+        if not isinstance(logo_provider_config, dict):
+            logo_provider_config = {}
+        logo_provider_config = decrypt_integration_config(logo_provider_config)
 
         # Prepare context data
         context = {
             "degiro_config": degiro_config,
             "bitvavo_config": bitvavo_config,
             "ibkr_config": ibkr_config,
-            "logodev_config": logodev_config,
+            "logo_provider_config": logo_provider_config,
             "is_standalone": not is_ajax_request,  # Wrap in HTML structure for non-AJAX requests
             "APPEARANCE": config.appearance,
             "BASE_CURRENCY": config.base_currency,
@@ -191,17 +192,26 @@ class SettingsView(View):
         if integration_name not in _ALLOWED_INTEGRATIONS:
             return JsonResponse({"error": "Unknown integration"}, status=400)
 
-        config = Config.get_global()
-        config.save_setting(
-            f"integration_{integration_name}",
-            encrypt_integration_config(
-                {
-                    "enabled": bool(data.get("enabled", False)),
-                    "api_key": data.get("api_key", "").strip(),
-                }
-            ),
-        )
+        if integration_name == "logo_provider":
+            provider = data.get("provider", "").strip()
+            if provider not in _ALLOWED_LOGO_PROVIDERS:
+                return JsonResponse({"error": "Unknown logo provider"}, status=400)
 
+        config = Config.get_global()
+        payload: dict = {"api_key": data.get("api_key", "").strip()}
+        if integration_name == "logo_provider":
+            provider = data.get("provider", "").strip()
+            payload["provider"] = provider
+            if provider == "none":
+                payload["api_key"] = ""
+        setting_key = f"integration_{integration_name}"
+        config.save_setting(setting_key, encrypt_integration_config(payload))
+
+        # Evict the key from the in-process settings cache so the next call to
+        # Config.get_setting() re-reads from the database instead of serving the
+        # stale pre-save value. In multi-worker deployments other workers retain
+        # their own stale caches until restart.
+        config._settings_cache.pop(setting_key, None)
         cache.clear()
 
         self.logger.debug(f"Integration settings saved for: {integration_name}")

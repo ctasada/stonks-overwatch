@@ -1,0 +1,77 @@
+{% load static %}
+<div class="settings-card mb-4">
+    <div class="card-body">
+        <h6 class="fw-bold mb-3">Logo Provider</h6>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold small mb-2">Provider</label>
+            <div class="d-flex align-items-center gap-2">
+                <input type="hidden" id="logo-provider-select"
+                       value="{% if logo_provider_config.provider %}{{ logo_provider_config.provider }}{% else %}none{% endif %}">
+                <div class="dropdown">
+                    <button class="logo-provider-dropdown-btn dropdown-toggle d-flex align-items-center gap-2"
+                            type="button" id="logo-provider-dropdown-btn" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img id="logo-provider-dropdown-img" src="" alt="" height="27" class="logo-provider-img">
+                        <span id="logo-provider-dropdown-label" class="text-muted small"></span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="logo-provider-dropdown-btn">
+                        <li>
+                            <a class="dropdown-item py-2 text-muted small" href="#" data-value="none" data-label="None">None</a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center py-2" href="#" data-value="logodev"
+                               data-name="Logo.dev" data-url="https://logo.dev">
+                                <img src="{% static 'integrations/logodev.svg' %}" alt="Logo.dev" height="21" class="logo-provider-img">
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center py-2" href="#" data-value="logostream"
+                               data-name="Logostream" data-url="https://logostream.dev">
+                                <img src="{% static 'integrations/logostream.svg' %}" alt="Logostream" height="21" class="logo-provider-img">
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        {% include 'components/password_field.html' with field_id='logo-provider-api-key' label='API Key' value=logo_provider_config.api_key placeholder='Enter your API key' wrapper_class='settings-form-group' %}
+
+        <p id="logo-provider-note" class="text-muted small mt-3 mb-0" style="display: none;">
+            <span id="logo-provider-note-text"></span>
+            <a id="logo-provider-note-link" class="logo-provider-note-link" href="#" target="_blank" rel="noopener noreferrer"></a>
+        </p>
+    </div>
+</div>
+
+<style>
+    .logo-provider-dropdown-btn {
+        background-color: var(--bs-body-bg);
+        border: 1px solid var(--bs-border-color);
+        border-radius: var(--bs-border-radius-sm);
+        color: var(--bs-body-color);
+        padding: 0.375rem 0.75rem;
+    }
+    .logo-provider-dropdown-btn:hover,
+    .logo-provider-dropdown-btn:focus {
+        background-color: var(--bs-tertiary-bg);
+        border-color: var(--bs-border-color);
+        color: var(--bs-body-color);
+        outline: none;
+        box-shadow: none;
+    }
+    .logo-provider-note-link {
+        color: var(--bs-link-color);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+    .logo-provider-note-link:hover {
+        color: var(--bs-link-hover-color);
+    }
+
+    html[data-bs-theme="dark"] .logo-provider-img { filter: invert(1); }
+    @media (prefers-color-scheme: dark) {
+        html:not([data-bs-theme="light"]) .logo-provider-img { filter: invert(1); }
+    }
+</style>

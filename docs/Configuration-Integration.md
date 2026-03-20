@@ -719,7 +719,9 @@ src/stonks_overwatch/
 │       ├── __init__.py
 │       ├── types.py        # LogoType enum (shared by view + integrations)
 │       ├── base.py         # LogoIntegration abstract base class
-│       └── logodev.py      # Logo.dev implementation
+│       ├── logodev.py      # Logo.dev implementation
+│       ├── logostream.py   # Logostream implementation
+│       └── registry.py     # LogoIntegrationRegistry
 └── views/
     └── asset_logos.py      # AssetLogoView — orchestrates integrations + fallbacks
 ```
@@ -747,34 +749,81 @@ logo_type = LogoType.from_str("stock")  # → LogoType.STOCK
 
 ### Available Integrations
 
-#### Logo.dev
+#### Logo Provider
 
-[Logo.dev](https://logo.dev) provides high-quality logos for stocks, ETFs and crypto.
-
-**Supported types:** `STOCK`, `ETF`, `CRYPTO`
+A single third-party logo provider can be configured. Choose between
+[Logo.dev](https://logo.dev) and [Logostream](https://logostream.dev).
 
 **Configuration (via Settings UI):**
 
-1. Open Settings → Integrations → Logo.dev
-2. Enable the toggle and paste your API token
-3. Settings save automatically on toggle or when the token field loses focus
+1. Open Settings → Integrations → Logo Provider
+2. Select your provider from the dropdown (Logo.dev or Logostream); select **None** to disable
+3. Paste your API key — settings save automatically on provider change or when the API key field loses focus
 
 **Configuration (via `config/config.json` template):**
 
 ```json
-"logodev": {
-    "enabled": true,
-    "api_key": "pk_your_token_here"
+"logo_provider": {
+    "provider": "logodev",
+    "api_key": "your-api-key-here"
 }
 ```
 
-> **Note:** Logo.dev settings are stored in the database (under the key `integration_logodev`),
-> not read from `config.json` at runtime. The template entry above is provided for documentation
-> purposes only. Use the Settings UI to configure it, or set it programmatically:
+> **Note:** Logo provider settings are stored in the database (under the key
+> `integration_logo_provider`), not read from `config.json` at runtime. The template entry
+> above is provided for documentation purposes only. Use the Settings UI to configure it, or
+> set it programmatically:
 >
 > ```python
-> Config.get_global().save_setting("integration_logodev", {"enabled": True, "api_key": "pk_..."})
+> from stonks_overwatch.services.brokers.encryption_utils import encrypt_integration_config
+>
+> Config.get_global().save_setting(
+>     "integration_logo_provider",
+>     encrypt_integration_config({"provider": "logodev", "api_key": "pk_..."})
+> )
 > ```
+>
+> Always wrap the payload in `encrypt_integration_config` — the API key is stored encrypted
+> at rest. Omitting this call stores the key in plaintext.
+
+**Providers:**
+
+---
+
+#### Logo.dev
+
+> <https://logo.dev>
+
+| | |
+|---|---|
+| Config key | `logodev` |
+| Token format | `pk_...` |
+| Supported types | `STOCK`, `ETF`, `CRYPTO` |
+
+Get your public token from the [Logo.dev dashboard](https://logo.dev). The free tier covers
+a generous number of requests per month.
+
+---
+
+#### Logostream
+
+> <https://logostream.dev>
+
+| | |
+|---|---|
+| Config key | `logostream` |
+| Token format | API key from dashboard |
+| Supported types | `STOCK`, `ETF`, `CRYPTO`, `CASH` (forex), `COUNTRY` |
+
+Logostream is the only provider that also serves **forex/currency logos** (used in the
+Currencies section of the Diversification view) and **country logos**. Prefer it if you
+hold multi-currency positions or want richer coverage across asset classes.
+
+---
+
+> **Tip:** Only one provider can be active at a time. If the active provider has no logo for
+> a given asset, the request falls through to the free CDN fallbacks automatically — no
+> manual configuration needed.
 
 ### Fallback Chain
 
@@ -789,60 +838,82 @@ When no integration is active (or the integration request fails), the view falls
 | `SECTOR` | Twemoji CDN |
 | Any (final) | Generated SVG with the ticker text |
 
-### How to Add a New Logo Integration
+### How to Add a New Logo Provider
 
 1. **Create** `src/stonks_overwatch/integrations/logos/your_provider.py`:
 
     ```python
+    import requests
+    from requests.exceptions import RequestException
+
     from stonks_overwatch.integrations.logos.base import LogoIntegration
     from stonks_overwatch.integrations.logos.types import LogoType
+    from stonks_overwatch.utils.core.logger import StonksLogger
 
 
     class YourProviderIntegration(LogoIntegration):
-        URL = "https://your-provider.com/logos/{symbol}"
+        URL = "https://your-provider.com/logos/{symbol}?key={key}"
 
-        def __init__(self, api_key: str) -> None:
+        logger = StonksLogger.get_logger("stonks_overwatch.integrations.logos", "[YOURPROVIDER|LOGO]")
+
+        def __init__(self, api_key: str, enabled: bool = True) -> None:
             self._api_key = api_key
+            self._enabled = enabled
 
         def is_active(self) -> bool:
-            return bool(self._api_key)
+            return bool(self._api_key) and self._enabled
 
         def supports(self, logo_type: LogoType) -> bool:
             return logo_type in {LogoType.STOCK, LogoType.ETF}
 
-        def get_logo_url(self, logo_type: LogoType, symbol: str) -> str:
-            return self.URL.format(symbol=symbol.upper())
+        def get_logo_url(
+            self, logo_type: LogoType, symbol: str, theme: str = "light", isin: str = "", conid: str = ""
+        ) -> str:
+            url = self.URL.format(symbol=symbol.upper(), key=self._api_key)
+            try:
+                response = requests.get(url, timeout=3, stream=True)
+                response.close()
+                if response.status_code >= 400:
+                    self.logger.debug(f"YourProvider returned {response.status_code} for {symbol.upper()}")
+                    return ""
+            except RequestException as e:
+                self.logger.debug(f"YourProvider availability check failed for {symbol.upper()}: {e}")
+                return ""
+            return url
     ```
 
-2. **Register** it in `_get_active_integrations` inside `views/asset_logos.py`:
+    > **Important:** always perform the streaming GET availability check before returning the URL.
+    > Returning the URL unconditionally causes broken images when the provider has no logo for a
+    > given symbol. Return `""` on any failure so the view falls through to the next integration
+    > or CDN fallback.
+
+2. **Register** it in `integrations/logos/registry.py` — add it to `_PROVIDER_CLASSES`:
 
     ```python
-    def _get_active_integrations(self):
-        from stonks_overwatch.config.config import Config
-        from stonks_overwatch.integrations.logos.your_provider import YourProviderIntegration
+    from stonks_overwatch.integrations.logos.your_provider import YourProviderIntegration
 
-        cfg = Config.get_global().get_setting("integration_your_provider", {})
-        if isinstance(cfg, dict) and cfg.get("enabled") and cfg.get("api_key", "").strip():
-            return [YourProviderIntegration(cfg["api_key"].strip())]
-        return []
+    _PROVIDER_CLASSES = {
+        "logodev": LogoDevIntegration,
+        "logostream": LogostreamIntegration,
+        "your_provider": YourProviderIntegration,
+    }
     ```
 
-3. **Add allowlist entry** in `views/settings.py`:
+3. **Add it to the allowed providers allowlist** in `views/settings.py`:
 
     ```python
-    _ALLOWED_INTEGRATIONS = frozenset({"logodev", "your_provider"})
+    _ALLOWED_LOGO_PROVIDERS = frozenset({"none", "logodev", "logostream", "your_provider"})
     ```
 
-4. **Add UI template** at `templates/components/integrations/your_provider_settings.html` and
-   include it from `general_settings.html`. The shared `saveIntegrationSettings(name)` JS
-   function (defined in `general_settings.html`) handles the save call automatically — no
-   additional script block is needed in the partial.
+4. **Add a dropdown option** in `templates/components/integrations/logo_provider_settings.html`
+   and a corresponding entry in the `_logoProviderMeta` JS object. No other template or script
+   changes are needed.
 
 ### Security Notes
 
 - Integration API keys are **never** logged (redacted at the `Config.save_setting` level).
-- The `_ALLOWED_INTEGRATIONS` allowlist in `views/settings.py` prevents arbitrary keys from
-  being written to the database via the settings endpoint.
+- The `_ALLOWED_INTEGRATIONS` and `_ALLOWED_LOGO_PROVIDERS` allowlists in `views/settings.py`
+  prevent arbitrary keys from being written to the database via the settings endpoint.
 - Integration logo requests are served as **HTTP redirects** — the browser fetches images
   directly from the integration CDN rather than being proxied through the server. This is
   required by Logo.dev's hotlinking model and keeps the server out of the content path.

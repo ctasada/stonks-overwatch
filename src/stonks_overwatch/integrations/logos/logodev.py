@@ -1,3 +1,5 @@
+from urllib.parse import quote
+
 import requests
 from requests.exceptions import RequestException
 
@@ -19,12 +21,11 @@ class LogoDevIntegration(LogoIntegration):
 
     logger = StonksLogger.get_logger("stonks_overwatch.integrations.logos", "[LOGODEV|LOGO]")
 
-    def __init__(self, api_key: str, enabled: bool = True) -> None:
+    def __init__(self, api_key: str) -> None:
         self._api_key = api_key
-        self._enabled = enabled
 
     def is_active(self) -> bool:
-        return bool(self._api_key) and self._enabled
+        return bool(self._api_key)
 
     def supports(self, logo_type: LogoType) -> bool:
         return logo_type in {LogoType.STOCK, LogoType.ETF, LogoType.CRYPTO}
@@ -52,11 +53,11 @@ class LogoDevIntegration(LogoIntegration):
             A fully qualified Logo.dev URL string, or ``""`` if the logo does not exist.
         """
         if logo_type == LogoType.CRYPTO:
-            url = self.CRYPTO_URL.format(symbol=symbol.lower(), token=self._api_key, theme=theme)
+            url = self.CRYPTO_URL.format(symbol=quote(symbol.lower()), token=self._api_key, theme=theme)
         elif isin:
-            url = self.ISIN_URL.format(isin=isin.upper(), token=self._api_key, theme=theme)
+            url = self.ISIN_URL.format(isin=quote(isin.upper()), token=self._api_key, theme=theme)
         else:
-            url = self.STOCK_URL.format(symbol=symbol.upper(), token=self._api_key, theme=theme)
+            url = self.STOCK_URL.format(symbol=quote(symbol.upper()), token=self._api_key, theme=theme)
 
         try:
             response = requests.get(url, timeout=3, stream=True)

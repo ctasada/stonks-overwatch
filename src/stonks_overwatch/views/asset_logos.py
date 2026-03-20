@@ -44,7 +44,8 @@ class AssetLogoView(View):
             self.logger.warning(f"Invalid Logo request for {product_type.name} {symbol.upper()}")
             return HttpResponseNotFound("Invalid product type")
 
-        theme = Config.get_global().resolved_theme()
+        theme_hint = request.GET.get("theme", "light").strip()
+        theme = Config.get_global().resolved_theme(hint=theme_hint)
         isin = request.GET.get("isin", "").strip()
         conid = request.GET.get("conid", "").strip()
         if conid and not conid.isdigit():
@@ -68,7 +69,7 @@ class AssetLogoView(View):
                 content_type=response.headers.get("Content-Type", self.SVG_CONTENT_TYPE),
                 status=response.status_code,
             )
-        except RequestException:
+        except (RequestException, ValueError):
             self.logger.warning(f"Logo for {product_type.name} {symbol.upper()} not found. Creating fallback logo.")
             return HttpResponse(
                 content=self.__generate_symbol(symbol.upper()), content_type=self.SVG_CONTENT_TYPE, status=200
@@ -121,7 +122,10 @@ class AssetLogoView(View):
         """Return the CDN/base URL to fetch for types that use an external fallback."""
         if product_type in (LogoType.COUNTRY, LogoType.SECTOR):
             return self.__emoji_to_svg(symbol)
-        return self.base_urls[product_type].format(symbol.lower())
+        url_template = self.base_urls.get(product_type)
+        if not url_template:
+            raise ValueError(f"No CDN fallback URL defined for logo type: {product_type.name}")
+        return url_template.format(symbol.lower())
 
     def __generate_symbol(self, symbol: str) -> str:
         # We need to fit the logo independently of the symbol length

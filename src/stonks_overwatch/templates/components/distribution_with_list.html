@@ -20,9 +20,11 @@
                         {% if item.product_type == 'sector' %}
                         <i class="bi bi-{{ item.symbol }} fs-4"></i>
                         {% elif item.product_type == 'cash' %}
-                        <span class="currency-symbol" data-currency="{{ item.name|lower }}">{{ item.symbol }}</span>
+                        <img data-logo-src="{% url 'asset_logo' product_type=item.product_type|lower symbol=item.name|lower %}"
+                            alt="{{ item.name }} logo"
+                            onerror="this.style.display='none'">
                         {% else %}
-                        <img src="{% url 'asset_logo' product_type=item.product_type|lower symbol=item.symbol|lower %}{% if item.isin and item.conid %}?isin={{ item.isin }}&amp;conid={{ item.conid }}{% elif item.isin %}?isin={{ item.isin }}{% elif item.conid %}?conid={{ item.conid }}{% endif %}"
+                        <img data-logo-src="{% url 'asset_logo' product_type=item.product_type|lower symbol=item.symbol|lower %}{% if item.isin and item.conid %}?isin={{ item.isin }}&amp;conid={{ item.conid }}{% elif item.isin %}?isin={{ item.isin }}{% elif item.conid %}?conid={{ item.conid }}{% endif %}"
                             alt="{{ item.symbol }} logo"
                             onerror="this.style.display='none'">
                         {% endif %}
