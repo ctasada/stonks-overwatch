@@ -1,5 +1,5 @@
 from stonks_overwatch.services.brokers.degiro.repositories.models import DeGiroProductInfo
-from stonks_overwatch.utils.database.db_utils import dictfetchall, dictfetchone, get_connection_for_model
+from stonks_overwatch.utils.database.db_utils import snake_to_camel
 
 
 class ProductInfoRepository:
@@ -12,19 +12,13 @@ class ProductInfoRepository:
         ### Returns
             list: list of product infos
         """
-        connection = get_connection_for_model(DeGiroProductInfo)
-        with connection.cursor() as cursor:
-            # Use a parameterized query to prevent SQL injection
-            placeholders = ",".join(["%s"] * len(ids))
-            cursor.execute(
-                f"""
-                SELECT *
-                FROM degiro_productinfo
-                WHERE id IN ({placeholders})
-                """,  # nosec B608
-                ids,
-            )
-            rows = dictfetchall(cursor)
+        if not ids:
+            return {}
+
+        rows = [
+            {snake_to_camel(key): value for key, value in row.items()}
+            for row in DeGiroProductInfo.objects.filter(id__in=ids).values()
+        ]
 
         # Convert the list of dictionaries into a dictionary indexed by 'productId'
         result_map = {row["id"]: row for row in rows}
@@ -39,19 +33,13 @@ class ProductInfoRepository:
         ### Returns
             list: list of product infos. For a single symbol, the list may contain multiple products.
         """
-        connection = get_connection_for_model(DeGiroProductInfo)
-        with connection.cursor() as cursor:
-            # Use a parameterized query to prevent SQL injection
-            placeholders = ",".join(["%s"] * len(symbols))
-            cursor.execute(
-                f"""
-                SELECT *
-                FROM degiro_productinfo
-                WHERE symbol IN ({placeholders})
-                """,  # nosec B608
-                symbols,
-            )
-            rows = dictfetchall(cursor)
+        if not symbols:
+            return {}
+
+        rows = [
+            {snake_to_camel(key): value for key, value in row.items()}
+            for row in DeGiroProductInfo.objects.filter(symbol__in=symbols).values()
+        ]
 
         # Convert the list of dictionaries into a dictionary indexed by 'productId'
         result_map = {row["id"]: row for row in rows}
@@ -73,19 +61,10 @@ class ProductInfoRepository:
         ### Returns
             Product Info
         """
-        connection = get_connection_for_model(DeGiroProductInfo)
-        with connection.cursor() as cursor:
-            # Use parameterized query to prevent SQL injection
-            cursor.execute(
-                """
-                SELECT *
-                FROM degiro_productinfo
-                WHERE name = %s
-                LIMIT 1
-                """,
-                [name],
-            )
-            return dictfetchone(cursor)
+        row = DeGiroProductInfo.objects.filter(name=name).values().first()
+        if row is None:
+            return None
+        return {snake_to_camel(key): value for key, value in row.items()}
 
     @staticmethod
     def get_products_isin() -> list[str]:
@@ -94,14 +73,4 @@ class ProductInfoRepository:
         ### Returns
             list: list of product ISINs
         """
-        connection = get_connection_for_model(DeGiroProductInfo)
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT isin FROM degiro_productinfo
-                """,
-            )
-            result = dictfetchall(cursor)
-
-        isin_list = [row["isin"] for row in result]
-        return list(set(isin_list))
+        return list(set(DeGiroProductInfo.objects.values_list("isin", flat=True)))
