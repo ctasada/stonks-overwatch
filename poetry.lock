@@ -4342,4 +4342,4 @@ briefcase = ["asgiref", "toga"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "00b460d5f23de4b6fd421c7f341215389df9d24c1ad54e4a7d0b2eb76baa3ed7"
+content-hash = "46248c6dd7ed88a2d8ae14ad0804a0494d7a86c9747d97263c7c1eab5d8c5177"
