@@ -71,3 +71,45 @@ class TestProductInfoRepository(BaseRepositoryTest):
         self.assert_dict_contains(
             products[331868], name="Apple Inc", symbol="AAPL", currency="USD", isin="US0378331005"
         )
+
+    # --- WARRANT / LEVERAGED products (no symbol in DeGiro API response) ---
+
+    WARRANT_PRODUCT = {
+        "id": 18960776,
+        "name": "MiniS O.End DAX 17230",
+        "isin": "DE000VP4KR02",
+        "symbol": "",  # DeGiro API omits 'symbol' for these product types; stored as ""
+        "contract_size": 1.0,
+        "product_type": "WARRANT",
+        "product_type_id": 536,
+        "tradable": False,
+        "category": "D",
+        "currency": "EUR",
+        "active": False,
+        "exchange_id": "195",
+        "only_eod_prices": False,
+    }
+
+    def test_warrant_product_stored_with_empty_symbol_is_retrievable_by_id(self):
+        """A WARRANT product stored with symbol='' must be found by ID without raising KeyError.
+        Previously __import_products_info crashed on row["symbol"], so these products were never
+        stored, and get_product_info_from_id raised KeyError: <product_id>."""
+        DeGiroProductInfo.objects.create(**self.WARRANT_PRODUCT)
+
+        product = ProductInfoRepository.get_product_info_from_id(18960776)
+
+        self.assert_dict_contains(product, name="MiniS O.End DAX 17230", symbol="", currency="EUR")
+
+    def test_get_products_info_raw_by_empty_symbol_does_not_return_normal_stocks(self):
+        """Querying by symbol='' must only return products that have an empty symbol.
+        This guards _get_correlated_products: if it queried '' it would return all
+        WARRANT products as 'correlated', corrupting realized P&L calculations."""
+        DeGiroProductInfo.objects.create(**self.WARRANT_PRODUCT)
+
+        products = ProductInfoRepository.get_products_info_raw_by_symbol([""])
+
+        # Only the WARRANT with empty symbol should be returned — not MSFT or AAPL
+        self.assert_list_length(products, 1)
+        self.assertIn(18960776, products)
+        self.assertNotIn(332111, products)
+        self.assertNotIn(331868, products)

@@ -32,6 +32,12 @@ class TestIsNonTradeableProduct:
         product = {"isin": "US0378331005", "currency": "USD"}
         assert is_non_tradeable_product(product) is False
 
+    def test_product_with_empty_symbol_is_not_non_tradeable(self):
+        """WARRANT/LEVERAGED products stored with symbol='' should not be flagged as non-tradeable.
+        They are handled by product-type-level filtering, not symbol-based detection."""
+        product = {"symbol": "", "name": "MiniS O.End DAX 17230", "productType": "WARRANT"}
+        assert is_non_tradeable_product(product) is False
+
 
 class TestRetryWithBackoff:
     """Test cases for the retry_with_backoff function."""

@@ -428,7 +428,11 @@ class UpdateService(BaseService, AbstractUpdateService):
                     defaults={
                         "name": row["name"],
                         "isin": row["isin"],
-                        "symbol": row["symbol"],
+                        # Some product types (e.g. WARRANT, LEVERAGED) do not include a 'symbol' field
+                        # in the DeGiro API response. Falling back to "" allows them to be stored and
+                        # looked up by product ID. Downstream filtering (is_non_tradeable_product,
+                        # issubset checks) handles empty symbols gracefully.
+                        "symbol": row.get("symbol", ""),
                         "contract_size": row["contractSize"],
                         "product_type": row["productType"],
                         "product_type_id": row["productTypeId"],

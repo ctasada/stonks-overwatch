@@ -104,7 +104,8 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
             if product_info.get("productType") == self.CASH_PRODUCT_TYPE:
                 continue
 
-            symbol = product_info["symbol"]
+            # Use .get() because live API responses for WARRANT/LEVERAGED products may omit 'symbol'
+            symbol = product_info.get("symbol", "")
             if symbol not in processed_symbols:
                 processed_symbols.add(symbol)
 
@@ -125,6 +126,10 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
 
     def _get_correlated_products(self, symbol: str) -> list[str]:
         """Get all product IDs for the same symbol (handles reopened products)."""
+        # Products without a symbol (e.g. WARRANT/LEVERAGED) cannot have correlated products.
+        # Querying with symbol="" would return all other empty-symbol products, corrupting P&L.
+        if not symbol:
+            return []
         tmp_products = self.product_info.get_products_info_raw_by_symbol([symbol])
         return [p["id"] for p in tmp_products.values() if "Non tradeable" not in p.get("name", "")]
 
