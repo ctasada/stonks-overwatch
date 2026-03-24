@@ -30,9 +30,10 @@ MANAGE_PY := $(SRC_DIR)/manage.py
 DEBUG_MODE := $(if $(debug),true,false)
 PROFILE_MODE := $(if $(profile),true,false)
 DEMO_MODE := $(if $(demo),true,false)
+STONKS_OVERWATCH_START_DATE := $(start_date)
 
 # Export variables for child processes
-export DEBUG_MODE PROFILE_MODE DEMO_MODE
+export DEBUG_MODE PROFILE_MODE DEMO_MODE STONKS_OVERWATCH_START_DATE
 
 #==============================================================================
 # CI/CD Configuration
@@ -81,6 +82,7 @@ help: ## Show this help message
 	@echo -e "$(BOLD)Examples:$(RESET)"
 	@echo -e "  make install                    # Install dependencies"
 	@echo -e "  make runserver debug=true       # Run server in debug mode"
+	@echo -e "  make run start_date=2020-01-01  # Run with scheduler start date override"
 	@echo -e "  make test                       # Run tests"
 	@echo -e "  make docker-run                 # Build and run with Docker"
 	@echo -e "  make cicd workflow=package target=deb  # Test deb build locally"
@@ -203,11 +205,12 @@ collectstatic: npminstall ## Collect static files
 	rm -rf $(STATIC_DIR)
 	poetry run python $(MANAGE_PY) collectstatic --noinput
 
-runserver: ## Run Django development server (supports debug=true, profile=true, demo=true)
+runserver: ## Run Django development server (supports debug=true, profile=true, demo=true, start_date=YYYY-MM-DD)
 	@echo -e "$(BOLD)$(GREEN)Starting Django development server...$(RESET)"
 	@echo -e "$(YELLOW)Debug mode: $(DEBUG_MODE)$(RESET)"
 	@echo -e "$(YELLOW)Profile mode: $(PROFILE_MODE)$(RESET)"
 	@echo -e "$(YELLOW)Demo mode: $(DEMO_MODE)$(RESET)"
+	@echo -e "$(YELLOW)Start date: $(if $(STONKS_OVERWATCH_START_DATE),$(STONKS_OVERWATCH_START_DATE),from config)$(RESET)"
 	poetry run python $(MANAGE_PY) runserver
 
 start: install collectstatic migrate runserver ## Full setup: install, collect static, migrate, and run server

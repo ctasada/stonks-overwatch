@@ -7,8 +7,11 @@ from stonks_overwatch.core.exceptions import CredentialsException
 from stonks_overwatch.services.brokers.bitvavo.services.update_service import UpdateService as BitvavoUpdateService
 from stonks_overwatch.services.brokers.degiro.services.update_service import UpdateService as DegiroUpdateService
 from stonks_overwatch.services.brokers.ibkr.services.update_service import UpdateService as IbkrUpdateService
-from stonks_overwatch.settings import DEBUG_MODE
+from stonks_overwatch.settings import DEBUG_MODE, STONKS_OVERWATCH_START_DATE
 from stonks_overwatch.utils.core.logger import StonksLogger
+
+# STONKS_OVERWATCH_START_DATE is parsed once at Django startup (settings.py) as a date | None.
+# We intentionally use a module-level name so that it is resolved at import time, not per tick.
 
 
 class JobsScheduler:
@@ -70,6 +73,31 @@ class JobsScheduler:
         return update_method
 
     @classmethod
+    def _ensure_connected(
+        cls, broker_name: BrokerName, broker_service, connection_check: str, connection_method: str | None
+    ) -> None:
+        """Ensure the broker service is connected, attempting to connect if needed."""
+        is_connected = False
+        if connection_check == "is_connected":
+            is_connected = broker_service.is_connected()
+        elif connection_check == "get_client":
+            is_connected = broker_service.get_client() is not None
+
+        if not is_connected:
+            cls.logger.info(f"{broker_name.capitalize()} service not connected, attempting to connect...")
+            try:
+                if connection_method:
+                    # For services that need explicit connection (like DeGiro)
+                    getattr(broker_service, connection_method)()
+                    cls.logger.info(f"{broker_name.capitalize()} service connected successfully")
+                else:
+                    # For services that connect during initialization (like IBKR, Bitvavo)
+                    cls.logger.info(f"{broker_name.capitalize()} service connection handled during initialization")
+            except Exception as connect_error:
+                cls.logger.warning(f"Failed to connect {broker_name.capitalize()} service: {connect_error}")
+                cls.logger.info(cls.PROCEED_WITH_CACHED_DATA_MSG)
+
+    @classmethod
     def _update_broker_portfolio(cls, broker_name: BrokerName):
         """Generic method to update any broker portfolio"""
         broker_config = cls.BROKER_CONFIGS.get(broker_name)
@@ -90,6 +118,10 @@ class JobsScheduler:
                 cls.logger.warning(f"{broker_name.capitalize()} is not enabled, skipping update")
                 return
 
+            if STONKS_OVERWATCH_START_DATE:
+                config.start_date = STONKS_OVERWATCH_START_DATE
+                cls.logger.info(f"Overriding start_date to {config.start_date} for {broker_name}")
+
             # Create update service with the proper config
             update_service_class = broker_config["update_service_class"]
             update_service = update_service_class(config=config)
@@ -97,29 +129,12 @@ class JobsScheduler:
             # Attempt to connect the broker service if not already connected
             service_attr = broker_config["service_attr"]
             broker_service = getattr(update_service, service_attr)
-            connection_check = broker_config["connection_check"]
-            connection_method = broker_config["connection_method"]
-
-            # Check if service is connected
-            is_connected = False
-            if connection_check == "is_connected":
-                is_connected = broker_service.is_connected()
-            elif connection_check == "get_client":
-                is_connected = broker_service.get_client() is not None
-
-            if not is_connected:
-                cls.logger.info(f"{broker_name.capitalize()} service not connected, attempting to connect...")
-                try:
-                    if connection_method:
-                        # For services that need explicit connection (like DeGiro)
-                        getattr(broker_service, connection_method)()
-                        cls.logger.info(f"{broker_name.capitalize()} service connected successfully")
-                    else:
-                        # For services that connect during initialization (like IBKR, Bitvavo)
-                        cls.logger.info(f"{broker_name.capitalize()} service connection handled during initialization")
-                except Exception as connect_error:
-                    cls.logger.warning(f"Failed to connect {broker_name.capitalize()} service: {connect_error}")
-                    cls.logger.info(cls.PROCEED_WITH_CACHED_DATA_MSG)
+            cls._ensure_connected(
+                broker_name,
+                broker_service,
+                broker_config["connection_check"],
+                broker_config["connection_method"],
+            )
 
             # Perform the update
             update_service.update_all()

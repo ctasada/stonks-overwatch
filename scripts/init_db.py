@@ -10,6 +10,7 @@ import logging
 import os
 import textwrap
 from argparse import Namespace
+from datetime import date
 
 from scripts.common import setup_script_environment
 
@@ -19,6 +20,7 @@ setup_script_environment()
 # Import Django and application modules after setup
 from django.core.management import call_command  # noqa: E402
 
+from stonks_overwatch.config.base_config import BaseConfig  # noqa: E402
 from stonks_overwatch.constants import BrokerName  # noqa: E402
 from stonks_overwatch.core.factories.broker_factory import BrokerFactory  # noqa: E402
 
@@ -33,6 +35,7 @@ from stonks_overwatch.services.brokers.ibkr.services.update_service import (  # 
     UpdateService as IbkrUpdateService,
 )
 from stonks_overwatch.services.brokers.models import BrokersConfigurationRepository  # noqa: E402
+from stonks_overwatch.utils.core.localization import LocalizationUtility  # noqa: E402
 
 
 def parse_args() -> Namespace:
@@ -66,6 +69,13 @@ def parse_args() -> Namespace:
         "--debug",
         action="store_true",
         help="Enable debug mode. When using debug mode, the script will store the DeGiro data in the import folder.",
+    )
+    parser.add_argument(
+        "--start_date",
+        type=str,
+        default=None,
+        metavar="YYYY-MM-DD",
+        help="Override the start date for data import (e.g. 2020-01-01). Defaults to the value set in config.json.",
     )
 
     parser.add_argument("--degiro", action="store_true", help="Import DEGIRO")
@@ -104,7 +114,10 @@ def update_credentials():
 
     config_path = os.path.join(os.path.dirname(__file__), "..", "config", "config.json")
     if not os.path.exists(config_path):
-        logging.error(f"Config file not found: {config_path}")
+        logging.warning(
+            f"config.json not found at '{config_path}' — skipping credential update. "
+            "Copy config/config.json.template to config/config.json and fill in your credentials."
+        )
         return
 
     with open(config_path, "r") as f:
@@ -174,23 +187,44 @@ def bitvavo_transactions(update_service: BitvavoUpdateService) -> None:
     update_service.update_transactions()
 
 
-def get_degiro_update_service(args, broker_factory):
+def _parse_start_date(start_date_str: str | None) -> date | None:
+    """Parse --start_date string to a date object, or return None if not provided."""
+    if not start_date_str:
+        return None
+    try:
+        return LocalizationUtility.convert_string_to_date(start_date_str)
+    except ValueError as e:
+        logging.error(f"Invalid --start_date value '{start_date_str}'. Expected format: YYYY-MM-DD. Error: {e}")
+        raise SystemExit(1) from e
+
+
+def _apply_start_date(config: BaseConfig, start_date: date | None) -> None:
+    """Override config.start_date if a start date was provided on the command line."""
+    if start_date is not None:
+        logging.info(f"Overriding start_date to {start_date}")
+        config.start_date = start_date
+
+
+def get_degiro_update_service(args: Namespace, broker_factory: BrokerFactory) -> DegiroUpdateService:
     degiro_import_folder = os.path.join(args.import_folder, BrokerName.DEGIRO.lower())
     degiro_config = broker_factory.create_config(BrokerName.DEGIRO)
+    _apply_start_date(degiro_config, _parse_start_date(args.start_date))
     return DegiroUpdateService(
         import_folder=degiro_import_folder, debug_mode=args.debug, config=degiro_config, force_connect=True
     )
 
 
-def get_ibkr_update_service(args, broker_factory):
+def get_ibkr_update_service(args: Namespace, broker_factory: BrokerFactory) -> IbkrUpdateService:
     ibkr_import_folder = os.path.join(args.import_folder, BrokerName.IBKR.lower())
     ibkr_config = broker_factory.create_config(BrokerName.IBKR)
+    _apply_start_date(ibkr_config, _parse_start_date(args.start_date))
     return IbkrUpdateService(import_folder=ibkr_import_folder, debug_mode=args.debug, config=ibkr_config)
 
 
-def get_bitvavo_update_service(args, broker_factory):
+def get_bitvavo_update_service(args: Namespace, broker_factory: BrokerFactory) -> BitvavoUpdateService:
     bitvavo_import_folder = os.path.join(args.import_folder, BrokerName.BITVAVO.lower())
     bitvavo_config = broker_factory.create_config(BrokerName.BITVAVO)
+    _apply_start_date(bitvavo_config, _parse_start_date(args.start_date))
     return BitvavoUpdateService(import_folder=bitvavo_import_folder, debug_mode=args.debug, config=bitvavo_config)
 
 

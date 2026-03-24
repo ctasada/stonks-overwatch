@@ -10,6 +10,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 import os
+from datetime import date
 from pathlib import Path
 
 from tzlocal import get_localzone
@@ -124,6 +125,14 @@ SECRET_KEY = "django-insecure-!2@us@&-4_p0s&k@u^s2xb865+yp=6-ic1e)*9o@$f=)66^ehi
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG_MODE = os.getenv("DEBUG_MODE", False) in [True, "true", "True", "1"]
+
+_start_date_str = os.getenv("STONKS_OVERWATCH_START_DATE")
+try:
+    STONKS_OVERWATCH_START_DATE: date | None = date.fromisoformat(_start_date_str) if _start_date_str else None
+except ValueError as e:
+    raise ValueError(
+        f"Invalid STONKS_OVERWATCH_START_DATE value '{_start_date_str}'. Expected format: YYYY-MM-DD"
+    ) from e
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
