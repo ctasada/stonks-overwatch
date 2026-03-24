@@ -154,7 +154,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
 
         return PortfolioEntry(
             name=product_info["name"],
-            symbol=product_info["symbol"],
+            symbol=product_info.get("symbol", ""),
             isin=product_info["isin"],
             sector=Sector.from_str(company_data["sector"]),
             industry=company_data["industry"],
@@ -200,7 +200,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         # Fallback to close price if no quotation found
         if price == self.FALLBACK_PRICE and self.CLOSE_PRICE_FIELD in product_info:
             self.logger.warning(
-                f"No quotation found for '{product_info['symbol']}' "
+                f"No quotation found for '{product_info.get('symbol', 'Unknown')}' "
                 f"(productId {product_data[self.PRODUCT_ID_FIELD]}), using {self.CLOSE_PRICE_FIELD}"
             )
             price = product_info[self.CLOSE_PRICE_FIELD]
