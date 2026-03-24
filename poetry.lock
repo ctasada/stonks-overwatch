@@ -890,14 +890,14 @@ files = [
 
 [[package]]
 name = "currencyconverter"
-version = "0.18.15"
+version = "0.18.16"
 description = "A currency converter using the European Central Bank data."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "currencyconverter-0.18.15-py3-none-any.whl", hash = "sha256:daa23172d1663eb71c383f627a4516cccab4590d94eb75cc49ccbf70a09f0731"},
-    {file = "currencyconverter-0.18.15.tar.gz", hash = "sha256:bc9290e513f76f6e5881bc4a12eacefa04e762a2ddedd33ab1b2e00c91f073d4"},
+    {file = "currencyconverter-0.18.16-py3-none-any.whl", hash = "sha256:b4253f56928528fb0e3f2f09a35236d9fe45eb31fe689299215d6582173c94a7"},
+    {file = "currencyconverter-0.18.16.tar.gz", hash = "sha256:8dc3d010debcc45c732548838153e70f9ca81cf6049d4e516c0d49374a4b2d7d"},
 ]
 
 [[package]]
