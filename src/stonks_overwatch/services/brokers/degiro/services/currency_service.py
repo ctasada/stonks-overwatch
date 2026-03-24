@@ -71,7 +71,7 @@ class CurrencyConverterService:
         quotations = self.currency_maps[currency][new_currency].quotations
 
         if not quotations:
-            self.logger.warning(f"Empty quotations for {currency}/{new_currency}, falling back to currency_converter")
+            self.logger.debug(f"Empty quotations for {currency}/{new_currency}, falling back to currency_converter")
             return self.currency_converter.convert(amount, currency, new_currency, fx_date)
 
         last_known_date = list(quotations.keys())[-1]
