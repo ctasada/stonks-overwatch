@@ -35,7 +35,6 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
     logger = StonksLogger.get_logger("stonks_overwatch.portfolio_data.degiro", "[DEGIRO|PORTFOLIO]")
 
     # Configuration constants
-    SUPPORTED_CURRENCY_ACCOUNTS = ["EUR", "USD", "GBP"]
     DEBUG_SYMBOL = "NVDA"  # Change this to debug other symbols
     DEBUG_DATES = ["2021-07-18", "2021-07-19", "2021-07-20"]  # Adjust for specific date ranges
 
@@ -69,6 +68,11 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         self.yfinance = YFinance()
 
     @cached_property
+    def _cash_currencies(self) -> list[str]:
+        """Distinct currencies with a FLATEX_CASH_SWEEP entry. Cached per instance to avoid repeated DB queries."""
+        return CashMovementsRepository.get_distinct_currencies()
+
+    @cached_property
     def get_portfolio(self) -> List[PortfolioEntry]:
         self.logger.debug("Get Portfolio")
 
@@ -88,14 +92,20 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         """Create portfolio entries for stock/ETF products."""
         stock_entries = []
         processed_symbols = set()
+        missing_info_ids = []
 
         for product_data in portfolio_products:
-            product_info = products_info[product_data[self.PRODUCT_ID_FIELD]]
+            product_id = product_data[self.PRODUCT_ID_FIELD]
+            product_info = products_info.get(product_id)
+            if product_info is None:
+                missing_info_ids.append(product_id)
+                continue
 
             if product_info.get("productType") == self.CASH_PRODUCT_TYPE:
                 continue
 
-            symbol = product_info["symbol"]
+            # Use .get() because live API responses for WARRANT/LEVERAGED products may omit 'symbol'
+            symbol = product_info.get("symbol", "")
             if symbol not in processed_symbols:
                 processed_symbols.add(symbol)
 
@@ -106,10 +116,20 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
             entry = self._create_portfolio_entry(product_data, product_info, products_config, correlated_products)
             stock_entries.append(entry)
 
+        if missing_info_ids:
+            self.logger.warning(
+                f"Skipped {len(missing_info_ids)} product(s) with no product info: {missing_info_ids}. "
+                "These positions are excluded from the portfolio."
+            )
+
         return stock_entries
 
     def _get_correlated_products(self, symbol: str) -> list[str]:
         """Get all product IDs for the same symbol (handles reopened products)."""
+        # Products without a symbol (e.g. WARRANT/LEVERAGED) cannot have correlated products.
+        # Querying with symbol="" would return all other empty-symbol products, corrupting P&L.
+        if not symbol:
+            return []
         tmp_products = self.product_info.get_products_info_raw_by_symbol([symbol])
         return [p["id"] for p in tmp_products.values() if "Non tradeable" not in p.get("name", "")]
 
@@ -134,7 +154,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
 
         return PortfolioEntry(
             name=product_info["name"],
-            symbol=product_info["symbol"],
+            symbol=product_info.get("symbol", ""),
             isin=product_info["isin"],
             sector=Sector.from_str(company_data["sector"]),
             industry=company_data["industry"],
@@ -180,7 +200,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         # Fallback to close price if no quotation found
         if price == self.FALLBACK_PRICE and self.CLOSE_PRICE_FIELD in product_info:
             self.logger.warning(
-                f"No quotation found for '{product_info['symbol']}' "
+                f"No quotation found for '{product_info.get('symbol', 'Unknown')}' "
                 f"(productId {product_data[self.PRODUCT_ID_FIELD]}), using {self.CLOSE_PRICE_FIELD}"
             )
             price = product_info[self.CLOSE_PRICE_FIELD]
@@ -231,7 +251,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         """Create portfolio entries for cash balances."""
         cash_entries = []
 
-        for currency in self.SUPPORTED_CURRENCY_ACCOUNTS:
+        for currency in self._cash_currencies:
             total_cash = CashMovementsRepository.get_total_cash(currency)
             if total_cash is None:
                 self.logger.debug(f"No cash movements found for currency {currency}, skipping")
@@ -348,7 +368,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
 
     def __get_total_cash(self) -> float:
         total_cash = 0.0
-        for currency in self.SUPPORTED_CURRENCY_ACCOUNTS:
+        for currency in self._cash_currencies:
             cash = CashMovementsRepository.get_total_cash(currency)
             if cash is None:
                 self.logger.debug(f"No cash movements found for currency {currency}, skipping")
@@ -751,14 +771,21 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
         product_growth = self.calculate_product_growth()
         tradable_products = {}
 
+        _required_fields = {"name", "isin", "symbol", "currency"}
+
         for key, data in product_growth.items():
             product = ProductInfoRepository.get_product_info_from_id(key)
+
+            if not product or not _required_fields.issubset(product):
+                self.logger.warning(f"Skipping product with incomplete info: {key}")
+                self.logger.debug(f"Product data for {key}: {product}")
+                continue
 
             # If the product is NOT tradable, we shouldn't consider it for Growth
             # The 'tradable' attribute identifies old Stocks, like the ones that are
             # renamed for some reason, and it's not good enough to identify stocks
             # that are provided as dividends, for example.
-            if self.NON_TRADEABLE_IDENTIFIER in product.get("name", ""):
+            if is_non_tradeable_product(product):
                 continue
 
             data[self.PRODUCT_ID_FIELD] = key

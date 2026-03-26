@@ -634,10 +634,15 @@ def dataclass_to_dict(obj) -> dict:
     return result
 
 
+# Currency codes commonly found in stock names that should remain uppercase during formatting.
+# This is for display purposes only and is independent of FX conversion configuration.
+_STOCK_NAME_CURRENCY_CODES: frozenset[str] = frozenset({"EUR", "USD"})
+
+
 def format_stock_name(name: str) -> str:
     words = name.split()
     special_cases = {"jpmorgan": "JPMorgan", "ishares": "iShares"}
-    preserve = {"SA", "SA.", "SA-B", "UCITS", "ETF", "USD", "EUR"}
+    preserve = {"SA", "SA.", "SA-B", "UCITS", "ETF"} | _STOCK_NAME_CURRENCY_CODES
     preserve_lower_to_original = {p.lower(): p for p in preserve}
     capitalized_words = []
 

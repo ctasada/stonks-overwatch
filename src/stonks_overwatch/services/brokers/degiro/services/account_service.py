@@ -35,14 +35,15 @@ class AccountOverviewService(AccountServiceInterface, BaseService):
             description = cash_movement["description"]
 
             if cash_movement["productId"] is not None:
-                info = products_info[int(cash_movement["productId"])]
-
-                if is_non_tradeable_product(info):
-                    # If the product is non-tradeable, we want to include the real product, if exists
-                    info = self.__find_equivalent_tradeable_product(info, products_info)
-
-                stock_name = info["name"]
-                stock_symbol = info["symbol"]
+                info = products_info.get(int(cash_movement["productId"]))
+                if not info:
+                    self.logger.warning(f"Missing product info for id: {cash_movement['productId']}")
+                else:
+                    if is_non_tradeable_product(info):
+                        # If the product is non-tradeable, we want to include the real product, if exists
+                        info = self.__find_equivalent_tradeable_product(info, products_info)
+                    stock_name = info["name"]
+                    stock_symbol = info["symbol"]
 
             overview.append(
                 AccountOverview(

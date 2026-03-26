@@ -1,8 +1,42 @@
 from stonks_overwatch.services.brokers.degiro.client.degiro_client import DeGiroOfflineModeError
-from stonks_overwatch.services.brokers.degiro.services.helper import retry_with_backoff
+from stonks_overwatch.services.brokers.degiro.services.helper import is_non_tradeable_product, retry_with_backoff
 from stonks_overwatch.utils.core.logger import StonksLogger
 
 from unittest.mock import Mock, patch
+
+
+class TestIsNonTradeableProduct:
+    """Test cases for the is_non_tradeable_product function."""
+
+    def test_empty_dict_returns_false(self):
+        """Test that an empty dict returns False (defensive case)."""
+        assert is_non_tradeable_product({}) is False
+
+    def test_product_with_dot_d_symbol_returns_true(self):
+        """Test that a product with a .D symbol is identified as non-tradeable."""
+        product = {"symbol": "AAPL.D", "name": "Apple Inc"}
+        assert is_non_tradeable_product(product) is True
+
+    def test_product_with_non_tradeable_in_name_returns_true(self):
+        """Test that a product with 'Non tradeable' in the name is identified as non-tradeable."""
+        product = {"symbol": "AAPL", "name": "Apple Inc Non tradeable"}
+        assert is_non_tradeable_product(product) is True
+
+    def test_normal_tradeable_product_returns_false(self):
+        """Test that a normal tradeable product returns False."""
+        product = {"symbol": "AAPL", "name": "Apple Inc"}
+        assert is_non_tradeable_product(product) is False
+
+    def test_product_missing_symbol_and_name_keys_returns_false(self):
+        """Test that a non-empty product missing both symbol and name gracefully returns False."""
+        product = {"isin": "US0378331005", "currency": "USD"}
+        assert is_non_tradeable_product(product) is False
+
+    def test_product_with_empty_symbol_is_not_non_tradeable(self):
+        """WARRANT/LEVERAGED products stored with symbol='' should not be flagged as non-tradeable.
+        They are handled by product-type-level filtering, not symbol-based detection."""
+        product = {"symbol": "", "name": "MiniS O.End DAX 17230", "productType": "WARRANT"}
+        assert is_non_tradeable_product(product) is False
 
 
 class TestRetryWithBackoff:

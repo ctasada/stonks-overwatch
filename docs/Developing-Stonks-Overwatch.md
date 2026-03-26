@@ -338,12 +338,33 @@ provides the most up-to-date information on how to profile a web request in Djan
 ### Create a new Database
 
 ```shell
-poetry run python ./scripts/init_db.py --help
+poetry run python -m scripts.init_db --help
 ```
 
 This command will create a new database with the initial data from your configured broker accounts (DEGIRO, Bitvavo, IBKR).
 
 > This script expects the `config/config.json` file to be present and properly configured with your broker credentials.
+
+#### Overriding the Start Date
+
+By default, data is imported from the `start_date` configured in `config/config.json` for each broker. You can override this on a per-run basis using `--start_date`:
+
+```shell
+# Import all broker data from a specific date
+poetry run python -m scripts.init_db --start_date 2022-06-01
+
+# Combined with other options
+poetry run python -m scripts.init_db --start_date 2022-06-01 --debug
+poetry run python -m scripts.init_db --start_date 2022-06-01 --degiro
+```
+
+The `--start_date` value must be in `YYYY-MM-DD` format.
+
+The background scheduler (started by `make run`) also supports a start date override via the `STONKS_OVERWATCH_START_DATE` environment variable, or with the `start_date` make parameter:
+
+```shell
+make run start_date=2022-06-01
+```
 
 ### Configuration File Format
 

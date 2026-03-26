@@ -301,7 +301,7 @@ Developers can configure DEGIRO credentials directly in the `config/config.json`
 | `credentials.password` | string | *required* | Your DEGIRO password |
 | `credentials.totp_secret_key` | string | optional | TOTP secret for automatic 2FA |
 | `base_currency` | string | DEGIRO default | Base currency for calculations (EUR, USD, etc.) |
-| `start_date` | string | `2020-01-01` | Portfolio tracking start date (YYYY-MM-DD) |
+| `start_date` | string | `2020-01-01` | Portfolio tracking start date (YYYY-MM-DD). Can be overridden per-run via `--start_date` on `init_db.py` or `make init_db start_date=YYYY-MM-DD` |
 | `update_frequency_minutes` | integer | `5` | Data refresh interval in minutes |
 
 #### Setup Steps

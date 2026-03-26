@@ -250,6 +250,7 @@ Developers can configure Bitvavo credentials directly in the `config/config.json
       "apikey": "YOUR_BITVAVO_API_KEY",
       "apisecret": "YOUR_BITVAVO_API_SECRET"
     },
+    "start_date": "2020-01-01",
     "update_frequency_minutes": 5
   }
 }
@@ -262,6 +263,7 @@ Developers can configure Bitvavo credentials directly in the `config/config.json
 | `enabled` | boolean | `true` | Enable/disable Bitvavo integration |
 | `credentials.apikey` | string | *required* | Your Bitvavo API key |
 | `credentials.apisecret` | string | *required* | Your Bitvavo API secret |
+| `start_date` | string | `2020-01-01` | Portfolio tracking start date (YYYY-MM-DD). Can be overridden per-run via `--start_date` on `init_db.py` or `make init_db start_date=YYYY-MM-DD` |
 | `update_frequency_minutes` | integer | `5` | Data refresh interval in minutes |
 
 #### Setup Steps

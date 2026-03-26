@@ -84,7 +84,7 @@ class ProductType(Enum):
     FUTURES = 7
     OPTIONS = 8
     FUNDS = 13
-    LEVERAGE_PRODUCTS = 14
+    LEVERAGE = 14
     CRYPTO = 15
 
     ETF = 131
