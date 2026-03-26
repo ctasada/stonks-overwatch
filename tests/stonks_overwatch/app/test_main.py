@@ -93,7 +93,6 @@ class TestStonksOverwatchApp:
 
         # Verify instance variables are initialized
         assert app_instance.main_window is None
-        assert app_instance.on_exit is None
         assert app_instance.server_thread is None
         assert app_instance.web_view is None
         assert app_instance._httpd is None
@@ -209,9 +208,6 @@ class TestStonksOverwatchApp:
         assert mock_main_window.content is not None
         assert mock_toga_deps["toga"].WebView.called
 
-        # Verify exit handler is set
-        assert app_instance.on_exit == app_instance.exit_handler
-
         # Verify menu setup is called
         app_instance.menu_manager.setup_main_menu.assert_called_once()
         app_instance.menu_manager.setup_debug_menu.assert_called_once()
@@ -220,14 +216,17 @@ class TestStonksOverwatchApp:
     @pytest.mark.asyncio
     async def test_exit_handler_confirm_exit(self, app_instance):
         """Test exit handler when user confirms exit."""
-        # Mock the dialog to return True (user confirms exit)
-        app_instance.dialog = AsyncMock(return_value=True)
+        # Bypass Toga's main_window type validation by setting the private attribute
+        mock_main_window = MagicMock()
+        mock_main_window.dialog = AsyncMock(return_value=True)
+        app_instance._main_window = mock_main_window
         app_instance._httpd = MagicMock()
 
-        result = await app_instance.exit_handler(app_instance)
+        # Call the unbound method directly to bypass Toga's simple_handler wrapping
+        result = await type(app_instance).on_exit(app_instance)
 
         # Verify dialog was shown
-        app_instance.dialog.assert_called_once()
+        mock_main_window.dialog.assert_called_once()
 
         # Verify server shutdown was called
         app_instance._httpd.shutdown.assert_called_once()
@@ -238,14 +237,17 @@ class TestStonksOverwatchApp:
     @pytest.mark.asyncio
     async def test_exit_handler_cancel_exit(self, app_instance):
         """Test exit handler when user cancels exit."""
-        # Mock the dialog to return False (user cancels exit)
-        app_instance.dialog = AsyncMock(return_value=False)
+        # Bypass Toga's main_window type validation by setting the private attribute
+        mock_main_window = MagicMock()
+        mock_main_window.dialog = AsyncMock(return_value=False)
+        app_instance._main_window = mock_main_window
         app_instance._httpd = MagicMock()
 
-        result = await app_instance.exit_handler(app_instance)
+        # Call the unbound method directly to bypass Toga's simple_handler wrapping
+        result = await type(app_instance).on_exit(app_instance)
 
         # Verify dialog was shown
-        app_instance.dialog.assert_called_once()
+        mock_main_window.dialog.assert_called_once()
 
         # Verify server shutdown was NOT called
         app_instance._httpd.shutdown.assert_not_called()

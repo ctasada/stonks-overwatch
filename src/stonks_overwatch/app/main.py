@@ -64,7 +64,6 @@ class StonksOverwatchApp(toga.App):
         self.logger = StonksLogger.get_logger("stonks_overwatch.app", "[APP]")
 
         self.main_window = None
-        self.on_exit = None
         self.server_thread = None
         self.web_view = None
         self._httpd = None
@@ -158,21 +157,19 @@ class StonksOverwatchApp(toga.App):
         self.loop.call_soon_threadsafe(self.server_exists.set_result, "ready")
         self._httpd.serve_forever()
 
-    async def exit_handler(self, app):
+    async def on_exit(self):
         # Return True if app should close, and False if it should remain open
-        if await self.dialog(toga.ConfirmDialog("Confirm Exit", "Are you sure you want to exit?")):
+        if await self.main_window.dialog(toga.ConfirmDialog("Confirm Exit", "Are you sure you want to exit?")):
             self.logger.info("Shutting down...")
             self._httpd.shutdown()
             return True
-        else:
-            return False
+        return False
 
     def startup(self):
         self.server_exists = asyncio.Future()
         self.web_view = toga.WebView()
         self.server_thread = Thread(target=self.web_server)
         self.server_thread.start()
-        self.on_exit = self.exit_handler
         self.main_window = toga.MainWindow()
         self.main_window.size = (1440, 900)
         self.main_window.content = self.web_view
