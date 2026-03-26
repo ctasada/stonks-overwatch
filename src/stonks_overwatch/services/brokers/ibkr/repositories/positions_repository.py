@@ -1,5 +1,5 @@
 from stonks_overwatch.services.brokers.ibkr.repositories.models import IBKRPosition
-from stonks_overwatch.utils.database.db_utils import dictfetchall, get_connection_for_model
+from stonks_overwatch.utils.database.db_utils import dictfetchall, get_connection_for_model, snake_to_camel
 
 
 class PositionsRepository:
@@ -26,17 +26,13 @@ class PositionsRepository:
         ### Returns
             list: list of product infos
         """
-        connection = get_connection_for_model(IBKRPosition)
-        with connection.cursor() as cursor:
-            # Use a parameterized query to prevent SQL injection
-            placeholders = ",".join(["%s"] * len(ids))
-            query = f"""
-                SELECT *
-                FROM ibkr_positions
-                WHERE conid IN ({placeholders})
-                """  # nosec: B608 - placeholders are generated safely and values are parameterized
-            cursor.execute(query, ids)
-            rows = dictfetchall(cursor)
+        if not ids:
+            return {}
+
+        rows = [
+            {snake_to_camel(key): value for key, value in row.items()}
+            for row in IBKRPosition.objects.filter(conid__in=ids).values()
+        ]
 
         # Convert the list of dictionaries into a dictionary indexed by 'productId'
         result_map = {row["conid"]: row for row in rows}

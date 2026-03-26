@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from stonks_overwatch.services.brokers.ibkr.repositories.models import IBKRTransactions
-from stonks_overwatch.utils.database.db_utils import dictfetchall, get_connection_for_model
+from stonks_overwatch.utils.database.db_utils import dictfetchall, get_connection_for_model, snake_to_camel
 
 
 class TransactionsRepository:
@@ -29,17 +29,14 @@ class TransactionsRepository:
             return dictfetchall(cursor)
 
     @staticmethod
-    def get_product_transactions(product_ids: list[str]) -> list[dict]:
-        connection = get_connection_for_model(IBKRTransactions)
-        with connection.cursor() as cursor:
-            # Use parameterized query to prevent SQL injection
-            placeholders = ",".join(["%s"] * len(product_ids))
-            query = f"""
-                SELECT * FROM ibkr_transactions
-                WHERE product_id IN ({placeholders})
-                """  # nosec: B608 - placeholders are generated safely and values are parameterized
-            cursor.execute(query, product_ids)
-            return dictfetchall(cursor)
+    def get_product_transactions(conids: list[int]) -> list[dict]:
+        if not conids:
+            return []
+
+        return [
+            {snake_to_camel(key): value for key, value in row.items()}
+            for row in IBKRTransactions.objects.filter(conid__in=conids).values()
+        ]
 
     @staticmethod
     def get_portfolio_products(only_open: bool = False) -> list[dict]:
@@ -70,6 +67,6 @@ class TransactionsRepository:
             if entry is not None:
                 return entry.date
         except Exception:
-            """Ignore. The Database doesn't contain anything"""
+            pass  # Ignore. The Database doesn't contain anything
 
         return None

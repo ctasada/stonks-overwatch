@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from stonks_overwatch.services.brokers.degiro.repositories.models import DeGiroTransactions
-from stonks_overwatch.utils.database.db_utils import dictfetchall, get_connection_for_model
+from stonks_overwatch.utils.database.db_utils import dictfetchall, get_connection_for_model, snake_to_camel
 
 
 class TransactionsRepository:
@@ -30,18 +30,17 @@ class TransactionsRepository:
 
     @staticmethod
     def get_product_transactions(product_ids: list[str]) -> list[dict]:
-        connection = get_connection_for_model(DeGiroTransactions)
-        with connection.cursor() as cursor:
-            # Use a parameterized query to prevent SQL injection
-            placeholders = ",".join(["%s"] * len(product_ids))
-            cursor.execute(
-                f"""
-                SELECT * FROM degiro_transactions
-                WHERE product_id IN ({placeholders})
-                """,  # nosec B608
-                product_ids,
-            )
-            return dictfetchall(cursor)
+        if not product_ids:
+            return []
+
+        rows = [
+            {snake_to_camel(key): value for key, value in row.items()}
+            for row in DeGiroTransactions.objects.filter(product_id__in=product_ids).values()
+        ]
+        for row in rows:
+            row["quantity"] = float(row["quantity"])
+            row["price"] = float(row["price"])
+        return rows
 
     @staticmethod
     def get_portfolio_products(only_open: bool = False) -> list[dict]:
@@ -72,6 +71,6 @@ class TransactionsRepository:
             if entry is not None:
                 return entry.date
         except Exception:
-            """Ignore. The Database doesn't contain anything"""
+            pass  # Ignore. The Database doesn't contain anything
 
         return None
