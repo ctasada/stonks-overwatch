@@ -18,7 +18,7 @@ runs:
     - name: Load cached Poetry installation
       if: ${{ !env.ACT }}
       id: cached-poetry
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.local
         key: ${{ runner.os }}-poetry
@@ -40,7 +40,7 @@ runs:
     - name: Load cached venv
       if: ${{ !env.ACT }}
       id: cached-poetry-dependencies
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: .venv
         key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
