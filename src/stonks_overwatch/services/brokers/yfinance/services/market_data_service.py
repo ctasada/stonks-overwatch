@@ -27,6 +27,11 @@ class YFinance:
         Returns:
             Ticker info dictionary or None if failed after all retries
         """
+        # First check if the symbol is empty to avoid wasteful API calls
+        if not symbol:
+            self.logger.warning("Skipping ticker info lookup for empty symbol.")
+            return None
+
         # First check cache/repository
         ticker_info = self.repository.get_ticker_info(symbol)
         if ticker_info is not None:
@@ -71,10 +76,15 @@ class YFinance:
         """
         self.logger.debug(f"Get Stock Splits for {symbol}")
 
+        if not symbol:
+            self.logger.warning("Skipping stock splits lookup for empty symbol.")
+            return []
+
         splits = self.repository.get_stock_splits(symbol)
         if splits is None:
             splits = self.client.get_stock_splits(symbol)
-            self.repository.save_stock_splits(symbol, splits)
+            splits_payload = [split.to_dict() for split in splits]
+            self.repository.save_stock_splits(symbol, splits_payload)
         else:
             splits = [StockSplit.from_dict(split) for split in splits]
 

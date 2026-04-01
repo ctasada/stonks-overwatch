@@ -74,7 +74,9 @@ class AccountOverviewService(AccountServiceInterface, BaseService):
         non_tradeable_products = []
         for product in products_info.values():
             if is_non_tradeable_product(product):
-                non_tradeable_products.append(product.get("symbol", "").replace(".D", ""))
+                symbol = product.get("symbol", "")
+                if symbol:
+                    non_tradeable_products.append(symbol.replace(".D", ""))
 
         # Retrieve the real product info for non-tradeable products
         if non_tradeable_products:
@@ -94,6 +96,8 @@ class AccountOverviewService(AccountServiceInterface, BaseService):
 
         # Remove the ".D" suffix to find the equivalent tradeable product
         tradeable_symbol = product.get("symbol", "").replace(".D", "")
+        if not tradeable_symbol:
+            return product
         for entry in all_products.values():
             if entry.get("symbol", "") == tradeable_symbol and not is_non_tradeable_product(entry):
                 return entry

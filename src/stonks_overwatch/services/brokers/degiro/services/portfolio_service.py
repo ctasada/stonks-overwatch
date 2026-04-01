@@ -574,14 +574,17 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
     def _calculate_position_growth(self, entry: dict) -> dict:
         """Calculate position growth with stock split adjustments."""
         symbol = entry["product"].get("symbol", "")
+        if not symbol:
+            self.logger.warning(f"Skipping stock split adjustments for product with empty symbol: {entry['productId']}")
 
         # Step 1: Build position values for all dates
         position_value = self._build_position_values(entry)
 
         # Step 2: Get and process stock splits
-        stock_splits = self.yfinance.get_stock_splits(symbol)
-        if stock_splits:
-            position_value = self._apply_stock_split_adjustments(symbol, position_value, stock_splits)
+        if symbol:
+            stock_splits = self.yfinance.get_stock_splits(symbol)
+            if stock_splits:
+                position_value = self._apply_stock_split_adjustments(symbol, position_value, stock_splits)
 
         # Step 3: Calculate final aggregate values with quotes
         return self._calculate_aggregate_values(entry, position_value)

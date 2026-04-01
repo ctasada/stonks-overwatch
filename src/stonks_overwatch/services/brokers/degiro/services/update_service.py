@@ -490,6 +490,11 @@ class UpdateService(BaseService, AbstractUpdateService):
                 self.logger.debug(f"Product data for {key}: {product}")
                 delete_keys.append(key)
                 continue
+            if not product.get("symbol"):
+                self.logger.warning(f"Skipping product with empty symbol: {key}")
+                self.logger.debug(f"Product data for {key}: {product}")
+                delete_keys.append(key)
+                continue
 
             # FIXME: Code copied from dashboard._create_products_quotation()
             if is_non_tradeable_product(product):
@@ -656,7 +661,7 @@ class UpdateService(BaseService, AbstractUpdateService):
             )
             result = dictfetchall(cursor)
 
-            symbol_list = [row.get("symbol", "") for row in result]
+            symbol_list = [row.get("symbol") for row in result if row.get("symbol")]
             return list(set(symbol_list))
 
     def __import_yfinance_tickers(self, tickers: Dict[str, dict]) -> None:
