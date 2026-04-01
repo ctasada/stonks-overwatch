@@ -53,7 +53,7 @@ class TransactionsService(BaseService, TransactionServiceInterface):
             my_transactions.append(
                 Transaction(
                     name=info["name"],
-                    symbol=info["symbol"],
+                    symbol=info.get("symbol", ""),
                     date=transaction["date"].strftime(LocalizationUtility.DATE_FORMAT),
                     time=transaction["date"].strftime(LocalizationUtility.TIME_FORMAT),
                     buy_sell=self.__convert_buy_sell(transaction["buysell"]),

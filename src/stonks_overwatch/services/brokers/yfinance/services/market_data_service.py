@@ -37,8 +37,8 @@ class YFinance:
             try:
                 ticker = self.client.get_ticker(symbol)
                 ticker_info = ticker.info
-                # TODO: Cache the result in repository to reduce future API calls
-                # self.repository.save_ticker_info(symbol, ticker_info)
+                # Cache the result in repository to reduce future API calls
+                self.repository.save_ticker_info(symbol, ticker_info)
                 return ticker_info
             except YFRateLimitError:
                 if attempt < max_retries - 1:
@@ -74,7 +74,7 @@ class YFinance:
         splits = self.repository.get_stock_splits(symbol)
         if splits is None:
             splits = self.client.get_stock_splits(symbol)
-            # self.repository.save_stock_splits(symbol, splits)
+            self.repository.save_stock_splits(symbol, splits)
         else:
             splits = [StockSplit.from_dict(split) for split in splits]
 

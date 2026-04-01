@@ -499,7 +499,7 @@ class UpdateService(BaseService, AbstractUpdateService):
             product_growth[key]["product"] = {}
             product_growth[key]["product"]["name"] = product["name"]
             product_growth[key]["product"]["isin"] = product["isin"]
-            product_growth[key]["product"]["symbol"] = product["symbol"]
+            product_growth[key]["product"]["symbol"] = product.get("symbol", "")
             product_growth[key]["product"]["currency"] = product["currency"]
             product_growth[key]["product"]["vwdIdentifierType"] = product["vwdIdentifierType"]
             product_growth[key]["product"]["vwdId"] = product["vwdId"]
@@ -526,7 +526,7 @@ class UpdateService(BaseService, AbstractUpdateService):
 
         # We need to use the productIds to get the daily quote for each product
         for key in product_growth.keys():
-            symbol = product_growth[key]["product"]["symbol"]
+            symbol = product_growth[key]["product"].get("symbol", "")
             if product_growth[key]["product"].get("vwdIdentifierTypeSecondary") is not None:
                 identifier_type = product_growth[key]["product"].get("vwdIdentifierTypeSecondary")
                 identifier_value = product_growth[key]["product"].get("vwdIdSecondary")
@@ -656,7 +656,7 @@ class UpdateService(BaseService, AbstractUpdateService):
             )
             result = dictfetchall(cursor)
 
-            symbol_list = [row["symbol"] for row in result]
+            symbol_list = [row.get("symbol", "") for row in result]
             return list(set(symbol_list))
 
     def __import_yfinance_tickers(self, tickers: Dict[str, dict]) -> None:

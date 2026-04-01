@@ -46,3 +46,11 @@ class YFinanceRepository:
             return json.loads(results["data"])
 
         return None
+
+    @staticmethod
+    def save_ticker_info(symbol: str, ticker_info: dict) -> None:
+        YFinanceTickerInfo.objects.update_or_create(symbol=symbol, defaults={"data": ticker_info})
+
+    @staticmethod
+    def save_stock_splits(symbol: str, splits: List[dict]) -> None:
+        YFinanceStockSplits.objects.update_or_create(symbol=symbol, defaults={"data": splits})

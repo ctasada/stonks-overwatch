@@ -573,7 +573,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
 
     def _calculate_position_growth(self, entry: dict) -> dict:
         """Calculate position growth with stock split adjustments."""
-        symbol = entry["product"]["symbol"]
+        symbol = entry["product"].get("symbol", "")
 
         # Step 1: Build position values for all dates
         position_value = self._build_position_values(entry)
@@ -663,7 +663,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
     def _calculate_aggregate_values(self, entry: dict, position_value: dict) -> dict:
         """Calculate final aggregate values by multiplying positions with quotes."""
         aggregate = {}
-        symbol = entry["product"]["symbol"]
+        symbol = entry["product"].get("symbol", "")
 
         if entry["quotation"]["quotes"]:
             for date_quote in entry["quotation"]["quotes"]:
@@ -792,7 +792,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
             data["product"] = {
                 "name": product["name"],
                 "isin": product["isin"],
-                "symbol": product["symbol"],
+                "symbol": product.get("symbol", ""),
                 "currency": product["currency"],
                 "vwdId": product["vwdId"],
                 "vwdIdSecondary": product["vwdIdSecondary"],
