@@ -229,7 +229,7 @@ Apache License
 
 
 Django
-6.0.3
+6.0.4
 BSD-3-Clause
 The MIT License (MIT)
 
@@ -322,7 +322,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 cryptography
-46.0.6
+46.0.7
 Apache-2.0 OR BSD-3-Clause
 This software is made available under the terms of *either* of the licenses
 found in LICENSE.APACHE or LICENSE.BSD. Contributions to cryptography are made
@@ -1485,7 +1485,7 @@ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 requests
-2.33.0
+2.33.1
 Apache Software License
 
                                  Apache License
@@ -1752,7 +1752,7 @@ SOFTWARE.
 
 
 yfinance
-1.2.0
+1.2.1
 Apache Software License
 
                                  Apache License
@@ -2332,7 +2332,7 @@ THE SOFTWARE.
 
 
 bootstrap-table
-1.27.0
+1.27.1
 MIT
 (The MIT License)
 
@@ -5485,7 +5485,7 @@ SOFTWARE.
 
 
 side-channel-list
-1.0.0
+1.0.1
 MIT
 MIT License
 
