@@ -1951,6 +1951,12 @@ html[style*="--sidebar-immediate-state: sidebar-collapsed"] #sidebar div.px-2.py
     transition: var(--transition-standard);
 }
 
+.asset-icon-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
 .asset-icon-container:hover img,
 .asset-icon-container:hover i {
     transform: scale(1.05);

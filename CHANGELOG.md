@@ -10,6 +10,8 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 ### Added
 
+- Added support to retrieve logos from [Logo.dev](https://www.logo.dev) and [Logostream](https://logostream.dev)
+
 ### Changed
 
 ### Fixed

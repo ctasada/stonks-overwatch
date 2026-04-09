@@ -990,6 +990,28 @@
         }
     </script>
 
+    <script>
+        // Resolve logo image sources with the correct theme.
+        // ThemeManager (loaded synchronously in <head>) has already set data-bs-theme on <html> to either
+        // "light" or "dark" — including the "auto" case resolved against prefers-color-scheme.
+        // Img tags use data-logo-src instead of src so the browser doesn't fetch them before we can
+        // append the correct theme parameter.
+        (function () {
+            const theme = document.documentElement.getAttribute('data-bs-theme') || 'light';
+            function applyLogoTheme() {
+                document.querySelectorAll('img[data-logo-src]').forEach(function (img) {
+                    const base = img.dataset.logoSrc;
+                    img.src = base + (base.includes('?') ? '&' : '?') + 'theme=' + theme;
+                });
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', applyLogoTheme);
+            } else {
+                applyLogoTheme();
+            }
+        })();
+    </script>
+
     {% block extra_js %}{% endblock %}
 </body>
 

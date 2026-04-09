@@ -1,3 +1,4 @@
+{% load static %}
 <div class="broker-section" id="broker-general">
     <div class="section-header d-flex justify-content-between align-items-center mb-4">
         <h5 class="fw-bold mb-0">General Settings</h5>
@@ -63,11 +64,157 @@
             </div>
         </div>
     </div>
+
+    <hr class="my-4">
+    <h6 class="fw-bold mb-3">Integrations</h6>
+    {% include 'components/integrations/logo_provider_settings.html' %}
 </div>
 
 <script>
     // Guard to prevent multiple initializations
     let generalSettingsInitialized = false;
+
+    let logoProviderMetaCache = null;
+
+    function getLogoProviderMeta() {
+        if (logoProviderMetaCache) {
+            return logoProviderMetaCache;
+        }
+
+        const meta = {};
+        document.querySelectorAll('#logo-provider-dropdown-btn ~ .dropdown-menu [data-value]').forEach(item => {
+            const value = item.dataset.value;
+            if (!value) {
+                return;
+            }
+            const imgSrc = item.querySelector('img')?.getAttribute('src') ?? null;
+            const label = item.dataset.label ?? null;
+            const name = item.dataset.name ?? null;
+            const url = item.dataset.url ?? null;
+
+            meta[value] = {
+                label: label,
+                url: url,
+                img: imgSrc,
+                name: name,
+            };
+        });
+
+        if (!meta.none) {
+            meta.none = { label: 'None', url: null, img: null, name: null };
+        } else if (!meta.none.label) {
+            meta.none.label = 'None';
+        }
+
+        logoProviderMetaCache = meta;
+        return meta;
+    }
+
+    function initLogoProviderSettings() {
+        updateLogoProviderDropdown();
+
+        const dropdownBtn = document.getElementById('logo-provider-dropdown-btn');
+        if (!dropdownBtn) {
+            return;
+        }
+        if (dropdownBtn.dataset.bound !== 'true') {
+            document.querySelectorAll('#logo-provider-dropdown-btn ~ .dropdown-menu [data-value]').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById('logo-provider-select').value = item.dataset.value;
+                    updateLogoProviderDropdown();
+                    saveLogoProviderSettings();
+                });
+            });
+
+            const apiKeyField = document.getElementById('logo-provider-api-key');
+            if (apiKeyField) {
+                apiKeyField.addEventListener('blur', saveLogoProviderSettings);
+            }
+
+            dropdownBtn.dataset.bound = 'true';
+        }
+    }
+
+    function updateLogoProviderDropdown() {
+        const value = document.getElementById('logo-provider-select')?.value ?? 'none';
+        const meta = getLogoProviderMeta()[value] ?? getLogoProviderMeta()['none'];
+
+        const btnImg = document.getElementById('logo-provider-dropdown-img');
+        const btnLabel = document.getElementById('logo-provider-dropdown-label');
+        const apiKeyWrapper = document.getElementById('logo-provider-api-key')?.closest('.settings-form-group');
+        const note = document.getElementById('logo-provider-note');
+        const noteText = document.getElementById('logo-provider-note-text');
+        const noteLink = document.getElementById('logo-provider-note-link');
+
+        if (btnImg) {
+            btnImg.src = meta.img ?? '';
+            btnImg.style.display = meta.img ? '' : 'none';
+        }
+        if (btnLabel) {
+            btnLabel.textContent = meta.label ?? '';
+            btnLabel.style.display = meta.label ? '' : 'none';
+        }
+        if (note && noteText && noteLink) {
+            if (meta.name && meta.url) {
+                noteText.textContent = "Logos will be loaded from ";
+                noteLink.textContent = meta.name;
+                noteLink.href = meta.url;
+                note.style.display = '';
+            } else {
+                note.style.display = 'none';
+                noteText.textContent = '';
+                noteLink.textContent = '';
+                noteLink.href = '#';
+            }
+        }
+        if (apiKeyWrapper) {
+            apiKeyWrapper.style.display = value === 'none' ? 'none' : '';
+        }
+        if (value === 'none') {
+            const apiKeyField = document.getElementById('logo-provider-api-key');
+            if (apiKeyField) {
+                apiKeyField.value = '';
+            }
+        }
+    }
+
+    async function saveLogoProviderSettings() {
+        const provider = document.getElementById('logo-provider-select')?.value ?? 'none';
+        const apiKey = provider === 'none' ? '' : (document.getElementById('logo-provider-api-key')?.value ?? '');
+
+        try {
+            const response = await fetch("{% url 'settings' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    action: 'save_integration',
+                    integration_name: 'logo_provider',
+                    provider: provider,
+                    api_key: apiKey
+                })
+            });
+
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                if (typeof showToast === 'function') {
+                    showToast(data?.error || 'Failed to save logo provider settings', 'error');
+                }
+                return;
+            }
+            if (typeof showToast === 'function') {
+                showToast(data.message || 'Logo provider settings saved', 'success');
+            }
+        } catch (error) {
+            if (typeof showToast === 'function') {
+                showToast('Failed to save logo provider settings. Please try again.', 'error');
+            }
+        }
+    }
 
     /**
      * Initialize General Settings UI from context variables
@@ -102,6 +249,8 @@
         if (currencySelect) {
             currencySelect.addEventListener('change', handleCurrencyChange);
         }
+
+        initLogoProviderSettings();
 
         generalSettingsInitialized = true;
     }
@@ -193,6 +342,7 @@
 
     // Export to global scope for external calls
     window.initGeneralSettings = initGeneralSettings;
+    window.initLogoProviderSettings = initLogoProviderSettings;
 
     // Re-initialize when modal becomes visible (for modal-based settings)
     setTimeout(() => {
