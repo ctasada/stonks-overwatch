@@ -2,7 +2,7 @@
     "base_currency": "Currency code for portfolio consolidation (e.g., EUR, USD). Defaults to EUR",
     "appearance": "UI theme: light, dark, or auto. Defaults to auto",
     "degiro": {
-        "enabled": true,
+        "enabled": false,
         "credentials": {
             "username": "USERNAME",
             "password": "PASSWORD",
@@ -12,14 +12,14 @@
         "update_frequency_minutes": "How frequently the data from DeGiro should be updated. Defaults to 5 minutes"
     },
     "bitvavo": {
-        "enabled": true,
+        "enabled": false,
         "credentials": {
             "apikey": "BITVAVO API KEY",
             "apisecret": "BITVAVO API SECRET"
         }
     },
     "ibkr": {
-        "enabled": true,
+        "enabled": false,
         "credentials": {
            "access_token": "IBKR ACCESS TOKEN",
            "access_token_secret": "IBKR ACCESS TOKEN SECRET",
@@ -30,5 +30,9 @@
         },
         "start_date": "PORTFOLIO CREATION DATE. Defaults to 2020-01-01",
         "update_frequency_minutes": "How frequently the data from IBKR should be updated. Defaults to 15 minutes (minimum due to API rate limits)"
+    },
+    "logo_provider": {
+        "provider": "logodev or logostream (omit or set to none to disable)",
+        "api_key": "YOUR_API_KEY. Get one at https://logo.dev or https://logostream.dev. Enables high-quality stock, ETF and crypto logos."
     }
 }

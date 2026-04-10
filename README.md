@@ -51,6 +51,7 @@
 - **Offline mode** - Work without internet connection
 - **Automated backups** - Never lose your data
 - **Demo mode** - Try it out with sample data
+- **Asset logo integrations** - Optional [Logo.dev](https://logo.dev) or [Logostream](https://logostream.dev) integration for high-quality stock, ETF, crypto, and forex logos (see [Logo Integrations](docs/Configuration-Integration.md#logo-integrations))
 
 ## Screenshots
 

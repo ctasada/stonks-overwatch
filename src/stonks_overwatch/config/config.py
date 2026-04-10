@@ -76,6 +76,17 @@ class Config:
             raise ValueError("appearance must be one of: light, dark, auto")
         self.save_setting("appearance", value)
 
+    def resolved_theme(self, hint: str = "light") -> str:
+        """Return a concrete theme ('light' or 'dark').
+
+        For explicit 'light'/'dark' appearance the config is authoritative.
+        For 'auto', falls back to hint (e.g. the browser-resolved preference).
+        """
+        appearance = self.appearance
+        if appearance in ("light", "dark"):
+            return appearance
+        return hint if hint in ("light", "dark") else "light"
+
     def get_setting(self, key: str, default: Any = None) -> Any:
         """
         Get an application-level setting.
@@ -96,7 +107,7 @@ class Config:
         try:
             GlobalConfiguration.set_setting(key, value)
             self._settings_cache[key] = value
-            self.logger.info(f"Saved setting '{key}' with value '{value}'")
+            self.logger.debug(f"Saved setting '{key}'")
         except Exception as e:
             self.logger.error(f"Failed to save setting '{key}': {e}")
             raise
