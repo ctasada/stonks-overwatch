@@ -573,15 +573,18 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
 
     def _calculate_position_growth(self, entry: dict) -> dict:
         """Calculate position growth with stock split adjustments."""
-        symbol = entry["product"]["symbol"]
+        symbol = entry["product"].get("symbol", "")
+        if not symbol:
+            self.logger.warning(f"Skipping stock split adjustments for product with empty symbol: {entry['productId']}")
 
         # Step 1: Build position values for all dates
         position_value = self._build_position_values(entry)
 
         # Step 2: Get and process stock splits
-        stock_splits = self.yfinance.get_stock_splits(symbol)
-        if stock_splits:
-            position_value = self._apply_stock_split_adjustments(symbol, position_value, stock_splits)
+        if symbol:
+            stock_splits = self.yfinance.get_stock_splits(symbol)
+            if stock_splits:
+                position_value = self._apply_stock_split_adjustments(symbol, position_value, stock_splits)
 
         # Step 3: Calculate final aggregate values with quotes
         return self._calculate_aggregate_values(entry, position_value)
@@ -663,7 +666,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
     def _calculate_aggregate_values(self, entry: dict, position_value: dict) -> dict:
         """Calculate final aggregate values by multiplying positions with quotes."""
         aggregate = {}
-        symbol = entry["product"]["symbol"]
+        symbol = entry["product"].get("symbol", "")
 
         if entry["quotation"]["quotes"]:
             for date_quote in entry["quotation"]["quotes"]:
@@ -792,7 +795,7 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
             data["product"] = {
                 "name": product["name"],
                 "isin": product["isin"],
-                "symbol": product["symbol"],
+                "symbol": product.get("symbol", ""),
                 "currency": product["currency"],
                 "vwdId": product["vwdId"],
                 "vwdIdSecondary": product["vwdIdSecondary"],

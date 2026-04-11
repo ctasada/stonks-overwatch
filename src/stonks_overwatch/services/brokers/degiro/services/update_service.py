@@ -490,6 +490,11 @@ class UpdateService(BaseService, AbstractUpdateService):
                 self.logger.debug(f"Product data for {key}: {product}")
                 delete_keys.append(key)
                 continue
+            if not product.get("symbol"):
+                self.logger.warning(f"Skipping product with empty symbol: {key}")
+                self.logger.debug(f"Product data for {key}: {product}")
+                delete_keys.append(key)
+                continue
 
             # FIXME: Code copied from dashboard._create_products_quotation()
             if is_non_tradeable_product(product):
@@ -499,7 +504,7 @@ class UpdateService(BaseService, AbstractUpdateService):
             product_growth[key]["product"] = {}
             product_growth[key]["product"]["name"] = product["name"]
             product_growth[key]["product"]["isin"] = product["isin"]
-            product_growth[key]["product"]["symbol"] = product["symbol"]
+            product_growth[key]["product"]["symbol"] = product.get("symbol", "")
             product_growth[key]["product"]["currency"] = product["currency"]
             product_growth[key]["product"]["vwdIdentifierType"] = product["vwdIdentifierType"]
             product_growth[key]["product"]["vwdId"] = product["vwdId"]
@@ -526,7 +531,7 @@ class UpdateService(BaseService, AbstractUpdateService):
 
         # We need to use the productIds to get the daily quote for each product
         for key in product_growth.keys():
-            symbol = product_growth[key]["product"]["symbol"]
+            symbol = product_growth[key]["product"].get("symbol", "")
             if product_growth[key]["product"].get("vwdIdentifierTypeSecondary") is not None:
                 identifier_type = product_growth[key]["product"].get("vwdIdentifierTypeSecondary")
                 identifier_value = product_growth[key]["product"].get("vwdIdSecondary")
@@ -656,7 +661,7 @@ class UpdateService(BaseService, AbstractUpdateService):
             )
             result = dictfetchall(cursor)
 
-            symbol_list = [row["symbol"] for row in result]
+            symbol_list = [row.get("symbol") for row in result if row.get("symbol")]
             return list(set(symbol_list))
 
     def __import_yfinance_tickers(self, tickers: Dict[str, dict]) -> None:

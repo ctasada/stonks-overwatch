@@ -117,7 +117,7 @@ class DividendsService(BaseService, DividendServiceInterface):
                     self.logger.warning(f"Stock info not found for {stock_name}. Skipping upcoming dividend.")
                     continue
 
-                stock_symbol = stock["symbol"]
+                stock_symbol = stock.get("symbol", "")
                 payment_date = datetime.combine(payment["payDate"], time.min)
 
                 # Create a key to group by date and stock symbol

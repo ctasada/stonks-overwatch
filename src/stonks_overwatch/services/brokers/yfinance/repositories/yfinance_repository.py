@@ -7,6 +7,11 @@ from stonks_overwatch.utils.database.db_utils import dictfetchone, get_connectio
 
 class YFinanceRepository:
     @staticmethod
+    def _normalize_json_payload(payload: object) -> object:
+        """Normalize payload to JSON-serializable primitives."""
+        return json.loads(json.dumps(payload, default=str))
+
+    @staticmethod
     def get_ticker_info(symbol: str) -> dict | None:
         connection = get_connection_for_model(YFinanceTickerInfo)
         with connection.cursor() as cursor:
@@ -46,3 +51,13 @@ class YFinanceRepository:
             return json.loads(results["data"])
 
         return None
+
+    @staticmethod
+    def save_ticker_info(symbol: str, ticker_info: dict) -> None:
+        normalized = YFinanceRepository._normalize_json_payload(ticker_info)
+        YFinanceTickerInfo.objects.update_or_create(symbol=symbol, defaults={"data": normalized})
+
+    @staticmethod
+    def save_stock_splits(symbol: str, splits: List[dict]) -> None:
+        normalized = YFinanceRepository._normalize_json_payload(splits)
+        YFinanceStockSplits.objects.update_or_create(symbol=symbol, defaults={"data": normalized})
