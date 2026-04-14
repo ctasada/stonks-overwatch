@@ -4319,14 +4319,14 @@ test = ["pytest", "pytest-cov"]
 
 [[package]]
 name = "yfinance"
-version = "1.2.1"
+version = "1.2.2"
 description = "Download market data from Yahoo! Finance API"
 optional = false
 python-versions = "*"
 groups = ["main"]
 files = [
-    {file = "yfinance-1.2.1-py2.py3-none-any.whl", hash = "sha256:6737c69f2c8872a259ce7a7fdc214336701cadc4ebe94390f852979aaf5e78b4"},
-    {file = "yfinance-1.2.1.tar.gz", hash = "sha256:3f8d2f5984c26a8bb398a7aa3a2a79aa92e19867c2ea075ad5e56549513406f4"},
+    {file = "yfinance-1.2.2-py2.py3-none-any.whl", hash = "sha256:3b292f609e5ff27a8c2d850f5a3c6f10d7290f3b403346705d8d33524ff5745b"},
+    {file = "yfinance-1.2.2.tar.gz", hash = "sha256:00e4fb8f054c36a3b5dfa6920ba5f12301c4dc77d573f6b6872b94ec1a4fef3c"},
 ]
 
 [package.dependencies]
@@ -4353,4 +4353,4 @@ briefcase = ["asgiref", "toga"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "cbd588d00ae0b58edebe9a25e90f153e1be500efcf00b04a25575834655e89c2"
+content-hash = "d0fa87db6c67e7677f629457eb42795780ff2272b2524f83b25a0bc5e7c47a8a"
