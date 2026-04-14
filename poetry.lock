@@ -918,14 +918,14 @@ files = [
 
 [[package]]
 name = "currencyconverter"
-version = "0.18.16"
+version = "0.18.17"
 description = "A currency converter using the European Central Bank data."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "currencyconverter-0.18.16-py3-none-any.whl", hash = "sha256:b4253f56928528fb0e3f2f09a35236d9fe45eb31fe689299215d6582173c94a7"},
-    {file = "currencyconverter-0.18.16.tar.gz", hash = "sha256:8dc3d010debcc45c732548838153e70f9ca81cf6049d4e516c0d49374a4b2d7d"},
+    {file = "currencyconverter-0.18.17-py3-none-any.whl", hash = "sha256:c75d71a7cc794e069a807e47180f2a3d7c58975b7903c8bff66c71c4115cedd7"},
+    {file = "currencyconverter-0.18.17.tar.gz", hash = "sha256:ac3812d5a7573974e2c32d239f631d6f447931a5b3bcccde88e99dc4dedc8bef"},
 ]
 
 [[package]]
@@ -4353,4 +4353,4 @@ briefcase = ["asgiref", "toga"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "d0fa87db6c67e7677f629457eb42795780ff2272b2524f83b25a0bc5e7c47a8a"
+content-hash = "716a2ab258fd1cea663aa15a6a2a09d567e0743915a8d410dab8de9270b222e9"
