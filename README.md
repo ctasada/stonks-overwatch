@@ -75,7 +75,7 @@
 ### Prerequisites
 
 - Python 3.13 or higher
-- Poetry 2.2.1 or higher (for development)
+- Poetry 2.3.4 or higher (for development)
 - Git
 
 ### Installation
