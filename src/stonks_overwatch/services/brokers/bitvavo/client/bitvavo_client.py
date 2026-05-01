@@ -116,6 +116,16 @@ class BitvavoService:
             options["symbol"] = symbol
         return self.get_client().balance(options)
 
+    def staking_balance(self, symbol: str = None) -> Any:
+        self.logger.debug(f"Retrieving staking balance for symbol {symbol}")
+        options = {}
+        if symbol:
+            options["symbol"] = symbol
+        postfix = createPostfix(options)
+        response = self.get_client().privateRequest("/stakingBalance", postfix, {}, "GET")
+        self.logger.debug(response)
+        return response
+
     def candles(self, market: str, interval: str, start: datetime, end: datetime = None) -> list[dict]:
         """
         Retrieve the Open, High, Low, Close, Volume (OHLCV) data you use to create candlestick charts for market with

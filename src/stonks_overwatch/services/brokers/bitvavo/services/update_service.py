@@ -1,5 +1,6 @@
 import os
 from datetime import timedelta
+from decimal import Decimal, InvalidOperation
 from typing import Optional
 
 from degiro_connector.quotecast.models.chart import Interval
@@ -70,12 +71,15 @@ class UpdateService(BaseService, AbstractUpdateService):
 
         """Update the Portfolio DB data."""
         balance = self.bitvavo_service.balance()
+        staking_balance = self.bitvavo_service.staking_balance()
 
         if self.debug_mode:
             balance_file = os.path.join(self.import_folder, "balance.json")
             save_to_json(balance, balance_file)
+            staking_balance_file = os.path.join(self.import_folder, "staking_balance.json")
+            save_to_json(staking_balance, staking_balance_file)
 
-        self.__import_balance(balance)
+        self.__import_balance(balance + staking_balance)
         self.__import_quotation()
 
     def update_assets(self):
@@ -101,6 +105,7 @@ class UpdateService(BaseService, AbstractUpdateService):
             save_to_json(transactions, transactions_file)
 
         self.__import_transactions(transactions)
+        self.__deduplicate_transactions()
 
     def __import_quotation(self) -> None:  # noqa: C901
         product_growth = self.portfolio_data.calculate_product_growth()
@@ -176,18 +181,56 @@ class UpdateService(BaseService, AbstractUpdateService):
                     BitvavoBalance.objects.update_or_create,
                     symbol=row["symbol"],
                     defaults={
-                        "available": row["available"],
+                        # balance() returns {"available": ...}; staking_balance() returns {"amount": ...}.
+                        # If the same symbol appears in both lists the staking entry wins (it comes second),
+                        # storing only the staked amount. This is intentional: the raw balance is used only
+                        # as an upper-bound sanity check in BalanceRepository._merge_with_raw_balance.
+                        "available": row.get("available", row.get("amount")),
                     },
                 )
             except Exception as error:
                 self.logger.error(f"Cannot import position: {row}")
                 self.logger.error("Exception: %s", str(error), exc_info=True)
 
-    def __import_transactions(self, balance: list[dict]) -> None:
+    # Matches DecimalField(decimal_places=10) precision used in BitvavoTransactions.
+    _DECIMAL_QUANTIZE = Decimal("0.0000000001")
+
+    @staticmethod
+    def __to_decimal(value: str | float | None) -> Decimal | None:
+        if value is None:
+            return None
+        try:
+            return Decimal(str(value)).quantize(UpdateService._DECIMAL_QUANTIZE)
+        except InvalidOperation:
+            return None
+
+    def __import_transactions(self, transactions: list[dict]) -> None:
         # Sort the transactions by executedAt to ensure they are processed in the correct order
-        balance.sort(key=lambda item: item["executedAt"])
-        for row in balance:
+        transactions.sort(key=lambda item: item["executedAt"])
+        for row in transactions:
             try:
+                # Bitvavo API bug: the same trade can appear on multiple pages with a different transactionId.
+                # Skip if a content-identical record already exists under a different ID.
+                # __deduplicate_transactions is the authoritative cleanup; this check avoids inserting in the
+                # first place when precision allows a reliable match.
+                duplicate_exists = (
+                    BitvavoTransactions.objects.filter(
+                        executed_at=row["executedAt"],
+                        type=row["type"],
+                        sent_currency=row.get("sentCurrency"),
+                        sent_amount=self.__to_decimal(row.get("sentAmount")),
+                        received_currency=row.get("receivedCurrency"),
+                        received_amount=self.__to_decimal(row.get("receivedAmount")),
+                    )
+                    .exclude(transaction_id=row["transactionId"])
+                    .exists()
+                )
+                if duplicate_exists:
+                    self.logger.debug(
+                        f"Skipping duplicate transaction {row['transactionId']} (same content, different ID)"
+                    )
+                    continue
+
                 self._retry_database_operation(
                     BitvavoTransactions.objects.update_or_create,
                     transaction_id=row["transactionId"],
@@ -208,6 +251,31 @@ class UpdateService(BaseService, AbstractUpdateService):
             except Exception as error:
                 self.logger.error(f"Cannot import position: {row}")
                 self.logger.error("Exception: %s", str(error), exc_info=True)
+
+    def __deduplicate_transactions(self) -> None:
+        """Remove transactions that are content-identical but have different transactionIds (Bitvavo API bug)."""
+        seen: set[tuple] = set()
+        to_delete: list[int] = []
+
+        for txn in BitvavoTransactions.objects.order_by("executed_at", "id").only(
+            "id", "executed_at", "type", "sent_currency", "sent_amount", "received_currency", "received_amount"
+        ):
+            fingerprint = (
+                txn.executed_at,
+                txn.type,
+                txn.sent_currency,
+                txn.sent_amount,
+                txn.received_currency,
+                txn.received_amount,
+            )
+            if fingerprint in seen:
+                to_delete.append(txn.id)
+            else:
+                seen.add(fingerprint)
+
+        if to_delete:
+            count, _ = BitvavoTransactions.objects.filter(id__in=to_delete).delete()
+            self.logger.info(f"Removed {count} duplicate transaction(s)")
 
     def __import_assets(self, assets: list[dict]) -> None:
         for row in assets:

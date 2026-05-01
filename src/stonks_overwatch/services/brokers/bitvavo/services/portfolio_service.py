@@ -62,13 +62,42 @@ class PortfolioService(BaseService, PortfolioServiceInterface):
     def __is_currency(symbol: str) -> bool:
         return symbol == "EUR"
 
+    def __get_balance_calculated(self) -> list:
+        balance = self.bitvavo_service.balance()
+        staking_balance = self.bitvavo_service.staking_balance()
+
+        total_balance = []
+        for item in balance:
+            total_balance.append({"symbol": item["symbol"], "amount": item["available"]})
+
+        for item in staking_balance:
+            total_balance.append({"symbol": item["symbol"], "amount": item["amount"]})
+
+        return total_balance
+
     def get_portfolio(self) -> List[PortfolioEntry]:
         self.logger.debug("Get Portfolio")
 
         bitvavo_portfolio = []
 
+        calculated = self.__get_balance_calculated()
+        self.logger.info(calculated)
+        # [{'symbol': 'EUR', 'amount': '0.12'},
+        # {'symbol': 'ADA', 'amount': '109.162278'},
+        # {'symbol': 'SOL', 'amount': '0.96044126'},
+        # {'symbol': 'ETH', 'amount': '0.38469542'},
+        # {'symbol': 'XRP', 'amount': '557.414218'},
+        # {'symbol': 'BTC', 'amount': '0.04053215'}]
+
         balance = BalanceRepository.get_balance_calculated()
 
+        self.logger.info(balance)
+        # [{'symbol': 'EUR', 'amount': 0.12},
+        # {'symbol': 'ADA', 'amount': Decimal('218.109935')},
+        # {'symbol': 'SOL', 'amount': Decimal('1.87774073')},
+        # {'symbol': 'ETH', 'amount': Decimal('0.44640997')},
+        # {'symbol': 'XRP', 'amount': Decimal('653.026591')},
+        # {'symbol': 'BTC', 'amount': Decimal('0.04473927')}]
         for item in balance:
             if item["amount"] == "0" or self.__is_currency(item["symbol"]):
                 continue

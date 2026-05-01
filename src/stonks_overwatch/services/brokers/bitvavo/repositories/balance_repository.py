@@ -102,7 +102,9 @@ class BalanceRepository:
             if symbol == "EUR":
                 balance_dict[symbol] = min(raw_amount, abs(calc_amount))
             else:
-                balance_dict[symbol] = max(raw_amount, calc_amount)
+                # Use min: the raw balance (from balance+staking API) is the authoritative upper bound.
+                # The calc value can be inflated by duplicate transactions in the Bitvavo API.
+                balance_dict[symbol] = min(raw_amount, calc_amount)
 
         # Round each balance to the correct number of decimals from BitvavoAssets
         for symbol in list(balance_dict.keys()):
