@@ -190,6 +190,7 @@ Override your DEGIRO base currency for portfolio calculations. Configure this in
 **Symptoms:** Waiting screen doesn't proceed
 
 **Solutions:**
+
 1. Open DEGIRO mobile app
 2. Check for notification and approve
 3. Wait up to 30 seconds
@@ -213,6 +214,7 @@ Override your DEGIRO base currency for portfolio calculations. Configure this in
 **Symptoms:** "Connection timeout" or "Cannot reach DEGIRO"
 
 **Solutions:**
+
 1. Check internet connection
 2. Verify DEGIRO website is accessible
 3. Check if using VPN (may cause issues)
@@ -347,6 +349,7 @@ The application uses the [DEGIRO Connector](https://github.com/Chavithra/degiro-
 ### Database Model
 
 The database model is defined in:
+
 - `src/stonks_overwatch/services/brokers/degiro/repositories/models.py`
 
 The model reflects the DEGIRO API structure and normalizes the data for consistent access.
@@ -447,6 +450,7 @@ poetry install
 ### Permissions
 
 Stonks Overwatch requires **read-only** access to your DEGIRO account. It can:
+
 - ✅ View portfolio and positions
 - ✅ View transaction history
 - ✅ View account information

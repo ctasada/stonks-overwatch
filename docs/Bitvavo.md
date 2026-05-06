@@ -19,6 +19,7 @@
 ### Supported Assets
 
 Bitvavo supports 150+ cryptocurrencies including:
+
 - **Bitcoin (BTC)**
 - **Ethereum (ETH)**
 - **Major altcoins** - XRP, ADA, DOT, SOL, etc.
@@ -179,6 +180,7 @@ Bitvavo integrates seamlessly with other brokers:
 **Symptoms:** Bitvavo enabled but no portfolio data
 
 **Solutions:**
+
 1. Check if you have any crypto balance on Bitvavo
 2. Verify API key has **"View"** permission
 3. Check logs: `data/logs/stonks-overwatch.log`
@@ -189,6 +191,7 @@ Bitvavo integrates seamlessly with other brokers:
 **Symptoms:** "Cannot connect to Bitvavo" or timeout errors
 
 **Solutions:**
+
 1. Check internet connection
 2. Verify Bitvavo website is accessible
 3. Check if using VPN (may cause issues)
@@ -323,6 +326,7 @@ The application uses the official [Python Bitvavo API](https://github.com/bitvav
 ### Database Model
 
 The database model is defined in:
+
 - `src/stonks_overwatch/services/brokers/bitvavo/repositories/models.py`
 
 ### Architecture
@@ -396,6 +400,7 @@ The database model is defined in:
 ### Permissions
 
 With the **View** API permission, Stonks Overwatch can:
+
 - ✅ View balances and portfolio
 - ✅ View transaction history
 - ✅ View asset information

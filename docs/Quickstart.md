@@ -35,6 +35,7 @@ make start
 ```
 
 This command will:
+
 - Install Python dependencies via Poetry
 - Set up the database
 - Install Node.js dependencies for the UI
@@ -53,6 +54,7 @@ cp config/config.json.template config/config.json
 ```
 
 Edit `config/config.json` with your broker credentials. See broker-specific setup:
+
 - [DEGIRO Configuration](DEGIRO.md)
 - [Bitvavo Configuration](Bitvavo.md)
 - [IBKR Configuration](IBKR.md)

@@ -299,6 +299,7 @@ make cicd workflow=precommit-autoupdate
 **Troubleshooting ACT:**
 
 If you see authentication errors like `authentication required: Invalid username or token`, ensure:
+
 - Your `.secrets` file exists and contains a valid `GITHUB_TOKEN`
 - The token has the `public_repo` scope enabled
 - You've copied the token correctly (no extra spaces or newlines)
@@ -409,6 +410,7 @@ poetry run python -m scripts.generate_demo_db \
 ```
 
 This command will:
+
 1. Create a fresh demo database with synthetic transaction data
 2. Generate realistic market data for popular stocks and ETFs
 3. Copy the database to `src/stonks_overwatch/fixtures/demo_db.sqlite3` for bundling with Briefcase distributions
@@ -425,6 +427,7 @@ poetry run python -m scripts.generate_demo_db --help
 #### For Users: Demo Mode in the Native App
 
 When users activate demo mode via the application menu:
+
 1. The application checks if a demo database exists in the user's data directory
 2. If the bundled demo database is different (detected by comparing SHA256 hashes):
    - The existing demo database is backed up to `demo_db.sqlite3.backup`
@@ -451,6 +454,7 @@ The application features an advanced database routing system that allows seamles
 #### How It Works
 
 The application supports two database configurations:
+
 - **Production Database** (`db.sqlite3`): Contains real user data
 - **Demo Database** (`demo_db.sqlite3`): Contains demo/sample data for testing
 
@@ -579,6 +583,7 @@ defaults write com.caribay.stonks-overwatch WebKitDeveloperExtras -bool true
 ```
 
 Then, when running your app:
+
 1. Open Safari
 2. Go to Develop menu
 3. Select your app's window

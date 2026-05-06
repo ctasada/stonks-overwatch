@@ -314,6 +314,7 @@ class AccountService(BaseService, AccountServiceInterface):
 #### Additional Services (Optional)
 
 Implement additional services as needed:
+
 - `DepositService` (implements `DepositServiceInterface`)
 - `DividendService` (implements `DividendServiceInterface`)
 - `FeeService` (implements `FeeServiceInterface`)
@@ -358,6 +359,7 @@ Stonks Overwatch uses a capability-based architecture. You only need to register
 - **Optional**: `TRANSACTION`, `ACCOUNT`, `DEPOSIT`, `DIVIDEND`, `FEE`, and `AUTHENTICATION` are optional.
 
 The application automatically handles missing services:
+
 1. **Backend**: Aggregator services skip brokers that don't provide the requested service.
 2. **Frontend**: The sidebar navigation dynamically hides links (e.g., "Dividends", "Fees") if the currently selected portfolio doesn't support them.
 

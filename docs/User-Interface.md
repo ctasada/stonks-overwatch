@@ -42,12 +42,14 @@ The application supports three theme modes to suit different preferences and env
 ### Accessing Theme Settings
 
 **Native Application:**
+
 1. Open the application menu
 2. Select **Preferences** (macOS) or **Settings** (Windows/Linux)
 3. Navigate to **General** tab
 4. Choose your preferred theme from the dropdown
 
 **Web Version:**
+
 1. Click the **Settings** option in the sidebar
 2. Navigate to **Preferences** section
 3. Select your preferred theme
@@ -83,6 +85,7 @@ The native application is built using [Toga](https://toga.readthedocs.io/en/stab
 The native application is very light and simple. A webview is used to display the web interface, which is the same as the one used in the browser.
 
 The application provides some extra features to the user, such as:
+
 - About dialog: Shows the version and build of the application.
 - Tools:
   - Export internal database: Allows the user to export the internal database to a file. This is useful for debugging.

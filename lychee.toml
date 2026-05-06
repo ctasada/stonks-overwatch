@@ -6,7 +6,7 @@
 max_concurrency = 10
 
 # Check all links, including fragments (anchors like #section-name)
-include_fragments = true
+include_fragments = "full"
 
 # Check local files referenced in links (e.g., code blocks, verbatim text)
 include_verbatim = true

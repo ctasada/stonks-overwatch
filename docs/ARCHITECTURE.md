@@ -65,6 +65,7 @@ class BrokerFactory:
 ```
 
 **Benefits**:
+
 - Single point of service creation
 - Automatic broker discovery
 - Type-safe service instantiation
@@ -84,6 +85,7 @@ class BrokerRegistry:
 ```
 
 **Features**:
+
 - Centralized configuration management
 - Environment-specific settings
 - Dynamic broker registration
@@ -94,6 +96,7 @@ class BrokerRegistry:
 The system uses a capability-based discovery mechanism. Brokers are not required to implement all service interfaces; they only implement those that they actually support.
 
 **Key Features**:
+
 - **Dynamic Discovery**: The `BrokerRegistry` tracks which services each broker provides.
 - **Graceful Adaptation**: Aggregator services automatically skip brokers that don't support a requested feature.
 - **Adaptive UI**: The frontend dynamically hides navigation links (e.g., "Dividends", "Fees") if the currently selected portfolio doesn't support them.
@@ -114,6 +117,7 @@ StonksOverwatchException (Base)
 ```
 
 **Key Features**:
+
 - Hierarchical exception classes for type-safe error handling
 - Centralized error handling in services
 - Graceful degradation in aggregator services
@@ -146,6 +150,7 @@ class UpdateService(AbstractUpdateService):
 ```
 
 **Benefits**:
+
 - Centralized cache management
 - Redis/Memcached ready
 - Configurable TTL via Django settings
@@ -172,6 +177,7 @@ class IBKRPosition(models.Model):
 ```
 
 **Standards**:
+
 - DecimalField for all financial data (precision-safe)
 - Snake_case naming conventions
 - Consistent field types across brokers
@@ -206,6 +212,7 @@ class AuthenticationServiceInterface(ABC):
 ```
 
 **Benefits**:
+
 - Type-safe contracts
 - Consistent API across brokers
 - Easier testing and mocking
@@ -248,6 +255,7 @@ class BaseAggregator(ABC):
 ```
 
 **Features**:
+
 - Graceful degradation (partial failures don't stop processing)
 - Comprehensive error tracking
 - Broker-agnostic implementation
@@ -291,6 +299,7 @@ The architecture is designed for easy broker integration. The system uses a unif
 3. Register broker in `registry_setup.py` with a single entry
 
 **What happens automatically**:
+
 - Factory discovers and creates services
 - Aggregators include the new broker
 - Error handling works out of the box

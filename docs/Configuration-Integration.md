@@ -601,6 +601,7 @@ def test_your_broker_config():
 **Problem**: `get_broker_config()` returns `None`
 
 **Solutions**:
+
 - Verify broker is registered in `BROKER_CONFIGS` dictionary
 - Check broker name spelling (case-sensitive)
 - Ensure `register_all_brokers()` was called during initialization
@@ -617,6 +618,7 @@ print("Available brokers:", factory.get_available_brokers())
 **Problem**: `ImportError` when registering new broker
 
 **Solutions**:
+
 - Verify import path in `registry_setup.py` is correct
 - Ensure all required methods are implemented in config class
 - Check for circular import dependencies
@@ -626,6 +628,7 @@ print("Available brokers:", factory.get_available_brokers())
 **Problem**: Configuration loads but credentials are `None`
 
 **Solutions**:
+
 - Check JSON file format matches expected structure
 - Verify `config_key` matches JSON key
 - Ensure `from_dict()` method handles missing data correctly
@@ -642,6 +645,7 @@ print("Credentials:", config.credentials)
 **Problem**: Test configurations persist between tests
 
 **Solutions**:
+
 - Always call `Config.reset_global_for_tests()` in test setup
 - Clear BrokerFactory cache: `factory.clear_cache()`
 - Use fresh Config instances: `Config._default()`
@@ -651,6 +655,7 @@ print("Credentials:", config.credentials)
 **Problem**: `LazyConfig` fails to load from database
 
 **Solutions**:
+
 - Ensure Django is properly initialized
 - Check database connectivity
 - Verify broker configuration exists in database
@@ -971,6 +976,7 @@ When no integration is active (or the integration request fails), the view falls
 The simplified unified configuration architecture with intelligent caching provides a robust foundation for adding new broker integrations. The system uses a configuration-driven approach for broker registration through the `BROKER_CONFIGS` dictionary.
 
 **Key advantages:**
+
 - **High Performance**: Cached access eliminates redundant creation
 - **Simplified Architecture**: Single BrokerFactory handles both configs and services
 - **Extensibility**: Easy to add new brokers through registry configuration
@@ -981,6 +987,7 @@ The simplified unified configuration architecture with intelligent caching provi
 - **Dynamic Adaptation**: Configuration automatically adapts to registered brokers
 
 **Key features:**
+
 - ✅ **Configuration-driven registration** - brokers added via `BROKER_CONFIGS`
 - ✅ **Unified factory pattern** - single point for config and service creation
 - ✅ **Intelligent caching** - configs and services cached by broker name

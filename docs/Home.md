@@ -225,6 +225,7 @@ See [Developer Guide](Developing-Stonks-Overwatch.md) for complete development s
 ### Common Issues
 
 **Application won't start**
+
 - Check Python version (`python --version` should be 3.13+)
 - Reinstall dependencies: `make start`
 - Check logs in `data/logs/stonks-overwatch.log`
@@ -236,10 +237,12 @@ See [Developer Guide](Developing-Stonks-Overwatch.md) for complete development s
 - Enable debug mode: `make run debug=true`
 
 **Port 8000 already in use**
+
 - Stop other services using port 8000
 - Or change port in settings
 
 **Database errors**
+
 - Backup data: `cp data/db.sqlite3 data/db.sqlite3.backup`
 - Reset database: `rm data/db.sqlite3 && make start`
 
@@ -308,6 +311,7 @@ Stonks Overwatch was created to solve a real problem: managing investments acros
 - Privacy-first architecture with local data storage
 
 **Your sponsorship enables:**
+
 - More time dedicated to development and maintenance
 - Faster broker integrations and feature development
 - Better infrastructure (CI/CD, testing, code signing)
@@ -319,6 +323,7 @@ Stonks Overwatch was created to solve a real problem: managing investments acros
 👉 [Sponsor via GitHub Sponsors](https://github.com/sponsors/ctasada)
 
 **Other Ways to Help:**
+
 - ⭐ **Star the repository** - Helps others discover the project
 - 🐛 **Report bugs** - [Open an issue](https://github.com/ctasada/stonks-overwatch/issues)
 - 💡 **Suggest features** - [Request a feature](https://github.com/ctasada/stonks-overwatch/issues/new?template=feature_request.md)
@@ -427,6 +432,7 @@ Our documentation is actively maintained. Current status:
 ### Documentation Standards
 
 Our documentation follows these principles:
+
 - **Clear and Concise**: Easy to understand for the target audience
 - **Well-Organized**: Logical structure with consistent formatting
 - **Up-to-Date**: Synchronized with codebase changes
@@ -436,6 +442,7 @@ Our documentation follows these principles:
 ### Report Issues
 
 Found a documentation issue?
+
 - [Open an issue](https://github.com/ctasada/stonks-overwatch/issues/new) to report errors
 - [Start a discussion](https://github.com/ctasada/stonks-overwatch/discussions) to suggest improvements
 - [Submit a PR](../CONTRIBUTING.md) to contribute fixes
