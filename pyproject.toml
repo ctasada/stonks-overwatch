@@ -8,7 +8,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "degiro-connector[quotecast] >= 3.0.35",
-    "django >= 6.0.4",
+    "django >= 6.0.5",
     "pycountry >= 26.2.16",
     "currency-symbols >= 2.0.4",
     "polars >=1.40.1",
