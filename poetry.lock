@@ -3669,148 +3669,149 @@ files = [
 
 [[package]]
 name = "toga"
-version = "0.5.3"
+version = "0.5.4"
 description = "A Python native, OS native GUI toolkit."
 optional = true
 python-versions = ">=3.10"
 groups = ["main"]
 markers = "extra == \"briefcase\""
 files = [
-    {file = "toga-0.5.3-py3-none-any.whl", hash = "sha256:d535e7829cfbff747349e1932e45b5492845da43998321bac81fd6a19c2f0f72"},
-    {file = "toga-0.5.3.tar.gz", hash = "sha256:4dc555c1cdff459e1224f55e71cb5c44c98c04b665a6d4cc49a7d40c6b0fc071"},
+    {file = "toga-0.5.4-py3-none-any.whl", hash = "sha256:f123a3814d9311b6f960f53cd2c83b650d6bb43c3ce7a0562d4a0a792a02fd72"},
+    {file = "toga-0.5.4.tar.gz", hash = "sha256:493600d89809630666a14fad08ecabd0a4c1d7e2089c8c6eade83649a22e0b08"},
 ]
 
 [package.dependencies]
-toga-android = {version = "0.5.3", markers = "sys_platform == \"android\""}
-toga-cocoa = {version = "0.5.3", markers = "sys_platform == \"darwin\""}
-toga-gtk = {version = "0.5.3", markers = "sys_platform == \"linux\" or \"freebsd\" in sys_platform"}
-toga-iOS = {version = "0.5.3", markers = "sys_platform == \"ios\""}
-toga-web = {version = "0.5.3", markers = "sys_platform == \"emscripten\""}
-toga-winforms = {version = "0.5.3", markers = "sys_platform == \"win32\""}
+toga-android = {version = "0.5.4", markers = "sys_platform == \"android\""}
+toga-cocoa = {version = "0.5.4", markers = "sys_platform == \"darwin\""}
+toga-gtk = {version = "0.5.4", markers = "sys_platform == \"linux\" or \"freebsd\" in sys_platform"}
+toga-iOS = {version = "0.5.4", markers = "sys_platform == \"ios\""}
+toga-web = {version = "0.5.4", markers = "sys_platform == \"emscripten\""}
+toga-winforms = {version = "0.5.4", markers = "sys_platform == \"win32\""}
 
 [[package]]
 name = "toga-android"
-version = "0.5.3"
+version = "0.5.4"
 description = "An Android backend for the Toga widget toolkit."
 optional = true
 python-versions = ">=3.10"
 groups = ["main"]
 markers = "extra == \"briefcase\" and sys_platform == \"android\""
 files = [
-    {file = "toga_android-0.5.3-py3-none-any.whl", hash = "sha256:edbc109154b15fb59e27221c78b649a9d8cda07d878aa478b93348ff328cb2e7"},
-    {file = "toga_android-0.5.3.tar.gz", hash = "sha256:e0279abfc13455cfc3d46d3b9338a81f3aa1ff5f51e402be6f518a7ee596a8e9"},
+    {file = "toga_android-0.5.4-py3-none-any.whl", hash = "sha256:ea9bbe031ca15ab12be1bd952a62826334231b9463dea5461a4dcbf30f1ff1fe"},
+    {file = "toga_android-0.5.4.tar.gz", hash = "sha256:597c50727ffe12e0f3957c6ca028f2ac3410d222b3645be6347c614702ecbee7"},
 ]
 
 [package.dependencies]
-toga-core = "0.5.3"
+toga-core = "0.5.4"
 
 [[package]]
 name = "toga-cocoa"
-version = "0.5.3"
+version = "0.5.4"
 description = "A Cocoa (macOS) backend for the Toga widget toolkit."
 optional = true
 python-versions = ">=3.10"
 groups = ["main"]
 markers = "extra == \"briefcase\" and sys_platform == \"darwin\""
 files = [
-    {file = "toga_cocoa-0.5.3-py3-none-any.whl", hash = "sha256:0cf2b53200132ace4a675658ced76039e6c2a28097bfbe3303a0d51d86a3cd4b"},
-    {file = "toga_cocoa-0.5.3.tar.gz", hash = "sha256:0688b1fa9279abc959e814261185468bc9598f2664e8fd1046b2681d0e65aec2"},
+    {file = "toga_cocoa-0.5.4-py3-none-any.whl", hash = "sha256:7d3b97332d0f0ed58309233632994944bd818eca39f93a3fbab8496a9e8888bb"},
+    {file = "toga_cocoa-0.5.4.tar.gz", hash = "sha256:ec768958844f42ebd0e7652444d9b8bccf2050c78f8958b515cb8f48ba12cb55"},
 ]
 
 [package.dependencies]
 fonttools = ">=4.42.1,<5.0.0"
 rubicon-objc = ">=0.5.1,<0.6.0"
-toga-core = "0.5.3"
+toga-core = "0.5.4"
 
 [[package]]
 name = "toga-core"
-version = "0.5.3"
+version = "0.5.4"
 description = "A Python native, OS native GUI toolkit."
 optional = true
 python-versions = ">=3.10"
 groups = ["main"]
 markers = "extra == \"briefcase\" and (sys_platform == \"linux\" or sys_platform == \"win32\" or sys_platform == \"darwin\" or sys_platform == \"ios\" or sys_platform == \"android\" or sys_platform == \"emscripten\" or \"freebsd\" in sys_platform)"
 files = [
-    {file = "toga_core-0.5.3-py3-none-any.whl", hash = "sha256:6dc50df6575c18bf34f385167808b027122f16ee25f143907293362178c01fab"},
-    {file = "toga_core-0.5.3.tar.gz", hash = "sha256:b8a32fb73f53088eec503bcf536e5b1da548147e356ae7c2077943c34af64519"},
+    {file = "toga_core-0.5.4-py3-none-any.whl", hash = "sha256:5bb8f46593706676d81b6c66097e3b406c02780a2e4e28d8f1a4699b6a449a8a"},
+    {file = "toga_core-0.5.4.tar.gz", hash = "sha256:6137b1b62a80d7a4d0a2897c7dcc92b1e179c7431f0cf8b869787b458377079a"},
 ]
 
 [package.dependencies]
-travertino = "0.5.3"
+travertino = "0.5.4"
 
 [[package]]
 name = "toga-gtk"
-version = "0.5.3"
+version = "0.5.4"
 description = "A GTK backend for the Toga widget toolkit."
 optional = true
 python-versions = ">=3.10"
 groups = ["main"]
 markers = "(sys_platform == \"linux\" or \"freebsd\" in sys_platform) and extra == \"briefcase\""
 files = [
-    {file = "toga_gtk-0.5.3-py3-none-any.whl", hash = "sha256:4e48a01b4aace7cd7e653bf82b2c31780e5b7f1d138130bb5ab73bc3f2bb5fa5"},
-    {file = "toga_gtk-0.5.3.tar.gz", hash = "sha256:38a566d14e90912c299d38e0a6e3a1ff6596a8db31412a9e37f4d23158b4a87f"},
+    {file = "toga_gtk-0.5.4-py3-none-any.whl", hash = "sha256:1178eb900c560c415a44299bb0b2b0dd5dde455198bd0ba52de5c2b43b4fbe50"},
+    {file = "toga_gtk-0.5.4.tar.gz", hash = "sha256:42135a1c3df4b961a1d2cc8383801a92d3bacbcccf7a933864d5cb0df935734a"},
 ]
 
 [package.dependencies]
 packaging = "*"
 pycairo = ">=1.17.0"
 pygobject = ">=3.50.0"
-toga-core = "0.5.3"
+toga-core = "0.5.4"
 
 [package.extras]
 gtk4 = ["pygobject (>=3.52.1)"]
 
 [[package]]
 name = "toga-ios"
-version = "0.5.3"
+version = "0.5.4"
 description = "An iOS backend for the Toga widget toolkit."
 optional = true
 python-versions = ">=3.10"
 groups = ["main"]
 markers = "extra == \"briefcase\" and sys_platform == \"ios\""
 files = [
-    {file = "toga_ios-0.5.3-py3-none-any.whl", hash = "sha256:9c6f89f5227bff4bea3e5d057ff686f0ac749ad6dbfdef8c24d0757888d0df13"},
-    {file = "toga_ios-0.5.3.tar.gz", hash = "sha256:d63d5bdb4553308f5d31f96cd7841f55eb5c9f95359f3fe615a162bc7d65adfc"},
+    {file = "toga_ios-0.5.4-py3-none-any.whl", hash = "sha256:02e8d58e605f24b9a2e1c3bc091276da5995fe31ba5dc7b729c1c7d027ec9d03"},
+    {file = "toga_ios-0.5.4.tar.gz", hash = "sha256:a6daa021ef33b7f72adee2c5a65be56def8bf58c7fb3bf2bb74a03bc91219fb4"},
 ]
 
 [package.dependencies]
 fonttools = ">=4.42.1,<5.0.0"
 rubicon-objc = ">=0.5.1,<0.6.0"
-toga-core = "0.5.3"
+toga-core = "0.5.4"
 
 [[package]]
 name = "toga-web"
-version = "0.5.3"
+version = "0.5.4"
 description = "A Web backend for the Toga widget toolkit."
 optional = true
 python-versions = ">=3.10"
 groups = ["main"]
 markers = "extra == \"briefcase\" and sys_platform == \"emscripten\""
 files = [
-    {file = "toga_web-0.5.3-py3-none-any.whl", hash = "sha256:7aba660a854195e1f6cf343e278d9570970461529b26f387b6132d7d65e5181d"},
-    {file = "toga_web-0.5.3.tar.gz", hash = "sha256:ac32c865522d3d8ad411809ef2ac466e0a3e38b376a1fca922270c69ae4041b5"},
+    {file = "toga_web-0.5.4-py3-none-any.whl", hash = "sha256:e396e8a8b280101f01520cd5c7e5005abcc9b268009d83f4b2a7ed2e723e960e"},
+    {file = "toga_web-0.5.4.tar.gz", hash = "sha256:df2a516f6ac15378f800e5d469cc89163f46461db16f2e111cd455f603fe2697"},
 ]
 
 [package.dependencies]
-toga-core = "0.5.3"
+toga-core = "0.5.4"
 
 [[package]]
 name = "toga-winforms"
-version = "0.5.3"
+version = "0.5.4"
 description = "A Windows backend for the Toga widget toolkit using the WinForms API."
 optional = true
 python-versions = ">=3.10"
 groups = ["main"]
 markers = "extra == \"briefcase\" and sys_platform == \"win32\""
 files = [
-    {file = "toga_winforms-0.5.3-py3-none-win_amd64.whl", hash = "sha256:7b30bed029576eeef9a9308b80f775954cb2886c20d4fc889060d3b86ccb60ef"},
-    {file = "toga_winforms-0.5.3.tar.gz", hash = "sha256:0980a5b45e8213e43d01ab6b48d89d5f2548609b7609eb8a301cfaae38700af9"},
+    {file = "toga_winforms-0.5.4-py3-none-win_amd64.whl", hash = "sha256:da257158819bd7ec66e5c865a010c5b94da41e41ce051ad52d928699ad693c59"},
+    {file = "toga_winforms-0.5.4-py3-none-win_arm64.whl", hash = "sha256:862c31f8fa15fa159fc3e137d45b116e22e76f40e491d2bf0676c4054fe6de09"},
+    {file = "toga_winforms-0.5.4.tar.gz", hash = "sha256:7a4177335f69b480b5b536f29600d6600c3a877b9411aae93c6fb4da5be8abd7"},
 ]
 
 [package.dependencies]
 pillow = ">=10.0.0"
 pythonnet = ">=3.0.0"
-toga-core = "0.5.3"
+toga-core = "0.5.4"
 
 [[package]]
 name = "tomli"
@@ -3895,15 +3896,15 @@ files = [
 
 [[package]]
 name = "travertino"
-version = "0.5.3"
+version = "0.5.4"
 description = "A set of constants and base classes for describing user interface layouts."
 optional = true
 python-versions = ">=3.10"
 groups = ["main"]
 markers = "extra == \"briefcase\" and (sys_platform == \"linux\" or sys_platform == \"win32\" or sys_platform == \"darwin\" or sys_platform == \"ios\" or sys_platform == \"android\" or sys_platform == \"emscripten\" or \"freebsd\" in sys_platform)"
 files = [
-    {file = "travertino-0.5.3-py3-none-any.whl", hash = "sha256:9f6f6840760af28295bba76aa175f35678aba33782ff29e78053b3cbdafafabf"},
-    {file = "travertino-0.5.3.tar.gz", hash = "sha256:fdbdf3a2c78335ce6c357c334defe6f15e8315c0e213c43e59d1975e77df7cf3"},
+    {file = "travertino-0.5.4-py3-none-any.whl", hash = "sha256:aff0d275c45be3965441d47af04c271ebd7d03f53a436b2b1f8de4534077959b"},
+    {file = "travertino-0.5.4.tar.gz", hash = "sha256:0f712aed518cfb47391cd0ade83237f4db127711a892dd4d5cef6118d041e180"},
 ]
 
 [[package]]
@@ -4344,4 +4345,4 @@ briefcase = ["asgiref", "toga"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "6d6c56ab21808b5bf2cb32f940abdbe94daa5e5b716cc5ad3dbc3653aece2140"
+content-hash = "5c28b2c346aaed1df5f7ab250ccd621962b2f5d35994606cd8f790ec0853a8ff"

@@ -33,7 +33,7 @@ dependencies = [
 [project.optional-dependencies]
 # Keep in sync with `tool.briefcase.app.stonks-overwatch.requires`
 briefcase = [
-    "toga >=0.5.3",
+    "toga >=0.5.4",
     "asgiref >= 3.11.1",
 ]
 
