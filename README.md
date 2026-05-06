@@ -159,6 +159,7 @@ Stonks Overwatch is released under the [MIT License](LICENSE). You're free to us
 ## Acknowledgments
 
 Built with these amazing open-source projects:
+
 - [Django](https://www.djangoproject.com/) - Web framework
 - [DEGIRO Connector](https://github.com/Chavithra/degiro-connector) - DEGIRO API client
 - [Bitvavo API](https://github.com/bitvavo/python-bitvavo-api) - Bitvavo integration
@@ -191,12 +192,14 @@ So I built Stonks Overwatch—a privacy-first, open-source solution that runs en
 ### The Reality of Maintaining This Project
 
 **Time Investment:** I spend a lot of my free time over the last year to build an improve Stonks Overwatch:
+
 - Fixing bugs and responding to issues
 - Improving the UI/UX based on feedback
 - Writing documentation and guides
 - Building native desktop applications for all platforms
 
 **What I've Built So Far:**
+
 - ✅ Full integration with DEGIRO (real-time data)
 - ✅ Beta support for Bitvavo and IBKR
 - ✅ Native desktop apps for Windows, macOS, and Linux
@@ -207,6 +210,7 @@ So I built Stonks Overwatch—a privacy-first, open-source solution that runs en
 - ✅ Plugin architecture design (ready for implementation)
 
 **What's Coming Next:**
+
 - 🚀 Dynamic plugin system for easy broker additions
 - 📱 Mobile app support (iOS and Android)
 - 📊 Advanced analytics and reporting
@@ -231,6 +235,7 @@ Your sponsorship directly enables me to:
 ### Your Support Makes a Difference
 
 Every contribution, no matter the size, helps sustain this project. Whether you're:
+
 - A casual investor who found value in the tool
 - A developer who appreciates the clean architecture
 - Someone who believes in privacy-first software
@@ -244,6 +249,7 @@ Your sponsorship shows that open-source, privacy-focused tools matter—and that
 👉 [Sponsor me on GitHub](https://github.com/sponsors/ctasada)
 
 **Other Ways to Help:**
+
 - ⭐ **Star the repository** - Helps others discover the project
 - 🐛 **Report bugs** - Help improve stability
 - 💡 **Suggest features** - Shape the roadmap

@@ -247,6 +247,7 @@ except Exception as e:
 ```
 
 **Expected Results:**
+
 - ✅ **Green checkmarks** = System healthy
 - ❌ **Red X** = See [Troubleshooting](#common-maintenance-tasks) below
 
@@ -297,6 +298,7 @@ Interactive Brokers: ❌ Not Ready
 ```
 
 **If all brokers show "Not Ready":**
+
 1. Check database credentials with `get_credentials_from_database()`
 2. Verify configuration files have valid credentials
 3. Ensure brokers are enabled in settings
@@ -375,11 +377,13 @@ print(f"Authentication status after clear: {is_auth}")  # Should be False
 ```
 
 **When to use this:**
+
 - User sees "Session exists but configuration is invalid" error
 - Authentication loops infinitely
 - Session data is corrupted or inconsistent
 
 **If issues persist:**
+
 1. Check [Common Issues](#2-troubleshooting-common-issues) for known problems
 2. Enable [debug logging](#enable-debug-logging) for detailed diagnostics
 3. Review [emergency procedures](#emergency-procedures) if system is unrecoverable
@@ -602,6 +606,7 @@ print(f"Session ID: {result.session_id}")
 ```
 
 **If issues persist:**
+
 1. Verify DEGIRO mobile app is up to date
 2. Check network connectivity to DEGIRO API
 3. Review [Authentication Architecture](ARCHITECTURE_AUTHENTICATION.md#in-app-authentication) for flow details
@@ -756,6 +761,7 @@ Typical performance on standard hardware (development environment):
 | Session read | ~5ms | ~1ms | <10ms |
 
 **If you see worse performance**, check:
+
 1. Database connection latency
 2. Session backend configuration (Redis vs database)
 3. Cache status and memory pressure
@@ -769,6 +775,7 @@ Typical performance on standard hardware (development environment):
 - **Cache Clearing**: Call `AuthenticationServiceLocator.clear_cache()` to free memory
 
 **Next steps for performance issues:**
+
 1. Review [Architecture Summary](#architecture-summary) to understand caching strategy
 2. Check database query performance with Django Debug Toolbar
 3. Monitor memory usage with system tools
@@ -795,6 +802,7 @@ The authentication system follows a layered architecture:
 | **Data** | Session, Database, Config | State persistence |
 
 **Key Patterns:**
+
 - **Factory Pattern**: Centralized service creation with dependency injection
 - **Service Locator**: High-performance cached access to services
 - **Interface Contracts**: Type-safe service boundaries
@@ -873,6 +881,7 @@ Confirm architectural security:
 🚨 **Danger Zone**: These procedures are for emergency recovery only. They can cause data loss or system downtime.
 
 **Before proceeding:**
+
 1. ✅ Back up your database
 2. ✅ Notify affected users
 3. ✅ Have rollback plan ready

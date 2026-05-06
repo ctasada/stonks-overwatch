@@ -45,12 +45,14 @@ See our [Quickstart Guide](Quickstart.md) for step-by-step installation instruct
 ### What are the system requirements?
 
 **Minimum Requirements:**
+
 - Python 3.13 or higher
 - 2 GB RAM
 - 500 MB disk space
 - Internet connection (for broker data sync)
 
 **Recommended:**
+
 - Python 3.13+
 - 4 GB RAM
 - 1 GB disk space
@@ -82,6 +84,7 @@ make run
 ### Where is my data stored?
 
 All data is stored locally on your computer in the `data/` directory:
+
 - **Database**: `data/db.sqlite3`
 - **Cache**: `data/cache/`
 - **Logs**: `data/logs/`
@@ -91,6 +94,7 @@ Your data **never** leaves your machine unless you explicitly configure backup s
 ### Is my financial data secure?
 
 Yes. Stonks Overwatch:
+
 - Stores all data locally on your computer
 - Does not send data to external servers
 - Encrypts sensitive credentials in the database
@@ -129,11 +133,13 @@ cp data_backup/db.sqlite3 data/db.sqlite3
 ### How do I configure my brokers?
 
 Each broker has specific setup instructions:
+
 - [DEGIRO Configuration](DEGIRO.md)
 - [Bitvavo Configuration](Bitvavo.md)
 - [IBKR Configuration](IBKR.md)
 
 General steps:
+
 1. Copy `config/config.json.template` to `config/config.json`
 2. Edit the file with your broker credentials
 3. Set `enabled: true` for brokers you want to use
@@ -174,6 +180,7 @@ make run demo=true
 ### How often is my portfolio data updated?
 
 By default:
+
 - **DEGIRO**: Every 5 minutes
 - **Bitvavo**: Every 5 minutes
 - **IBKR**: Every 15 minutes
@@ -237,11 +244,13 @@ Yes! Stonks Overwatch supports three theme options:
 **To change themes:**
 
 **Native App:**
+
 1. Open Preferences from the application menu
 2. Go to General tab
 3. Select your preferred theme
 
 **Web Version:**
+
 1. Click Settings in the sidebar
 2. Navigate to Preferences section
 3. Choose your theme preference
@@ -276,6 +285,7 @@ make run debug=true
 ### I can't login to DEGIRO
 
 **Common issues:**
+
 1. **2FA enabled**: You need to set up TOTP in your config. See [DEGIRO setup](DEGIRO.md)
 2. **Wrong credentials**: Double-check username/password
 3. **Account blocked**: Check if you can login via DEGIRO website
@@ -283,6 +293,7 @@ make run debug=true
 
 **In-App authentication required:**
 If DEGIRO asks for mobile app confirmation:
+
 1. Open the DEGIRO mobile app
 2. Approve the login request
 3. The dashboard will load automatically
@@ -290,6 +301,7 @@ If DEGIRO asks for mobile app confirmation:
 ### My portfolio data is not updating
 
 **Check broker connection:**
+
 1. Verify credentials in `config.json`
 2. Check if broker's website is accessible
 3. Review logs in `data/logs/stonks-overwatch.log`
@@ -300,6 +312,7 @@ Restart the application to trigger an immediate update.
 ### I'm seeing "Port already in use" error
 
 Another service is using port 8000. Either:
+
 1. Stop the other service
 2. Change the port in settings (advanced)
 
@@ -317,6 +330,7 @@ make start
 ### Performance is slow
 
 **Optimize:**
+
 1. Reduce update frequency in config
 2. Close other browser tabs
 3. Check system resources
@@ -329,6 +343,7 @@ make start
 We welcome all contributions! See [Contributing Guidelines](../CONTRIBUTING.md) for details.
 
 Ways to contribute:
+
 - Report bugs
 - Suggest features
 - Improve documentation
@@ -362,6 +377,7 @@ Our feature request template helps ensure we understand your needs.
 ### Can I add support for my broker?
 
 Yes! We have an extensible plugin architecture. See:
+
 - [Broker Architecture Guide](ARCHITECTURE_BROKERS.md)
 - [Developer Guide](Developing-Stonks-Overwatch.md)
 
@@ -427,6 +443,7 @@ To provide a privacy-focused, open-source alternative to commercial portfolio tr
 ### What's planned for the future?
 
 Planned features include:
+
 - Mobile applications
 - More broker integrations
 - Advanced analytics

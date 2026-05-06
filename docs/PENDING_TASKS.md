@@ -60,6 +60,7 @@ request.session[SessionKeys.get_credentials_key("ibkr")] = {
 ```
 
 **Implementation Steps:**
+
 1. Use existing `EncryptionUtils` from `services/brokers/encryption_utils.py`
 2. Encrypt all credential storage operations
 3. Store only encrypted credential reference ID in session
@@ -90,12 +91,14 @@ def get_portfolio_total(...) -> TotalPortfolio:
 ```
 
 **Business Impact:**
+
 - All portfolio ROI calculations are meaningless
 - Users see incorrect performance metrics
 - Portfolio totals completely wrong
 - Misleading financial information
 
 **Implementation Steps:**
+
 1. Implement proper retrieval from IBKR API
 2. Add configuration option as temporary fallback
 3. Log warning if API retrieval fails
@@ -123,12 +126,14 @@ if len(access_token) < 10 or len(access_token_secret) < 10:
 ```
 
 **Security Risks:**
+
 - No character set validation (SQL injection, XSS potential)
 - No maximum length check (DoS via memory exhaustion)
 - No format validation (should be alphanumeric + specific chars)
 - Credentials could contain malicious payloads
 
 **Files:**
+
 - `src/stonks_overwatch/services/brokers/ibkr/services/authentication_service.py:73-91`
 
 **Proposed Solution:**
@@ -152,6 +157,7 @@ def validate_credentials(...) -> dict:
 ```
 
 **Implementation Steps:**
+
 1. Add regex pattern validation for all OAuth fields
 2. Implement maximum length checks (prevent DoS)
 3. Validate character sets (alphanumeric + allowed special chars)
@@ -180,12 +186,14 @@ def is_user_authenticated(self, request: HttpRequest) -> bool:
 ```
 
 **Performance Impact:**
+
 - Called on every authenticated request (via middleware)
 - Causes API rate limiting
 - Unnecessary CPU cycles under load
 - Poor user experience
 
 **Files:**
+
 - `src/stonks_overwatch/services/brokers/bitvavo/services/authentication_service.py:159`
 - `src/stonks_overwatch/services/brokers/ibkr/services/authentication_service.py:210-223`
 
@@ -215,6 +223,7 @@ def is_user_authenticated(self, request: HttpRequest) -> bool:
 ```
 
 **Implementation Steps:**
+
 1. Implement token-based authentication cache with TTL (5-10 minutes)
 2. Add `last_validated` timestamp to session
 3. Only re-validate if cache expired or explicit validation requested
@@ -236,9 +245,11 @@ def is_user_authenticated(self, request: HttpRequest) -> bool:
 Missing session fixation attack prevention after authentication
 
 **Files:**
+
 - `src/stonks_overwatch/views/broker_login.py:80-129`
 
 **Implementation Steps:**
+
 1. Add `request.session.cycle_key()` after successful authentication
 2. Clear previous session data before setting authenticated state
 3. Update middleware to handle session transitions properly
@@ -304,6 +315,7 @@ class DegiroTransactionsRepository(BaseRepository):
 ```
 
 **Implementation Steps:**
+
 1. Create `BaseRepository` class with common patterns
 2. Add input validation framework
 3. Implement centralized error handling
@@ -343,6 +355,7 @@ class DeGiroCashMovements(models.Model):
 ```
 
 **Implementation Steps:**
+
 1. Create Django migration for field type changes
 2. Add data migration to convert existing CharField data to Decimal
 3. Update service layer to handle DecimalField types
@@ -353,6 +366,7 @@ class DeGiroCashMovements(models.Model):
 **Dependencies:** None (can be done independently)
 
 **Notes:**
+
 - ✅ Bitvavo models already use DecimalField
 - ✅ IBKR models already use DecimalField
 - ⚠️ Requires careful data migration to preserve existing values
@@ -386,6 +400,7 @@ def _auto_authenticate_degiro(self, request, credentials) -> dict:
 ```
 
 **Files:**
+
 - `src/stonks_overwatch/views/login.py:234-303`
 
 **Proposed Solution:**
@@ -426,6 +441,7 @@ BROKER_STRATEGIES = {
 ```
 
 **Implementation Steps:**
+
 1. Create `BrokerAuthenticationStrategy` base class
 2. Implement concrete strategies for each broker
 3. Update `_attempt_auto_authentication()` to use registry
@@ -454,6 +470,7 @@ self._reconfigure_jobs()
 ```
 
 **Files:**
+
 - `src/stonks_overwatch/services/brokers/bitvavo/services/authentication_service.py:274-330`
 - `src/stonks_overwatch/views/settings.py:148-188`
 
@@ -506,6 +523,7 @@ class ConfigurationManager:
 ```
 
 **Implementation Steps:**
+
 1. Create `src/stonks_overwatch/core/configuration_manager.py`
 2. Update `authentication_service.py` to use ConfigurationManager
 3. Update `settings.py` to use ConfigurationManager
@@ -533,6 +551,7 @@ _singleton_locks: dict[type, Lock] = {}
 ```
 
 **Files:**
+
 - `src/stonks_overwatch/utils/core/singleton.py:7-9, 38-43`
 
 **Proposed Solution:**
@@ -577,6 +596,7 @@ class SingletonRegistry:
 ```
 
 **Implementation Steps:**
+
 1. Create `SingletonRegistry` class
 2. Update `singleton` decorator to use registry
 3. Update `reset_singleton` to use registry
@@ -595,6 +615,7 @@ class SingletonRegistry:
 **Source:** BROKER_LOGIN_IMPROVEMENT_PLAN.md (Issue 2.9)
 
 **Completed Work:**
+
 - ✅ BrokerName enum type hints across entire codebase
 - ✅ Configuration layer (BaseConfig, LazyConfig) fully typed
 - ✅ Repository methods with proper type constraints
@@ -619,6 +640,7 @@ def _auto_authenticate_degiro(self, request, credentials) -> dict:
 ```
 
 **Implementation Steps:**
+
 1. Add complete type hints to remaining view methods
 2. Add type hints to authentication service helper methods
 3. Use `TypedDict` for structured dictionaries where appropriate
@@ -659,6 +681,7 @@ for attempt in range(max_retries):
 ```
 
 **Files:**
+
 - `src/stonks_overwatch/services/brokers/ibkr/services/portfolio.py:32-63, 205-236`
 
 **Proposed Solution:**
@@ -697,6 +720,7 @@ account_summary = self._get_account_summary_with_retry()
 ```
 
 **Implementation Steps:**
+
 1. Extract retry logic into private method
 2. Replace hardcoded delays with configuration
 3. Add exponential backoff
@@ -723,6 +747,7 @@ except Exception as e:  # ⚠️ Catches ALL exceptions including SystemExit
 ```
 
 **Files:**
+
 - `src/stonks_overwatch/services/brokers/ibkr/services/portfolio.py:71, 223`
 
 **Proposed Solution:**
@@ -746,6 +771,7 @@ except Exception as e:
 ```
 
 **Implementation Steps:**
+
 1. Replace with specific exception types
 2. Allow system exceptions to propagate
 3. Add better error context
@@ -800,6 +826,7 @@ def validate_credentials(...) -> ValidationResult:
 ```
 
 **Implementation Steps:**
+
 1. Create typed response dataclasses
 2. Update all methods to return typed objects
 3. Update tests to use typed responses
@@ -826,6 +853,7 @@ except Exception as e:  # ⚠️ Too broad
 ```
 
 **Files:**
+
 - `src/stonks_overwatch/core/registry_setup.py:35-39, 65-69, 95-99`
 
 **Proposed Solution:**
@@ -837,6 +865,7 @@ except (ImportError, ModuleNotFoundError, AttributeError) as e:
 ```
 
 **Implementation Steps:**
+
 1. Replace with specific exception types
 2. Allow system exceptions to propagate
 3. Add better error messages
@@ -862,6 +891,7 @@ time.sleep(0.5)  # Why 0.5 seconds?
 ```
 
 **Files:**
+
 - `src/stonks_overwatch/services/brokers/ibkr/services/portfolio.py:40, 45, 59, 208, 211, 231`
 
 **Proposed Solution:**
@@ -892,6 +922,7 @@ for attempt in range(self.config.API_MAX_RETRY_ATTEMPTS):
 ```
 
 **Implementation Steps:**
+
 1. Create configuration class for IBKR timing
 2. Document reasoning for timing choices
 3. Make configurable via environment variables
@@ -915,6 +946,7 @@ New views lack dedicated test files:
 - `src/stonks_overwatch/views/root_redirect.py` (167 lines, no tests)
 
 **Implementation Steps:**
+
 1. Create `tests/stonks_overwatch/views/test_broker_login_view.py`
 2. Create `tests/stonks_overwatch/views/test_root_redirect.py`
 3. Test all broker authentication flows (DEGIRO TOTP, Bitvavo API, IBKR OAuth)
@@ -938,9 +970,11 @@ New views lack dedicated test files:
 Current tests heavily rely on mocks, missing integration scenarios
 
 **Files:**
+
 - `tests/stonks_overwatch/middleware/test_authentication.py`
 
 **Implementation Steps:**
+
 1. Add integration tests with real Django request/response cycle
 2. Test middleware chain: `AuthenticationMiddleware` → `DeGiroAuthMiddleware`
 3. Test session state across multiple requests
@@ -973,6 +1007,7 @@ def test_successful_login(broker, credentials):
 ```
 
 **Implementation Steps:**
+
 1. Use `@pytest.mark.parametrize` for broker-specific tests
 2. Extract common test setup to fixtures
 3. Reduce test duplication
@@ -998,9 +1033,11 @@ def __is_currency(symbol: str) -> bool:
 ```
 
 **Files:**
+
 - `src/stonks_overwatch/services/brokers/bitvavo/services/portfolio_service.py:60-61`
 
 **Implementation Steps:**
+
 1. Make currency list configurable in `BitvavoConfig`
 2. Add `SUPPORTED_CURRENCIES = ["EUR", "USD", "GBP"]` to config
 3. Update method to check against config list
@@ -1021,9 +1058,11 @@ def __is_currency(symbol: str) -> bool:
 Double-fetch failure returns 0, causing incorrect portfolio valuation
 
 **Files:**
+
 - `src/stonks_overwatch/services/brokers/bitvavo/services/portfolio_service.py:318-325`
 
 **Implementation Steps:**
+
 1. Add retry logic with exponential backoff
 2. Return `None` instead of 0 when both fetches fail
 3. Log critical error with symbol and retry count
@@ -1048,9 +1087,11 @@ last_movement = self._get_last_cash_movement_import().replace(tzinfo=timezone.ut
 ```
 
 **Files:**
+
 - `src/stonks_overwatch/services/brokers/degiro/services/update_service.py:165-166`
 
 **Implementation Steps:**
+
 1. Use `django.utils.timezone.make_aware()` instead of `.replace()`
 2. Respect configured timezone from settings
 3. Add timezone validation tests
@@ -1070,9 +1111,11 @@ last_movement = self._get_last_cash_movement_import().replace(tzinfo=timezone.ut
 1-hour cache TTL hardcoded, may be too long for active trading
 
 **Files:**
+
 - `src/stonks_overwatch/services/brokers/degiro/services/update_service.py:47`
 
 **Implementation Steps:**
+
 1. Add `PORTFOLIO_CACHE_TTL` to Django settings
 2. Default to 1800 seconds (30 minutes)
 3. Allow override via environment variable
@@ -1146,6 +1189,7 @@ class DegiroPortfolioService:
 ```
 
 **Implementation Steps:**
+
 1. Create `DataTransformerService` utility
 2. Define mapping configurations for each broker
 3. Refactor existing services to use transformer
@@ -1196,6 +1240,7 @@ class ModernService:
 ```
 
 **Implementation Steps:**
+
 1. Identify remaining services with legacy caching
 2. Refactor to use Django cache framework
 3. Update cache key management
@@ -1214,6 +1259,7 @@ class ModernService:
 **Impact:** Medium - Improves extensibility and monitoring
 
 **Problem:**
+
 - Jobs are hardcoded for specific brokers
 - No job registration system
 - Inconsistent scheduling patterns
@@ -1268,6 +1314,7 @@ class GenericPortfolioUpdateJob:
 ```
 
 **Implementation Steps:**
+
 1. Create `JobRegistry` class
 2. Implement generic job classes
 3. Add job monitoring and status tracking
@@ -1286,6 +1333,7 @@ class GenericPortfolioUpdateJob:
 **Impact:** Medium - Enables generic authentication
 
 **Problem:**
+
 - Authentication middleware is hardcoded for DeGiro
 - No generic authentication strategy
 - Inconsistent session handling across brokers
@@ -1340,6 +1388,7 @@ class GenericBrokerAuthMiddleware:
 ```
 
 **Implementation Steps:**
+
 1. Create `BrokerAuthStrategy` base class
 2. Implement strategy for each broker
 3. Create `GenericBrokerAuthMiddleware`
@@ -1360,6 +1409,7 @@ class GenericBrokerAuthMiddleware:
 **Source:** Conversation b750aff0 (Plugin Architecture Review)
 
 **Implemented Solutions:**
+
 1. ✅ **Generic Interface Types**: Removed `DegiroCredentials` from `AuthenticationServiceInterface`, now uses generic `object` type
 2. ✅ **Polymorphic Validation**: `CredentialValidator` supports `has_minimal_credentials()` method on credential objects
 3. ✅ **Centralized Helper**: Created `AuthenticationHelper` with unified broker readiness logic
@@ -1367,6 +1417,7 @@ class GenericBrokerAuthMiddleware:
 5. ✅ **Code Reduction**: Eliminated ~93 lines of duplicated code across 4 files
 
 **Files Modified:**
+
 - `src/stonks_overwatch/core/authentication_helper.py` (new file)
 - `src/stonks_overwatch/core/interfaces/authentication_service.py`
 - `src/stonks_overwatch/middleware/authentication.py`
@@ -1376,11 +1427,13 @@ class GenericBrokerAuthMiddleware:
 - `src/stonks_overwatch/views/root_redirect.py`
 
 **Documentation:**
+
 - See [ARCHITECTURE_AUTHENTICATION.md](ARCHITECTURE_AUTHENTICATION.md#authenticationhelper) for implementation details
 - See [OPERATIONS_AUTHENTICATION.md](OPERATIONS_AUTHENTICATION.md#broker-readiness-check) for debugging commands
 - See [PLUGIN_ARCHITECTURE.md](PLUGIN_ARCHITECTURE.md#phase-5-legacy-migration-2-3-weeks) for plugin architecture integration
 
 **Benefits:**
+
 - Prepares authentication system for plugin architecture
 - Reduces maintenance burden through code consolidation
 - Enables broker plugins to provide custom credential classes
@@ -1405,9 +1458,11 @@ Broker cards use `<div onclick>` - not keyboard accessible
 ```
 
 **Files:**
+
 - `src/stonks_overwatch/templates/login.html:85, 112-114`
 
 **Implementation Steps:**
+
 1. Replace `<div>` with semantic `<a>` or `<button>` elements
 2. Add proper `href` or `role="button"` with keyboard handlers
 3. Add focus styles for keyboard navigation
@@ -1428,9 +1483,11 @@ Broker cards use `<div onclick>` - not keyboard accessible
 Help tooltips only work on hover, not accessible to keyboard users
 
 **Files:**
+
 - `src/stonks_overwatch/templates/login/ibkr_login.html:58-63, 72-77`
 
 **Implementation Steps:**
+
 1. Add `tabindex="0"` to make icons focusable
 2. Use `aria-describedby` pattern instead of tooltips
 3. Create expandable help text section as alternative
@@ -1451,10 +1508,12 @@ Help tooltips only work on hover, not accessible to keyboard users
 Decorative icons announced by screen readers unnecessarily
 
 **Files:**
+
 - `src/stonks_overwatch/templates/login.html:68-76`
 - `src/stonks_overwatch/templates/components/messages.html:5-12`
 
 **Implementation Steps:**
+
 1. Add `aria-hidden="true"` to all decorative icons
 2. Ensure message text provides full context without icons
 3. Add `role="alert"` to error message containers
@@ -1474,9 +1533,11 @@ Decorative icons announced by screen readers unnecessarily
 Password visibility button missing `aria-pressed` state
 
 **Files:**
+
 - `src/stonks_overwatch/templates/components/password_field.html:19-22`
 
 **Implementation Steps:**
+
 1. Add `aria-pressed="false"` to button element
 2. Update JavaScript to toggle `aria-pressed` value
 3. Update `base_broker_login.html:100-110` and `settings_content.html:383-394`
@@ -1497,9 +1558,11 @@ Password visibility button missing `aria-pressed` state
 IBKR form too wide on mobile (650px on 375px viewport)
 
 **Files:**
+
 - `src/stonks_overwatch/templates/login/ibkr_login.html:9-11`
 
 **Implementation Steps:**
+
 1. Add responsive CSS media query for IBKR card
 2. Reduce textarea rows on mobile (6 → 4 rows)
 3. Test on iPhone SE (320px), iPhone 12 (390px), iPad (768px)
@@ -1519,6 +1582,7 @@ IBKR form too wide on mobile (650px on 375px viewport)
 No timeout on external service calls
 
 **Implementation Steps:**
+
 1. Add timeout parameters to all external calls
 2. Configure reasonable defaults (5-10 seconds)
 3. Handle timeout exceptions gracefully
@@ -1542,6 +1606,7 @@ self.logger.error(f"IBKR credentials validation error: {str(e)}")
 ```
 
 **Files:**
+
 - `src/stonks_overwatch/services/brokers/ibkr/services/authentication_service.py:105`
 
 **Proposed Solution:**
@@ -1551,6 +1616,7 @@ self.logger.error(f"IBKR credentials validation error: {type(e).__name__}")
 ```
 
 **Implementation Steps:**
+
 1. Log exception type instead of message
 2. Sanitize error messages before logging
 3. Add security audit logging
@@ -1566,11 +1632,13 @@ self.logger.error(f"IBKR credentials validation error: {type(e).__name__}")
 **Impact:** Low - Nice to have
 
 **Issues:**
+
 - Constants scattered across multiple files
 - No environment-specific configuration validation
 - Limited configuration documentation
 
 **Proposed Improvements:**
+
 1. Centralize all configuration constants
 2. Add configuration validation on startup
 3. Create environment-specific config files
@@ -1586,11 +1654,13 @@ self.logger.error(f"IBKR credentials validation error: {type(e).__name__}")
 **Impact:** Low - Improves debugging
 
 **Issues:**
+
 - Inconsistent log formats across services
 - Missing contextual information in some logs
 - No structured logging (JSON format)
 
 **Proposed Improvements:**
+
 1. Standardize log format across all services
 2. Add structured logging (JSON) for production
 3. Include request context in all logs
@@ -1608,6 +1678,7 @@ self.logger.error(f"IBKR credentials validation error: {type(e).__name__}")
 **Impact:** Low - Operational visibility
 
 **Proposed Features:**
+
 - Real-time service performance metrics
 - Cache hit rate monitoring
 - API call tracking and latency
@@ -1623,6 +1694,7 @@ self.logger.error(f"IBKR credentials validation error: {type(e).__name__}")
 **Impact:** Low - Improved management
 
 **Proposed Features:**
+
 - Broker configuration management UI
 - Job scheduling and monitoring
 - Cache management interface
@@ -1712,14 +1784,16 @@ self.logger.error(f"IBKR credentials validation error: {type(e).__name__}")
 **Production Readiness Status:** ⚠️ **NOT READY**
 
 **Blocking Issues (Must Fix):**
+
 1. 🔴 Plaintext credentials in session (4h)
 2. 🔴 Hardcoded portfolio values (4h)
 3. 🟡 Missing input validation (3h)
 
 **High Priority (Strongly Recommended):**
-4. 🟡 Authentication performance (3h)
-5. 🟡 IBKR duplicate retry logic (2h)
-6. 🟡 Exception handling improvements (2h)
+
+1. 🟡 Authentication performance (3h)
+2. 🟡 IBKR duplicate retry logic (2h)
+3. 🟡 Exception handling improvements (2h)
 
 **Minimum Time to Production Ready:** 17 hours (critical path only)
 **Recommended Time to Production Ready:** 31.5 hours (critical + high priority)

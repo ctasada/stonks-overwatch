@@ -19,6 +19,7 @@ Interactive Brokers (IBKR) is a global broker supported by **Stonks Overwatch**,
 ### Supported Markets
 
 IBKR provides access to:
+
 - **US Markets** - NYSE, NASDAQ, AMEX
 - **European Markets** - LSE, XETRA, Euronext, etc.
 - **Asian Markets** - HKEX, TSE, SGX, etc.
@@ -72,6 +73,7 @@ Follow the detailed instructions at [iBind - OAuth-1.0a Guide](https://github.co
 ### Required Files
 
 After setup, you'll have:
+
 - `private_signature.pem` - Signature private key
 - `private_encryption.pem` - Encryption private key
 - Access token and secret (strings)
@@ -208,6 +210,7 @@ IBKR integrates seamlessly with other brokers:
 **Symptoms:** IBKR enabled but no portfolio data
 
 **Solutions:**
+
 1. Check if you have open positions on IBKR
 2. Verify Web API is enabled for your account
 3. Check logs: `data/logs/stonks-overwatch.log`
@@ -218,6 +221,7 @@ IBKR integrates seamlessly with other brokers:
 **Symptoms:** "Connection timeout" or "Cannot reach IBKR"
 
 **Solutions:**
+
 1. Check internet connection
 2. Verify IBKR Web API is operational
 3. Check if using VPN (may cause issues)
@@ -402,6 +406,7 @@ The application uses [iBind](https://github.com/Voyz/ibind), a Python client for
 ### Database Model
 
 The database model is defined in:
+
 - `src/stonks_overwatch/services/brokers/ibkr/repositories/models.py`
 
 ### Architecture
@@ -446,6 +451,7 @@ The IBKR Client Portal Gateway caches position data server-side. On a cold sessi
 **Workaround**: Stonks Overwatch calls the positions endpoint twice — the first call primes the gateway cache with full contract details, and the second call returns the fully populated data. Defensive fallbacks are also in place for any fields that remain `None` (e.g., ETFs with no sector classification).
 
 **Impact**:
+
 - ✅ Portfolio displays correctly with ticker symbols, sector, and asset type
 - ✅ Position values and P&L calculations work properly
 - ⚠️ ETFs may still show `null` for `sector`/`group` as IBKR does not classify them
@@ -526,6 +532,7 @@ poetry install
 ### Permissions
 
 Stonks Overwatch requires **read-only** access to your IBKR account. It can:
+
 - ✅ View portfolio and positions
 - ✅ View account information
 - ✅ View available transaction data (last 90 days)

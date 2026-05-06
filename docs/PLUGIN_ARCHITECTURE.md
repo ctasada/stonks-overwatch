@@ -44,6 +44,7 @@
 This document outlines a comprehensive proposal to evolve the current broker architecture from a static registry-based system to a dynamic plugin architecture. The goal is to create a truly extensible system where brokers can be developed, distributed, and deployed independently while maintaining type safety and backward compatibility.
 
 **Key Objectives:**
+
 - Enable dynamic broker discovery and loading
 - Support independent broker distribution as packages
 - Provide plugin isolation and sandboxing
@@ -1870,6 +1871,7 @@ class {plugin_class_name}(BrokerPluginInterface):
 #### 6.1 Plugin Security & Sandboxing (Week 1-2)
 
 **Considerations:**
+
 - Resource limits per plugin (memory, CPU)
 - Permission system for file access
 - Network access control
@@ -1878,6 +1880,7 @@ class {plugin_class_name}(BrokerPluginInterface):
 #### 6.2 Plugin Dependencies & Versioning (Week 2-3)
 
 **Considerations:**
+
 - Semantic versioning enforcement
 - Dependency conflict resolution
 - Virtual environment per plugin
@@ -1886,6 +1889,7 @@ class {plugin_class_name}(BrokerPluginInterface):
 #### 6.3 Plugin Marketplace Features (Week 3-4)
 
 **Considerations:**
+
 - Plugin catalog/directory
 - Plugin ratings and reviews
 - Automatic updates
@@ -1894,6 +1898,7 @@ class {plugin_class_name}(BrokerPluginInterface):
 #### 6.4 Advanced Monitoring & Analytics (Week 4-5)
 
 **Considerations:**
+
 - Performance metrics collection
 - Resource usage tracking
 - Error rate monitoring

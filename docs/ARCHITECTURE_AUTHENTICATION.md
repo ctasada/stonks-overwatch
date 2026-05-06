@@ -268,6 +268,7 @@ In-App authentication is DEGIRO's security mechanism that requires users to conf
 #### Error Detection
 
 The system detects In-App authentication requirements through DEGIRO API responses:
+
 - **Status Code**: `error_details.status == 12`
 - **Status Text**: `error_details.status_text == "inAppTOTPNeeded"`
 - **In-App Token**: `error_details.in_app_token` contains the authentication token
@@ -289,6 +290,7 @@ self.session_manager.set_in_app_auth_required(request, True)
 #### UI State Management
 
 The login template supports four states:
+
 - **Initial**: Username/password form
 - **TOTP**: 2FA code input
 - **In-App**: Waiting for mobile app confirmation
@@ -351,6 +353,7 @@ def _wait_for_in_app_confirmation(self, credentials) -> Optional[str]:
 **Path**: `src/stonks_overwatch/services/utilities/authentication_service.py`
 
 **Methods**:
+
 - `handle_in_app_authentication()` - Main orchestration method
 - `_wait_for_in_app_confirmation()` - Polling loop implementation
 - `_handle_in_app_auth_required_error()` - Error handler
@@ -362,6 +365,7 @@ def _wait_for_in_app_confirmation(self, credentials) -> Optional[str]:
 **Path**: `src/stonks_overwatch/views/login.py`
 
 **Methods**:
+
 - `_handle_in_app_authentication()` - Delegates to service layer (UI concerns only)
 
 #### Session Manager
@@ -369,6 +373,7 @@ def _wait_for_in_app_confirmation(self, credentials) -> Optional[str]:
 **Path**: `src/stonks_overwatch/services/utilities/authentication_session_manager.py`
 
 **Methods**:
+
 - `set_in_app_auth_required()` - Set UI state flag
 - `is_in_app_auth_required()` - Check UI state flag
 - `store_credentials()` - Store token with credentials
@@ -473,6 +478,7 @@ def handle_authentication_error(
 ```
 
 **Benefits:**
+
 - **Plugin Support**: New brokers can provide custom credential classes without modifying core interfaces
 - **Type Safety**: Polymorphic validation through `has_minimal_credentials()` method
 - **Flexibility**: Each broker implements its own credential validation logic

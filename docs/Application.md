@@ -204,6 +204,7 @@ Stonks Overwatch supports three theme modes:
 - **System Theme** - Automatically follows your operating system's theme preference
 
 The theme setting is available in:
+
 - **Native App**: Menu → Preferences → General → Theme
 - **Web Version**: Settings page (sidebar) → Preferences → Theme
 
@@ -255,6 +256,7 @@ Or manually navigate to the logs directory (see [Configuration Files](#configura
 **Problem**: App crashes or doesn't launch
 
 **Solutions**:
+
 1. Check system requirements (see below)
 2. Run in debug mode to see error messages
 3. Clear cache: Delete cache directory
@@ -265,6 +267,7 @@ Or manually navigate to the logs directory (see [Configuration Files](#configura
 **Problem**: Broker authentication fails
 
 **Solutions**:
+
 1. Verify credentials in Settings
 2. Check if 2FA is required (DEGIRO)
 3. Ensure internet connection is working
@@ -275,6 +278,7 @@ Or manually navigate to the logs directory (see [Configuration Files](#configura
 **Problem**: Data not loading or corrupting
 
 **Solutions**:
+
 1. Export current database (backup)
 2. Clear cache
 3. Force refresh data
@@ -285,6 +289,7 @@ Or manually navigate to the logs directory (see [Configuration Files](#configura
 **Problem**: Application is slow or unresponsive
 
 **Solutions**:
+
 1. Clear cache
 2. Reduce auto-refresh frequency
 3. Check system resources (RAM, CPU)
@@ -321,6 +326,7 @@ defaults write com.caribay.stonks-overwatch WebKitDeveloperExtras -bool true
 ```
 
 Then:
+
 1. Open the application
 2. Open Safari
 3. Go to **Develop** menu
@@ -361,19 +367,23 @@ Configure in Settings.
 ### Minimum Requirements
 
 **All Platforms:**
+
 - 2 GB RAM
 - 500 MB disk space
 - Internet connection (for broker data sync)
 
 **macOS:**
+
 - macOS 10.14 (Mojave) or later
 - 64-bit Intel or Apple Silicon
 
 **Windows:**
+
 - Windows 10 or later
 - 64-bit processor
 
 **Linux:**
+
 - Modern 64-bit distribution
 - GTK+ 3.0 or later
 - X11 or Wayland
@@ -391,6 +401,7 @@ Configure in Settings.
 ### Data Storage
 
 All data is stored **locally** on your computer:
+
 - Portfolio data
 - Transaction history
 - Broker credentials (encrypted)
@@ -400,6 +411,7 @@ All data is stored **locally** on your computer:
 ### Credential Security
 
 Broker credentials are:
+
 - Encrypted using **AES-128-CBC** (via Python Fernet)
 - Stored in OS keychain when available
 - Never transmitted except to your broker
@@ -407,6 +419,7 @@ Broker credentials are:
 ### Network Access
 
 The application only connects to:
+
 - Your configured broker APIs
 - GitHub (for update checks)
 
