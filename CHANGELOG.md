@@ -16,6 +16,10 @@ _This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) a
 
 ### Fixed
 
+- Bitvavo:
+  - Properly show the total balance, even with staking assets
+  - Deduplicated some Bitvavo transactions
+
 ### Security
 
 - Routine dependency updates for security and stability

@@ -100,6 +100,10 @@ class TestPortfolioService(TestCase):
     def test_get_portfolio(self):
         BaseConfig.CONFIG_PATH = "tests/resources/stonks_overwatch/config/sample-config.json"
 
+        pook.get("https://api.bitvavo.com/v2/balance").reply(200).json(
+            [{"symbol": "BTC", "available": "0.00318807"}, {"symbol": "EUR", "available": "100.0"}]
+        )
+        pook.get("https://api.bitvavo.com/v2/stakingBalance").reply(200).json([])
         pook.get("https://api.bitvavo.com/v2/ticker/price").reply(200).json({"market": "BTC-EUR", "price": "75398"})
 
         portfolio = PortfolioService().get_portfolio()

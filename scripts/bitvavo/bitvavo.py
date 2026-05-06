@@ -49,6 +49,10 @@ class BitvavoImplementation:
         response = self.bitvavo.balance(symbol)
         print("Balance:", json.dumps(response, indent=2))
 
+    def staking_balance(self, symbol: str = None):
+        response = self.bitvavo.staking_balance(symbol)
+        print("Staking Balance", json.dumps(response, indent=2))
+
     def account_history(self):
         response = self.bitvavo.account_history()
         print("Account History:", json.dumps(response, indent=2))
@@ -89,45 +93,20 @@ class BitvavoImplementation:
         except KeyboardInterrupt:
             self.bitvavo_socket.closeSocket()
 
-    def calculate_staking(self):
-        totals = {}
-        response = self.bitvavo.account_history()
-        for transaction in response["items"]:
-            if transaction["type"] == "staking":
-                print(transaction)
-                staked = totals.get(transaction["receivedCurrency"], 0.0)
-                totals[transaction["receivedCurrency"]] = staked + float(transaction["receivedAmount"])
-
-        print("Total staking rewards:")
-        for asset, total in totals.items():
-            print(f"{asset}: {total:.8f}")
-
-    def get_balances(self):
-        try:
-            balances = self.bitvavo.balance()
-            for asset in balances:
-                available = float(asset.get("available", 0))
-                in_order = float(asset.get("inOrder", 0))
-                if available > 0 or in_order > 0:
-                    print(f"{asset['symbol']}: Available = {available}, In Order = {in_order}")
-        except Exception as e:
-            print(f"Error fetching balances: {e}")
-
 
 # Shall I re-explain main? Naaaaaaaaaa.
 if __name__ == "__main__":
     bvavo = BitvavoImplementation()
 
-    # bvavo.calculate_staking()
-    # bvavo.get_balances()
     # portfolio = PortfolioService()
     # portfolio.get_portfolio()
     # bvavo.account()
     # bvavo.assets()
-    # bvavo.balance()
+    bvavo.balance()
+    bvavo.staking_balance()
     # bvavo.orders()
     # bvavo.account_history()
-    bvavo.deposit_history()
+    # bvavo.deposit_history()
     # bvavo.withdrawal_history()
     # bvavo.ticker_price()
     # bvavo.candles()
