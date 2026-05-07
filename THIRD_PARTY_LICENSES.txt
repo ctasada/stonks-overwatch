@@ -229,7 +229,7 @@ Apache License
 
 
 Django
-6.0.4
+6.0.5
 BSD-3-Clause
 The MIT License (MIT)
 
@@ -322,7 +322,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 cryptography
-47.0.0
+48.0.0
 Apache-2.0 OR BSD-3-Clause
 This software is made available under the terms of *either* of the licenses
 found in LICENSE.APACHE or LICENSE.BSD. Contributions to cryptography are made
@@ -2958,7 +2958,7 @@ MIT
 
 
 dompurify
-3.4.1
+3.4.2
 (MPL-2.0 OR Apache-2.0)
 DOMPurify
 Copyright 2025-2026 Dr.-Ing. Mario Heiderich, Cure53

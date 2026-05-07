@@ -4,6 +4,7 @@ version = "0.4.0.dev0"
 description = "Stonks Overwatch"
 authors = [{name = "Carlos Tasada", email = "carlos.tasada@gmail.com"}]
 license = "MIT"
+license-files = ["LICENSE"]
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
@@ -33,7 +34,7 @@ dependencies = [
 [project.optional-dependencies]
 # Keep in sync with `tool.briefcase.app.stonks-overwatch.requires`
 briefcase = [
-    "toga >=0.5.3",
+    "toga >=0.5.4",
     "asgiref >= 3.11.1",
 ]
 
@@ -53,7 +54,7 @@ pook = "^2.1.6"
 pyinstrument = "^5.1.2"
 licensecheck = "^2025.1.0"
 pip-licenses = "^5.5.5"
-briefcase = ">=0.4.1"
+briefcase = ">=0.4.2"
 deptry = ">=0.25.1"
 pre-commit = "^4.6.0"
 bandit = "^1.9.4"
@@ -199,7 +200,6 @@ addopts = [
 project_name = "Stonks Overwatch"
 bundle = "com.caribay"
 url = "https://github.com/ctasada/stonks-overwatch"
-license = {file = "LICENSE"}
 author = "Carlos Tasada"
 author_email = "ctasada@gmail.com"
 # revision is injected during the build process: "git rev-parse --short HEAD"
@@ -226,7 +226,7 @@ test_sources = [
 ]
 # Keep in sync with `project.optional-dependencies.briefcase`
 requires = [
-    "toga >=0.5.3",
+    "toga >=0.5.4",
     "asgiref >= 3.11.0",
 ]
 test_requires = [ ]

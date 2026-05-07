@@ -59,6 +59,15 @@ class YFinanceClient:
         if ticker_info is None:
             return []
 
-        splits = ticker_info.splits
+        try:
+            splits = ticker_info.splits
+        except AttributeError:
+            # yfinance 1.3.0 bug: _dividends/_splits not initialized when history() returns early
+            self.logger.warning(
+                f"Failed to fetch splits for {ticker_info.ticker}: yfinance internal state missing. "
+                "Returning empty splits list."
+            )
+            return []
+
         splits_list = [StockSplit(date.to_pydatetime().astimezone(), ratio) for date, ratio in splits.to_dict().items()]
         return splits_list

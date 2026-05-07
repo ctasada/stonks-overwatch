@@ -157,12 +157,25 @@ class StonksOverwatchApp(toga.App):
         self.loop.call_soon_threadsafe(self.server_exists.set_result, "ready")
         self._httpd.serve_forever()
 
+    def _shutdown_cleanup(self) -> None:
+        """Run cleanup tasks that signal handlers would normally handle in dev mode."""
+        try:
+            from django.apps import apps
+
+            config = apps.get_app_config("stonks_overwatch")
+            config.close_connections()
+        except Exception as e:
+            self.logger.error(f"Error during shutdown cleanup: {e}")
+
     async def on_exit(self):
         # Return True if app should close, and False if it should remain open
         if await self.main_window.dialog(toga.ConfirmDialog("Confirm Exit", "Are you sure you want to exit?")):
             self.logger.info("Shutting down...")
             self._httpd.shutdown()
-            return True
+            self._shutdown_cleanup()
+            # os._exit(0) bypasses Python finalizers and the ObjC autorelease pool drain
+            # that causes a KVO use-after-free SIGSEGV in Toga's WKWebView bridge on macOS.
+            os._exit(0)
         return False
 
     def startup(self):
