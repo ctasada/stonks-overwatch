@@ -92,15 +92,19 @@ help: ## Show this help message
 ##@ Development Environment
 #==============================================================================
 
-install: ## Install all dependencies (including optional dependencies for native apps)
+install: _check-poetry ## Install all dependencies (including optional dependencies for native apps)
 	@echo -e  "$(BOLD)$(GREEN)Installing dependencies...$(RESET)"
 	poetry install --no-root --all-extras
 	poetry run python $(SRC_DIR)/manage.py npminstall
 
-update: ## Update all dependencies
+update: _check-poetry ## Update all dependencies
 	@echo -e "$(BOLD)$(YELLOW)Updating dependencies...$(RESET)"
 	cd $(SRC_DIR) && npm update
-	poetry self update
+	@if command -v poetry >/dev/null 2>&1 && command -v brew >/dev/null 2>&1 && brew list poetry >/dev/null 2>&1; then \
+		echo -e "$(YELLOW)Skipping 'poetry self update' (Poetry is managed by Homebrew — use 'brew upgrade poetry' instead)$(RESET)"; \
+	else \
+		poetry self update; \
+	fi
 	poetry update
 	@echo -e "$(BOLD)$(YELLOW)Updating main dependencies to latest versions...$(RESET)"
 	@OUTDATED_JSON=$$(poetry show --outdated --only main --format=json) || { echo -e "$(RED)Failed to fetch outdated main dependencies$(RESET)"; exit 1; }; \
@@ -140,20 +144,20 @@ clean: ## Clean temporary files and caches
 
 lint: lint-check ## Alias for lint-check
 
-lint-check: ## Check code style and quality
+lint-check: _check-poetry ## Check code style and quality
 	@echo -e "$(BOLD)$(BLUE)Checking code style...$(RESET)"
 	poetry run ruff check .
 
-lint-fix: ## Fix code style issues automatically
+lint-fix: _check-poetry ## Fix code style issues automatically
 	@echo -e "$(BOLD)$(GREEN)Fixing code style issues...$(RESET)"
 	poetry run ruff check . --fix
 	poetry run ruff format .
 
-markdown-check: ## Check Markdown files for style issues
+markdown-check: _check-poetry ## Check Markdown files for style issues
 	@echo -e "$(BOLD)$(BLUE)Checking Markdown files...$(RESET)"
 	poetry run pymarkdown --config=pyproject.toml scan -r README.md CHANGELOG.md ./docs
 
-markdown-fix: ## Fix Markdown files automatically
+markdown-fix: _check-poetry ## Fix Markdown files automatically
 	@echo -e "$(BOLD)$(GREEN)Fixing Markdown files...$(RESET)"
 	poetry run pymarkdown --config=pyproject.toml fix -r README.md CHANGELOG.md ./docs
 
@@ -168,18 +172,18 @@ markdown-links-check: ## Check links and images in Markdown files
 		exit 1; \
 	fi
 
-license-check: ## Check license compatibility
+license-check: _check-poetry ## Check license compatibility
 	@echo -e "$(BOLD)$(BLUE)Checking license compatibility...$(RESET)"
 	poetry run licensecheck
 
-generate-third-party: ## Generate third-party licenses file
+generate-third-party: _check-poetry ## Generate third-party licenses file
 	@poetry run python scripts/generate_licenses.py
 
-check-dependencies: ## Check for dependency issues
+check-dependencies: _check-poetry ## Check for dependency issues
 	@echo -e "$(BOLD)$(BLUE)Checking dependencies...$(RESET)"
 	poetry run deptry .
 
-scan: ## Run security scans
+scan: _check-poetry ## Run security scans
 	@echo -e "$(BOLD)$(BLUE)Running security scans...$(RESET)"
 	poetry run bandit -c pyproject.toml -ll -r .
 
@@ -187,7 +191,7 @@ scan: ## Run security scans
 ##@ Database Operations
 #==============================================================================
 
-migrate: ## Apply database migrations
+migrate: _check-poetry ## Apply database migrations
 	@echo -e "$(BOLD)$(GREEN)Applying database migrations...$(RESET)"
 	poetry run python $(MANAGE_PY) makemigrations
 	poetry run python $(MANAGE_PY) migrate
@@ -196,11 +200,11 @@ migrate: ## Apply database migrations
 ##@ Django Operations
 #==============================================================================
 
-npminstall: _check-node ## Install Node.js dependencies
+npminstall: _check-node _check-poetry ## Install Node.js dependencies
 	@echo -e "$(BOLD)$(GREEN)Installing Node.js dependencies...$(RESET)"
 	poetry run python $(MANAGE_PY) npminstall
 
-collectstatic: npminstall ## Collect static files
+collectstatic: npminstall _check-poetry ## Collect static files
 	@echo -e "$(BOLD)$(BLUE)Collecting static files...$(RESET)"
 	rm -rf $(STATIC_DIR)
 	poetry run python $(MANAGE_PY) collectstatic --noinput
@@ -221,11 +225,11 @@ run: start ## Alias for start
 ##@ Testing
 #==============================================================================
 
-test: ## Run tests
+test: _check-poetry ## Run tests
 	@echo -e "$(BOLD)$(GREEN)Running tests...$(RESET)"
 	poetry run pytest
 
-coverage: ## Run tests with coverage report
+coverage: _check-poetry ## Run tests with coverage report
 	@echo -e "$(BOLD)$(GREEN)Running tests with coverage...$(RESET)"
 	poetry run pytest --cov=$(SRC_DIR)/stonks_overwatch --cov-report=html --cov-report=term-missing
 	@echo -e "$(BOLD)$(GREEN)Coverage report generated in htmlcov/index.html$(RESET)"
@@ -430,7 +434,21 @@ cicd: _check-docker _check-act ## Run CI/CD pipeline (use job=<name> or workflow
 #==============================================================================
 
 _check-poetry:
-	@command -v poetry >/dev/null 2>&1 || (echo -e "$(RED)Error: Poetry not found. Please install Poetry first.$(RESET)" && exit 1)
+	@command -v poetry >/dev/null 2>&1 || { \
+		echo -e "$(BOLD)$(RED)Error: 'poetry' is not installed or not in PATH.$(RESET)"; \
+		echo -e ""; \
+		echo -e "$(BOLD)Install Poetry via one of the following methods:$(RESET)"; \
+		echo -e "  $(CYAN)Official installer (recommended):$(RESET)"; \
+		echo -e "    curl -sSL https://install.python-poetry.org | python3 -"; \
+		echo -e "  $(CYAN)pipx (isolated install):$(RESET)"; \
+		echo -e "    pipx install poetry"; \
+		echo -e "  $(CYAN)Homebrew (macOS/Linux):$(RESET)"; \
+		echo -e "    brew install poetry"; \
+		echo -e ""; \
+		echo -e "  After installing, ensure it is in your PATH, then re-run make."; \
+		echo -e "  Docs: https://python-poetry.org/docs/"; \
+		exit 1; \
+	}
 
 _check-docker:
 	@docker info > /dev/null 2>&1 || (echo -e "$(RED)Error: Docker is not running$(RESET)" && exit 1)
