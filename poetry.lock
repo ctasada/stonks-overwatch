@@ -629,7 +629,7 @@ description = "Cross-platform colored terminal text."
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7"
 groups = ["dev"]
-markers = "sys_platform == \"win32\" or os_name == \"nt\" or platform_system == \"Windows\""
+markers = "platform_system == \"Windows\" or os_name == \"nt\" or sys_platform == \"win32\""
 files = [
     {file = "colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"},
     {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
@@ -996,14 +996,14 @@ files = [
 
 [[package]]
 name = "django"
-version = "6.0.5"
+version = "6.0.6"
 description = "A high-level Python web framework that encourages rapid development and clean, pragmatic design."
 optional = false
 python-versions = ">=3.12"
 groups = ["main"]
 files = [
-    {file = "django-6.0.5-py3-none-any.whl", hash = "sha256:9d58a7cb49244e74c8e161d5e403a46d6209f1009ba40f5a66d6aa0d0786a8f0"},
-    {file = "django-6.0.5.tar.gz", hash = "sha256:bc6d6872e98a2864c836e42edd644b362db311147dd5aa8d5b82ba7a032f5269"},
+    {file = "django-6.0.6-py3-none-any.whl", hash = "sha256:25148b1194c47c2e685e5f5e9c5d59c78b075dfd282cb9618861ba6c1708f4d2"},
+    {file = "django-6.0.6.tar.gz", hash = "sha256:ad03916ba59523d781ae5c3f631960c23d69a9d9c43cecda52fc23b47e953713"},
 ]
 
 [package.dependencies]
@@ -4296,4 +4296,4 @@ briefcase = ["asgiref", "toga"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "523e133ede981a0e65a88f688dd2f7dc9bdfd333e70f9faec2327ba7c7a6b2e4"
+content-hash = "01b3cb24515c6b14e443f43bf37e389025be9ff6448e883fee79a00aa7ae6629"
