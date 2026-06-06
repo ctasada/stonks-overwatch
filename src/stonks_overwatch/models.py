@@ -1,5 +1,6 @@
 # ruff: noqa: F403
 from stonks_overwatch.core.models import *
+from stonks_overwatch.services.brokers.alpaca.repositories.models import *
 from stonks_overwatch.services.brokers.bitvavo.repositories.models import *
 from stonks_overwatch.services.brokers.degiro.repositories.models import *
 from stonks_overwatch.services.brokers.ibkr.repositories.models import *

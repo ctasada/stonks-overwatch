@@ -955,6 +955,25 @@
                     signature_key: signatureKeyEl.value || null
                 };
                 payload.update_frequency = parseInt(updateFreqEl.value);
+            } else if (brokerName === 'alpaca') {
+                const enabledEl = document.getElementById('alpaca-enabled');
+                const apiKeyEl = document.getElementById('alpaca-api-key');
+                const secretKeyEl = document.getElementById('alpaca-secret-key');
+                const paperTradingEl = document.getElementById('alpaca-paper-trading');
+                const updateFreqEl = document.getElementById('alpaca-update-frequency');
+
+                if (!enabledEl || !apiKeyEl || !secretKeyEl || !paperTradingEl || !updateFreqEl) {
+                    BootstrapAlertHelper.error('<strong>Error:</strong> Alpaca configuration elements not found');
+                    return JSON.stringify({ success: false, message: 'Alpaca configuration elements not found' });
+                }
+
+                payload.enabled = enabledEl.checked;
+                payload.credentials = {
+                    api_key: apiKeyEl.value,
+                    secret_key: secretKeyEl.value,
+                    paper_trading: paperTradingEl.checked
+                };
+                payload.update_frequency = parseInt(updateFreqEl.value);
             }
 
             try {

@@ -36,6 +36,7 @@ class BrokerLogin(View):
             BrokerName.DEGIRO: "login/degiro_login.html",
             BrokerName.BITVAVO: "login/bitvavo_login.html",
             BrokerName.IBKR: "login/ibkr_login.html",
+            BrokerName.ALPACA: "login/alpaca_login.html",
         }
         return template_mapping.get(broker_name, "login/degiro_login.html")
 
@@ -186,6 +187,14 @@ class BrokerLogin(View):
                 "supports_remember_me": True,
                 "auth_type": "oauth",  # Indicate this uses OAuth instead of username/password
             }
+        elif broker_name == BrokerName.ALPACA:
+            return {
+                "username_label": "API Key",
+                "password_label": "Secret Key",
+                "supports_2fa": False,
+                "supports_remember_me": True,
+                "supports_paper_trading": True,
+            }
         else:
             return {
                 "username_label": "Username",
@@ -264,6 +273,8 @@ class BrokerLogin(View):
             return self._extract_bitvavo_credentials(request)
         elif broker_name == BrokerName.IBKR:
             return self._extract_ibkr_credentials(request)
+        elif broker_name == BrokerName.ALPACA:
+            return self._extract_alpaca_credentials(request)
         return None
 
     def _extract_degiro_credentials(self, request: HttpRequest) -> Optional[dict]:
@@ -310,6 +321,22 @@ class BrokerLogin(View):
             }
         return None
 
+    def _extract_alpaca_credentials(self, request: HttpRequest) -> Optional[dict]:
+        """Extract Alpaca credentials from request."""
+        api_key = request.POST.get("username")
+        secret_key = request.POST.get("password")
+        paper_trading = request.POST.get("paper_trading") == "true"
+        remember_me = request.POST.get("remember_me") == "true"
+
+        if api_key and secret_key:
+            return {
+                "api_key": api_key,
+                "api_secret": secret_key,
+                "paper_trading": paper_trading,
+                "remember_me": remember_me,
+            }
+        return None
+
     def _extract_ibkr_credentials(self, request: HttpRequest) -> Optional[dict]:
         """Extract IBKR OAuth credentials from request."""
         access_token = request.POST.get("access_token")
@@ -341,6 +368,8 @@ class BrokerLogin(View):
                 return self._authenticate_bitvavo(request, credentials)
             elif broker_name == BrokerName.IBKR:
                 return self._authenticate_ibkr(request, credentials)
+            elif broker_name == BrokerName.ALPACA:
+                return self._authenticate_alpaca(request, credentials)
             else:
                 return {"success": False, "message": f"Authentication not implemented for {broker_name}"}
         except Exception as e:
@@ -458,6 +487,30 @@ class BrokerLogin(View):
 
         except Exception as e:
             self.logger.error(f"IBKR authentication error: {str(e)}")
+            return {"success": False, "message": "Authentication failed"}
+
+    def _authenticate_alpaca(self, request: HttpRequest, credentials: dict) -> dict:
+        """Authenticate with Alpaca Markets."""
+        try:
+            auth_service = self.factory.create_authentication_service(BrokerName.ALPACA)
+            if not auth_service:
+                return {"success": False, "message": "Alpaca authentication service not available"}
+
+            auth_result = auth_service.authenticate_user(
+                request=request,
+                api_key=credentials["api_key"],
+                api_secret=credentials["api_secret"],
+                remember_me=credentials.get("remember_me", False),
+                paper_trading=credentials.get("paper_trading", False),
+            )
+
+            if auth_result["success"]:
+                return {"success": True, "message": "Authentication successful"}
+            else:
+                return {"success": False, "message": auth_result["message"]}
+
+        except Exception as e:
+            self.logger.error(f"Alpaca authentication error: {str(e)}")
             return {"success": False, "message": "Authentication failed"}
 
     def _handle_in_app_authentication(self, request: HttpRequest, broker_name: BrokerName) -> HttpResponse:

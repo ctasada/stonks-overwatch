@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
 
+from stonks_overwatch.config.config import Config
 from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.services.aggregators.deposits_aggregator import DepositsAggregatorService
 from stonks_overwatch.services.aggregators.portfolio_aggregator import PortfolioAggregatorService
@@ -33,6 +34,7 @@ class Deposits(CapabilityRequiredMixin, View):
             "total_deposits": total_portfolio.total_deposit_withdrawal_formatted,
             "deposits": deposits,
             "deposit_growth": {"value": cash_contributions},
+            "base_currency": Config.get_global().base_currency,
         }
 
         if request.headers.get("Accept") == "application/json":

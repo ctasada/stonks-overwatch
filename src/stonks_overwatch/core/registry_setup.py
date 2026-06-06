@@ -20,6 +20,7 @@ except Exception as e:
     logger = logging.getLogger("stonks_overwatch.core.registry_setup")
     logger.warning(f"Could not import StonksLogger, using basic logger: {e}")
 
+from stonks_overwatch.config.alpaca import AlpacaConfig
 from stonks_overwatch.config.bitvavo import BitvavoConfig
 from stonks_overwatch.config.degiro import DegiroConfig
 from stonks_overwatch.config.ibkr import IbkrConfig
@@ -79,6 +80,17 @@ except Exception as e:
     logger.warning(f"Could not import IbkrAuthenticationService: {e}")
     IbkrAuthenticationService = None
 
+# Import Alpaca services
+from stonks_overwatch.services.brokers.alpaca.services.account_service import AccountService as AlpacaAccountService
+from stonks_overwatch.services.brokers.alpaca.services.deposit_service import DepositService as AlpacaDepositService
+from stonks_overwatch.services.brokers.alpaca.services.dividend_service import DividendService as AlpacaDividendService
+from stonks_overwatch.services.brokers.alpaca.services.portfolio_service import (
+    PortfolioService as AlpacaPortfolioService,
+)
+from stonks_overwatch.services.brokers.alpaca.services.transaction_service import (
+    TransactionService as AlpacaTransactionService,
+)
+from stonks_overwatch.services.brokers.alpaca.services.update_service import UpdateService as AlpacaUpdateService
 from stonks_overwatch.services.brokers.ibkr.services.dividends import (
     DividendsService as IbkrDividendsService,
 )
@@ -89,6 +101,14 @@ from stonks_overwatch.services.brokers.ibkr.services.transactions import (
     TransactionsService as IbkrTransactionService,
 )
 from stonks_overwatch.services.brokers.ibkr.services.update_service import UpdateService as IbkrUpdateService
+
+try:
+    from stonks_overwatch.services.brokers.alpaca.services.authentication_service import (
+        AlpacaAuthenticationService,
+    )
+except Exception as e:
+    logger.warning(f"Could not import AlpacaAuthenticationService: {e}")
+    AlpacaAuthenticationService = None
 
 # Configuration-driven broker definitions
 BROKER_CONFIGS: Dict[BrokerName, Dict[str, Any]] = {
@@ -126,6 +146,18 @@ BROKER_CONFIGS: Dict[BrokerName, Dict[str, Any]] = {
             ServiceType.ACCOUNT: IbkrAccountOverviewService,
             ServiceType.AUTHENTICATION: IbkrAuthenticationService,
             ServiceType.UPDATE: IbkrUpdateService,
+        },
+    },
+    BrokerName.ALPACA: {
+        "config": AlpacaConfig,
+        "services": {
+            ServiceType.PORTFOLIO: AlpacaPortfolioService,
+            ServiceType.TRANSACTION: AlpacaTransactionService,
+            ServiceType.DEPOSIT: AlpacaDepositService,
+            ServiceType.DIVIDEND: AlpacaDividendService,
+            ServiceType.ACCOUNT: AlpacaAccountService,
+            ServiceType.AUTHENTICATION: AlpacaAuthenticationService,
+            ServiceType.UPDATE: AlpacaUpdateService,
         },
     },
 }

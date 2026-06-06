@@ -74,7 +74,7 @@ echo "Target: $TARGET_DIR"
 echo "Sizes: $SIDEBAR_SIZE (sidebar) and $DOC_SIZE (documentation)"
 echo ""
 
-for icon in bitvavo.png degiro.png ibkr.png; do
+for icon in bitvavo.png degiro.png ibkr.png alpaca.png; do
   # Extract base name without extension
   base_name=$(basename "$icon" .png)
 

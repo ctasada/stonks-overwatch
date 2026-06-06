@@ -57,13 +57,13 @@ class PortfolioAggregatorService(BaseAggregator):
             entry.sector = Sector.CRYPTO
         elif entry.product_type == ProductType.ETF:
             entry.sector = Sector.ETF
-        elif entry.product_type == ProductType.STOCK and entry.sector == Sector.UNKNOWN:
+        elif entry.product_type == ProductType.STOCK and entry.sector in (None, Sector.UNKNOWN):
             sector, _ = self.yfinance.get_sector_industry(entry.symbol)
             if sector != Sector.UNKNOWN:
                 entry.sector = sector
 
     def _assign_industry(self, entry: PortfolioEntry):
-        if entry.product_type == ProductType.STOCK and entry.industry == "Unknown":
+        if entry.product_type == ProductType.STOCK and (not entry.industry or entry.industry == "Unknown"):
             _, industry = self.yfinance.get_sector_industry(entry.symbol)
             if industry and industry != "Unknown":
                 entry.industry = industry

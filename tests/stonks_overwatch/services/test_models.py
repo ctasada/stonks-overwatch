@@ -20,7 +20,13 @@ import pytest
 
 
 def test_portfolio_ids():
-    assert PortfolioId.values() == [PortfolioId.ALL, PortfolioId.DEGIRO, PortfolioId.BITVAVO, PortfolioId.IBKR]
+    assert PortfolioId.values() == [
+        PortfolioId.ALL,
+        PortfolioId.DEGIRO,
+        PortfolioId.BITVAVO,
+        PortfolioId.IBKR,
+        PortfolioId.ALPACA,
+    ]
 
     for portfolio_id in PortfolioId.values():
         assert PortfolioId.from_id(portfolio_id.id) == portfolio_id
@@ -62,9 +68,10 @@ def test_portfolio_id_get_broker_portfolios():
     assert PortfolioId.DEGIRO in broker_portfolios
     assert PortfolioId.BITVAVO in broker_portfolios
     assert PortfolioId.IBKR in broker_portfolios
+    assert PortfolioId.ALPACA in broker_portfolios
 
-    # Should have exactly 3 broker portfolios
-    assert len(broker_portfolios) == 3
+    # Should have exactly 4 broker portfolios
+    assert len(broker_portfolios) == 4
 
 
 def test_portfolio_id_uses_broker_name_values():
