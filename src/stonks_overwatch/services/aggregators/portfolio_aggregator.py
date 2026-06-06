@@ -41,10 +41,19 @@ class PortfolioAggregatorService(BaseAggregator):
 
     def _fill_missing_entry_info(self, portfolio: List[PortfolioEntry]):
         for entry in portfolio:
+            self._assign_name(entry)
             self._assign_country(entry)
             self._assign_sector(entry)
             self._assign_industry(entry)
             self._warn_if_unknown_sector(entry)
+
+    def _assign_name(self, entry: PortfolioEntry):
+        if entry.product_type not in (ProductType.STOCK, ProductType.ETF):
+            return
+        if not entry.name or entry.name == entry.symbol:
+            name = self.yfinance.get_name(entry.symbol)
+            if name:
+                entry.name = name
 
     def _assign_country(self, entry: PortfolioEntry):
         if not entry.country and entry.product_type in [ProductType.STOCK, ProductType.ETF]:

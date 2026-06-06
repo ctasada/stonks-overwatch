@@ -347,3 +347,50 @@ def test_rate_limit_respects_cached_data(yfinance_service, mock_yfinance_client,
     assert industry == "Consumer Electronics"
     # get_ticker should not be called since data was cached
     mock_yfinance_client.get_ticker.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# get_name tests
+# ---------------------------------------------------------------------------
+
+
+def test_get_name_returns_long_name(yfinance_service, mock_yfinance_repository):
+    """Test that get_name returns longName when available."""
+    mock_yfinance_repository.get_ticker_info.return_value = {
+        "longName": "Apple Inc.",
+        "shortName": "Apple",
+    }
+
+    result = yfinance_service.get_name("AAPL")
+
+    assert result == "Apple Inc."
+
+
+def test_get_name_falls_back_to_short_name(yfinance_service, mock_yfinance_repository):
+    """Test that get_name falls back to shortName when longName is absent."""
+    mock_yfinance_repository.get_ticker_info.return_value = {"shortName": "Apple"}
+
+    result = yfinance_service.get_name("AAPL")
+
+    assert result == "Apple"
+
+
+def test_get_name_returns_none_when_no_name_fields(yfinance_service, mock_yfinance_repository):
+    """Test that get_name returns None when neither name field is present."""
+    mock_yfinance_repository.get_ticker_info.return_value = {"sector": "Technology"}
+
+    result = yfinance_service.get_name("AAPL")
+
+    assert result is None
+
+
+def test_get_name_returns_none_when_ticker_info_unavailable(
+    yfinance_service, mock_yfinance_client, mock_yfinance_repository
+):
+    """Test that get_name returns None when ticker info cannot be fetched."""
+    mock_yfinance_repository.get_ticker_info.return_value = None
+    mock_yfinance_client.get_ticker.side_effect = Exception("Network error")
+
+    result = yfinance_service.get_name("UNKNOWN")
+
+    assert result is None

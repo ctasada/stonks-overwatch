@@ -115,6 +115,24 @@ class YFinance:
 
         return None
 
+    def get_name(self, symbol: str) -> str | None:
+        """
+        Get the full company name for a ticker symbol.
+
+        Prefers ``longName`` (e.g. "Apple Inc.") and falls back to
+        ``shortName`` (e.g. "Apple") when the long name is unavailable.
+
+        Args:
+            symbol: Stock ticker symbol
+
+        Returns:
+            Company name string, or None if not found
+        """
+        ticker_info = self._get_ticker_info_with_retry(symbol)
+        if ticker_info is None:
+            return None
+        return ticker_info.get("longName") or ticker_info.get("shortName") or None
+
     def get_sector_industry(self, symbol: str) -> tuple[Sector, str | None]:
         """
         Get sector and industry information for a ticker symbol.
