@@ -298,6 +298,13 @@ class SettingsManager {
                 (!credentials.signature_key_fp || !credentials.signature_key_fp.trim())) {
                 errors.push('Signature Key is required for IBKR (either direct content or file path)');
             }
+        } else if (brokerName === 'alpaca') {
+            if (!credentials.api_key || !credentials.api_key.trim()) {
+                errors.push('API Key is required for Alpaca');
+            }
+            if (!credentials.secret_key || !credentials.secret_key.trim()) {
+                errors.push('Secret Key is required for Alpaca');
+            }
         }
 
         // Validate update frequency

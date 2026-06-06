@@ -13,6 +13,7 @@
 <script src="{% static '@seahsky/chartjs-plugin-autocolors/dist/chartjs-plugin-autocolors.min.js' %}"></script>
 {# Chart data for static JS (deposits.js). Bootstrap table pages don't need this because data is already in the DOM. #}
 {{ deposit_growth.value|json_script:"deposits-growth-data" }}
+{{ base_currency|json_script:"deposits-base-currency" }}
 
 <div class="container-fluid row-gap-5">
     <div class="row mt-2">

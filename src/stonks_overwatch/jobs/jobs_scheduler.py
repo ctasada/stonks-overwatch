@@ -4,6 +4,7 @@ from django.utils import timezone
 
 from stonks_overwatch.constants.brokers import BrokerName
 from stonks_overwatch.core.exceptions import CredentialsException
+from stonks_overwatch.services.brokers.alpaca.services.update_service import UpdateService as AlpacaUpdateService
 from stonks_overwatch.services.brokers.bitvavo.services.update_service import UpdateService as BitvavoUpdateService
 from stonks_overwatch.services.brokers.degiro.services.update_service import UpdateService as DegiroUpdateService
 from stonks_overwatch.services.brokers.ibkr.services.update_service import UpdateService as IbkrUpdateService
@@ -47,6 +48,14 @@ class JobsScheduler:
             "service_attr": "ibkr_service",
             "connection_check": "get_client",
             "connection_method": None,  # Handled during initialization
+        },
+        BrokerName.ALPACA.value: {
+            "job_id": "update_alpaca_portfolio",
+            "check_offline": True,
+            "update_service_class": AlpacaUpdateService,
+            "service_attr": None,  # Alpaca handles credentials/offline checks in update_all()
+            "connection_check": None,
+            "connection_method": None,
         },
     }
 
@@ -126,15 +135,17 @@ class JobsScheduler:
             update_service_class = broker_config["update_service_class"]
             update_service = update_service_class(config=config)
 
-            # Attempt to connect the broker service if not already connected
+            # Attempt to connect the broker service if not already connected.
+            # Brokers with service_attr=None handle their own connection internally.
             service_attr = broker_config["service_attr"]
-            broker_service = getattr(update_service, service_attr)
-            cls._ensure_connected(
-                broker_name,
-                broker_service,
-                broker_config["connection_check"],
-                broker_config["connection_method"],
-            )
+            if service_attr is not None:
+                broker_service = getattr(update_service, service_attr)
+                cls._ensure_connected(
+                    broker_name,
+                    broker_service,
+                    broker_config["connection_check"],
+                    broker_config["connection_method"],
+                )
 
             # Perform the update
             update_service.update_all()

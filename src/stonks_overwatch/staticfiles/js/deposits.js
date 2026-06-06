@@ -17,6 +17,8 @@
         return;
     }
 
+    const baseCurrency = readJsonScript("deposits-base-currency") || "EUR";
+
     const TimeRanges = {
         YTD: "YTD",
         Y1: "1Y",
@@ -109,8 +111,39 @@
         redrawDepositsGraph(dataValue, timeRange, minimumDate);
     }
 
+    /**
+     * Compute an explicit Y-axis [0, niceMax] range for the deposits chart.
+     *
+     * Always anchors at zero (cumulative deposits start from nothing) and
+     * rounds the ceiling up to a "nice" step boundary so Chart.js places
+     * clean, evenly-spaced, always-distinct tick labels (e.g. €0 → €30K →
+     * €60K → €90K → €120K) regardless of how many unique data values exist.
+     */
+    function computeYRange(datasets) {
+        const yValues = datasets.datasets
+            .flatMap((ds) => ds.data.map((p) => (p != null && typeof p === "object" ? p.y : p)))
+            .filter((v) => v != null && isFinite(v));
+
+        const dataMax = yValues.length > 0 ? Math.max(...yValues) : 0;
+
+        if (dataMax <= 0) {
+            return { min: 0, max: 100 };
+        }
+
+        // Add 20 % headroom then round up to the nearest "nice" step so we
+        // always get ~5 evenly-spaced ticks that are clearly distinct.
+        const rawMax = dataMax * 1.2;
+        const roughStep = rawMax / 5;
+        const stepMag = Math.pow(10, Math.floor(Math.log10(roughStep)));
+        const niceStep = Math.ceil(roughStep / stepMag) * stepMag;
+        const niceMax = Math.ceil(rawMax / niceStep) * niceStep;
+
+        return { min: 0, max: niceMax };
+    }
+
     function redrawDepositsGraph(datasets, timeRange, minimumDate) {
         const timeRangeConfig = getTimeRangeConfig(timeRange, minimumDate);
+        const yRange = computeYRange(datasets);
 
         const configDeposits = {
             type: "line",
@@ -139,12 +172,24 @@
                         },
                     },
                     y: {
-                        beginAtZero: false,
+                        min: yRange.min,
+                        max: yRange.max,
                         grid: {
                             color:
                                 window.CHART_TEXT_COLOR === "#e0e0e0"
                                     ? "rgba(255, 255, 255, 0.1)"
                                     : "rgba(0, 0, 0, 0.1)",
+                        },
+                        ticks: {
+                            color: window.CHART_TEXT_COLOR || "#666",
+                            callback: function (value) {
+                                return new Intl.NumberFormat("nl-NL", {
+                                    style: "currency",
+                                    currency: baseCurrency,
+                                    notation: "compact",
+                                    maximumFractionDigits: 1,
+                                }).format(value);
+                            },
                         },
                     },
                 },
@@ -168,7 +213,8 @@
                                 if (context.parsed.y !== null) {
                                     label += new Intl.NumberFormat("nl-NL", {
                                         style: "currency",
-                                        currency: "EUR",
+                                        currency: baseCurrency,
+                                        maximumFractionDigits: 2,
                                     }).format(context.parsed.y);
                                 }
                                 return label;

@@ -50,6 +50,7 @@ class BrokerName(str, Enum):
     DEGIRO = "degiro"
     BITVAVO = "bitvavo"
     IBKR = "ibkr"
+    ALPACA = "alpaca"
 
     @property
     def short_name(self) -> str:
@@ -66,6 +67,7 @@ class BrokerName(str, Enum):
             BrokerName.DEGIRO: "DEGIRO",
             BrokerName.BITVAVO: "Bitvavo",
             BrokerName.IBKR: "IBKR",
+            BrokerName.ALPACA: "Alpaca",
         }
         return _short_names.get(self, self.value.upper())
 
@@ -84,6 +86,7 @@ class BrokerName(str, Enum):
             BrokerName.DEGIRO: "DEGIRO",
             BrokerName.BITVAVO: "Bitvavo",
             BrokerName.IBKR: "Interactive Brokers",
+            BrokerName.ALPACA: "Alpaca Markets",
         }
         return _long_names.get(self, self.value.title())
 

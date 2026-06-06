@@ -31,6 +31,16 @@
         "start_date": "PORTFOLIO CREATION DATE. Defaults to 2020-01-01",
         "update_frequency_minutes": "How frequently the data from IBKR should be updated. Defaults to 15 minutes (minimum due to API rate limits)"
     },
+    "alpaca": {
+        "enabled": false,
+        "credentials": {
+            "api_key": "ALPACA API KEY ID (from app.alpaca.markets → Your API Keys)",
+            "secret_key": "ALPACA SECRET KEY (only shown once at creation — generate a new key if lost)",
+            "paper_trading": "Set to true to connect to the paper trading (simulated) environment instead of live"
+        },
+        "start_date": "PORTFOLIO CREATION DATE. Defaults to 2020-01-01",
+        "update_frequency_minutes": "How frequently the data from Alpaca should be updated. Defaults to 15 minutes"
+    },
     "logo_provider": {
         "provider": "logodev or logostream (omit or set to none to disable)",
         "api_key": "YOUR_API_KEY. Get one at https://logo.dev or https://logostream.dev. Enables high-quality stock, ETF and crypto logos."

@@ -64,6 +64,12 @@
                         <span>IBKR</span>
                     </div>
                     {% endif %}
+                    {% if alpaca_config %}
+                    <div class="broker-item" data-broker="alpaca" onclick="selectBroker('alpaca')">
+                        <img src="{% static 'brokers/alpaca.png' %}" alt="Alpaca">
+                        <span>Alpaca</span>
+                    </div>
+                    {% endif %}
                     {% endif %}
                 </div>
 
@@ -85,6 +91,11 @@
                     <!-- IBKR Section -->
                     {% if ibkr_config %}
                     {% include 'components/brokers/ibkr_settings.html' %}
+                    {% endif %}
+
+                    <!-- Alpaca Section -->
+                    {% if alpaca_config %}
+                    {% include 'components/brokers/alpaca_settings.html' %}
                     {% endif %}
                 </div>
             </div>
@@ -544,6 +555,25 @@
                 payload.update_frequency = parseInt(updateFreqEl.value);
 
                 console.log('IBKR Debug - Final payload:', payload);
+            } else if (brokerName === 'alpaca') {
+                const enabledEl = document.getElementById('alpaca-enabled');
+                const apiKeyEl = document.getElementById('alpaca-api-key');
+                const secretKeyEl = document.getElementById('alpaca-secret-key');
+                const paperTradingEl = document.getElementById('alpaca-paper-trading');
+                const updateFreqEl = document.getElementById('alpaca-update-frequency');
+
+                if (!enabledEl || !apiKeyEl || !secretKeyEl || !paperTradingEl || !updateFreqEl) {
+                    showToast('Alpaca settings are not available', 'error');
+                    return JSON.stringify({ success: false, message: 'Alpaca configuration elements not found' });
+                }
+
+                payload.enabled = enabledEl.checked;
+                payload.credentials = {
+                    api_key: apiKeyEl.value,
+                    secret_key: secretKeyEl.value,
+                    paper_trading: paperTradingEl.checked
+                };
+                payload.update_frequency = parseInt(updateFreqEl.value);
             }
 
             try {

@@ -10,7 +10,8 @@
 
 - [![DEGIRO](images/brokers/degiro_small.png) DEGIRO](DEGIRO)
 - [![Bitvavo](images/brokers/bitvavo_small.png) Bitvavo](Bitvavo)
-- [![IBKT](images/brokers/ibkr_small.png) IBKR](IBKR)
+- [![IBKR](images/brokers/ibkr_small.png) IBKR](IBKR)
+- [![Alpaca](images/brokers/alpaca_small.png) Alpaca](Alpaca)
 
 ## User Guides
 

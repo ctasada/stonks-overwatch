@@ -50,6 +50,7 @@ class SettingsView(View):
         degiro_config = self.repository.get_broker_by_name(BrokerName.DEGIRO.value)
         bitvavo_config = self.repository.get_broker_by_name(BrokerName.BITVAVO.value)
         ibkr_config = self.repository.get_broker_by_name(BrokerName.IBKR.value)
+        alpaca_config = self.repository.get_broker_by_name(BrokerName.ALPACA.value)
 
         logo_provider_config = config.get_setting("integration_logo_provider", {})
         if not isinstance(logo_provider_config, dict):
@@ -61,6 +62,7 @@ class SettingsView(View):
             "degiro_config": degiro_config,
             "bitvavo_config": bitvavo_config,
             "ibkr_config": ibkr_config,
+            "alpaca_config": alpaca_config,
             "logo_provider_config": logo_provider_config,
             "is_standalone": not is_ajax_request,  # Wrap in HTML structure for non-AJAX requests
             "APPEARANCE": config.appearance,
@@ -79,7 +81,7 @@ class SettingsView(View):
 
         Expected JSON payload for saving configuration:
         {
-            "broker_name": "degiro" | "bitvavo" | "ibkr",
+            "broker_name": "degiro" | "bitvavo" | "ibkr" | "alpaca",
             "enabled": true | false,
             "credentials": {
                 "username": "...",
