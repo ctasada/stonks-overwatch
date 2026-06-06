@@ -353,7 +353,7 @@ The database models are defined in:
 │                  Stonks Overwatch                       │
 │                                                         │
 │  PortfolioService  TransactionService  DividendService  │
-│  DepositService    AccountService      UpdateService     │
+│  DepositService    AccountService      UpdateService    │
 │         │                │                  │           │
 │         └────────────────┼──────────────────┘           │
 │                          │                              │
@@ -361,10 +361,10 @@ The database models are defined in:
 └──────────────┬───────────┴───────────────┬──────────────┘
                │                           │
       ┌────────▼────────┐        ┌─────────▼─────────┐
-      │  alpaca-py SDK  │        │   Raw HTTP         │
-      │  TradingClient  │        │   /v2/account/     │
-      │  DataClient     │        │   activities       │
-      └────────┬────────┘        └─────────┬──────────┘
+      │  alpaca-py SDK  │        │   Raw HTTP        │
+      │  TradingClient  │        │   /v2/account/    │
+      │  DataClient     │        │   activities      │
+      └────────┬────────┘        └─────────┬─────────┘
                │                           │
                └──────────┬────────────────┘
                           │ HTTPS
