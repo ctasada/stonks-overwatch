@@ -4038,14 +4038,14 @@ markers = {main = "platform_system == \"Windows\" or sys_platform == \"win32\" o
 
 [[package]]
 name = "tzlocal"
-version = "5.4"
+version = "5.4.1"
 description = "tzinfo object for the local timezone"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "tzlocal-5.4-py3-none-any.whl", hash = "sha256:024d11221ff83453eae1f608f09b145b9779e1345d08c15404ce8ff7917cf629"},
-    {file = "tzlocal-5.4.tar.gz", hash = "sha256:41e1293f80d4b5ff38dff222601a8fbd06b4fdcaf25e224704047ad26a39af54"},
+    {file = "tzlocal-5.4.1-py3-none-any.whl", hash = "sha256:ab63bdea85848eafe89896bca77ed3f771dad077e15efa2ea9ca411d06bd495a"},
+    {file = "tzlocal-5.4.1.tar.gz", hash = "sha256:3dfc6bc97112aadf18c3d37339c96b335bded593954354b39ffc4cdf127e36bd"},
 ]
 
 [package.dependencies]
@@ -4393,4 +4393,4 @@ briefcase = ["asgiref", "toga"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "8deac1fbee6310b98e3adcefc51359a14870bdcbc2cacf8a3450ba6516880f8d"
+content-hash = "1206a88d5d1230ed13b455be54543da3bf7394518bd8852a0eaa7a9a876bf4ca"
