@@ -673,6 +673,24 @@ toolz = "*"
 wcwidth = "*"
 
 [[package]]
+name = "configurator"
+version = "3.2.0"
+description = "A library for building a configuration store from one or more layered configuration sources"
+optional = false
+python-versions = ">=3.6"
+groups = ["dev"]
+files = [
+    {file = "configurator-3.2.0-py3-none-any.whl", hash = "sha256:be39c84f9a9aafd09b3c34acdc267ca4a5804e51975bfdd01cb2d433e9856766"},
+    {file = "configurator-3.2.0.tar.gz", hash = "sha256:42650ea55e7df5e4601c1c3d137d1b0ea0bec332448947627c368e0254a36043"},
+]
+
+[package.extras]
+build = ["furo", "setuptools-git", "sphinx", "twine", "wheel"]
+test = ["jinja2", "mock", "pyfakefs", "pytest", "pytest-cov", "requests", "sybil", "testfixtures", "voluptuous"]
+toml = ["tomli ; python_version < \"3.11\""]
+yaml = ["pyyaml"]
+
+[[package]]
 name = "cookiecutter"
 version = "2.7.1"
 description = "A command-line utility that creates projects from project templates, e.g. creating a Python package project from a Python package project template."
@@ -971,6 +989,27 @@ qrcode = ["opencv-python (>=4.12.0.88)"]
 quotecast = ["polars (>=1.33.0)"]
 
 [[package]]
+name = "depgather"
+version = "0.4.0"
+description = "Get a list of deps given a pyproject.toml, uv.lock, requirements.txt etc"
+optional = false
+python-versions = ">=3.12"
+groups = ["dev"]
+files = [
+    {file = "depgather-0.4.0-py3-none-any.whl", hash = "sha256:8bd2a813a4b9cfe385daea7d8addcfc03fd9b12254dc119918d5c65ccd26461f"},
+    {file = "depgather-0.4.0.tar.gz", hash = "sha256:661facd6fffd709ef57086461fcc749cbfcb073eac1518db7db2cd02f60c3bd5"},
+]
+
+[package.dependencies]
+loguru = ">=0.7.3"
+requirements-parser = ">=0.13.0"
+tomli = ">=2.2.1"
+
+[package.extras]
+pip = ["pip (>=26.0.1)"]
+uv = ["uv (>=0.6.8)"]
+
+[[package]]
 name = "deptry"
 version = "0.25.1"
 description = "A command line utility to check for unused, missing and transitive dependencies in a Python project."
@@ -1101,22 +1140,6 @@ files = [
 
 [package.dependencies]
 mac_alias = ">=2.2.2"
-
-[[package]]
-name = "fhconfparser"
-version = "2024.1"
-description = "Provides a config language independent way to read a config file."
-optional = false
-python-versions = ">=3.8,<4.0"
-groups = ["dev"]
-files = [
-    {file = "fhconfparser-2024.1-py3-none-any.whl", hash = "sha256:f6048cb646e69a3422a581bc0102150c2b79fe7ff26b82233e5ef52f72820e3e"},
-    {file = "fhconfparser-2024.1.tar.gz", hash = "sha256:de8af019f0071e614d523985e1d93e0fce20a409d1c64dead03b1b665d4b2e4d"},
-]
-
-[package.dependencies]
-attrs = ">=23.2.0,<24"
-tomli = ">=2.0.1,<3"
 
 [[package]]
 name = "filelock"
@@ -1474,29 +1497,27 @@ dev = ["Sphinx (>=5.0.2)", "doc8 (>=0.11.2)", "pytest (>=7.0.1)", "pytest-xdist 
 
 [[package]]
 name = "licensecheck"
-version = "2025.1.0"
+version = "2026.0.3"
 description = "Output the licenses used by dependencies and check if these are compatible with the project license"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.12"
 groups = ["dev"]
 files = [
-    {file = "licensecheck-2025.1.0-py3-none-any.whl", hash = "sha256:eb20131cd8f877e5396958fd7b00cdb2225436c37a59dba4cf36d36079133a17"},
-    {file = "licensecheck-2025.1.0.tar.gz", hash = "sha256:411a1d81606b8be695794c1e7e79cc899b51fe5c501164155361cd2d6f3c5969"},
+    {file = "licensecheck-2026.0.3-py3-none-any.whl", hash = "sha256:984575b02ed473ba9bb0931b03c114e8b7fad6ac3c3999967fa416753e804134"},
+    {file = "licensecheck-2026.0.3.tar.gz", hash = "sha256:b47c842da2792a9f75a7f6b8cb3b1d2ebf59eee33b1a903925fd17d3925ab6f4"},
 ]
 
 [package.dependencies]
 appdirs = ">=1.4.4"
-fhconfparser = ">=2024.1"
-license-expression = ">=30.4.1"
+configurator = ">=3.2.0"
+depgather = ">=0.4.0"
+license-expression = ">=30.4.4"
 loguru = ">=0.7.3"
-markdown = ">=3.7"
-packaging = ">=24.2"
-requests = ">=2.32.3"
-requests-cache = ">=1.2.1"
-requirements-parser = ">=0.11.0"
-rich = ">=13.9.4"
+markdown = ">=3.10.2"
+requests = ">=2.32.5"
+requests-cache = ">=1.3.2"
+rich = ">=15.0.0"
 tomli = ">=2.2.1"
-uv = ">=0.6.8"
 
 [[package]]
 name = "loguru"
@@ -4071,35 +4092,6 @@ socks = ["pysocks (>=1.5.6,!=1.5.7,<2.0)"]
 zstd = ["backports-zstd (>=1.0.0) ; python_version < \"3.14\""]
 
 [[package]]
-name = "uv"
-version = "0.11.19"
-description = "An extremely fast Python package and project manager, written in Rust."
-optional = false
-python-versions = ">=3.8"
-groups = ["dev"]
-files = [
-    {file = "uv-0.11.19-py3-none-linux_armv6l.whl", hash = "sha256:c729f56ffef9b945053412c839695e8a0b13758aa15b7763e95a7dd539a6f522"},
-    {file = "uv-0.11.19-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:a98495b9dd67287d8c1a0786f98cb037a50f0ee6c3d648572edaa7137aabc277"},
-    {file = "uv-0.11.19-py3-none-macosx_11_0_arm64.whl", hash = "sha256:7fdd881cd6d80782afcf8c1d446dd15a42985167fd812b763d38ba1e4a8d944d"},
-    {file = "uv-0.11.19-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.musllinux_1_1_aarch64.whl", hash = "sha256:7222f45b5541551057bfc2e3021f113800704f665c119fdf3ea700c6c4859b21"},
-    {file = "uv-0.11.19-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.musllinux_1_1_armv7l.whl", hash = "sha256:2e0e0b8ad59ec56f1440d6e4313b64a1d8119275dcec73d19eef33c43f99428c"},
-    {file = "uv-0.11.19-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:f4aa17ffd719daf37b7a6265efd3ee4922a8ddaabaf0406d2b28c7e5ce2f20ff"},
-    {file = "uv-0.11.19-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:32d7988c0dfb6f90941f201c871a4478e96e4f2a32bdb2256d62a78ee20593fc"},
-    {file = "uv-0.11.19-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:2d663bacb97e2e8412d1c26eace28c7ebbde9d6f5d7d78760fafd114d693817f"},
-    {file = "uv-0.11.19-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:574f5dd4f31666661ea6386d3b91c5f0e8b84a8cae98ebba447c4674f2e6a4c7"},
-    {file = "uv-0.11.19-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:731d9fab8db5d41590af64236d03f8069c8da665fd0f9493b85985f19c86cd90"},
-    {file = "uv-0.11.19-py3-none-manylinux_2_28_aarch64.whl", hash = "sha256:301fd78309fc545c2cec2bfcc61a6bbdde876856c6d2041502737cf44085c178"},
-    {file = "uv-0.11.19-py3-none-manylinux_2_31_riscv64.musllinux_1_1_riscv64.whl", hash = "sha256:62b0b35a51d3034ff30ecd0f381e9bbc20d5b335754f54b098da29424d551ceb"},
-    {file = "uv-0.11.19-py3-none-manylinux_2_31_riscv64.whl", hash = "sha256:65e932720daed1af1f720a0ff5f9b33ee5f7ad97488dcceceb85154fc1323b82"},
-    {file = "uv-0.11.19-py3-none-musllinux_1_1_i686.whl", hash = "sha256:8f90b6687a480d154595aa619fb836a9a20d00ce37293db8099aad924f2b18f9"},
-    {file = "uv-0.11.19-py3-none-musllinux_1_1_x86_64.whl", hash = "sha256:28b0d612a766eb25756dbaa315433b726e93affa467d29a2682cc317547952ba"},
-    {file = "uv-0.11.19-py3-none-win32.whl", hash = "sha256:aa6a7e8d07b33ad22f4732848ebb1d9486503973c248d6e632c06ce4339fe347"},
-    {file = "uv-0.11.19-py3-none-win_amd64.whl", hash = "sha256:480fc34a8d0967af6a90b3f99a6e5687cd5c6e29528de96bec04d6e305a59363"},
-    {file = "uv-0.11.19-py3-none-win_arm64.whl", hash = "sha256:50e4d4796ca1a6da359a4f723a0fea86640c381d3ff4fa759a41badd7cb52dee"},
-    {file = "uv-0.11.19.tar.gz", hash = "sha256:f56f5bf853626a30423052d7ee00bf5cc940a08347d6ee7ede96862d084054a5"},
-]
-
-[[package]]
 name = "virtualenv"
 version = "21.4.2"
 description = "Virtual Python Environment builder"
@@ -4401,4 +4393,4 @@ briefcase = ["asgiref", "toga"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "7a7b1f41e59e03211795ed2d8d81a822f4860334317901da56e3ab8086ce0cfb"
+content-hash = "5c9aaca39172ac3d42cb7a876388146ce4d611fce02b80b5b876372d49927682"
