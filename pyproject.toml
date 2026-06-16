@@ -18,7 +18,7 @@ dependencies = [
     "currencyconverter >= 0.18.18",
     "django-node-assets >= 0.9.16",
     "apscheduler >= 3.11.2",
-    "tzlocal >= 5.3.1",
+    "tzlocal >= 5.4",
     "python-bitvavo-api >= 1.4.3",
     "yfinance >= 1.4.1",
     "iso10383 >=2025.2.10",
@@ -53,7 +53,7 @@ pytest-cov = ">=7.0.0"
 pytest-django = "^4.12.0"
 pook = "^2.1.6"
 pyinstrument = "^5.1.2"
-licensecheck = "^2025.1.0"
+licensecheck = "^2026.0.3"
 pip-licenses = "^5.5.5"
 briefcase = ">=0.4.2"
 deptry = ">=0.25.1"
