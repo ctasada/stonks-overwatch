@@ -135,18 +135,19 @@ test = ["dateparser (==1.*)", "pre-commit", "pytest", "pytest-cov", "pytest-mock
 
 [[package]]
 name = "asgiref"
-version = "3.11.1"
+version = "3.12.1"
 description = "ASGI specs, helper code, and adapters"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "asgiref-3.11.1-py3-none-any.whl", hash = "sha256:e8667a091e69529631969fd45dc268fa79b99c92c5fcdda727757e52146ec133"},
-    {file = "asgiref-3.11.1.tar.gz", hash = "sha256:5f184dc43b7e763efe848065441eac62229c9f7b0475f41f80e207a114eda4ce"},
+    {file = "asgiref-3.12.1-py3-none-any.whl", hash = "sha256:fe386d1c2bff7259ea95929266d12a8cf9a8b5a1c2598402967d8792e7a7c094"},
+    {file = "asgiref-3.12.1.tar.gz", hash = "sha256:59dcb51c272ad209d59bed5708a64a333083e86017d7fcdd67498eeab7784340"},
 ]
 
 [package.extras]
-tests = ["mypy (>=1.14.0)", "pytest", "pytest-asyncio"]
+mypy = ["mypy (>=1.14.0)"]
+tests = ["pytest", "pytest-asyncio"]
 
 [[package]]
 name = "attrs"
@@ -4387,4 +4388,4 @@ briefcase = ["asgiref", "toga"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "2cd18b942a1fb14dab0eabe1ba24463e29d63fe022e205fab882e04e30524f1d"
+content-hash = "4ff8a6d61a516f02e94b9077df97ed9d589432740a028cacf7fc63ff0cbd37d3"
