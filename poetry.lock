@@ -929,14 +929,14 @@ test = ["charset_normalizer (>=3.3.2,<4.0)", "cryptography (>=46.0.4,<47.0)", "h
 
 [[package]]
 name = "currency-symbols"
-version = "2.0.4"
+version = "2.0.5"
 description = "Get currency symbol by currency code"
 optional = false
-python-versions = "*"
+python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "currency_symbols-2.0.4-py3-none-any.whl", hash = "sha256:f0f381c517b08b862612b31e915b5e84aeeef8da9387bcb7a73a221628ae3310"},
-    {file = "currency_symbols-2.0.4.tar.gz", hash = "sha256:cb1ccbbe47909d7958f211359027eb8876874b8b0a19a70a7c0b2fa6bbe71a8b"},
+    {file = "currency_symbols-2.0.5-py3-none-any.whl", hash = "sha256:f4e88588c96134b8066afaf3388d23b85b550b2fbe58846e734a8e4d43cee73e"},
+    {file = "currency_symbols-2.0.5.tar.gz", hash = "sha256:f1dfcff1a8646e7f80118446bc7e79b8241e0ff93c4d0e8d1d159dbec56c77fb"},
 ]
 
 [[package]]
@@ -4388,4 +4388,4 @@ briefcase = ["asgiref", "toga"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "82f1417d76f1f63b62ac99b8aa11899474b5199e630bdf1c7340d4da6ca0af5f"
+content-hash = "4486e241d8da98765b6b28dea0ef5cd4d7c3df0d6cbef3e5ee0c776bb16de88c"
