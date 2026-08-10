@@ -394,3 +394,17 @@ def test_get_name_returns_none_when_ticker_info_unavailable(
     result = yfinance_service.get_name("UNKNOWN")
 
     assert result is None
+
+
+def test_client_get_stock_splits_returns_empty_when_splits_is_none():
+    """Test that the client handles None splits data without crashing."""
+    from stonks_overwatch.services.brokers.yfinance.client.yfinance_client import YFinanceClient
+
+    client = YFinanceClient()
+    mock_ticker = MagicMock()
+    mock_ticker.ticker = "AAPL"
+    mock_ticker.splits = None
+
+    result = client.get_stock_splits(mock_ticker)
+
+    assert result == []

@@ -69,5 +69,9 @@ class YFinanceClient:
             )
             return []
 
+        if splits is None:
+            self.logger.warning(f"No splits data available for {ticker_info.ticker}. Returning empty splits list.")
+            return []
+
         splits_list = [StockSplit(date.to_pydatetime().astimezone(), ratio) for date, ratio in splits.to_dict().items()]
         return splits_list
