@@ -1046,14 +1046,14 @@ files = [
 
 [[package]]
 name = "django"
-version = "6.0.7"
+version = "6.1"
 description = "A high-level Python web framework that encourages rapid development and clean, pragmatic design."
 optional = false
 python-versions = ">=3.12"
 groups = ["main"]
 files = [
-    {file = "django-6.0.7-py3-none-any.whl", hash = "sha256:a037427c2288443a8c02a1b02295a31c239663aa682bc50b1976afb7cf6a769e"},
-    {file = "django-6.0.7.tar.gz", hash = "sha256:2998503fc083124fb58037084bfa00de323c7c743f05f1b4284e77bff0ab8890"},
+    {file = "django-6.1-py3-none-any.whl", hash = "sha256:6c132cd980c9392b06807d4ca52d72530d631dc65a85d9dacede00a780cefbbe"},
+    {file = "django-6.1.tar.gz", hash = "sha256:86a2aacd59b817e4d6ac2ebfe22356c58f66f7b24e503f71b7c2fead677ee48b"},
 ]
 
 [package.dependencies]
@@ -4381,4 +4381,4 @@ briefcase = ["asgiref", "toga"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "e906a65c30c429e1f469b384f2c62bd757470a2d03dc20e1cf496bb7afe4cc7b"
+content-hash = "ecc34aa0713f76a83daf3dac48c5793757f0a1f42f6a023d5c293546d39fc4aa"
