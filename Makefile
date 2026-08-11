@@ -282,30 +282,28 @@ define _get_briefcase_args
 	esac
 endef
 
-_create-wheels: ## Internal: Create wheel files for Briefcase
-	@echo -e "$(BOLD)$(BLUE)Creating wheel files...$(RESET)"
-	rm -rf $(WHEEL_DIR)
-	@packages="peewee>=3.18.2 ibind>=0.1.18"; \
-	for pkg in $$packages; do \
-	  poetry run pip wheel "$$pkg" --wheel-dir $(WHEEL_DIR); \
-	done; \
-	for pkg in peewee ibind; do \
-	  for f in $(WHEEL_DIR)/$$pkg-*-cp*-*.whl; do \
-	    if [ -f "$$f" ]; then \
-	      version=$$(echo $$f | sed -E "s|.*$$pkg-([0-9.]+)-cp[0-9]+.*\\.whl|\\1|"); \
-	      new_name="$$pkg-$${version}-py3-none-any.whl"; \
-	      echo -e "$(YELLOW)Renaming $$(basename $$f) to $$new_name$(RESET)"; \
-	      mv "$$f" "$(WHEEL_DIR)/$$new_name"; \
-	    fi; \
-	  done; \
-	done
+# ibind only publishes an sdist on PyPI, so Briefcase (which installs with
+# `--only-binary :all:`) needs a locally built wheel. The requirement is
+# derived from pyproject.toml so version bumps stay in sync automatically.
+IBIND_REQ := poetry run python -c "import tomllib; from packaging.requirements import Requirement; print(next(str(r.name)+str(r.specifier) for r in map(Requirement, tomllib.load(open('pyproject.toml','rb'))['project']['dependencies']) if r.name.lower()=='ibind'))"
+
+_create-wheels: ## Internal: Create wheel files for Briefcase (skips if already present)
+	@echo -e "$(BOLD)$(BLUE)Checking wheel files...$(RESET)"
+	@mkdir -p $(WHEEL_DIR)
+	@ibind_requirement="$$($(IBIND_REQ))"; \
+	if poetry run pip install --ignore-installed --no-index --only-binary=:all: --find-links $(WHEEL_DIR) --dry-run "$$ibind_requirement" >/dev/null 2>&1; then \
+		echo -e "$(GREEN)Required wheels already present, skipping rebuild$(RESET)"; \
+	else \
+		echo -e "$(BOLD)$(BLUE)Building missing wheels...$(RESET)"; \
+		poetry run pip wheel "$$ibind_requirement" --wheel-dir $(WHEEL_DIR); \
+	fi
 
 briefcase-create: install collectstatic _create-wheels ## Create Briefcase project (supports target=macos|windows|flatpak)
 	@echo -e "$(BOLD)$(GREEN)Creating Briefcase project...$(RESET)"
 	@if [ -n "$(target)" ]; then \
 		$(_get_briefcase_args); \
 		echo -e "$(YELLOW)Target: $(target) (platform: $$platform, output-format: $$output_format)$(RESET)"; \
-		rm -rf build; \
+		rm -rf build/$(PROJECT_NAME)/$$platform; \
 		poetry run briefcase create $$platform $$output_format; \
 		poetry run briefcase build $$platform $$output_format; \
 	else \
@@ -326,7 +324,7 @@ briefcase-update: install collectstatic _create-wheels ## Update Briefcase proje
 		poetry run briefcase build; \
 	fi
 
-briefcase-run: ## Run Briefcase project (supports debug=true, profile=true, demo=true, target=macos|windows|flatpak)
+briefcase-run: _create-wheels ## Run Briefcase project (supports debug=true, profile=true, demo=true, target=macos|windows|flatpak)
 	@echo -e "$(BOLD)$(GREEN)Running Briefcase project...$(RESET)"
 	@if [ -n "$(target)" ]; then \
 		$(_get_briefcase_args); \
@@ -335,7 +333,7 @@ briefcase-run: ## Run Briefcase project (supports debug=true, profile=true, demo
 		poetry run briefcase run; \
 	fi
 
-briefcase-package: briefcase-create ## Package Briefcase project (supports target=macos|windows|flatpak)
+briefcase-package: _create-wheels collectstatic ## Package Briefcase project (supports target=macos|windows|flatpak)
 	@echo -e "$(BOLD)$(BLUE)Packaging Briefcase project...$(RESET)"
 	@if [ -n "$(target)" ]; then \
 		$(_get_briefcase_args); \
