@@ -2,14 +2,14 @@
 
 [[package]]
 name = "alpaca-py"
-version = "0.43.5"
+version = "0.44.0"
 description = "The Official Python SDK for Alpaca APIs"
 optional = false
-python-versions = "<4.0.0,>=3.8.0"
+python-versions = "<4.0.0,>=3.10.0"
 groups = ["main"]
 files = [
-    {file = "alpaca_py-0.43.5-py3-none-any.whl", hash = "sha256:0b4cac9b743851310f19f6a9aa84f57ddf95ae75b601350395746a893f54a2da"},
-    {file = "alpaca_py-0.43.5.tar.gz", hash = "sha256:7b09ba442cb0c6f957c2c57a30c6035456e2e670e63e383d439c639ffdbf98ba"},
+    {file = "alpaca_py-0.44.0-py3-none-any.whl", hash = "sha256:b54673f967c0c814a5e0223cbb0211a5d9d75a8d107e792872b14e5bae957c03"},
+    {file = "alpaca_py-0.44.0.tar.gz", hash = "sha256:5388715b67b51ad30fa07308e89299d48b19bed65b81013b8a1158fa5837337b"},
 ]
 
 [package.dependencies]
@@ -4383,4 +4383,4 @@ briefcase = ["asgiref", "toga"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "228eb475510f2a131c6106ed7c8d12e11fd9c588184dae14c51e3c1406e06d08"
+content-hash = "c30779e48182e3ff10d5beb9dd3ee267cefbeeabc676919698bcade4a92dcc1a"

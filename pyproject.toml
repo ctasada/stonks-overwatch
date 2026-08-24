@@ -29,7 +29,7 @@ dependencies = [
     "python-dateutil >= 2.9.0.post0",
     "markdown >= 3.10.3",
     "pyotp >= 2.10.0",
-    "alpaca-py >= 0.43.5",
+    "alpaca-py >= 0.44.0",
 ]
 
 [project.optional-dependencies]
