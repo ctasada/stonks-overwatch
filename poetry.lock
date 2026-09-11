@@ -252,20 +252,19 @@ testing = ["pytest (>=6,!=7.0.0)", "pytest-xdist (>=2)"]
 
 [[package]]
 name = "briefcase"
-version = "0.4.2"
+version = "0.4.5"
 description = "Tools to support converting a Python project into a standalone native application."
 optional = false
-python-versions = ">=3.10"
+python-versions = ">=3.11"
 groups = ["dev"]
 files = [
-    {file = "briefcase-0.4.2-py3-none-any.whl", hash = "sha256:daf921b4520915e002b0a0f8e4abc82f046bddedcc4a52e9cbb2a8c444ff3cd1"},
-    {file = "briefcase-0.4.2.tar.gz", hash = "sha256:e1026ad9502760d6f296bc2c68f32a3279f3af7a0560032356379c9b5860ed4f"},
+    {file = "briefcase-0.4.5-py3-none-any.whl", hash = "sha256:0fd06503b03bfbb52fb13137d49791e0c686bb3c39c9bd901e35ebf3de37aa2a"},
+    {file = "briefcase-0.4.5.tar.gz", hash = "sha256:b3c9e2f781ad6ca9e241a73ca80660624fed86db5b3e65a80b7a5bb697d54741"},
 ]
 
 [package.dependencies]
-binaryornot = "<0.5.0"
 build = ">=0.10"
-chardet = "<6.0"
+chardet = "<8.0"
 cookiecutter = ">=2.6.0,<3.0"
 dmgbuild = {version = ">=1.6.4,<2.0", markers = "sys_platform == \"darwin\""}
 GitPython = ">=3.1,<4.0"
@@ -4573,4 +4572,4 @@ briefcase = ["asgiref", "toga"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "de3729db98746e945928c9943304dd7b044d8bfd8babead4b00069c12e3defab"
+content-hash = "547c9750ddc18fa5e7f2860b8a1e4fd039b117a0155da9a98f558a1c6b5c0424"
