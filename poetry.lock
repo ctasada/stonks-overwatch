@@ -1325,23 +1325,24 @@ zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
 name = "ibind"
-version = "0.1.24"
+version = "0.2.1"
 description = "IBind is a REST and WebSocket client library for Interactive Brokers Client Portal Web API."
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "ibind-0.1.24.tar.gz", hash = "sha256:57676c75df74d4ba0063e720d4e042c098d4934939c0fb2d3c46a5c4e79ae25d"},
+    {file = "ibind-0.2.1.tar.gz", hash = "sha256:55f46c396368e579e0b5db051ac75e607a538f390e2b29dea9fd5b1bc3094435"},
 ]
 
 [package.dependencies]
 pycryptodome = {version = ">=3.21", optional = true, markers = "extra == \"oauth\""}
-requests = ">=2.31"
-urllib3 = {version = ">=2.3", optional = true, markers = "extra == \"oauth\""}
-websocket-client = ">=1.7"
+pydantic = ">=2.13"
+requests = ">=2.33"
+urllib3 = {version = ">=2.7", optional = true, markers = "extra == \"oauth\""}
+websocket-client = ">=1.9"
 
 [package.extras]
-oauth = ["pycryptodome (>=3.21)", "urllib3 (>=2.3)"]
+oauth = ["pycryptodome (>=3.21)", "urllib3 (>=2.7)"]
 
 [[package]]
 name = "identify"
@@ -4573,4 +4574,4 @@ briefcase = ["asgiref", "toga"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "56250017c01525d7e4be0bb458eda70340e5087ef97b473fe0241ee5831ff7ba"
+content-hash = "277719ee45f37d902c0a6067796372b0cdb6e6d13fa48b579148a20693c4da39"
