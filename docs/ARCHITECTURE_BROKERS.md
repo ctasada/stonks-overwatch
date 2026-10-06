@@ -201,10 +201,12 @@ from stonks_overwatch.config.base_credentials import BaseCredentials
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.logger_constants import LOGGER_CONFIG, TAG_BASE_CONFIG
 
+
 class NewBrokerCredentials(BaseCredentials):
     def __init__(self, username: str, password: str, api_key: str = None):
         super().__init__(username, password)
         self.api_key = api_key
+
 
 class NewBrokerConfig(BaseConfig):
     config_key = "newbroker"
@@ -219,20 +221,14 @@ class NewBrokerConfig(BaseConfig):
         credentials = NewBrokerCredentials(
             username=credentials_data.get("username", ""),
             password=credentials_data.get("password", ""),
-            api_key=credentials_data.get("api_key", "")
+            api_key=credentials_data.get("api_key", ""),
         )
-        return cls(
-            credentials=credentials,
-            enabled=data.get("enabled", True)
-        )
+        return cls(credentials=credentials, enabled=data.get("enabled", True))
 
     @classmethod
     def default(cls) -> "NewBrokerConfig":
         """Create default configuration."""
-        return cls(
-            credentials=NewBrokerCredentials("", ""),
-            enabled=False
-        )
+        return cls(credentials=NewBrokerCredentials("", ""), enabled=False)
 ```
 
 ### 2. Create Service Directory Structure
@@ -256,6 +252,7 @@ from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.logger_constants import LOGGER_SERVICES
 
+
 class PortfolioService(BaseService, PortfolioServiceInterface):
     def __init__(self, config=None):
         super().__init__(config)
@@ -278,6 +275,7 @@ from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.logger_constants import LOGGER_SERVICES
 
+
 class TransactionService(BaseService, TransactionServiceInterface):
     def __init__(self, config=None):
         super().__init__(config)
@@ -298,6 +296,7 @@ from stonks_overwatch.core.interfaces.account_service import AccountServiceInter
 from stonks_overwatch.core.interfaces.base_service import BaseService
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.logger_constants import LOGGER_SERVICES
+
 
 class AccountService(BaseService, AccountServiceInterface):
     def __init__(self, config=None):
@@ -490,7 +489,7 @@ Once registered, your broker will automatically:
 - ✅ Work with the portfolio filtering system
 - ✅ Be included in the factory system
 - ✅ Pass interface validation checks
-- ✅ Appear in Config.__repr__ output dynamically
+- ✅ Appear in `Config.__repr__` output dynamically
 - ✅ Support credential updates if mapping is added
 - ✅ Use consistent logging patterns via logger constants
 
@@ -536,11 +535,13 @@ python -m pytest tests/stonks_overwatch/services/aggregators/
 ```python
 # Check broker registration status
 from stonks_overwatch.core.factories.broker_registry import BrokerRegistry
+
 registry = BrokerRegistry()
 print(registry.get_fully_registered_brokers())
 
 # Test service creation
 from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+
 factory = BrokerFactory()
 service = factory.create_service("newbroker", ServiceType.PORTFOLIO)
 print(f"Service created: {service}")
@@ -556,6 +557,7 @@ Create a dedicated client for API interactions:
 # src/stonks_overwatch/services/brokers/newbroker/client/newbroker_client.py
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.logger_constants import LOGGER_SERVICES
+
 
 class NewBrokerClient:
     def __init__(self, config):
