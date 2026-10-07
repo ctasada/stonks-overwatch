@@ -189,7 +189,7 @@ class Config:
     @classmethod
     def get_global(cls) -> "Config":
         """Get cached configuration (recommended for production)"""
-        if not hasattr(cls, '_global_instance'):
+        if not hasattr(cls, "_global_instance"):
             cls._global_instance = cls._default()
         return cls._global_instance
 
@@ -296,6 +296,7 @@ TAG_BROKER_REGISTRY = "[BROKER_REGISTRY]"
 # Usage in classes:
 from stonks_overwatch.utils.core.logger_constants import LOGGER_CONFIG, TAG_CONFIG
 
+
 class Config:
     logger = StonksLogger.get_logger(LOGGER_CONFIG, TAG_CONFIG)
 ```
@@ -342,9 +343,11 @@ from dataclasses import dataclass
 from stonks_overwatch.config.base_config import BaseConfig
 from stonks_overwatch.config.base_credentials import BaseCredentials
 
+
 @dataclass
 class YourBrokerCredentials(BaseCredentials):
     """Credentials for YourBroker integration."""
+
     username: str
     password: str
     api_key: str = ""
@@ -359,16 +362,22 @@ class YourBrokerCredentials(BaseCredentials):
             username=data.get("username", ""),
             password=data.get("password", ""),
             api_key=data.get("api_key", ""),
-            api_secret=data.get("api_secret", "")
+            api_secret=data.get("api_secret", ""),
         )
+
 
 class YourBrokerConfig(BaseConfig):
     """Configuration for YourBroker integration."""
 
     config_key = "your_broker"
 
-    def __init__(self, credentials: YourBrokerCredentials, enabled: bool = True,
-                 custom_setting: str = None, update_frequency_minutes: int = 5):
+    def __init__(
+        self,
+        credentials: YourBrokerCredentials,
+        enabled: bool = True,
+        custom_setting: str = None,
+        update_frequency_minutes: int = 5,
+    ):
         super().__init__(credentials, enabled)
         self.custom_setting = custom_setting
         self.update_frequency_minutes = update_frequency_minutes
@@ -381,7 +390,7 @@ class YourBrokerConfig(BaseConfig):
             credentials=credentials,
             enabled=data.get("enabled", True),
             custom_setting=data.get("custom_setting"),
-            update_frequency_minutes=data.get("update_frequency_minutes", 5)
+            update_frequency_minutes=data.get("update_frequency_minutes", 5),
         )
 
     @classmethod
@@ -391,7 +400,7 @@ class YourBrokerConfig(BaseConfig):
             credentials=YourBrokerCredentials("", "", "", ""),
             enabled=False,
             custom_setting=None,
-            update_frequency_minutes=5
+            update_frequency_minutes=5,
         )
 ```
 
@@ -448,6 +457,7 @@ def is_your_broker_enabled(self) -> bool:
     """Check if YourBroker is enabled."""
     config = self.get_broker_config("your_broker")
     return config.is_enabled() if config else False
+
 
 def get_your_broker_config(self) -> Optional[YourBrokerConfig]:
     """Get YourBroker configuration."""
@@ -530,13 +540,12 @@ def test_your_broker_config():
 
     # Test with BrokerFactory directly if needed
     from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+
     factory = BrokerFactory()
 
     # Create test configuration with custom credentials
     test_config = factory.create_config(
-        "your_broker",
-        credentials=YourBrokerCredentials("test", "test", "key", "secret"),
-        enabled=True
+        "your_broker", credentials=YourBrokerCredentials("test", "test", "key", "secret"), enabled=True
     )
 
     assert test_config.is_enabled()
@@ -609,6 +618,7 @@ def test_your_broker_config():
 ```python
 # Debug: List available brokers
 from stonks_overwatch.core.factories.broker_factory import BrokerFactory
+
 factory = BrokerFactory()
 print("Available brokers:", factory.get_available_brokers())
 ```
@@ -667,6 +677,7 @@ Enable debug logging to troubleshoot configuration issues:
 
 ```python
 import logging
+
 logging.getLogger("stonks_overwatch.config").setLevel(logging.DEBUG)
 logging.getLogger("stonks_overwatch.core").setLevel(logging.DEBUG)
 ```
@@ -707,7 +718,7 @@ If experiencing slow configuration loading:
 - ✅ **Clear Intent**: Private methods indicate internal use
 - ✅ **Consistent Patterns**: Same integration approach for all brokers
 - ✅ **Simplified Debugging**: Consistent logger constants across modules
-- ✅ **Dynamic Adaptation**: Config.__repr__ automatically shows available brokers
+- ✅ **Dynamic Adaptation**: `Config.__repr__` automatically shows available brokers
 
 ## Logo Integrations
 

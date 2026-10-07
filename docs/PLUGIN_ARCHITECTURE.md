@@ -27,13 +27,13 @@
 7. [Implementation Status](#implementation-status)
 8. [Decision Gates](#decision-gates)
 9. [Detailed Implementation Phases](#detailed-implementation-phases)
-   - [Phase 1: Foundation](#phase-1-foundation--standards-2-3-weeks)
+   - [Phase 1: Foundation](#phase-1-foundation-and-standards-2-3-weeks)
    - [Phase 2: Plugin Core](#phase-2-plugin-core-system-3-4-weeks)
    - [Phase 3: Discovery System](#phase-3-discovery-system-2-3-weeks)
    - [Phase 4: Lifecycle Management](#phase-4-lifecycle-management-3-4-weeks)
    - [Phase 5: Legacy Migration](#phase-5-legacy-migration-2-3-weeks)
    - [Phase 6: Advanced Features](#phase-6-advanced-features-4-5-weeks)
-10. [Risk Mitigation](#risk-mitigation--success-criteria)
+10. [Risk Mitigation](#risk-mitigation-and-success-criteria)
 11. [Success Criteria](#success-criteria)
 12. [Testing Strategy](#testing-strategy)
 
@@ -373,7 +373,7 @@ Each phase requires sign-off before proceeding to the next:
 
 ## Detailed Implementation Phases
 
-## Phase 1: Foundation & Standards (2-3 weeks)
+## Phase 1: Foundation and Standards (2-3 weeks)
 
 ### Goals
 
@@ -393,11 +393,13 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional
 from enum import Enum
 
+
 class PluginType(Enum):
     BROKER = "broker"
     AGGREGATOR = "aggregator"
     MIDDLEWARE = "middleware"
     VIEW = "view"
+
 
 @dataclass
 class PluginManifest:
@@ -439,6 +441,7 @@ class PluginManifest:
     main_entry_point: str
     config_entry_point: str
 
+
 @dataclass
 class PluginInfo:
     """Runtime plugin information."""
@@ -460,6 +463,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, List, Type, Any
 from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.config.base_config import BaseConfig
+
 
 class PluginInterface(ABC):
     """Base interface all plugins must implement."""
@@ -484,6 +488,7 @@ class PluginInterface(ABC):
     def health_check(self) -> Dict[str, Any]:
         """Return plugin health status and metrics."""
         pass
+
 
 class BrokerPluginInterface(PluginInterface):
     """Interface specific to broker plugins."""
@@ -539,6 +544,7 @@ src/stonks_overwatch/
 from typing import List, Dict, Any
 from stonks_overwatch.plugins.models import PluginManifest, PluginInfo
 
+
 class ValidationResult:
     def __init__(self):
         self.is_valid = True
@@ -551,6 +557,7 @@ class ValidationResult:
 
     def add_warning(self, message: str):
         self.warnings.append(message)
+
 
 class PluginValidator:
     """Validates plugin compatibility and requirements."""
@@ -595,7 +602,8 @@ class PluginValidator:
         """Check if version string is valid semantic version."""
         # Implementation for semantic version validation
         import re
-        pattern = r'^\d+\.\d+\.\d+$'
+
+        pattern = r"^\d+\.\d+\.\d+$"
         return bool(re.match(pattern, version))
 
     def _is_api_compatible(self, min_version: str, max_version: str) -> bool:
@@ -656,6 +664,7 @@ class PluginValidator:
 from typing import Dict, List, Optional
 from stonks_overwatch.plugins.models import PluginInfo, PluginManifest
 from stonks_overwatch.plugins.interfaces import PluginInterface
+
 
 class PluginRegistry:
     """Central registry for managing discovered and loaded plugins."""
@@ -718,9 +727,12 @@ from typing import Optional, Type
 from stonks_overwatch.plugins.models import PluginInfo, PluginManifest
 from stonks_overwatch.plugins.interfaces import PluginInterface
 
+
 class PluginLoadError(Exception):
     """Raised when plugin loading fails."""
+
     pass
+
 
 class PluginLoader:
     """Handles dynamic loading and unloading of plugins."""
@@ -759,7 +771,7 @@ class PluginLoader:
             plugin_class = entry_point.load()
 
             # Get manifest from plugin class
-            if hasattr(plugin_class, 'get_manifest'):
+            if hasattr(plugin_class, "get_manifest"):
                 manifest = plugin_class.get_manifest()
             else:
                 raise PluginLoadError(f"Plugin {entry_point.name} missing get_manifest method")
@@ -778,7 +790,7 @@ class PluginLoader:
         if plugin_name in self._loaded_modules:
             # Remove from sys.modules
             module = self._loaded_modules[plugin_name]
-            if hasattr(module, '__name__') and module.__name__ in sys.modules:
+            if hasattr(module, "__name__") and module.__name__ in sys.modules:
                 del sys.modules[module.__name__]
 
             # Remove from our tracking
@@ -793,7 +805,7 @@ class PluginLoader:
         import json
 
         try:
-            with open(manifest_path, 'r') as f:
+            with open(manifest_path, "r") as f:
                 manifest_data = json.load(f)
 
             # Convert to PluginManifest object
@@ -804,39 +816,39 @@ class PluginLoader:
 
     def _parse_manifest(self, data: dict) -> PluginManifest:
         """Parse manifest JSON into PluginManifest object."""
-        plugin_data = data.get('plugin', {})
-        api_data = data.get('api', {})
-        deps_data = data.get('dependencies', {})
-        caps_data = data.get('capabilities', {})
-        config_data = data.get('configuration', {})
-        services_data = data.get('services', {})
-        entry_data = data.get('entry_points', {})
+        plugin_data = data.get("plugin", {})
+        api_data = data.get("api", {})
+        deps_data = data.get("dependencies", {})
+        caps_data = data.get("capabilities", {})
+        config_data = data.get("configuration", {})
+        services_data = data.get("services", {})
+        entry_data = data.get("entry_points", {})
 
         return PluginManifest(
-            name=plugin_data.get('name'),
-            version=plugin_data.get('version'),
-            type=plugin_data.get('type'),
-            display_name=plugin_data.get('display_name'),
-            description=plugin_data.get('description'),
-            author=plugin_data.get('author'),
-            license=plugin_data.get('license'),
-            homepage=plugin_data.get('homepage'),
-            min_api_version=api_data.get('min_version'),
-            max_api_version=api_data.get('max_version'),
-            required_interfaces=api_data.get('interfaces', []),
-            python_version=deps_data.get('python'),
-            core_dependencies={k: v for k, v in deps_data.items() if k != 'python'},
-            plugin_dependencies=deps_data.get('plugin_dependencies', {}),
-            services=caps_data.get('services', []),
-            features=caps_data.get('features', []),
-            supported_markets=caps_data.get('supported_markets', []),
-            supported_currencies=caps_data.get('supported_currencies', []),
-            config_class=config_data.get('config_class'),
-            required_credentials=config_data.get('required_credentials', []),
-            optional_settings=config_data.get('optional_settings', []),
+            name=plugin_data.get("name"),
+            version=plugin_data.get("version"),
+            type=plugin_data.get("type"),
+            display_name=plugin_data.get("display_name"),
+            description=plugin_data.get("description"),
+            author=plugin_data.get("author"),
+            license=plugin_data.get("license"),
+            homepage=plugin_data.get("homepage"),
+            min_api_version=api_data.get("min_version"),
+            max_api_version=api_data.get("max_version"),
+            required_interfaces=api_data.get("interfaces", []),
+            python_version=deps_data.get("python"),
+            core_dependencies={k: v for k, v in deps_data.items() if k != "python"},
+            plugin_dependencies=deps_data.get("plugin_dependencies", {}),
+            services=caps_data.get("services", []),
+            features=caps_data.get("features", []),
+            supported_markets=caps_data.get("supported_markets", []),
+            supported_currencies=caps_data.get("supported_currencies", []),
+            config_class=config_data.get("config_class"),
+            required_credentials=config_data.get("required_credentials", []),
+            optional_settings=config_data.get("optional_settings", []),
             service_mappings=services_data,
-            main_entry_point=entry_data.get('main'),
-            config_entry_point=entry_data.get('config')
+            main_entry_point=entry_data.get("main"),
+            config_entry_point=entry_data.get("config"),
         )
 
     def _load_plugin_module(self, plugin_path: Path, manifest: PluginManifest):
@@ -851,10 +863,7 @@ class PluginLoader:
 
         try:
             # Import the main module
-            spec = importlib.util.spec_from_file_location(
-                module_name,
-                plugin_path / "__init__.py"
-            )
+            spec = importlib.util.spec_from_file_location(module_name, plugin_path / "__init__.py")
 
             if spec is None:
                 raise PluginLoadError(f"Could not load plugin spec from {plugin_path}")
@@ -878,8 +887,8 @@ class PluginLoader:
 
         # Parse entry point to get class name
         entry_point = manifest.main_entry_point
-        if ':' in entry_point:
-            module_path, class_name = entry_point.split(':')
+        if ":" in entry_point:
+            module_path, class_name = entry_point.split(":")
         else:
             raise PluginLoadError(f"Invalid entry point format: {entry_point}")
 
@@ -911,6 +920,7 @@ from stonks_overwatch.plugins.manager.validator import PluginValidator
 from stonks_overwatch.plugins.manager.discovery import PluginDiscovery
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.logger_constants import LOGGER_PLUGINS
+
 
 class PluginManager:
     """Central manager for all plugin operations."""
@@ -1086,6 +1096,7 @@ from stonks_overwatch.plugins.models import PluginInfo, PluginManifest
 from stonks_overwatch.utils.core.logger import StonksLogger
 from stonks_overwatch.utils.core.logger_constants import LOGGER_PLUGINS
 
+
 class PluginDiscovery:
     """Handles discovery of plugins from multiple sources."""
 
@@ -1110,13 +1121,13 @@ class PluginDiscovery:
                     # Load the plugin class to get manifest
                     plugin_class = entry_point.load()
 
-                    if hasattr(plugin_class, 'get_manifest'):
+                    if hasattr(plugin_class, "get_manifest"):
                         manifest = plugin_class.get_manifest()
 
                         plugin_info = PluginInfo(
                             manifest=manifest,
                             path="",  # Entry point has no path
-                            state="discovered"
+                            state="discovered",
                         )
 
                         plugins.append(plugin_info)
@@ -1152,11 +1163,7 @@ class PluginDiscovery:
                     try:
                         manifest = self._load_manifest_file(manifest_file)
 
-                        plugin_info = PluginInfo(
-                            manifest=manifest,
-                            path=str(item),
-                            state="discovered"
-                        )
+                        plugin_info = PluginInfo(manifest=manifest, path=str(item), state="discovered")
 
                         plugins.append(plugin_info)
 
@@ -1169,43 +1176,43 @@ class PluginDiscovery:
         """Load and parse a manifest file."""
         import json
 
-        with open(manifest_path, 'r') as f:
+        with open(manifest_path, "r") as f:
             data = json.load(f)
 
         # Extract nested structure and flatten for PluginManifest
-        plugin_data = data.get('plugin', {})
-        api_data = data.get('api', {})
-        deps_data = data.get('dependencies', {})
-        caps_data = data.get('capabilities', {})
-        config_data = data.get('configuration', {})
-        services_data = data.get('services', {})
-        entry_data = data.get('entry_points', {})
+        plugin_data = data.get("plugin", {})
+        api_data = data.get("api", {})
+        deps_data = data.get("dependencies", {})
+        caps_data = data.get("capabilities", {})
+        config_data = data.get("configuration", {})
+        services_data = data.get("services", {})
+        entry_data = data.get("entry_points", {})
 
         return PluginManifest(
-            name=plugin_data.get('name'),
-            version=plugin_data.get('version'),
-            type=plugin_data.get('type'),
-            display_name=plugin_data.get('display_name'),
-            description=plugin_data.get('description'),
-            author=plugin_data.get('author'),
-            license=plugin_data.get('license'),
-            homepage=plugin_data.get('homepage'),
-            min_api_version=api_data.get('min_version'),
-            max_api_version=api_data.get('max_version'),
-            required_interfaces=api_data.get('interfaces', []),
-            python_version=deps_data.get('python'),
-            core_dependencies={k: v for k, v in deps_data.items() if k != 'python'},
-            plugin_dependencies=deps_data.get('plugin_dependencies', {}),
-            services=caps_data.get('services', []),
-            features=caps_data.get('features', []),
-            supported_markets=caps_data.get('supported_markets', []),
-            supported_currencies=caps_data.get('supported_currencies', []),
-            config_class=config_data.get('config_class'),
-            required_credentials=config_data.get('required_credentials', []),
-            optional_settings=config_data.get('optional_settings', []),
+            name=plugin_data.get("name"),
+            version=plugin_data.get("version"),
+            type=plugin_data.get("type"),
+            display_name=plugin_data.get("display_name"),
+            description=plugin_data.get("description"),
+            author=plugin_data.get("author"),
+            license=plugin_data.get("license"),
+            homepage=plugin_data.get("homepage"),
+            min_api_version=api_data.get("min_version"),
+            max_api_version=api_data.get("max_version"),
+            required_interfaces=api_data.get("interfaces", []),
+            python_version=deps_data.get("python"),
+            core_dependencies={k: v for k, v in deps_data.items() if k != "python"},
+            plugin_dependencies=deps_data.get("plugin_dependencies", {}),
+            services=caps_data.get("services", []),
+            features=caps_data.get("features", []),
+            supported_markets=caps_data.get("supported_markets", []),
+            supported_currencies=caps_data.get("supported_currencies", []),
+            config_class=config_data.get("config_class"),
+            required_credentials=config_data.get("required_credentials", []),
+            optional_settings=config_data.get("optional_settings", []),
             service_mappings=services_data,
-            main_entry_point=entry_data.get('main'),
-            config_entry_point=entry_data.get('config')
+            main_entry_point=entry_data.get("main"),
+            config_entry_point=entry_data.get("config"),
         )
 ```
 
@@ -1241,6 +1248,7 @@ from typing import Dict, List, Callable, Any
 from dataclasses import dataclass
 from datetime import datetime
 
+
 class PluginState(Enum):
     DISCOVERED = "discovered"
     LOADING = "loading"
@@ -1250,12 +1258,14 @@ class PluginState(Enum):
     DISABLED = "disabled"
     UNLOADING = "unloading"
 
+
 @dataclass
 class PluginStateTransition:
     from_state: PluginState
     to_state: PluginState
     timestamp: datetime
     reason: str
+
 
 class PluginLifecycleManager:
     """Manages plugin lifecycle states and transitions."""
@@ -1273,10 +1283,7 @@ class PluginLifecycleManager:
         if old_state != new_state:
             # Record transition
             transition = PluginStateTransition(
-                from_state=old_state,
-                to_state=new_state,
-                timestamp=datetime.now(),
-                reason=reason
+                from_state=old_state, to_state=new_state, timestamp=datetime.now(), reason=reason
             )
 
             # Update state
@@ -1327,12 +1334,14 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from stonks_overwatch.plugins.interfaces import PluginInterface
 
+
 @dataclass
 class HealthMetric:
     name: str
     value: Any
     unit: str
     timestamp: datetime
+
 
 @dataclass
 class HealthStatus:
@@ -1341,6 +1350,7 @@ class HealthStatus:
     status_message: str
     metrics: List[HealthMetric]
     last_check: datetime
+
 
 class PluginHealthMonitor:
     """Monitors plugin health and collects metrics."""
@@ -1359,12 +1369,7 @@ class PluginHealthMonitor:
             # Convert to metrics
             metrics = []
             for key, value in health_data.items():
-                metric = HealthMetric(
-                    name=key,
-                    value=value,
-                    unit=self._get_metric_unit(key),
-                    timestamp=datetime.now()
-                )
+                metric = HealthMetric(name=key, value=value, unit=self._get_metric_unit(key), timestamp=datetime.now())
                 metrics.append(metric)
 
             # Determine overall health
@@ -1376,7 +1381,7 @@ class PluginHealthMonitor:
                 is_healthy=is_healthy,
                 status_message=status_message,
                 metrics=metrics,
-                last_check=datetime.now()
+                last_check=datetime.now(),
             )
 
             # Store in history
@@ -1391,7 +1396,7 @@ class PluginHealthMonitor:
                 is_healthy=False,
                 status_message=f"Health check failed: {e}",
                 metrics=[],
-                last_check=datetime.now()
+                last_check=datetime.now(),
             )
 
             self._store_health_status(status)
@@ -1405,22 +1410,15 @@ class PluginHealthMonitor:
 
         cutoff = datetime.now() - timedelta(hours=hours)
 
-        return [
-            status for status in self._health_history[plugin_name]
-            if status.last_check >= cutoff
-        ]
+        return [status for status in self._health_history[plugin_name] if status.last_check >= cutoff]
 
-    def set_metric_threshold(self, plugin_name: str, metric_name: str,
-                           min_value: Any = None, max_value: Any = None):
+    def set_metric_threshold(self, plugin_name: str, metric_name: str, min_value: Any = None, max_value: Any = None):
         """Set health thresholds for plugin metrics."""
 
         if plugin_name not in self._metric_thresholds:
             self._metric_thresholds[plugin_name] = {}
 
-        self._metric_thresholds[plugin_name][metric_name] = {
-            'min': min_value,
-            'max': max_value
-        }
+        self._metric_thresholds[plugin_name][metric_name] = {"min": min_value, "max": max_value}
 
     def _evaluate_health(self, plugin_name: str, metrics: List[HealthMetric]) -> bool:
         """Evaluate if plugin is healthy based on metrics and thresholds."""
@@ -1434,10 +1432,10 @@ class PluginHealthMonitor:
             if metric.name in thresholds:
                 threshold = thresholds[metric.name]
 
-                if threshold['min'] is not None and metric.value < threshold['min']:
+                if threshold["min"] is not None and metric.value < threshold["min"]:
                     return False
 
-                if threshold['max'] is not None and metric.value > threshold['max']:
+                if threshold["max"] is not None and metric.value > threshold["max"]:
                     return False
 
         return True
@@ -1457,13 +1455,13 @@ class PluginHealthMonitor:
     def _get_metric_unit(self, metric_name: str) -> str:
         """Get unit for metric name."""
         unit_map = {
-            'memory_usage': 'MB',
-            'cpu_usage': '%',
-            'request_count': 'count',
-            'error_rate': '%',
-            'response_time': 'ms'
+            "memory_usage": "MB",
+            "cpu_usage": "%",
+            "request_count": "count",
+            "error_rate": "%",
+            "response_time": "ms",
         }
-        return unit_map.get(metric_name, '')
+        return unit_map.get(metric_name, "")
 ```
 
 ### Deliverables
@@ -1510,6 +1508,7 @@ from stonks_overwatch.plugins.models import PluginManifest, PluginType
 from stonks_overwatch.core.service_types import ServiceType
 from stonks_overwatch.config.base_config import BaseConfig
 
+
 class LegacyBrokerAdapter(BrokerPluginInterface):
     """Adapter to wrap legacy broker implementations as plugins."""
 
@@ -1546,10 +1545,10 @@ class LegacyBrokerAdapter(BrokerPluginInterface):
     def health_check(self) -> Dict[str, any]:
         """Basic health check for legacy broker."""
         return {
-            'status': 'legacy_adapter',
-            'broker_name': self.broker_name,
-            'services_count': len(self._services),
-            'config_available': self._config_class is not None
+            "status": "legacy_adapter",
+            "broker_name": self.broker_name,
+            "services_count": len(self._services),
+            "config_available": self._config_class is not None,
         }
 
     def get_config_class(self) -> Type[BaseConfig]:
@@ -1599,7 +1598,7 @@ class LegacyBrokerAdapter(BrokerPluginInterface):
             optional_settings=[],
             service_mappings={},
             main_entry_point=f"{self.broker_name}_legacy:LegacyAdapter",
-            config_entry_point=f"{self.broker_name}.config:Config"
+            config_entry_point=f"{self.broker_name}.config:Config",
         )
 
     def _extract_legacy_components(self):
@@ -1626,6 +1625,7 @@ import json
 from stonks_overwatch.core.registry_setup import BROKER_CONFIGS
 from stonks_overwatch.plugins.models import PluginManifest
 
+
 class BrokerMigrationTool:
     """Tools for migrating legacy brokers to plugin format."""
 
@@ -1651,7 +1651,7 @@ class BrokerMigrationTool:
         manifest = self._generate_manifest(broker_name, broker_config)
         manifest_path = plugin_dir / "plugin_manifest.json"
 
-        with open(manifest_path, 'w') as f:
+        with open(manifest_path, "w") as f:
             json.dump(manifest, f, indent=2)
 
         # Generate plugin wrapper
@@ -1676,31 +1676,24 @@ class BrokerMigrationTool:
                 "display_name": f"{broker_name.title()} Broker",
                 "description": f"Migrated {broker_name} broker plugin",
                 "author": "Stonks Overwatch Team",
-                "license": "MIT"
+                "license": "MIT",
             },
             "api": {
                 "min_version": "1.0.0",
                 "max_version": "2.0.0",
-                "interfaces": [
-                    "BrokerServiceInterface",
-                    "PortfolioServiceInterface",
-                    "TransactionServiceInterface"
-                ]
+                "interfaces": ["BrokerServiceInterface", "PortfolioServiceInterface", "TransactionServiceInterface"],
             },
-            "dependencies": {
-                "python": ">=3.11",
-                "stonks-overwatch-core": ">=2.0.0"
-            },
+            "dependencies": {"python": ">=3.11", "stonks-overwatch-core": ">=2.0.0"},
             "capabilities": {
                 "services": [service_type.value for service_type in services.keys()],
                 "features": ["migrated_legacy"],
                 "supported_markets": [],
-                "supported_currencies": []
+                "supported_currencies": [],
             },
             "configuration": {
                 "config_class": f"{broker_name}.config.{config_class.__name__}" if config_class else "",
                 "required_credentials": [],
-                "optional_settings": []
+                "optional_settings": [],
             },
             "services": {
                 service_type.value: f"{broker_name}.services.{service_class.__name__}"
@@ -1708,8 +1701,8 @@ class BrokerMigrationTool:
             },
             "entry_points": {
                 "main": f"{broker_name}.plugin:{broker_name.title()}Plugin",
-                "config": f"{broker_name}.config:{config_class.__name__}" if config_class else ""
-            }
+                "config": f"{broker_name}.config:{config_class.__name__}" if config_class else "",
+            },
         }
 
         return manifest_data
@@ -1803,7 +1796,7 @@ class {plugin_class_name}(BrokerPluginInterface):
 '''
 
         plugin_file = plugin_dir / "__init__.py"
-        with open(plugin_file, 'w') as f:
+        with open(plugin_file, "w") as f:
             f.write(plugin_code)
 
     def _generate_service_imports(self, broker_name: str, broker_config: dict) -> str:
@@ -1915,7 +1908,7 @@ class {plugin_class_name}(BrokerPluginInterface):
 
 ---
 
-## Risk Mitigation & Success Criteria
+## Risk Mitigation and Success Criteria
 
 ### Technical Risks
 
