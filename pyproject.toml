@@ -27,7 +27,7 @@ dependencies = [
     "cryptography >=50.0.2",
     "packaging >=26.3",
     "python-dateutil >= 2.9.0.post0",
-    "markdown >= 3.11.1",
+    "markdown >= 3.11.2",
     "pyotp >= 2.10.0",
     "alpaca-py >= 0.44.0",
 ]
