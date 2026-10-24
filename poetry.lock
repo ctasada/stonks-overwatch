@@ -40,6 +40,7 @@ description = "High-level concurrency and networking framework on top of asyncio
 optional = false
 python-versions = ">=3.10"
 groups = ["dev"]
+markers = "sys_platform != \"emscripten\""
 files = [
     {file = "anyio-4.14.2-py3-none-any.whl", hash = "sha256:9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494"},
     {file = "anyio-4.14.2.tar.gz", hash = "sha256:cfa139f3ed1a23ee8f88a145ddb5ac7605b8bbfd8592baacd7ce3d8bb4313c7f"},
@@ -252,24 +253,22 @@ testing = ["pytest (>=6,!=7.0.0)", "pytest-xdist (>=2)"]
 
 [[package]]
 name = "briefcase"
-version = "0.4.2"
+version = "0.4.6"
 description = "Tools to support converting a Python project into a standalone native application."
 optional = false
-python-versions = ">=3.10"
+python-versions = ">=3.11"
 groups = ["dev"]
 files = [
-    {file = "briefcase-0.4.2-py3-none-any.whl", hash = "sha256:daf921b4520915e002b0a0f8e4abc82f046bddedcc4a52e9cbb2a8c444ff3cd1"},
-    {file = "briefcase-0.4.2.tar.gz", hash = "sha256:e1026ad9502760d6f296bc2c68f32a3279f3af7a0560032356379c9b5860ed4f"},
+    {file = "briefcase-0.4.6-py3-none-any.whl", hash = "sha256:5a02c1033bac8d4b33ece5bc0a5c0f29f220bf5d3deee30d8c2a4ac352329441"},
+    {file = "briefcase-0.4.6.tar.gz", hash = "sha256:d8a78ff8acc97c5df6ad15560f2fb2e8508476e1ea1b331ef4cae6839dbbf804"},
 ]
 
 [package.dependencies]
-binaryornot = "<0.5.0"
-build = ">=0.10"
-chardet = "<6.0"
+chardet = "<8.0"
 cookiecutter = ">=2.6.0,<3.0"
 dmgbuild = {version = ">=1.6.4,<2.0", markers = "sys_platform == \"darwin\""}
 GitPython = ">=3.1,<4.0"
-httpx = ">=0.20,<1.0"
+httpx2 = ">=2.13,<3.0"
 packaging = ">=24.2"
 pip = ">=24.3"
 platformdirs = ">=2.6,<5.0"
@@ -277,21 +276,21 @@ psutil = ">=5.9,<8.0"
 python-dateutil = ">=2.9.0.post0"
 rich = ">=12.6,<16.0"
 setuptools = ">=60"
-tenacity = ">=8.0,<10.0"
+tenacity = ">=9.2.0,<10.0"
 tomli_w = ">=1.0,<2.0"
-truststore = ">=0.10.1"
 wheel = ">=0.37"
+xbuild = ">=0.4.0"
 
 [[package]]
 name = "build"
-version = "1.5.0"
+version = "1.6.1"
 description = "A simple, correct Python build frontend"
 optional = false
 python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "build-1.5.0-py3-none-any.whl", hash = "sha256:13f3eecb844759ab66efec90ca17639bbf14dc06cb2fdf37a9010322d9c50a6f"},
-    {file = "build-1.5.0.tar.gz", hash = "sha256:302c22c3ba2a0fd5f3911918651341ebb3896176cbdec15bd421f80b1afc7647"},
+    {file = "build-1.6.1-py3-none-any.whl", hash = "sha256:ecd351a4be9d35a9eaaba244a7687143c9c7d4aea6ac964e7e7ddab20cbcf4e7"},
+    {file = "build-1.6.1.tar.gz", hash = "sha256:51cc11666391ab6f092070437ac747002ff46f3e4113a3622177ee6b488bfc53"},
 ]
 
 [package.dependencies]
@@ -302,7 +301,7 @@ pyproject_hooks = "*"
 [package.extras]
 keyring = ["keyring"]
 uv = ["uv (>=0.1.18)"]
-virtualenv = ["virtualenv (>=20.17) ; python_version >= \"3.10\" and python_version < \"3.14\"", "virtualenv (>=20.31) ; python_version >= \"3.14\""]
+virtualenv = ["virtualenv (>=20.36.1)"]
 
 [[package]]
 name = "cattrs"
@@ -988,6 +987,24 @@ qrcode = ["opencv-python (>=4.12.0.88)"]
 quotecast = ["polars (>=1.33.0)"]
 
 [[package]]
+name = "dependency-groups"
+version = "1.3.2"
+description = "A tool for resolving PEP 735 Dependency Group data"
+optional = false
+python-versions = ">=3.9"
+groups = ["dev"]
+files = [
+    {file = "dependency_groups-1.3.2-py3-none-any.whl", hash = "sha256:8c337f7b92445823b0d0ea507f611390c58dcd2112be00aebcd738a2ca7a1c64"},
+    {file = "dependency_groups-1.3.2.tar.gz", hash = "sha256:c81831f43828dbc3987ee247eb198241a0152b8e7ceab10977cc3808eb388ac7"},
+]
+
+[package.dependencies]
+packaging = "*"
+
+[package.extras]
+cli = ["tomli ; python_version < \"3.11\""]
+
+[[package]]
 name = "depgather"
 version = "0.5.0"
 description = "Get a list of deps given a pyproject.toml, uv.lock, requirements.txt etc"
@@ -1283,57 +1300,74 @@ description = "A pure-Python, bring-your-own-I/O implementation of HTTP/1.1"
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
+markers = "sys_platform != \"emscripten\""
 files = [
     {file = "h11-0.16.0-py3-none-any.whl", hash = "sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86"},
     {file = "h11-0.16.0.tar.gz", hash = "sha256:4e35b956cf45792e4caa5885e69fba00bdbc6ffafbfa020300e549b208ee5ff1"},
 ]
 
 [[package]]
-name = "httpcore"
-version = "1.0.9"
+name = "httpcore2"
+version = "2.16.0"
 description = "A minimal low-level HTTP client."
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.11"
 groups = ["dev"]
+markers = "sys_platform != \"emscripten\""
 files = [
-    {file = "httpcore-1.0.9-py3-none-any.whl", hash = "sha256:2d400746a40668fc9dec9810239072b40b4484b640a8c38fd654a024c7a1bf55"},
-    {file = "httpcore-1.0.9.tar.gz", hash = "sha256:6e34463af53fd2ab5d807f399a9b45ea31c3dfa2276f15a2c3f00afff6e176e8"},
+    {file = "httpcore2-2.16.0-py3-none-any.whl", hash = "sha256:5c4358319f2602d984ad93182c9fee5160f22e9da7babdda870a5e7c4e2dc34f"},
+    {file = "httpcore2-2.16.0.tar.gz", hash = "sha256:c72cd0413563b17e1cd8354677dff887466f8ec2551679759e93126534428643"},
 ]
 
 [package.dependencies]
-certifi = "*"
 h11 = ">=0.16"
+truststore = ">=0.10"
 
 [package.extras]
-asyncio = ["anyio (>=4.0,<5.0)"]
+asyncio = ["anyio (>=4.5.0,<5.0)"]
 http2 = ["h2 (>=3,<5)"]
 socks = ["socksio (==1.*)"]
-trio = ["trio (>=0.22.0,<1.0)"]
+trio = ["trio (>=0.34.0,<1.0)"]
 
 [[package]]
-name = "httpx"
-version = "0.28.1"
+name = "httpx2"
+version = "2.16.0"
 description = "The next generation HTTP client."
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.11"
 groups = ["dev"]
 files = [
-    {file = "httpx-0.28.1-py3-none-any.whl", hash = "sha256:d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad"},
-    {file = "httpx-0.28.1.tar.gz", hash = "sha256:75e98c5f16b0f35b567856f597f06ff2270a374470a5c2392242528e3e3e42fc"},
+    {file = "httpx2-2.16.0-py3-none-any.whl", hash = "sha256:fd2c5d7909e8d86fe92d53020c310ca0e4e431b838c207c5754b9bbf0308d49a"},
+    {file = "httpx2-2.16.0.tar.gz", hash = "sha256:0d54c98128e8f2ff7fbbde0fca8c359e5f032edeaaaac443cdb7f31f685bcd7f"},
 ]
 
 [package.dependencies]
-anyio = "*"
-certifi = "*"
-httpcore = "==1.*"
-idna = "*"
+anyio = {version = ">=4.10", markers = "sys_platform != \"emscripten\""}
+httpcore2 = {version = "2.16.0", markers = "sys_platform != \"emscripten\""}
+httpx2-jsfetch = {version = "*", markers = "sys_platform == \"emscripten\" and python_version >= \"3.12\""}
+idna = ">=3.18"
+truststore = {version = ">=0.10", markers = "sys_platform != \"emscripten\""}
 
 [package.extras]
-brotli = ["brotli ; platform_python_implementation == \"CPython\"", "brotlicffi ; platform_python_implementation != \"CPython\""]
-cli = ["click (==8.*)", "pygments (==2.*)", "rich (>=10,<14)"]
+brotli = ["brotli (>=1.2.0) ; platform_python_implementation == \"CPython\"", "brotlicffi (>=1.2.0.2) ; platform_python_implementation != \"CPython\""]
+cli = ["click (>=8.4.2)", "pygments (==2.*)", "rich (>=10,<16)"]
 http2 = ["h2 (>=3,<5)"]
 socks = ["socksio (==1.*)"]
-zstd = ["zstandard (>=0.18.0)"]
+ws = ["wsproto (>=1.2)"]
+zstd = ["backports-zstd (>=1.0.0) ; python_version <= \"3.13\""]
+
+[[package]]
+name = "httpx2-jsfetch"
+version = "1.0"
+description = "httpx2 transports for Emscripten/Pyodide, backed by the JavaScript fetch API."
+optional = false
+python-versions = ">=3.12"
+groups = ["dev"]
+markers = "sys_platform == \"emscripten\""
+files = [
+    {file = "httpx2_jsfetch-1.0-py3-none-any.whl", hash = "sha256:cb916b707601e69a07721aabc8f3f6659be3a6893bc1ff5c6f9e02241df2da32"},
+    {file = "httpx2_jsfetch-1.0.tar.gz", hash = "sha256:70a0e3eabfef7cce5ad9c629f7d01ca05e418f586646f4ddf14782e4c1454c60"},
+]
 
 [[package]]
 name = "ibind"
@@ -3903,19 +3937,19 @@ files = [
 
 [[package]]
 name = "tenacity"
-version = "9.1.4"
+version = "9.2.1"
 description = "Retry code until it succeeds"
 optional = false
 python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "tenacity-9.1.4-py3-none-any.whl", hash = "sha256:6095a360c919085f28c6527de529e76a06ad89b23659fa881ae0649b867a9d55"},
-    {file = "tenacity-9.1.4.tar.gz", hash = "sha256:adb31d4c263f2bd041081ab33b498309a57c77f9acf2db65aadf0898179cf93a"},
+    {file = "tenacity-9.2.1-py3-none-any.whl", hash = "sha256:9e56f17539296baab7beabb08b92f6ee3d7be92d8be72d763360677c2ad6580e"},
+    {file = "tenacity-9.2.1.tar.gz", hash = "sha256:a606b5c808d0cded4a359d5b9932d867ff2a6a6b64d37350260fd01bbdf83839"},
 ]
 
 [package.extras]
 doc = ["reno", "sphinx"]
-test = ["pytest", "tornado (>=4.5)", "typeguard"]
+test = ["pytest", "tornado (>=6.0)"]
 
 [[package]]
 name = "text-unidecode"
@@ -4174,6 +4208,7 @@ description = "Verify certificates using native system trust stores"
 optional = false
 python-versions = ">=3.10"
 groups = ["dev"]
+markers = "sys_platform != \"emscripten\""
 files = [
     {file = "truststore-0.10.4-py3-none-any.whl", hash = "sha256:adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981"},
     {file = "truststore-0.10.4.tar.gz", hash = "sha256:9d91bd436463ad5e4ee4aba766628dd6cd7010cf3e2461756b3303710eebc301"},
@@ -4528,6 +4563,29 @@ files = [
 dev = ["pytest", "setuptools"]
 
 [[package]]
+name = "xbuild"
+version = "0.4.1"
+description = "A PEP517 build frontend for cross-compiling wheels."
+optional = false
+python-versions = ">=3.11"
+groups = ["dev"]
+files = [
+    {file = "xbuild-0.4.1-py3-none-any.whl", hash = "sha256:c691d6fbb9a6baa3ae7a904d656dca65bd12af6b86bc29665cf83067291e4618"},
+    {file = "xbuild-0.4.1.tar.gz", hash = "sha256:f0b1f76adab44b1be6d0587d1433ced1a0903e7402ef381f6f7c35b0e8126d17"},
+]
+
+[package.dependencies]
+build = ">=1.6.0"
+dependency-groups = "*"
+filelock = "*"
+platformdirs = "*"
+
+[package.extras]
+keyring = ["build[keyring]"]
+uv = ["build[uv]"]
+virtualenv = ["build[virtualenv]"]
+
+[[package]]
 name = "xmltodict"
 version = "1.0.4"
 description = "Makes working with XML feel like you are working with JSON"
@@ -4578,4 +4636,4 @@ briefcase = ["asgiref", "toga"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "8bed765293ced8ea76cf0f509d99534311fa19d453f71e902ff69893111063ab"
+content-hash = "78a4f9cef43be9fa8fa9adf49049cb8a64fd89ddeb08063d59e2919f59582c89"
