@@ -48,7 +48,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.group.dev.dependencies]
 ruff = ">=0.17.3"
-pytest = ">=9.1.1"
+pytest = ">=9.2.0"
 pytest-cov = ">=7.0.0"
 pytest-django = "^4.14.0"
 pook = "^2.1.6"
