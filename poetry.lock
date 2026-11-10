@@ -2,23 +2,23 @@
 
 [[package]]
 name = "alpaca-py"
-version = "0.44.0"
+version = "0.45.0"
 description = "The Official Python SDK for Alpaca APIs"
 optional = false
 python-versions = "<4.0.0,>=3.10.0"
 groups = ["main"]
 files = [
-    {file = "alpaca_py-0.44.0-py3-none-any.whl", hash = "sha256:b54673f967c0c814a5e0223cbb0211a5d9d75a8d107e792872b14e5bae957c03"},
-    {file = "alpaca_py-0.44.0.tar.gz", hash = "sha256:5388715b67b51ad30fa07308e89299d48b19bed65b81013b8a1158fa5837337b"},
+    {file = "alpaca_py-0.45.0-py3-none-any.whl", hash = "sha256:49d1969520f93f0f3f194a595b4ac8dc180e9e7e1eb84b5b8fd5bd641f217dd2"},
+    {file = "alpaca_py-0.45.0.tar.gz", hash = "sha256:89b39e29b734e3bb13832691126366b4508998511e42f66159faa547f9493256"},
 ]
 
 [package.dependencies]
 msgpack = ">=1.0.3,<2.0.0"
 pandas = ">=1.5.3"
-pydantic = ">=2.0.3,<3.0.0"
-pytz = ">=2020.1"
+pydantic = ">=2.7.0,<3.0.0"
 requests = ">=2.30.0,<3.0.0"
 sseclient-py = ">=1.7.2,<2.0.0"
+typing-extensions = ">=4.5.0"
 websockets = ">=10.4"
 
 [[package]]
@@ -4604,4 +4604,4 @@ briefcase = ["asgiref", "toga"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "206796e599a5d7aa972517f489a27b95e2c250956ffb0865d219421192988d4e"
+content-hash = "f3ba756125462fbc4387cdc3ca73490ffba94ab83350e05a1916ffcc1b21cffe"
