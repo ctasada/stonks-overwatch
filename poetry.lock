@@ -3237,14 +3237,14 @@ files = [
 
 [[package]]
 name = "pymarkdownlnt"
-version = "0.9.41"
+version = "0.9.42"
 description = "A GitHub Flavored Markdown compliant Markdown linter."
 optional = false
-python-versions = ">=3.10.0"
+python-versions = ">=3.11.0"
 groups = ["dev"]
 files = [
-    {file = "pymarkdownlnt-0.9.41-py3-none-any.whl", hash = "sha256:677985658f0d452c9d0a639d2aca11060a99874c127b3d7513d7f33dc5462973"},
-    {file = "pymarkdownlnt-0.9.41.tar.gz", hash = "sha256:d6a477498feacf004ba1eea1847e70cbb083c7175ee62bde7a8f11bf2ce943cb"},
+    {file = "pymarkdownlnt-0.9.42-py3-none-any.whl", hash = "sha256:31565c3241824922c2bd56eb7cc072b21fed59f6faccb1c23fb9e24af9bd7805"},
+    {file = "pymarkdownlnt-0.9.42.tar.gz", hash = "sha256:6ff2569ea4196c47b5fccc72606c0bda87e6b566a03474fccef39ed0bf03b9e7"},
 ]
 
 [package.dependencies]
@@ -4604,4 +4604,4 @@ briefcase = ["asgiref", "toga"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "84e24c0f1a0c967f7642c978c49bca5def37a209963d960461c556f6c5fe155d"
+content-hash = "649202d68f8f14cb9496005942d3e314249056268fb1e021c7cd1a074c9fa90b"
