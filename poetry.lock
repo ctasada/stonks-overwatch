@@ -3256,14 +3256,14 @@ typing-extensions = ">=4.15.0"
 
 [[package]]
 name = "pyotp"
-version = "2.10.0"
+version = "2.12.1"
 description = "Python One Time Password Library"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "pyotp-2.10.0-py3-none-any.whl", hash = "sha256:1df2f6a1bcc3bb0716172a5215ddc2f8c7c7fd26a13df9927d52e1746934836c"},
-    {file = "pyotp-2.10.0.tar.gz", hash = "sha256:d01e9703443616b03c57c700b5cbffd56a1f929c1b0f8f03131bc78c1fca9d3f"},
+    {file = "pyotp-2.12.1-py3-none-any.whl", hash = "sha256:2f65978d0a0afe5588ec960c810cbb974ba1957ffbf29775d8d4e1b2d4b8984c"},
+    {file = "pyotp-2.12.1.tar.gz", hash = "sha256:8d0c4192f3c5d1b1a8792df23b9d8acbb7e70abd2b160962af55c5700edbd236"},
 ]
 
 [package.extras]
@@ -4604,4 +4604,4 @@ briefcase = ["asgiref", "toga"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "649202d68f8f14cb9496005942d3e314249056268fb1e021c7cd1a074c9fa90b"
+content-hash = "340cba947445111859d3600dc61b1c48a79107237b20d76c0e74f75c1a742193"
