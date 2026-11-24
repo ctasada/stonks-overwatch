@@ -1337,13 +1337,13 @@ zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
 name = "ibind"
-version = "0.2.2"
+version = "0.2.3"
 description = "IBind is a REST and WebSocket client library for Interactive Brokers Client Portal Web API."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "ibind-0.2.2.tar.gz", hash = "sha256:91351290bcffa9aa6c1018a58146cf66dfe8835c239b8228e7b2bf34ef37e697"},
+    {file = "ibind-0.2.3.tar.gz", hash = "sha256:3fa7ae921981d075162a4b184b9d41e40c40a438994669dccd426eefa753a613"},
 ]
 
 [package.dependencies]
@@ -4604,4 +4604,4 @@ briefcase = ["asgiref", "toga"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "a246eb30e28a9a90b41a0bddc404e2c0c3e82eade1d7b7274ee3d1c6ac5f9338"
+content-hash = "35dfb67133a268d60c03bac1b7c633d4808b7b4f8785155f5be815841903fe2b"
